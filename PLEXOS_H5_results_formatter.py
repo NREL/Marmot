@@ -20,6 +20,7 @@ import os
 import h5py
 from h5plexos.query import PLEXOSSolution
 
+
 #===============================================================================
 # Create HDF5 file from PLEXOS zip solution
 #===============================================================================
@@ -43,15 +44,16 @@ Run_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment"
 # The folder that contains all h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
 HDF5_folder_in = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\HDF5 Files"
 
-# This folder contains all the csv required mapping and selecting outpuits to process
+# This folder contains all the csv required for mapping and selecting outputs to process
+# Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
 Mapping_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\Region_Mapping\\"
 
-# File which determiens which plexos properties to pull from the h5plexos results and process
-Plexos_Properties = pd.read_csv(Mapping_folder + "plexos_properties.csv")
 Region_Mapping = pd.read_csv(Mapping_folder + "Region_mapping.csv")
 reserve_region_type = pd.read_csv(Mapping_folder + "reserve_region_type.csv")
 gen_names = pd.read_csv(Mapping_folder + "gen_names.csv")
 
+# File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
+Plexos_Properties = pd.read_csv(r"C:\Users\DLEVIE\Documents\Marmot\plexos_properties.csv")
 
 overlap = 0 # number of hours overlapped between two adjacent models
 
