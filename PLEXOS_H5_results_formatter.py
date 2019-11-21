@@ -37,11 +37,21 @@ from h5plexos.query import PLEXOSSolution
 # Name of the Scenario being run, must have the same name as the folder holding the runs HDF5 file
 Scenario_name = "Test_Data"
 
+# Base directory to create folders and save outputs
 Run_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment"
 
-HDF5_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\HDF5 Files"
+# The folder that contains all h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
+HDF5_folder_in = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\HDF5 Files"
 
+# This folder contains all the csv required mapping and selecting outpuits to process
 Mapping_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\Region_Mapping\\"
+
+# File which determiens which plexos properties to pull from the h5plexos results and process
+Plexos_Properties = pd.read_csv(Mapping_folder + "plexos_properties.csv")
+Region_Mapping = pd.read_csv(Mapping_folder + "Region_mapping.csv")
+reserve_region_type = pd.read_csv(Mapping_folder + "reserve_region_type.csv")
+gen_names = pd.read_csv(Mapping_folder + "gen_names.csv")
+
 
 overlap = 0 # number of hours overlapped between two adjacent models
 
@@ -49,13 +59,6 @@ VoLL = 10000 # Value of Lost Load for calculatinhg cost of unserved energy
 
 
 HDF5_output = "PLEXOS_outputs_formatted.h5" #name of hdf5 file which holds processed outputs 
-
-#===============================================================================
-# Input mapping files
-#===============================================================================
-
-Region_Mapping = pd.read_csv(Mapping_folder + "Region_mapping.csv")
-reserve_region_type = pd.read_csv(r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\Region_Mapping\reserve_region_type.csv")
 
 
 #===============================================================================
@@ -75,9 +78,9 @@ try:
 except FileExistsError:
     # directory already exists
     pass
-hdf5_folder = HDF5_folder + "/" + Scenario_name
+HDF5_folder_in = HDF5_folder_in + "/" + Scenario_name
 try:
-    os.makedirs(hdf5_folder)
+    os.makedirs(HDF5_folder_in)
 except FileExistsError:
     # directory already exists
     pass
@@ -93,7 +96,6 @@ except FileExistsError:
 # Standard Naming of Generation Data
 #===============================================================================
 
-gen_names = pd.read_csv(Mapping_folder + "\gen_names.csv")
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
 #===============================================================================
@@ -104,9 +106,6 @@ try:
     Region_Mapping = Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
 except Exception:
     pass
-
-
-Reserve_Regions = reserve_region_type["Reserve_Region"].unique()
 
 
 #=============================================================================
@@ -350,13 +349,13 @@ def get_data(loc, prop,t, db, overlap):
 #===============================================================================      
 
 
-files = os.listdir(hdf5_folder) # List of all files in hdf5 folder
+files = os.listdir(HDF5_folder_in) # List of all files in hdf5 folder
 files_list = []
 for names in files:
     if names.endswith(".h5"):
         files_list.append(names) # Creates a list of only the hdf5 files
 
-hdf5_read = hdf5_folder + "/" + files_list[0]
+hdf5_read = HDF5_folder_in + "/" + files_list[0]
 
 data = h5py.File(hdf5_read, 'r')
 metadata = np.asarray(data['metadata'])
@@ -390,7 +389,7 @@ generator_storage["gen_name"]=generator_storage["gen_name"].str.decode("utf-8")
 print("Loading all HDF5 files to prepare for processing")
 hdf5_collection = {}
 for file in files_list:
-    hdf5_collection[file] = PLEXOSSolution(hdf5_folder + "/" + file)
+    hdf5_collection[file] = PLEXOSSolution(HDF5_folder_in + "/" + file)
 
 
 
@@ -400,8 +399,7 @@ for file in files_list:
 Processed_Data_Out=pd.DataFrame()
 Processed_Data_Out.to_hdf(hdf_out_folder + "/" + HDF5_output , key="generator_Generation" , mode="w", complevel=9, complib="blosc")
 
-# Reads in PLEXOS properties to process and filters for chosen ones
-Plexos_Properties = pd.read_csv(Mapping_folder + "plexos_properties.csv")
+# Filters for chosen Plexos properties to prcoess
 Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
 
 
