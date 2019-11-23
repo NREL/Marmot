@@ -8,9 +8,9 @@ Marmot consists of two .py files:
 * **Marmot_results_plotting.py**
 
 ## PLEXOS_H5_results_formatter
-The **PLEXOS_H5_results_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed they are saved to a itermediatry hdf5 file which can then be read into **Marmot_results_plotting.py**.
+The **PLEXOS_H5_results_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed they are saved to a intermediary hdf5 file which can then be read into **Marmot_results_plotting.py**.
 
-Before you use the **PLEXOS_H5_results_formatter** you will need to set adjust the input settings and mapping files which are all defined at the top of the code under *User Defined Names, Directories and Settings*, these include:
+Before you use the **PLEXOS_H5_results_formatter** you will need to adjust the input settings and mapping files which are all defined at the top of the code under *User Defined Names, Directories and Settings*, these include:
 
 - `Plexos_Properties` This is a csv file which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo. Under the *"collect_data"* column adjust the property to be TRUE or FALSE to change if the data is processed. If your property is not here, add it as a new line with the same format. 
 
