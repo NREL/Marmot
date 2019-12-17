@@ -19,6 +19,7 @@ import numpy as np
 import os
 import h5py
 from h5plexos.query import PLEXOSSolution
+import pickle
 
 
 #===============================================================================
@@ -35,26 +36,29 @@ from h5plexos.query import PLEXOSSolution
 """ User Defined Names, Directories and Settings """
 #===============================================================================
 
+# Directory of cloned Marmot repo and loaction of this file
+Marmot_DIR = r"C:\Users\DLEVIE\Documents\Marmot"
+os.chdir(Marmot_DIR)
+
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
-Plexos_Properties = pd.read_csv(r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\Region_Mapping\plexos_properties.csv")
+Plexos_Properties = pd.read_csv(Marmot_DIR + "\plexos_properties.csv")
 
 # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
-# Scenario_List = ["BAU", "BAU_Copperplate", "BAU_VG_Reserves", "BAU2", "BAU2_Copperplate", "BAU2_VG_Reserves"]
+Scenario_List = ["BAU", "BAU_Copperplate", "BAU_VG_Reserves", "BAU2", "BAU2_Copperplate", "BAU2_VG_Reserves"]
 
 # The folder that contains all h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
 HDF5_input_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\HDF5 Files\LA_Hourly_20191212"
 
-# Base directory to create folders in and save outputs
-Run_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment"
+# Base directory to create folders in and save outputs (Default is Marmot_DIR but you can change to wherever you like)
+Solutions_folder = Marmot_DIR
 
 # This folder contains all the csv required for mapping and selecting outputs to process
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
-Mapping_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\Region_Mapping\\"
+Mapping_folder = Marmot_DIR + "\mapping_folder\\"
 
-Region_Mapping = pd.read_csv(Mapping_folder + "Region_mapping_LA.csv")
-reserve_region_type = pd.read_csv(Mapping_folder + "reserve_region_type_LA.csv")
-gen_names = pd.read_csv(Mapping_folder + "gen_names_LA.csv")
-
+Region_Mapping = pd.read_csv(Mapping_folder + "Region_mapping.csv")
+reserve_region_type = pd.read_csv(Mapping_folder + "reserve_region_type.csv")
+gen_names = pd.read_csv(Mapping_folder + "gen_names.csv")
 
 
 overlap = 0 # number of hours overlapped between two adjacent models
@@ -71,7 +75,7 @@ for Scenario_name in Scenario_List:
     #===============================================================================
     
     
-    PLEXOS_Scenarios = Run_folder + r"\PLEXOS_Scenarios\LA_Hourly_1212" + "/" + Scenario_name
+    PLEXOS_Scenarios = Solutions_folder + r"\PLEXOS_Scenarios" + "/" + Scenario_name
     try:
         os.makedirs(PLEXOS_Scenarios)
     except FileExistsError:
@@ -112,7 +116,6 @@ for Scenario_name in Scenario_List:
     except Exception:
         pass
     
-    
     #=============================================================================
     # FUNCTIONS FOR PLEXOS DATA EXTRACTION
     #=============================================================================
@@ -122,7 +125,8 @@ for Scenario_name in Scenario_List:
     def df_process_region(df, overlap_hour): 
         df = df.reset_index() # unzip the levels in index
         df.rename(columns={'name':'region'}, inplace=True)
-        df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
+        if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
+            df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
         df = df.drop(["band", "property", "category"],axis=1) 
         if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
             df = df.drop(range(0, overlap_hour))  
@@ -138,7 +142,8 @@ for Scenario_name in Scenario_List:
         df = df.drop(["band", "property"],axis=1) 
         df.rename(columns={'category':'tech', 'name':'gen_name'}, inplace=True)
         df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
-        df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
+        if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
+            df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
         df['tech'].replace(gen_names_dict, inplace=True)
         if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
             df = df.drop(range(0, overlap_hour))
@@ -228,7 +233,8 @@ for Scenario_name in Scenario_List:
         df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
         df = df.merge(generator_storage, how='left', on='name')
         df = df.merge(region_generators, how='left', on='gen_name')
-        df = df.merge(Region_Mapping, how='left', on='region')
+        if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
+            df = df.merge(Region_Mapping, how='left', on='region')
         df.rename(columns={'name':'storage_resource'}, inplace=True)
         if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
             df = df.drop(range(0, overlap_hour))
@@ -391,6 +397,11 @@ for Scenario_name in Scenario_List:
     generator_storage["name"]=generator_storage["name"].str.decode("utf-8")
     generator_storage["gen_name"]=generator_storage["gen_name"].str.decode("utf-8")
     
+    if Region_Mapping.empty==True:
+        regions = pd.DataFrame(np.asarray(data['metadata/objects/region']))
+        regions["name"]=regions["name"].str.decode("utf-8")
+        regions["category"]=regions["category"].str.decode("utf-8")
+        regions.to_pickle(Marmot_DIR + "/regions" + ".pkl")
     
     # Read in all HDF5 files into dictionary 
     print("Loading all HDF5 files to prepare for processing")
@@ -451,16 +462,17 @@ for Scenario_name in Scenario_List:
         print("NOTE!! Curtailment not calculated, processing skipped")
         pass 
     
-    
-    print("Calculating Cost Unserved Energy")  
-    Cost_Unserved_Energy = pd.read_hdf(hdf_out_folder + "/" + HDF5_output, 'region_Unserved_Energy')
-    Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
-    Cost_Unserved_Energy.to_hdf(hdf_out_folder + "/" + HDF5_output , key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib="blosc")
-       
+    try:
+        print("Calculating Cost Unserved Energy")  
+        Cost_Unserved_Energy = pd.read_hdf(hdf_out_folder + "/" + HDF5_output, 'region_Unserved_Energy')
+        Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
+        Cost_Unserved_Energy.to_hdf(hdf_out_folder + "/" + HDF5_output , key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib="blosc")
+    except Exception:
+        pass   
     ###################################################################            
     
      
-    # Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + HDF5_output, 'region_Unserved_Energy')
+# Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + HDF5_output, 'generator_Available_Capacity')
     # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
     #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
 

@@ -1,5 +1,5 @@
 data_type,group,data_set,collect_data,Units,description
-interval,generator,Available Capacity,TRUE,MW,Rated Capacity - maintenance - Forced Outage
+interval,generator,Available Capacity,FALSE,MW,Rated Capacity - maintenance - Forced Outage
 interval,generator,Capacity Curtailed,FALSE,MW,Amount of Capacity with ) VO&M costs that is not generating.
 interval,generator,Curtailment Factor,FALSE,%,Capacity curtailed but reported as a percentage.
 interval,generator,Emissions Cost,FALSE,$,Emissions costs reported by generator.

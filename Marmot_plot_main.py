@@ -7,7 +7,7 @@ Created on Thu Dec  5 14:16:30 2019
 
 import pandas as pd
 import os
-os.chdir(r"C:\Users\DLEVIE\Documents\Marmot")
+import sys
 
 import matplotlib as mpl
 
@@ -15,6 +15,7 @@ import generation_stack
 import total_generation 
 import total_installed_capacity
 import curtailment
+
 
 #===============================================================================
 # Graphing Defaults
@@ -31,26 +32,27 @@ mpl.rc('font', family='serif')
 """ User Defined Names, Directories and Settings """
 #===============================================================================
 
-Marmot_plot_select = pd.read_csv(r"C:\Users\DLEVIE\Documents\Marmot\Marmot_plot_select.csv")
+# Directory of cloned Marmot repo and loaction of this file
+Marmot_DIR = r"C:\Users\DLEVIE\Documents\Marmot"
+os.chdir(Marmot_DIR)
+
+Marmot_plot_select = pd.read_csv(Marmot_DIR + "\Marmot_plot_select.csv")
 
 Scenario_name = "BAU_No_VG_Reserves"
 
-Run_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment"
+Solutions_folder = Marmot_DIR
 
-# Multi_Scenario = ["High_PV", "High_PV_2x_Mingen", "High_PV_2x_Mintime", "High_PV_2x_Ramp_Rate", "High_PV_Copperplate", "High_PV_No_Mingen", 
-#                   "High_PV_No_Mintime", "High_PV_No_VG_Reserves", "High_PV_10prct_Ramp_Rate", "Low_PV", "Low_PV_2x_Mingen",
-#                   "Low_PV_2x_Mintime", "Low_PV_2x_Ramp_Rate", "Low_PV_Copperplate", "Low_PV_No_Mingen", "Low_PV_No_Mintime", "Low_PV_No_VG_Reserves",
-#                   "Low_PV_10prct_Ramp_Rate", "BAU", "BAU_2x_Mingen", "BAU_2x_Mintime", "BAU_2x_Ramp_Rate", "BAU_Copperplate", "BAU_No_Mingen", "BAU_No_Mintime",
-#                   "BAU_No_VG_Reserves",  "BAU2", "BAU2_2x_Mingen", "BAU2_2x_Mintime", "BAU2_2x_Ramp_Rate", "BAU2_Copperplate", 
-#                   "BAU2_No_Mingen", "BAU2_No_Mintime", "BAU2_No_VG_Reserves"]
 
 Multi_Scenario = ["BAU_No_VG_Reserves", "BAU_VG_Reserves", "BAU_Copperplate",  
                   "BAU2_No_VG_Reserves", "BAU2_VG_Reserves", "BAU2_Copperplate"]
 
 
-region_mapping = pd.read_csv(r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\Region_Mapping\Region_mapping_LA.csv")
-Reserve_Regions = pd.read_csv(r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\Region_Mapping\reserve_region_type_LA.csv")
-gen_names = pd.read_csv(r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\Region_Mapping\gen_names_LA.csv")
+Mapping_folder = Marmot_DIR + "\mapping_folder\\"
+
+Region_Mapping = pd.read_csv(Mapping_folder + "Region_mapping.csv")
+Reserve_Regions = pd.read_csv(Mapping_folder + "reserve_region_type.csv")
+gen_names = pd.read_csv(Mapping_folder + "gen_names.csv")
+
 
 AGG_BY ="Usual"
 
@@ -63,7 +65,7 @@ xlabels = ["BAU No VG Reserves", "VG Reserves", "Copperplate"]
 #===============================================================================
 
 
-PLEXOS_Scenarios = Run_folder + r"\PLEXOS_Scenarios\LA_Hourly_1212" 
+PLEXOS_Scenarios = Solutions_folder + r"\PLEXOS_Scenarios\LA_Hourly_1212" 
 
 figure_folder = PLEXOS_Scenarios + "/" + Scenario_name + r"\Figures_Output"
 try:
@@ -205,9 +207,13 @@ marker_style = ["^", "*", "o", "D", "x", "<", "P"]
 #===============================================================================                   
  
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
-             
-region_mapping.rename(columns={'name':'Region'}, inplace=True)
-Zones = region_mapping[AGG_BY].unique()
+
+if Region_Mapping.empty==True: 
+     Zones = pd.read_pickle(Marmot_DIR + "/regions" + ".pkl") 
+     Zones = Zones['name'].unique()
+else:     
+    Zones = Region_Mapping[AGG_BY].unique()
+
 
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
