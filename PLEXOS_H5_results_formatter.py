@@ -397,6 +397,8 @@ for Scenario_name in Scenario_List:
     generator_storage["name"]=generator_storage["name"].str.decode("utf-8")
     generator_storage["gen_name"]=generator_storage["gen_name"].str.decode("utf-8")
     
+    # If Region_Mapping csv was left empty, regions will be retrieved from the plexos results h5 file for use in Marmot_plot.
+    # This limits the user to only plotting results from PLEXOS regions, therefore it is recommended to populate the Region_Mapping.csv for more control. 
     if Region_Mapping.empty==True:
         regions = pd.DataFrame(np.asarray(data['metadata/objects/region']))
         regions["name"]=regions["name"].str.decode("utf-8")

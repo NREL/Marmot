@@ -58,14 +58,14 @@ AGG_BY ="Usual"
 
 # Facet Grid Labels (Based on Scenarios)
 ylabels = ["BAU", "BAU2"]
-xlabels = ["BAU No VG Reserves", "VG Reserves", "Copperplate"]
+xlabels = ["No VG Reserves", "VG Reserves", "Copperplate"]
 
 #===============================================================================
 # Input and Output Directories 
 #===============================================================================
 
 
-PLEXOS_Scenarios = Solutions_folder + r"\PLEXOS_Scenarios\LA_Hourly_1212" 
+PLEXOS_Scenarios = Solutions_folder + r"\PLEXOS_Scenarios" 
 
 figure_folder = PLEXOS_Scenarios + "/" + Scenario_name + r"\Figures_Output"
 try:
@@ -265,6 +265,15 @@ def pass_data(figure, prop, start, end, timezone, hdf_out_folder, HDF5_output,
                                     Multi_Scenario, PLEXOS_Scenarios, color_list, marker_style, gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
         Figure_Out = fig.curt_pen()
         return Figure_Out
+    
+    elif figure == 'Production Cost':
+        fig = production_cost.mplot(prop, hdf_out_folder, HDF5_output, 
+                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                    Multi_Scenario, PLEXOS_Scenarios, color_list, marker_style, 
+                                    gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+        Figure_Out = fig.prod_cost()
+        return Figure_Out
+    
 
     
 
@@ -303,4 +312,8 @@ for index, row in Marmot_plot_select.iterrows():
         elif row["Figure Type"] == "Curtailment vs Penetration": 
             Figure_Out["fig"].savefig(figure_folder  + "/" + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
             Figure_Out["data_table"].to_csv(figure_folder + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+            
+        elif row["Figure Type"] == "Production Cost": 
+            Figure_Out["fig"].savefig(system_cost_figures  + "/" + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
+            Figure_Out["data_table"].to_csv(system_cost_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
             
