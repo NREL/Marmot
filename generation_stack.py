@@ -285,13 +285,13 @@ class mplot(object):
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
                     
-            Pump_Load = Pump_Load_read.xs(self.zone_input,level=self.AGG_BY)
+            Pump_Load = Pump_Load_Collection.xs(self.zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
             if (Pump_Load == 0).all() == False:
                 Pump_Load = Load - Pump_Load
        
-            Unserved_Energy = Unserved_Energy_read.xs(self.zone_input,level=self.AGG_BY)
+            Unserved_Energy = Unserved_Energy_Collection.xs(self.zone_input,level=self.AGG_BY)
             Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
             Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
             if (Unserved_Energy == 0).all() == False:

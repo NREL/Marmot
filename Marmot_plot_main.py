@@ -19,6 +19,8 @@ import generation_stack
 import total_generation 
 import total_installed_capacity
 import curtailment
+import production_cost
+import unserved_energy
 
 
 #===============================================================================
