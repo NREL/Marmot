@@ -836,35 +836,39 @@ fig4.figure.savefig(figure_folder + "\\" + zone_select_name + "_Wind_Generation"
 
 print("Plotting Unserved by Scenario and Zone")
 
-for zone_input in Zones:  
+Unserved_Energy_Collection = {}
+for scenario in Multi_Scenario:
+    Unserved_Energy_Collection[scenario] = pd.read_hdf(PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + HDF5_output, "region_Unserved_Energy")
+
+Zones =["North East"]  
+for zone_input in Zones:
     Unserved_Energy_Timeseries_Out = pd.DataFrame()
     Total_Unserved_Energy_Out = pd.DataFrame()
-    
-    if not Multi_Scenario:
-        print("WARNING - You have not selected scenarios to compare and plot")
-        break
+
     
     for scenario in Multi_Scenario:
-        try:
-            unserved_eng_timeseries = pd.read_pickle(PLEXOS_Scenarios + r"\\" + scenario + r"\Pickle_folder" + "/" + AGG_BY + "_Unserved_Energy\\" + zone_input + "_Unserved_Energy.pkl")
-            unserved_eng_timeseries.rename(scenario, inplace=True)
-            Unserved_Energy_Timeseries_Out = pd.concat([Unserved_Energy_Timeseries_Out, unserved_eng_timeseries], axis=1, sort=False).fillna(0)
-        except Exception:
-            print("WARNING Scenario", scenario, "data is Missing to Plot for", zone_input)
-            
+        unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
+        unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=AGG_BY)
+        unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
+        unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
+        unserved_eng_timeseries.rename(scenario, inplace=True)
+        Unserved_Energy_Timeseries_Out = pd.concat([Unserved_Energy_Timeseries_Out, unserved_eng_timeseries], axis=1, sort=False).fillna(0)
+    
+    Unserved_Energy_Timeseries_Out.columns = Unserved_Energy_Timeseries_Out.columns.str.replace('_',' ')     
     Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out.loc[:, (Unserved_Energy_Timeseries_Out >= 1).any(axis=0)]
-    Total_Unserved_Energy_Out = Unserved_Energy_Timeseries_Out.sum(axis=0)/12
+    Total_Unserved_Energy_Out = Unserved_Energy_Timeseries_Out.sum(axis=0)
     
 
     fig5, (ax1, ax2) = plt.subplots(2,1, sharex=False,  figsize=(9,9))
     
-    i=0
+    # Converts color_list into an iterable list for use in a loop
+    iter_colour = iter(color_list)
+    
     for column in Unserved_Energy_Timeseries_Out:
         ax1.plot(Unserved_Energy_Timeseries_Out[column], linewidth=3, antialiased=True, 
-                 color=color_list[i], label=Unserved_Energy_Timeseries_Out.columns[i])
-        ax1.legend(loc='lower right', 
-                 facecolor='inherit', frameon=True)
-        i=i+1
+                 color=next(iter_colour), label=column)
+        # ax1.legend(loc='lower right', 
+                 # facecolor='inherit', frameon=True)
 
     ax1.set_ylabel('Unserved Energy (MW)',  color='black', rotation='vertical')
     ax1.set_ylim(bottom=0)
@@ -875,11 +879,11 @@ for zone_input in Zones:
     ax1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     ax1.margins(x=0.01)
     
-    ax1.axvline(dt.datetime(2024, 1, 2, 14, 15), color='black', linestyle='--')
+    ax1.axvline(dt.datetime(2024, 1, 2, 2, 0), color='black', linestyle='--')
 #    ax1.axvline(outage_date_from, color='black', linestyle='--')
     ax1.text(dt.datetime(2024, 1, 1, 5, 15), 0.8*max(ax1.get_ylim()), "Outage \nBegins", fontsize=13)
-    ax1.axvline(dt.datetime(2024, 1, 9, 20, 35), color='black', linestyle='--')
-    ax1.text(dt.datetime(2024, 1, 9, 22, 50), 0.8*max(ax1.get_ylim()), "Outage \nEnds", fontsize=13)
+    ax1.axvline(dt.datetime(2024, 1, 6, 23, 0), color='black', linestyle='--')
+    ax1.text(dt.datetime(2024, 1, 7, 1, 30), 0.8*max(ax1.get_ylim()), "Outage \nEnds", fontsize=13)
     
     locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
     formatter = mdates.ConciseDateFormatter(locator)
@@ -891,21 +895,19 @@ for zone_input in Zones:
     formatter.show_offset = False
     ax1.xaxis.set_major_locator(locator)
     ax1.xaxis.set_major_formatter(formatter)
-    
-    i=0
-    N = int(len(Total_Unserved_Energy_Out))
-    ind = np.arange(N)
-    for index in Total_Unserved_Energy_Out:
-        ax2.bar(ind[i], Total_Unserved_Energy_Out.values[i], width=0.35, 
-                                       color=color_list[i])
-        i=i+1
    
-
+    # Converts color_list into an iterable list for use in a loop
+    iter_colour = iter(color_list)
+    
+    bp = Total_Unserved_Energy_Out.plot.bar(stacked=False, rot=0, edgecolor='black', 
+                                            color=next(iter_colour), linewidth='0.1', 
+                                            width=0.35, ax=ax2)
+   
     ax2.spines['right'].set_visible(False)
 #    ax2.spines['top'].set_visible(False)
     ax2.set_ylabel('Total Unserved Energy (MWh)',  color='black', rotation='vertical')
     ax2.set_xticks(ind)
-    ax2.set_xticklabels(["0% \nDualFuel", "25% \nDualFuel", "50% \nDualFuel", "75% \nDualFuel", "100% \nDualFuel"])
+    ax2.set_xticklabels(["Gas Outage + Icing"])
     ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     ax2.margins(x=0.01)
     
@@ -935,13 +937,15 @@ fuel_switching.set_index('timestamp', inplace=True)
 
 fig6, ax = plt.subplots(figsize=(9,6))
 
-i=0
+# Converts color_list into an iterable list for use in a loop
+iter_colour = iter(color_list)
+
 for column in fuel_switching:
+    print(column)
     fp = ax.plot(fuel_switching[column], antialiased=True, 
-                  linewidth=3 , color=color_list[i], label=fuel_switching.columns[i])
+                  linewidth=3 , color=next(iter_colour), label=column)
     ax.legend(loc='upper center',bbox_to_anchor=(0.5,-0.15), 
                  facecolor='inherit', frameon=True, ncol=2)
-    i=i+1
 
 
 ax.set_ylabel('Real Time Fuel Offtake (MMBtu)',  color='black', rotation='vertical')
@@ -1030,17 +1034,16 @@ DA_RT_gas.set_index('timestamp', inplace=True)
 
 fig8, ax = plt.subplots(figsize=(9,6))
 
-i=0
+# Converts color_list into an iterable list for use in a loop
+iter_colour = iter(color_list)
+
 for column in DA_RT_gas:
     fp = ax.plot(DA_RT_gas[column], antialiased=True, 
-                  linewidth=3 , color=color_list[i], label=DA_RT_gas.columns[i])
+                  linewidth=3 , color=next(iter_colour), label=column)
     ax.legend(loc='upper center',bbox_to_anchor=(0.5,-0.15), 
                  facecolor='inherit', frameon=True, ncol=2)
-    ax.fill_between(DA_RT_gas.index, DA_RT_gas[column])
-    i=i+1
+    ax.fill_between(DA_RT_gas.index, DA_RT_gas[column])   
     
-    
-
 ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
 ax.set_ylim(bottom=0)
 ax.spines['right'].set_visible(False)
@@ -1067,3 +1070,169 @@ ax.text(dt.datetime(2024, 1, 2, 11), 0.80*max(ax.get_ylim()), "Outage \nBegins",
 
 fig8.savefig(figure_folder + "\\" + zone_input + "_DA-RT_Gas_Gen", dpi=600, bbox_inches='tight') 
 
+##===============================================================================
+
+pv_gen_cat = ['Solar',
+              'PV']
+
+re_gen_cat = ['Wind',
+              'PV']
+
+vre_gen_cat = ['Hydro',
+               'Ocean',
+               'Geothermal',
+               'Biomass',
+               'Biopwoer',
+               'Wind',
+               'Solar',
+               'CSP',
+               'PV']
+
+
+Gen_Collection = {} 
+Avail_Gen_Collection = {}
+Curtailment_Collection = {}
+Installed_Capacity_Collection = {} 
+Total_Gen_Cost_Collection = {}
+        
+for scenario in Multi_Scenario:
+    Installed_Capacity_Collection[scenario] = pd.read_hdf(PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + HDF5_output,  "generator_Installed_Capacity")
+    Gen_Collection[scenario] = pd.read_hdf(PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + HDF5_output, "generator_Generation")
+    Avail_Gen_Collection[scenario] = pd.read_hdf(PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + HDF5_output, "generator_Available_Capacity")
+    Curtailment_Collection[scenario] = pd.read_hdf(PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + HDF5_output,  "generator_Curtailment")
+    Total_Gen_Cost_Collection[scenario] = pd.read_hdf(PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + HDF5_output, "generator_Total_Generation_Cost")
+    
+        
+Penetration_Curtailment_out = pd.DataFrame()
+
+for zone_input in Zones: 
+    print(zone_input)
+    
+    # Multi_Scenario = ['BAU_No_VG_Reserves']
+    for scenario in Multi_Scenario:
+        print("     " + scenario)
+    
+    
+        gen = Gen_Collection.get(scenario)
+        gen = gen.xs(zone_input,level=AGG_BY)
+        
+        avail_gen = Avail_Gen_Collection.get(scenario)
+        avail_gen = avail_gen.xs(zone_input,level=AGG_BY) 
+        
+        re_curt = Curtailment_Collection.get(scenario)
+        re_curt = re_curt.xs(zone_input,level=AGG_BY)
+
+        # Finds the number of unique hours in the year
+        no_hours_year = len(gen.index.unique(level="timestamp"))
+        
+        # Total generation across all technologies [MWh]
+        total_gen = float(gen.sum())
+        
+        # Timeseries [MW] and Total VRE generation [MWh]
+        vre_gen = (gen.loc[(slice(None), vre_gen_cat),:])
+        total_vre_gen = float(vre_gen.sum())
+        
+        # Timeseries [MW] and Total RE generation [MWh]
+        re_gen = (gen.loc[(slice(None), re_gen_cat),:])
+        total_re_gen = float(re_gen.sum())
+        
+        # Timeseries [MW] and Total PV generation [MWh]
+        pv_gen = (gen.loc[(slice(None), pv_gen_cat),:])
+        total_pv_gen = float(pv_gen.sum())
+        
+        # % Penetration of generation classes across the year
+        VRE_Penetration = (total_vre_gen/total_gen)*100
+        RE_Penetration = (total_re_gen/total_gen)*100
+        PV_Penetration = (total_pv_gen/total_gen)*100
+        
+        # Timeseries [MW] and Total RE available [MWh]
+        re_avail = (avail_gen.loc[(slice(None), re_gen_cat),:])
+        total_re_avail = float(re_avail.sum())
+        
+        # Timeseries [MW] and Total PV available [MWh]
+        pv_avail = (avail_gen.loc[(slice(None), pv_gen_cat),:])
+        total_pv_avail = float(pv_avail.sum())
+    
+        # Total RE curtailment [MWh]
+        total_re_curt = float(re_curt.sum())
+        
+        # Timeseries [MW] and Total PV curtailment [MWh]
+        pv_curt = (re_curt.loc[(slice(None), pv_gen_cat),:])
+        total_pv_curt = float(pv_curt.sum())
+        
+        # % of hours with curtailment
+        Prct_hr_RE_curt = (len((re_curt.sum(axis=1)).loc[(re_curt.sum(axis=1))>0])/no_hours_year)*100
+        Prct_hr_PV_curt = (len((pv_curt.sum(axis=1)).loc[(pv_curt.sum(axis=1))>0])/no_hours_year)*100
+        
+        # Max instantaneous curtailment 
+        Max_RE_Curt = max(re_curt.sum(axis=1))
+        Max_PV_Curt = max(pv_curt.sum(axis=1))
+
+        # % RE and PV Curtailment Capacity Factor
+        RE_Curt_Cap_factor = (total_re_curt/Max_RE_Curt)/no_hours_year
+        PV_Curt_Cap_factor = (total_pv_curt/Max_PV_Curt)/no_hours_year
+        
+        # % Curtailment across the year
+        Prct_RE_curt = (total_re_curt/total_re_avail)*100
+        Prct_PV_curt = (total_pv_curt/total_pv_avail)*100
+        
+        # Total generation cost
+        Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
+        Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=AGG_BY)
+        Total_Gen_Cost = float(Total_Gen_Cost.sum())
+    
+        
+        vg_out = pd.Series([PV_Penetration ,RE_Penetration, VRE_Penetration, Max_PV_Curt, 
+                            Max_RE_Curt, Prct_PV_curt, Prct_RE_curt, Prct_hr_PV_curt,
+                            Prct_hr_RE_curt, PV_Curt_Cap_factor, RE_Curt_Cap_factor, Total_Gen_Cost], 
+                           index=["% PV Penetration", "% RE Penetration", "% VRE Penetration",
+                                  "Max PV Curtailment [MW]", "Max RE Curtailment [MW]",
+                                  "% PV Curtailment", '% RE Curtailment',"% PV hrs Curtailed", 
+                                  "% RE hrs Curtailed", "PV Curtailment Capacity Factor", 
+                                  "RE Curtailment Capacity Factor", "Gen Cost"])
+        vg_out = vg_out.rename(scenario)
+        
+        Penetration_Curtailment_out = pd.concat([Penetration_Curtailment_out, vg_out], axis=1, sort=False)
+    
+    Penetration_Curtailment_out = Penetration_Curtailment_out.T
+        
+    # Data table of values to return to main program
+    Data_Table_Out = Penetration_Curtailment_out 
+    
+    VG_index = pd.Series(Penetration_Curtailment_out.index)
+    # VG_index = VG_index.str.split(n=1, pat="_", expand=True)
+    # VG_index.rename(columns = {0:"Scenario"}, inplace=True) 
+    VG_index.rename("Scenario", inplace=True) 
+    # VG_index = VG_index["Scenario"]
+    Penetration_Curtailment_out.loc[:, "Scenario"] = VG_index[:,].values     
+        
+    marker_dict = dict(zip(VG_index.unique(), marker_style))
+    colour_dict = dict(zip(VG_index.unique(), color_list))
+    
+    Penetration_Curtailment_out["colour"] = [colour_dict.get(x, '#333333') for x in Penetration_Curtailment_out.Scenario]
+    Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '+') for x in Penetration_Curtailment_out.Scenario]
+    
+    fig1, ax = plt.subplots(figsize=(9,6))
+    for index, row in Penetration_Curtailment_out.iterrows():      
+        # if self.prop == "PV":
+        sp = ax.scatter(row["% PV Penetration"], row["% PV Curtailment"],
+              marker=row["marker"],  c=row["colour"], s=100, label = row["Scenario"])
+        ax.set_ylabel('% PV Curtailment',  color='black', rotation='vertical')
+        ax.set_xlabel('% PV Penetration',  color='black', rotation='horizontal')
+    
+        # elif self.prop == "PV+Wind":
+        #     sp = ax.scatter(row["% RE Penetration"], row["% RE Curtailment"],
+        #           marker=row["marker"],  c=row["colour"], s=100, label = row["Scenario"])
+        #     ax.set_ylabel('% PV + Wind Curtailment',  color='black', rotation='vertical')
+        #     ax.set_xlabel('% PV + Wind Penetration',  color='black', rotation='horizontal')
+    
+    ax.set_ylim(bottom=0)
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.tick_params(axis='y', which='major', length=5, width=1)
+    ax.tick_params(axis='x', which='major', length=5, width=1)
+    ax.margins(x=0.01)
+
+    handles, labels = plt.gca().get_legend_handles_labels()
+    by_label = OrderedDict(zip(labels, handles))
+    plt.legend(by_label.values(), by_label.keys())

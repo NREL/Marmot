@@ -144,3 +144,109 @@ class mplot(object):
         ax.add_artist(leg1)
         
         return {'fig': fig1, 'data_table': Data_Table_Out}
+    
+    
+    def sys_cost(self):
+        Total_Gen_Cost_Collection = {}
+        Cost_Unserved_Energy_Collection = {}
+        for scenario in self.Multi_Scenario:
+
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "generator_Total_Generation_Cost")
+            Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "region_Cost_Unserved_Energy")
+
+        Total_Systems_Cost_Out = pd.DataFrame()
+        print(self.zone_input)
+        
+        for scenario in self.Multi_Scenario:
+            print(scenario)
+            Total_Systems_Cost = pd.DataFrame()
+            
+            Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
+            Total_Gen_Cost = Total_Gen_Cost.xs(self.zone_input,level=self.AGG_BY)
+            Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
+            Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
+            
+            Cost_Unserved_Energy = Cost_Unserved_Energy_Collection.get(scenario)
+            Cost_Unserved_Energy = Cost_Unserved_Energy.xs(self.zone_input,level=self.AGG_BY)
+            Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
+            Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
+            
+            Total_Systems_Cost = pd.concat([Total_Systems_Cost, Total_Gen_Cost, Cost_Unserved_Energy], axis=1, sort=False) 
+            
+            Total_Systems_Cost.columns = Total_Systems_Cost.columns.str.replace('_',' ')    
+            Total_Systems_Cost.rename({0:scenario}, axis='index', inplace=True)
+            
+            
+            Total_Systems_Cost_Out = pd.concat([Total_Systems_Cost_Out, Total_Systems_Cost], axis=0, sort=False)
+        
+        Total_Systems_Cost_Out["Total Gen Cost"] = Total_Systems_Cost_Out["Total Gen Cost"]
+        Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
+
+        Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')  
+        
+        
+        # Data table of values to return to main program
+        Data_Table_Out = Total_Systems_Cost_Out
+        
+        fig2, ax = plt.subplots(figsize=(9,6))
+        
+        sb = Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
+        ax.tick_params(axis='y', which='major', length=5, width=1)
+        ax.tick_params(axis='x', which='major', length=5, width=1)
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+        ax.margins(x=0.01)
+       
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(reversed(handles), reversed(labels), loc='upper center',bbox_to_anchor=(0.5,-0.15), 
+                     facecolor='inherit', frameon=True, ncol=2)
+    
+    
+        """adds annotations to bar plots"""
+        cost_values=[]  #holds cost of each stack
+        cost_totals=[]  #holds total of each bar
+        
+        for i in ax.patches:
+            cost_values.append(i.get_height())
+
+        #calculates total value of bar
+        q=0    
+        j = int(len(cost_values)/2)   #total number of bars in plot
+        for cost in cost_values: 
+            out = cost + cost_values[q+j]
+            cost_totals.append(out)
+            q=q+1
+            if q>=j:
+                break
+            
+        #inserts values into bar stacks
+        for i in ax.patches:
+           width, height = i.get_width(), i.get_height()
+           if height<=1:
+               continue
+           x, y = i.get_xy() 
+           ax.text(x+width/2, 
+                y+height/2, 
+                '{:,.0f}'.format(height), 
+                horizontalalignment='center', 
+                verticalalignment='center', fontsize=13)
+       
+        #inserts total bar value above each bar
+        k=0   
+        for i in ax.patches:
+            height = cost_totals[k]
+            width = 0.5
+            x, y = i.get_xy() 
+            ax.text(x+width/2, 
+                y+height + 0.05*max(ax.get_ylim()), 
+                '{:,.0f}'.format(height), 
+                horizontalalignment='center', 
+                verticalalignment='center', fontsize=15, color='red') 
+            k=k+1
+            if k>=j:
+                break
+            
+        return {'fig': fig2, 'data_table': Data_Table_Out}
+            

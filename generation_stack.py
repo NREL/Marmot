@@ -30,7 +30,7 @@ def df_process_gen_inputs(df, self):
 
 class mplot(object):
     def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict,
-                 Multi_Scenario, PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat):
+                 Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat):
         self.prop = prop
         self.start = start     
         self.end = end
@@ -42,6 +42,7 @@ class mplot(object):
         self.ordered_gen = ordered_gen
         self.PLEXOS_color_dict = PLEXOS_color_dict
         self.Multi_Scenario = Multi_Scenario
+        self.Scenario_Diff = Scenario_Diff
         self.PLEXOS_Scenarios = PLEXOS_Scenarios
         self.ylabels = ylabels
         self.xlabels = xlabels
@@ -76,9 +77,11 @@ class mplot(object):
         except Exception:
             pass
         
-
-        Net_Load = Stacked_Gen.drop(labels = "Curtailment", axis=1)
-        Net_Load = Net_Load.drop(labels = self.re_gen_cat, axis=1)
+        # Calculates Net Load by removing variable gen + curtailment
+        self.re_gen_cat = self.re_gen_cat + ['Curtailment']
+        # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+        self.re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
+        Net_Load = Stacked_Gen.drop(labels = self.re_gen_cat, axis=1)
         Net_Load = Net_Load.sum(axis=1)
         
         Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
@@ -87,15 +90,13 @@ class mplot(object):
         Load = Load.groupby(["timestamp"]).sum()
         Load = Load.squeeze() #Convert to Series
     
-        try:
-            Pump_Load = Pump_Load_read.xs(self.zone_input,level=self.AGG_BY)
-            Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
-            Pump_Load = Pump_Load.squeeze() #Convert to Series
-            if (Pump_Load == 0).all() == False:
-                Pump_Load = Load - Pump_Load
-        except Exception:
-            pass
-        
+
+        Pump_Load = Pump_Load_read.xs(self.zone_input,level=self.AGG_BY)
+        Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
+        Pump_Load = Pump_Load.squeeze() #Convert to Series
+        if (Pump_Load == 0).all() == False:
+            Pump_Load = Load - Pump_Load
+
 
         
         Unserved_Energy = Unserved_Energy_read.xs(self.zone_input,level=self.AGG_BY)
@@ -131,6 +132,8 @@ class mplot(object):
         else:
             print("Plotting graph for entire timeperiod")
         
+        # Data table of values to return to main program
+        Data_Table_Out = Stacked_Gen
         
         fig1, ax = plt.subplots(figsize=(9,6))
         sp = ax.stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=5,
@@ -208,7 +211,7 @@ class mplot(object):
         if (Unserved_Energy == 0).all() == False:
             ax.add_artist(leg3)
             
-        return fig1
+        return {'fig': fig1, 'data_table': Data_Table_Out}
     
     def gen_stack_facet(self):
         
@@ -268,31 +271,27 @@ class mplot(object):
             except Exception:
                 pass
             
-            Net_Load = Stacked_Gen.drop(labels = "Curtailment", axis=1)
-            Net_Load = Net_Load.drop(labels = self.re_gen_cat, axis=1)
+            # Calculates Net Load by removing variable gen + curtailment
+            self.re_gen_cat = self.re_gen_cat + ['Curtailment']
+            # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+            self.re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
+            Net_Load = Stacked_Gen.drop(labels = self.re_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)
 
-            
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
             Load = Load_Collection.get(scenario)
             Load = Load.xs(self.zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
-        
-            try:
-                Pump_Load = Pump_Load_Collection.get(scenario)
-                Pump_Load = Pump_Load.xs(self.zone_input,level=self.AGG_BY)
-                Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
-                Pump_Load = Pump_Load.squeeze() #Convert to Series
-                if (Pump_Load == 0).all() == False:
-                    Pump_Load = Load - Pump_Load
-            except Exception:
-                pass
-            
-
-            Unserved_Energy = Unserved_Energy_Collection.get(scenario)
-            Unserved_Energy = Unserved_Energy.xs(self.zone_input,level=self.AGG_BY)
+                    
+            Pump_Load = Pump_Load_read.xs(self.zone_input,level=self.AGG_BY)
+            Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
+            Pump_Load = Pump_Load.squeeze() #Convert to Series
+            if (Pump_Load == 0).all() == False:
+                Pump_Load = Load - Pump_Load
+       
+            Unserved_Energy = Unserved_Energy_read.xs(self.zone_input,level=self.AGG_BY)
             Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
             Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
             if (Unserved_Energy == 0).all() == False:
@@ -414,3 +413,67 @@ class mplot(object):
         plt.ylabel('Genertaion (MW)',  color='black', rotation='vertical', labelpad=60)
         
         return fig2
+    
+    def gen_diff(self):
+        
+        # Create Dictionary to hold Datframes for each scenario 
+        Gen_Collection = {} 
+        
+        for scenario in self.Scenario_Diff:
+            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "generator_Generation")
+            
+            
+        Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[1])
+        Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(self.zone_input,level=self.AGG_BY)
+        Total_Gen_Stack_1 = df_process_gen_inputs(Total_Gen_Stack_1, self)
+        #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
+        Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns = self.ordered_gen).fillna(0)
+        
+        Total_Gen_Stack_2 = Gen_Collection.get(self.Scenario_Diff[0])
+        Total_Gen_Stack_2 = Total_Gen_Stack_2.xs(self.zone_input,level=self.AGG_BY)
+        Total_Gen_Stack_2 = df_process_gen_inputs(Total_Gen_Stack_2, self)
+        #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
+        Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns = self.ordered_gen).fillna(0)
+        
+        print(self.Scenario_Diff[1])
+        print(self.Scenario_Diff[0])
+        Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
+        # Removes columns that only equal 0
+        Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]
+        
+        # Data table of values to return to main program
+        Data_Table_Out = Gen_Stack_Out
+        # Reverses order of columns
+        Gen_Stack_Out = Gen_Stack_Out.iloc[:, ::-1]
+       
+        fig3, ax = plt.subplots(figsize=(9,6))
+        
+        for column in Gen_Stack_Out:
+            ax.plot(Gen_Stack_Out[column], linewidth=3, color=self.PLEXOS_color_dict[column], 
+                    label=column)
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0), 
+                          facecolor='inherit', frameon=True)
+        
+        ax.set_title(self.Multi_Scenario[0].replace('_', ' ') + " vs. " + self.Multi_Scenario[1].replace('_', ' '))
+        ax.set_ylabel('Generation Difference (MW)',  color='black', rotation='vertical')
+        ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.tick_params(axis='y', which='major', length=5, width=1)
+        ax.tick_params(axis='x', which='major', length=5, width=1)
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+        ax.margins(x=0.01)
+        
+        locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
+        formatter = mdates.ConciseDateFormatter(locator)
+        formatter.formats[2] = '%d\n %b'
+        formatter.zero_formats[1] = '%b\n %Y'
+        formatter.zero_formats[2] = '%d\n %b'
+        formatter.zero_formats[3] = '%H:%M\n %d-%b'
+        formatter.offset_formats[3] = '%b %Y'
+        formatter.show_offset = False
+        ax.xaxis.set_major_locator(locator)
+        ax.xaxis.set_major_formatter(formatter)
+        
+        return {'fig': fig3, 'data_table': Data_Table_Out}
+            

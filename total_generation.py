@@ -95,17 +95,14 @@ class mplot(object):
             Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
             Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
             
-            try:
-                Pump_Load = Pump_Load_Collection.get(scenario)
-                Pump_Load = Pump_Load.xs(self.zone_input,level=self.AGG_BY)
-                Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
-                Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
-                if (Pump_Load == 0).all() == False:
-                    Pump_Load = Total_Load - Pump_Load
-                    Pump_Load_Out = pd.concat([Pump_Load_Out, Pump_Load], axis=0, sort=False)
-            except Exception:
-                pass
-                
+            Pump_Load = Pump_Load_Collection.get(scenario)
+            Pump_Load = Pump_Load.xs(self.zone_input,level=self.AGG_BY)
+            Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
+            Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
+            if (Pump_Load == 0).all() == False:
+                Pump_Load = Total_Load - Pump_Load
+            Pump_Load_Out = pd.concat([Pump_Load_Out, Pump_Load], axis=0, sort=False)
+              
         
         Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load'})
         
@@ -121,6 +118,8 @@ class mplot(object):
     
         Total_Load_Out = Total_Load_Out.T/1000
         Pump_Load_Out = Pump_Load_Out.T/1000
+        
+        print(Pump_Load_Out)
 
         
         fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0, 
@@ -135,27 +134,35 @@ class mplot(object):
         
         n=0
         for scenario in self.Multi_Scenario:
+            
             x = [fig1.patches[n].get_x(), fig1.patches[n].get_x() + fig1.patches[n].get_width()]
             height1 = [int(Total_Load_Out[scenario])]*2
             lp1 = plt.plot(x,height1, c='black', linewidth=1.5)
-            height2 = [int(Pump_Load_Out[scenario])]*2
-            lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)
+            if Pump_Load_Out.values.sum() > 0:
+                height2 = [int(Pump_Load_Out[scenario])]*2
+                lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)   
             n=n+1
          
         #Legend 1 
         handles, labels = fig1.get_legend_handles_labels()
         leg1 = fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
                       facecolor='inherit', frameon=True)
+        
+        if (Pump_Load_Out.values.sum()) == 0:
+            leg2 = fig1.legend(lp1, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.95), 
+                      facecolor='inherit', frameon=True)
+            fig1.add_artist(leg1)
+        
         #Legend 2
-        leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 0.95), 
+        if (Pump_Load_Out.values.sum()) > 0:
+            leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 0.95), 
                       facecolor='inherit', frameon=True)
         
-        #Legend 3
-        leg3 = fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.85), 
+            leg3 = fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.85), 
                       facecolor='inherit', frameon=True)
         
-        fig1.add_artist(leg1)
-        fig1.add_artist(leg2)
+            fig1.add_artist(leg1)
+            fig1.add_artist(leg2)
         
         return {'fig': fig1, 'data_table': Data_Table_Out}
     
