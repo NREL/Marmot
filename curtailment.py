@@ -63,7 +63,7 @@ class mplot(object):
         
         for scenario in self.Multi_Scenario:
             print("     " + scenario)
-    
+            
             gen = Gen_Collection.get(scenario)
             gen = gen.xs(self.zone_input,level=self.AGG_BY)
             
@@ -114,14 +114,18 @@ class mplot(object):
             # % of hours with curtailment
             Prct_hr_RE_curt = (len((re_curt.sum(axis=1)).loc[(re_curt.sum(axis=1))>0])/no_hours_year)*100
             Prct_hr_PV_curt = (len((pv_curt.sum(axis=1)).loc[(pv_curt.sum(axis=1))>0])/no_hours_year)*100
-            
+                        
             # Max instantaneous curtailment 
             Max_RE_Curt = max(re_curt.sum(axis=1))
             Max_PV_Curt = max(pv_curt.sum(axis=1))
     
             # % RE and PV Curtailment Capacity Factor
-            RE_Curt_Cap_factor = (total_re_curt/Max_RE_Curt)/no_hours_year
-            PV_Curt_Cap_factor = (total_pv_curt/Max_PV_Curt)/no_hours_year
+            if total_pv_curt > 0:
+                RE_Curt_Cap_factor = (total_re_curt/Max_RE_Curt)/no_hours_year
+                PV_Curt_Cap_factor = (total_pv_curt/Max_PV_Curt)/no_hours_year
+            else:
+                RE_Curt_Cap_factor = 0
+                PV_Curt_Cap_factor = 0
             
             # % Curtailment across the year
             Prct_RE_curt = (total_re_curt/total_re_avail)*100
@@ -144,7 +148,7 @@ class mplot(object):
             vg_out = vg_out.rename(scenario)
             
             Penetration_Curtailment_out = pd.concat([Penetration_Curtailment_out, vg_out], axis=1, sort=False)
-
+            
          
         Penetration_Curtailment_out = Penetration_Curtailment_out.T
         
@@ -152,16 +156,17 @@ class mplot(object):
         Data_Table_Out = Penetration_Curtailment_out 
         
         VG_index = pd.Series(Penetration_Curtailment_out.index)
-        VG_index = VG_index.str.split(n=1, pat="_", expand=True)
-        VG_index.rename(columns = {0:"Scenario"}, inplace=True) 
-        VG_index = VG_index["Scenario"]
+        # VG_index = VG_index.str.split(n=1, pat="_", expand=True)
+        # VG_index.rename(columns = {0:"Scenario"}, inplace=True) 
+        VG_index.rename("Scenario", inplace=True)
+        # VG_index = VG_index["Scenario"]
         Penetration_Curtailment_out.loc[:, "Scenario"] = VG_index[:,].values     
             
         marker_dict = dict(zip(VG_index.unique(), self.marker_style))
         colour_dict = dict(zip(VG_index.unique(), self.color_list))
         
         Penetration_Curtailment_out["colour"] = [colour_dict.get(x, '#333333') for x in Penetration_Curtailment_out.Scenario]
-        Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '+') for x in Penetration_Curtailment_out.Scenario]
+        Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
         
         
         fig1, ax = plt.subplots(figsize=(9,6))
