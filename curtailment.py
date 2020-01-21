@@ -63,56 +63,92 @@ class mplot(object):
         
         for scenario in self.Multi_Scenario:
             print("     " + scenario)
-    
+            
             gen = Gen_Collection.get(scenario)
             gen = gen.xs(self.zone_input,level=self.AGG_BY)
             
-            total_gen = gen.sum(axis=1)
-            total_gen = total_gen.sum(axis=0)
-            
-            vre_gen = (gen.loc[(slice(None), self.vre_gen_cat),:]).sum(axis=1)
-            vre_gen = vre_gen.sum(axis=0)
-            
-            re_gen = (gen.loc[(slice(None), self.re_gen_cat),:]).sum(axis=1)
-            re_gen = re_gen.sum(axis=0)
-            
-            pv_gen = (gen.loc[(slice(None), self.pv_gen_cat),:]).sum(axis=1)   
-            pv_gen = pv_gen.sum(axis=0)
-            
-            VRE_Penetration = (vre_gen/total_gen)*100
-            RE_Penetration = (re_gen/total_gen)*100
-            PV_Penetration = (pv_gen/total_gen)*100
-            
             avail_gen = Avail_Gen_Collection.get(scenario)
-            avail_gen = avail_gen.xs(self.zone_input,level=self.AGG_BY)  
+            avail_gen = avail_gen.xs(self.zone_input,level=self.AGG_BY) 
             
-            re_avail = (avail_gen.loc[(slice(None), self.re_gen_cat),:]).sum(axis=1)
-            re_avail = re_avail.sum(axis=0)
+            re_curt = Curtailment_Collection.get(scenario)
+            re_curt = re_curt.xs(self.zone_input,level=self.AGG_BY)
+    
+            # Finds the number of unique hours in the year
+            no_hours_year = len(gen.index.unique(level="timestamp"))
             
-            pv_avail = (avail_gen.loc[(slice(None), self.pv_gen_cat),:]).sum(axis=1)
-            pv_avail = pv_avail.sum(axis=0)
-
-            total_curt = Curtailment_Collection.get(scenario)
-            re_curt = total_curt.xs(self.zone_input,level=self.AGG_BY).sum(axis=1)
-            re_curt = re_curt.sum(axis=0)
+            # Total generation across all technologies [MWh]
+            total_gen = float(gen.sum())
             
-            pv_curt = total_curt.xs(self.zone_input,level=self.AGG_BY)
-            pv_curt = (pv_curt.loc[(slice(None), self.pv_gen_cat),:]).sum(axis=1) 
-            pv_curt = pv_curt.sum(axis=0)
-                    
-            Prct_RE_curt = (re_curt/re_avail)*100
-            Prct_PV_curt = (pv_curt/pv_avail)*100
+            # Timeseries [MW] and Total VRE generation [MWh]
+            vre_gen = (gen.loc[(slice(None), self.vre_gen_cat),:])
+            total_vre_gen = float(vre_gen.sum())
             
+            # Timeseries [MW] and Total RE generation [MWh]
+            re_gen = (gen.loc[(slice(None), self.re_gen_cat),:])
+            total_re_gen = float(re_gen.sum())
+            
+            # Timeseries [MW] and Total PV generation [MWh]
+            pv_gen = (gen.loc[(slice(None), self.pv_gen_cat),:])
+            total_pv_gen = float(pv_gen.sum())
+            
+            # % Penetration of generation classes across the year
+            VRE_Penetration = (total_vre_gen/total_gen)*100
+            RE_Penetration = (total_re_gen/total_gen)*100
+            PV_Penetration = (total_pv_gen/total_gen)*100
+            
+            # Timeseries [MW] and Total RE available [MWh]
+            re_avail = (avail_gen.loc[(slice(None), self.re_gen_cat),:])
+            total_re_avail = float(re_avail.sum())
+            
+            # Timeseries [MW] and Total PV available [MWh]
+            pv_avail = (avail_gen.loc[(slice(None), self.pv_gen_cat),:])
+            total_pv_avail = float(pv_avail.sum())
+        
+            # Total RE curtailment [MWh]
+            total_re_curt = float(re_curt.sum())
+            
+            # Timeseries [MW] and Total PV curtailment [MWh]
+            pv_curt = (re_curt.loc[(slice(None), self.pv_gen_cat),:])
+            total_pv_curt = float(pv_curt.sum())
+            
+            # % of hours with curtailment
+            Prct_hr_RE_curt = (len((re_curt.sum(axis=1)).loc[(re_curt.sum(axis=1))>0])/no_hours_year)*100
+            Prct_hr_PV_curt = (len((pv_curt.sum(axis=1)).loc[(pv_curt.sum(axis=1))>0])/no_hours_year)*100
+                        
+            # Max instantaneous curtailment 
+            Max_RE_Curt = max(re_curt.sum(axis=1))
+            Max_PV_Curt = max(pv_curt.sum(axis=1))
+    
+            # % RE and PV Curtailment Capacity Factor
+            if total_pv_curt > 0:
+                RE_Curt_Cap_factor = (total_re_curt/Max_RE_Curt)/no_hours_year
+                PV_Curt_Cap_factor = (total_pv_curt/Max_PV_Curt)/no_hours_year
+            else:
+                RE_Curt_Cap_factor = 0
+                PV_Curt_Cap_factor = 0
+            
+            # % Curtailment across the year
+            Prct_RE_curt = (total_re_curt/total_re_avail)*100
+            Prct_PV_curt = (total_pv_curt/total_pv_avail)*100
+            
+            # Total generation cost
             Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
-            Total_Gen_Cost = Total_Gen_Cost.xs(self.zone_input,level=self.AGG_BY).sum(axis=1)
-            Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
-
+            Total_Gen_Cost = Total_Gen_Cost.xs(self.zone_input,level=self.AGG_BY)
+            Total_Gen_Cost = float(Total_Gen_Cost.sum())
+        
             
-            vg_out = pd.Series([PV_Penetration ,RE_Penetration, VRE_Penetration, Prct_PV_curt, Prct_RE_curt, Total_Gen_Cost], 
-                               index=["% PV Penetration", "% RE Penetration", "% VRE Penetration", "% PV Curtailment", '% RE Curtailment', "Gen Cost"])
+            vg_out = pd.Series([PV_Penetration ,RE_Penetration, VRE_Penetration, Max_PV_Curt, 
+                                Max_RE_Curt, Prct_PV_curt, Prct_RE_curt, Prct_hr_PV_curt,
+                                Prct_hr_RE_curt, PV_Curt_Cap_factor, RE_Curt_Cap_factor, Total_Gen_Cost], 
+                               index=["% PV Penetration", "% RE Penetration", "% VRE Penetration",
+                                      "Max PV Curtailment [MW]", "Max RE Curtailment [MW]",
+                                      "% PV Curtailment", '% RE Curtailment',"% PV hrs Curtailed", 
+                                      "% RE hrs Curtailed", "PV Curtailment Capacity Factor", 
+                                      "RE Curtailment Capacity Factor", "Gen Cost"])
             vg_out = vg_out.rename(scenario)
             
             Penetration_Curtailment_out = pd.concat([Penetration_Curtailment_out, vg_out], axis=1, sort=False)
+            
          
         Penetration_Curtailment_out = Penetration_Curtailment_out.T
         
@@ -120,16 +156,17 @@ class mplot(object):
         Data_Table_Out = Penetration_Curtailment_out 
         
         VG_index = pd.Series(Penetration_Curtailment_out.index)
-        VG_index = VG_index.str.split(n=1, pat="_", expand=True)
-        VG_index.rename(columns = {0:"Scenario"}, inplace=True) 
-        VG_index = VG_index["Scenario"]
+        # VG_index = VG_index.str.split(n=1, pat="_", expand=True)
+        # VG_index.rename(columns = {0:"Scenario"}, inplace=True) 
+        VG_index.rename("Scenario", inplace=True)
+        # VG_index = VG_index["Scenario"]
         Penetration_Curtailment_out.loc[:, "Scenario"] = VG_index[:,].values     
             
         marker_dict = dict(zip(VG_index.unique(), self.marker_style))
         colour_dict = dict(zip(VG_index.unique(), self.color_list))
         
         Penetration_Curtailment_out["colour"] = [colour_dict.get(x, '#333333') for x in Penetration_Curtailment_out.Scenario]
-        Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '+') for x in Penetration_Curtailment_out.Scenario]
+        Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
         
         
         fig1, ax = plt.subplots(figsize=(9,6))

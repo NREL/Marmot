@@ -1,13 +1,18 @@
 Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]"
-Generation Stack,TRUE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,PST
-Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,3,3,PST
+Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,PST
+Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,4,4,EST
+Generation Stack,FALSE,Stacked_Gen,,,,EST
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,PST
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,PST
 Total Generation,FALSE,Total_Generation ,,,,
 Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,
 Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,
 Total System Cost,FALSE,Total_System_Cost,,,,
+Production Cost,FALSE,Production_Cost,,,,
 Reserve Timeseries,FALSE,Reserve_Timeseries,Peak Demand,3,3,PST
 Reserve Total,FALSE,Reserve_Total,,,,
 Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,
 Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,
+Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST
+Unserved Energy Timeseries,TRUE,Unserved_Energy_Timeseries,,,,EST
+Total Unserved Energy,TRUE,Total_Unserved_Energy,,,,

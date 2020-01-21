@@ -9,12 +9,18 @@ import pandas as pd
 import os
 import sys
 
+# Directory of cloned Marmot repo and loaction of this file
+Marmot_DIR = r"C:\Users\DLEVIE\Documents\Marmot"
+os.chdir(Marmot_DIR)
+
 import matplotlib as mpl
 
 import generation_stack
 import total_generation 
 import total_installed_capacity
 import curtailment
+import production_cost
+import unserved_energy
 
 
 #===============================================================================
@@ -32,20 +38,18 @@ mpl.rc('font', family='serif')
 """ User Defined Names, Directories and Settings """
 #===============================================================================
 
-# Directory of cloned Marmot repo and loaction of this file
-Marmot_DIR = r"C:\Users\DLEVIE\Documents\Marmot"
-os.chdir(Marmot_DIR)
-
 Marmot_plot_select = pd.read_csv(Marmot_DIR + "\Marmot_plot_select.csv")
 
 Scenario_name = "BAU_No_VG_Reserves"
 
 Solutions_folder = Marmot_DIR
 
-
 Multi_Scenario = ["BAU_No_VG_Reserves", "BAU_VG_Reserves", "BAU_Copperplate",  
                   "BAU2_No_VG_Reserves", "BAU2_VG_Reserves", "BAU2_Copperplate"]
 
+# For plots using the differnec of the values between two scenarios. 
+# Max two entries, the second scenario is subtracted from the first. 
+Scenario_Diff = ["Gas_Outage_+_Icing", "Base_Case"]
 
 Mapping_folder = Marmot_DIR + "\mapping_folder\\"
 
@@ -197,11 +201,11 @@ PLEXOS_color_dict = {'Nuclear':'#B22222',
                     'Curtailment': '#FF0000'}  
                     
 
-color_list = ['#396AB1', '#CC2529','#3E9651','#535154','#6B4C9A','#922428','#948B3D']
+color_list = ['#396AB1', '#CC2529','#3E9651','#ff7f00','#6B4C9A','#922428','#cab2d6', '#6a3d9a', '#fb9a99', '#b15928']
  
 
 
-marker_style = ["^", "*", "o", "D", "x", "<", "P"]
+marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
 #===============================================================================
 # Main          
 #===============================================================================                   
@@ -219,21 +223,28 @@ Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
 
 def pass_data(figure, prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-              zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, 
+              zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
               PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat):
     
     if figure == 'Generation Stack': 
         fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, 
+                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
                                     PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat) 
         Figure_Out = fig.gen_stack()
         return Figure_Out
     
-    if figure == 'Generation Stack Facet Grid': 
+    elif figure == 'Generation Stack Facet Grid': 
         fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, 
+                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
                                     PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat) 
         Figure_Out = fig.gen_stack_facet()
+        return Figure_Out
+    
+    elif figure == 'Generation Timeseries Difference': 
+        fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
+                                    PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat) 
+        Figure_Out = fig.gen_diff()
         return Figure_Out
 
         
@@ -274,6 +285,32 @@ def pass_data(figure, prop, start, end, timezone, hdf_out_folder, HDF5_output,
         Figure_Out = fig.prod_cost()
         return Figure_Out
     
+    elif figure == 'Total System Cost':
+        fig = production_cost.mplot(prop, hdf_out_folder, HDF5_output, 
+                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                    Multi_Scenario, PLEXOS_Scenarios, color_list, marker_style, 
+                                    gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+        Figure_Out = fig.sys_cost()
+        return Figure_Out
+    
+    elif figure == 'Unserved Energy Timeseries':
+        fig = unserved_energy.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
+                                    PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, 
+                                    gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+        
+        Figure_Out = fig.unserved_energy_timeseries()
+        return Figure_Out
+    
+    elif figure == 'Total Unserved Energy':
+        fig = unserved_energy.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
+                                    PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, 
+                                    gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+        
+        Figure_Out = fig.tot_unserved_energy()
+        return Figure_Out
+    
 
     
 
@@ -288,26 +325,27 @@ for index, row in Marmot_plot_select.iterrows():
 
     for zone_input in Zones:
         Figure_Out = pass_data(row["Figure Type"], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],
-                              hdf_out_folder, HDF5_output, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                              hdf_out_folder, HDF5_output, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Scenario_Diff,
                               Multi_Scenario, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
        
         if row["Figure Type"] == "Generation Stack":
-            Figure_Out.savefig(gen_stack_figures + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight')
-       
+            Figure_Out["fig"].savefig(gen_stack_figures + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight')
+            Figure_Out["data_table"].to_csv(gen_stack_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+            
         if row["Figure Type"] == "Generation Stack Facet Grid":
             Figure_Out.savefig(gen_stack_figures + zone_input + "_" + row["Figure Output Name"], dpi=600, bbox_inches='tight')
         
         elif row["Figure Type"] == "Total Generation": 
             Figure_Out["fig"].figure.savefig(tot_gen_stack_figures + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
-            Figure_Out["data_table"].to_csv(figure_folder + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+            Figure_Out["data_table"].to_csv(tot_gen_stack_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
             
         elif row["Figure Type"] == "Total Generation Facet Grid": 
             Figure_Out["fig"].savefig(tot_gen_stack_figures + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')    
-            Figure_Out["data_table"].to_csv(figure_folder + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+            Figure_Out["data_table"].to_csv(tot_gen_stack_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
             
         elif row["Figure Type"] == "Total Installed Capacity": 
             Figure_Out["fig"].figure.savefig(installed_cap_figures + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
-            Figure_Out["data_table"].to_csv(figure_folder + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+            Figure_Out["data_table"].to_csv(installed_cap_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
             
         elif row["Figure Type"] == "Curtailment vs Penetration": 
             Figure_Out["fig"].savefig(figure_folder  + "/" + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
@@ -317,3 +355,14 @@ for index, row in Marmot_plot_select.iterrows():
             Figure_Out["fig"].savefig(system_cost_figures  + "/" + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
             Figure_Out["data_table"].to_csv(system_cost_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
             
+        elif row["Figure Type"] == "Total System Cost": 
+            Figure_Out["fig"].savefig(system_cost_figures  + "/" + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
+            Figure_Out["data_table"].to_csv(system_cost_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+            
+        elif row["Figure Type"] == "Generation Timeseries Difference": 
+            Figure_Out["fig"].savefig(figure_folder  + "/" + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_Diff[0]+"_vs_"+Scenario_Diff[1], dpi=600, bbox_inches='tight')
+            Figure_Out["data_table"].to_csv(figure_folder + "/" + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_Diff[0]+"_vs_"+Scenario_Diff[1] + ".csv")
+    
+        elif row["Figure Type"] == "Unserved Energy Timeseries" or row["Figure Type"] == 'Total Unserved Energy': 
+            Figure_Out["fig"].savefig(figure_folder  + "/" + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
+            Figure_Out["data_table"].to_csv(figure_folder + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")        
