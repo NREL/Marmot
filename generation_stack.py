@@ -29,8 +29,11 @@ def df_process_gen_inputs(df, self):
 
 
 class mplot(object):
-    def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict,
-                 Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat):
+    def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat):
         self.prop = prop
         self.start = start     
         self.end = end
@@ -158,11 +161,11 @@ class mplot(object):
         ax.margins(x=0.01)
         
         if self.prop == "Min Net Load":
-            ax.annotate('Min Net Load: \n' + str(int(Min_Net_Load)) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
+            ax.annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
         
         elif self.prop == "Peak Demand":
-                ax.annotate('Peak Demand: \n' + str(int(Load[peak_pump_load_t])) + ' MW', xy=(peak_pump_load_t, Peak_Pump_Load), xytext=((peak_pump_load_t + dt.timedelta(days=0.1)), (max(Load) + Load[peak_pump_load_t]*0.1)),
+                ax.annotate('Peak Demand: \n' + str(format(int(Load[peak_pump_load_t]), ',')) + ' MW', xy=(peak_pump_load_t, Peak_Pump_Load), xytext=((peak_pump_load_t + dt.timedelta(days=0.1)), (max(Load) + Load[peak_pump_load_t]*0.1)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
         locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
@@ -176,8 +179,7 @@ class mplot(object):
         ax.xaxis.set_major_locator(locator)
         ax.xaxis.set_major_formatter(formatter)
          
-        
-        
+                
         if (Unserved_Energy == 0).all() == False:
             ax.fill_between(Load.index, Load,Unserved_Energy, facecolor='#EE1289')
         
@@ -344,11 +346,11 @@ class mplot(object):
             axs[i].margins(x=0.01)
     
             if self.prop == "Min Net Load":
-                axs[i].annotate('Min Net Load: \n' + str(int(Min_Net_Load)) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
+                axs[i].annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
         
             elif self.prop == "Peak Demand":
-                axs[i].annotate('Peak Demand: \n' + str(int(Load[peak_pump_load_t])) + ' MW', xy=(peak_pump_load_t, Peak_Pump_Load), xytext=((peak_pump_load_t + dt.timedelta(days=0.1)), (max(Load) + Load[peak_pump_load_t]*0.1)),
+                axs[i].annotate('Peak Demand: \n' + str(format(int(Load[peak_pump_load_t]), ',')) + ' MW', xy=(peak_pump_load_t, Peak_Pump_Load), xytext=((peak_pump_load_t + dt.timedelta(days=0.1)), (max(Load) + Load[peak_pump_load_t]*0.1)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
             
             
@@ -423,20 +425,20 @@ class mplot(object):
             Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "generator_Generation")
             
             
-        Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[1])
+        Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[0])
         Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(self.zone_input,level=self.AGG_BY)
         Total_Gen_Stack_1 = df_process_gen_inputs(Total_Gen_Stack_1, self)
         #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
         Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns = self.ordered_gen).fillna(0)
         
-        Total_Gen_Stack_2 = Gen_Collection.get(self.Scenario_Diff[0])
+        Total_Gen_Stack_2 = Gen_Collection.get(self.Scenario_Diff[1])
         Total_Gen_Stack_2 = Total_Gen_Stack_2.xs(self.zone_input,level=self.AGG_BY)
         Total_Gen_Stack_2 = df_process_gen_inputs(Total_Gen_Stack_2, self)
         #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
         Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns = self.ordered_gen).fillna(0)
         
-        print(self.Scenario_Diff[1])
         print(self.Scenario_Diff[0])
+        print(self.Scenario_Diff[1])
         Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
         # Removes columns that only equal 0
         Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]

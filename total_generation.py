@@ -35,8 +35,12 @@ def df_process_categorical_index(df, self):
 
 
 class mplot(object):
-    def __init__(self, hdf_out_folder, HDF5_output, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, 
-                 PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict):
+    def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat):
+        
         self.hdf_out_folder = hdf_out_folder
         self.HDF5_output = HDF5_output
         self.zone_input =zone_input

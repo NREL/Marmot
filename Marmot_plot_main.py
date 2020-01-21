@@ -228,85 +228,103 @@ def pass_data(figure, prop, start, end, timezone, hdf_out_folder, HDF5_output,
     
     if figure == 'Generation Stack': 
         fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
-                                    PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat) 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat) 
         Figure_Out = fig.gen_stack()
         return Figure_Out
     
     elif figure == 'Generation Stack Facet Grid': 
         fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
-                                    PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat) 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat) 
         Figure_Out = fig.gen_stack_facet()
         return Figure_Out
     
     elif figure == 'Generation Timeseries Difference': 
         fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
-                                    PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict, re_gen_cat) 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat) 
         Figure_Out = fig.gen_diff()
         return Figure_Out
 
         
     elif figure == 'Total Generation':
-        fig = total_generation.mplot(hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                    Multi_Scenario, PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict) 
+        fig = total_generation.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat) 
         Figure_Out = fig.total_gen()
         return Figure_Out
     
     elif figure == 'Total Generation Facet Grid':
-        fig = total_generation.mplot(hdf_out_folder, HDF5_output, 
-                                zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                Multi_Scenario, PLEXOS_Scenarios, ylabels, xlabels, gen_names_dict) 
+        fig = total_generation.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat) 
         Figure_Out = fig.total_gen_facet()
         return Figure_Out
 
     
     elif figure == 'Total Installed Capacity':
-        fig = total_installed_capacity.mplot(hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                    Multi_Scenario, PLEXOS_Scenarios, gen_names_dict)
+        fig = total_installed_capacity.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat)
         Figure_Out = fig.total_cap()
         return Figure_Out
     
     elif figure == 'Curtailment vs Penetration':
-        fig = curtailment.mplot(prop, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                    Multi_Scenario, PLEXOS_Scenarios, color_list, marker_style, gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+        fig = curtailment.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat)
         Figure_Out = fig.curt_pen()
         return Figure_Out
     
     elif figure == 'Production Cost':
-        fig = production_cost.mplot(prop, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                    Multi_Scenario, PLEXOS_Scenarios, color_list, marker_style, 
-                                    gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+        fig = production_cost.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat)
         Figure_Out = fig.prod_cost()
         return Figure_Out
     
     elif figure == 'Total System Cost':
-        fig = production_cost.mplot(prop, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                    Multi_Scenario, PLEXOS_Scenarios, color_list, marker_style, 
-                                    gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+        fig = production_cost.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat)
         Figure_Out = fig.sys_cost()
         return Figure_Out
     
     elif figure == 'Unserved Energy Timeseries':
         fig = unserved_energy.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
-                                    PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, 
-                                    gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat)
         
         Figure_Out = fig.unserved_energy_timeseries()
         return Figure_Out
     
     elif figure == 'Total Unserved Energy':
         fig = unserved_energy.mplot(prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-                                    zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
-                                    PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, 
-                                    gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat)
         
         Figure_Out = fig.tot_unserved_energy()
         return Figure_Out
@@ -325,8 +343,8 @@ for index, row in Marmot_plot_select.iterrows():
 
     for zone_input in Zones:
         Figure_Out = pass_data(row["Figure Type"], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],
-                              hdf_out_folder, HDF5_output, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Scenario_Diff,
-                              Multi_Scenario, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
+                              hdf_out_folder, HDF5_output, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
+                              Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat)
        
         if row["Figure Type"] == "Generation Stack":
             Figure_Out["fig"].savefig(gen_stack_figures + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight')

@@ -25,8 +25,11 @@ def df_process_gen_inputs(df, self):
 
 
 class mplot(object):
-    def __init__(self, prop, hdf_out_folder, HDF5_output, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, 
-                 PLEXOS_Scenarios, color_list, marker_style, gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat):
+    def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat):
         self.prop = prop
         self.hdf_out_folder = hdf_out_folder
         self.HDF5_output = HDF5_output

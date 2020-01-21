@@ -21,8 +21,10 @@ import matplotlib.dates as mdates
 
 class mplot(object):
     def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, 
-              zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
-              PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, re_gen_cat, vre_gen_cat):
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat):
         
         self.prop = prop
         self.start = start     
