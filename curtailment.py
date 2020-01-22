@@ -8,6 +8,7 @@ Created on Wed Dec 11 15:23:06 2019
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
+import matplotlib as mpl
 
 
 #===============================================================================
@@ -198,3 +199,88 @@ class mplot(object):
         plt.legend(by_label.values(), by_label.keys())
         
         return {'fig': fig1, 'data_table': Data_Table_Out}
+    
+    def curt_duration_curve(self):
+        
+        Curtailment_Collection = {}
+        
+        for scenario in self.Multi_Scenario:
+            Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output,  "generator_Curtailment")
+            
+        RE_Curtailment_DC = pd.DataFrame()
+        PV_Curtailment_DC = pd.DataFrame()
+        
+        for scenario in self.Multi_Scenario:
+            print("     " + scenario)
+            
+            re_curt = Curtailment_Collection.get(scenario)
+            
+            # Timeseries [MW] RE curtailment [MWh]
+            re_curt = re_curt.xs(self.zone_input,level=self.AGG_BY)
+            
+            # Timeseries [MW] PV curtailment [MWh]
+            pv_curt = (re_curt.loc[(slice(None), self.pv_gen_cat),:])
+            
+            re_curt = re_curt.groupby(["timestamp"]).sum()
+            pv_curt = pv_curt.groupby(["timestamp"]).sum()
+            
+            re_curt = re_curt.squeeze() #Convert to Series
+            pv_curt = pv_curt.squeeze() #Convert to Series
+            
+            # Sort from larget to smallest             
+            re_cdc = re_curt.sort_values(ascending=False).reset_index(drop=True)
+            pv_cdc = pv_curt.sort_values(ascending=False).reset_index(drop=True)
+            
+            re_cdc.rename(scenario, inplace=True)
+            pv_cdc.rename(scenario, inplace=True)
+            
+            RE_Curtailment_DC = pd.concat([RE_Curtailment_DC, re_cdc], axis=1, sort=False)
+            PV_Curtailment_DC = pd.concat([PV_Curtailment_DC, pv_cdc], axis=1, sort=False)
+        
+        # Remove columns that have values less than 1 
+        RE_Curtailment_DC = RE_Curtailment_DC.loc[:, (RE_Curtailment_DC >= 1).any(axis=0)]
+        PV_Curtailment_DC = PV_Curtailment_DC.loc[:, (PV_Curtailment_DC >= 1).any(axis=0)]
+        # Replace _ with white space
+        RE_Curtailment_DC.columns = RE_Curtailment_DC.columns.str.replace('_',' ')   
+        PV_Curtailment_DC.columns = PV_Curtailment_DC.columns.str.replace('_',' ')   
+        
+        # Create Dictionary from scenario names and color list
+        colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
+        
+        
+        fig2, ax = plt.subplots(figsize=(9,6))
+        
+        if self.prop == "PV":
+            Data_Table_Out = PV_Curtailment_DC
+            
+            for column in PV_Curtailment_DC:
+                ax.plot(PV_Curtailment_DC[column], linewidth=3, color=colour_dict[column], 
+                        label=column)
+                ax.legend(loc='lower left',bbox_to_anchor=(1,0), 
+                          facecolor='inherit', frameon=True)
+                ax.set_ylabel('PV Curtailment (MW)',  color='black', rotation='vertical')
+        
+        if self.prop == "PV+Wind":
+            Data_Table_Out = RE_Curtailment_DC
+            
+            for column in RE_Curtailment_DC:
+                ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column], 
+                        label=column)
+                ax.legend(loc='lower left',bbox_to_anchor=(1,0), 
+                          facecolor='inherit', frameon=True)
+                ax.set_ylabel('PV + Wind Curtailment (MW)',  color='black', rotation='vertical')
+        
+        ax.set_xlabel('Hours',  color='black', rotation='horizontal')
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.tick_params(axis='y', which='major', length=5, width=1)
+        ax.tick_params(axis='x', which='major', length=5, width=1)
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+        ax.margins(x=0.01)
+        ax.set_xlim=(0, 9490)
+        ax.set_ylim(bottom=0)
+        
+        return {'fig': fig2, 'data_table': Data_Table_Out}
+            
+        
+        
