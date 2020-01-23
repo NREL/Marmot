@@ -456,7 +456,8 @@ class mplot(object):
             ax.legend(loc='lower left',bbox_to_anchor=(1,0), 
                           facecolor='inherit', frameon=True)
         
-        ax.set_title(self.Multi_Scenario[0].replace('_', ' ') + " vs. " + self.Multi_Scenario[1].replace('_', ' '))
+
+        ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
         ax.set_ylabel('Generation Difference (MW)',  color='black', rotation='vertical')
         ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
         ax.spines['right'].set_visible(False)
