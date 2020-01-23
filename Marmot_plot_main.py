@@ -136,6 +136,7 @@ HDF5_output = str(HDF5_output[0])
 ordered_gen = ['Nuclear',
                'Coal',
                'Gas-CC',
+               'Gas-CC CCS',
                'Gas-CT',
                'Gas',
                'Gas-Steam',
@@ -175,7 +176,9 @@ vre_gen_cat = ['Hydro',
                'CSP',
                'PV']
 
-
+if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
+                    print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
+                    print(set(gen_names["New"].unique()) - (set(ordered_gen)))
 
 #===============================================================================
 # Colours and styles
@@ -185,6 +188,7 @@ vre_gen_cat = ['Hydro',
 PLEXOS_color_dict = {'Nuclear':'#B22222',
                     'Coal':'#333333',
                     'Gas-CC':'#6E8B3D',
+                    'Gas-CC CCS':'#396AB1',
                     'Gas-CT':'#FFB6C1',
                     'DualFuel':'#000080',
                     'Oil-Gas-Steam':'#cd5c5c',
