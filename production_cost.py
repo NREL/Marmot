@@ -128,7 +128,7 @@ class mplot(object):
     #    ax.set_xticklabels(rotation='vertical')
         ax.tick_params(axis='y', which='major', length=5, width=1)
         ax.tick_params(axis='x', which='major', length=5, width=1)
-        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.2g}'))
         ax.margins(x=0.01)
         plt.xticks(rotation=90)
         
@@ -199,7 +199,7 @@ class mplot(object):
         ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
         ax.tick_params(axis='y', which='major', length=5, width=1)
         ax.tick_params(axis='x', which='major', length=5, width=1)
-        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.2g}'))
         ax.margins(x=0.01)
        
         handles, labels = ax.get_legend_handles_labels()
@@ -244,7 +244,7 @@ class mplot(object):
             x, y = i.get_xy() 
             ax.text(x+width/2, 
                 y+height + 0.05*max(ax.get_ylim()), 
-                '{:,.0f}'.format(height), 
+                '{:#,.2g}'.format(height),  
                 horizontalalignment='center', 
                 verticalalignment='center', fontsize=15, color='red') 
             k=k+1
