@@ -25,14 +25,13 @@ def df_process_gen_inputs(df, self):
 
 
 class mplot(object):
-    def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+    def __init__(self, prop, start, end, timezone, hdf_out_folder, 
                                      zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
                                      Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
                                      xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
                                      re_gen_cat, vre_gen_cat):
         self.prop = prop
         self.hdf_out_folder = hdf_out_folder
-        self.HDF5_output = HDF5_output
         self.zone_input =zone_input
         self.AGG_BY = AGG_BY
         self.ordered_gen = ordered_gen
@@ -53,10 +52,10 @@ class mplot(object):
         Installed_Capacity_Collection = {} 
         for scenario in self.Multi_Scenario:
 
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "generator_Total_Generation_Cost")
-            Pool_Revenues_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output,  "generator_Pool_Revenue")
-            Reserve_Revenues_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output,  "generator_Reserves_Revenue")
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output,  "generator_Installed_Capacity")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Total_Generation_Cost")
+            Pool_Revenues_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Pool_Revenue")
+            Reserve_Revenues_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Reserves_Revenue")
+            Installed_Capacity_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Installed_Capacity")
             
 
         Total_Systems_Cost_Out = pd.DataFrame()
@@ -154,8 +153,8 @@ class mplot(object):
         Cost_Unserved_Energy_Collection = {}
         for scenario in self.Multi_Scenario:
 
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "generator_Total_Generation_Cost")
-            Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "region_Cost_Unserved_Energy")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Total_Generation_Cost")
+            Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Cost_Unserved_Energy")
 
         Total_Systems_Cost_Out = pd.DataFrame()
         print(self.zone_input)

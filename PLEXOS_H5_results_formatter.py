@@ -66,14 +66,13 @@ overlap = 0 # number of hours overlapped between two adjacent models
 VoLL = 10000 # Value of Lost Load for calculatinhg cost of unserved energy
 
 
-HDF5_output = "PLEXOS_outputs_formatted.h5" #name of hdf5 file which holds processed outputs 
-
 for Scenario_name in Scenario_List:
     
     #===============================================================================
     # Input and Output Directories 
     #===============================================================================
     
+    HDF5_output = Scenario_name+"_formatted.h5"
     
     PLEXOS_Scenarios = Solutions_folder + r"\PLEXOS_Scenarios" + "/" + Scenario_name
     try:
