@@ -20,7 +20,7 @@ import matplotlib.dates as mdates
 
 
 class mplot(object):
-    def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+    def __init__(self, prop, start, end, timezone, hdf_out_folder,
                                      zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
                                      Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
                                      xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
@@ -31,7 +31,6 @@ class mplot(object):
         self.end = end
         self.timezone = timezone
         self.hdf_out_folder = hdf_out_folder
-        self.HDF5_output = HDF5_output
         self.zone_input =zone_input
         self.AGG_BY = AGG_BY
         self.ordered_gen = ordered_gen
@@ -50,7 +49,7 @@ class mplot(object):
         Unserved_Energy_Collection = {}
 
         for scenario in self.Multi_Scenario:
-            Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "region_Unserved_Energy")
+            Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Unserved_Energy")
             
         Unserved_Energy_Timeseries_Out = pd.DataFrame()
         Total_Unserved_Energy_Out = pd.DataFrame()    
@@ -116,7 +115,7 @@ class mplot(object):
         Unserved_Energy_Collection = {}
 
         for scenario in self.Multi_Scenario:
-            Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "region_Unserved_Energy")
+            Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "region_Unserved_Energy")
             
         Unserved_Energy_Timeseries_Out = pd.DataFrame()
         Total_Unserved_Energy_Out = pd.DataFrame()    

@@ -29,7 +29,7 @@ def df_process_gen_inputs(df, self):
 
 
 class mplot(object):
-    def __init__(self, prop, start, end, timezone, hdf_out_folder, HDF5_output, 
+    def __init__(self, prop, start, end, timezone, hdf_out_folder,  
                                      zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
                                      Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
                                      xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
@@ -39,7 +39,6 @@ class mplot(object):
         self.end = end
         self.timezone = timezone
         self.hdf_out_folder = hdf_out_folder
-        self.HDF5_output = HDF5_output
         self.zone_input =zone_input
         self.AGG_BY = AGG_BY
         self.ordered_gen = ordered_gen
@@ -55,12 +54,12 @@ class mplot(object):
    
     
     def gen_stack(self):
-        Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.HDF5_output, 'generator_Generation')
-        Avail_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.HDF5_output, "generator_Available_Capacity")
-        Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.HDF5_output, "generator_Pump_Load" )
-        Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.HDF5_output, "region_Load")
-        Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.HDF5_output, "region_Unserved_Energy" )
-        Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.HDF5_output, "generator_Curtailment" )
+        Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
+        Avail_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Available_Capacity")
+        Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
+        Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Load")
+        Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
+        Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Curtailment" )
         
         print("     "+ self.zone_input)
         Pump_Load = pd.Series() # Initiate pump load 
@@ -227,12 +226,12 @@ class mplot(object):
         
         
         for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "generator_Generation")
-            Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output,  "region_Load")
-            Avail_Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "generator_Available_Capacity")
-            Pump_Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output,  "generator_Pump_Load" )
-            Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "region_Unserved_Energy" )
-            Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output,  "generator_Curtailment")
+            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Generation")
+            Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "region_Load")
+            Avail_Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Available_Capacity")
+            Pump_Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Pump_Load" )
+            Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Unserved_Energy" )
+            Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Curtailment")
             
         
         xdimension=len(self.xlabels)
@@ -424,7 +423,7 @@ class mplot(object):
         Gen_Collection = {} 
         
         for scenario in self.Scenario_Diff:
-            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + self.HDF5_output, "generator_Generation")
+            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Generation")
             
             
         Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[0])
