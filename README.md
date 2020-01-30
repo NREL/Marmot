@@ -4,8 +4,10 @@ Marmot is a set of python scripts to process h5plexos PLEXOS results to ready th
 
 ## Main Python Scripts
 Marmot consists of two main .py files:
-* **PLEXOS_H5_results_formatter.py**
-* **Marmot_plot_main.py**
+* [**PLEXOS_H5_results_formatter.py**](https://github.nrel.gov/PCM/Marmot#marmot_plot_main)
+* [**Marmot_plot_main.py**](https://github.nrel.gov/PCM/Marmot#marmot_plot_main)
+
+A high level explanation of what these files do and suggested settings to change are described in this readme. Code specifics are decribed in more detail in the code comments. 
 
 ## PLEXOS_H5_results_formatter
 The **PLEXOS_H5_results_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed they are saved to a intermediary hdf5 file which can then be read into tyhe Marmot plotting code.
@@ -58,7 +60,28 @@ As with the processing script useres useres will need to adjust the input settin
 
 - `Marmot_plot_select` This is a csv file which determiens which figures to plot. This file is in the repo. Under the *"Plot Graph"* column adjust the property to be TRUE or FALSE to decide whether to plot the figure. Column *D* allows the user to adjust certain properties within the plot (examples given). Columns *E* and *F* adjust the range of days to plot either side of the specified property in *D*. Column *G* adjusts the timezone to plot on the figure. The list of figures to plot is currently limited by what code has been written for.  
 
+- `Scenario_name` This is the name of the scenario to plot and is also the folder where plots are saved. This folder will be located in the `Solutions_folder` decribed [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
 
+- `Solutions_folder` Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
 
+- `Multi_Scenario` This is a list of scenarios to plot on the same figure, allowing comparisons to be made between them. The order of the sceanrios will determine the order of the plots
 
-I will write this section in a while, email daniel.levie@nrel.gov if you need help
+- `Scenario_Diff` This is a list which can contain max two entries. This list is used to create plots using the difference of the values between two scenarios. The second scenario in the list is subtracted from the first. If you are not creating difference plots this list can remain empty.
+
+- `Mapping_folder` Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
+
+- `AGG_BY` A string which tells Marmot which region type to aggregate by when creating plots. The options you have here will be based on how you setup the **Region_mapping.csv** described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
+
+- `ylabels` & `xlabels` - If you wish to create a Facet plot, these labels will be applied to the axis. The amount of entries given to each label will determine the dimensions of the Facet plot. This should be equal to the number of scenarios you are plotting. For example if you have 6 sceanrios your Facet Grid dimensions may be 23, 32 or 16. 
+
+ ### Other Settings (Optional Changes)
+ 
+ The following are found within **Marmot_plot_main.py** and are optional to change.
+ 
+ - `ordered_gen` - Ordered list of generators which determines how they appear in a stack plot.
+ 
+ - `pv_gen_cat` , `re_gen_cat` & `vre_gen_cat`- Generators which belong to specified category, used for certain figures.
+ 
+ - `PLEXOS_color_dict` - Dictionary which holds the colors to apply to each generator type within a plot.
+ 
+ - `color_list` - List of colors to apply to non generator specific line plot and bar plot figures
