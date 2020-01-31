@@ -11,6 +11,7 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import numpy as np 
 
 
 #===============================================================================
@@ -78,6 +79,12 @@ class mplot(object):
             Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)
             Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
             
+            # Calculates interval step to correct for MWh of generation
+            time_delta = Total_Gen_Stack.index[1]- Total_Gen_Stack.index[0]
+            # Finds intervals in 60 minute period
+            interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+
+            
             try:
                 Stacked_Curt = Curtailment_Collection.get(scenario)
                 Stacked_Curt = Stacked_Curt.xs(self.zone_input,level=self.AGG_BY)
@@ -88,6 +95,7 @@ class mplot(object):
             except Exception:
                 pass
             
+            Total_Gen_Stack = Total_Gen_Stack/interval_count
             Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
             Total_Gen_Stack.rename(scenario, inplace=True)
             Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
@@ -96,12 +104,14 @@ class mplot(object):
             Total_Load = Total_Load.xs(self.zone_input,level=self.AGG_BY)
             Total_Load = Total_Load.groupby(["timestamp"]).sum()
             Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
+            Total_Load = Total_Load/interval_count
             Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
             
             Pump_Load = Pump_Load_Collection.get(scenario)
             Pump_Load = Pump_Load.xs(self.zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
+            Pump_Load = Pump_Load/interval_count
             if (Pump_Load == 0).all() == False:
                 Pump_Load = Total_Load - Pump_Load
             Pump_Load_Out = pd.concat([Pump_Load_Out, Pump_Load], axis=0, sort=False)
@@ -122,8 +132,6 @@ class mplot(object):
         Total_Load_Out = Total_Load_Out.T/1000
         Pump_Load_Out = Pump_Load_Out.T/1000
         
-        print(Pump_Load_Out)
-
         
         fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0, 
                          color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
