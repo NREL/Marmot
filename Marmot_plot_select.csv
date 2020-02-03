@@ -19,3 +19,8 @@ Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,
 Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,
 Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,
+Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,MT
+Generation Unstacked,FALSE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,MT
+Generation Unstacked,FALSE,Unstacked_Gen,,,,MT
+Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,MT
+Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,MT

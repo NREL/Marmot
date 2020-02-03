@@ -22,7 +22,7 @@ import curtailment
 import production_cost
 import unserved_energy
 import reserves
-
+import generation_unstack
 
 #===============================================================================
 # Graphing Defaults
@@ -360,7 +360,23 @@ def pass_data(figure, prop, start, end, timezone, hdf_out_folder,
         Figure_Out = fig.reserve_timeseries_facet()
         return Figure_Out
     
+    if figure == 'Generation Unstacked': 
+        fig = generation_unstack.mplot(prop, start, end, timezone, hdf_out_folder, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat) 
+        Figure_Out = fig.gen_unstack()
+        return Figure_Out
     
+    elif figure == 'Generation Unstack Facet Grid': 
+        fig = generation_unstack.mplot(prop, start, end, timezone, hdf_out_folder, 
+                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
+                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+                                     re_gen_cat, vre_gen_cat) 
+        Figure_Out = fig.gen_unstack_facet()
+        return Figure_Out
 
 # Filter for chosen figures to plot
 Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == True]
@@ -437,3 +453,10 @@ for index, row in Marmot_plot_select.iterrows():
             elif row["Figure Type"] == "Unserved Energy Timeseries" or row["Figure Type"] == 'Total Unserved Energy': 
                 Figure_Out["fig"].savefig(figure_folder  + "/" + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(figure_folder + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")     
+                
+            elif row["Figure Type"] == "Generation Unstacked":
+                Figure_Out["fig"].savefig(gen_stack_figures + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(gen_stack_figures + "/" + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv")
+                
+            elif row["Figure Type"] == "Generation Unstacked Facet Grid":
+                Figure_Out.savefig(gen_stack_figures + zone_input + "_" + row["Figure Output Name"], dpi=600, bbox_inches='tight')

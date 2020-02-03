@@ -2,7 +2,7 @@
 """
 Created on Mon Dec  9 10:34:48 2019
 
-This code creates generation stack plots and is called from Marmot_plot_main.py
+This code creates generation UNstacked plots and is called from Marmot_plot_main.py
 
 @author: dlevie
 """
@@ -53,7 +53,7 @@ class mplot(object):
 
    
     
-    def gen_stack(self):
+    def gen_unstack(self):
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
         Avail_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Available_Capacity")
         Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
@@ -104,8 +104,6 @@ class mplot(object):
         Unserved_Energy = Unserved_Energy_read.xs(self.zone_input,level=self.AGG_BY)
         Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
         Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
-        if (Unserved_Energy == 0).all() == False:
-            Unserved_Energy = Load - Unserved_Energy
         
 
         if self.prop == "Peak Demand":
@@ -138,16 +136,12 @@ class mplot(object):
         Data_Table_Out = Stacked_Gen
         
         fig1, ax = plt.subplots(figsize=(9,6))
-        sp = ax.stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=5,
-                     colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
+        for column in Stacked_Gen.columns:
+            ax.plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2, 
+                    color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
         
         if (Unserved_Energy == 0).all() == False:
             lp2 = plt.plot(Unserved_Energy, color='#EE1289')
-        
-        lp = plt.plot(Load, color='black')
-        
-        if (Pump_Load == 0).all() == False:
-            lp3 = plt.plot(Pump_Load, color='black', linestyle="--")
         
         
         ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
@@ -159,14 +153,6 @@ class mplot(object):
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
         ax.margins(x=0.01)
         
-        if self.prop == "Min Net Load":
-            ax.annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
-                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-        
-        elif self.prop == "Peak Demand":
-                ax.annotate('Peak Demand: \n' + str(format(int(Load[peak_pump_load_t]), ',')) + ' MW', xy=(peak_pump_load_t, Peak_Pump_Load), xytext=((peak_pump_load_t + dt.timedelta(days=0.1)), (max(Load) + Load[peak_pump_load_t]*0.1)),
-                            fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-
         locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
         formatter = mdates.ConciseDateFormatter(locator)
         formatter.formats[2] = '%d\n %b'
@@ -179,42 +165,29 @@ class mplot(object):
         ax.xaxis.set_major_formatter(formatter)
          
                 
-        if (Unserved_Energy == 0).all() == False:
-            ax.fill_between(Load.index, Load,Unserved_Energy, facecolor='#EE1289')
-        
+
         handles, labels = ax.get_legend_handles_labels()
         
      
         #Legend 1
         leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
                       facecolor='inherit', frameon=True)  
-        #Legend 2
-        if (Pump_Load == 0).all() == False:
-            leg2 = ax.legend(lp, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 0.9), 
-                      facecolor='inherit', frameon=True)
-        else:
-            leg2 = ax.legend(lp, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9), 
-                      facecolor='inherit', frameon=True)
         
         #Legend 3
         if (Unserved_Energy == 0).all() == False:
             leg3 = ax.legend(lp2, ['Unserved Energy'], loc='upper left',bbox_to_anchor=(1, 0.82), 
                       facecolor='inherit', frameon=True)
             
-        #Legend 4
-        if (Pump_Load == 0).all() == False:
-            leg4 = ax.legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.885), 
-                      facecolor='inherit', frameon=True)
+
         
         # Manually add the first legend back
         ax.add_artist(leg1)
-        ax.add_artist(leg2)
         if (Unserved_Energy == 0).all() == False:
             ax.add_artist(leg3)
             
         return {'fig': fig1, 'data_table': Data_Table_Out}
     
-    def gen_stack_facet(self):
+    def gen_unstack_facet(self):
         
         # Create Dictionary to hold Datframes for each scenario 
         Gen_Collection = {} 
@@ -234,6 +207,7 @@ class mplot(object):
             Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Curtailment")
             
         print("     "+ self.zone_input)
+
         
         xdimension=len(self.xlabels)
         ydimension=len(self.ylabels)
@@ -286,7 +260,7 @@ class mplot(object):
             Load = Load.xs(self.zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
-                    
+
             Pump_Load = Pump_Load_Collection.get(scenario)
             Pump_Load = Pump_Load.xs(self.zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
@@ -298,8 +272,7 @@ class mplot(object):
             Unserved_Energy = Unserved_Energy.xs(self.zone_input,level=self.AGG_BY)
             Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
             Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
-            if (Unserved_Energy == 0).all() == False:
-                Unserved_Energy = Load - Unserved_Energy
+
           
             
             if self.prop == "Peak Demand":
@@ -326,20 +299,17 @@ class mplot(object):
             else:
                 print("Plotting graph for entire timeperiod")
             
+            for column in Stacked_Gen.columns:
+                axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2, 
+                   color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
         
-            sp = axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
-                         colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
-             
-            
+        
+    
             if (Unserved_Energy == 0).all() == False:
                 lp2 = axs[i].plot(Unserved_Energy, color='#EE1289')
             
-            lp = axs[i].plot(Load, color='black')
             
-            if (Pump_Load == 0).all() == False:
-                lp3 = axs[i].plot(Pump_Load, color='black', linestyle="--")
-            
-            
+           
             axs[i].spines['right'].set_visible(False)
             axs[i].spines['top'].set_visible(False)
             axs[i].tick_params(axis='y', which='major', length=5, width=1)
@@ -347,14 +317,6 @@ class mplot(object):
             axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             axs[i].margins(x=0.01)
     
-            if self.prop == "Min Net Load":
-                axs[i].annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
-                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-        
-            elif self.prop == "Peak Demand":
-                axs[i].annotate('Peak Demand: \n' + str(format(int(Load[peak_pump_load_t]), ',')) + ' MW', xy=(peak_pump_load_t, Peak_Pump_Load), xytext=((peak_pump_load_t + dt.timedelta(days=0.1)), (max(Load) + Load[peak_pump_load_t]*0.1)),
-                            fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-            
             
             locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
             formatter = mdates.ConciseDateFormatter(locator)
@@ -367,32 +329,22 @@ class mplot(object):
             axs[i].xaxis.set_major_locator(locator)
             axs[i].xaxis.set_major_formatter(formatter)
             
-            if (Unserved_Energy == 0).all() == False:
-                axs[i].fill_between(Load.index, Load,Unserved_Energy, facecolor='#EE1289')
-            
+                        
             handles, labels = axs[grid_size-1].get_legend_handles_labels()
             
          
             #Legend 1
             leg1 = axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
                           facecolor='inherit', frameon=True)  
-            #Legend 2
-            leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.45), 
-                          facecolor='inherit', frameon=True)
             
             #Legend 3
             if (Unserved_Energy == 0).all() == False:
                 leg3 = axs[grid_size-1].legend(lp2, ['Unserved Energy'], loc='upper left',bbox_to_anchor=(1, 1.55), 
                           facecolor='inherit', frameon=True)
                 
-            #Legend 4
-            if (Pump_Load == 0).all() == False:
-                leg4 = axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.35), 
-                          facecolor='inherit', frameon=True)
-            
+
             # Manually add the first legend back
             axs[grid_size-1].add_artist(leg1)
-            axs[grid_size-1].add_artist(leg2)
             if (Unserved_Energy == 0).all() == False:
                 axs[grid_size-1].add_artist(leg3)
                 
@@ -418,67 +370,4 @@ class mplot(object):
         
         return fig2
     
-    def gen_diff(self):
-        
-        # Create Dictionary to hold Datframes for each scenario 
-        Gen_Collection = {} 
-        
-        for scenario in self.Scenario_Diff:
-            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Generation")
-            
-            
-        Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[0])
-        Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(self.zone_input,level=self.AGG_BY)
-        Total_Gen_Stack_1 = df_process_gen_inputs(Total_Gen_Stack_1, self)
-        #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
-        Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns = self.ordered_gen).fillna(0)
-        
-        Total_Gen_Stack_2 = Gen_Collection.get(self.Scenario_Diff[1])
-        Total_Gen_Stack_2 = Total_Gen_Stack_2.xs(self.zone_input,level=self.AGG_BY)
-        Total_Gen_Stack_2 = df_process_gen_inputs(Total_Gen_Stack_2, self)
-        #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
-        Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns = self.ordered_gen).fillna(0)
-        
-        print(self.Scenario_Diff[0])
-        print(self.Scenario_Diff[1])
-        Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
-        # Removes columns that only equal 0
-        Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]
-        
-        # Data table of values to return to main program
-        Data_Table_Out = Gen_Stack_Out
-        # Reverses order of columns
-        Gen_Stack_Out = Gen_Stack_Out.iloc[:, ::-1]
-       
-        fig3, ax = plt.subplots(figsize=(9,6))
-        
-        for column in Gen_Stack_Out:
-            ax.plot(Gen_Stack_Out[column], linewidth=3, color=self.PLEXOS_color_dict[column], 
-                    label=column)
-            ax.legend(loc='lower left',bbox_to_anchor=(1,0), 
-                          facecolor='inherit', frameon=True)
-        
-
-        ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
-        ax.set_ylabel('Generation Difference (MW)',  color='black', rotation='vertical')
-        ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        ax.tick_params(axis='y', which='major', length=5, width=1)
-        ax.tick_params(axis='x', which='major', length=5, width=1)
-        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-        ax.margins(x=0.01)
-        
-        locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-        formatter = mdates.ConciseDateFormatter(locator)
-        formatter.formats[2] = '%d\n %b'
-        formatter.zero_formats[1] = '%b\n %Y'
-        formatter.zero_formats[2] = '%d\n %b'
-        formatter.zero_formats[3] = '%H:%M\n %d-%b'
-        formatter.offset_formats[3] = '%b %Y'
-        formatter.show_offset = False
-        ax.xaxis.set_major_locator(locator)
-        ax.xaxis.set_major_formatter(formatter)
-        
-        return {'fig': fig3, 'data_table': Data_Table_Out}
-            
+    
