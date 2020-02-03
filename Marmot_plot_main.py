@@ -375,7 +375,7 @@ def pass_data(figure, prop, start, end, timezone, hdf_out_folder,
                                      Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
                                      xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
                                      re_gen_cat, vre_gen_cat) 
-        Figure_Out = fig.gen_unsstack_facet()
+        Figure_Out = fig.gen_unstack_facet()
         return Figure_Out
 
 # Filter for chosen figures to plot
