@@ -233,6 +233,7 @@ class mplot(object):
             Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Unserved_Energy" )
             Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Curtailment")
             
+        print("     "+ self.zone_input)
         
         xdimension=len(self.xlabels)
         ydimension=len(self.ylabels)
