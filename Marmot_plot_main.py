@@ -22,7 +22,7 @@ import curtailment
 import production_cost
 import unserved_energy
 import reserves
-
+import generation_unstack
 
 #===============================================================================
 # Graphing Defaults
