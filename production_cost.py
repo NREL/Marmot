@@ -185,7 +185,7 @@ class mplot(object):
         Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
 
         Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')  
-        
+        Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(10, break_long_words=False)
         
         # Data table of values to return to main program
         Data_Table_Out = Total_Systems_Cost_Out
