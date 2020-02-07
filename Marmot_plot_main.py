@@ -213,9 +213,12 @@ marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
  
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
-if Region_Mapping.empty==True: 
-     Zones = pd.read_pickle(Marmot_DIR + "/regions" + ".pkl") 
-     Zones = Zones['name'].unique()
+if AGG_BY=="zone":
+    Zones = pd.read_pickle(Marmot_DIR + "/zones" + ".pkl")
+    Zones = Zones['name'].unique()
+elif Region_Mapping.empty==True:
+    Zones = pd.read_pickle(Marmot_DIR + "/regions" + ".pkl") 
+    Zones = Zones['name'].unique()
 else:     
     Zones = Region_Mapping[AGG_BY].unique()
 

@@ -439,6 +439,12 @@ for Scenario_name in Scenario_List:
         regions["category"]=regions["category"].str.decode("utf-8")
         regions.to_pickle(Marmot_DIR + "/regions" + ".pkl")
     
+    # Outputs Zones in results to pickle file
+    zones = pd.DataFrame(np.asarray(data['metadata/objects/zone']))
+    zones["name"]=zones["name"].str.decode("utf-8")
+    zones["category"]=zones["category"].str.decode("utf-8")
+    zones.to_pickle(Marmot_DIR + "/zones" + ".pkl")
+    
     # Read in all HDF5 files into dictionary 
     print("Loading all HDF5 files to prepare for processing")
     hdf5_collection = {}
