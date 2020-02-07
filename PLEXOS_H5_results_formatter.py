@@ -482,7 +482,7 @@ for Scenario_name in Scenario_List:
             row["data_set"] = row["data_set"].replace(' ', '_')
             Processed_Data_Out.to_hdf(hdf_out_folder + "/" + HDF5_output , key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib="blosc")
         else:
-            break
+            continue
     
     ######### Calculate Extra Ouputs################################################
     try:
