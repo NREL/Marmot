@@ -133,6 +133,19 @@ for Scenario_name in Scenario_List:
         df_col.remove(0) # Removes 0, the data column from the list 
         df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
         df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column
+        return df   
+    
+    # Function for formating data which comes from the PLEXOS Region Category
+    def df_process_zone(df, overlap_hour): 
+        df = df.reset_index() # unzip the levels in index
+        df.rename(columns={'name':'zone'}, inplace=True)
+        df = df.drop(["band", "property", "category"],axis=1) 
+        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
+            df = df.drop(range(0, overlap_hour))  
+        df_col = list(df.columns) # Gets names of all columns in df and places in list
+        df_col.remove(0) # Removes 0, the data column from the list 
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column
         return df    
     
     # Function for formatting data which comes form the PLEXOS Generator Category
@@ -141,6 +154,8 @@ for Scenario_name in Scenario_List:
         df = df.drop(["band", "property"],axis=1) 
         df.rename(columns={'category':'tech', 'name':'gen_name'}, inplace=True)
         df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
+        df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
+        print(df)
         if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
             df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
         df['tech'].replace(gen_names_dict, inplace=True)
@@ -150,6 +165,7 @@ for Scenario_name in Scenario_List:
         df_col.remove(0) # Removes 0, the data column from the list 
         df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
         df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column 
+        print(df)
         return df  
     
     # Function for formatting data which comes form the PLEXOS Line Category
@@ -232,6 +248,7 @@ for Scenario_name in Scenario_List:
         df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
         df = df.merge(generator_storage, how='left', on='name')
         df = df.merge(region_generators, how='left', on='gen_name')
+        df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
         if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
             df = df.merge(Region_Mapping, how='left', on='region')
         df.rename(columns={'name':'storage_resource'}, inplace=True)
@@ -351,7 +368,13 @@ for Scenario_name in Scenario_List:
                 return df
             except: df = report_prop_error(prop,loc)       
             
-        elif loc == 'zone': df = db.zone(prop, timescale=t)
+        elif loc == 'zone':
+            try:
+                df = db.zone(prop, timescale=t)
+                df = df_process_zone(df, overlap)
+                return df
+            except: df = report_prop_error(prop,loc) 
+            
         else: 
             df = pd.DataFrame()
             print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
@@ -379,7 +402,15 @@ for Scenario_name in Scenario_List:
     region_generators["gen_name"]=region_generators["gen_name"].str.decode("utf-8")
     region_generators["region"]=region_generators["region"].str.decode("utf-8")
     region_generators.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
-     
+    
+    # Zone generators mapping
+    zone_generators = pd.DataFrame(np.asarray(data['metadata/relations/zone_generators']))
+    zone_generators.rename(columns={'child':'gen_name'}, inplace=True)
+    zone_generators.rename(columns={'parent':'zone'}, inplace=True)
+    zone_generators["gen_name"]=zone_generators["gen_name"].str.decode("utf-8")
+    zone_generators["zone"]=zone_generators["zone"].str.decode("utf-8")
+    zone_generators.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
+    
     # Generator categories mapping 
     generator_category = pd.DataFrame(np.asarray(data['metadata/objects/generator']))
     generator_category.rename(columns={'name':'gen_name'}, inplace=True)
@@ -387,14 +418,18 @@ for Scenario_name in Scenario_List:
     generator_category["gen_name"]=generator_category["gen_name"].str.decode("utf-8")
     generator_category["tech"]=generator_category["tech"].str.decode("utf-8")
     
-    # Generator head and tail torage mapping 
-    generator_headstorage = pd.DataFrame(np.asarray(data['metadata/relations/generator_headstorage']))
-    generator_tailtorage = pd.DataFrame(np.asarray(data['metadata/relations/generator_tailstorage']))
-    generator_storage = pd.concat([generator_headstorage, generator_tailtorage])
-    generator_storage.rename(columns={'child':'name'}, inplace=True)
-    generator_storage.rename(columns={'parent':'gen_name'}, inplace=True)
-    generator_storage["name"]=generator_storage["name"].str.decode("utf-8")
-    generator_storage["gen_name"]=generator_storage["gen_name"].str.decode("utf-8")
+    # Generator head and tail torage mapping
+    try:
+        generator_headstorage = pd.DataFrame(np.asarray(data['metadata/relations/generator_headstorage']))
+        generator_tailtorage = pd.DataFrame(np.asarray(data['metadata/relations/generator_tailstorage']))
+        generator_storage = pd.concat([generator_headstorage, generator_tailtorage])
+        generator_storage.rename(columns={'child':'name'}, inplace=True)
+        generator_storage.rename(columns={'parent':'gen_name'}, inplace=True)
+        generator_storage["name"]=generator_storage["name"].str.decode("utf-8")
+        generator_storage["gen_name"]=generator_storage["gen_name"].str.decode("utf-8")
+    except Exception:
+        print("\nGenerator head/tail storage not included in h5plexos results.\nSkipping storage property\n")
+        pass    
     
     # If Region_Mapping csv was left empty, regions will be retrieved from the plexos results h5 file for use in Marmot_plot.
     # This limits the user to only plotting results from PLEXOS regions, therefore it is recommended to populate the Region_Mapping.csv for more control. 
@@ -432,16 +467,22 @@ for Scenario_name in Scenario_List:
             
             processed_data = get_data(row["group"], row["data_set"], 
                                              row["data_type"], db, overlap)
+            if processed_data is None:
+                break
+            
+            # if interval is eqaul to year only process first h5plexos file. Also corrects units with unit_multiplier
             if row["data_type"] == "year":
-                Processed_Data_Out = processed_data
+                Processed_Data_Out = processed_data*row["unit_multiplier"]
                 break
             else:    
                 Processed_Data_Out = pd.concat([Processed_Data_Out, processed_data])
-        
-        Processed_Data_Out.sort_index(inplace=True)
-        row["data_set"] = row["data_set"].replace(' ', '_')
-        Processed_Data_Out.to_hdf(hdf_out_folder + "/" + HDF5_output , key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib="blosc")
-    
+                
+        if Processed_Data_Out.empty == False:
+            Processed_Data_Out.sort_index(inplace=True)
+            row["data_set"] = row["data_set"].replace(' ', '_')
+            Processed_Data_Out.to_hdf(hdf_out_folder + "/" + HDF5_output , key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib="blosc")
+        else:
+            break
     
     ######### Calculate Extra Ouputs################################################
     try:
@@ -464,16 +505,29 @@ for Scenario_name in Scenario_List:
         pass 
     
     try:
-        print("Calculating Cost Unserved Energy")  
+        print("Calculating Cost Unserved Energy: Regions")  
         Cost_Unserved_Energy = pd.read_hdf(hdf_out_folder + "/" + HDF5_output, 'region_Unserved_Energy')
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(hdf_out_folder + "/" + HDF5_output , key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib="blosc")
     except Exception:
+        print("NOTE!! Unserved Energy not availabel to process, processing skipped")
+        pass
+    
+    try:
+        print("Calculating Cost Unserved Energy: Zones")  
+        Cost_Unserved_Energy = pd.read_hdf(hdf_out_folder + "/" + HDF5_output, 'zone_Unserved_Energy')
+        Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
+        Cost_Unserved_Energy.to_hdf(hdf_out_folder + "/" + HDF5_output , key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib="blosc")
+    except Exception:
+        print("NOTE!! Unserved Energy not availabel to process, processing skipped")
         pass   
     ###################################################################            
     
-     
-# Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + HDF5_output, 'generator_Available_Capacity')
+# Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + HDF5_output, 'zone_Generation')
+
+# Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
+# Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
+#         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1) 
     # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
     #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
 
