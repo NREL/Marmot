@@ -50,7 +50,7 @@ class mplot(object):
 
         for scenario in self.Multi_Scenario:
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone"
+            if self.AGG_BY == "zone":
                 Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "zone_Unserved_Energy")
             else:
                 Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Unserved_Energy")
@@ -126,7 +126,7 @@ class mplot(object):
 
         for scenario in self.Multi_Scenario:
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone"
+            if self.AGG_BY == "zone":
                 Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "zone_Unserved_Energy")
             else:
                 Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "region_Unserved_Energy")

@@ -104,8 +104,8 @@ class mplot(object):
         Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')   
     #    Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(8)
         
+        # Total_Systems_Cost_Out["Total Gen Cost"] = Total_Systems_Cost_Out["Total Gen Cost"]*1000
         
-        Total_Systems_Cost_Out["Total Gen Cost"] = Total_Systems_Cost_Out["Total Gen Cost"]*1000
         Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000
         Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
         
@@ -155,7 +155,7 @@ class mplot(object):
 
             Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Total_Generation_Cost")
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone"
+            if self.AGG_BY == "zone":
                 Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "zone_Cost_Unserved_Energy")
             else:
                 Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Cost_Unserved_Energy")
@@ -185,7 +185,6 @@ class mplot(object):
             
             Total_Systems_Cost_Out = pd.concat([Total_Systems_Cost_Out, Total_Systems_Cost], axis=0, sort=False)
         
-        Total_Systems_Cost_Out["Total Gen Cost"] = Total_Systems_Cost_Out["Total Gen Cost"]
         Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
 
         Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')  

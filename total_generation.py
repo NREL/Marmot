@@ -65,7 +65,7 @@ class mplot(object):
             Pump_Load_Collection[scenario] =pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Pump_Load" )
             Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Curtailment")
             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone"
+            if self.AGG_BY == "zone":
                 Stacked_Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "zone_Load")
             else:
                 Stacked_Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "region_Load")
@@ -191,7 +191,7 @@ class mplot(object):
                 Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Generation")
                 Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Curtailment")
                 # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
-                if self.AGG_BY == "zone"
+                if self.AGG_BY == "zone":
                     Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "zone_Load")
                 else:
                     Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "region_Load")
