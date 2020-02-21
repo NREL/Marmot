@@ -37,11 +37,11 @@ import pickle
 #===============================================================================
 
 # Directory of cloned Marmot repo and loaction of this file
-Marmot_DIR = r"C:\Users\DLEVIE\Documents\Marmot"
-os.chdir(Marmot_DIR)
+Marmot_DIR = '.' # r"C:\Users\DLEVIE\Documents\Marmot"
+# os.chdir(Marmot_DIR)
 
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
-Plexos_Properties = pd.read_csv(Marmot_DIR + "\plexos_properties.csv")
+Plexos_Properties = pd.read_csv('plexos_properties.csv')
 
 # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
 Scenario_List = ["BAU", "BAU_Copperplate", "BAU_VG_Reserves", "BAU2", "BAU2_Copperplate", "BAU2_VG_Reserves"]
@@ -54,11 +54,11 @@ Solutions_folder = Marmot_DIR
 
 # This folder contains all the csv required for mapping and selecting outputs to process
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
-Mapping_folder = Marmot_DIR + "\mapping_folder\\"
+Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(Mapping_folder + "Region_mapping.csv")
-reserve_region_type = pd.read_csv(Mapping_folder + "reserve_region_type.csv")
-gen_names = pd.read_csv(Mapping_folder + "gen_names.csv")
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
+reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
+gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
 
 overlap = 0 # number of hours overlapped between two adjacent models
@@ -74,25 +74,25 @@ for Scenario_name in Scenario_List:
     
     HDF5_output = Scenario_name+"_formatted.h5"
     
-    PLEXOS_Scenarios = Solutions_folder + r"\PLEXOS_Scenarios" + "/" + Scenario_name
+    PLEXOS_Scenarios = os.path.join(Solutions_folder, 'PLEXOS_Scenarios', Scenario_name)
     try:
         os.makedirs(PLEXOS_Scenarios)
     except FileExistsError:
         # directory already exists
         pass
-    hdf_out_folder = PLEXOS_Scenarios + r"\Processed_HDF5_folder"
+    hdf_out_folder = os.path.join(PLEXOS_Scenarios, 'Processed_HDF5_folder')
     try:
         os.makedirs(hdf_out_folder)
     except FileExistsError:
         # directory already exists
         pass
-    HDF5_folder_in = HDF5_input_folder + "/" + Scenario_name
+    HDF5_folder_in = os.path.join(HDF5_input_folder, Scenario_name)
     try:
         os.makedirs(HDF5_folder_in)
     except FileExistsError:
         # directory already exists
         pass
-    figure_folder = PLEXOS_Scenarios + r"\Figures_Output"
+    figure_folder = os.path.join(PLEXOS_Scenarios, 'Figures_Output')
     try:
         os.makedirs(figure_folder)
     except FileExistsError:
@@ -390,7 +390,7 @@ for Scenario_name in Scenario_List:
         if names.endswith(".h5"):
             files_list.append(names) # Creates a list of only the hdf5 files
     
-    hdf5_read = HDF5_folder_in + "/" + files_list[0]
+    hdf5_read = os.path.join(HDF5_folder_in, files_list[0])
     
     data = h5py.File(hdf5_read, 'r')
     metadata = np.asarray(data['metadata'])
@@ -449,7 +449,7 @@ for Scenario_name in Scenario_List:
     print("Loading all HDF5 files to prepare for processing")
     hdf5_collection = {}
     for file in files_list:
-        hdf5_collection[file] = PLEXOSSolution(HDF5_folder_in + "/" + file)
+        hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
     
     print("#### Processing " + Scenario_name + " PLEXOS Results ####")
     
@@ -486,7 +486,7 @@ for Scenario_name in Scenario_List:
         if Processed_Data_Out.empty == False:
             Processed_Data_Out.sort_index(inplace=True)
             row["data_set"] = row["data_set"].replace(' ', '_')
-            Processed_Data_Out.to_hdf(hdf_out_folder + "/" + HDF5_output , key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib="blosc")
+            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output , key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib="blosc"))
         else:
             continue
     

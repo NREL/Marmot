@@ -9,9 +9,10 @@ import pandas as pd
 import os
 import sys
 
-# Directory of cloned Marmot repo and loaction of this file
-Marmot_DIR = r"C:\Users\DLEVIE\Documents\Marmot"
+# Directory of cloned Marmot repo and location of this file
+Marmot_DIR = '.' # '/Users/ngates/Documents/Marmot'
 os.chdir(Marmot_DIR)
+# Reomve Marmot_DIR
 
 import matplotlib as mpl
 
@@ -39,27 +40,28 @@ mpl.rc('font', family='serif')
 """ User Defined Names, Directories and Settings """
 #===============================================================================
 
-Marmot_plot_select = pd.read_csv(Marmot_DIR + "\Marmot_plot_select.csv")
+Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
-Scenario_name = "BAU_No_VG_Reserves"
+Scenario_name = 'BAU' # "BAU_No_VG_Reserves"
 
 Solutions_folder = Marmot_DIR
 
-Multi_Scenario = ["BAU_No_VG_Reserves", "BAU_VG_Reserves", "BAU_Copperplate",  
-                  "BAU2_No_VG_Reserves", "BAU2_VG_Reserves", "BAU2_Copperplate"]
+Multi_Scenario = ['BAU']
+# Multi_Scenario = ["BAU_No_VG_Reserves", "BAU_VG_Reserves", "BAU_Copperplate",  
+#                   "BAU2_No_VG_Reserves", "BAU2_VG_Reserves", "BAU2_Copperplate"]
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
 Scenario_Diff = ["Gas_Outage_+_Icing", "Base_Case"]
 
-Mapping_folder = Marmot_DIR + "\mapping_folder\\"
+Mapping_folder = os.path.join(Marmot_DIR, 'mapping_folder')
 
-Region_Mapping = pd.read_csv(Mapping_folder + "Region_mapping.csv")
-Reserve_Regions = pd.read_csv(Mapping_folder + "reserve_region_type.csv")
-gen_names = pd.read_csv(Mapping_folder + "gen_names.csv")
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
+Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
+gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
 
-AGG_BY ="Usual"
+AGG_BY = "Usual"
 
 # Facet Grid Labels (Based on Scenarios)
 ylabels = ["BAU", "BAU2"]
@@ -70,9 +72,10 @@ xlabels = ["No VG Reserves", "VG Reserves", "Copperplate"]
 #===============================================================================
 
 
-PLEXOS_Scenarios = Solutions_folder + r"\PLEXOS_Scenarios" 
+PLEXOS_Scenarios = os.path.join(Solutions_folder, 'PLEXOS_Scenarios')
+PLEXOS_Scenarios = '/Volumes/PLEXOS/Projects/Drivers_of_Curtailment/PLEXOS_Scenarios'
 
-figure_folder = PLEXOS_Scenarios + "/" + Scenario_name + r"\Figures_Output"
+figure_folder = os.path.join(PLEXOS_Scenarios, Scenario_name, 'Figures_Output')
 try:
     os.makedirs(figure_folder)
 except FileExistsError:
@@ -80,44 +83,44 @@ except FileExistsError:
     pass
 
 
-hdf_out_folder = PLEXOS_Scenarios + "/" + Scenario_name + r"\Processed_HDF5_folder"
+hdf_out_folder = os.path.join(PLEXOS_Scenarios, Scenario_name,'Processed_HDF5_folder')
 try:
     os.makedirs(hdf_out_folder)
 except FileExistsError:
     # directory already exists
     pass
 
-gen_stack_figures = figure_folder + "/" + AGG_BY +"_Gen_Stack\\"
+gen_stack_figures = os.path.join(figure_folder, AGG_BY + '_Gen_Stack')
 try:
     os.makedirs(gen_stack_figures)
 except FileExistsError:
     # directory already exists
     pass    
-tot_gen_stack_figures = figure_folder + "/" + AGG_BY +"_Total_Gen_Stack\\"
+tot_gen_stack_figures = os.path.join(figure_folder, AGG_BY + '_Total_Gen_Stack')
 try:
     os.makedirs(tot_gen_stack_figures)
 except FileExistsError:
     # directory already exists
     pass    
-installed_cap_figures = figure_folder + "/" + AGG_BY +"_Total_Installed_Capacity\\"
+installed_cap_figures = os.path.join(figure_folder, AGG_BY + '_Total_Installed_Capacity')
 try:
     os.makedirs(installed_cap_figures)
 except FileExistsError:
     # directory already exists
     pass                           
-system_cost_figures = figure_folder + "/" + AGG_BY +"_Total_System_Cost\\"
+system_cost_figures = os.path.join(figure_folder, AGG_BY + '_Total_System_Cost')
 try:
     os.makedirs(system_cost_figures)
 except FileExistsError:
     # directory already exists
     pass                
-reserve_timeseries_figures = figure_folder + "/" + AGG_BY + "_Reserve_Timeseries\\"
+reserve_timeseries_figures = os.path.join(figure_folder, AGG_BY + '_Reserve_Timeseries')
 try:
     os.makedirs(reserve_timeseries_figures)
 except FileExistsError:
     # directory already exists
     pass   
-reserve_total_figures = figure_folder + "/" + AGG_BY + "_Reserve_Total\\"
+reserve_total_figures = os.path.join(figure_folder, AGG_BY + '_Reserve_Total')
 try:
     os.makedirs(reserve_total_figures)
 except FileExistsError:
@@ -214,10 +217,10 @@ marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
 if AGG_BY=="zone":
-    Zones = pd.read_pickle(Marmot_DIR + "/zones" + ".pkl")
+    Zones = pd.read_pickle('zones' + '.pkl')
     Zones = Zones['name'].unique()
 elif Region_Mapping.empty==True:
-    Zones = pd.read_pickle(Marmot_DIR + "/regions" + ".pkl") 
+    Zones = pd.read_pickle('regions' + '.pkl') 
     Zones = Zones['name'].unique()
 else:     
     Zones = Region_Mapping[AGG_BY].unique()
@@ -401,7 +404,7 @@ for index, row in Marmot_plot_select.iterrows():
             
             if row["Figure Type"] == "Reserve Timeseries":
                 Figure_Out["fig"].savefig(reserve_timeseries_figures + region + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(reserve_timeseries_figures + "/" + region + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv")
+                Figure_Out["data_table"].to_csv(os.path.join(reserve_timeseries_figures, region + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
                 
             if row["Figure Type"] == "Reserve Timeseries Facet Grid":
                 Figure_Out.savefig(reserve_timeseries_figures + region + "_" + row["Figure Output Name"], dpi=600, bbox_inches='tight')
@@ -416,23 +419,24 @@ for index, row in Marmot_plot_select.iterrows():
            
             if row["Figure Type"] == "Generation Stack":
                 Figure_Out["fig"].savefig(gen_stack_figures + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(gen_stack_figures + "/" + zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv")
+                Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
                 
             if row["Figure Type"] == "Generation Stack Facet Grid":
                 Figure_Out.savefig(gen_stack_figures + zone_input + "_" + row["Figure Output Name"], dpi=600, bbox_inches='tight')
             
             elif row["Figure Type"] == "Total Generation": 
                 Figure_Out["fig"].figure.savefig(tot_gen_stack_figures + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(tot_gen_stack_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+                Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Total Generation Facet Grid": 
                 Figure_Out["fig"].savefig(tot_gen_stack_figures + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')    
-                Figure_Out["data_table"].to_csv(tot_gen_stack_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+                Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Total Installed Capacity": 
                 Figure_Out["fig"].figure.savefig(installed_cap_figures + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(installed_cap_figures + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
+                Figure_Out["data_table"].to_csv(os.path.join(installed_cap_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
+            # Continue here (NSG)
             elif row["Figure Type"] == "Curtailment vs Penetration": 
                 Figure_Out["fig"].savefig(figure_folder  + "/" + zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(figure_folder + "/" + zone_input + "_" + row["Figure Output Name"] + ".csv")
