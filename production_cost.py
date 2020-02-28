@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
+import os
 
 
 #===============================================================================
@@ -52,10 +53,10 @@ class mplot(object):
         Installed_Capacity_Collection = {} 
         for scenario in self.Multi_Scenario:
 
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Total_Generation_Cost")
-            Pool_Revenues_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Pool_Revenue")
-            Reserve_Revenues_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Reserves_Revenue")
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Installed_Capacity")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
+            Pool_Revenues_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Pool_Revenue")
+            Reserve_Revenues_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Reserves_Revenue")
+            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Installed_Capacity")
             
 
         Total_Systems_Cost_Out = pd.DataFrame()
@@ -153,12 +154,12 @@ class mplot(object):
         Cost_Unserved_Energy_Collection = {}
         for scenario in self.Multi_Scenario:
 
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Total_Generation_Cost")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
-                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "zone_Cost_Unserved_Energy")
+                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "zone_Cost_Unserved_Energy")
             else:
-                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Cost_Unserved_Energy")
+                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "region_Cost_Unserved_Energy")
                             
         Total_Systems_Cost_Out = pd.DataFrame()
         print(self.zone_input)

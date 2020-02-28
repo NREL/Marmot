@@ -1,26 +1,26 @@
 Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]"
-Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST
-Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,4,4,EST
+Generation Stack,TRUE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST
+Generation Stack,TRUE,Stacked_Gen_Peak Demand,Peak Demand,4,4,EST
 Generation Stack,TRUE,Stacked_Gen,,,,EST
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST
-Total Generation,FALSE,Total_Generation ,,,,
+Total Generation,TRUE,Total_Generation ,,,,
 Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,
 Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,
-Total System Cost,FALSE,Total_System_Cost,,,,
+Total System Cost,TRUE,Total_System_Cost,,,,
 Production Cost,FALSE,Production_Cost,,,,
 Reserve Timeseries,FALSE,Reserve_Timeseries,Peak Demand,1,1,EST
 Reserve Timeseries Facet Grid,FALSE,Reserve_Timeseries_Facet_Grid,Peak Demand,1,1,EST
-Reserve Total,FALSE,Reserve_Total,,,,
+Reserve Total,TRUE,Reserve_Total,,,,
 Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,
 Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST
 Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,
-Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,
-Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,
-Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,MT
-Generation Unstacked,FALSE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,MT
-Generation Unstacked,FALSE,Unstacked_Gen,,,,MT
+Curtailment Duration Curve,TRUE,PV_Curtailment_Duration_Curve,PV,,,
+Curtailment Duration Curve,TRUE,RE_Curtailment_Duration_Curve,PV+Wind,,,
+Generation Unstacked,TRUE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,MT
+Generation Unstacked,TRUE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,MT
+Generation Unstacked,TRUE,Unstacked_Gen,,,,MT
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,MT
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,MT

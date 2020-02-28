@@ -41,15 +41,13 @@ from h5plexos.query import PLEXOSSolution
 Plexos_Properties = pd.read_csv('plexos_properties.csv')
 
 # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
-Scenario_List = ['data1'] # ["BAU", "BAU_Copperplate", "BAU_VG_Reserves", "BAU2", "BAU2_Copperplate", "BAU2_VG_Reserves"]
+Scenario_List = ['Cold Wave 2011'] # ["BAU", "BAU_Copperplate", "BAU_VG_Reserves", "BAU2", "BAU2_Copperplate", "BAU2_VG_Reserves"]
 
 # The folder that contains all h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
-HDF5_input_folder = r"\\nrelqnap02\PLEXOS\Projects\Drivers_of_Curtailment\HDF5 Files\LA_Hourly_20191212"
-HDF5_input_folder = '/Volumes/PLEXOS/Projects/Drivers_of_Curtailment/HDF5 Files/LA_Hourly_20191212'
-HDF5_input_folder = '/Users/ngates/Documents/Marmot/From Marty'
+HDF5_input_folder = '../TB_2024/StageA_DA'
 
 # Base directory to create folders in and save outputs (Default is Marmot_DIR but you can change to wherever you like)
-Solutions_folder = '.'
+Solutions_folder = '../TB_2024/StageA_DA'
 
 # This folder contains all the csv required for mapping and selecting outputs to process
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
@@ -71,7 +69,7 @@ for Scenario_name in Scenario_List:
     # Input and Output Directories 
     #===============================================================================
     
-    HDF5_output = Scenario_name+"_formatted.h5"
+    HDF5_output = Scenario_name + "_formatted.h5"
     
     PLEXOS_Scenarios = os.path.join(Solutions_folder, 'PLEXOS_Scenarios', Scenario_name)
     try:
@@ -154,7 +152,6 @@ for Scenario_name in Scenario_List:
         df.rename(columns={'category':'tech', 'name':'gen_name'}, inplace=True)
         df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
         df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
-        print(df)
         if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
             df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
         df['tech'].replace(gen_names_dict, inplace=True)
@@ -164,7 +161,6 @@ for Scenario_name in Scenario_List:
         df_col.remove(0) # Removes 0, the data column from the list 
         df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
         df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column 
-        print(df)
         return df  
     
     # Function for formatting data which comes form the PLEXOS Line Category
@@ -389,7 +385,7 @@ for Scenario_name in Scenario_List:
         if names.endswith(".h5"):
             files_list.append(names) # Creates a list of only the hdf5 files
     
-    hdf5_read = os.path.join(HDF5_folder_in, files_list[0])
+    hdf5_read = os.path.join(HDF5_folder_in, files_list[0]) #The first file is used for metadata.
     
     data = h5py.File(hdf5_read, 'r')
     metadata = np.asarray(data['metadata'])
@@ -456,17 +452,24 @@ for Scenario_name in Scenario_List:
     
     # Creates Initial HDF5 file for ouputing formated data
     Processed_Data_Out=pd.DataFrame()
-    Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Generation" , mode="w", complevel=9, complib="blosc")
+    Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
     
     # Filters for chosen Plexos properties to prcoess
     Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
-    
+    Plexos_Properties_test = Plexos_Properties.iloc[0:1,:]
+    row = next(Plexos_Properties_test.iterrows())[1]
     
     # Main loop to process each ouput and pass data to functions
-    for index, row in Plexos_Properties.iterrows():
+    for index, row in Plexos_Properties_test.iterrows():
+        
+        print('index = ')
+        print(index)
+        print('row = ')
+        print(row)
+        
         Processed_Data_Out = pd.DataFrame()
         print("Processing " + row["group"] + " " + row["data_set"])
-        for model in files_list:
+        for model in files_list[0:2]:
             print("     "+ model) 
             db = hdf5_collection.get(model)
             
@@ -485,7 +488,12 @@ for Scenario_name in Scenario_List:
         if Processed_Data_Out.empty == False:
             Processed_Data_Out.sort_index(inplace=True)
             row["data_set"] = row["data_set"].replace(' ', '_')
-            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib="blosc")
+            import time
+            start = time.time()
+            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, ccomplib = 'blosc:zlib')
+            end = time.time()
+            elapsed = end - start
+            print('Saving to HDF5 took' + elapsed + ' seconds.')
         else:
             continue
     
@@ -498,7 +506,7 @@ for Scenario_name in Scenario_List:
         Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), ['Wind','PV']),:]) - 
                             (Total_Gen_Out.loc[(slice(None), ['Wind','PV']),:]))
         
-        Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib="blosc")
+        Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
         
     
         #Clear Some Memory
@@ -511,9 +519,9 @@ for Scenario_name in Scenario_List:
     
     try:
         print("Calculating Cost Unserved Energy: Regions")  
-        Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output, 'region_Unserved_Energy'))
+        Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
-        Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib="blosc")
+        Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
     except Exception:
         print("NOTE!! Unserved Energy not availabel to process, processing skipped")
         pass
@@ -522,7 +530,7 @@ for Scenario_name in Scenario_List:
         print("Calculating Cost Unserved Energy: Zones")  
         Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
-        Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib="blosc")
+        Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
     except Exception:
         print("NOTE!! Unserved Energy not availabel to process, processing skipped")
         pass

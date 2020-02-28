@@ -34,13 +34,13 @@ mpl.rc('font', family='serif')
 
 Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
-Scenario_name = 'data1' # 'BAU' # "BAU_No_VG_Reserves"
+Scenario_name = 'Feb26-Feb29' # 'BAU' # "BAU_No_VG_Reserves"
 
-Solutions_folder = '.'
+Solutions_folder = '../TB_2024/StageA_DA'
 
 # Multi_Scenario = ["BAU_No_VG_Reserves", "BAU_VG_Reserves", "BAU_Copperplate",  
 #                   "BAU2_No_VG_Reserves", "BAU2_VG_Reserves", "BAU2_Copperplate"]
-Multi_Scenario = ['data1'] # ['BAU']
+Multi_Scenario = ['Feb26-Feb29'] # ['BAU']
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
@@ -410,52 +410,52 @@ for index, row in Marmot_plot_select.iterrows():
                                   re_gen_cat, vre_gen_cat, Reserve_Regions)
            
             if row["Figure Type"] == "Generation Stack":
-                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
                 
             if row["Figure Type"] == "Generation Stack Facet Grid":
-                Figure_Out.savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"], dpi=600, bbox_inches='tight'))
+                Figure_Out.savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
             
             elif row["Figure Type"] == "Total Generation": 
-                Figure_Out["fig"].figure.savefig(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].figure.savefig(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Total Generation Facet Grid": 
-                Figure_Out["fig"].savefig(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight'))  
+                Figure_Out["fig"].savefig(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Total Installed Capacity": 
-                Figure_Out["fig"].figure.savefig(os.path.join(installed_cap_figures, zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].figure.savefig(os.path.join(installed_cap_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(installed_cap_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             # Continue here (NSG)
             elif row["Figure Type"] == "Curtailment vs Penetration": 
-                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] + ".csv"))
             
             elif row["Figure Type"] == "Curtailment Duration Curve": 
-                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Production Cost": 
-                Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Total System Cost": 
-                Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Generation Timeseries Difference": 
-                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_Diff[0]+"_vs_"+Scenario_Diff[1], dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_Diff[0]+"_vs_"+Scenario_Diff[1]), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_Diff[0]+"_vs_"+Scenario_Diff[1] + ".csv"))
         
             elif row["Figure Type"] == "Unserved Energy Timeseries" or row["Figure Type"] == 'Total Unserved Energy': 
-                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] , dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Generation Unstacked":
-                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight'))
+                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
                 
             elif row["Figure Type"] == "Generation Unstacked Facet Grid":
-                Figure_Out.savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"], dpi=600, bbox_inches='tight'))
+                Figure_Out.savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
