@@ -462,7 +462,7 @@ for Scenario_name in Scenario_List:
         
         Processed_Data_Out = pd.DataFrame()
         print("Processing " + row["group"] + " " + row["data_set"])
-        for model in files_list[0:2]:
+        for model in files_list:
             print("     "+ model) 
             db = hdf5_collection.get(model)
             
