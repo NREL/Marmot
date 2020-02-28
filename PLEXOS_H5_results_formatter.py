@@ -457,6 +457,9 @@ for Scenario_name in Scenario_List:
     # Filters for chosen Plexos properties to prcoess
     Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
     
+    import time
+    start = time.time()
+    
     # Main loop to process each ouput and pass data to functions
     for index, row in Plexos_Properties.iterrows():
         
@@ -481,12 +484,9 @@ for Scenario_name in Scenario_List:
         if Processed_Data_Out.empty == False:
             Processed_Data_Out.sort_index(inplace=True)
             row["data_set"] = row["data_set"].replace(' ', '_')
-            import time
-            start = time.time()
+        
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, ccomplib = 'blosc:zlib')
-            end = time.time()
-            elapsed = end - start
-            print('Saving to HDF5 took' + elapsed + ' seconds.')
+
         else:
             continue
     
@@ -527,6 +527,11 @@ for Scenario_name in Scenario_List:
     except Exception:
         print("NOTE!! Unserved Energy not availabel to process, processing skipped")
         pass
+    
+    end = time.time()
+    elapsed = end - start
+    print('Main loop took ' + str(elapsed/60) + ' minutes.')
+    
     ###################################################################            
     
 # Stacked_Gen_read = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Generation')
