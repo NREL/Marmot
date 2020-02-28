@@ -456,11 +456,9 @@ for Scenario_name in Scenario_List:
     
     # Filters for chosen Plexos properties to prcoess
     Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
-    Plexos_Properties_test = Plexos_Properties.iloc[0:1,:]
-    row = next(Plexos_Properties_test.iterrows())[1]
     
     # Main loop to process each ouput and pass data to functions
-    for index, row in Plexos_Properties_test.iterrows():
+    for index, row in Plexos_Properties.iterrows():
         
         print('index = ')
         print(index)
