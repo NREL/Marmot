@@ -460,11 +460,6 @@ for Scenario_name in Scenario_List:
     # Main loop to process each ouput and pass data to functions
     for index, row in Plexos_Properties.iterrows():
         
-        print('index = ')
-        print(index)
-        print('row = ')
-        print(row)
-        
         Processed_Data_Out = pd.DataFrame()
         print("Processing " + row["group"] + " " + row["data_set"])
         for model in files_list[0:2]:
