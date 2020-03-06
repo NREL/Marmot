@@ -24,3 +24,4 @@ Generation Unstacked,TRUE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,MT
 Generation Unstacked,TRUE,Unstacked_Gen,,,,MT
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,MT
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,MT
+Net Interchange,TRUE,Net_Interchange,,,,EST

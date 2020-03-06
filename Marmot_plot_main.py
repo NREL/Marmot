@@ -4,7 +4,7 @@ Created on Thu Dec  5 14:16:30 2019
 
 @author: dlevie
 """
-
+#%%
 import pandas as pd
 import os
 import matplotlib as mpl
@@ -16,6 +16,7 @@ import production_cost
 import unserved_energy
 import reserves
 import generation_unstack
+import transmission
 
 #===============================================================================
 # Graphing Defaults
@@ -32,15 +33,15 @@ mpl.rc('font', family='serif')
 """ User Defined Names, Directories and Settings """
 #===============================================================================
 
-Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
+Marmot_plot_select = pd.read_csv("Marmot_plot_select_test.csv")
 
-Scenario_name = 'Feb26-Feb29' # 'BAU' # "BAU_No_VG_Reserves"
+Scenario_name = 'Cold Wave 2011' # 'BAU' # "BAU_No_VG_Reserves"
 
 Solutions_folder = '../TB_2024/StageA_DA'
 
 # Multi_Scenario = ["BAU_No_VG_Reserves", "BAU_VG_Reserves", "BAU_Copperplate",  
 #                   "BAU2_No_VG_Reserves", "BAU2_VG_Reserves", "BAU2_Copperplate"]
-Multi_Scenario = ['Feb26-Feb29'] # ['BAU']
+Multi_Scenario = ['Cold Wave 2011'] # ['BAU']
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
@@ -67,7 +68,7 @@ xlabels = [] # ["No VG Reserves", "VG Reserves", "Copperplate"]
 PLEXOS_Scenarios = os.path.join(Solutions_folder, 'PLEXOS_Scenarios')
 # PLEXOS_Scenarios = '/Volumes/PLEXOS/Projects/Drivers_of_Curtailment/PLEXOS_Scenarios'
 
-figure_folder = os.path.join(PLEXOS_Scenarios, Scenario_name, 'Figures_Output')
+figure_folder = os.path.join(PLEXOS_Scenarios, Scenario_name, 'Figures_Output_test')
 try:
     os.makedirs(figure_folder)
 except FileExistsError:
@@ -117,7 +118,12 @@ try:
     os.makedirs(reserve_total_figures)
 except FileExistsError:
     # directory already exists
-    pass                          
+    pass          
+transmission_figures = os.path.join(figure_folder, AGG_BY + '_Transmission')
+try:
+    os.makedirs(transmission_figures)
+except FileExistsError:
+    pass                
 
 
 #===============================================================================
@@ -202,6 +208,7 @@ color_list = ['#396AB1', '#CC2529','#3E9651','#ff7f00','#6B4C9A','#922428','#cab
 
 
 marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
+#%%
 #===============================================================================
 # Main          
 #===============================================================================                   
@@ -221,161 +228,99 @@ else:
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
 
-def pass_data(figure, prop, start, end, timezone, hdf_out_folder, 
-              zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario, Scenario_Diff,
-              PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-              re_gen_cat, vre_gen_cat, Reserve_Regions):
+def pass_data(figure,argument_list):
     
     if figure == 'Generation Stack': 
-        fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat) 
+        fig = generation_stack.mplot(argument_list) 
         Figure_Out = fig.gen_stack()
         return Figure_Out
     
     elif figure == 'Generation Stack Facet Grid': 
-        fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat) 
+        fig = generation_stack.mplot(argument_list) 
         Figure_Out = fig.gen_stack_facet()
         return Figure_Out
     
     elif figure == 'Generation Timeseries Difference': 
-        fig = generation_stack.mplot(prop, start, end, timezone, hdf_out_folder,  
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat) 
+        fig = generation_stack.mplot(argument_list) 
         Figure_Out = fig.gen_diff()
         return Figure_Out
 
         
     elif figure == 'Total Generation':
-        fig = total_generation.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat) 
+        fig = total_generation.mplot(argument_list) 
         Figure_Out = fig.total_gen()
         return Figure_Out
     
     elif figure == 'Total Generation Facet Grid':
-        fig = total_generation.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat) 
+        fig = total_generation.mplot(argument_list) 
         Figure_Out = fig.total_gen_facet()
         return Figure_Out
 
     
     elif figure == 'Total Installed Capacity':
-        fig = total_installed_capacity.mplot(prop, start, end, timezone, hdf_out_folder,  
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat)
+        fig = total_installed_capacity.mplot(argument_list)
         Figure_Out = fig.total_cap()
         return Figure_Out
     
     elif figure == 'Curtailment vs Penetration':
-        fig = curtailment.mplot(prop, start, end, timezone, hdf_out_folder,  
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat)
+        fig = curtailment.mplot(argument_list)
         Figure_Out = fig.curt_pen()
         return Figure_Out
     
     elif figure == 'Curtailment Duration Curve':
-        fig = curtailment.mplot(prop, start, end, timezone, hdf_out_folder,  
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat)
+        fig = curtailment.mplot(argument_list)
         Figure_Out = fig.curt_duration_curve()
         return Figure_Out
     
     elif figure == 'Production Cost':
-        fig = production_cost.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat)
+        fig = production_cost.mplot(argument_list)
         Figure_Out = fig.prod_cost()
         return Figure_Out
     
     elif figure == 'Total System Cost':
-        fig = production_cost.mplot(prop, start, end, timezone, hdf_out_folder,  
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat)
+        fig = production_cost.mplot(argument_list)
         Figure_Out = fig.sys_cost()
         return Figure_Out
     
     elif figure == 'Unserved Energy Timeseries':
-        fig = unserved_energy.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat)
+        fig = unserved_energy.mplot(argument_list)
         
         Figure_Out = fig.unserved_energy_timeseries()
         return Figure_Out
     
     elif figure == 'Total Unserved Energy':
-        fig = unserved_energy.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat)
+        fig = unserved_energy.mplot(argument_list)
         
         Figure_Out = fig.tot_unserved_energy()
         return Figure_Out
     
     elif figure == 'Reserve Timeseries':
-        fig = reserves.mplot(prop, start, end, timezone, hdf_out_folder,  
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat, Reserve_Regions)
+        fig = reserves.mplot(argument_list)
         
         Figure_Out = fig.reserve_timeseries()
         return Figure_Out
     
     elif figure == 'Reserve Timeseries Facet Grid':
-        fig = reserves.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat, Reserve_Regions)
+        fig = reserves.mplot(argument_list)
         
         Figure_Out = fig.reserve_timeseries_facet()
         return Figure_Out
     
     if figure == 'Generation Unstacked': 
-        fig = generation_unstack.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat) 
+        fig = generation_unstack.mplot(argument_list) 
         Figure_Out = fig.gen_unstack()
         return Figure_Out
     
     elif figure == 'Generation Unstack Facet Grid': 
-        fig = generation_unstack.mplot(prop, start, end, timezone, hdf_out_folder, 
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat) 
+        fig = generation_unstack.mplot(argument_list) 
         Figure_Out = fig.gen_unstack_facet()
         return Figure_Out
-
+    
+    elif figure == 'Net Interchange':
+         fig = transmission.mplot(argument_list) 
+         Figure_Out = fig.net_interchange()
+         return Figure_Out
+        
 # Filter for chosen figures to plot
 Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == True]
 
@@ -389,10 +334,13 @@ for index, row in Marmot_plot_select.iterrows():
     if "Reserve" in row["Figure Type"]:
         
         for region in Reserve_Regions:
-            Figure_Out = pass_data(row["Figure Type"], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],
+            
+            argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7], row.iloc[8],
                                   hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                                   Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                  re_gen_cat, vre_gen_cat, region)
+                                  re_gen_cat, vre_gen_cat, region]
+            
+            Figure_Out = pass_data(row["Figure Type"],argument_list)
             
             if row["Figure Type"] == "Reserve Timeseries":
                 Figure_Out["fig"].savefig(reserve_timeseries_figures + region + "_" + row["Figure Output Name"] + "_" + Scenario_name, dpi=600, bbox_inches='tight')
@@ -403,11 +351,15 @@ for index, row in Marmot_plot_select.iterrows():
 
     else:
         
+       
+        
         for zone_input in Zones:
-            Figure_Out = pass_data(row["Figure Type"], row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],
+            argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                                   hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                                   Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                  re_gen_cat, vre_gen_cat, Reserve_Regions)
+                                  re_gen_cat, vre_gen_cat, Reserve_Regions]
+             
+            Figure_Out = pass_data(row["Figure Type"],argument_list)
            
             if row["Figure Type"] == "Generation Stack":
                 Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
@@ -459,3 +411,14 @@ for index, row in Marmot_plot_select.iterrows():
                 
             elif row["Figure Type"] == "Generation Unstacked Facet Grid":
                 Figure_Out.savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+#%%
+ 
+list_test = [1,2,3,4]
+               
+def argument_list(list):
+    print(list[1])
+    
+argument_list(list_test)
+                
+                
+                

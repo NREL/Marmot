@@ -29,28 +29,27 @@ def df_process_gen_inputs(df, self):
 
 
 class mplot(object):
-    def __init__(self, prop, start, end, timezone, hdf_out_folder,  
-                                     zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, 
-                                     Multi_Scenario, Scenario_Diff, PLEXOS_Scenarios, ylabels, 
-                                     xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                     re_gen_cat, vre_gen_cat):
-        self.prop = prop
-        self.start = start     
-        self.end = end
-        self.timezone = timezone
-        self.hdf_out_folder = hdf_out_folder
-        self.zone_input =zone_input
-        self.AGG_BY = AGG_BY
-        self.ordered_gen = ordered_gen
-        self.PLEXOS_color_dict = PLEXOS_color_dict
-        self.Multi_Scenario = Multi_Scenario
-        self.Scenario_Diff = Scenario_Diff
-        self.PLEXOS_Scenarios = PLEXOS_Scenarios
-        self.ylabels = ylabels
-        self.xlabels = xlabels
-        self.gen_names_dict = gen_names_dict
-        self.re_gen_cat = re_gen_cat
-
+        
+    def __init__(self,argument_list):
+        
+        self.prop = argument_list[0]
+        self.start = argument_list[1]     
+        self.end = argument_list[2]
+        self.timezone = argument_list[3]
+        self.start_date = argument_list[4]
+        self.end_date = argument_list[5]
+        self.hdf_out_folder = argument_list[6]
+        self.zone_input =argument_list[7]
+        self.AGG_BY = argument_list[8]
+        self.ordered_gen = argument_list[9]
+        self.PLEXOS_color_dict = argument_list[10]
+        self.Multi_Scenario = argument_list[11]
+        self.Scenario_Diff = argument_list[12]
+        self.PLEXOS_Scenarios = argument_list[13]
+        self.ylabels = argument_list[14]
+        self.xlabels = argument_list[15]
+        self.gen_names_dict = argument_list[18]
+        self.re_gen_cat = argument_list[20]
    
     
     def gen_unstack(self):
@@ -132,6 +131,18 @@ class mplot(object):
             Unserved_Energy = Unserved_Energy[start_date : end_date]
             Pump_Load = Pump_Load[start_date : end_date]
             
+            
+        elif self.prop == 'Date Range':
+            print("Plotting specific date range:")
+            print(self.start_date)
+            print('    to')
+            print(self.end_date)
+            print('    ')
+             
+            Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
+            Load = Load[self.start_date : self.end_date]
+            Unserved_Energy = Unserved_Energy[self.start_date : self.end_date]
+            Pump_Load = Pump_Load[self.start_date : self.end_date]
 
 
         else:
