@@ -52,11 +52,10 @@ class mplot(object):
         self.re_gen_cat = argument_list[20]
 
    
-    
-    def net_interchange(self):
-        Net_Interchange_read = pd.read_hdf(os.path.join(self.hdf_out_folder,self.Multi_Scenario[0] + '_formatted.h5'),'region_Net_Interchange')
-        print("     "+ self.zone_input)
-        return(Net_Interchange_read)
+    # def net_interchange(self):
+    #       Net_Interchange_read = pd.read_hdf(os.path.join(self.hdf_out_folder,self.Multi_Scenario[0] + '_formatted.h5'),'region_Net_Interchange')
+    #       print("     "+ self.zone_input)
+    #       return(Net_Interchange_read)
     
     
     #     Stacked_Gen = Stacked_Gen_read.xs(self.zone_input,level=self.AGG_BY)        

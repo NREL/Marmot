@@ -141,3 +141,6 @@ RPM Storage c0,Storage
 RPM PV Batt c1 PV,PV-Battery
 Gas CC_ERCOT,Gas-CC
 2024_dpv,PV
+Hydro,Hydro
+SynchCond,Other
+Wind,Wind

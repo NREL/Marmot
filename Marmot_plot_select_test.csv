@@ -1,7 +1,7 @@
-Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], use specific date range? [Date Range]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date,End date
+Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], use specific date range? [Date Range], other alternatives [only when committed]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date,End date
 Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,
 Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,4,4,EST,,
-Generation Stack,TRUE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/24 0:00,2/5/24 0:00
+Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/24 0:00,2/5/24 0:00
 Generation Stack,FALSE,Stacked_Gen,,,,EST,,
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST,,
@@ -26,3 +26,7 @@ Generation Unstacked,FALSE,Unstacked_Gen,,,,MT,,
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,MT,,
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,MT,,
 Net Interchange,FALSE,Net_Interchange,,,,EST,,
+Capacity Factor,FALSE,Capacity_Factor,,,,EST,,
+Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,2/1/24 0:00,2/5/24 0:00
+Capacity Factor,FALSE,Capacity_Factor_When_Committed,only when committed,,,EST,,
+Ramping,TRUE,Starts_and_Stops,,,,EST,,

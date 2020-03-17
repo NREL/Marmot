@@ -157,7 +157,7 @@ class mplot(object):
                     color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
         
         if (Unserved_Energy == 0).all() == False:
-            lp2 = plt.plot(Unserved_Energy, color='#EE1289')
+            lp2 = plt.plot(Unserved_Energy, color='#DD0200')
         
         
         ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
@@ -327,7 +327,7 @@ class mplot(object):
         
     
             if (Unserved_Energy == 0).all() == False:
-                lp2 = axs[i].plot(Unserved_Energy, color='#EE1289')
+                lp2 = axs[i].plot(Unserved_Energy, color='#DD0200')
             
             
            

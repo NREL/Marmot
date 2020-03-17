@@ -55,7 +55,7 @@ class mplot(object):
     
     def gen_stack(self):
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-        Avail_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Available_Capacity")
+       # Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')    Test
         Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
         Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Curtailment" )
         # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
@@ -69,12 +69,10 @@ class mplot(object):
         print("     "+ self.zone_input)
         Pump_Load = pd.Series() # Initiate pump load 
     
-        Stacked_Gen = Stacked_Gen_read.xs(self.zone_input,level=self.AGG_BY)        
+        Stacked_Gen = Stacked_Gen_read.xs(self.zone_input,level=self.AGG_BY)  
+        # Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=AGG_BY) Test
         Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
-        
-        Avail_Gen = Avail_Gen_read.xs(self.zone_input,level=self.AGG_BY)
-        Avail_Gen = df_process_gen_inputs(Avail_Gen, self)
-        
+                
         try:
             Stacked_Curt = Stacked_Curt_read.xs(self.zone_input,level=self.AGG_BY)
             Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
@@ -158,7 +156,10 @@ class mplot(object):
                      colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
         
         if (Unserved_Energy == 0).all() == False:
-            lp2 = plt.plot(Unserved_Energy, color='#EE1289')
+            lp2 = plt.plot(Unserved_Energy, 
+                           #color='#EE1289'  OLD MARMOT COLOR
+                           color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                           )
         
         lp = plt.plot(Load, color='black')
         
@@ -196,7 +197,9 @@ class mplot(object):
          
                 
         if (Unserved_Energy == 0).all() == False:
-            ax.fill_between(Load.index, Load,Unserved_Energy, facecolor='#EE1289')
+            ax.fill_between(Load.index, Load,Unserved_Energy, 
+                            #facecolor='#EE1289'
+                            facecolor = '#DD0200')
         
         handles, labels = ax.get_legend_handles_labels()
         
@@ -235,7 +238,6 @@ class mplot(object):
         # Create Dictionary to hold Datframes for each scenario 
         Gen_Collection = {} 
         Load_Collection = {}
-        Avail_Gen_Collection = {}
         Pump_Load_Collection = {}
         Unserved_Energy_Collection = {}
         Curtailment_Collection = {}
@@ -244,7 +246,6 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
             Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Generation")
             Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Curtailment")
-            Avail_Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Available_Capacity")
             Pump_Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Pump_Load" )
             if self.AGG_BY == "zone":
                 Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "zone_Unserved_Energy" )
@@ -280,10 +281,7 @@ class mplot(object):
                 continue
             Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
             
-            Avail_Gen = Avail_Gen_Collection.get(scenario)
-            Avail_Gen = Avail_Gen.xs(self.zone_input,level=self.AGG_BY)
-            Avail_Gen = df_process_gen_inputs(Avail_Gen, self)
-            
+                
             try:
                 Stacked_Curt = Curtailment_Collection.get(scenario)
                 Stacked_Curt = Stacked_Curt.xs(self.zone_input,level=self.AGG_BY)
@@ -353,7 +351,10 @@ class mplot(object):
              
             
             if (Unserved_Energy == 0).all() == False:
-                lp2 = axs[i].plot(Unserved_Energy, color='#EE1289')
+                lp2 = axs[i].plot(Unserved_Energy,
+                                  #color='#EE1289'  OLD MARMOT COLOR
+                                  color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                                  )
             
             lp = axs[i].plot(Load, color='black')
             
@@ -389,7 +390,10 @@ class mplot(object):
             axs[i].xaxis.set_major_formatter(formatter)
             
             if (Unserved_Energy == 0).all() == False:
-                axs[i].fill_between(Load.index, Load,Unserved_Energy, facecolor='#EE1289')
+                axs[i].fill_between(Load.index, Load,Unserved_Energy, 
+                                   # facecolor='#EE1289' OLD MARMOT COLOR
+                                    facecolor = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                                    )
             
             handles, labels = axs[grid_size-1].get_legend_handles_labels()
             
