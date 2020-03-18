@@ -129,6 +129,16 @@ WALC_WI,Southwest,USA,WI,USA-WI
 TH_Malin_WI,NorthwestUS,USA,WI,USA-WI
 TH_Mead_WI,Southwest,USA,WI,USA-WI
 TH_PV_WI,Southwest,USA,WI,USA-WI
+01-Central_MX,Mexico,Mexico,SEN,Mexico-SEN
+02-Oriental_MX,Mexico,Mexico,SEN,Mexico-SEN
+03-Occidental_MX,Mexico,Mexico,SEN,Mexico-SEN
+04-Noroeste_MX,Mexico,Mexico,SEN,Mexico-SEN
+05-Norte_MX,Mexico,Mexico,SEN,Mexico-SEN
+06-Noreste_MX,Mexico,Mexico,SEN,Mexico-SEN
+07-Peninsular_MX,Mexico,Mexico,SEN,Mexico-SEN
+08-Baja California_MX,Mexico,Mexico,SEN,Mexico-SEN
+09-Baja California Sur_MX,Mexico,Mexico,SEN,Mexico-SEN
+10-Mulege_MX,Mexico,Mexico,SEN,Mexico-SEN
 Houston_ERC,ERCOT,USA,Texas,USA-Texas
 Non-Ercot_ERC,ERCOT,USA,Texas,USA-Texas
 North_ERC,ERCOT,USA,Texas,USA-Texas
