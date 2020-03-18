@@ -39,6 +39,10 @@ from h5plexos.query import PLEXOSSolution
 """ User Defined Names, Directories and Settings """
 #===============================================================================
 
+# Directory of cloned Marmot repo and loaction of this file
+Marmot_DIR = "/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/Marmot"
+os.chdir(Marmot_DIR)
+
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
 Plexos_Properties = pd.read_csv('plexos_properties.csv')
 
