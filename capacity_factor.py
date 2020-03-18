@@ -57,20 +57,17 @@ class mplot(object):
             Cap_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
 
         CF_all_scenarios = pd.DataFrame()
-        print("     "+ self.zone_input)
+        print("Zone = " + self.zone_input)
             
         for scenario in self.Multi_Scenario:
             
+            print("Scenario = " + str(scenario))
             Gen = Gen_Collection.get(scenario)
             Gen = Gen.xs(self.zone_input,level = self.AGG_BY)
             Gen = df_process_gen_inputs(Gen,self)
             if self.prop == 'Date Range':
                 print("Plotting specific date range:")
-                print(self.start_date)
-                print('    to')
-                print(self.end_date)
-                print('    ')
-                
+                print(str(self.start_date) + '  to  ' + str(self.end_date))
                 Gen = Gen[self.start_date : self.end_date]
          
             # Calculates interval step to correct for MWh of generation
@@ -119,67 +116,56 @@ class mplot(object):
         Gen_Collection = {} 
         Cap_Collection = {}
         
-        for scenario in Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
-            Cap_Collection[scenario] = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Installed_Capacity")
+        for scenario in self.Multi_Scenario:
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
+            Cap_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Installed_Capacity")
 
         
         CF_all_scenarios = pd.DataFrame()
         
-        print("Processing zone " + zone_input)
+        print("Zone = " + self.zone_input)
             
-        for scenario in Multi_Scenario:
-            print(scenario)
+        for scenario in self.Multi_Scenario:
+            print("Scenario = " + str(scenario))
             Gen = Gen_Collection.get(scenario)
-            Gen = Gen.xs(zone_input,level = AGG_BY)
+            Gen = Gen.xs(self.zone_input,level = self.AGG_BY)
       
             Gen = Gen.reset_index()
             Gen.tech = Gen.tech.astype("category")
-            Gen.tech.cat.set_categories(ordered_gen, inplace=True)
+            Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
             Gen = Gen.drop(columns = ['region'])
             Gen = Gen.rename(columns = {0:"Output (MWh)"})
     
             
             Cap = Cap_Collection.get(scenario)
-            Cap = Cap.xs(zone_input,level =AGG_BY)
+            Cap = Cap.xs(self.zone_input,level = self.AGG_BY)
             Cap = Cap.reset_index()
             Cap = Cap.drop(columns = ['timestamp','region','tech'])
             Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
             Gen = pd.merge(Gen,Cap, on = 'gen_name')
+            Gen.index = Gen.timestamp
+            Gen = Gen.drop(columns = ['timestamp'])
             
             if self.prop == 'Date Range':
                 print("Plotting specific date range:")
-                print(self.start_date)
-                print('    to')
-                print(self.end_date)
-                print('    ')
-                
-                             
-                date_range = pd.date_range(start = start_date, end = end_date)
-                date_range_str = [str(date) for date in date_range]
-                Gen = Gen.loc[Gen.timestamp == start_date : Gen.timestamp == end_date]
-           
+                print(str(self.start_date) + '  to  ' + str(self.end_date))
+                Gen = Gen[self.start_date : self.end_date]
+
             #Calculate CF individually for each plant, since we need to take out all zero rows.
             tech_names = Gen['tech'].unique()
             CF = pd.DataFrame(columns = tech_names,index = [scenario])
             for tech_name in tech_names:
                 stt = Gen.loc[Gen['tech'] == tech_name]
-                if all(stt['Output (MWh)'] == 0):
-                      print('No ' + tech_name + ' generators produced energy.')
-                      
-                else: 
-                    
-                    gen_names = stt['gen_name'].unique()
-                    
+                if not all(stt['Output (MWh)'] == 0):
+             
+                    gen_names = stt['gen_name'].unique()              
                     cfs = []
                     caps = []
                     for gen in gen_names:
                         sgt = stt.loc[stt['gen_name'] == gen]
-                        if all(sgt['Output (MWh)'] == 0):
-                            print(gen + ' was off the entire time.')
-                            
-                        else: 
-                            time_delta = sgt.timestamp.iloc[1] - sgt.timestamp.iloc[0]  # Calculates interval step to correct for MWh of generation.
+                        if not all(sgt['Output (MWh)'] == 0):
+
+                            time_delta = sgt.index[1] - sgt.index[0]  # Calculates interval step to correct for MWh of generation.
                             sgt = sgt[sgt['Output (MWh)'] !=0] #Remove time intervals when output is zero.
                             duration_hours = (len(sgt) * time_delta + time_delta)/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation
                             total_gen = sgt['Output (MWh)'].sum()
@@ -216,67 +202,56 @@ def time_at_min_gen(self):
         Gen_Collection = {} 
         Cap_Collection = {}
         
-        for scenario in Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
-            Cap_Collection[scenario] = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Installed_Capacity")
+        for scenario in self.Multi_Scenario:
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
+            Cap_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Installed_Capacity")
 
         
         CF_all_scenarios = pd.DataFrame()
         
-        print("Processing zone " + zone_input)
+        print("Zone = " + self.zone_input)
             
         for scenario in self.Multi_Scenario:
-            print(scenario)
+            print("Scenario = " + str(scenario))
             Gen = Gen_Collection.get(scenario)
             Gen = Gen.xs(zone_input,level = AGG_BY)
       
             Gen = Gen.reset_index()
             Gen.tech = Gen.tech.astype("category")
-            Gen.tech.cat.set_categories(ordered_gen, inplace=True)
+            Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
             Gen = Gen.drop(columns = ['region'])
             Gen = Gen.rename(columns = {0:"Output (MWh)"})
     
             
             Cap = Cap_Collection.get(scenario)
-            Cap = Cap.xs(zone_input,level =AGG_BY)
+            Cap = Cap.xs(self.zone_input,level = self.AGG_BY)
             Cap = Cap.reset_index()
             Cap = Cap.drop(columns = ['timestamp','region','tech'])
             Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
             Gen = pd.merge(Gen,Cap, on = 'gen_name')
+            Gen.index = Gen.timestamp
+            Gen = Gen.drop(columns = ['timestamp'])
             
             if self.prop == 'Date Range':
                 print("Plotting specific date range:")
-                print(self.start_date)
-                print('    to')
-                print(self.end_date)
-                print('    ')
-                
-                             
-                date_range = pd.date_range(start = start_date, end = end_date)
-                date_range_str = [str(date) for date in date_range]
-                Gen = Gen.loc[Gen.timestamp == start_date : Gen.timestamp == end_date]
+                print(str(self.start_date) + '  to  ' + str(self.end_date))
+                Gen = Gen[self.start_date : self.end_date]
            
             #Calculate CF individually for each plant, since we need to take out all zero rows.
             tech_names = Gen['tech'].unique()
             CF = pd.DataFrame(columns = tech_names,index = [scenario])
             for tech_name in tech_names:
                 stt = Gen.loc[Gen['tech'] == tech_name]
-                if all(stt['Output (MWh)'] == 0):
-                      print('No ' + tech_name + ' generators produced energy.')
-                      
-                else: 
-                    
-                    gen_names = stt['gen_name'].unique()
-                    
+                if not all(stt['Output (MWh)'] == 0):
+
+                    gen_names = stt['gen_name'].unique() 
                     cfs = []
                     caps = []
                     for gen in gen_names:
                         sgt = stt.loc[stt['gen_name'] == gen]
-                        if all(sgt['Output (MWh)'] == 0):
-                            print(gen + ' was off the entire time.')
+                        if not all(sgt['Output (MWh)'] == 0):
                             
-                        else: 
-                            time_delta = sgt.timestamp.iloc[1] - sgt.timestamp.iloc[0]  # Calculates interval step to correct for MWh of generation.
+                            time_delta = sgt.index[1] - sgt.index[0]  # Calculates interval step to correct for MWh of generation.
                             sgt = sgt[sgt['Output (MWh)'] !=0] #Remove time intervals when output is zero.
                             duration_hours = (len(sgt) * time_delta + time_delta)/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation
                             total_gen = sgt['Output (MWh)'].sum()

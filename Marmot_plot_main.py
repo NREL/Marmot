@@ -35,7 +35,7 @@ mpl.rc('font', family='serif')
 """ User Defined Names, Directories and Settings """
 #===============================================================================
 
-Marmot_plot_select = pd.read_csv("Marmot_plot_select_test.csv")
+Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
 Scenario_name = 'Cold Wave 2011' # 'BAU' # "BAU_No_VG_Reserves"
 Scenario_name = 'Base'
@@ -51,7 +51,7 @@ Multi_Scenario = ['Base','NoCSP']
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
-Scenario_Diff = [] # ["Gas_Outage_+_Icing", "Base_Case"]
+Scenario_Diff = ['Base','NoCSP'] # ["Gas_Outage_+_Icing", "Base_Case"]
 
 Mapping_folder = 'mapping_folder'
 
@@ -273,8 +273,11 @@ Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == 
 #%%
 # Main loop to process each figure and pass data to functions
 for index, row in Marmot_plot_select.iterrows():
-   
-    print("Processing " + row["Figure Type"])
+    
+    print("                 ")
+    print("                 ")
+    print("                 ")
+    print("Plot =  " + row["Figure Type"])
     
 # Checks if figure type is a reserve figure. This is required as reserve regions dont always match generator regions/zones    
     if "Reserve" in row["Figure Type"]:

@@ -46,11 +46,13 @@ class mplot(object):
             Cap_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
 
 
-        print("Processing " + self.zone_input)
+        print("Zone =  " + self.zone_input)
         
         cap_started_all_scenarios = pd.DataFrame()
         
         for scenario in self.Multi_Scenario:
+            
+            print("Scenario = " + str(scenario))
             
             Gen = Gen_Collection.get(scenario)
             Gen = Gen.xs(self.zone_input,level = self.AGG_BY)
@@ -59,7 +61,7 @@ class mplot(object):
             Gen.tech = Gen.tech.astype("category")
             Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
             Gen = Gen.drop(columns = ['region'])
-            Gen = Gen.rename(columns = {0:"Output (MW)"})
+            Gen = Gen.rename(columns = {0:"Output (MWh)"})
             Gen = Gen[~Gen['tech'].isin(['PV','Wind','Hydro','CSP'])]   #We are only interested in thermal starts/stops.
             
             Cap = Cap_Collection.get(scenario)
@@ -68,14 +70,12 @@ class mplot(object):
             Cap = Cap.drop(columns = ['timestamp','region','tech'])
             Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
             Gen = pd.merge(Gen,Cap, on = 'gen_name')
+            Gen.index = Gen.timestamp
+            Gen = Gen.drop(columns = ['timestamp'])
                  
             if self.prop == 'Date Range':
                 print("Plotting specific date range:")
-                print(self.start_date)
-                print('    to')
-                print(self.end_date)
-                print('    ')
-                
+                print(str(self.start_date) + '  to  ' + str(self.end_date))
                 Gen = Gen[self.start_date : self.end_date]
             
             tech_names = Gen['tech'].unique()
@@ -91,10 +91,10 @@ class mplot(object):
    
                 for gen in gen_names:
                     sgt = stt.loc[stt['gen_name'] == gen]
-                    if any(sgt["Output (MW)"] == 0) and not all(sgt["Output (MW)"] == 0):   #Check that this generator has some, but not all, uncommited hours.
+                    if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommited hours.
                         #print('Couting starts for: ' + gen)
-                        for idx in range(len(sgt['timestamp']) - 1):
-                                if sgt["Output (MW)"].iloc[idx] == 0 and not sgt["Output (MW)"].iloc[idx + 1] == 0:
+                        for idx in range(len(sgt['Output (MWh)']) - 1):
+                                if sgt["Output (MWh)"].iloc[idx] == 0 and not sgt["Output (MWh)"].iloc[idx + 1] == 0:
                                     cap_started = cap_started + sgt["Installed Capacity (MW)"].iloc[idx] 
                                   # print('started on '+ timestamp)
                                 # if sgt[0].iloc[idx] == 0 and not idx == 0 and not sgt[0].iloc[idx - 1] == 0:
