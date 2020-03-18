@@ -270,6 +270,9 @@ Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 # Filter for chosen figures to plot
 Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == True]
 
+zone_input = '1'
+AGG_BY = 'zone'
+
 #%%
 # Main loop to process each figure and pass data to functions
 for index, row in Marmot_plot_select.iterrows():
@@ -342,7 +345,13 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["fig"].figure.savefig(os.path.join(capacity_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(capacity_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
-            elif row["Figure Type"] == "Ramping": 
+            elif row["Figure Type"] == "Average Output When Committed": 
+                fig = capacity_factor.mplot(argument_list)
+                Figure_Out = fig.avg_output_when_committed()
+                Figure_Out["fig"].figure.savefig(os.path.join(capacity_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(capacity_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+                
+            elif row["Figure Type"] == "Capacity Started": 
                 fig = ramping.mplot(argument_list)
                 Figure_Out = fig.capacity_started()
                 Figure_Out["fig"].figure.savefig(os.path.join(ramping_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')

@@ -17,17 +17,6 @@ import os
 
 
 #===============================================================================
-
-def df_process_gen_inputs(df, self):
-    df = df.reset_index()
-    df['tech'].replace(self.gen_names_dict, inplace=True)
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"]) 
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df  
-
 class mplot(object):
         
     def __init__(self, argument_list):
