@@ -25,14 +25,11 @@ from h5plexos.query import PLEXOSSolution
 #===============================================================================
 # Create HDF5 file from PLEXOS zip solution
 #===============================================================================
-# #This is only required if your output has not been processed already on Eagle
+#This is only required if your output has not been processed already on Eagle
 
 # from h5plexos.process import process_solution
 # PLEXOS_Solution = '/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/MAGMA/Examples/RTS-2016/solutions/NoCSP/Model Year DA_noCSP Solution.zip' #PLEXOS solution .zip file.
 # process_solution(PLEXOS_Solution,'/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/MAGMA/Examples/RTS-2016/solutions/NoCSP/Model Year DA_noCSP Solution.h5') # Saves out to PLEXOS_Solution.h5
-
-# PLEXOS_Solution = '/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/MAGMA/Examples/RTS-2016/solutions/Base/Model Year DA Solution.zip' #PLEXOS solution .zip file.
-# process_solution(PLEXOS_Solution,'/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/MAGMA/Examples/RTS-2016/solutions/Base/Model Year DA Solution.h5') # Saves out to PLEXOS_Solution.h5
 
 
 #===============================================================================
@@ -47,17 +44,13 @@ os.chdir(Marmot_DIR)
 Plexos_Properties = pd.read_csv('plexos_properties.csv')
 
 # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
-Scenario_List = ['Base','NoCSP'] # ["BAU", "BAU_Copperplate", "BAU_VG_Reserves", "BAU2", "BAU2_Copperplate", "BAU2_VG_Reserves"]
-#Scenario_List = ['Cold Wave 2011']
+Scenario_List = ['Cold Wave 2011']
 
 # The folder that contains all h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
-HDF5_input_folder = '../MAGMA/Examples/RTS-2016/solutions'
-#HDF5_input_folder = '../TB_2024/StageA_DA'
-
+HDF5_input_folder = '../TB_2024/StageA_DA/'
 
 # Base directory to create folders in and save outputs (Default is Marmot_DIR but you can change to wherever you like)
-Solutions_folder = '../MAGMA/Examples/RTS-2016/solutions'
-#Solutions_folder = '../TB_2024/StageA_DA'
+Solutions_folder = '../TB_2024/StageA_DA'
 
 # This folder contains all the csv required for mapping and selecting outputs to process
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
@@ -72,7 +65,6 @@ overlap = 0 # number of hours overlapped between two adjacent models
 
 VoLL = 10000 # Value of Lost Load for calculatinhg cost of unserved energy
 
-Scenario_name = Scenario_List[0]
 for Scenario_name in Scenario_List:
     
     #===============================================================================
@@ -496,7 +488,7 @@ for Scenario_name in Scenario_List:
             Processed_Data_Out.sort_index(inplace=True)
             row["data_set"] = row["data_set"].replace(' ', '_')
         
-            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, ccomplib = 'blosc:zlib')
+            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
 
         else:
             continue
