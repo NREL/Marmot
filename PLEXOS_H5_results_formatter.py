@@ -56,7 +56,7 @@ Solutions_folder = '../TB_2024/StageA_DA'
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping_empty.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
 reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 

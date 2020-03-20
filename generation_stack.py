@@ -55,10 +55,10 @@ class mplot(object):
     
     def gen_stack(self):
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-       # Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')    Test
+    #    Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", 'generator_Generation') 
         Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
         Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Curtailment" )
-        # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
+        # If data is to be aggregated by zone, then zone properties are loaded, else region properties are loaded
         if self.AGG_BY == "zone":
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Load")
             Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Unserved_Energy" )
@@ -66,13 +66,13 @@ class mplot(object):
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Load")
             Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
         
-        print("     "+ self.zone_input)
+        print("Zone = "+ self.zone_input)
         Pump_Load = pd.Series() # Initiate pump load 
-    
+        
+       # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
         Stacked_Gen = Stacked_Gen_read.xs(self.zone_input,level=self.AGG_BY)  
-        # Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=AGG_BY) Test
         Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
-                
+ 
         try:
             Stacked_Curt = Stacked_Curt_read.xs(self.zone_input,level=self.AGG_BY)
             Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
@@ -134,10 +134,7 @@ class mplot(object):
             
         elif self.prop == 'Date Range':
             print("Plotting specific date range:")
-            print(self.start_date)
-            print('    to')
-            print(self.end_date)
-            print('    ')
+            print(str(self.start_date) + '  to  ' + str(self.end_date))
             
             Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
             Load = Load[self.start_date : self.end_date]
@@ -255,7 +252,7 @@ class mplot(object):
                 Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "region_Load")
             
             
-        print("     "+ self.zone_input)
+        print("Zone = "+ self.zone_input)
         
         xdimension=len(self.xlabels)
         ydimension=len(self.ylabels)

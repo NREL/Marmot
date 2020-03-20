@@ -35,33 +35,32 @@ mpl.rc('font', family='serif')
 """ User Defined Names, Directories and Settings """
 #===============================================================================
 
+# Directory of cloned Marmot repo and loaction of this file
+Marmot_DIR = "/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/Marmot"
+os.chdir(Marmot_DIR)
+
 Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
 Scenario_name = 'Cold Wave 2011' # 'BAU' # "BAU_No_VG_Reserves"
-Scenario_name = 'Base'
 
 Solutions_folder = '../TB_2024/StageA_DA'
-Solutions_folder = '../MAGMA/Examples/RTS-2016/solutions'
 
-
-# Multi_Scenario = ["BAU_No_VG_Reserves", "BAU_VG_Reserves", "BAU_Copperplate",  
-#                   "BAU2_No_VG_Reserves", "BAU2_VG_Reserves", "BAU2_Copperplate"]
 Multi_Scenario = ['Cold Wave 2011'] # ['BAU']
-Multi_Scenario = ['Base','NoCSP']
+#Multi_Scenario = ['Base','NoCSP']
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
-Scenario_Diff = ['Base','NoCSP'] # ["Gas_Outage_+_Icing", "Base_Case"]
+Scenario_Diff = []
+#Scenario_Diff = ['Base','NoCSP'] # ["Gas_Outage_+_Icing", "Base_Case"]
 
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping_empty.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
 Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
 
 AGG_BY = 'Interconnection' # "Usual"
-AGG_BY = 'zone'
 
 # Facet Grid Labels (Based on Scenarios)
 ylabels = [] # ["BAU", "BAU2"]
@@ -277,7 +276,7 @@ for index, row in Marmot_plot_select.iterrows():
     print("                 ")
     print("                 ")
     print("                 ")
-    print("Plot =  " + row["Figure Type"])
+    print("Plot =  " + row["Figure Output Name"])
     
 # Checks if figure type is a reserve figure. This is required as reserve regions dont always match generator regions/zones    
     if "Reserve" in row["Figure Type"]:

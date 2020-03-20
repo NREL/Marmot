@@ -47,11 +47,9 @@ class mplot(object):
         Gen_Collection = {} 
         Avail_Gen_Collection = {}
         Curtailment_Collection = {}
-        Installed_Capacity_Collection = {} 
         Total_Gen_Cost_Collection = {}
         
         for scenario in self.Multi_Scenario:
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "generator_Installed_Capacity")
             Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "generator_Generation")
             Avail_Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "generator_Available_Capacity")
             Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5",  "generator_Curtailment")
