@@ -7,6 +7,7 @@ Created on Thu Dec  5 14:16:30 2019
 #%%
 import pandas as pd
 import os
+import pathlib
 import matplotlib as mpl
 import generation_stack
 import total_generation 
@@ -20,6 +21,7 @@ import generation_unstack
 import transmission
 import ramping
 
+
 #===============================================================================
 # Graphing Defaults
 #===============================================================================
@@ -32,26 +34,35 @@ mpl.rc('font', family='serif')
 
 
 #===============================================================================
-""" User Defined Names, Directories and Settings """
+# Load Input Properties
 #===============================================================================
 
-# Directory of cloned Marmot repo and loaction of this file
-Marmot_DIR = "/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/Marmot"
-os.chdir(Marmot_DIR)
+#A bug in pandas requires this to be included, otherwise df.to_string truncates long strings
+#Fix available in Pandas 1.0 but leaving here in case user version not up to date
+pd.set_option("display.max_colwidth", 1000)
+
+#changes working directory to location of this python file
+os.chdir(pathlib.Path(__file__).parent.absolute())
+
+Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'], 
+                                         index_col='Input', skipinitialspace=True)
+
+# Directory of cloned Marmot repo
+Marmot_DIR = Marmot_user_defined_inputs.loc['Marmot_DIR'].to_string(index=False).strip()
 
 Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
-Scenario_name = 'Cold Wave 2011' # 'BAU' # "BAU_No_VG_Reserves"
+Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].to_string(index=False).strip()
 
-Solutions_folder = '../TB_2024/StageA_DA'
+# Folder to save your processed solutions
+Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions_folder'].to_string(index=False).strip()
 
-Multi_Scenario = ['Cold Wave 2011'] # ['BAU']
-#Multi_Scenario = ['Base','NoCSP']
+Multi_Scenario = Marmot_user_defined_inputs.loc['Multi_sceanrio_plot'].to_string(index=False).replace(" ","").split(",")
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
-Scenario_Diff = []
-#Scenario_Diff = ['Base','NoCSP'] # ["Gas_Outage_+_Icing", "Base_Case"]
+Scenario_Diff = Marmot_user_defined_inputs.loc['Scenario_Diff_plot'].to_string(index=False).replace(" ","").split(",")
+if Scenario_Diff == ['NaN']: Scenario_Diff = []
 
 Mapping_folder = 'mapping_folder'
 
@@ -59,19 +70,20 @@ Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
 Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
-
-AGG_BY = 'Interconnection' # "Usual"
+AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].to_string(index=False).strip()
 
 # Facet Grid Labels (Based on Scenarios)
-ylabels = [] # ["BAU", "BAU2"]
-xlabels = [] # ["No VG Reserves", "VG Reserves", "Copperplate"]
+ylabels = Marmot_user_defined_inputs.loc['Facet_ylabels'].to_string(index=False).strip().split(",") # ["BAU", "BAU2"]
+if ylabels == ['NaN']: ylabels = []
+xlabels = Marmot_user_defined_inputs.loc['Facet_xlabels'].to_string(index=False).strip().split(",") # ["No VG Reserves", "VG Reserves", "Copperplate"]
+if xlabels == ['NaN']: xlabels = []
 
 #===============================================================================
 # Input and Output Directories 
 #===============================================================================
 
 
-PLEXOS_Scenarios = os.path.join(Solutions_folder, 'PLEXOS_Scenarios')
+PLEXOS_Scenarios = os.path.join(Processed_Solutions_folder)
 # PLEXOS_Scenarios = '/Volumes/PLEXOS/Projects/Drivers_of_Curtailment/PLEXOS_Scenarios'
 
 figure_folder = os.path.join(PLEXOS_Scenarios, Scenario_name, 'Figures_Output')
@@ -273,9 +285,7 @@ Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == 
 # Main loop to process each figure and pass data to functions
 for index, row in Marmot_plot_select.iterrows():
     
-    print("                 ")
-    print("                 ")
-    print("                 ")
+    print("\n\n\n")
     print("Plot =  " + row["Figure Output Name"])
     
 # Checks if figure type is a reserve figure. This is required as reserve regions dont always match generator regions/zones    

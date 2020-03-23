@@ -19,6 +19,9 @@ import numpy as np
 import os
 import h5py
 import sys
+import pathlib
+import time
+
 sys.path.append('../h5plexos')
 from h5plexos.query import PLEXOSSolution
 
@@ -31,26 +34,34 @@ from h5plexos.query import PLEXOSSolution
 # PLEXOS_Solution = '/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/MAGMA/Examples/RTS-2016/solutions/NoCSP/Model Year DA_noCSP Solution.zip' #PLEXOS solution .zip file.
 # process_solution(PLEXOS_Solution,'/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/MAGMA/Examples/RTS-2016/solutions/NoCSP/Model Year DA_noCSP Solution.h5') # Saves out to PLEXOS_Solution.h5
 
-
 #===============================================================================
-""" User Defined Names, Directories and Settings """
+# Load Input Properties
 #===============================================================================
 
-# Directory of cloned Marmot repo and loaction of this file
-Marmot_DIR = "/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/Marmot"
-os.chdir(Marmot_DIR)
+#A bug in pandas requires this to be included, otherwise df.to_string truncates long strings
+#Fix available in Pandas 1.0 but leaving here in case user version not up to date
+pd.set_option("display.max_colwidth", 1000)
+
+#changes working directory to location of this python file
+os.chdir(pathlib.Path(__file__).parent.absolute())
+
+Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'], 
+                                         index_col='Input', skipinitialspace=True)
+
+# Directory of cloned Marmot repo
+Marmot_DIR = Marmot_user_defined_inputs.loc['Marmot_DIR'].to_string(index=False).strip()
 
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
 Plexos_Properties = pd.read_csv('plexos_properties.csv')
 
 # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
-Scenario_List = ['Cold Wave 2011']
+Scenario_List = Marmot_user_defined_inputs.loc['Scenario_process_list'].to_string(index=False).replace(" ","").split(",")
 
-# The folder that contains all h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
-HDF5_input_folder = '../TB_2024/StageA_DA/'
+# The folder that contains all PLEXOS h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
+PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
 
-# Base directory to create folders in and save outputs (Default is Marmot_DIR but you can change to wherever you like)
-Solutions_folder = '../TB_2024/StageA_DA'
+# Folder to save your processed solutions
+Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions_folder'].to_string(index=False).strip()
 
 # This folder contains all the csv required for mapping and selecting outputs to process
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
@@ -60,12 +71,16 @@ Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
 reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
+# number of hours overlapped between two adjacent models
+overlap = pd.to_numeric(Marmot_user_defined_inputs.loc['overlap'].to_string(index=False)) 
 
-overlap = 0 # number of hours overlapped between two adjacent models
+# Value of Lost Load for calculatinhg cost of unserved energy
+VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))  
 
-VoLL = 10000 # Value of Lost Load for calculatinhg cost of unserved energy
 
 for Scenario_name in Scenario_List:
+    
+    print("\n#### Processing " + Scenario_name + " PLEXOS Results ####")
     
     #===============================================================================
     # Input and Output Directories 
@@ -73,7 +88,7 @@ for Scenario_name in Scenario_List:
     
     HDF5_output = Scenario_name + "_formatted.h5"
     
-    PLEXOS_Scenarios = os.path.join(Solutions_folder, 'PLEXOS_Scenarios', Scenario_name)
+    PLEXOS_Scenarios = os.path.join(Processed_Solutions_folder, Scenario_name)
     try:
         os.makedirs(PLEXOS_Scenarios)
     except FileExistsError:
@@ -85,7 +100,7 @@ for Scenario_name in Scenario_List:
     except FileExistsError:
         # directory already exists
         pass
-    HDF5_folder_in = os.path.join(HDF5_input_folder, Scenario_name)
+    HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
     try:
         os.makedirs(HDF5_folder_in)
     except FileExistsError:
@@ -380,7 +395,6 @@ for Scenario_name in Scenario_List:
     # Main         
     #===============================================================================      
     
-    
     files = os.listdir(HDF5_folder_in) # List of all files in hdf5 folder
     files_list = []
     for names in files:
@@ -392,22 +406,39 @@ for Scenario_name in Scenario_List:
     data = h5py.File(hdf5_read, 'r')
     metadata = np.asarray(data['metadata'])
     
-    # Region generators mapping
-    region_generators = pd.DataFrame(np.asarray(data['metadata/relations/region_generators']))
-    region_generators.rename(columns={'child':'gen_name'}, inplace=True)
-    region_generators.rename(columns={'parent':'region'}, inplace=True)
-    region_generators["gen_name"]=region_generators["gen_name"].str.decode("utf-8")
-    region_generators["region"]=region_generators["region"].str.decode("utf-8")
-    region_generators.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
     
-    # Zone generators mapping
-    zone_generators = pd.DataFrame(np.asarray(data['metadata/relations/zone_generators']))
-    zone_generators.rename(columns={'child':'gen_name'}, inplace=True)
-    zone_generators.rename(columns={'parent':'zone'}, inplace=True)
-    zone_generators["gen_name"]=zone_generators["gen_name"].str.decode("utf-8")
-    zone_generators["zone"]=zone_generators["zone"].str.decode("utf-8")
-    zone_generators.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
+    try:
+        # Region generators mapping
+        region_generators = pd.DataFrame(np.asarray(data['metadata/relations/region_generators']))
+        region_generators.rename(columns={'child':'gen_name'}, inplace=True)
+        region_generators.rename(columns={'parent':'region'}, inplace=True)
+        region_generators["gen_name"]=region_generators["gen_name"].str.decode("utf-8")
+        region_generators["region"]=region_generators["region"].str.decode("utf-8")
+        region_generators.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
+    except Exception:
+        print("\Regional data not included in h5plexos results.\nSkipping Regional properties\n")
+        pass
     
+    
+    try:
+        # Zone generators mapping
+        zone_generators = pd.DataFrame(np.asarray(data['metadata/relations/zone_generators']))
+        zone_generators.rename(columns={'child':'gen_name'}, inplace=True)
+        zone_generators.rename(columns={'parent':'zone'}, inplace=True)
+        zone_generators["gen_name"]=zone_generators["gen_name"].str.decode("utf-8")
+        zone_generators["zone"]=zone_generators["zone"].str.decode("utf-8")
+        zone_generators.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
+        
+        # Outputs Zones in results to pickle file
+        zones = pd.DataFrame(np.asarray(data['metadata/objects/zone']))
+        zones["name"]=zones["name"].str.decode("utf-8")
+        zones["category"]=zones["category"].str.decode("utf-8")
+        zones.to_pickle('zones.pkl')
+    
+    except Exception:
+        print("\nZonal data not included in h5plexos results.\nSkipping Zonal properties\n")
+        pass
+        
     # Generator categories mapping 
     generator_category = pd.DataFrame(np.asarray(data['metadata/objects/generator']))
     generator_category.rename(columns={'name':'gen_name'}, inplace=True)
@@ -415,8 +446,9 @@ for Scenario_name in Scenario_List:
     generator_category["gen_name"]=generator_category["gen_name"].str.decode("utf-8")
     generator_category["tech"]=generator_category["tech"].str.decode("utf-8")
     
-    # Generator head and tail torage mapping
+    
     try:
+        # Generator head and tail torage mapping
         generator_headstorage = pd.DataFrame(np.asarray(data['metadata/relations/generator_headstorage']))
         generator_tailtorage = pd.DataFrame(np.asarray(data['metadata/relations/generator_tailstorage']))
         generator_storage = pd.concat([generator_headstorage, generator_tailtorage])
@@ -436,11 +468,6 @@ for Scenario_name in Scenario_List:
         regions["category"]=regions["category"].str.decode("utf-8")
         regions.to_pickle('regions.pkl')
     
-    # Outputs Zones in results to pickle file
-    zones = pd.DataFrame(np.asarray(data['metadata/objects/zone']))
-    zones["name"]=zones["name"].str.decode("utf-8")
-    zones["category"]=zones["category"].str.decode("utf-8")
-    zones.to_pickle('zones.pkl')
     
     # Read in all HDF5 files into dictionary 
     print("Loading all HDF5 files to prepare for processing")
@@ -448,7 +475,6 @@ for Scenario_name in Scenario_List:
     for file in files_list:
         hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
     
-    print("#### Processing " + Scenario_name + " PLEXOS Results ####")
     
     ######### Process the Outputs################################################          
     
@@ -459,7 +485,6 @@ for Scenario_name in Scenario_List:
     # Filters for chosen Plexos properties to prcoess
     Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
     
-    import time
     start = time.time()
     
     # Main loop to process each ouput and pass data to functions
@@ -474,7 +499,7 @@ for Scenario_name in Scenario_List:
             processed_data = get_data(row["group"], row["data_set"], 
                                              row["data_type"], db, overlap)
             if processed_data is None:
-                print("This parameter has no data.")
+                print("\n")
                 break
             
             # if interval is eqaul to year only process first h5plexos file. Also corrects units with unit_multiplier
@@ -519,7 +544,7 @@ for Scenario_name in Scenario_List:
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
     except Exception:
-        print("NOTE!! Unserved Energy not availabel to process, processing skipped")
+        print("NOTE!! Regional Unserved Energy not availabel to process, processing skipped")
         pass
     
     try:
@@ -528,7 +553,7 @@ for Scenario_name in Scenario_List:
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
     except Exception:
-        print("NOTE!! Unserved Energy not availabel to process, processing skipped")
+        print("NOTE!! Zonal Unserved Energy not availabel to process, processing skipped")
         pass
     
     end = time.time()
