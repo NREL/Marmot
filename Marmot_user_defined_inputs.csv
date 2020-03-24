@@ -1,13 +1,14 @@
 Input,Input_type,Importance,User_defined_value
-Marmot_DIR,folder,required,C:\Users\Marmot_DIR
-PLEXOS_Solutions_folder,folder,required,C:\Users\h5_files
-Processed_Solutions_folder,folder,required,C:\Users\h5_files\Solutions
-Scenario_process_list,List,required,"Test1, Test2, Test3                             "
+Marmot_DIR,folder,required,_/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/Marmot
+PLEXOS_Solutions_folder,folder,required,/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/TB_2024/StageA_DA
+Processed_Solutions_folder,folder,required,/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/TB_2024/StageA_DA
+Scenario_process_list,List,required,ColdWave_2011
 overlap,int,required,0
 VoLL,int,required,10000
-Main_scenario_plot,string,required,Test1
-Multi_sceanrio_plot,List,required,"Test1, Test2, Test3                             "
-Scenario_Diff_plot,List [Max 2],optional,"Tes2,Test1"
-AGG_BY,string ,required,Usual
-Facet_ylabels,List,optional,"BAU,BAU2"
-Facet_xlabels,List,optional,"No VG Reserves,VG Reserves,Copperplate"
+Main_scenario_plot,string,required,ColdWave_2011
+Multi_scenario_plot,List,required,ColdWave_2011
+Scenario_Diff_plot,List [Max 2],optional,
+AGG_BY,string ,required,Interconnection
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,
+Tech_exclusions,List,optional,"PV, Wind, Hydro, CSP"

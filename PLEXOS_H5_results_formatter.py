@@ -375,7 +375,7 @@ for Scenario_name in Scenario_List:
             
         elif loc == 'region_regions':
             try: 
-                df = db.storage(prop, timescale=t)
+                df = db.region_regions(prop, timescale=t)
                 df = df_process_region_regions(df, overlap) 
                 return df
             except: df = report_prop_error(prop,loc)       

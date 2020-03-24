@@ -71,10 +71,12 @@ class mplot(object):
         Total_Generation_Stack_Out = pd.DataFrame()
         Total_Load_Out = pd.DataFrame()
         Pump_Load_Out = pd.DataFrame()
-        print("     "+ self.zone_input)
+        print("Zone = " + self.zone_input)
             
             
         for scenario in self.Multi_Scenario:
+            
+            print("Scenario = " + scenario)
             
             Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
             Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)
@@ -200,11 +202,11 @@ class mplot(object):
     
         Total_Generation_Stack_Out = pd.DataFrame()
         Total_Load_Out = pd.DataFrame()
-        print("     "+ self.zone_input)
+        print("Zone = " + self.zone_input)
         
         
         for scenario in self.Multi_Scenario:      
-            print("     " + scenario)
+            print("Scenario = " + scenario)
             try:
                 Total_Gen_Stack = Gen_Collection.get(scenario)
                 Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)

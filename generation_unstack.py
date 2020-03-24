@@ -65,7 +65,7 @@ class mplot(object):
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Load")
             Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
         
-        print("     "+ self.zone_input)
+        print("Zone = "+ self.zone_input)
         Pump_Load = pd.Series() # Initiate pump load 
     
         Stacked_Gen = Stacked_Gen_read.xs(self.zone_input,level=self.AGG_BY)        
@@ -134,10 +134,7 @@ class mplot(object):
             
         elif self.prop == 'Date Range':
             print("Plotting specific date range:")
-            print(self.start_date)
-            print('    to')
-            print(self.end_date)
-            print('    ')
+            print(str(self.start_date) + '  to  ' + str(self.end_date))
              
             Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
             Load = Load[self.start_date : self.end_date]
@@ -227,7 +224,7 @@ class mplot(object):
                 Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Unserved_Energy" )
                 Load_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "region_Load")
                             
-        print("     "+ self.zone_input)
+        print("Zone = "+ self.zone_input)
 
         
         xdimension=len(self.xlabels)

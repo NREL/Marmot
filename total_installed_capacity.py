@@ -8,6 +8,7 @@ Created on Tue Dec 10 08:51:15 2019
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
+import os
 
 
 #===============================================================================
@@ -40,14 +41,16 @@ class mplot(object):
         Installed_Capacity_Collection = {} 
         
         for scenario in self.Multi_Scenario:
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",   "generator_Installed_Capacity")
+            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),   "generator_Installed_Capacity")
             
             
         Total_Installed_Capacity_Out = pd.DataFrame()
         Data_Table_Out = pd.DataFrame()
-        print("     " + self.zone_input)
+        print("Zone = " + self.zone_input)
         
         for scenario in self.Multi_Scenario:
+            
+            print("Scenario = " + scenario)
             
             Total_Installed_Capacity = Installed_Capacity_Collection.get(scenario)
             Total_Installed_Capacity = Total_Installed_Capacity.xs(self.zone_input,level=self.AGG_BY)

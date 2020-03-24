@@ -13,6 +13,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
+import os
 
 
 
@@ -26,7 +27,7 @@ class mplot(object):
         self.start = argument_list[1]     
         self.end = argument_list[2]
         self.timezone = argument_list[3]
-        self.start_date = argment_list[4]
+        self.start_date = argument_list[4]
         self.end_date = argument_list[5]
         self.hdf_out_folder = argument_list[6]
         self.zone_input = argument_list[7]
@@ -44,20 +45,25 @@ class mplot(object):
 
     def unserved_energy_timeseries(self):
         
+        print('Zone = ' + self.zone_input)
+        
         Unserved_Energy_Collection = {}
 
         for scenario in self.Multi_Scenario:
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "zone_Unserved_Energy")
+                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy")
             else:
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "region_Unserved_Energy")
+                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy")
             
         Unserved_Energy_Timeseries_Out = pd.DataFrame()
         Total_Unserved_Energy_Out = pd.DataFrame()    
         
         
         for scenario in self.Multi_Scenario:
+            
+            print('Scenario = ' + scenario)
+            
             unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
             unserved_eng_timeseries = unserved_eng_timeseries.xs(self.zone_input,level=self.AGG_BY)
             unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
@@ -120,19 +126,24 @@ class mplot(object):
         
     def tot_unserved_energy(self):
         
+        print('Zone = ' + self.zone_input)
+        
         Unserved_Energy_Collection = {}
 
         for scenario in self.Multi_Scenario:
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "zone_Unserved_Energy")
+                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy")
             else:
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "region_Unserved_Energy")
+                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy")
             
         Unserved_Energy_Timeseries_Out = pd.DataFrame()
         Total_Unserved_Energy_Out = pd.DataFrame()    
             
         for scenario in self.Multi_Scenario:
+            
+            print('Scenario = ' + scenario)
+            
             unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
             unserved_eng_timeseries = unserved_eng_timeseries.xs(self.zone_input,level=self.AGG_BY)
             unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()

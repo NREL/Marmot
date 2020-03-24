@@ -36,8 +36,9 @@ class mplot(object):
         self.color_list = argument_list[16]
         self.gen_names_dict = argument_list[18]
         
+        
     def capacity_started(self):
-        # Create Dictionary to hold Datframes for each scenario 
+        # Create Dictionary to hold Dataframes for each scenario 
         Gen_Collection = {}
         Cap_Collection = {}
         
@@ -129,16 +130,62 @@ class mplot(object):
             # print('Method 2 (first making a data frame with only 0s, then checking if timestamps > 1 hour) took ' + str(elapsed) + ' seconds')
                     
                 
-        fig1 = cap_started_all_scenarios.plot.bar(stacked = False, figsize=(9,6), rot=0, 
+        fig2 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0, 
                              color = self.color_list,edgecolor='black', linewidth='0.1')
         
-        fig1.spines['right'].set_visible(False)
-        fig1.spines['top'].set_visible(False)
-        fig1.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
-        fig1.tick_params(axis='y', which='major', length=5, width=1)
-        fig1.tick_params(axis='x', which='major', length=5, width=1)
+        fig2.spines['right'].set_visible(False)
+        fig2.spines['top'].set_visible(False)
+        fig2.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
+        fig2.tick_params(axis='y', which='major', length=5, width=1)
+        fig2.tick_params(axis='x', which='major', length=5, width=1)
                            
-        return {'fig': fig1, 'data_table': cap_started_all_scenarios}
+        return {'fig': fig2, 'data_table': cap_started_all_scenarios.T}
+    
+   # def ramps(self):
+   #      # Create Dictionary to hold Dataframes for each scenario 
+   #      Gen_Collection = {}
+   #      Cap_Collection = {}
+        
+   #      for scenario in Multi_Scenario:
+   #          Gen_Collection[scenario] = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
+   #          Cap_Collection[scenario] = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
+            
+   #      print("Zone =  " + zone_input)
+        
+   #      cap_started_all_scenarios = pd.DataFrame()
+        
+   #      for scenario in Multi_Scenario:
+            
+   #          print("Scenario = " + str(scenario))
+            
+   #          Gen = Gen_Collection.get(scenario)
+   #          Gen = Gen.xs(zone_input,level = AGG_BY)
+      
+   #          Gen = Gen.reset_index()
+   #          Gen.tech = Gen.tech.astype("category")
+   #          Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
+   #          Gen = Gen.drop(columns = ['region'])
+   #          Gen = Gen.rename(columns = {0:"Output (MWh)"})
+   #          Gen = Gen[~Gen['tech'].isin(['PV','Wind','Hydro','CSP'])]   #We are only interested in thermal starts/stops.
+            
+   #          Cap = Cap_Collection.get(scenario)
+   #          Cap = Cap.xs(self.zone_input,level = self.AGG_BY)
+   #          Cap = Cap.reset_index()
+   #          Cap = Cap.drop(columns = ['timestamp','region','tech'])
+   #          Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
+   #          Gen = pd.merge(Gen,Cap, on = 'gen_name')
+   #          Gen.index = Gen.timestamp
+   #          Gen = Gen.drop(columns = ['timestamp'])
+                 
+   #          if self.prop == 'Date Range':
+   #              print("Plotting specific date range:")
+   #              print(str(self.start_date) + '  to  ' + str(self.end_date))
+   #              Gen = Gen[self.start_date : self.end_date]
+            
+   #          tech_names = Gen['tech'].unique()
+        
+
+
     
 
     

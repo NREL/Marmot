@@ -57,7 +57,7 @@ Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].to_string(i
 # Folder to save your processed solutions
 Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions_folder'].to_string(index=False).strip()
 
-Multi_Scenario = Marmot_user_defined_inputs.loc['Multi_sceanrio_plot'].to_string(index=False).replace(" ","").split(",")
+Multi_Scenario = Marmot_user_defined_inputs.loc['Multi_scenario_plot'].to_string(index=False).replace(" ","").split(",")
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
@@ -77,6 +77,9 @@ ylabels = Marmot_user_defined_inputs.loc['Facet_ylabels'].to_string(index=False)
 if ylabels == ['NaN']: ylabels = []
 xlabels = Marmot_user_defined_inputs.loc['Facet_xlabels'].to_string(index=False).strip().split(",") # ["No VG Reserves", "VG Reserves", "Copperplate"]
 if xlabels == ['NaN']: xlabels = []
+
+tech_exclusions = Marmot_user_defined_inputs.loc['Tech_exclusions'].to_string(index = False).replace(" ","").split(",")
+if tech_exclusions == ['NaN']: tech_exclusios = []
 
 #===============================================================================
 # Input and Output Directories 
@@ -296,7 +299,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7], row.iloc[8],
                                   hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                                   Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                  re_gen_cat, vre_gen_cat, region]
+                                  re_gen_cat, vre_gen_cat, region, tech_exclusions]
             
             if row["Figure Type"] == "Reserve Timeseries":
                 fig = reserves.mplot(argument_list)
@@ -317,7 +320,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                                   hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                                   Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                  re_gen_cat, vre_gen_cat, Reserve_Regions]
+                                  re_gen_cat, vre_gen_cat, Reserve_Regions, tech_exclusions]
                                     
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list) 
@@ -357,6 +360,12 @@ for index, row in Marmot_plot_select.iterrows():
             elif row["Figure Type"] == "Average Output When Committed": 
                 fig = capacity_factor.mplot(argument_list)
                 Figure_Out = fig.avg_output_when_committed()
+                Figure_Out["fig"].figure.savefig(os.path.join(capacity_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(capacity_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+                
+            elif row["Figure Type"] == "Time at Minimum Generation": 
+                fig = capacity_factor.mplot(argument_list)
+                Figure_Out = fig.time_at_min_gen()
                 Figure_Out["fig"].figure.savefig(os.path.join(capacity_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(capacity_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 

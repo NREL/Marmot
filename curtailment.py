@@ -9,6 +9,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
+import os
 
 
 #===============================================================================
@@ -50,16 +51,18 @@ class mplot(object):
         Total_Gen_Cost_Collection = {}
         
         for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "generator_Generation")
-            Avail_Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "generator_Available_Capacity")
-            Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5",  "generator_Curtailment")
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5", "generator_Total_Generation_Cost")
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
+            Avail_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"), "generator_Available_Capacity")
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"),  "generator_Curtailment")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Total_Generation_Cost")
             
         
         Penetration_Curtailment_out = pd.DataFrame()
         
+        print("Zone = " + self.zone_input)
+        
         for scenario in self.Multi_Scenario:
-            print("     " + scenario)
+            print("Scenario = " + scenario)
             
             gen = Gen_Collection.get(scenario)
             gen = gen.xs(self.zone_input,level=self.AGG_BY)
@@ -196,15 +199,16 @@ class mplot(object):
     def curt_duration_curve(self):
         
         Curtailment_Collection = {}
+        print("Zone = " + self.zone_input)
         
         for scenario in self.Multi_Scenario:
-            Curtailment_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" +  scenario+"_formatted.h5",  "generator_Curtailment")
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
             
         RE_Curtailment_DC = pd.DataFrame()
         PV_Curtailment_DC = pd.DataFrame()
         
         for scenario in self.Multi_Scenario:
-            print("     " + scenario)
+            print("Scenario = " + scenario)
             
             re_curt = Curtailment_Collection.get(scenario)
             
