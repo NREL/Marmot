@@ -67,7 +67,7 @@ Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Regions_default_WECC_EWCC.csv'))
 reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
@@ -78,6 +78,264 @@ overlap = pd.to_numeric(Marmot_user_defined_inputs.loc['overlap'].to_string(inde
 VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))  
 
 
+
+#===============================================================================
+# Standard Naming of Generation Data
+#===============================================================================
+
+gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
+
+#===============================================================================
+# Region mapping
+#===============================================================================
+
+try:
+    Region_Mapping = Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
+except Exception:
+    pass
+
+#=============================================================================
+# FUNCTIONS FOR PLEXOS DATA EXTRACTION
+#=============================================================================
+    
+
+# Function for formating data which comes from the PLEXOS Region Category
+def df_process_region(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df.rename(columns={'name':'region'}, inplace=True)
+    if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
+        df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
+    df = df.drop(["band", "property", "category"],axis=1) 
+    df_col = list(df.columns) # Gets names of all columns in df and places in list
+    df_col.remove(0) # Removes 0, the data column from the list 
+    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+    df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column
+    return df   
+
+# Function for formating data which comes from the PLEXOS Region Category
+def df_process_zone(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df.rename(columns={'name':'zone'}, inplace=True)
+    df = df.drop(["band", "property", "category"],axis=1) 
+    df_col = list(df.columns) # Gets names of all columns in df and places in list
+    df_col.remove(0) # Removes 0, the data column from the list 
+    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+    df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column
+    return df    
+
+# Function for formatting data which comes form the PLEXOS Generator Category
+def df_process_gen(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property"],axis=1) 
+    df.rename(columns={'category':'tech', 'name':'gen_name'}, inplace=True)
+    df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
+    df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
+    if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
+        df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
+    df['tech'].replace(gen_names_dict, inplace=True)
+    df_col = list(df.columns) # Gets names of all columns in df and places in list
+    df_col.remove(0) # Removes 0, the data column from the list 
+    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+    df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column 
+    return df  
+
+# Function for formatting data which comes form the PLEXOS Line Category
+def df_process_line(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
+    df.rename(columns={'name':'line_name'}, inplace=True)
+    df = df.groupby(["timestamp", "line_name"]).sum()
+    return df 
+
+# Function for formatting data which comes form the PLEXOS Line Category
+def df_process_interface(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property"],axis=1) # delete property and band columns
+    df.rename(columns={'category':'region_region', 'name':'line_name'}, inplace=True)
+    df = df.groupby(["timestamp",  "region_region", "line_name"]).sum()
+    return df                   
+
+# Function for formatting data which comes form the PLEXOS Reserve Category
+def df_process_reserve(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
+    df.rename(columns={'name':'parent'}, inplace=True)
+    df = df.merge(reserve_region_type, how='left', on='parent')
+    df = df.groupby(["timestamp",  "Reserve_Region", "Type"]).sum()
+    return df      
+
+# Function for formatting data which comes form the PLEXOS Reserve_generators Category
+def df_process_reserve_generators(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property"],axis=1) # delete property and band columns
+    df.rename(columns={'child':'gen_name'}, inplace=True)
+    df = df.merge(generator_category, how='left', on='gen_name')
+    df = df.merge(reserve_region_type, how='left', on='parent')
+    df['tech'].replace(gen_names_dict, inplace=True)
+    df = df.groupby(["timestamp",  "tech", "Reserve_Region", "Type"]).sum()
+    return df      
+
+# Function for formatting data which comes form the PLEXOS Fuel Category
+def df_process_fuel(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
+    df.rename(columns={'name':'fuel_type'}, inplace=True)
+    df = df.groupby(["timestamp",  "fuel_type"]).sum()
+    return df   
+
+# Function for formatting data which comes form the PLEXOS Constraint Category
+def df_process_constraint(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property"],axis=1) # delete property and band columns
+    df.rename(columns={'category':'constraint_category', 'name':'constraint'}, inplace=True)
+    df = df.groupby(["timestamp",  "constraint_category", "constraint"]).sum()
+    return df
+
+# Function for formatting data which comes form the PLEXOS emission Category
+def df_process_emission(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property"],axis=1) # delete property and band columns
+    df.rename(columns={'name':'emission_type'}, inplace=True)
+    df = df.groupby(["timestamp", "emission_type"]).sum()
+    return df 
+
+# Function for formatting data which comes form the PLEXOS storage Category
+def df_process_storage(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
+    df = df.merge(generator_storage, how='left', on='name')
+    df = df.merge(region_generators, how='left', on='gen_name')
+    df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
+    if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
+        df = df.merge(Region_Mapping, how='left', on='region')
+    df.rename(columns={'name':'storage_resource'}, inplace=True)
+    df_col = list(df.columns) # Gets names of all columns in df and places in list
+    df_col.remove(0) # Removes 0, the data column from the list 
+    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+    df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column 
+    return df
+
+# Function for formatting data which comes form the PLEXOS region_regions Category
+def df_process_region_regions(df, overlap_hour): 
+    df = df.reset_index() # unzip the levels in index
+    df = df.drop(["band", "property"],axis=1) # delete property and band columns
+    df =  df.groupby(["timestamp",  "parent", "child"]).sum()
+    return df                                          
+
+
+# This fucntion prints a warning message when the get_data function cannot find the specified property in the H5plexos hdf5 file
+def report_prop_error(prop,loc):
+        print('CAN NOT FIND {} FOR {}. {} DOES NOT EXIST'.format(prop,loc,prop))
+        df = pd.DataFrame()
+        return df
+
+
+
+# This function handles the pulling of the data from the H5plexos hdf5 file and then passes the data to one of the formating functions                
+def get_data(loc, prop,t, db, overlap):
+    if loc == 'constraint': 
+        try: 
+            df = db.constraint(prop, timescale=t)
+            df = df_process_constraint(df, overlap)
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'emission':
+        try: 
+            df = db.emission(prop)
+            df = df_process_emission(df, overlap)
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+#    elif loc == 'emission_generators':
+#        try: 
+#            df = db.emission_generators(prop, timescale=t)
+#        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'fuel':
+        try: 
+            df = db.fuel(prop, timescale=t)
+            df = df_process_fuel(df, overlap)
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'generator':
+        try:
+            df = db.generator(prop, timescale=t)
+            df = df_process_gen(df, overlap)
+            # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
+            if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
+                print("\n WARNING!! The Following Generators do not have a correct category mapping \n")
+                print((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'line':
+        try: 
+            df = db.line(prop, timescale=t)
+            df = df_process_line(df, overlap)
+            return df
+        except: df = report_prop_error(prop,loc)
+       
+    elif loc == 'interface':
+        try: 
+            df = db.line(prop, timescale=t)
+            df = df_process_interface(df, overlap)
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'region':
+        try: 
+            df = db.region(prop, timescale=t)
+            df = df_process_region(df, overlap)
+            if prop == "Unserved Energy" and int(df.sum(axis=0)) >= 0:
+                print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'reserve':
+        try: 
+            df = db.reserve(prop, timescale=t)
+            df = df_process_reserve(df, overlap) 
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'reserve_generators':
+        try: 
+            df = db.reserve_generators(prop, timescale=t)
+            df = df_process_reserve_generators(df, overlap) 
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'storage':
+        try: 
+            df = db.storage(prop, timescale=t)
+            df = df_process_storage(df, overlap) 
+            return df
+        except: df = report_prop_error(prop,loc)
+        
+    elif loc == 'region_regions':
+        try: 
+            df = db.region_regions(prop, timescale=t)
+            df = df_process_region_regions(df, overlap) 
+            return df
+        except: df = report_prop_error(prop,loc)       
+        
+    elif loc == 'zone':
+        try:
+            df = db.zone(prop, timescale=t)
+            df = df_process_zone(df, overlap)
+            return df
+        except: df = report_prop_error(prop,loc) 
+        
+    else: 
+        df = pd.DataFrame()
+        print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
+
+#===================================================================================
+# Main         
+#=================================================================================== 
+        
 for Scenario_name in Scenario_List:
     
     print("\n#### Processing " + Scenario_name + " PLEXOS Results ####")
@@ -114,288 +372,8 @@ for Scenario_name in Scenario_List:
         pass
     
     
-    #===============================================================================
-    # Standard Naming of Generation Data
-    #===============================================================================
     
-    gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
-    
-    #===============================================================================
-    # Region mapping
-    #===============================================================================
-    
-    try:
-        Region_Mapping = Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
-    except Exception:
-        pass
-    
-    #=============================================================================
-    # FUNCTIONS FOR PLEXOS DATA EXTRACTION
-    #=============================================================================
-    
-    
-    # Function for formating data which comes from the PLEXOS Region Category
-    def df_process_region(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df.rename(columns={'name':'region'}, inplace=True)
-        if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
-            df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
-        df = df.drop(["band", "property", "category"],axis=1) 
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))  
-        df_col = list(df.columns) # Gets names of all columns in df and places in list
-        df_col.remove(0) # Removes 0, the data column from the list 
-        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-        df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column
-        return df   
-    
-    # Function for formating data which comes from the PLEXOS Region Category
-    def df_process_zone(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df.rename(columns={'name':'zone'}, inplace=True)
-        df = df.drop(["band", "property", "category"],axis=1) 
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))  
-        df_col = list(df.columns) # Gets names of all columns in df and places in list
-        df_col.remove(0) # Removes 0, the data column from the list 
-        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-        df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column
-        return df    
-    
-    # Function for formatting data which comes form the PLEXOS Generator Category
-    def df_process_gen(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property"],axis=1) 
-        df.rename(columns={'category':'tech', 'name':'gen_name'}, inplace=True)
-        df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
-        df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
-        if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
-            df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
-        df['tech'].replace(gen_names_dict, inplace=True)
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df_col = list(df.columns) # Gets names of all columns in df and places in list
-        df_col.remove(0) # Removes 0, the data column from the list 
-        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-        df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column 
-        return df  
-    
-    # Function for formatting data which comes form the PLEXOS Line Category
-    def df_process_line(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
-        df.rename(columns={'name':'line_name'}, inplace=True)
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df = df.groupby(["timestamp", "line_name"]).sum()
-        return df 
-    
-    # Function for formatting data which comes form the PLEXOS Line Category
-    def df_process_interface(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property"],axis=1) # delete property and band columns
-        df.rename(columns={'category':'region_region', 'name':'line_name'}, inplace=True)
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df = df.groupby(["timestamp",  "region_region", "line_name"]).sum()
-        return df                   
-    
-    # Function for formatting data which comes form the PLEXOS Reserve Category
-    def df_process_reserve(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
-        df.rename(columns={'name':'parent'}, inplace=True)
-        df = df.merge(reserve_region_type, how='left', on='parent')
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df = df.groupby(["timestamp",  "Reserve_Region", "Type"]).sum()
-        return df      
-    
-    # Function for formatting data which comes form the PLEXOS Reserve_generators Category
-    def df_process_reserve_generators(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property"],axis=1) # delete property and band columns
-        df.rename(columns={'child':'gen_name'}, inplace=True)
-        df = df.merge(generator_category, how='left', on='gen_name')
-        df = df.merge(reserve_region_type, how='left', on='parent')
-        df['tech'].replace(gen_names_dict, inplace=True)
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df = df.groupby(["timestamp",  "tech", "Reserve_Region", "Type"]).sum()
-        return df      
-    
-    # Function for formatting data which comes form the PLEXOS Fuel Category
-    def df_process_fuel(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
-        df.rename(columns={'name':'fuel_type'}, inplace=True)
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df = df.groupby(["timestamp",  "fuel_type"]).sum()
-        return df   
-    
-    # Function for formatting data which comes form the PLEXOS Constraint Category
-    def df_process_constraint(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property"],axis=1) # delete property and band columns
-        df.rename(columns={'category':'constraint_category', 'name':'constraint'}, inplace=True)
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df = df.groupby(["timestamp",  "constraint_category", "constraint"]).sum()
-        return df
-    
-    # Function for formatting data which comes form the PLEXOS emission Category
-    def df_process_emission(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property"],axis=1) # delete property and band columns
-        df.rename(columns={'name':'emission_type'}, inplace=True)
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df = df.groupby(["timestamp", "emission_type"]).sum()
-        return df 
-    
-    # Function for formatting data which comes form the PLEXOS storage Category
-    def df_process_storage(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
-        df = df.merge(generator_storage, how='left', on='name')
-        df = df.merge(region_generators, how='left', on='gen_name')
-        df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
-        if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
-            df = df.merge(Region_Mapping, how='left', on='region')
-        df.rename(columns={'name':'storage_resource'}, inplace=True)
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df_col = list(df.columns) # Gets names of all columns in df and places in list
-        df_col.remove(0) # Removes 0, the data column from the list 
-        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-        df =  df.groupby(df_col).sum() #moves all columns to multiindex except 0 column 
-        return df
-    
-    # Function for formatting data which comes form the PLEXOS region_regions Category
-    def df_process_region_regions(df, overlap_hour): 
-        df = df.reset_index() # unzip the levels in index
-        df = df.drop(["band", "property"],axis=1) # delete property and band columns
-        if not df["timestamp"].iloc[0].is_year_start: # for results not start at the first hour in the year, remove the overlapped beginning hours
-            df = df.drop(range(0, overlap_hour))
-        df =  df.groupby(["timestamp",  "parent", "child"]).sum()
-        return df                                          
-    
-    
-    # This fucntion prints a warning message when the get_data function cannot find the specified property in the H5plexos hdf5 file
-    def report_prop_error(prop,loc):
-            print('CAN NOT FIND {} FOR {}. {} DOES NOT EXIST'.format(prop,loc,prop))
-            df = pd.DataFrame()
-            return df
-    
-    
-    
-    # This function handles the pulling of the data from the H5plexos hdf5 file and then passes the data to one of the formating functions                
-    def get_data(loc, prop,t, db, overlap):
-        if loc == 'constraint': 
-            try: 
-                df = db.constraint(prop, timescale=t)
-                df = df_process_constraint(df, overlap)
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'emission':
-            try: 
-                df = db.emission(prop)
-                df = df_process_emission(df, overlap)
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-    #    elif loc == 'emission_generators':
-    #        try: 
-    #            df = db.emission_generators(prop, timescale=t)
-    #        except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'fuel':
-            try: 
-                df = db.fuel(prop, timescale=t)
-                df = df_process_fuel(df, overlap)
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'generator':
-            try:
-                df = db.generator(prop, timescale=t)
-                df = df_process_gen(df, overlap)
-                # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
-                if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
-                    print("\n WARNING!! The Following Generators do not have a correct category mapping \n")
-                    print((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'line':
-            try: 
-                df = db.line(prop, timescale=t)
-                df = df_process_line(df, overlap)
-                return df
-            except: df = report_prop_error(prop,loc)
-           
-        elif loc == 'interface':
-            try: 
-                df = db.line(prop, timescale=t)
-                df = df_process_interface(df, overlap)
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'region':
-            try: 
-                df = db.region(prop, timescale=t)
-                df = df_process_region(df, overlap)
-                if prop == "Unserved Energy" and int(df.sum(axis=0)) >= 0:
-                    print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'reserve':
-            try: 
-                df = db.reserve(prop, timescale=t)
-                df = df_process_reserve(df, overlap) 
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'reserve_generators':
-            try: 
-                df = db.reserve_generators(prop, timescale=t)
-                df = df_process_reserve_generators(df, overlap) 
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'storage':
-            try: 
-                df = db.storage(prop, timescale=t)
-                df = df_process_storage(df, overlap) 
-                return df
-            except: df = report_prop_error(prop,loc)
-            
-        elif loc == 'region_regions':
-            try: 
-                df = db.region_regions(prop, timescale=t)
-                df = df_process_region_regions(df, overlap) 
-                return df
-            except: df = report_prop_error(prop,loc)       
-            
-        elif loc == 'zone':
-            try:
-                df = db.zone(prop, timescale=t)
-                df = df_process_zone(df, overlap)
-                return df
-            except: df = report_prop_error(prop,loc) 
-            
-        else: 
-            df = pd.DataFrame()
-            print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
-    
-    #===============================================================================
-    # Main         
-    #===============================================================================      
-    
-    files = os.listdir(HDF5_folder_in) # List of all files in hdf5 folder
+    files = sorted(os.listdir(HDF5_folder_in)) # List of all files in hdf5 folder in alpha numeric order
     files_list = []
     for names in files:
         if names.endswith(".h5"):
@@ -478,9 +456,13 @@ for Scenario_name in Scenario_List:
     
     ######### Process the Outputs################################################          
     
+    
     # Creates Initial HDF5 file for ouputing formated data
     Processed_Data_Out=pd.DataFrame()
-    Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
+    if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
+        print("Warning: "+hdf_out_folder + "/" + HDF5_output+" already exists; new variables will be added.")
+    else:
+        Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
     
     # Filters for chosen Plexos properties to prcoess
     Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
@@ -510,11 +492,13 @@ for Scenario_name in Scenario_List:
                 Processed_Data_Out = pd.concat([Processed_Data_Out, processed_data])
                 
         if Processed_Data_Out.empty == False:
+            oldsize=Processed_Data_Out.size
+            Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
+            print('Drop duplicates removed '+str(oldsize-Processed_Data_Out.size)+' rows.')
             Processed_Data_Out.sort_index(inplace=True)
             row["data_set"] = row["data_set"].replace(' ', '_')
-        
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
-
+            del Processed_Data_Out
         else:
             continue
     
@@ -544,7 +528,7 @@ for Scenario_name in Scenario_List:
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
     except Exception:
-        print("NOTE!! Regional Unserved Energy not availabel to process, processing skipped")
+        print("NOTE!! Regional Unserved Energy not available to process, processing skipped")
         pass
     
     try:
@@ -553,7 +537,7 @@ for Scenario_name in Scenario_List:
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
     except Exception:
-        print("NOTE!! Zonal Unserved Energy not availabel to process, processing skipped")
+        print("NOTE!! Zonal Unserved Energy not available to process, processing skipped")
         pass
     
     end = time.time()
