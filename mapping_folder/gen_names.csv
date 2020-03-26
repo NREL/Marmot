@@ -144,3 +144,12 @@ Gas CC_ERCOT,Gas-CC
 Hydro,Hydro
 SynchCond,Other
 Wind,Wind
+ReEDS_canada,Net Imports
+ReEDS_wind-ofs,Wind
+ReEDS_nuclear,Nuclear
+ReEDS_csp,CSP
+ReEDS_gas-cc-ccs,Gas-CC CCS
+ReEDS_hydsnd,Hydro
+Hydro_MonthlyEnergy,Hydro
+Hydro_FixedDispatch,Hydro
+dpv,PV
