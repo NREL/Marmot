@@ -55,7 +55,7 @@ Marmot_DIR = Marmot_user_defined_inputs.loc['Marmot_DIR'].to_string(index=False)
 Plexos_Properties = pd.read_csv('plexos_properties.csv')
 
 # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
-Scenario_List = Marmot_user_defined_inputs.loc['Scenario_process_list'].to_string(index=False).replace(" ","").split(",")
+Scenario_List = pd.Series(Marmot_user_defined_inputs.loc['Scenario_process_list'].squeeze().split(",")).str.strip().tolist()
 
 # The folder that contains all PLEXOS h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
 PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()

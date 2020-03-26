@@ -52,16 +52,16 @@ Marmot_DIR = Marmot_user_defined_inputs.loc['Marmot_DIR'].to_string(index=False)
 
 Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
-Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].to_string(index=False).strip()
+Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].squeeze().strip()
 
 # Folder to save your processed solutions
 Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions_folder'].to_string(index=False).strip()
 
-Multi_Scenario = Marmot_user_defined_inputs.loc['Multi_scenario_plot'].to_string(index=False).replace(" ","").split(",")
+Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_sceanrio_plot'].squeeze().split(",")).str.strip().tolist()
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
-Scenario_Diff = Marmot_user_defined_inputs.loc['Scenario_Diff_plot'].to_string(index=False).replace(" ","").split(",")
+Scenario_Diff = pd.Series(Marmot_user_defined_inputs.loc['Scenario_Diff_plot'].squeeze().split(",")).str.strip().tolist()  
 if Scenario_Diff == ['NaN']: Scenario_Diff = []
 
 Mapping_folder = 'mapping_folder'
@@ -70,12 +70,12 @@ Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
 Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
-AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].to_string(index=False).strip()
+AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
 
 # Facet Grid Labels (Based on Scenarios)
-ylabels = Marmot_user_defined_inputs.loc['Facet_ylabels'].to_string(index=False).strip().split(",") # ["BAU", "BAU2"]
+ylabels = pd.Series(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze().split(",")).str.strip().tolist() 
 if ylabels == ['NaN']: ylabels = []
-xlabels = Marmot_user_defined_inputs.loc['Facet_xlabels'].to_string(index=False).strip().split(",") # ["No VG Reserves", "VG Reserves", "Copperplate"]
+xlabels = pd.Series(Marmot_user_defined_inputs.loc['Facet_xlabels'].squeeze().split(",")).str.strip().tolist() 
 if xlabels == ['NaN']: xlabels = []
 
 tech_exclusions = Marmot_user_defined_inputs.loc['Tech_exclusions'].to_string(index = False).replace(" ","").split(",")
