@@ -48,9 +48,6 @@ os.chdir(pathlib.Path(__file__).parent.absolute())
 Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'], 
                                          index_col='Input', skipinitialspace=True)
 
-# Directory of cloned Marmot repo
-Marmot_DIR = Marmot_user_defined_inputs.loc['Marmot_DIR'].to_string(index=False).strip()
-
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
 Plexos_Properties = pd.read_csv('plexos_properties.csv')
 
@@ -132,7 +129,7 @@ def df_process_gen(df, overlap_hour):
     df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
     if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
         df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
-    df['tech'].replace(gen_names_dict, inplace=True)
+    df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
     df_col = list(df.columns) # Gets names of all columns in df and places in list
     df_col.remove(0) # Removes 0, the data column from the list 
     df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
@@ -171,7 +168,7 @@ def df_process_reserve_generators(df, overlap_hour):
     df.rename(columns={'child':'gen_name'}, inplace=True)
     df = df.merge(generator_category, how='left', on='gen_name')
     df = df.merge(reserve_region_type, how='left', on='parent')
-    df['tech'].replace(gen_names_dict, inplace=True)
+    df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))   
     df = df.groupby(["timestamp",  "tech", "Reserve_Region", "Type"]).sum()
     return df      
 
@@ -372,7 +369,6 @@ for Scenario_name in Scenario_List:
         pass
     
     
-    
     files = sorted(os.listdir(HDF5_folder_in)) # List of all files in hdf5 folder in alpha numeric order
     files_list = []
     for names in files:
@@ -477,7 +473,7 @@ for Scenario_name in Scenario_List:
         for model in files_list:
             print("     "+ model) 
             db = hdf5_collection.get(model)
-        
+            
             processed_data = get_data(row["group"], row["data_set"], 
                                              row["data_type"], db, overlap)
             if processed_data is None:
@@ -494,8 +490,8 @@ for Scenario_name in Scenario_List:
         if Processed_Data_Out.empty == False:
             oldsize=Processed_Data_Out.size
             Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
-            print('Drop duplicates removed '+str(oldsize-Processed_Data_Out.size)+' rows.')
-            Processed_Data_Out.sort_index(inplace=True)
+            if (oldsize-Processed_Data_Out.size) >0:
+                print('Drop duplicates removed '+str(oldsize-Processed_Data_Out.size)+' rows.')
             row["data_set"] = row["data_set"].replace(' ', '_')
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
             del Processed_Data_Out

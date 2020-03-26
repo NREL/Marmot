@@ -1,8 +1,7 @@
 Input,Input_type,Importance,User_defined_value
-Marmot_DIR,folder,required,C:\Users\Marmot_DIR
-PLEXOS_Solutions_folder,folder,required,C:\Users\h5_files
-Processed_Solutions_folder,folder,required,C:\Users\h5_files\Solutions
-Scenario_process_list,List,required,"Test1 ,  Test2,  Test3, Test 4,  Test_5                             "
+PLEXOS_Solutions_folder,folder,required,C:\Users\Documents\h5_files
+Processed_Solutions_folder,folder,required,C:\Users\Documents\Solutions
+Scenario_process_list,List,required,"Test1,Test2"
 overlap,int,required,0
 VoLL,int,required,10000
 Main_scenario_plot,string,required,Test1   
