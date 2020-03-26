@@ -67,7 +67,7 @@ Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Regions_default_WECC_EWCC.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
 reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
