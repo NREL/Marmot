@@ -262,8 +262,8 @@ def get_data(loc, prop,t, db, overlap):
             df = df_process_gen(df, overlap)
             # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
             if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
-                print("\n WARNING!! The Following Generators do not have a correct category mapping \n")
-                print((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
+                print("\n WARNING!! The Following Generators do not have a correct category mapping:")
+                print((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())) + "\n")
             return df
         except: df = report_prop_error(prop,loc)
         
@@ -285,7 +285,7 @@ def get_data(loc, prop,t, db, overlap):
         try: 
             df = db.region(prop, timescale=t)
             df = df_process_region(df, overlap)
-            if prop == "Unserved Energy" and int(df.sum(axis=0)) >= 0:
+            if prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
                 print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
             return df
         except: df = report_prop_error(prop,loc)
@@ -456,7 +456,7 @@ for Scenario_name in Scenario_List:
     # Creates Initial HDF5 file for ouputing formated data
     Processed_Data_Out=pd.DataFrame()
     if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
-        print("Warning: "+hdf_out_folder + "/" + HDF5_output+" already exists; new variables will be added.")
+        print("Warning: "+hdf_out_folder + "/" + HDF5_output+" already exists; new variables will be added.\n")
     else:
         Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
     
@@ -500,7 +500,7 @@ for Scenario_name in Scenario_List:
     
     ######### Calculate Extra Ouputs################################################
     try:
-        print("Processing Curtailment")  
+        print("Processing generator Curtailment")  
         Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
         Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
         # Output Curtailment# 

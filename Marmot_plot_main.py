@@ -5,10 +5,15 @@ Created on Thu Dec  5 14:16:30 2019
 @author: dlevie
 """
 #%%
+
 import pandas as pd
 import os
 import pathlib
 import matplotlib as mpl
+
+#changes working directory to location of this python file
+os.chdir(pathlib.Path(__file__).parent.absolute())
+
 import generation_stack
 import total_generation 
 import total_installed_capacity
@@ -41,14 +46,8 @@ mpl.rc('font', family='serif')
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
 
-#changes working directory to location of this python file
-os.chdir(pathlib.Path(__file__).parent.absolute())
-
 Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'], 
                                          index_col='Input', skipinitialspace=True)
-
-# Directory of cloned Marmot repo
-Marmot_DIR = Marmot_user_defined_inputs.loc['Marmot_DIR'].to_string(index=False).strip()
 
 Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
@@ -78,7 +77,7 @@ if ylabels == ['NaN']: ylabels = []
 xlabels = pd.Series(Marmot_user_defined_inputs.loc['Facet_xlabels'].squeeze().split(",")).str.strip().tolist() 
 if xlabels == ['NaN']: xlabels = []
 
-tech_exclusions = Marmot_user_defined_inputs.loc['Tech_exclusions'].to_string(index = False).replace(" ","").split(",")
+tech_exclusions = pd.Series(Marmot_user_defined_inputs.loc['Tech_exclusions'].squeeze().split(",")).str.strip().tolist() 
 if tech_exclusions == ['NaN']: tech_exclusios = []
 
 #===============================================================================
@@ -87,7 +86,6 @@ if tech_exclusions == ['NaN']: tech_exclusios = []
 
 
 PLEXOS_Scenarios = os.path.join(Processed_Solutions_folder)
-# PLEXOS_Scenarios = '/Volumes/PLEXOS/Projects/Drivers_of_Curtailment/PLEXOS_Scenarios'
 
 figure_folder = os.path.join(PLEXOS_Scenarios, Scenario_name, 'Figures_Output')
 try:
@@ -161,49 +159,14 @@ except FileExistsError:
 # Standard Generation Order
 #===============================================================================
 
-ordered_gen = ['Nuclear',
-               'Coal',
-               'Gas-CC',
-               'Gas-CC CCS',
-               'Gas-CT',
-               'Gas',
-               'Gas-Steam',
-               'DualFuel',
-               'Oil-Gas-Steam',
-               'Oil',
-               'Hydro',
-               'Ocean', 
-               'Geothermal',
-               'Biomass',
-               'Biopower',
-               'Other',
-               'Wind',
-               'Solar',
-               'CSP',
-               'PV',
-               'PV-Battery',
-               'Battery',
-               'PHS',
-               'Storage',
-               'Net Imports',
-               'Curtailment']
+ordered_gen = pd.read_csv(os.path.join(Mapping_folder, 'ordered_gen.csv'),squeeze=True).str.strip().tolist()
 
-pv_gen_cat = ['Solar',
-              'PV']
+pv_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'pv_gen_cat.csv'),squeeze=True).str.strip().tolist()
 
-re_gen_cat = ['Wind',
-              'PV']
+re_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 're_gen_cat.csv'),squeeze=True).str.strip().tolist()
 
-vre_gen_cat = ['Hydro',
-               'Ocean',
-               'Geothermal',
-               'Biomass',
-               'Biopwoer',
-               'Wind',
-               'Solar',
-               'CSP',
-               'PV']
-
+vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
+    
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
                     print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
                     print(set(gen_names["New"].unique()) - (set(ordered_gen)))
@@ -234,28 +197,11 @@ if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
 #                     'Curtailment': '#FF0000'}  
                     
 
-# color_list = ['#396AB1', '#CC2529','#3E9651','#ff7f00','#6B4C9A','#922428','#cab2d6', '#6a3d9a', '#fb9a99', '#b15928']
-
 #STANDARD SEAC COLORS (AS OF MARCH 9, 2020)             
-PLEXOS_color_dict = {'Nuclear':'#820000',
-                    'Coal':'#222222',
-                    'Gas-CC':'#52216B',
-                    'Gas-CC CCS':'#5E1688',
-                    'Gas-CT':'#C2A1DB',
-                    'DualFuel':'#000080',
-                    'Oil-Gas-Steam':'#3D3376',
-                    'Hydro':'#187F94',
-                    'Ocean':'#000080',
-                    'Geothermal':'#A96235',
-                    'Biopower':'#5B9844',
-                    'Wind':'#00B6EF',
-                    'CSP':'#FC761A',
-                    'PV':'#FFC903',
-                    'PV-Battery':'#D1C202',
-                    'Storage':'#FF4A88',
-                    'Other': '#FF7FBB',
-                    'Net Imports':'#193A71',
-                    'Curtailment': '#5B6272'}  
+PLEXOS_color_dict = pd.read_csv(os.path.join(Mapping_folder, 'colour_dictionary.csv')) 
+PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
+PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
+PLEXOS_color_dict=PLEXOS_color_dict[['Generator','Colour']].set_index("Generator").to_dict()["Colour"]
                     
 
 color_list = ['#396AB1', '#CC2529','#3E9651','#ff7f00','#6B4C9A','#922428','#cab2d6', '#6a3d9a', '#fb9a99', '#b15928']

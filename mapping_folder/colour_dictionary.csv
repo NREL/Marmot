@@ -1,0 +1,20 @@
+Generator,Colour
+Nuclear,#820000
+Coal,#222222
+Gas-CC,#52216B
+Gas-CC CCS,#5E1688
+Gas-CT,#C2A1DB
+Dual Fuel,#000080
+Oil-Gas-Steam,#3D3376
+Hydro,#187F94
+Ocean,#000080
+Geothermal,#A96235
+Biopower,#5B9844
+Wind,#00B6EF
+CSP,#FC761A
+PV,#FFC903
+PV-Battery,#D1C202
+Storage,#FF4A88
+Other,#FF7FBB
+Net Imports,#193A71
+Curtailment,#5B6272
