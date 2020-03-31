@@ -26,7 +26,7 @@ Gas_CT_ERCOT,Gas-CT
 NGCT_MX,Gas-CT
 gas-ct,Gas-CT
 Cogen_MX,Gas-CT
-Dual_Fuel_NE,DualFuel
+Dual_Fuel_NE,Dual Fuel
 Oil/CT,Oil-Gas-Steam
 Oil/Steam,Oil-Gas-Steam
 Gas_ST_ERCOT,Oil-Gas-Steam
@@ -153,3 +153,4 @@ ReEDS_hydsnd,Hydro
 Hydro_MonthlyEnergy,Hydro
 Hydro_FixedDispatch,Hydro
 dpv,PV
+Dual_Fuel_NY,Dual Fuel

@@ -263,7 +263,9 @@ def get_data(loc, prop,t, db, overlap):
             # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
             if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
                 print("\n WARNING!! The Following Generators do not have a correct category mapping:")
-                print((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())) + "\n")
+                missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
+                print(missing_gen_cat)
+                print("")
             return df
         except: df = report_prop_error(prop,loc)
         
@@ -515,7 +517,7 @@ for Scenario_name in Scenario_List:
         del Avail_Gen_Out
         del Curtailment_Out
     except Exception:
-        print("NOTE!! Curtailment not calculated, processing skipped")
+        print("NOTE!! Curtailment not calculated, processing skipped\n")
         pass
     
     try:
@@ -524,7 +526,7 @@ for Scenario_name in Scenario_List:
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
     except Exception:
-        print("NOTE!! Regional Unserved Energy not available to process, processing skipped")
+        print("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
         pass
     
     try:
@@ -533,7 +535,7 @@ for Scenario_name in Scenario_List:
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
     except Exception:
-        print("NOTE!! Zonal Unserved Energy not available to process, processing skipped")
+        print("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
         pass
     
     end = time.time()
