@@ -63,7 +63,11 @@ class mplot(object):
             Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Unserved_Energy" )
         else:
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Load")
-            Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
+            try:
+                Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
+            except:
+                Unserved_Energy_read = Load_read.copy()
+                Unserved_Energy_read.iloc[:,0] = 0
         
         print("Zone = "+ self.zone_input)
         Pump_Load = pd.Series() # Initiate pump load 

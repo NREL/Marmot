@@ -21,7 +21,7 @@ import os
 def df_process_gen_inputs(df,self):
     df = df.reset_index()
     df['tech'].replace(self.gen_names_dict, inplace=True)
-    df = df[~df['tech'].isin(self.tech_exclusions)]  #Optional, select which technologies to show. 
+    df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show. 
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
     df.tech = df.tech.astype("category")
     df.tech.cat.set_categories(self.ordered_gen, inplace=True)
@@ -47,7 +47,7 @@ class mplot(object):
         self.xlabels = argument_list[15]
         self.color_list = argument_list[16]
         self.gen_names_dict = argument_list[18]
-        self.tech_exclusions = argument_list[23]
+        self.thermal_gen_cat = argument_list[23]
         
     def cf(self):
         # Create Dictionary to hold Datframes for each scenario 
@@ -137,7 +137,7 @@ class mplot(object):
             Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
             Gen = Gen.drop(columns = ['region'])
             Gen = Gen.rename(columns = {0:"Output (MWh)"})
-            Gen = Gen[~Gen['tech'].isin(self.tech_exclusions)]
+            Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]
             
             Cap = Cap_Collection.get(scenario)
             Cap = Cap.xs(self.zone_input,level = self.AGG_BY)

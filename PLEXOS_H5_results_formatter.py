@@ -31,8 +31,8 @@ from h5plexos.query import PLEXOSSolution
 #This is only required if your output has not been processed already on Eagle
 
 # from h5plexos.process import process_solution
-# PLEXOS_Solution = '/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/MAGMA/Examples/RTS-2016/solutions/NoCSP/Model Year DA_noCSP Solution.zip' #PLEXOS solution .zip file.
-# process_solution(PLEXOS_Solution,'/Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/MAGMA/Examples/RTS-2016/solutions/NoCSP/Model Year DA_noCSP Solution.h5') # Saves out to PLEXOS_Solution.h5
+# PLEXOS_Solution = '/Volumes/PLEXOS CEII/Projects/Extreme Events/Model c_Feb01-04_2011_2024 Solution/Model c_Feb01-04_2011_2024 Solution.zip' #PLEXOS solution .zip file.
+# process_solution(PLEXOS_Solution,'/Volumes/PLEXOS CEII/Projects/Extreme Events/Model c_Feb01-04_2011_2024 Solution/Model c_Feb01-04_2011_2024 Solution.h5') # Saves out to PLEXOS_Solution.h5
 
 #===============================================================================
 # Load Input Properties
@@ -544,7 +544,7 @@ for Scenario_name in Scenario_List:
     
     ###################################################################            
     
-# test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+ #test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Load')
 
 # Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
 # Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)

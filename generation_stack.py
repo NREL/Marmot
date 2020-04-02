@@ -64,11 +64,17 @@ class mplot(object):
             Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Unserved_Energy" )
         else:
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Load")
-            Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
-        
+
+           # Load_read = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", "region_Load")
+            try:
+                Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
+            except:
+                Unserved_Energy_read = Load_read.copy()
+                Unserved_Energy_read.iloc[:,0] = 0
+
         print("Zone = "+ self.zone_input)
         Pump_Load = pd.Series() # Initiate pump load 
-        
+                
        # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
         Stacked_Gen = Stacked_Gen_read.xs(self.zone_input,level=self.AGG_BY)  
         Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
@@ -92,7 +98,11 @@ class mplot(object):
         Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
         
         Load = Load_read.xs(self.zone_input,level=self.AGG_BY)
+        #AGG_BY = 'Interconnection'
+        #zone_input = 'EI'
+        #Load = Load_read.xs(zone_input,level = AGG_BY)
         Load = Load.groupby(["timestamp"]).sum()
+
         Load = Load.squeeze() #Convert to Series
     
 
@@ -103,13 +113,11 @@ class mplot(object):
             Pump_Load = Load - Pump_Load
 
 
-        
         Unserved_Energy = Unserved_Energy_read.xs(self.zone_input,level=self.AGG_BY)
         Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
         Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
         if (Unserved_Energy == 0).all() == False:
             Unserved_Energy = Load - Unserved_Energy
-        
 
         if self.prop == "Peak Demand":
              peak_pump_load_t = Pump_Load.idxmax() 
@@ -157,7 +165,7 @@ class mplot(object):
                            #color='#EE1289'  OLD MARMOT COLOR
                            color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
                            )
-        
+
         lp = plt.plot(Load, color='black')
         
         if (Pump_Load == 0).all() == False:
