@@ -1,7 +1,5 @@
 # Ignore byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-necessary_properties.csv
-Marmot_plot_select.csv
 Marmot_user_defined_inputs.csv
-plexos_properties.csv
+

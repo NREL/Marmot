@@ -56,12 +56,12 @@ Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].squeeze().s
 # Folder to save your processed solutions
 Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions_folder'].to_string(index=False).strip()
 
-Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_sceanrio_plot'].squeeze().split(",")).str.strip().tolist()
+Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_scenario_plot'].squeeze().split(",")).str.strip().tolist()
 
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
-Scenario_Diff = pd.Series(Marmot_user_defined_inputs.loc['Scenario_Diff_plot'].squeeze().split(",")).str.strip().tolist()  
-if Scenario_Diff == ['NaN']: Scenario_Diff = []
+Scenario_Diff = pd.Series(str(Marmot_user_defined_inputs.loc['Scenario_Diff_plot'].squeeze()).split(",")).str.strip().tolist()  
+if Scenario_Diff == ['nan']: Scenario_Diff = []
 
 Mapping_folder = 'mapping_folder'
 
@@ -72,13 +72,10 @@ gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
 
 # Facet Grid Labels (Based on Scenarios)
-ylabels = pd.Series(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze().split(",")).str.strip().tolist() 
-if ylabels == ['NaN']: ylabels = []
-xlabels = pd.Series(Marmot_user_defined_inputs.loc['Facet_xlabels'].squeeze().split(",")).str.strip().tolist() 
-if xlabels == ['NaN']: xlabels = []
-
-tech_exclusions = pd.Series(Marmot_user_defined_inputs.loc['Tech_exclusions'].squeeze().split(",")).str.strip().tolist() 
-if tech_exclusions == ['NaN']: tech_exclusios = []
+ylabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze()).split(",")).str.strip().tolist() 
+if ylabels == ['nan']: ylabels = []
+xlabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_xlabels'].squeeze()).split(",")).str.strip().tolist() 
+if xlabels == ['nan']: xlabels = []
 
 #===============================================================================
 # Input and Output Directories 
@@ -166,6 +163,8 @@ pv_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'pv_gen_cat.csv'),squeeze=
 re_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 're_gen_cat.csv'),squeeze=True).str.strip().tolist()
 
 vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
+
+thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
     
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
                     print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
@@ -201,7 +200,7 @@ if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
 PLEXOS_color_dict = pd.read_csv(os.path.join(Mapping_folder, 'colour_dictionary.csv')) 
 PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
 PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
-PLEXOS_color_dict=PLEXOS_color_dict[['Generator','Colour']].set_index("Generator").to_dict()["Colour"]
+PLEXOS_color_dict = PLEXOS_color_dict[['Generator','Colour']].set_index("Generator").to_dict()["Colour"]
                     
 
 color_list = ['#396AB1', '#CC2529','#3E9651','#ff7f00','#6B4C9A','#922428','#cab2d6', '#6a3d9a', '#fb9a99', '#b15928']
@@ -245,7 +244,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7], row.iloc[8],
                                   hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                                   Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                  re_gen_cat, vre_gen_cat, region, tech_exclusions]
+                                  re_gen_cat, vre_gen_cat, region, thermal_gen_cat]
             
             if row["Figure Type"] == "Reserve Timeseries":
                 fig = reserves.mplot(argument_list)
@@ -266,7 +265,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                                   hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                                   Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                  re_gen_cat, vre_gen_cat, Reserve_Regions, tech_exclusions]
+                                  re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat]
                                     
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list) 
@@ -375,9 +374,9 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out = fig.gen_unstack_facet()
                 Figure_Out.savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
                 
-            elif row["Figure Type"] == 'Transmission':
+            elif row["Figure Type"] == 'Net Export':
                 fig = transmission.mplot(argument_list) 
-                Figure_Out = fig.net_interchange()
+                Figure_Out = fig.net_export()
                 Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
                 
