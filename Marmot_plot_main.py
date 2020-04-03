@@ -379,7 +379,9 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out = fig.net_export()
                 Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
-                
+            
+            mpl.pyplot.close('all')
+
 
  #%%               
                 
