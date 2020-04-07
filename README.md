@@ -46,6 +46,10 @@ Marmot gives the user the ability to map in extra regions to your data and renam
 
 - **reserve_region_type.csv** This file allows you to adjust the Reserve Region names and reserve types. Check the file for an example. 
 
+### View formatted contents
+In order to check the contents of an existing processed HDF5 folder, use the following (adjusting scenario as desired):
+contents=pd.HDFStore(hdf_out_folder+"/"Multi_Scenario[0]+"_formatted.h5").keys()
+
 ## Marmot_plot_main
 
 **Marmot_plot_main.py** is the main plotting script within Marmot which calls on supporting files to read in data, create the plot, and then return the plot and data to **Marmot_plot_main.py**. The supporting files can be viewed within the repo and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc. 
