@@ -12,7 +12,7 @@ import pathlib
 import matplotlib as mpl
 
 #changes working directory to location of this python file
-#os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
+os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
 
 import generation_stack
 import total_generation 

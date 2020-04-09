@@ -204,7 +204,8 @@ class mplot(object):
         if (Unserved_Energy == 0).all() == False:
             ax.fill_between(Load.index, Load,Unserved_Energy, 
                             #facecolor='#EE1289'
-                            facecolor = '#DD0200')
+                            facecolor = '#DD0200',
+                            alpha=0.5)
         
         handles, labels = ax.get_legend_handles_labels()
         
@@ -397,8 +398,8 @@ class mplot(object):
             if (Unserved_Energy == 0).all() == False:
                 axs[i].fill_between(Load.index, Load,Unserved_Energy, 
                                    # facecolor='#EE1289' OLD MARMOT COLOR
-                                    facecolor = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
-                                    )
+                                    facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                                    alpha=0.5)
             
             handles, labels = axs[grid_size-1].get_legend_handles_labels()
             
