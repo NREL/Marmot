@@ -12,7 +12,7 @@ import pathlib
 import matplotlib as mpl
 
 #changes working directory to location of this python file
-os.chdir(pathlib.Path(__file__).parent.absolute())
+#os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
 
 import generation_stack
 import total_generation 
@@ -25,6 +25,7 @@ import reserves
 import generation_unstack
 import transmission
 import ramping
+import utilization_factor
 
 
 #===============================================================================
@@ -65,7 +66,7 @@ if Scenario_Diff == ['nan']: Scenario_Diff = []
 
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'region_mapping.csv'))
 Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
@@ -123,6 +124,18 @@ try:
 except FileExistsError:
     # directory already exists
     pass          
+utilization_factor_figures = os.path.join(figure_folder, AGG_BY + '_Utilization_Factor')
+try:
+    os.makedirs(utilization_factor_figures)
+except FileExistsError:
+    # directory already exists
+    pass
+line_utilization_figures = os.path.join(figure_folder, 'Line_Utilization')
+try:
+    os.makedirs(line_utilization_figures)
+except FileExistsError:
+    # directory already exists
+    pass
 system_cost_figures = os.path.join(figure_folder, AGG_BY + '_Total_System_Cost')
 try:
     os.makedirs(system_cost_figures)
@@ -166,6 +179,8 @@ vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeez
 
 thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
     
+thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
+
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
                     print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
                     print(set(gen_names["New"].unique()) - (set(ordered_gen)))
@@ -319,6 +334,29 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out = fig.capacity_started()
                 Figure_Out["fig"].figure.savefig(os.path.join(ramping_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(ramping_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))     
+
+            elif row["Figure Type"] == "Utilization Factor Fleet": 
+                fig = utilization_factor.mplot(argument_list)
+                Figure_Out = fig.uf_fleet()
+                Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+
+            elif row["Figure Type"] == "Utilization Factor Generators": 
+                fig = utilization_factor.mplot(argument_list)
+                Figure_Out = fig.uf_gen()
+                Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+            
+            elif row["Figure Type"] == "Line Utilization Hourly": 
+                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
+                    fig = transmission.mplot(argument_list)
+                    Figure_Out = fig.line_util()
+                    Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                
+            elif row["Figure Type"] == "Line Utilization Annual": 
+                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
+                    fig = transmission.mplot(argument_list)
+                    Figure_Out = fig.line_hist()
+                    Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
                 
             # Continue here (NSG)
             elif row["Figure Type"] == "Curtailment vs Penetration": 

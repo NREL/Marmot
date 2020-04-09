@@ -13,6 +13,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
+import numpy as np 
 
 
 
@@ -40,6 +41,7 @@ class mplot(object):
         self.color_list = argument_list[16]
         self.gen_names_dict = argument_list[18]
         self.re_gen_cat = argument_list[20]
+        
         
     
     def net_export(self):
@@ -111,4 +113,115 @@ class mplot(object):
         return {'fig': fig1, 'data_table': Data_Table_Out}
     
   
+    def line_util(self):          #Duration curve of individual line utilization for all hours
+        
+        Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario 
+        
+        for scenario in self.Multi_Scenario:
+            Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
+
+        
+        
+        print("Line analysis done only once (not per zone).")
+        
+        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
+     
+        n=0 #Counter for scenario subplots
+        
+        for scenario in self.Multi_Scenario:
             
+            print("Scenario = " + str(scenario))
+            
+            Flow = Flow_Collection.get(scenario)
+            
+            if (self.prop!=self.prop)==False: # This checks for a nan in string. If no scenario selected, do nothing.
+                print("Line category = "+str(self.prop))
+                line_relations=pd.read_pickle(self.PLEXOS_Scenarios+"/line_relations.pkl").rename(columns={"name":"line_name"}).set_index(["line_name"])
+                Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
+                Flow=Flow[Flow["category"]==self.prop] 
+                Flow=Flow.drop('category',axis=1) 
+                
+            AbsMaxFlow = Flow.abs().groupby(["line_name"]).max()
+            Flow = pd.merge(Flow,AbsMaxFlow,left_index=True, right_index=True)
+            del AbsMaxFlow
+            Flow['Util']=Flow['0_x'].abs()/Flow['0_y']
+                   
+            for line in Flow.index.get_level_values(level='line_name').unique() :
+                duration_curve = Flow.xs(line,level="line_name").sort_values(by='Util',ascending=False).reset_index()
+                        
+                if len(self.Multi_Scenario)>1:
+                    ax3[n].plot(duration_curve['Util'])
+                    ax3[n].set_ylabel(scenario+' Line Utilization '+self.prop,  color='black', rotation='vertical')
+                    ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
+                    ax3[n].spines['right'].set_visible(False)
+                    ax3[n].spines['top'].set_visible(False)                         
+                
+                else:
+                    ax3.plot(duration_curve['Util'])
+                    ax3.set_ylabel(scenario+' Line Utilization '+self.prop,  color='black', rotation='vertical')
+                    ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
+                    ax3.spines['right'].set_visible(False)
+                    ax3.spines['top'].set_visible(False)   
+                    plt.ylim((0,1.1))           
+                
+                del duration_curve
+            del Flow 
+            
+               
+            n=n+1
+        #end scenario loop
+                              
+        return {'fig': fig3}
+    
+    
+    
+    def line_hist(self):                #Histograms of individual line utilization factor for entire year
+        Flow_Collection = {}            # Create Dictionary to hold Datframes for each scenario 
+
+        
+        for scenario in self.Multi_Scenario:
+            Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
+
+        print("Line analysis done only once (not per zone).")
+        
+        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
+     
+        n=0 #Counter for scenario subplots
+                              
+        for scenario in self.Multi_Scenario:
+            
+            print("Scenario = " + str(scenario))
+            Flow = Flow_Collection.get(scenario)
+            
+            if (self.prop!=self.prop)==False: # This checks for a nan in string. If no category selected, do nothing.
+                print("Line category = "+str(self.prop))
+                line_relations=pd.read_pickle(self.PLEXOS_Scenarios+"/line_relations.pkl").rename(columns={"name":"line_name"}).set_index(["line_name"])
+                Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
+                Flow=Flow[Flow["category"]==self.prop] 
+                Flow=Flow.drop('category',axis=1) 
+                       
+            AbsMaxFlow = Flow.abs().groupby(["line_name"]).max()
+            Flow = pd.merge(Flow,AbsMaxFlow,left_index=True, right_index=True)
+            Flow['Util']=Flow['0_x'].abs()/Flow['0_y']
+            Annual_Util=Flow['Util'].groupby(["line_name"]).mean()
+            del Flow
+                                
+            if len(self.Multi_Scenario)>1:
+                ax3[n].hist(Annual_Util.replace([np.inf,np.nan]),bins=20,range=(0,1),label=scenario)
+                ax3[n].set_ylabel(scenario+' Number of lines '+self.prop,  color='black', rotation='vertical')
+                ax3[n].set_xlabel('Utilization',  color='black', rotation='horizontal')
+                ax3[n].spines['right'].set_visible(False)
+                ax3[n].spines['top'].set_visible(False)                       
+            
+            else:
+                ax3.hist(Annual_Util.replace([np.inf,np.nan]),bins=20,range=(0,1),label=scenario)
+                ax3.set_ylabel(scenario+' Number of lines '+self.prop,  color='black', rotation='vertical')
+                ax3.set_xlabel('Utilization',  color='black', rotation='horizontal')
+                ax3.spines['right'].set_visible(False)
+                ax3.spines['top'].set_visible(False)   
+              
+            del Annual_Util  
+            n=n+1
+        #end scenario loop
+                              
+        return {'fig': fig3}

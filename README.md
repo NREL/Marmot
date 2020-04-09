@@ -48,7 +48,7 @@ Marmot gives the user the ability to map in extra regions to your data and renam
 
 ### View formatted contents
 In order to check the contents of an existing processed HDF5 folder, use the following (adjusting scenario as desired):
-contents=pd.HDFStore(hdf_out_folder+"/"Multi_Scenario[0]+"_formatted.h5").keys()
+contents=pd.HDFStore(hdf_out_folder+"/"+Multi_Scenario[0]+"_formatted.h5").keys()
 
 ## Marmot_plot_main
 

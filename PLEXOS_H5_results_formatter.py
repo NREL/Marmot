@@ -444,6 +444,11 @@ for Scenario_name in Scenario_List:
         regions["category"]=regions["category"].str.decode("utf-8")
         regions.to_pickle('regions.pkl')
     
+    ## Get Line relations and save to pickle 
+    line_relations=pd.DataFrame(np.asarray(data['metadata/objects/line']))
+    line_relations["name"]=line_relations["name"].str.decode("utf-8")
+    line_relations["category"]=line_relations["category"].str.decode("utf-8")
+    line_relations.to_pickle(PLEXOS_Scenarios+"/line_relations.pkl")
     
     # Read in all HDF5 files into dictionary 
     print("Loading all HDF5 files to prepare for processing")
