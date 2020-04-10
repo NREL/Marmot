@@ -25,6 +25,12 @@ import time
 sys.path.append('../h5plexos')
 from h5plexos.query import PLEXOSSolution
 
+try:
+    print("Will process row:" +(sys.argv[1]))
+    print(str(len(sys.argv)-1)+" arguments were passed from commmand line.")
+except IndexError:
+    #No arguments passed
+    pass
 #===============================================================================
 # Create HDF5 file from PLEXOS zip solution
 #===============================================================================
@@ -467,8 +473,12 @@ for Scenario_name in Scenario_List:
     else:
         Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
     
-    # Filters for chosen Plexos properties to prcoess
-    Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
+    # Filters for chosen Plexos properties to process
+    if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
+        print("Will process row " +(sys.argv[1])+" of plexos properties regardless of T/F.")
+        Plexos_Properties = Plexos_Properties.iloc[int(sys.argv[1])-1].to_frame().T
+    else:
+        Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
     
     start = time.time()
     

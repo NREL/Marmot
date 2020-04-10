@@ -10,6 +10,7 @@ import pandas as pd
 import os
 import pathlib
 import matplotlib as mpl
+import sys
 
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
@@ -26,6 +27,13 @@ import generation_unstack
 import transmission
 import ramping
 import utilization_factor
+
+try:
+    print("Will plot row:" +(sys.argv[1]))
+    print(str(len(sys.argv)-1)+" arguments were passed from commmand line.")
+except IndexError:
+    #No arguments passed
+    pass
 
 
 #===============================================================================
@@ -66,7 +74,7 @@ if Scenario_Diff == ['nan']: Scenario_Diff = []
 
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'region_mapping.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
 Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
@@ -242,7 +250,13 @@ else:
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
 # Filter for chosen figures to plot
-Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == True]
+if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
+    print("Will plot row " +(sys.argv[1])+" of Marmot plot select regardless of T/F.")
+    Marmot_plot_select = Marmot_plot_select.iloc[int(sys.argv[1])-1].to_frame().T
+else:
+    Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == True]
+
+
 
 #%%
 # Main loop to process each figure and pass data to functions
