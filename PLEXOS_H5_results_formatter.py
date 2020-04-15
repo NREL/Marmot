@@ -376,8 +376,11 @@ for Scenario_name in Scenario_List:
         # directory already exists
         pass
     
+    startdir=os.getcwd()
+    os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
+    files = sorted(os.listdir()) # List of all files in hdf5 folder in alpha numeric order
+    os.chdir(startdir)
     
-    files = sorted(os.listdir(HDF5_folder_in)) # List of all files in hdf5 folder in alpha numeric order
     files_list = []
     for names in files:
         if names.endswith(".h5"):
