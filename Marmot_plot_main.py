@@ -248,7 +248,6 @@ elif Region_Mapping.empty==True:
 else:     
     Zones = Region_Mapping[AGG_BY].unique()
 
-Zones =["ISONE", "NYISO"]
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
 # Filter for chosen figures to plot
