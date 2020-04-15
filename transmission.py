@@ -155,7 +155,8 @@ class mplot(object):
                     ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3[n].spines['right'].set_visible(False)
                     ax3[n].spines['top'].set_visible(False)                         
-                
+                    plt.ylim((0,1.1))           
+
                 else:
                     ax3.plot(duration_curve['Util'])
                     ax3.set_ylabel(scenario+' Line Utilization '+self.prop,  color='black', rotation='vertical')
