@@ -1,4 +1,4 @@
-Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date,End date
+Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date,End date
 Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,
 Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,2/1/2024 0:00,2/5/2024 0:00
 Capacity Factor,FALSE,Capacity_Factor,,,,EST,,
@@ -12,7 +12,7 @@ Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,
 Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,
 Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,4,4,EST,,
 Generation Stack,FALSE,Stacked_Gen,,,,EST,,
-Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/2024 0:00,2/5/2024 0:00
+Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,4/1/2038 0:00,4/5/2038 0:00
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST,,
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,
@@ -37,6 +37,11 @@ Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,
 Utilization Factor Fleet,FALSE,Utilization_Factor_Fleet,,,,EST,,
 Utilization Factor Generators,FALSE,Utilization_Factor_Generators,,,,EST,,
 Line Utilization Annual,FALSE,Line_Utilization_Histogram,,,,,,
-Line Utilization Annual,TRUE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,
+Line Utilization Annual,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,
 Line Utilization Hourly,FALSE,Line_Utilization_Duration,,,,,,
 Line Utilization Hourly,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,
+Region Price,FALSE,Region_Price_Duration,,,,,,
+Region Price,FALSE,Region_Price_Duration_Threshold,300,,,,,
+Region Price Timeseries,TRUE,Region_Price_Timeseries,,,,,,
+Region Price Timeseries,TRUE,Region_Price_Timeseries_Threshold,4100,,,,,
+Constraint Violation,FALSE,Constraint_Violation_Timeseries,,,,,,

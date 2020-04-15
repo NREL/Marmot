@@ -27,6 +27,8 @@ import generation_unstack
 import transmission
 import ramping
 import utilization_factor
+import prices
+import constraints
 
 try:
     print("Will plot row:" +(sys.argv[1]))
@@ -371,7 +373,27 @@ for index, row in Marmot_plot_select.iterrows():
                     fig = transmission.mplot(argument_list)
                     Figure_Out = fig.line_hist()
                     Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
-                
+              
+            elif row["Figure Type"] == "Region Price": 
+                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
+                    fig = prices.mplot(argument_list)
+                    Figure_Out = fig.price_region()
+                    Figure_Out["fig"].savefig(os.path.join(figure_folder, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+             
+            elif row["Figure Type"] == "Region Price Timeseries": 
+                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
+                    fig = prices.mplot(argument_list)
+                    Figure_Out = fig.price_region_chron()
+                    Figure_Out["fig"].savefig(os.path.join(figure_folder, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+             
+            elif row["Figure Type"] == "Constraint Violation": 
+                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
+                    fig = constraints.mplot(argument_list)
+                    Figure_Out = fig.constraint_violation()
+                    Figure_Out["fig"].savefig(os.path.join(figure_folder, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+             
+                                      
+            
             # Continue here (NSG)
             elif row["Figure Type"] == "Curtailment vs Penetration": 
                 fig = curtailment.mplot(argument_list)
