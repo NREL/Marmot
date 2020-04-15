@@ -70,9 +70,9 @@ Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
-reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
-gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
+reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['reserve_region_type.csv_name'].to_string(index=False).strip()))
+gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
 # number of hours overlapped between two adjacent models
 overlap = pd.to_numeric(Marmot_user_defined_inputs.loc['overlap'].to_string(index=False)) 
@@ -87,6 +87,7 @@ VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=Fals
 #===============================================================================
 
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
+vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
 
 #===============================================================================
 # Region mapping
@@ -523,9 +524,13 @@ for Scenario_name in Scenario_List:
         print("Processing generator Curtailment")  
         Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
         Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+        
+        # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+        vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+        
         # Output Curtailment# 
-        Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), ['Wind','PV']),:]) - 
-                            (Total_Gen_Out.loc[(slice(None), ['Wind','PV']),:]))
+        Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), vre_gen_cat),:]) - 
+                            (Total_Gen_Out.loc[(slice(None), vre_gen_cat),:]))
         
         Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
         

@@ -56,10 +56,10 @@ class mplot(object):
             
 
         Total_Systems_Cost_Out = pd.DataFrame()
-        print(self.zone_input)
+        print("Zone = "+ self.zone_input)
         
         for scenario in self.Multi_Scenario:
-            print(scenario)
+            print("Scenario = " + scenario)
             Total_Systems_Cost = pd.DataFrame()
             
             Total_Installed_Capacity = Installed_Capacity_Collection.get(scenario)
@@ -82,6 +82,7 @@ class mplot(object):
             Pool_Revenues = Pool_Revenues/Total_Installed_Capacity #Change to $/kW-year
             Pool_Revenues.rename("Energy_Revenues", inplace=True)
             
+            ### Might cvhnage to Net Reserve Revenue at later date
             Reserve_Revenues = Reserve_Revenues_Collection.get(scenario)
             Reserve_Revenues = Reserve_Revenues.xs(self.zone_input,level=self.AGG_BY)
             Reserve_Revenues = df_process_gen_inputs(Reserve_Revenues, self)
@@ -99,10 +100,8 @@ class mplot(object):
         
         Total_Systems_Cost_Out = Total_Systems_Cost_Out.T
         Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')   
-    #    Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(8)
-        
-        # Total_Systems_Cost_Out["Total Gen Cost"] = Total_Systems_Cost_Out["Total Gen Cost"]*1000
-        
+        Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(10, break_long_words=False)
+                
         Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000
         Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
         
@@ -158,10 +157,10 @@ class mplot(object):
                 Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "region_Cost_Unserved_Energy")
                             
         Total_Systems_Cost_Out = pd.DataFrame()
-        print(self.zone_input)
+        print("Zone = "+ self.zone_input)
         
         for scenario in self.Multi_Scenario:
-            print(scenario)
+            print("Scenario = " + scenario)
             Total_Systems_Cost = pd.DataFrame()
             
             Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
@@ -207,22 +206,9 @@ class mplot(object):
     
     
         """adds annotations to bar plots"""
-        cost_values=[]  #holds cost of each stack
-        cost_totals=[]  #holds total of each bar
         
-        for i in ax.patches:
-            cost_values.append(i.get_height())
-
-        #calculates total value of bar
-        q=0    
-        j = int(len(cost_values)/2)   #total number of bars in plot
-        for cost in cost_values: 
-            out = cost + cost_values[q+j]
-            cost_totals.append(out)
-            q=q+1
-            if q>=j:
-                break
-            
+        cost_totals = Total_Systems_Cost_Out.sum(axis=1) #holds total of each bar
+        
         #inserts values into bar stacks
         for i in ax.patches:
            width, height = i.get_width(), i.get_height()
@@ -233,22 +219,137 @@ class mplot(object):
                 y+height/2, 
                 '{:,.0f}'.format(height), 
                 horizontalalignment='center', 
-                verticalalignment='center', fontsize=13)
+                verticalalignment='center', fontsize=12)
        
         #inserts total bar value above each bar
         k=0   
         for i in ax.patches:
             height = cost_totals[k]
-            width = 0.5
+            width = i.get_width()
             x, y = i.get_xy() 
             ax.text(x+width/2, 
                 y+height + 0.05*max(ax.get_ylim()), 
-                '{:#,.2g}'.format(height),  
+                '{:,.0f}'.format(height),  
                 horizontalalignment='center', 
                 verticalalignment='center', fontsize=15, color='red') 
             k=k+1
-            if k>=j:
+            if k>=len(cost_totals):
                 break
             
         return {'fig': fig2, 'data_table': Data_Table_Out}
+    
+    
+    
+    def detailed_gen_cost(self):
+        Total_Gen_Cost_Collection = {}
+        Fuel_Cost_Collection = {}
+        VOM_Cost_Collection = {}
+        Start_Shutdown_Cost_Collection = {} 
+        Emissions_Cost_Collection = {}
+        for scenario in self.Multi_Scenario:
             
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
+            Fuel_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
+            VOM_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
+            Start_Shutdown_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
+            try:
+                Emissions_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
+            except Exception:
+                print("\ngenerator_Emissions_Cost not included in " + scenario + " results,\nEmissions_Cost will not be included in plot\n")
+                Emissions_Cost_Collection[scenario] = Start_Shutdown_Cost_Collection[scenario].copy()
+                Emissions_Cost_Collection[scenario].iloc[:,0] = 0
+                pass   
+            
+        print("Zone = "+ self.zone_input)
+        
+        Detailed_Gen_Cost_Out = pd.DataFrame()
+        
+        for scenario in self.Multi_Scenario:
+            print("Scenario = " + scenario)
+            
+            Fuel_Cost = Fuel_Cost_Collection.get(scenario)
+            Fuel_Cost = Fuel_Cost.xs(self.zone_input,level=self.AGG_BY)
+            Fuel_Cost = Fuel_Cost.sum(axis=0)
+            Fuel_Cost.rename("Fuel_Cost", inplace=True)
+            
+            VOM_Cost = VOM_Cost_Collection.get(scenario)
+            VOM_Cost = VOM_Cost.xs(self.zone_input,level=self.AGG_BY)
+            VOM_Cost = VOM_Cost.sum(axis=0)
+            VOM_Cost.rename("VO&M_Cost", inplace=True)
+            
+            Start_Shutdown_Cost = Start_Shutdown_Cost_Collection.get(scenario)
+            Start_Shutdown_Cost = Start_Shutdown_Cost.xs(self.zone_input,level=self.AGG_BY)
+            Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
+            Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
+            
+            Emissions_Cost = Emissions_Cost_Collection.get(scenario)
+            Emissions_Cost = Emissions_Cost.xs(self.zone_input,level=self.AGG_BY)
+            Emissions_Cost = Emissions_Cost.sum(axis=0)
+            Emissions_Cost.rename("Emissions_Cost", inplace=True)
+            
+            Detailed_Gen_Cost = pd.concat([Fuel_Cost, VOM_Cost, Start_Shutdown_Cost, Emissions_Cost], axis=1, sort=False) 
+        
+            Detailed_Gen_Cost.columns = Detailed_Gen_Cost.columns.str.replace('_',' ')    
+            Detailed_Gen_Cost = Detailed_Gen_Cost.sum(axis=0)
+            Detailed_Gen_Cost = Detailed_Gen_Cost.rename(scenario)
+            
+            Detailed_Gen_Cost_Out = pd.concat([Detailed_Gen_Cost_Out, Detailed_Gen_Cost], axis=1, sort=False)
+            
+        Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
+        
+        Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')  
+        Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(10, break_long_words=False)
+        # Deletes columns that are all 0 
+        Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
+        
+        # Data table of values to return to main program
+        Data_Table_Out = Detailed_Gen_Cost_Out
+        
+        fig3, ax = plt.subplots(figsize=(9,6))
+        
+        sb = Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.set_ylabel('Total Generation Cost (Million $)',  color='black', rotation='vertical')
+        ax.tick_params(axis='y', which='major', length=5, width=1)
+        ax.tick_params(axis='x', which='major', length=5, width=1)
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+        ax.margins(x=0.01)
+        
+        handles, labels = ax.get_legend_handles_labels()
+        ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
+                      facecolor='inherit', frameon=True)  
+    
+    
+        """adds annotations to bar plots"""
+        
+        cost_totals = Detailed_Gen_Cost_Out.sum(axis=1) #holds total of each bar
+                  
+        #inserts values into bar stacks
+        for i in ax.patches:
+           width, height = i.get_width(), i.get_height()
+           if height<=1:
+               continue
+           x, y = i.get_xy() 
+           ax.text(x+width/2, 
+                y+height/2, 
+                '{:,.0f}'.format(height), 
+                horizontalalignment='center', 
+                verticalalignment='center', fontsize=12)
+         
+        #inserts total bar value above each bar
+        k=0   
+        for i in ax.patches:
+            height = cost_totals[k]
+            width = i.get_width()
+            x, y = i.get_xy() 
+            ax.text(x+width/2, 
+                y+height + 0.05*max(ax.get_ylim()), 
+                '{:,.0f}'.format(height), 
+                horizontalalignment='center', 
+                verticalalignment='center', fontsize=15, color='red') 
+            k=k+1
+            if k>=len(cost_totals):
+                break
+            
+        return {'fig': fig3, 'data_table': Data_Table_Out}

@@ -76,9 +76,9 @@ if Scenario_Diff == ['nan']: Scenario_Diff = []
 
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
-Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
-gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
+Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['reserve_region_type.csv_name'].to_string(index=False).strip()))
+gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
 AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
 
@@ -248,7 +248,7 @@ elif Region_Mapping.empty==True:
 else:     
     Zones = Region_Mapping[AGG_BY].unique()
 
-
+Zones =["ISONE", "NYISO"]
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
 # Filter for chosen figures to plot
@@ -418,7 +418,13 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out = fig.sys_cost()
                 Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
-                
+            
+            elif row["Figure Type"] == "Detailed Total Generation Cost": 
+                fig = production_cost.mplot(argument_list)
+                Figure_Out = fig.detailed_gen_cost()
+                Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+            
             elif row["Figure Type"] == "Generation Timeseries Difference": 
                 fig = generation_stack.mplot(argument_list) 
                 Figure_Out = fig.gen_diff()

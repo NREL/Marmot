@@ -49,28 +49,31 @@ class mplot(object):
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
-        self.re_gen_cat = argument_list[20]
+        self.vre_gen_cat = argument_list[21]
 
    
     
     def gen_stack(self):
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-    #    Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", 'generator_Generation') 
         Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
         Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Curtailment" )
+        
         # If data is to be aggregated by zone, then zone properties are loaded, else region properties are loaded
         if self.AGG_BY == "zone":
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Load")
-            Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Unserved_Energy" )
+            try:
+                Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Unserved_Energy" )
+            except:
+                Unserved_Energy_read = Load_read.copy()
+                Unserved_Energy_read.iloc[:,0] = 0
         else:
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Load")
-
-           # Load_read = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", "region_Load")
             try:
                 Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
             except:
                 Unserved_Energy_read = Load_read.copy()
                 Unserved_Energy_read.iloc[:,0] = 0
+
 
         print("Zone = "+ self.zone_input)
         Pump_Load = pd.Series() # Initiate pump load 
@@ -89,10 +92,10 @@ class mplot(object):
             pass
         
         # Calculates Net Load by removing variable gen + curtailment
-        self.re_gen_cat = self.re_gen_cat + ['Curtailment']
+        self.vre_gen_cat = self.vre_gen_cat + ['Curtailment']
         # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-        self.re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
-        Net_Load = Stacked_Gen.drop(labels = self.re_gen_cat, axis=1)
+        self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
+        Net_Load = Stacked_Gen.drop(labels = self.vre_gen_cat, axis=1)
         Net_Load = Net_Load.sum(axis=1)
         
         Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
@@ -299,10 +302,10 @@ class mplot(object):
                 pass
             
             # Calculates Net Load by removing variable gen + curtailment
-            self.re_gen_cat = self.re_gen_cat + ['Curtailment']
+            self.vre_gen_cat = self.vre_gen_cat + ['Curtailment']
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-            self.re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
-            Net_Load = Stacked_Gen.drop(labels = self.re_gen_cat, axis=1)
+            self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
+            Net_Load = Stacked_Gen.drop(labels = self.vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)
 
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
@@ -455,7 +458,7 @@ class mplot(object):
         Gen_Collection = {} 
         
         for scenario in self.Scenario_Diff:
-            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Generation")
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
             
             
         Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[0])

@@ -19,7 +19,6 @@ import os
 
 def df_process_gen_inputs(df, self):
     df = df.reset_index()
-    df['tech'].replace(self.gen_names_dict, inplace=True)
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
     df.tech = df.tech.astype("category")
     df.tech.cat.set_categories(self.ordered_gen, inplace=True)
@@ -57,6 +56,7 @@ class mplot(object):
         Stacked_Load_Collection = {}
         Pump_Load_Collection = {}
         Curtailment_Collection = {}
+        Unserved_Energy_Collection = {}
         
         for scenario in self.Multi_Scenario:
             Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
@@ -65,12 +65,25 @@ class mplot(object):
             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
                 Stacked_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
+                try:
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
+                except:
+                    Unserved_Energy_Collection[scenario] = Stacked_Load_Collection[scenario].copy()
+                    Unserved_Energy_Collection[scenario].iloc[:,0] = 0
             else:
                 Stacked_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "region_Load")
-            
+                try:
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
+                except:
+                    Unserved_Energy_Collection[scenario] = Stacked_Load_Collection[scenario].copy()
+                    Unserved_Energy_Collection[scenario].iloc[:,0] = 0
+                
         Total_Generation_Stack_Out = pd.DataFrame()
         Total_Load_Out = pd.DataFrame()
         Pump_Load_Out = pd.DataFrame()
+        Total_Demand_Out = pd.DataFrame()
+        Unserved_Energy_Out = pd.DataFrame()
+        unserved_eng_data_table_out = pd.DataFrame()
         print("Zone = " + self.zone_input)
             
             
@@ -110,34 +123,58 @@ class mplot(object):
             Total_Load = Total_Load/interval_count
             Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
             
+            Unserved_Energy = Unserved_Energy_Collection.get(scenario)
+            Unserved_Energy = Unserved_Energy.xs(self.zone_input,level=self.AGG_BY)
+            Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
+            Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
+            Unserved_Energy = Unserved_Energy/interval_count
+            # Used for output to data table csv 
+            unserved_eng_data_table = Unserved_Energy
+            unserved_eng_data_table_out = pd.concat([unserved_eng_data_table_out, unserved_eng_data_table], axis=0, sort=False)
+            
+            # Subtracts Unserved energt from load for graphing 
+            if (Unserved_Energy == 0).all() == False:
+                Unserved_Energy = Total_Load - Unserved_Energy
+            Unserved_Energy_Out = pd.concat([Unserved_Energy_Out, Unserved_Energy], axis=0, sort=False)
+                     
+            
             Pump_Load = Pump_Load_Collection.get(scenario)
             Pump_Load = Pump_Load.xs(self.zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
             Pump_Load = Pump_Load/interval_count
             if (Pump_Load == 0).all() == False:
-                Pump_Load = Total_Load - Pump_Load
+                Total_Demand = Total_Load - Pump_Load
+            else:
+                Total_Demand = Total_Load
             Pump_Load_Out = pd.concat([Pump_Load_Out, Pump_Load], axis=0, sort=False)
-              
-        
+            Total_Demand_Out = pd.concat([Total_Demand_Out, Total_Demand], axis=0, sort=False)
+            
+            
         Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load'})
+        Total_Demand_Out = Total_Demand_Out.rename(columns={0: 'Total Demand'})
+        Unserved_Energy_Out = Unserved_Energy_Out.rename(columns={0: 'Unserved Energy'})
+        unserved_eng_data_table_out = unserved_eng_data_table_out.rename(columns={0: 'Unserved Energy'})
         
         Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
-        Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 
+        Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to GWh
         Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
         
         # Data table of values to return to main program
-        Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
+        Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Demand_Out/1000, unserved_eng_data_table_out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
 
         Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
         Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
     
-        Total_Load_Out = Total_Load_Out.T/1000
-        Pump_Load_Out = Pump_Load_Out.T/1000
-        
+        Total_Load_Out = Total_Load_Out.T/1000 #Convert to GWh
+        Pump_Load_Out = Pump_Load_Out.T/1000 #Convert to GWh
+        Total_Demand_Out = Total_Demand_Out.T/1000 #Convert to GWh
+        Unserved_Energy_Out = Unserved_Energy_Out.T/1000
         
         fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0, 
                          color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
+        
+        
         fig1.spines['right'].set_visible(False)
         fig1.spines['top'].set_visible(False)
         fig1.set_ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical')
@@ -152,31 +189,47 @@ class mplot(object):
             x = [fig1.patches[n].get_x(), fig1.patches[n].get_x() + fig1.patches[n].get_width()]
             height1 = [int(Total_Load_Out[scenario])]*2
             lp1 = plt.plot(x,height1, c='black', linewidth=1.5)
-            if Pump_Load_Out.values.sum() > 0:
-                height2 = [int(Pump_Load_Out[scenario])]*2
+            if Pump_Load_Out[scenario].values.sum() > 0:
+                height2 = [int(Total_Demand_Out[scenario])]*2
                 lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)   
+            
+            if Unserved_Energy_Out[scenario].values.sum() > 0:
+                height3 = [int(Unserved_Energy_Out[scenario])]*2
+                lp3 = plt.plot(x,height3, c='#DD0200', linewidth=1.5)   
+                fig1.fill_between(x, height3, height1, 
+                            facecolor = '#DD0200',
+                            alpha=0.5)
             n=n+1
-         
-        #Legend 1 
+        
         handles, labels = fig1.get_legend_handles_labels()
+        
+        #Legend 1
         leg1 = fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
-                      facecolor='inherit', frameon=True)
-        
-        if (Pump_Load_Out.values.sum()) == 0:
-            leg2 = fig1.legend(lp1, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.95), 
-                      facecolor='inherit', frameon=True)
-            fig1.add_artist(leg1)
-        
+                      facecolor='inherit', frameon=True)  
         #Legend 2
-        if (Pump_Load_Out.values.sum()) > 0:
-            leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 0.95), 
+        if Pump_Load_Out.values.sum() > 0:
+            leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 0.9), 
+                      facecolor='inherit', frameon=True)
+        else:
+            leg2 = fig1.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9), 
                       facecolor='inherit', frameon=True)
         
-            leg3 = fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.85), 
+        #Legend 3
+        if Unserved_Energy_Out.values.sum() > 0:
+            leg3 = fig1.legend(lp3, ['Unserved Energy'], loc='upper left',bbox_to_anchor=(1, 0.885), 
+                      facecolor='inherit', frameon=True)
+            
+        #Legend 4
+        if Pump_Load_Out.values.sum() > 0:
+            leg4 = fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.82), 
                       facecolor='inherit', frameon=True)
         
-            fig1.add_artist(leg1)
-            fig1.add_artist(leg2)
+        # Manually add the first legend back
+        fig1.add_artist(leg1)
+        fig1.add_artist(leg2)
+        if Unserved_Energy_Out.values.sum() > 0:
+            fig1.add_artist(leg3)
+        
         
         return {'fig': fig1, 'data_table': Data_Table_Out}
     
