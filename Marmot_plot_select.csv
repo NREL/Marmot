@@ -1,10 +1,10 @@
-Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date,End date
+Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d]
 Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,
-Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,2/1/2024 00:00,2/5/2024 00:00
+Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,2024-02-01,2024-02-05
 Capacity Factor,FALSE,Capacity_Factor,,,,EST,,
-Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,2/1/2024 00:00,2/5/2024 00:00
+Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,2024-02-01,2024-02-05
 Capacity Started,FALSE,Capacity_Started,,,,EST,,
-Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,2/1/2024 00:00,2/5/2024 00:00
+Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,2024-02-01,2024-02-05
 Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,,,
 Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,,,
 Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,
@@ -12,9 +12,10 @@ Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,
 Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,
 Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,4,4,EST,,
 Generation Stack,FALSE,Stacked_Gen,,,,EST,,
-Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/2024 00:00,2/5/2024 00:00
+Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2024-01-01,2024-01-06
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST,,
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Range,Date Range,,,EST,2024-01-01,2024-01-08
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,
 Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,MT,,
 Generation Unstacked,FALSE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,MT,,
@@ -22,7 +23,7 @@ Generation Unstacked,FALSE,Unstacked_Gen,,,,MT,,
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,MT,,
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,MT,,
 Net Export,FALSE,Net_Export,,,,EST,,
-Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,2/1/2024 00:00,2/5/2024 00:00
+Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,2024-02-01,2024-02-05
 Production Cost,FALSE,Production_Cost,,,,,,
 Reserve Timeseries,FALSE,Reserve_Timeseries,Peak Demand,1,1,EST,,
 Reserve Timeseries Facet Grid,FALSE,Reserve_Timeseries_Facet_Grid,Peak Demand,1,1,EST,,
