@@ -53,6 +53,7 @@ mpl.rc('font', family='serif')
 # Load Input Properties
 #===============================================================================
 
+    
 #A bug in pandas requires this to be included, otherwise df.to_string truncates long strings
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)

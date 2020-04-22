@@ -401,9 +401,8 @@ for Scenario_name in Scenario_List:
         region_generators["gen_name"]=region_generators["gen_name"].str.decode("utf-8")
         region_generators["region"]=region_generators["region"].str.decode("utf-8")
         region_generators.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
-    except Exception:
+    except KeyError:
         print("\Regional data not included in h5plexos results.\nSkipping Regional properties\n")
-        pass
     
     
     try:
@@ -421,9 +420,8 @@ for Scenario_name in Scenario_List:
         zones["category"]=zones["category"].str.decode("utf-8")
         zones.to_pickle('zones.pkl')
     
-    except Exception:
+    except KeyError:
         print("\nZonal data not included in h5plexos results.\nSkipping Zonal properties\n")
-        pass
         
     # Generator categories mapping 
     generator_category = pd.DataFrame(np.asarray(data['metadata/objects/generator']))
@@ -442,9 +440,8 @@ for Scenario_name in Scenario_List:
         generator_storage.rename(columns={'parent':'gen_name'}, inplace=True)
         generator_storage["name"]=generator_storage["name"].str.decode("utf-8")
         generator_storage["gen_name"]=generator_storage["gen_name"].str.decode("utf-8")
-    except Exception:
+    except KeyError:
         print("\nGenerator head/tail storage not included in h5plexos results.\nSkipping storage property\n")
-        pass    
     
     # If Region_Mapping csv was left empty, regions will be retrieved from the plexos results h5 file for use in Marmot_plot.
     # This limits the user to only plotting results from PLEXOS regions, therefore it is recommended to populate the Region_Mapping.csv for more control. 
@@ -455,11 +452,15 @@ for Scenario_name in Scenario_List:
         regions.to_pickle('regions.pkl')
     
     ## Get Line relations and save to pickle 
-    line_relations=pd.DataFrame(np.asarray(data['metadata/objects/line']))
-    line_relations["name"]=line_relations["name"].str.decode("utf-8")
-    line_relations["category"]=line_relations["category"].str.decode("utf-8")
-    line_relations.to_pickle(PLEXOS_Scenarios+"/line_relations.pkl")
-    
+    try:
+        line_relations=pd.DataFrame(np.asarray(data['metadata/objects/line']))
+        line_relations["name"]=line_relations["name"].str.decode("utf-8")
+        line_relations["category"]=line_relations["category"].str.decode("utf-8")
+        line_relations.to_pickle(PLEXOS_Scenarios+"/line_relations.pkl")
+    except KeyError:
+        print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
+        
+        
     # Read in all HDF5 files into dictionary 
     print("Loading all HDF5 files to prepare for processing")
     hdf5_collection = {}
