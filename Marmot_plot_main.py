@@ -28,7 +28,7 @@ import transmission
 import ramping
 import utilization_factor
 import prices
-import constraints
+# import constraints
 
 try:
     print("Will plot row:" +(sys.argv[1]))
@@ -53,6 +53,7 @@ mpl.rc('font', family='serif')
 # Load Input Properties
 #===============================================================================
 
+    
 #A bug in pandas requires this to be included, otherwise df.to_string truncates long strings
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
@@ -72,21 +73,21 @@ Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_scenario_plot']
 # For plots using the differnec of the values between two scenarios. 
 # Max two entries, the second scenario is subtracted from the first. 
 Scenario_Diff = pd.Series(str(Marmot_user_defined_inputs.loc['Scenario_Diff_plot'].squeeze()).split(",")).str.strip().tolist()  
-if Scenario_Diff == ['nan']: Scenario_Diff = []
+if Scenario_Diff == ['nan']: Scenario_Diff = [""]
 
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
-Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
-gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
+Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['reserve_region_type.csv_name'].to_string(index=False).strip()))
+gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
 AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
 
 # Facet Grid Labels (Based on Scenarios)
 ylabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze()).split(",")).str.strip().tolist() 
-if ylabels == ['nan']: ylabels = []
+if ylabels == ['nan']: ylabels = [""]
 xlabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_xlabels'].squeeze()).split(",")).str.strip().tolist() 
-if xlabels == ['nan']: xlabels = []
+if xlabels == ['nan']: xlabels = [""]
 
 #===============================================================================
 # Input and Output Directories 
@@ -174,7 +175,12 @@ try:
     os.makedirs(ramping_figures)
 except FileExistsError:
     pass           
-
+unserved_energy_figures = os.path.join(figure_folder, AGG_BY + '_Unserved_Energy')
+try:
+    os.makedirs(unserved_energy_figures)
+except FileExistsError:
+    # directory already exists
+    pass          
 #===============================================================================
 # Standard Generation Order
 #===============================================================================
@@ -248,7 +254,6 @@ elif Region_Mapping.empty==True:
 else:     
     Zones = Region_Mapping[AGG_BY].unique()
 
-
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
 # Filter for chosen figures to plot
@@ -316,10 +321,11 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Total Generation Facet Grid": 
-                fig = total_generation.mplot(argument_list) 
-                Figure_Out = fig.total_gen_facet()
-                Figure_Out["fig"].savefig(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+                print("Total Generation Facet Grid currently unavailable for plotting, code not stable and needs testing")
+                # fig = total_generation.mplot(argument_list) 
+                # Figure_Out = fig.total_gen_facet()
+                # Figure_Out["fig"].savefig(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                # Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Total Installed Capacity":
                 fig = total_installed_capacity.mplot(argument_list)
@@ -418,7 +424,13 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out = fig.sys_cost()
                 Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
-                
+            
+            elif row["Figure Type"] == "Detailed Total Generation Cost": 
+                fig = production_cost.mplot(argument_list)
+                Figure_Out = fig.detailed_gen_cost()
+                Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+            
             elif row["Figure Type"] == "Generation Timeseries Difference": 
                 fig = generation_stack.mplot(argument_list) 
                 Figure_Out = fig.gen_diff()
@@ -428,14 +440,20 @@ for index, row in Marmot_plot_select.iterrows():
             elif row["Figure Type"] == "Unserved Energy Timeseries" :
                 fig = unserved_energy.mplot(argument_list)
                 Figure_Out = fig.unserved_energy_timeseries()
-                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] + ".csv"))
-                
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No unserved energy in any scenario in "+zone_input)
+                else:    
+                    Figure_Out["fig"].savefig(os.path.join(unserved_energy_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(unserved_energy_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+                                
             elif row["Figure Type"] == 'Total Unserved Energy': 
                 fig = unserved_energy.mplot(argument_list)
                 Figure_Out = fig.tot_unserved_energy()
-                Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(figure_folder, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No unserved energy in any scenario in "+zone_input)
+                else:    
+                    Figure_Out["fig"].savefig(os.path.join(unserved_energy_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(unserved_energy_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
                 
             elif row["Figure Type"] == "Generation Unstacked":
                 fig = generation_unstack.mplot(argument_list) 

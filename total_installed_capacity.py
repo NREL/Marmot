@@ -60,7 +60,7 @@ class mplot(object):
             Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
         
 
-        Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000
+        Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000 #Convert to GW
         Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
         
         # Data table of values to return to main program

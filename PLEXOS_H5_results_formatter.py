@@ -70,9 +70,9 @@ Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
-reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
-gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
+reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['reserve_region_type.csv_name'].to_string(index=False).strip()))
+gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
 # number of hours overlapped between two adjacent models
 overlap = pd.to_numeric(Marmot_user_defined_inputs.loc['overlap'].to_string(index=False)) 
@@ -87,6 +87,7 @@ VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=Fals
 #===============================================================================
 
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
+vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
 
 #===============================================================================
 # Region mapping
@@ -131,8 +132,10 @@ def df_process_gen(df, overlap_hour):
     df = df.reset_index() # unzip the levels in index
     df = df.drop(["band", "property"],axis=1) 
     df.rename(columns={'category':'tech', 'name':'gen_name'}, inplace=True)
-    df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
-    df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
+    if region_generators.empty==False: #checks if region_generators contains data to merge, skips if empty
+        df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
+    if zone_generators.empty==False: #checks if zone_generators contains data to merge, skips if empty
+        df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
     if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
         df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
     df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
@@ -207,10 +210,12 @@ def df_process_storage(df, overlap_hour):
     df = df.reset_index() # unzip the levels in index
     df = df.drop(["band", "property", "category"],axis=1) # delete property and band columns
     df = df.merge(generator_storage, how='left', on='name')
-    df = df.merge(region_generators, how='left', on='gen_name')
-    df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
+    if region_generators.empty==False: #checks if region_generators contains data to merge, skips if empty
+        df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
+    if zone_generators.empty==False: #checks if zone_generators contains data to merge, skips if empty
+        df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
     if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
-        df = df.merge(Region_Mapping, how='left', on='region')
+        df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
     df.rename(columns={'name':'storage_resource'}, inplace=True)
     df_col = list(df.columns) # Gets names of all columns in df and places in list
     df_col.remove(0) # Removes 0, the data column from the list 
@@ -239,99 +244,126 @@ def get_data(loc, prop,t, db, overlap):
     if loc == 'constraint': 
         try: 
             df = db.constraint(prop, timescale=t)
-            df = df_process_constraint(df, overlap)
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_constraint(df, overlap)
+        return df
+        
         
     elif loc == 'emission':
         try: 
-            df = db.emission(prop)
-            df = df_process_emission(df, overlap)
+            df = db.emission(prop, timescale=t)
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_emission(df, overlap)
+        return df
+        
         
 #    elif loc == 'emission_generators':
 #        try: 
 #            df = db.emission_generators(prop, timescale=t)
-#        except: df = report_prop_error(prop,loc)
+#        except KeyError: df = report_prop_error(prop,loc)
         
     elif loc == 'fuel':
         try: 
             df = db.fuel(prop, timescale=t)
-            df = df_process_fuel(df, overlap)
-            return df
-        except: df = report_prop_error(prop,loc)
+        except KeyError: 
+            df = report_prop_error(prop,loc)
+            return df        
+        df = df_process_fuel(df, overlap)
+        return df
         
     elif loc == 'generator':
         try:
             df = db.generator(prop, timescale=t)
-            df = df_process_gen(df, overlap)
-            # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
-            if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
-                print("\n WARNING!! The Following Generators do not have a correct category mapping:")
-                missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
-                print(missing_gen_cat)
-                print("")
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_gen(df, overlap)
+        # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
+        if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
+            print("\n WARNING!! The Following Generators do not have a correct category mapping:")
+            missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
+            print(missing_gen_cat)
+            print("")
+        return df
         
     elif loc == 'line':
         try: 
             df = db.line(prop, timescale=t)
-            df = df_process_line(df, overlap)
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_line(df, overlap)
+        return df
+       
        
     elif loc == 'interface':
         try: 
             df = db.line(prop, timescale=t)
-            df = df_process_interface(df, overlap)
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_interface(df, overlap)
+        return df
         
     elif loc == 'region':
         try: 
             df = db.region(prop, timescale=t)
-            df = df_process_region(df, overlap)
-            if prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
-                print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_region(df, overlap)
+        if prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
+            print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
+        return df
         
     elif loc == 'reserve':
         try: 
             df = db.reserve(prop, timescale=t)
-            df = df_process_reserve(df, overlap) 
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_reserve(df, overlap) 
+        return df
         
     elif loc == 'reserve_generators':
         try: 
             df = db.reserve_generators(prop, timescale=t)
-            df = df_process_reserve_generators(df, overlap) 
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_reserve_generators(df, overlap) 
+        return df
         
     elif loc == 'storage':
         try: 
             df = db.storage(prop, timescale=t)
-            df = df_process_storage(df, overlap) 
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)
+        df = df_process_storage(df, overlap) 
+        return df
         
     elif loc == 'region_regions':
         try: 
             df = db.region_regions(prop, timescale=t)
-            df = df_process_region_regions(df, overlap) 
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc)       
+        df = df_process_region_regions(df, overlap) 
+        return df
         
     elif loc == 'zone':
         try:
             df = db.zone(prop, timescale=t)
-            df = df_process_zone(df, overlap)
+        except KeyError: 
+            df = report_prop_error(prop,loc)
             return df
-        except: df = report_prop_error(prop,loc) 
+        df = df_process_zone(df, overlap)
+        return df
         
     else: 
         df = pd.DataFrame()
@@ -400,9 +432,9 @@ for Scenario_name in Scenario_List:
         region_generators["gen_name"]=region_generators["gen_name"].str.decode("utf-8")
         region_generators["region"]=region_generators["region"].str.decode("utf-8")
         region_generators.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
-    except Exception:
+    except KeyError:
+        region_generators = pd.DataFrame()
         print("\Regional data not included in h5plexos results.\nSkipping Regional properties\n")
-        pass
     
     
     try:
@@ -420,9 +452,9 @@ for Scenario_name in Scenario_List:
         zones["category"]=zones["category"].str.decode("utf-8")
         zones.to_pickle('zones.pkl')
     
-    except Exception:
+    except KeyError:
+        zone_generators = pd.DataFrame()
         print("\nZonal data not included in h5plexos results.\nSkipping Zonal properties\n")
-        pass
         
     # Generator categories mapping 
     generator_category = pd.DataFrame(np.asarray(data['metadata/objects/generator']))
@@ -441,9 +473,9 @@ for Scenario_name in Scenario_List:
         generator_storage.rename(columns={'parent':'gen_name'}, inplace=True)
         generator_storage["name"]=generator_storage["name"].str.decode("utf-8")
         generator_storage["gen_name"]=generator_storage["gen_name"].str.decode("utf-8")
-    except Exception:
+    except KeyError:
+        generator_storage = pd.DataFrame()
         print("\nGenerator head/tail storage not included in h5plexos results.\nSkipping storage property\n")
-        pass    
     
     # If Region_Mapping csv was left empty, regions will be retrieved from the plexos results h5 file for use in Marmot_plot.
     # This limits the user to only plotting results from PLEXOS regions, therefore it is recommended to populate the Region_Mapping.csv for more control. 
@@ -454,11 +486,15 @@ for Scenario_name in Scenario_List:
         regions.to_pickle('regions.pkl')
     
     ## Get Line relations and save to pickle 
-    line_relations=pd.DataFrame(np.asarray(data['metadata/objects/line']))
-    line_relations["name"]=line_relations["name"].str.decode("utf-8")
-    line_relations["category"]=line_relations["category"].str.decode("utf-8")
-    line_relations.to_pickle(PLEXOS_Scenarios+"/line_relations.pkl")
-    
+    try:
+        line_relations=pd.DataFrame(np.asarray(data['metadata/objects/line']))
+        line_relations["name"]=line_relations["name"].str.decode("utf-8")
+        line_relations["category"]=line_relations["category"].str.decode("utf-8")
+        line_relations.to_pickle(PLEXOS_Scenarios+"/line_relations.pkl")
+    except KeyError:
+        print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
+        
+        
     # Read in all HDF5 files into dictionary 
     print("Loading all HDF5 files to prepare for processing")
     hdf5_collection = {}
@@ -496,7 +532,7 @@ for Scenario_name in Scenario_List:
             
             processed_data = get_data(row["group"], row["data_set"], 
                                              row["data_type"], db, overlap)
-            if processed_data is None:
+            if processed_data.empty == True:
                 print("\n")
                 break
             
@@ -521,11 +557,23 @@ for Scenario_name in Scenario_List:
     ######### Calculate Extra Ouputs################################################
     try:
         print("Processing generator Curtailment")  
-        Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
-        Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+        try:
+            Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
+            Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+            if Total_Gen_Out.empty==True:
+                print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+        except KeyError:
+            print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+        # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+        vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+        
+        if not vre_gen_cat:
+            print("\nvre_gen_cat is not set up correctly with your gen_names")
+            print("To Process Curtailment add correct names to vre_gen_cat.csv")
+            print("For more information see Marmot Readme under 'Mapping Files'")
         # Output Curtailment# 
-        Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), ['Wind','PV']),:]) - 
-                            (Total_Gen_Out.loc[(slice(None), ['Wind','PV']),:]))
+        Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), vre_gen_cat),:]) - 
+                            (Total_Gen_Out.loc[(slice(None), vre_gen_cat),:]))
         
         Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
         
@@ -543,7 +591,7 @@ for Scenario_name in Scenario_List:
         Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
-    except Exception:
+    except KeyError:
         print("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
         pass
     
@@ -552,7 +600,7 @@ for Scenario_name in Scenario_List:
         Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
         Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL 
         Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
-    except Exception:
+    except KeyError:
         print("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
         pass
     

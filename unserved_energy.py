@@ -79,11 +79,9 @@ class mplot(object):
         Data_Table_Out = Unserved_Energy_Timeseries_Out
          
         if Unserved_Energy_Timeseries_Out.empty==True:
-            print("no unserved energy in any scenario in "+self.zone_input)
+            df = pd.DataFrame()
+            return df
             
-            fig1, ax = plt.subplots(figsize=(9,6))
-
-            return {'fig': fig1, 'data_table': Data_Table_Out}
         else:
             fig1, ax = plt.subplots(figsize=(9,6))
         
@@ -158,35 +156,41 @@ class mplot(object):
         Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.replace('_',' ')
         Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.wrap(10, break_long_words=False)
         
-        # Data table of values to return to main program
-        Data_Table_Out = Total_Unserved_Energy_Out
+        if Total_Unserved_Energy_Out.values.sum() == 0:
+            df = pd.DataFrame()
+            return df
         
-        # Converts color_list into an iterable list for use in a loop
-        iter_colour = iter(self.color_list)
+        else:
+            
+            # Data table of values to return to main program
+            Data_Table_Out = Total_Unserved_Energy_Out
+            
+            # Converts color_list into an iterable list for use in a loop
+            iter_colour = iter(self.color_list)
+            
+            fig2, ax = plt.subplots(figsize=(9,6))
         
-        fig2, ax = plt.subplots(figsize=(9,6))
+            bp = Total_Unserved_Energy_Out.plot.bar(stacked=False, rot=0, edgecolor='black', 
+                                                    color=next(iter_colour), linewidth='0.1', 
+                                                    width=0.35, ax=ax)
+           
+            ax.set_ylabel('Total Unserved Energy (MWh)',  color='black', rotation='vertical')
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.margins(x=0.01)
     
-        bp = Total_Unserved_Energy_Out.plot.bar(stacked=False, rot=0, edgecolor='black', 
-                                                color=next(iter_colour), linewidth='0.1', 
-                                                width=0.35, ax=ax)
-       
-        ax.set_ylabel('Total Unserved Energy (MWh)',  color='black', rotation='vertical')
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
-        ax.tick_params(axis='y', which='major', length=5, width=1)
-        ax.tick_params(axis='x', which='major', length=5, width=1)
-        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-        ax.margins(x=0.01)
-
-        for i in ax.patches:
-           width, height = i.get_width(), i.get_height()
-           if height<=1:
-               continue
-           x, y = i.get_xy() 
-           ax.text(x+width/2, 
-                y+(height+100)/2, 
-                '{:,.0f}'.format(height), 
-                horizontalalignment='center', 
-                verticalalignment='center', fontsize=13)
-
-        return {'fig': fig2, 'data_table': Data_Table_Out}
+            for i in ax.patches:
+               width, height = i.get_width(), i.get_height()
+               if height<=1:
+                   continue
+               x, y = i.get_xy() 
+               ax.text(x+width/2, 
+                    y+height/2, 
+                    '{:,.0f}'.format(height), 
+                    horizontalalignment='center', 
+                    verticalalignment='center', fontsize=13)
+    
+            return {'fig': fig2, 'data_table': Data_Table_Out}
