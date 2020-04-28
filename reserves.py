@@ -11,7 +11,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-
+import os
 
 
 #===============================================================================
@@ -48,7 +48,9 @@ class mplot(object):
         self.gen_names_dict = argument_list[18]
         self.re_gen_cat = argument_list[20]
         self.region = argument_list[22]
-        
+        self.color_list = argument_list[16]
+        self.Region_Mapping = argument_list[23]
+          
     def reserve_timeseries(self):
         
         print("     "+ self.region)
@@ -210,4 +212,169 @@ class mplot(object):
              
         return fig2
     
+
+        
+    def reg_reserve_shortage(self):
+        
+        print("     "+ self.region)
+        
+        Reserve_Shortage_Collection = {}
+
+        for scenario in self.Multi_Scenario:
+            Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+            
+        fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
+
+        n=0 #Counter for scenario subplots
+        for scenario in self.Multi_Scenario:
+            
+            print('Scenario = ' + scenario)
+            
+            reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
+            reserve_short_timeseries = reserve_short_timeseries.xs(self.region,level="Reserve_Region")
+            reserve_short_total = reserve_short_timeseries.groupby(["Type"]).sum()
+
+                           
+            if len(self.Multi_Scenario)>1:
+                ax2[n].bar(reserve_short_total.index,reserve_short_total[0])
+                ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
+                ax2[n].spines['right'].set_visible(False)
+                ax2[n].spines['top'].set_visible(False)
+                ax2[n].tick_params(axis='y', which='major', length=5, width=1)
+                ax2[n].tick_params(axis='x', which='major', length=5, width=1)
+                ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                ax2[n].margins(x=0.01)
+            else:
+                ax2.bar(reserve_short_total.index,reserve_short_total[0])
+                ax2.set_ylabel(scenario,color='black',rotation='vertical')
+                ax2.spines['right'].set_visible(False)
+                ax2.spines['top'].set_visible(False)
+                ax2.tick_params(axis='y', which='major', length=5, width=1)
+                ax2.tick_params(axis='x', which='major', length=5, width=1)
+                ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                ax2.margins(x=0.01)
+            n=n+1
+            
+        #End scenario loop
+
+        fig2.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel('Reserve Shortage [MWh]',  color='black', rotation='vertical', labelpad=60)
+
+        return {'fig': fig2}
     
+    
+    def reg_reserve_provision(self):
+        
+        print("     "+ self.region)
+        
+        Reserve_Provision_Collection = {}
+
+        for scenario in self.Multi_Scenario:
+            Reserve_Provision_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Provision")
+            
+        fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
+
+        n=0 #Counter for scenario subplots
+        for scenario in self.Multi_Scenario:
+            
+            print('Scenario = ' + scenario)
+            
+            reserve_provision_timeseries = Reserve_Provision_Collection.get(scenario)
+            reserve_provision_timeseries = reserve_provision_timeseries.xs(self.region,level="Reserve_Region")
+            reserve_provision_total = reserve_provision_timeseries.groupby(["Type"]).sum()
+
+                           
+            if len(self.Multi_Scenario)>1:
+                ax2[n].bar(reserve_provision_total.index,reserve_provision_total[0])
+                ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
+                ax2[n].spines['right'].set_visible(False)
+                ax2[n].spines['top'].set_visible(False)
+                ax2[n].tick_params(axis='y', which='major', length=5, width=1)
+                ax2[n].tick_params(axis='x', which='major', length=5, width=1)
+                ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                ax2[n].margins(x=0.01)
+            else:
+                ax2.bar(reserve_provision_total.index,reserve_provision_total[0])
+                ax2.set_ylabel(scenario,color='black',rotation='vertical')
+                ax2.spines['right'].set_visible(False)
+                ax2.spines['top'].set_visible(False)
+                ax2.tick_params(axis='y', which='major', length=5, width=1)
+                ax2.tick_params(axis='x', which='major', length=5, width=1)
+                ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                ax2.margins(x=0.01)
+            n=n+1
+            
+        #End scenario loop
+
+        fig2.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel('Reserve Provision [MWh]',  color='black', rotation='vertical', labelpad=60)
+
+        return {'fig': fig2}
+    
+#    def tot_reserve_shortage(self):
+#        
+#        print("     "+ self.zone_input)
+#        
+#        Reserve_Shortage_Collection = {}
+#
+#        for scenario in self.Multi_Scenario:
+#            Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+#            
+#        Reserve_Shortage_Timeseries_Out = pd.DataFrame()
+#        Total_Reserve_Shortage_Out = pd.DataFrame()    
+#            
+#        for scenario in self.Multi_Scenario:
+#            
+#            print('Scenario = ' + scenario)
+#            
+#            reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
+#            rto_Mapping=self.Region_Mapping[['rto',self.AGG_BY]].drop_duplicates().reset_index().drop('index',axis=1)
+#            reserve_short_timeseries = pd.merge(reserve_short_timeseries.reset_index(),rto_Mapping,left_on='Reserve_Region',right_on='rto')
+#            reserve_short_timeseries = reserve_short_timeseries.reset_index().set_index(['timestamp','Reserve_Region','Type','rto',AGG_BY])
+#            reserve_short_timeseries = reserve_short_timeseries.xs(self.zone_input,level=self.AGG_BY)
+#            reserve_short_timeseries = reserve_short_timeseries.groupby(["timestamp"]).sum()
+#            reserve_short_timeseries = reserve_short_timeseries.squeeze() #Convert to Series
+#            reserve_short_timeseries.rename(scenario, inplace=True)
+#            Reserve_Shortage_Timeseries_Out = pd.concat([Reserve_Shortage_Timeseries_Out, reserve_short_timeseries], axis=1, sort=False).fillna(0)
+#            
+#        Reserve_Shortage_Timeseries_Out.columns = Reserve_Shortage_Timeseries_Out.columns.str.replace('_',' ')     
+#    
+#        Total_Reserve_Shortage_Out = Reserve_Shortage_Timeseries_Out.sum(axis=0)
+#        
+#        Total_Reserve_Shortage_Out.index = Total_Reserve_Shortage_Out.index.str.replace('_',' ')
+#        Total_Reserve_Shortage_Out.index = Total_Reserve_Shortage_Out.index.str.wrap(10, break_long_words=False)
+#        
+#        # Data table of values to return to main program
+#        Data_Table_Out = Total_Reserve_Shortage_Out
+#        
+#        # Converts color_list into an iterable list for use in a loop
+#        iter_colour = iter(self.color_list)
+#        
+#        fig2, ax = plt.subplots(figsize=(9,6))
+#    
+#        bp = Total_Reserve_Shortage_Out.plot.bar(stacked=False, rot=0, edgecolor='black', 
+#                                                color=next(iter_colour), linewidth='0.1', 
+#                                                width=0.35, ax=ax)
+#       
+#        ax.set_ylabel('Total Reserve Shortage (MWh)',  color='black', rotation='vertical')
+#        ax.spines['right'].set_visible(False)
+#        ax.spines['top'].set_visible(False)
+#        ax.tick_params(axis='y', which='major', length=5, width=1)
+#        ax.tick_params(axis='x', which='major', length=5, width=1)
+#        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+#        ax.margins(x=0.01)
+#
+#        for i in ax.patches:
+#           width, height = i.get_width(), i.get_height()
+#           if height<=1:
+#               continue
+#           x, y = i.get_xy() 
+#           ax.text(x+width/2, 
+#                y+(height+100)/2, 
+#                '{:,.0f}'.format(height), 
+#                horizontalalignment='center', 
+#                verticalalignment='center', fontsize=13)
+#
+#        return {'fig': fig2, 'data_table': Data_Table_Out}

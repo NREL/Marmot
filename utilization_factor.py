@@ -73,7 +73,7 @@ class mplot(object):
         CF_all_scenarios = pd.DataFrame()
         print("Zone = " + self.zone_input)
         
-        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
+        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
      
         n=0 #Counter for scenario subplots
         
@@ -103,17 +103,17 @@ class mplot(object):
                 duration_curve = Gen.xs(i,level="tech").sort_values(by='Type CF',ascending=False).reset_index()
                         
                 if len(self.Multi_Scenario)>1:
-                    ax3[n].plot(duration_curve['Type CF'],color=self.PLEXOS_color_dict.get(i, '#333333'),label=(scenario+'_'+i))
+                    ax3[n].plot(duration_curve['Type CF'],color=self.PLEXOS_color_dict.get(i, '#333333'),label=i)
                     ax3[n].legend()
-                    ax3[n].set_ylabel('CF',  color='black', rotation='vertical')
+                    ax3[n].set_ylabel('CF \n'+scenario,  color='black', rotation='vertical')
                     ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3[n].spines['right'].set_visible(False)
                     ax3[n].spines['top'].set_visible(False)                         
                 
                 else:
-                    ax3.plot(duration_curve['Type CF'],color=self.PLEXOS_color_dict.get(i, '#333333'),label=(scenario+'_'+i))
+                    ax3.plot(duration_curve['Type CF'],color=self.PLEXOS_color_dict.get(i, '#333333'),label=i)
                     ax3.legend()
-                    ax3.set_ylabel('CF',  color='black', rotation='vertical')
+                    ax3.set_ylabel('CF \n'+scenario,  color='black', rotation='vertical')
                     ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3.spines['right'].set_visible(False)
                     ax3.spines['top'].set_visible(False)   
@@ -147,7 +147,7 @@ class mplot(object):
 
         print("Zone = " + self.zone_input)
         
-        fig2, ax2 = plt.subplots(len(self.Multi_Scenario),len(self.thermal_gen_cat),figsize=(20,6))# Set up subplots for all scenarios & techs
+        fig2, ax2 = plt.subplots(len(self.Multi_Scenario),len(self.thermal_gen_cat),figsize=(len(self.Multi_Scenario)*4,len(self.thermal_gen_cat)*4),sharey=True)# Set up subplots for all scenarios & techs
 
         n=0 #Counter for scenario subplots
         
@@ -178,7 +178,7 @@ class mplot(object):
                 if len(self.Multi_Scenario)>1:
                     ax2[n][m].hist(cfs.replace([np.inf,np.nan]),bins=20,range=(0,1),color=self.PLEXOS_color_dict.get(i, '#333333'),label=scenario+"_"+i)
                     ax2[len(self.Multi_Scenario)-1][m].set_xlabel('Annual CF',  color='black', rotation='horizontal')
-                    ax2[n][m].set_ylabel(('Generators, n='+str(len(cfs))),  color='black', rotation='vertical') 
+                    ax2[n][m].set_ylabel(('n='+str(len(cfs))),  color='black', rotation='vertical') 
                     ax2[n][m].legend()
              #Plot histograms of individual generator annual CF's on a subplot containing all combinations
 
@@ -186,7 +186,7 @@ class mplot(object):
                     ax2[m].hist(cfs.replace([np.inf,np.nan]),bins=20,range=(0,1),color=self.PLEXOS_color_dict.get(i, '#333333'),label=scenario+"_"+i)
                     ax2[m].legend()
                     ax2[m].set_xlabel('Annual CF',  color='black', rotation='horizontal')
-                    ax2[m].set_ylabel(('Generators, n='+str(len(cfs))),  color='black', rotation='vertical')              #Plot histograms of individual generator annual CF's on a subplot containing all combinations
+                    ax2[m].set_ylabel(('n='+str(len(cfs))),  color='black', rotation='vertical')              #Plot histograms of individual generator annual CF's on a subplot containing all combinations
 
                 m=m+1
                 del cfs
@@ -196,7 +196,9 @@ class mplot(object):
             del Gen, thermal_generator_cf
         #End scenario loop
 
-
+        fig2.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel('Generators',  color='black', rotation='vertical', labelpad=60)
             
 
                            

@@ -76,7 +76,7 @@ if Scenario_Diff == ['nan']: Scenario_Diff = []
 
 Mapping_folder = 'mapping_folder'
 
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_mapping.csv'))
+Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 'Region_Mapping.csv'))
 Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, 'reserve_region_type.csv'))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, 'gen_names.csv'))
 
@@ -287,6 +287,19 @@ for index, row in Marmot_plot_select.iterrows():
                 fig = reserves.mplot(argument_list)
                 Figure_Out = fig.reserve_timeseries_facet()
                 Figure_Out.savefig(reserve_timeseries_figures + region + "_" + row["Figure Output Name"], dpi=600, bbox_inches='tight')
+            if row["Figure Type"] == "Reserve Shortage Region":
+                fig = reserves.mplot(argument_list)
+                Figure_Out = fig.reg_reserve_shortage()
+                Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+#                Figure_Out["data_table"].to_csv(os.path.join(reserve_timeseries_figures, region + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+            
+            if row["Figure Type"] == "Reserve Provision Region":
+                fig = reserves.mplot(argument_list)
+                Figure_Out = fig.reg_reserve_provision()
+                Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+#                Figure_Out["data_table"].to_csv(os.path.join(reserve_timeseries_figures, region + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+
+            mpl.pyplot.close('all')
 
     else:
         
@@ -296,7 +309,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                                   hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                                   Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                  re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat]
+                                  re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping]
                                     
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list) 
@@ -454,6 +467,7 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
             
+
             mpl.pyplot.close('all')
 
 
