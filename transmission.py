@@ -136,7 +136,7 @@ class mplot(object):
             
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no scenario selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(self.PLEXOS_Scenarios+"/line_relations.pkl").rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop] 
                 Flow=Flow.drop('category',axis=1) 
@@ -151,7 +151,7 @@ class mplot(object):
                         
                 if len(self.Multi_Scenario)>1:
                     ax3[n].plot(duration_curve['Util'])
-                    ax3[n].set_ylabel(scenario+' Line Utilization '+self.prop,  color='black', rotation='vertical')
+                    ax3[n].set_ylabel(scenario+' Line Utilization '+'\n'+'Line cateogory: '+str(self.prop),  color='black', rotation='vertical')
                     ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3[n].spines['right'].set_visible(False)
                     ax3[n].spines['top'].set_visible(False)                         
@@ -159,7 +159,7 @@ class mplot(object):
 
                 else:
                     ax3.plot(duration_curve['Util'])
-                    ax3.set_ylabel(scenario+' Line Utilization '+self.prop,  color='black', rotation='vertical')
+                    ax3.set_ylabel(scenario+' Line Utilization '+'\n'+'Line cateogory: '+str(self.prop),  color='black', rotation='vertical')
                     ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3.spines['right'].set_visible(False)
                     ax3.spines['top'].set_visible(False)   
@@ -196,7 +196,7 @@ class mplot(object):
             
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no category selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(self.PLEXOS_Scenarios+"/line_relations.pkl").rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop] 
                 Flow=Flow.drop('category',axis=1) 
@@ -209,14 +209,14 @@ class mplot(object):
                                 
             if len(self.Multi_Scenario)>1:
                 ax3[n].hist(Annual_Util.replace([np.inf,np.nan]),bins=20,range=(0,1),label=scenario)
-                ax3[n].set_ylabel(scenario+' Number of lines '+self.prop,  color='black', rotation='vertical')
+                ax3[n].set_ylabel(scenario+' Number of lines '+'\n'+'Line cateogory: '+str(self.prop),  color='black', rotation='vertical')
                 ax3[n].set_xlabel('Utilization',  color='black', rotation='horizontal')
                 ax3[n].spines['right'].set_visible(False)
                 ax3[n].spines['top'].set_visible(False)                       
             
             else:
                 ax3.hist(Annual_Util.replace([np.inf,np.nan]),bins=20,range=(0,1),label=scenario)
-                ax3.set_ylabel(scenario+' Number of lines '+self.prop,  color='black', rotation='vertical')
+                ax3.set_ylabel(scenario+' Number of lines '+'\n'+'Line cateogory: '+str(self.prop),  color='black', rotation='vertical')
                 ax3.set_xlabel('Utilization',  color='black', rotation='horizontal')
                 ax3.spines['right'].set_visible(False)
                 ax3.spines['top'].set_visible(False)   

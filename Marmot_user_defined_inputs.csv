@@ -1,13 +1,15 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,C:\Users\Documents\h5_files
-Processed_Solutions_folder,folder,required,C:\Users\Documents\Solutions
-Scenario_process_list,List,required,"Test1,Test2"
+PLEXOS_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS\Projects\ProjectA\PLEXOS_Solutions
+Processed_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS\Projects\ProjectA\Processed_Solutions
+Scenario_process_list,List,required,"Scenario1, Scenario2, Scenario3"
 overlap,int,required,0
 VoLL,int,required,10000
-Main_scenario_plot,string,required,Test1   
-Multi_sceanrio_plot,List,required,"Test1, Test 2, Test3                             "
-Scenario_Diff_plot,List [Max 2],optional,"Test2,  Test_5"
+Region_Mapping.csv_name,string,required(default),Region_mapping.csv
+gen_names.csv_name,string,required(default),gen_names.csv
+reserve_region_type.csv_name,string,required(default),reserve_region_type.csv
+Main_scenario_plot,string,required,Scenario1
+Multi_scenario_plot,List,required,"Scenario1, Scenario2, Scenario3"
+Scenario_Diff_plot,List [Max 2],optional,"Scenario2, Scenario1"
 AGG_BY,string ,required,Usual
 Facet_ylabels,List,optional,"BAU,BAU2"
 Facet_xlabels,List,optional,"No VG Reserves, VG Reserves, Copperplate  "
-Tech_exclusions,List,optional,"PV, Wind, Hydro, CSP"

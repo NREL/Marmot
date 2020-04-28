@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
+from matplotlib.patches import Patch
 
 
 
@@ -27,6 +28,9 @@ def df_process_gen_inputs(df, self):
     df = df.pivot(index='timestamp', columns='tech', values=0)
     return df  
 
+custom_legend_elements = [Patch(facecolor='#DD0200',
+                            alpha=0.5, edgecolor='#DD0200',
+                         label='Unserved Energy')]
 
 class mplot(object):
       
@@ -49,31 +53,33 @@ class mplot(object):
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
-        self.re_gen_cat = argument_list[20]
+        self.vre_gen_cat = argument_list[21]
 
    
     
     def gen_stack(self):
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-    #    Stacked_Gen_read = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", 'generator_Generation') 
         Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
         Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Curtailment" )
+        
         # If data is to be aggregated by zone, then zone properties are loaded, else region properties are loaded
         if self.AGG_BY == "zone":
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Load")
-            Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Unserved_Energy" )
+            try:
+                Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Unserved_Energy" )
+            except:
+                Unserved_Energy_read = Load_read.copy()
+                Unserved_Energy_read.iloc[:,0] = 0
         else:
             Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Load")
-
-           # Load_read = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", "region_Load")
             try:
                 Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
             except:
                 Unserved_Energy_read = Load_read.copy()
                 Unserved_Energy_read.iloc[:,0] = 0
 
+
         print("Zone = "+ self.zone_input)
-        Pump_Load = pd.Series() # Initiate pump load 
                 
        # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
         Stacked_Gen = Stacked_Gen_read.xs(self.zone_input,level=self.AGG_BY)  
@@ -89,46 +95,45 @@ class mplot(object):
             pass
         
         # Calculates Net Load by removing variable gen + curtailment
-        self.re_gen_cat = self.re_gen_cat + ['Curtailment']
+        self.vre_gen_cat = self.vre_gen_cat + ['Curtailment']
         # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-        self.re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
-        Net_Load = Stacked_Gen.drop(labels = self.re_gen_cat, axis=1)
+        self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
+        Net_Load = Stacked_Gen.drop(labels = self.vre_gen_cat, axis=1)
         Net_Load = Net_Load.sum(axis=1)
         
+        # Removes columns that only contain 0
         Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
         
         Load = Load_read.xs(self.zone_input,level=self.AGG_BY)
-        #AGG_BY = 'Interconnection'
-        #zone_input = 'EI'
-        #Load = Load_read.xs(zone_input,level = AGG_BY)
         Load = Load.groupby(["timestamp"]).sum()
-
         Load = Load.squeeze() #Convert to Series
     
-
         Pump_Load = Pump_Load_read.xs(self.zone_input,level=self.AGG_BY)
         Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
         Pump_Load = Pump_Load.squeeze() #Convert to Series
         if (Pump_Load == 0).all() == False:
-            Pump_Load = Load - Pump_Load
-
+            Total_Demand = Load - Pump_Load
+        else:
+            Total_Demand = Load
 
         Unserved_Energy = Unserved_Energy_read.xs(self.zone_input,level=self.AGG_BY)
         Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
         Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
+        unserved_eng_data_table = Unserved_Energy # Used for output to data table csv 
         if (Unserved_Energy == 0).all() == False:
             Unserved_Energy = Load - Unserved_Energy
 
         if self.prop == "Peak Demand":
-             peak_pump_load_t = Pump_Load.idxmax() 
-             end_date = peak_pump_load_t + dt.timedelta(days=self.end)
-             start_date = peak_pump_load_t - dt.timedelta(days=self.start)
-             Peak_Pump_Load = Pump_Load[peak_pump_load_t]
-             Stacked_Gen = Stacked_Gen[start_date : end_date]
-             Load = Load[start_date : end_date]
-             Unserved_Energy = Unserved_Energy[start_date : end_date]
-             Pump_Load = Pump_Load[start_date : end_date]
-
+                        
+            peak_demand_t = Total_Demand.idxmax() 
+            end_date = peak_demand_t + dt.timedelta(days=self.end)
+            start_date = peak_demand_t - dt.timedelta(days=self.start)
+            Peak_Demand = Total_Demand[peak_demand_t]
+            Stacked_Gen = Stacked_Gen[start_date : end_date]
+            Load = Load[start_date : end_date]
+            Unserved_Energy = Unserved_Energy[start_date : end_date]
+            Total_Demand = Total_Demand[start_date : end_date]
+            unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
              
         elif self.prop == "Min Net Load":
             min_net_load_t = Net_Load.idxmin()
@@ -138,7 +143,8 @@ class mplot(object):
             Stacked_Gen = Stacked_Gen[start_date : end_date]
             Load = Load[start_date : end_date]
             Unserved_Energy = Unserved_Energy[start_date : end_date]
-            Pump_Load = Pump_Load[start_date : end_date]
+            Total_Demand = Total_Demand[start_date : end_date]
+            unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
             
         elif self.prop == 'Date Range':
             print("Plotting specific date range:")
@@ -147,14 +153,18 @@ class mplot(object):
             Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
             Load = Load[self.start_date : self.end_date]
             Unserved_Energy = Unserved_Energy[self.start_date : self.end_date]
-            Pump_Load = Pump_Load[self.start_date : self.end_date]
+            Total_Demand = Total_Demand[self.start_date : self.end_date]
+            unserved_eng_data_table = unserved_eng_data_table[self.start_date : self.end_date]
             
             
         else:
             print("Plotting graph for entire timeperiod")
         
+        Load = Load.rename('Total Load (Demand + Pumped Load)')
+        Total_Demand = Total_Demand.rename('Total Demand')
+        unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
         # Data table of values to return to main program
-        Data_Table_Out = Stacked_Gen
+        Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
         
         fig1, ax = plt.subplots(figsize=(9,6))
         sp = ax.stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=5,
@@ -166,10 +176,10 @@ class mplot(object):
                            color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
                            )
 
-        lp = plt.plot(Load, color='black')
+        lp1 = plt.plot(Load, color='black')
         
         if (Pump_Load == 0).all() == False:
-            lp3 = plt.plot(Pump_Load, color='black', linestyle="--")
+            lp3 = plt.plot(Total_Demand, color='black', linestyle="--")
         
         
         ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
@@ -186,7 +196,7 @@ class mplot(object):
                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
         
         elif self.prop == "Peak Demand":
-                ax.annotate('Peak Demand: \n' + str(format(int(Load[peak_pump_load_t]), ',')) + ' MW', xy=(peak_pump_load_t, Peak_Pump_Load), xytext=((peak_pump_load_t + dt.timedelta(days=0.1)), (max(Load) + Load[peak_pump_load_t]*0.1)),
+                ax.annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
         locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
@@ -215,15 +225,15 @@ class mplot(object):
                       facecolor='inherit', frameon=True)  
         #Legend 2
         if (Pump_Load == 0).all() == False:
-            leg2 = ax.legend(lp, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 0.9), 
+            leg2 = ax.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 0.9), 
                       facecolor='inherit', frameon=True)
         else:
-            leg2 = ax.legend(lp, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9), 
+            leg2 = ax.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9), 
                       facecolor='inherit', frameon=True)
         
         #Legend 3
         if (Unserved_Energy == 0).all() == False:
-            leg3 = ax.legend(lp2, ['Unserved Energy'], loc='upper left',bbox_to_anchor=(1, 0.82), 
+            leg3 = ax.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 0.82), 
                       facecolor='inherit', frameon=True)
             
         #Legend 4
@@ -254,17 +264,30 @@ class mplot(object):
             Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
             Pump_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Pump_Load" )
             if self.AGG_BY == "zone":
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
                 Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "zone_Load")
+                try:
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
+                except:
+                    Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
+                    Unserved_Energy_Collection[scenario].iloc[:,0] = 0
             else:
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
                 Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "region_Load")
+                try:
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
+                except:
+                    Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
+                    Unserved_Energy_Collection[scenario].iloc[:,0] = 0
             
             
         print("Zone = "+ self.zone_input)
         
         xdimension=len(self.xlabels)
+        if xdimension == 0:
+            xdimension = 1
         ydimension=len(self.ylabels)
+        if ydimension == 0:
+            ydimension = 1
+            
         grid_size = xdimension*ydimension
         
         fig2, axs = plt.subplots(ydimension,xdimension, figsize=((4*xdimension),(4*ydimension)), sharey=True)
@@ -274,7 +297,6 @@ class mplot(object):
         
         for scenario in self.Multi_Scenario:
             print("Scenario = " + scenario)
-            Pump_Load = pd.Series() # Initiate pump load 
             
             try:
                 Stacked_Gen = Gen_Collection.get(scenario)
@@ -299,10 +321,10 @@ class mplot(object):
                 pass
             
             # Calculates Net Load by removing variable gen + curtailment
-            self.re_gen_cat = self.re_gen_cat + ['Curtailment']
+            self.vre_gen_cat = self.vre_gen_cat + ['Curtailment']
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-            self.re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
-            Net_Load = Stacked_Gen.drop(labels = self.re_gen_cat, axis=1)
+            self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
+            Net_Load = Stacked_Gen.drop(labels = self.vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)
 
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
@@ -317,7 +339,9 @@ class mplot(object):
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
             if (Pump_Load == 0).all() == False:
-                Pump_Load = Load - Pump_Load
+                Total_Demand = Load - Pump_Load
+            else:
+                Total_Demand = Load
        
             Unserved_Energy = Unserved_Energy_Collection.get(scenario)
             Unserved_Energy = Unserved_Energy.xs(self.zone_input,level=self.AGG_BY)
@@ -328,15 +352,15 @@ class mplot(object):
           
             
             if self.prop == "Peak Demand":
-                peak_pump_load_t = Pump_Load.idxmax() 
-                end_date = peak_pump_load_t + dt.timedelta(days=self.end)
-                start_date = peak_pump_load_t - dt.timedelta(days=self.start)
-                Peak_Pump_Load = Pump_Load[peak_pump_load_t]
+                peak_demand_t = Total_Demand.idxmax() 
+                end_date = peak_demand_t + dt.timedelta(days=self.end)
+                start_date = peak_demand_t - dt.timedelta(days=self.start)
+                Peak_Demand = Total_Demand[peak_demand_t]
                 Stacked_Gen = Stacked_Gen[start_date : end_date]
                 Load = Load[start_date : end_date]
                 Unserved_Energy = Unserved_Energy[start_date : end_date]
-                Pump_Load = Pump_Load[start_date : end_date]
-
+                Total_Demand = Total_Demand[start_date : end_date]
+                
              
             elif self.prop == "Min Net Load":
                 min_net_load_t = Net_Load.idxmin()
@@ -346,7 +370,16 @@ class mplot(object):
                 Stacked_Gen = Stacked_Gen[start_date : end_date]
                 Load = Load[start_date : end_date]
                 Unserved_Energy = Unserved_Energy[start_date : end_date]
-                Pump_Load = Pump_Load[start_date : end_date]
+                Total_Demand = Total_Demand[start_date : end_date]
+                
+            elif self.prop == 'Date Range':
+                print("Plotting specific date range:")
+                print(str(self.start_date) + '  to  ' + str(self.end_date))
+            
+                Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
+                Load = Load[self.start_date : self.end_date]
+                Unserved_Energy = Unserved_Energy[self.start_date : self.end_date]
+                Total_Demand = Total_Demand[self.start_date : self.end_date]
 
             else:
                 print("Plotting graph for entire timeperiod")
@@ -365,7 +398,7 @@ class mplot(object):
             lp = axs[i].plot(Load, color='black')
             
             if (Pump_Load == 0).all() == False:
-                lp3 = axs[i].plot(Pump_Load, color='black', linestyle="--")
+                lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
             
             
             axs[i].spines['right'].set_visible(False)
@@ -380,7 +413,7 @@ class mplot(object):
                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
         
             elif self.prop == "Peak Demand":
-                axs[i].annotate('Peak Demand: \n' + str(format(int(Load[peak_pump_load_t]), ',')) + ' MW', xy=(peak_pump_load_t, Peak_Pump_Load), xytext=((peak_pump_load_t + dt.timedelta(days=0.1)), (max(Load) + Load[peak_pump_load_t]*0.1)),
+                axs[i].annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
             
             
@@ -408,17 +441,21 @@ class mplot(object):
             leg1 = axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
                           facecolor='inherit', frameon=True)  
             #Legend 2
-            leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.45), 
+            if (Pump_Load == 0).all() == False:
+                leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.55), 
+                          facecolor='inherit', frameon=True)
+            else:
+                leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.55), 
                           facecolor='inherit', frameon=True)
             
             #Legend 3
             if (Unserved_Energy == 0).all() == False:
-                leg3 = axs[grid_size-1].legend(lp2, ['Unserved Energy'], loc='upper left',bbox_to_anchor=(1, 1.55), 
-                          facecolor='inherit', frameon=True)
+                leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.35), 
+                      facecolor='inherit', frameon=True)
                 
             #Legend 4
             if (Pump_Load == 0).all() == False:
-                leg4 = axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.35), 
+                leg4 = axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.45), 
                           facecolor='inherit', frameon=True)
             
             # Manually add the first legend back
@@ -455,7 +492,7 @@ class mplot(object):
         Gen_Collection = {} 
         
         for scenario in self.Scenario_Diff:
-            Gen_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5", "generator_Generation")
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
             
             
         Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[0])
