@@ -337,6 +337,7 @@ def get_data(loc, prop,t, db, overlap):
         df = pd.DataFrame()
         print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
 
+
 #===================================================================================
 # Main         
 #=================================================================================== 
@@ -500,18 +501,30 @@ for Scenario_name in Scenario_List:
                 print("\n")
                 break
             
-            # if interval is eqaul to year only process first h5plexos file. Also corrects units with unit_multiplier
             if row["data_type"] == "year":
-                Processed_Data_Out = processed_data*row["unit_multiplier"]
-                break
-            else:    
+                Processed_Data_Out = pd.concat([Processed_Data_Out, processed_data*row["unit_multiplier"]])
+            else:
                 Processed_Data_Out = pd.concat([Processed_Data_Out, processed_data])
                 
         if Processed_Data_Out.empty == False:
-            oldsize=Processed_Data_Out.size
-            Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
-            if (oldsize-Processed_Data_Out.size) >0:
-                print('Drop duplicates removed '+str(oldsize-Processed_Data_Out.size)+' rows.')
+            if row["data_type"]== "year":
+                print("test")
+                data_index=Processed_Data_Out.index.names
+                Processed_Data_Out_var=Processed_Data_Out.groupby(data_index).var()
+                if ('tech' in Processed_Data_Out.index.names) == True: #Remove hydro if tech included
+                    Processed_Data_Out_var=Processed_Data_Out_var.drop('Hydro',level='tech')
+                if Processed_Data_Out_var[0].max() > 0.0:
+                    print("Property "+ row["group"] + " " + row["data_set"]+" "+row["data_type"]+" is summed across partisions if there are multiple partitions.")
+                    Processed_Data_Out=Processed_Data_Out.groupby(data_index).sum()    #if the variance is non zero, group by all the values in the index and sum()
+                else:
+                    print("Property "+ row["group"] + " " + row["data_set"]+" "+row["data_type"]+" is reported by maximum if there are multiple paritions.")
+                    Processed_Data_Out=Processed_Data_Out.groupby(data_index).max()
+            else:
+                oldsize=Processed_Data_Out.size
+                Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
+                if  (oldsize-Processed_Data_Out.size) >0:
+                    print('Drop duplicates removed '+str(oldsize-Processed_Data_Out.size)+' rows.')
+            
             row["data_set"] = row["data_set"].replace(' ', '_')
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
             del Processed_Data_Out
