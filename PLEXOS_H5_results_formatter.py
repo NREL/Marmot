@@ -550,7 +550,7 @@ for Scenario_name in Scenario_List:
                 if ('tech' in Processed_Data_Out.index.names) == True: #Remove hydro if tech included
                     Processed_Data_Out_var=Processed_Data_Out_var.drop('Hydro',level='tech')
                 if Processed_Data_Out_var[0].max() > 0.0:
-                    print("Property "+ row["group"] + " " + row["data_set"]+" "+row["data_type"]+" is summed across partisions if there are multiple partitions.")
+                    print("Property "+ row["group"] + " " + row["data_set"]+" "+row["data_type"]+" is summed across partitions if there are multiple partitions.")
                     Processed_Data_Out=Processed_Data_Out.groupby(data_index).sum()    #if the variance is non zero, group by all the values in the index and sum()
                 else:
                     print("Property "+ row["group"] + " " + row["data_set"]+" "+row["data_type"]+" is reported by maximum if there are multiple paritions.")
@@ -562,7 +562,22 @@ for Scenario_name in Scenario_List:
                     print('Drop duplicates removed '+str(oldsize-Processed_Data_Out.size)+' rows.')
             
             row["data_set"] = row["data_set"].replace(' ', '_')
-            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
+            try:
+                Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
+            except:
+                print("File is probably in use, waiting to attempt save for a second time.")
+                time.sleep(30)
+                try:
+                     Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
+                     print("File save succeded on second attempt.")
+                except:
+                    print("File is probably in use, waiting to attempt save for a third time.")
+                    time.sleep(60)
+                    try:
+                        Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a",  complevel=9, complib = 'blosc:zlib')
+                        print("File save succeded on third attempt.")
+                    except:
+                        print("Save failed on third try; will not attempt again.")
             del Processed_Data_Out
         else:
             continue
