@@ -1,0 +1,15 @@
+#TOC {
+position: fixed;
+left: 0;
+top: 0;
+width: 250px;
+height: auto;
+overflow:auto;
+}
+
+body {
+  max-width: 1800px;
+  margin: auto;
+  margin-left:210px;
+  line-height: 20px;
+}

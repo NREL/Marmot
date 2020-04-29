@@ -1,15 +1,15 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS\Projects\ProjectA\PLEXOS_Solutions
-Processed_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS\Projects\ProjectA\Processed_Solutions
-Scenario_process_list,List,required,"Scenario1, Scenario2, Scenario3"
+PLEXOS_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS CEII\Projects\Extreme Events\Solutions
+Processed_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS CEII\Projects\Extreme Events\Results
+Scenario_process_list,List,required,ColdWave_Feb2011_BAU2024
 overlap,int,required,0
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Region_mapping.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 reserve_region_type.csv_name,string,required(default),reserve_region_type.csv
-Main_scenario_plot,string,required,Scenario1
-Multi_scenario_plot,List,required,"Scenario1, Scenario2, Scenario3"
-Scenario_Diff_plot,List [Max 2],optional,"Scenario2, Scenario1"
-AGG_BY,string ,required,Usual
-Facet_ylabels,List,optional,"BAU,BAU2"
-Facet_xlabels,List,optional,"No VG Reserves, VG Reserves, Copperplate  "
+Main_scenario_plot,string,required,ColdWave_Feb2011_BAU2024
+Multi_scenario_plot,List,required,ColdWave_Feb2011_BAU2024
+Scenario_Diff_plot,List [Max 2],optional,
+AGG_BY,string ,required,Interconnection
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,
