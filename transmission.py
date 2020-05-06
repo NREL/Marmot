@@ -41,6 +41,7 @@ class mplot(object):
         self.color_list = argument_list[16]
         self.gen_names_dict = argument_list[18]
         self.re_gen_cat = argument_list[20]
+        self.Region_Mapping = argument_list[24]
         
         
     
@@ -55,6 +56,7 @@ class mplot(object):
             print("Scenario = " + str(scenario))
     
             Net_Export_read = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,scenario, 'Processed_HDF5_folder', scenario + '_formatted.h5'),'region_Net_Interchange')
+                
             Net_Export = Net_Export_read.xs(self.zone_input, level = self.AGG_BY)
             Net_Export = Net_Export.reset_index()
             Net_Export = Net_Export.groupby(["timestamp"]).sum()
@@ -226,3 +228,75 @@ class mplot(object):
         #end scenario loop
                               
         return {'fig': fig3}
+    
+    def region_region_interchange(self): 
+
+        rr_int = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
+        agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
+
+        rr_int = rr_int.reset_index()
+        rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
+        rr_int['child']  = rr_int['child'].map(agg_region_mapping)
+        rr_int_agg = rr_int.groupby(['timestamp','parent','child'],as_index=True).sum() 
+        rr_int_agg.rename(columns = {0:'Flow (MW)'}, inplace = True)
+        rr_int_agg = rr_int_agg.unstack(level = 'child')
+        rr_int_agg = rr_int_agg.droplevel(level = 0, axis = 1)
+        rr_int_agg = rr_int_agg.stack(level = 'child')
+        rr_int_agg = rr_int_agg.reset_index()
+
+        Data_Table_Out = rr_int_agg
+        
+        #Make a facet plot, one panel for each parent zone. 
+        parents = rr_int_agg['parent'].unique()
+
+        fig4, axs = plt.subplots(nrows = 5, ncols = 4, figsize=(6*5,4*4), sharey = False)
+        plt.subplots_adjust(wspace=0.6, hspace=0.5)
+
+        axs = axs.ravel()
+        i=0
+        
+        for parent in parents:
+            single_parent = rr_int_agg[rr_int_agg['parent'] == parent]
+            single_parent = single_parent.pivot(index = 'timestamp',columns = 'child',values = 0)
+            single_parent = single_parent.loc[:,(single_parent != 0).any(axis = 0)] #Remove all 0 columns (uninteresting).
+            if (parent in single_parent.columns):
+                single_parent = single_parent.drop(columns = [parent]) #Remove columns if parent = child (strange).
+            
+            for column in single_parent.columns:
+                axs[i].plot(single_parent.index.values,single_parent[column], linewidth=2, label=column)
+            
+            axs[i].set_title(parent)
+            axs[i].spines['right'].set_visible(False)
+            axs[i].spines['top'].set_visible(False)
+            axs[i].tick_params(axis='y', which='major', length=5, width=1)
+            axs[i].tick_params(axis='x', which='major', length=5, width=1)
+            axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            axs[i].margins(x=0.01)
+            
+            locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
+            formatter = mdates.ConciseDateFormatter(locator)
+            formatter.formats[2] = '%d\n %b'
+            formatter.zero_formats[1] = '%b\n %Y'
+            formatter.zero_formats[2] = '%d\n %b'
+            formatter.zero_formats[3] = '%H:%M\n %d-%b'
+            formatter.offset_formats[3] = '%b %Y'
+            formatter.show_offset = False
+            axs[i].xaxis.set_major_locator(locator)
+            axs[i].xaxis.set_major_formatter(formatter)
+            axs[i].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)  
+            
+            i = i + 1 
+        if len(parents) % 2 !=0:    #Remove extra plot
+            fig4.delaxes(axs[len(parents)])
+            
+        fig4.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 60)
+        plt.ylabel('Flow from zone indicated in panel title to zone indicated in legend (MW)',  color='black', rotation='vertical', labelpad = 60)
+        
+            
+        return {'fig': fig4, 'data_table': Data_Table_Out}
+
+    
+    
+    

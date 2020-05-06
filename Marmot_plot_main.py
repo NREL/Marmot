@@ -308,14 +308,13 @@ for index, row in Marmot_plot_select.iterrows():
 
     else:
         
-       
-        
         for zone_input in Zones:
+            
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
-                                  hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
-                                  Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
-                                  re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping]
-                                    
+               hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
+               Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat, 
+               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping]
+
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list) 
                 Figure_Out = fig.gen_stack()
@@ -409,9 +408,7 @@ for index, row in Marmot_plot_select.iterrows():
                 if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
                     fig = constraints.mplot(argument_list)
                     Figure_Out = fig.constraint_violation()
-                    Figure_Out["fig"].savefig(os.path.join(figure_folder, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-             
-                                      
+                    Figure_Out["fig"].savefig(os.path.join(figure_folder, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')               
             
             # Continue here (NSG)
             elif row["Figure Type"] == "Curtailment vs Penetration": 
@@ -484,10 +481,18 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out = fig.net_export()
                 Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
-            
+        
+            #This property facets by zone aggregation, so it shouldn't be looped over for every zone_input. Keep at the end for now.
+            elif row["Figure Type"] == 'Region-Region Net Interchange':
+                fig = transmission.mplot(argument_list) 
+                Figure_Out = fig.region_region_interchange()
+                Figure_Out["fig"].savefig(os.path.join(transmission_figures, row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                break
 
             mpl.pyplot.close('all')
 
 
- #%%               
+ #%%
+#subprocess.call("/usr/bin/Rscript --vanilla /Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/Marmot/run_html_output.R", shell=True)
                 
