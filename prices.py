@@ -51,7 +51,7 @@ class mplot(object):
             Price_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"region_Price")
 
               
-        print("Price analysis done only once (includes all regions).")
+        print("Zone = " + self.zone_input)
         
         fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
      
@@ -62,7 +62,7 @@ class mplot(object):
             print("Scenario = " + str(scenario))
             
             Price = Price_Collection.get(scenario)
-
+            Price = Price.xs(self.zone_input,level=self.AGG_BY,drop_level=False) #Filter to the AGGBY level and keep all levels
             for region in Price.index.get_level_values(level='region').unique() :
                 duration_curve = Price.xs(region,level="region").sort_values(by=0,ascending=False).reset_index()
                         
@@ -117,7 +117,7 @@ class mplot(object):
             Price_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"region_Price")
 
               
-        print("Price analysis done only once (includes all regions).")
+        print("Zone = " + self.zone_input)
         
         fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
      
@@ -128,6 +128,7 @@ class mplot(object):
             print("Scenario = " + str(scenario))
             
             Price = Price_Collection.get(scenario)
+            Price = Price.xs(self.zone_input,level=self.AGG_BY,drop_level=False) #Filter to the AGGBY level and keep all levels
 
             for region in Price.index.get_level_values(level='region').unique() :
                 timeseries = Price.xs(region,level="region").reset_index().set_index('timestamp')

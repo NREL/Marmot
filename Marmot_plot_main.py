@@ -393,16 +393,14 @@ for index, row in Marmot_plot_select.iterrows():
                     Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
               
             elif row["Figure Type"] == "Region Price": 
-                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
                     fig = prices.mplot(argument_list)
                     Figure_Out = fig.price_region()
-                    Figure_Out["fig"].savefig(os.path.join(figure_folder, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" +row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
              
             elif row["Figure Type"] == "Region Price Timeseries": 
-                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
                     fig = prices.mplot(argument_list)
                     Figure_Out = fig.price_region_chron()
-                    Figure_Out["fig"].savefig(os.path.join(figure_folder, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" +row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
              
             elif row["Figure Type"] == "Constraint Violation": 
                 if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
