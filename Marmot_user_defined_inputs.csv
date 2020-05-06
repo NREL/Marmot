@@ -1,15 +1,15 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS CEII\Projects\Extreme Events\Solutions
-Processed_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS CEII\Projects\Extreme Events\Results
-Scenario_process_list,List,required,ColdWave_Feb2011_BAU2024
+PLEXOS_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\h5plexos_0.6_test
+Processed_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\h5plexos_0.6_test
+Scenario_process_list,List,required,Test_File
 overlap,int,required,0
 VoLL,int,required,10000
-Region_Mapping.csv_name,string,required(default),Region_mapping.csv
+Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 reserve_region_type.csv_name,string,required(default),reserve_region_type.csv
-Main_scenario_plot,string,required,ColdWave_Feb2011_BAU2024
-Multi_scenario_plot,List,required,ColdWave_Feb2011_BAU2024
+Main_scenario_plot,string,required,Test_File
+Multi_scenario_plot,List,required,Test_File
 Scenario_Diff_plot,List [Max 2],optional,
-AGG_BY,string ,required,Interconnection
+AGG_BY,string ,required,zone
 Facet_ylabels,List,optional,
 Facet_xlabels,List,optional,
