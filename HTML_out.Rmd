@@ -1,5 +1,5 @@
 ---
-title: "PLEXOS Results"
+title: "Heat Wave July 17th - 25th, 2011"
 author: "Created by: National Renewable Energy Laboratory (NREL)"
 date: "`r format(Sys.time(), '%d %B %Y')`"
 output: 
@@ -35,8 +35,9 @@ agg_by_prefix = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
 plots_dir = paste0(parent_dir,'/',scenario_dir,'/Figures_Output/',agg_by_prefix,'_')
 
 #Read in list of regions.
-regions = data.table(read.csv('mapping_folder/Region_mapping.csv'))
-regions = as.character(unique(pull(regions,agg_by_prefix)))
+regions = data.table(read.csv('mapping_folder/region2zone.csv'))
+regions = as.character(unique(pull(regions,Zones)))
+regions = sort(regions)
 
 # set up default options for chunks, turn off error or warning messages
 knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T, 
@@ -44,8 +45,79 @@ knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,
 
 ```
 
+#Total Generation
+```{r total generation, out.width = "50%", fig.asp = 0.675}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plots_subdir = paste0(plots_dir,'Total_Gen_Stack/')
+for (region in regions){
+  img_fn = paste0(plots_subdir,region,'_Total_Generation.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + 
+                                                                  draw_image(img_fn) + 
+                                                                  draw_label(region, y = 0.975)) }
+}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
+
 ***
-#Capacity Factor
+#Generation
+##Dispatch Stacks
+```{r stacked-generation, out.width = "100%", fig.align = 'left'}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plots_subdir = paste0(plots_dir,'Gen_stack/')
+for (region in regions){
+  img_fn = paste0(plots_subdir,region,'_Stacked_Gen_Facet_Grid.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + 
+                                                                     draw_image(img_fn) + 
+                                                                     draw_label(region, y = 0.985) +
+                                                                     theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+  }
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
+
+#Outages
+```{r outage-stacks, out.width = "100%", fig.align = 'left'}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plots_subdir = paste0(plots_dir,'Outage_Stack/')
+for (region in regions){
+  img_fn = paste0(plots_subdir,region,'_Capacity_Out_Stacked_Facet_Grid.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + 
+                                                                     draw_image(img_fn) + 
+                                                                     draw_label(region, y = 0.985) +
+                                                                     theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+  }
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
+
+***
+#Transmission
+##Net Export
+```{r Net export, out.width = "50%", fig.asp = 0.675}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plots_subdir = paste0(plots_dir,'Transmission/')
+for (region in regions){
+  img_fn = paste0(plots_subdir,region,'_Net_Export_',scenario_dir,'.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
+}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
+
+##Zonal Interchange
+```{r Zonal Interchange, out.width = "100%", fig.align = 'left'}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plots_subdir = paste0(plots_dir,'Transmission/')
+for (region in regions){
+  img_fn = paste0(plots_subdir,region,'_Zone-Zone_Net_Interchange_',scenario_dir,'.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + 
+                                                                     draw_image(img_fn) + 
+                                                                     draw_label(region, y = 0.985) + 
+                                                                     theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
+
+
+***
+#Thermal and Hydro Unit Analysis
 ##Capacity Factor (average output for all hours)
 ```{r capacity-factor, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -69,30 +141,7 @@ for (region in regions){
 ```
 
 ***
-#Generation
-##Stacked generation
-```{r stacked-generation, out.width = "100%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(plots_dir,'Gen_stack/')
-for (region in regions){
-  img_fn = paste0(plots_subdir,region,'_Stacked_Gen_',scenario_dir,'.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
-  }
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
 
-##Unstacked generation
-```{r unstacked-generation, out.width = "100%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(plots_dir,'Gen_stack/')
-for (region in regions){
-  img_fn = paste0(plots_subdir,region,'_Unstacked_Gen_',scenario_dir,'.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-#Ramping
 ##Capacity Started
 ```{r Capacity Started, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -105,19 +154,7 @@ for (region in regions){
 ```
 
 ***
-#Total Generation
-```{r total generation, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(plots_dir,'Total_Gen_Stack/')
-for (region in regions){
-  img_fn = paste0(plots_subdir,region,'_Total_Generation .png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
 
-
-***
 #Installed Capacity
 ```{r Installed Capacity, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -130,16 +167,4 @@ for (region in regions){
 ```
 
 
-***
-#Transmission
-##Net Export
-```{r Net export, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(plots_dir,'Transmission/')
-for (region in regions){
-  img_fn = paste0(plots_subdir,region,'_Net_Export_',scenario_dir,'.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
 
