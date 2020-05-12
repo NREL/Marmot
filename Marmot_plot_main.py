@@ -251,14 +251,18 @@ marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
  
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
+Zones_pkl = pd.read_pickle(os.path.join(PLEXOS_Scenarios, Scenario_name,"zones.pkl"))
+Regions_pkl = pd.read_pickle(os.path.join(PLEXOS_Scenarios, Scenario_name,'regions.pkl'))
+
 if AGG_BY=="zone":
-    Zones = pd.read_pickle('zones.pkl')
-    Zones = Zones['name'].unique()
+    Zones = Zones_pkl['name'].unique()
 elif Region_Mapping.empty==True:
-    Zones = pd.read_pickle('regions.pkl') 
-    Zones = Zones['name'].unique()
+    Zones = Regions_pkl['region'].unique()
 else:     
+    Region_Mapping = Regions_pkl.merge(Region_Mapping, how='left', on='region')
     Zones = Region_Mapping[AGG_BY].unique()
+    
+# Zones = ['NYISO', 'PJM', 'MISO', 'SERC', 'SPP', 'SaskPower', 'MH']    
 
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
