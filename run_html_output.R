@@ -1,4 +1,5 @@
 #Read in file locations
+library(data.table)
 inputs = data.table(read.csv('Marmot_user_defined_inputs.csv', header = T))
 parent_dir = as.character(inputs[Input == 'Processed_Solutions_folder']$User_defined_value)
 scenario_dir = as.character(inputs[Input == 'Main_scenario_plot']$User_defined_value)

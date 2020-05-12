@@ -22,15 +22,15 @@ def df_process_gen_inputs(df, self):
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
     df.tech = df.tech.astype("category")
     df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"]) 
+    df = df.sort_values(["tech"])
     df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df  
+    return df
 
 
 class mplot(object):
     def __init__(self, argument_list):
         self.prop = argument_list[0]
-        self.start = argument_list[1]     
+        self.start = argument_list[1]
         self.end = argument_list[2]
         self.timezone = argument_list[3]
         self.start_date = argument_list[4]
@@ -50,38 +50,38 @@ class mplot(object):
         self.region = argument_list[22]
         self.color_list = argument_list[16]
         self.Region_Mapping = argument_list[23]
-          
+
     def reserve_timeseries(self):
-        
+
         print("     "+ self.region)
-        
-        Reserve_Provision = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5",  "reserve_generators_Provision")
-        
-        Reserve_Provision_Timeseries = Reserve_Provision.xs(self.region,level="Reserve_Region")          
+
+        Reserve_Provision = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),  "reserve_generators_Provision")
+
+        Reserve_Provision_Timeseries = Reserve_Provision.xs(self.region,level="Reserve_Region")
         Reserve_Provision_Timeseries = df_process_gen_inputs(Reserve_Provision_Timeseries, self)
-        
+
         if self.prop == "Peak Demand":
             print("Plotting Peak Demand period")
-            
+
             peak_reserve_t =  Reserve_Provision_Timeseries.sum(axis=1).idxmax()
             start_date = peak_reserve_t - dt.timedelta(days=self.start)
             end_date = peak_reserve_t + dt.timedelta(days=self.end)
             Reserve_Provision_Timeseries = Reserve_Provision_Timeseries[start_date : end_date]
             Peak_Reserve = Reserve_Provision_Timeseries.sum(axis=1)[peak_reserve_t]
-            
+
         else:
             print("Plotting graph for entire timeperiod")
-            
+
         # Data table of values to return to main program
         Data_Table_Out = Reserve_Provision_Timeseries
-        
+
         fig1, ax = plt.subplots(figsize=(9,6))
-        sp = ax.stackplot(Reserve_Provision_Timeseries.index.values, 
-                          Reserve_Provision_Timeseries.values.T, labels=Reserve_Provision_Timeseries.columns, 
-                          linewidth=5, 
+        sp = ax.stackplot(Reserve_Provision_Timeseries.index.values,
+                          Reserve_Provision_Timeseries.values.T, labels=Reserve_Provision_Timeseries.columns,
+                          linewidth=5,
                           colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Reserve_Provision_Timeseries.T.index])
-        
-        
+
+
         ax.set_ylabel('Reserve Provision (MW)',  color='black', rotation='vertical')
         ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
         ax.spines['right'].set_visible(False)
@@ -90,12 +90,12 @@ class mplot(object):
         ax.tick_params(axis='x', which='major', length=5, width=1)
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
         ax.margins(x=0.01)
-        
+
         if self.prop == "Peak Demand":
-            ax.annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve), 
+            ax.annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve),
                         xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
                         fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-        
+
         locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
         formatter = mdates.ConciseDateFormatter(locator)
         formatter.formats[2] = '%d\n %b'
@@ -106,73 +106,73 @@ class mplot(object):
         formatter.show_offset = False
         ax.xaxis.set_major_locator(locator)
         ax.xaxis.set_major_formatter(formatter)
-        
+
         handles, labels = ax.get_legend_handles_labels()
-    
- 
-        ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
-                      facecolor='inherit', frameon=True)  
-        
+
+
+        ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+                      facecolor='inherit', frameon=True)
+
         return {'fig': fig1, 'data_table': Data_Table_Out}
-    
-    
+
+
 
     def reserve_timeseries_facet(self):
-        
+
         print("     "+ self.region)
-        
-        # Create Dictionary to hold Datframes for each scenario 
-        Reserve_Provision_Collection = {} 
-         
+
+        # Create Dictionary to hold Datframes for each scenario
+        Reserve_Provision_Collection = {}
+
         for scenario in self.Multi_Scenario:
-             Reserve_Provision_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "reserve_generators_Provision")
+             Reserve_Provision_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),  "reserve_generators_Provision")
              
-        
+
         xdimension=len(self.xlabels)
         ydimension=len(self.ylabels)
         grid_size = xdimension*ydimension
-       
+
         fig2, axs = plt.subplots(ydimension,xdimension, figsize=((4*xdimension),(4*ydimension)), sharey=True)
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
         axs = axs.ravel()
         i=0
-        
+
         for scenario in self.Multi_Scenario:
             print("     " + scenario)
-            
+
             Reserve_Provision_Timeseries = Reserve_Provision_Collection.get(scenario)
-            Reserve_Provision_Timeseries = Reserve_Provision_Timeseries.xs(self.region,level="Reserve_Region")          
+            Reserve_Provision_Timeseries = Reserve_Provision_Timeseries.xs(self.region,level="Reserve_Region")
             Reserve_Provision_Timeseries = df_process_gen_inputs(Reserve_Provision_Timeseries, self)
-        
+
             if self.prop == "Peak Demand":
                 print("Plotting Peak Demand period")
-                
+
                 peak_reserve_t =  Reserve_Provision_Timeseries.sum(axis=1).idxmax()
                 start_date = peak_reserve_t - dt.timedelta(days=self.start)
                 end_date = peak_reserve_t + dt.timedelta(days=self.end)
                 Reserve_Provision_Timeseries = Reserve_Provision_Timeseries[start_date : end_date]
                 Peak_Reserve = Reserve_Provision_Timeseries.sum(axis=1)[peak_reserve_t]
-            
+
             else:
                 print("Plotting graph for entire timeperiod")
-            
-            
+
+
             sp = axs[i].stackplot(Reserve_Provision_Timeseries.index.values, Reserve_Provision_Timeseries.values.T, labels=Reserve_Provision_Timeseries.columns, linewidth=5,
                          colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Reserve_Provision_Timeseries.T.index])
-            
-            
+
+
             axs[i].spines['right'].set_visible(False)
             axs[i].spines['top'].set_visible(False)
             axs[i].tick_params(axis='y', which='major', length=5, width=1)
             axs[i].tick_params(axis='x', which='major', length=5, width=1)
             axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             axs[i].margins(x=0.01)
-            
+
             if self.prop == "Peak Demand":
-                axs[i].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve), 
+                axs[i].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve),
                         xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
                         fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-            
+
             locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
             formatter = mdates.ConciseDateFormatter(locator)
             formatter.formats[2] = '%d\n %b'
@@ -183,58 +183,58 @@ class mplot(object):
             formatter.show_offset = False
             axs[i].xaxis.set_major_locator(locator)
             axs[i].xaxis.set_major_formatter(formatter)
-            
+
             handles, labels = axs[grid_size-1].get_legend_handles_labels()
-            
-            
-            axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
+
+
+            axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                      facecolor='inherit', frameon=True)
-            
+
             i=i+1
-        
+
         all_axes = fig2.get_axes()
-            
+
         self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
-        
+
         j=0
         k=0
         for ax in all_axes:
             if ax.is_last_row():
                 ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
                 j=j+1
-            if ax.is_first_col(): 
+            if ax.is_first_col():
                 ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
                 k=k+1
-        
+
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Reserve Provision (MW)',  color='black', rotation='vertical', labelpad=60)
-             
-        return fig2
-    
 
-        
+        return fig2
+
+
+
     def reg_reserve_shortage(self):
-        
+
         print("     "+ self.region)
-        
+
         Reserve_Shortage_Collection = {}
 
         for scenario in self.Multi_Scenario:
             Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
-            
+
         fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
 
         n=0 #Counter for scenario subplots
         for scenario in self.Multi_Scenario:
-            
+
             print('Scenario = ' + scenario)
-            
+
             reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
             reserve_short_timeseries = reserve_short_timeseries.xs(self.region,level="Reserve_Region")
             reserve_short_total = reserve_short_timeseries.groupby(["Type"]).sum()
 
-                           
+
             if len(self.Multi_Scenario)>1:
                 ax2[n].bar(reserve_short_total.index,reserve_short_total[0])
                 ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
@@ -254,7 +254,7 @@ class mplot(object):
                 ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
                 ax2.margins(x=0.01)
             n=n+1
-            
+
         #End scenario loop
 
         fig2.add_subplot(111, frameon=False)
@@ -262,29 +262,29 @@ class mplot(object):
         plt.ylabel('Reserve Shortage [MWh]',  color='black', rotation='vertical', labelpad=60)
 
         return {'fig': fig2}
-    
-    
+
+
     def reg_reserve_provision(self):
-        
+
         print("     "+ self.region)
-        
+
         Reserve_Provision_Collection = {}
 
         for scenario in self.Multi_Scenario:
             Reserve_Provision_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Provision")
-            
+
         fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
 
         n=0 #Counter for scenario subplots
         for scenario in self.Multi_Scenario:
-            
+
             print('Scenario = ' + scenario)
-            
+
             reserve_provision_timeseries = Reserve_Provision_Collection.get(scenario)
             reserve_provision_timeseries = reserve_provision_timeseries.xs(self.region,level="Reserve_Region")
             reserve_provision_total = reserve_provision_timeseries.groupby(["Type"]).sum()
 
-                           
+
             if len(self.Multi_Scenario)>1:
                 ax2[n].bar(reserve_provision_total.index,reserve_provision_total[0])
                 ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
@@ -304,7 +304,7 @@ class mplot(object):
                 ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
                 ax2.margins(x=0.01)
             n=n+1
-            
+
         #End scenario loop
 
         fig2.add_subplot(111, frameon=False)
@@ -312,23 +312,23 @@ class mplot(object):
         plt.ylabel('Reserve Provision [MWh]',  color='black', rotation='vertical', labelpad=60)
 
         return {'fig': fig2}
-    
+
 #    def tot_reserve_shortage(self):
-#        
+#
 #        print("     "+ self.zone_input)
-#        
+#
 #        Reserve_Shortage_Collection = {}
 #
 #        for scenario in self.Multi_Scenario:
 #            Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
-#            
+#
 #        Reserve_Shortage_Timeseries_Out = pd.DataFrame()
-#        Total_Reserve_Shortage_Out = pd.DataFrame()    
-#            
+#        Total_Reserve_Shortage_Out = pd.DataFrame()
+#
 #        for scenario in self.Multi_Scenario:
-#            
+#
 #            print('Scenario = ' + scenario)
-#            
+#
 #            reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
 #            rto_Mapping=self.Region_Mapping[['rto',self.AGG_BY]].drop_duplicates().reset_index().drop('index',axis=1)
 #            reserve_short_timeseries = pd.merge(reserve_short_timeseries.reset_index(),rto_Mapping,left_on='Reserve_Region',right_on='rto')
@@ -338,26 +338,26 @@ class mplot(object):
 #            reserve_short_timeseries = reserve_short_timeseries.squeeze() #Convert to Series
 #            reserve_short_timeseries.rename(scenario, inplace=True)
 #            Reserve_Shortage_Timeseries_Out = pd.concat([Reserve_Shortage_Timeseries_Out, reserve_short_timeseries], axis=1, sort=False).fillna(0)
-#            
-#        Reserve_Shortage_Timeseries_Out.columns = Reserve_Shortage_Timeseries_Out.columns.str.replace('_',' ')     
-#    
+#
+#        Reserve_Shortage_Timeseries_Out.columns = Reserve_Shortage_Timeseries_Out.columns.str.replace('_',' ')
+#
 #        Total_Reserve_Shortage_Out = Reserve_Shortage_Timeseries_Out.sum(axis=0)
-#        
+#
 #        Total_Reserve_Shortage_Out.index = Total_Reserve_Shortage_Out.index.str.replace('_',' ')
 #        Total_Reserve_Shortage_Out.index = Total_Reserve_Shortage_Out.index.str.wrap(10, break_long_words=False)
-#        
+#
 #        # Data table of values to return to main program
 #        Data_Table_Out = Total_Reserve_Shortage_Out
-#        
+#
 #        # Converts color_list into an iterable list for use in a loop
 #        iter_colour = iter(self.color_list)
-#        
+#
 #        fig2, ax = plt.subplots(figsize=(9,6))
-#    
-#        bp = Total_Reserve_Shortage_Out.plot.bar(stacked=False, rot=0, edgecolor='black', 
-#                                                color=next(iter_colour), linewidth='0.1', 
+#
+#        bp = Total_Reserve_Shortage_Out.plot.bar(stacked=False, rot=0, edgecolor='black',
+#                                                color=next(iter_colour), linewidth='0.1',
 #                                                width=0.35, ax=ax)
-#       
+#
 #        ax.set_ylabel('Total Reserve Shortage (MWh)',  color='black', rotation='vertical')
 #        ax.spines['right'].set_visible(False)
 #        ax.spines['top'].set_visible(False)
@@ -370,11 +370,11 @@ class mplot(object):
 #           width, height = i.get_width(), i.get_height()
 #           if height<=1:
 #               continue
-#           x, y = i.get_xy() 
-#           ax.text(x+width/2, 
-#                y+(height+100)/2, 
-#                '{:,.0f}'.format(height), 
-#                horizontalalignment='center', 
+#           x, y = i.get_xy()
+#           ax.text(x+width/2,
+#                y+(height+100)/2,
+#                '{:,.0f}'.format(height),
+#                horizontalalignment='center',
 #                verticalalignment='center', fontsize=13)
 #
 #        return {'fig': fig2, 'data_table': Data_Table_Out}

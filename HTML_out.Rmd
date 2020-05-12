@@ -2,8 +2,8 @@
 title: "PLEXOS Results"
 author: "Created by: National Renewable Energy Laboratory (NREL)"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-output: 
-  html_document: 
+output:
+  html_document:
     css: custom.css
     toc: yes
     toc_float:
@@ -24,9 +24,10 @@ if(!require("pacman")){
   install_version("pacman", version = "0.4.6", repos = "http://cran.us.r-project.org")
 }
 
-pacman::p_load(ggplot2, data.table, maptools, mapproj, RColorBrewer,tidyverse,magick,cowplot,
-               rgeos, scales, stringr, rmarkdown, gdata, zoo, viridis,png,grid,dplyr)
+pacman::p_load(ggplot2, data.table, maptools, mapproj, RColorBrewer,tidyverse,cowplot,
+               scales, stringr, rmarkdown, gdata, zoo, viridis,png,grid,dplyr)
 
+#Had to take out magick and rgeos for Eagle.
 #Read in file locations
 inputs = data.table(read.csv('Marmot_user_defined_inputs.csv', header = T))
 parent_dir = as.character(inputs[Input == 'Processed_Solutions_folder']$User_defined_value)
@@ -35,11 +36,11 @@ agg_by_prefix = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
 plots_dir = paste0(parent_dir,'/',scenario_dir,'/Figures_Output/',agg_by_prefix,'_')
 
 #Read in list of regions.
-regions = data.table(read.csv('mapping_folder/Region_mapping.csv'))
+regions = data.table(read.csv('mapping_folder/mapping_for_html.csv'))
 regions = as.character(unique(pull(regions,agg_by_prefix)))
 
 # set up default options for chunks, turn off error or warning messages
-knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T, 
+knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,
                       dev='png', cache = F, fig.width = 5)
 
 ```
@@ -52,7 +53,8 @@ knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,
 plots_subdir = paste0(plots_dir,'Capacity_Factor/')
 for (region in regions){
   img_fn = paste0(plots_subdir,region,'_Capacity_Factor.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
+  fns = gsub('//','/',list.files(plots_subdir, full.names = T))
+  if (img_fn %in% fns){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -133,13 +135,12 @@ for (region in regions){
 ***
 #Transmission
 ##Net Export
-```{r Net export, out.width = "50%", fig.asp = 0.675}
+<!-- ```{r Net export, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plots_subdir = paste0(plots_dir,'Transmission/')
 for (region in regions){
   img_fn = paste0(plots_subdir,region,'_Net_Export_',scenario_dir,'.png')
   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
-}
+} -->
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
-
