@@ -1,15 +1,15 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\h5plexos_0.6_test
-Processed_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\h5plexos_0.6_test
-Scenario_process_list,List,required,Test_File
+PLEXOS_Solutions_folder,folder,required,/projects/continental/pcm/solutions_for_Marmot_formatter
+Processed_Solutions_folder,folder,required,/projects/continental/pcm/Results/HeatWave_Jul2011
+Scenario_process_list,List,required,"HeatWave_Jul2011_TB2050, HeatWave_Jul2011_TB2036, HeatWave_Jul2011_BAU2024"
 overlap,int,required,0
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 reserve_region_type.csv_name,string,required(default),reserve_region_type.csv
-Main_scenario_plot,string,required,Test_File
-Multi_scenario_plot,List,required,Test_File
+Main_scenario_plot,string,required,TB_2050
+Multi_scenario_plot,List,required,"BAU_2024, TB_2036, TB_2050"
 Scenario_Diff_plot,List [Max 2],optional,
-AGG_BY,string ,required,zone
-Facet_ylabels,List,optional,
+AGG_BY,string ,required,zone
+Facet_ylabels,List,optional,"BAU_2024, TB_2036, TB_2050"
 Facet_xlabels,List,optional,
