@@ -20,13 +20,15 @@ from matplotlib.patches import Patch
 #===============================================================================
 
 def df_process_gen_inputs(df, self):
-    df = df.reset_index()
+    df = df.reset_index(['timestamp','tech'])
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
     df.tech = df.tech.astype("category")
     df.tech.cat.set_categories(self.ordered_gen, inplace=True)
     df = df.sort_values(["tech"]) 
     df = df.pivot(index='timestamp', columns='tech', values=0)
     return df  
+    
+
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
@@ -82,9 +84,6 @@ class mplot(object):
 
         print("Zone = "+ self.zone_input)
         
-        Stacked_Gen_test = pd.read_hdf(hdf_out_folder + "/" + Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-        test = Stacked_Gen_test.reset_index()
-        test = test[test['gen_name'] == '99Islands_1']
         
        # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
         Stacked_Gen = Stacked_Gen_read.xs(self.zone_input,level=self.AGG_BY)  
@@ -554,15 +553,7 @@ class mplot(object):
         ax.xaxis.set_major_formatter(formatter)
         
         return {'fig': fig3, 'data_table': Data_Table_Out}
-    
-def df_process_gen_inputs(df):
-    df = df.reset_index()
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(ordered_gen, inplace=True)
-    df = df.sort_values(["tech"]) 
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df  
+
 
     
     def outage_stack(self):

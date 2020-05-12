@@ -53,7 +53,7 @@ class mplot(object):
               
         print("Zone = " + self.zone_input)
         
-        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
+        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
      
         n=0 #Counter for scenario subplots
         
@@ -73,7 +73,7 @@ class mplot(object):
                     else:
                         ax3[n].plot(duration_curve[0])
 
-                    ax3[n].set_ylabel(scenario+'\n'+'Region Price $/MWh ',  color='black', rotation='vertical')
+                    ax3[n].set_ylabel(scenario,  color='black', rotation='vertical')
                     ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3[n].spines['right'].set_visible(False)
                     ax3[n].spines['top'].set_visible(False)                         
@@ -89,7 +89,7 @@ class mplot(object):
                     else:    
                         ax3.plot(duration_curve[0])
                     
-                    ax3.set_ylabel(scenario+'\n'+'Region Price $/MWh ',  color='black', rotation='vertical')
+                    ax3.set_ylabel(scenario,  color='black', rotation='vertical')
                     ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3.spines['right'].set_visible(False)
                     ax3.spines['top'].set_visible(False)   
@@ -106,7 +106,9 @@ class mplot(object):
                
             n=n+1
         #end scenario loop
-                              
+        fig3.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel('Region Price $/MWh ',  color='black', rotation='vertical', labelpad=60)                      
         return {'fig': fig3}
     
     def price_region_chron(self):          #Timeseries of individual region prices 
@@ -119,7 +121,7 @@ class mplot(object):
               
         print("Zone = " + self.zone_input)
         
-        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
+        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
      
         n=0 #Counter for scenario subplots
         
@@ -135,7 +137,7 @@ class mplot(object):
                         
                 if len(self.Multi_Scenario)>1:
                     ax3[n].plot(timeseries[0])
-                    ax3[n].set_ylabel(scenario+'\n'+'Region Price $/MWh ',  color='black', rotation='vertical')
+                    ax3[n].set_ylabel(scenario,  color='black', rotation='vertical')
                     ax3[n].spines['right'].set_visible(False)
                     ax3[n].spines['top'].set_visible(False)                         
                    
@@ -157,7 +159,7 @@ class mplot(object):
                 else:
 
                     ax3.plot(timeseries[0])
-                    ax3.set_ylabel(scenario+'\n'+'Region Price $/MWh ',  color='black', rotation='vertical')
+                    ax3.set_ylabel(scenario,  color='black', rotation='vertical')
                     ax3.spines['right'].set_visible(False)
                     ax3.spines['top'].set_visible(False)   
                     locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
@@ -177,10 +179,13 @@ class mplot(object):
                 del timeseries
             del Price 
             
-               
+                           
             n=n+1
         #end scenario loop
-                              
+        fig3.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel('Region Price $/MWh ',  color='black', rotation='vertical', labelpad=60)          
+                      
         return {'fig': fig3}
     
     

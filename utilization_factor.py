@@ -19,7 +19,7 @@ import os
 #===============================================================================
 
 def df_process_gen_inputs(df,self):
-    df = df.reset_index()
+    df = df.reset_index(['timestamp','tech'])
     df['tech'].replace(self.gen_names_dict, inplace=True)
     df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show. 
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
@@ -30,7 +30,7 @@ def df_process_gen_inputs(df,self):
     return df  
 
 def df_process_gen_ind_inputs(df,self):
-    df = df.reset_index()
+    df = df.reset_index(['timestamp','tech','gen_name'])
     df['tech'].replace(self.gen_names_dict, inplace=True)
     df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show. 
     df.tech = df.tech.astype("category")
@@ -147,7 +147,7 @@ class mplot(object):
 
         print("Zone = " + self.zone_input)
         
-        fig2, ax2 = plt.subplots(len(self.Multi_Scenario),len(self.thermal_gen_cat),figsize=(len(self.Multi_Scenario)*4,len(self.thermal_gen_cat)*4),sharey=True)# Set up subplots for all scenarios & techs
+        fig2, ax2 = plt.subplots(len(self.Multi_Scenario),len(self.thermal_gen_cat),figsize=(len(self.thermal_gen_cat)*4,len(self.Multi_Scenario)*4),sharey=True)# Set up subplots for all scenarios & techs
 
         n=0 #Counter for scenario subplots
         

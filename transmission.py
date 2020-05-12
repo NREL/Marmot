@@ -297,6 +297,110 @@ class mplot(object):
             
         return {'fig': fig4, 'data_table': Data_Table_Out}
 
+    def region_region_checkerboard(self): 
+
+        rr_int = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
+        agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
+
+        rr_int = rr_int.reset_index()
+        rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
+        rr_int['child']  = rr_int['child'].map(agg_region_mapping)
+        rr_int_agg = rr_int.groupby(['parent','child'],as_index=True).sum() # Determine annual net flow between regions.
+        rr_int_agg.rename(columns = {0:'Flow (MW)'}, inplace = True)
+        rr_int_agg = rr_int_agg.reset_index(['parent','child'])
+        rr_int_agg=rr_int_agg.loc[rr_int_agg['Flow (MW)']>0.01] # Keep only positive flows                            
+        rr_int_agg.sort_values(ascending=False,by='Flow (MW)')
+        rr_int_agg.set_index(['parent','child'],inplace=True)
+        rr_int_agg = rr_int_agg.unstack('child')
+        rr_int_agg = rr_int_agg.droplevel(level = 0, axis = 1)
+        
+#        rr_int_agg['path']=rr_int_agg['parent']+"_"+rr_int_agg['child']
+#        pathlist=rr_int_agg['path'] #List of paths
+
+        ## Annual summary
+        fig, ax = plt.subplots(figsize=(9,6))
+        current_cmap = plt.cm.get_cmap()
+        current_cmap.set_bad(color='grey')
+
+        im = ax.imshow(rr_int_agg,interpolation='none')
+        cbar=fig.colorbar(im,ax=ax)
+        cbar.ax.set_ylabel("Net Interchange [GWh]", rotation=-90, va="bottom")
+
+        ax.set_xticks(np.arange(rr_int_agg.shape[1]))
+        ax.set_yticks(np.arange(rr_int_agg.shape[0]))
+        ax.set_xticklabels(rr_int_agg.columns)
+        ax.set_yticklabels(rr_int_agg.index)
+
+        # Rotate the tick labels and set their alignment.
+        plt.setp(ax.get_xticklabels(), rotation=45, ha="right",
+             rotation_mode="anchor")
+
+        ax.set_xticks(np.arange(rr_int_agg.shape[1]+1)-.5, minor=True) #Delineate the boxes and make room at top and bottom
+        ax.set_yticks(np.arange(rr_int_agg.shape[0]+1)-.5, minor=True)
+        ax.grid(which="minor", color="k", linestyle='-', linewidth=1)
+        ax.tick_params(which="minor", bottom=False, left=False)
+
+        ax.set_ylabel('From Region',  color='black')
+        ax.set_xlabel('To Region',color='black')
+        fig.tight_layout()
+                
+        Data_Table_Out = rr_int_agg
+           
+                   
+        return {'fig': fig, 'data_table': Data_Table_Out}
     
+    def region_region_duration(self): 
+
+        rr_int = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
+        agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
+
+        rr_int = rr_int.reset_index()
+        rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
+        rr_int['child']  = rr_int['child'].map(agg_region_mapping)
+        
+        rr_int_agg = rr_int.groupby(['parent','child'],as_index=True).sum() # Determine annual net flow between regions.
+        rr_int_agg.rename(columns = {0:'Flow (MW)'}, inplace = True)
+        rr_int_agg = rr_int_agg.reset_index(['parent','child'])
+        rr_int_agg=rr_int_agg.loc[rr_int_agg['Flow (MW)']>0.01] # Keep only positive flows                            
+#        rr_int_agg.set_index(['parent','child'],inplace=True)
+   
+        rr_int_agg['path']=rr_int_agg['parent']+"_"+rr_int_agg['child']
+        
+        if (self.prop!=self.prop)==False: # This checks for a nan in string. If a number of paths is selected only plot those
+            pathlist=rr_int_agg.sort_values(ascending=False,by='Flow (MW)')['path'][1:int(self.prop)+1] #list of top paths based on number selected
+        else:
+            pathlist=rr_int_agg['path'] #List of paths
+
+        
+        rr_int_hr = rr_int.groupby(['timestamp','parent','child'],as_index=True).sum() # Hourly flow
+        rr_int_hr.rename(columns = {0:'Flow (MW)'}, inplace = True)
+        rr_int_hr.reset_index(['timestamp','parent','child'],inplace=True)
+        rr_int_hr['path']=rr_int_hr['parent']+"_"+rr_int_hr['child']
+        rr_int_hr.set_index(['path'],inplace=True)
+        rr_int_hr['Abs MW']=abs(rr_int_hr['Flow (MW)'])
+        rr_int_hr['Abs MW'].sum()        
+        rr_int_hr.loc[pathlist]['Abs MW'].sum()*2  # Check that the sum of the absolute value of flows is the same. i.e. only redundant flows were eliminated.
+        rr_int_hr=rr_int_hr.loc[pathlist].drop(['Abs MW'],axis=1)
+        
+        ## Plot duration curves 
+        fig3, ax3 = plt.subplots(figsize=(9,6))
+        for i in pathlist:
+            duration_curve = rr_int_hr.loc[i].sort_values(ascending=False,by='Flow (MW)').reset_index()
+            plt.plot(duration_curve['Flow (MW)'],label=i)
+            del duration_curve
     
+        ax3.set_ylabel('Flow MW',  color='black', rotation='vertical')
+        ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
+        ax3.spines['right'].set_visible(False)
+        ax3.spines['top'].set_visible(False)
+
+        if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
+            ax3.legend(loc='best')            
+#            plt.lim((0,int(self.prop)))  
+
+            
+        Data_Table_Out = rr_int_hr
+           
+                   
+        return {'fig': fig3, 'data_table': Data_Table_Out}
     
