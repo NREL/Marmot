@@ -58,7 +58,7 @@ class mplot(object):
 
           infra_year = scenario[-4:] #Extract infra year from scenario name.
           capacity_out = pd.read_csv(os.path.join('/projects/continental/pcm/Results/capacity out timeseries',infra_year + '_' + met_year + '_capacity out.csv'))
-          capacity_out.index = capacity_out.DATETIME
+          capacity_out.index = pd.to_datetime(capacity_out.DATETIME)
           one_zone = capacity_out[capacity_out['PLEXOS_Zone'] == self.zone_input]    #Select only this particular zone.
           one_zone = one_zone.drop(columns = ['DATETIME','PLEXOS_Zone'])
 
@@ -93,6 +93,21 @@ class mplot(object):
               leg1 = axs[i].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
               axs[i].add_artist(leg1)
           i = i + 1
+
+      all_axes = fig1.get_axes()
+
+      self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
+
+      j=0
+      k=0
+      for ax in all_axes:
+            if ax.is_last_row():
+                ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
+                j=j+1
+            if ax.is_first_col():
+                ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
+                k=k+1
+
 
       fig1.add_subplot(111, frameon=False)
       plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)

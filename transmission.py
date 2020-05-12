@@ -49,6 +49,8 @@ class mplot(object):
 
         print("Zone = " + self.zone_input)
 
+        region2zone_mapping = pd.read_csv('/home/mschwarz/PLEXOS results analysis/Marmot/mapping_folder/region2zone.csv')
+        region2zone_mapping = region2zone_mapping.set_index('region').to_dict()['Zones']
         Net_Export_all_scenarios = pd.DataFrame()
 
         for scenario in self.Multi_Scenario:
