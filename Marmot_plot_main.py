@@ -141,7 +141,7 @@ try:
 except FileExistsError:
     # directory already exists
     pass
-line_utilization_figures = os.path.join(figure_folder, 'Line_Utilization')
+line_utilization_figures = os.path.join(figure_folder, AGG_BY+'_Line_Utilization')
 try:
     os.makedirs(line_utilization_figures)
 except FileExistsError:
@@ -254,7 +254,7 @@ gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["Ne
 Zones_pkl = pd.read_pickle(os.path.join(PLEXOS_Scenarios, Scenario_name,"zones.pkl"))
 Regions_pkl = pd.read_pickle(os.path.join(PLEXOS_Scenarios, Scenario_name,'regions.pkl'))
 
-if AGG_BY=="zone":
+if AGG_BY=="zone": 
     Zones = Zones_pkl['name'].unique()
 elif Region_Mapping.empty==True:
     Zones = Regions_pkl['region'].unique()
@@ -262,6 +262,7 @@ else:
     Region_Mapping = Regions_pkl.merge(Region_Mapping, how='left', on='region')
     Zones = Region_Mapping[AGG_BY].unique()
 #Zones = Region_Mapping[AGG_BY].unique()    
+
 # Zones = ['NYISO', 'PJM', 'MISO', 'SERC', 'SPP', 'SaskPower', 'MH']    
 
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
@@ -305,9 +306,13 @@ for index, row in Marmot_plot_select.iterrows():
             if row["Figure Type"] == "Reserve Shortage Region":
                 fig = reserves.mplot(argument_list)
                 Figure_Out = fig.reg_reserve_shortage()
-                Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(reserve_total_figures, region + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
-            
+
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No shortage in any scenario in "+zone_input)
+                else:
+                    Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+
             if row["Figure Type"] == "Reserve Provision Region":
                 fig = reserves.mplot(argument_list)
                 Figure_Out = fig.reg_reserve_provision()
@@ -317,14 +322,20 @@ for index, row in Marmot_plot_select.iterrows():
             if row["Figure Type"] == "Reserve Shortage Timeseries":
                 fig = reserves.mplot(argument_list)
                 Figure_Out = fig.reg_reserve_shortage_timeseries()
-                Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No shortage in any scenario in "+zone_input)
+                else:
+                    Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
 #                Figure_Out["data_table"].to_csv(os.path.join(reserve_timeseries_figures, region + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
             
             if row["Figure Type"] == "Reserve Shortage Hours":
                 fig = reserves.mplot(argument_list)
                 Figure_Out = fig.reg_reserve_shortage_hrs()
-                Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-#                Figure_Out["data_table"].to_csv(os.path.join(reserve_timeseries_figures, region + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                Figure_Out["data_table"].to_csv(os.path.join(reserve_total_figures, region + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No shortage in any scenario in "+zone_input)
+                else:
+                    Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
             
 
             mpl.pyplot.close('all')
@@ -404,6 +415,7 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
+            
             elif row["Figure Type"] == "Utilization Factor Generators": 
                 fig = utilization_factor.mplot(argument_list)
                 Figure_Out = fig.uf_gen()
@@ -411,27 +423,31 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["data_table"].to_csv(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == "Line Utilization Hourly": 
-                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
-                    fig = transmission.mplot(argument_list)
-                    Figure_Out = fig.line_util()
-                    Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-                
+                print("WARNING Line Utilization currently in testing.")
+                fig = transmission.mplot(argument_list)
+                Figure_Out = fig.line_util()
+                Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(line_utilization_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+
             elif row["Figure Type"] == "Line Utilization Annual": 
-                if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
-                    fig = transmission.mplot(argument_list)
-                    Figure_Out = fig.line_hist()
-                    Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
-              
+                print("WARNING Line Utilization currently in testing.")
+                fig = transmission.mplot(argument_list)
+                Figure_Out = fig.line_hist()
+                Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(line_utilization_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+
             elif row["Figure Type"] == "Region Price": 
-                    fig = prices.mplot(argument_list)
-                    Figure_Out = fig.price_region()
-                    Figure_Out["fig"].savefig(os.path.join(price_figures, zone_input + "_" +row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-             
+                fig = prices.mplot(argument_list)
+                Figure_Out = fig.price_region()
+                Figure_Out["fig"].savefig(os.path.join(price_figures, zone_input + "_" +row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+#                    Figure_Out["data_table"].to_csv(os.path.join(price_figures, zone_input + "_" + row["Figure Output Name"] + ".csv")) # These are huge files.
+
             elif row["Figure Type"] == "Region Price Timeseries": 
-                    fig = prices.mplot(argument_list)
-                    Figure_Out = fig.price_region_chron()
-                    Figure_Out["fig"].savefig(os.path.join(price_figures, zone_input + "_" +row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-             
+                fig = prices.mplot(argument_list)
+                Figure_Out = fig.price_region_chron()
+                Figure_Out["fig"].savefig(os.path.join(price_figures, zone_input + "_" +row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+#                    Figure_Out["data_table"].to_csv(os.path.join(price_figures, zone_input + "_" + row["Figure Output Name"] + ".csv")) #These are huge files.
+
             elif row["Figure Type"] == "Constraint Violation": 
                 if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
                     fig = constraints.mplot(argument_list)

@@ -57,59 +57,59 @@ class mplot(object):
      
         n=0 #Counter for scenario subplots
         
+        Data_Out=pd.DataFrame()
+        
         for scenario in self.Multi_Scenario:
             
             print("Scenario = " + str(scenario))
             
             Price = Price_Collection.get(scenario)
             Price = Price.xs(self.zone_input,level=self.AGG_BY,drop_level=False) #Filter to the AGGBY level and keep all levels
+            
+            
             for region in Price.index.get_level_values(level='region').unique() :
                 duration_curve = Price.xs(region,level="region").sort_values(by=0,ascending=False).reset_index()
                         
                 if len(self.Multi_Scenario)>1:                  #Multi scenario
-                    if duration_curve[0].max()>1e6:             #Only label curves with high prices
-                        ax3[n].plot(duration_curve[0],label=region)
-                        ax3[n].legend(loc='upper right')
-                    else:
-                        ax3[n].plot(duration_curve[0])
-
+                    ax3[n].plot(duration_curve[0],label=region)
                     ax3[n].set_ylabel(scenario,  color='black', rotation='vertical')
                     ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3[n].spines['right'].set_visible(False)
                     ax3[n].spines['top'].set_visible(False)                         
                    
                     if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
-                        ax3[n].set_ylim((0,int(self.prop)))           
-
-
+                        ax3[n].set_ylim(top=int(self.prop))           
                 else: #Single scenario
-                    if duration_curve[0].max()>1e6: #only label regions with high prices
-                        ax3.plot(duration_curve[0],label=region)
-                        ax3.legend(loc='upper right')
-                    else:    
-                        ax3.plot(duration_curve[0])
-                    
+                    ax3.plot(duration_curve[0],label=region)
+                 
                     ax3.set_ylabel(scenario,  color='black', rotation='vertical')
                     ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
                     ax3.spines['right'].set_visible(False)
                     ax3.spines['top'].set_visible(False)   
-
                    
                     if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
-                        plt.ylim((0,int(self.prop)))   
-                       
-
-                
+                        plt.ylim(top=int(self.prop))   
+                                      
                 del duration_curve
-            del Price 
+               
+            if len(Price.index.get_level_values(level='region').unique()) <10:# Add legend if legible
+                if len(self.Multi_Scenario)>1:
+                    ax3[n].legend(loc='upper right')
+                else:
+                    ax3.legend(loc='upper right')
             
+            Price=Price.reset_index(['timestamp','region']).set_index(['timestamp'])
+            Price.rename(columns={0:scenario},inplace=True)
+            Data_Out=pd.concat([Data_Out,Price],axis=1)
+
+            del Price 
                
             n=n+1
         #end scenario loop
         fig3.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Region Price $/MWh ',  color='black', rotation='vertical', labelpad=60)                      
-        return {'fig': fig3}
+        return {'fig': fig3, 'data_table':Data_Out}
     
     def price_region_chron(self):          #Timeseries of individual region prices 
         
@@ -125,6 +125,8 @@ class mplot(object):
      
         n=0 #Counter for scenario subplots
         
+        Data_Out=pd.DataFrame()
+        
         for scenario in self.Multi_Scenario:
             
             print("Scenario = " + str(scenario))
@@ -136,7 +138,7 @@ class mplot(object):
                 timeseries = Price.xs(region,level="region").reset_index().set_index('timestamp')
                         
                 if len(self.Multi_Scenario)>1:
-                    ax3[n].plot(timeseries[0])
+                    ax3[n].plot(timeseries[0],label=region)
                     ax3[n].set_ylabel(scenario,  color='black', rotation='vertical')
                     ax3[n].spines['right'].set_visible(False)
                     ax3[n].spines['top'].set_visible(False)                         
@@ -153,12 +155,12 @@ class mplot(object):
                     ax3[n].xaxis.set_major_formatter(formatter)
                     
                     if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
-                        ax3[n].set_ylim((0,int(self.prop)))           
+                        ax3[n].set_ylim(top=int(self.prop))           
 
 
                 else:
 
-                    ax3.plot(timeseries[0])
+                    ax3.plot(timeseries[0],label=region)
                     ax3.set_ylabel(scenario,  color='black', rotation='vertical')
                     ax3.spines['right'].set_visible(False)
                     ax3.spines['top'].set_visible(False)   
@@ -174,9 +176,20 @@ class mplot(object):
                     ax3.xaxis.set_major_formatter(formatter)
                     
                     if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
-                        plt.ylim((0,int(self.prop)))   
+                        plt.ylim(top=int(self.prop))   
                 
                 del timeseries
+                
+            if len(Price.index.get_level_values(level='region').unique()) <10:# Add legend if legible
+                    if len(self.Multi_Scenario)>1:
+                        ax3[n].legend()
+                    else:
+                        ax3.legend()
+                            
+            Price=Price.reset_index(['timestamp','region']).set_index(['timestamp'])
+            Price.rename(columns={0:scenario},inplace=True)
+            Data_Out=pd.concat([Data_Out,Price],axis=1)
+            
             del Price 
             
                            
@@ -186,6 +199,6 @@ class mplot(object):
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Region Price $/MWh ',  color='black', rotation='vertical', labelpad=60)          
                       
-        return {'fig': fig3}
+        return {'fig': fig3, 'data_table':Data_Out}
     
     

@@ -2,9 +2,9 @@ Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, P
 Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,
 Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,2/1/2024,2/5/2024
 Capacity Factor,FALSE,Capacity_Factor,,,,EST,,
-Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,2/1/2024,2/5/2024
+Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,8/12/2024,8/18/2024
 Capacity Started,FALSE,Capacity_Started,,,,EST,,
-Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,2/1/2024,2/5/2024
+Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,8/12/2024,8/18/2024
 Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,,,
 Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,,,
 Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,
@@ -37,9 +37,9 @@ Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,,,
 Total System Cost,FALSE,Total_System_Cost,,,,,,
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,
 Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,
-Utilization Factor Fleet,TRUE,Utilization_Factor_Fleet,,,,EST,,
+Utilization Factor Fleet,FALSE,Utilization_Factor_Fleet,,,,EST,,
 Utilization Factor Fleet by Type,FALSE,Utilization_Factor_Fleet_Type,,,,,,
-Utilization Factor Generators,TRUE,Utilization_Factor_Generators,,,,EST,,
+Utilization Factor Generators,FALSE,Utilization_Factor_Generators,,,,EST,,
 Line Utilization Annual,FALSE,Line_Utilization_Histogram,,,,,,
 Line Utilization Annual,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,
 Line Utilization Hourly,FALSE,Line_Utilization_Duration,,,,,,

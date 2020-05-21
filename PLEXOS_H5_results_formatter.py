@@ -590,6 +590,31 @@ for Scenario_name in Scenario_List:
     except KeyError:
         print("\nLine data not included in h5plexos results.\nSkipping Line property\n")  
     
+    
+        ## Get Line relations and save to pickle 
+    try:
+        try:
+            line_relations_interregional=pd.DataFrame(np.asarray(data['metadata/relations/region_interregionallines']))
+            line_relations_intraregional=pd.DataFrame(np.asarray(data['metadata/relations/region_intraregionallines']))
+
+        except KeyError:
+            line_relations_interregional=pd.DataFrame(np.asarray(data['metadata/relations/region_interregionalline']))
+            line_relations_intraregional=pd.DataFrame(np.asarray(data['metadata/relations/region_interregionalline']))        
+        line_relations_interregional["parent"]=line_relations_interregional["parent"].str.decode("utf-8")
+        line_relations_interregional["child"]= line_relations_interregional["child"].str.decode("utf-8")
+        line_relations_interregional.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+        line_relations_interregional=pd.merge(line_relations_interregional,Region_Mapping,how='left',on="region")
+        line_relations_interregional.to_pickle(PLEXOS_Scenarios+"/line_relations_interregional.pkl")
+        
+        line_relations_intraregional["parent"]=line_relations_intraregional["parent"].str.decode("utf-8")
+        line_relations_intraregional["child"]= line_relations_intraregional["child"].str.decode("utf-8")
+        line_relations_intraregional.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+        line_relations_intraregional=pd.merge(line_relations_intraregional,Region_Mapping,how='left',on="region")
+        line_relations_intraregional.to_pickle(PLEXOS_Scenarios+"/line_relations_intraregional.pkl")
+    except KeyError:
+        print("\nLine data not included in h5plexos results.\nSkipping Line property\n")  
+    
+    
     # Read in all HDF5 files into dictionary 
     print("Loading all HDF5 files to prepare for processing")
     hdf5_collection = {}

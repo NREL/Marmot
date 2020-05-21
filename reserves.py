@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
+import numpy as np 
 
 
 #===============================================================================
@@ -233,7 +234,12 @@ class mplot(object):
             
             reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
             reserve_short_timeseries = reserve_short_timeseries.xs(self.region,level="Reserve_Region")
-            reserve_short_total = reserve_short_timeseries.groupby(["Type"]).sum()
+            timestamps=reserve_short_timeseries.reset_index(['timestamp'])['timestamp']
+            time_delta = timestamps.iloc[1]- timestamps.iloc[0]                # Calculates interval step to correct for MWh of generation
+            interval_count = 60/(time_delta/np.timedelta64(1, 'm'))            # Finds intervals in 60 minute period
+            print("Identified timestep was: "+str(time_delta))
+
+            reserve_short_total = reserve_short_timeseries.groupby(["Type"]).sum()/interval_count
 
     
                            
@@ -245,7 +251,7 @@ class mplot(object):
                 ax2[n].tick_params(axis='y', which='major', length=5, width=1)
                 ax2[n].tick_params(axis='x', which='major', length=5, width=1)
                 ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                ax2[n].margins(x=0.01)
+                ax2[n].margins(x=0.1)
             else:
                 ax2.bar(reserve_short_total.index,reserve_short_total[0])
                 ax2.set_ylabel(scenario,color='black',rotation='vertical')
@@ -254,7 +260,7 @@ class mplot(object):
                 ax2.tick_params(axis='y', which='major', length=5, width=1)
                 ax2.tick_params(axis='x', which='major', length=5, width=1)
                 ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                ax2.margins(x=0.01)
+                ax2.margins(x=0.1)
             n=n+1
             reserve_short_total.rename(columns={0:scenario},inplace=True)
             Data_Table_Out=pd.concat([Data_Table_Out,reserve_short_total],axis=1) 
@@ -285,7 +291,11 @@ class mplot(object):
             
             reserve_provision_timeseries = Reserve_Provision_Collection.get(scenario)
             reserve_provision_timeseries = reserve_provision_timeseries.xs(self.region,level="Reserve_Region")
-            reserve_provision_total = reserve_provision_timeseries.groupby(["Type"]).sum()
+            timestamps=reserve_provision_timeseries.reset_index(['timestamp'])['timestamp']
+            time_delta = timestamps.iloc[1]- timestamps.iloc[0]                # Calculates interval step to correct for MWh of generation
+            print("Identified timestep was: "+str(time_delta))
+            interval_count = 60/(time_delta/np.timedelta64(1, 'm'))            # Finds intervals in 60 minute period
+            reserve_provision_total = reserve_provision_timeseries.groupby(["Type"]).sum()/interval_count
 
                            
             if len(self.Multi_Scenario)>1:
@@ -296,7 +306,7 @@ class mplot(object):
                 ax2[n].tick_params(axis='y', which='major', length=5, width=1)
                 ax2[n].tick_params(axis='x', which='major', length=5, width=1)
                 ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                ax2[n].margins(x=0.01)
+                ax2[n].margins(x=0.1)
             else:
                 ax2.bar(reserve_provision_total.index,reserve_provision_total[0])
                 ax2.set_ylabel(scenario,color='black',rotation='vertical')
@@ -305,7 +315,7 @@ class mplot(object):
                 ax2.tick_params(axis='y', which='major', length=5, width=1)
                 ax2.tick_params(axis='x', which='major', length=5, width=1)
                 ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                ax2.margins(x=0.01)
+                ax2.margins(x=0.1)
             n=n+1
             reserve_provision_total.rename(columns={0:scenario},inplace=True)
             Data_Table_Out=pd.concat([Data_Table_Out,reserve_provision_total],axis=1)
@@ -380,7 +390,7 @@ class mplot(object):
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel('Reserve Shortage [MWh]',  color='black', rotation='vertical', labelpad=60)
+        plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical', labelpad=60)
 
         return {'fig': fig2}
     
@@ -394,7 +404,7 @@ class mplot(object):
             Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
             
         fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
-
+        Data_Out=pd.DataFrame()
         n=0 #Counter for scenario subplots
         for scenario in self.Multi_Scenario:
             
@@ -404,7 +414,6 @@ class mplot(object):
             reserve_short_timeseries = reserve_short_timeseries.xs(self.region,level="Reserve_Region")
             reserve_short_hrs = reserve_short_timeseries[reserve_short_timeseries[0]>0] #Filter for non zero values
             reserve_short_hrs = reserve_short_hrs.groupby("Type").count()
-## HERE
                            
             if len(self.Multi_Scenario)>1:
                 ax2[n].bar(reserve_short_hrs.index,reserve_short_hrs[0])
@@ -414,7 +423,7 @@ class mplot(object):
                 ax2[n].tick_params(axis='y', which='major', length=5, width=1)
                 ax2[n].tick_params(axis='x', which='major', length=5, width=1)
                 ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                ax2[n].margins(x=0.01)
+                ax2[n].margins(x=0.1)
             else:
                 ax2.bar(reserve_short_hrs.index,reserve_short_hrs[0])
                 ax2.set_ylabel(scenario,color='black',rotation='vertical')
@@ -423,16 +432,17 @@ class mplot(object):
                 ax2.tick_params(axis='y', which='major', length=5, width=1)
                 ax2.tick_params(axis='x', which='major', length=5, width=1)
                 ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                ax2.margins(x=0.01)
+                ax2.margins(x=0.1)
             n=n+1
-            
+        reserve_short_hrs.rename(columns={0:scenario},inplace=True)
+        Data_Out=pd.concat([Data_Out,reserve_short_hrs],axis=1)    
         #End scenario loop
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel('Reserve Shortage Hours',  color='black', rotation='vertical', labelpad=60)
+        plt.ylabel('Reserve Shortage Intervals',  color='black', rotation='vertical', labelpad=60)
 
-        return {'fig': fig2}
+        return {'fig': fig2,'data_table':Data_Out}
 #    def tot_reserve_shortage(self):
 #        
 #        print("     "+ self.zone_input)

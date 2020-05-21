@@ -284,3 +284,4 @@ class mplot(object):
         
                            
         return {'fig': fig3, 'data_table': CF_all_scenarios}             
+

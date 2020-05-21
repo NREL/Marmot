@@ -121,8 +121,7 @@ class mplot(object):
         
         for scenario in self.Multi_Scenario:
             Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
-
-        
+      
         
         print("Line analysis done only once (not per zone).")
         
@@ -130,6 +129,8 @@ class mplot(object):
      
         n=0 #Counter for scenario subplots
         
+        Data_Out=pd.DataFrame()
+                
         for scenario in self.Multi_Scenario:
             
             print("Scenario = " + str(scenario))
@@ -174,11 +175,14 @@ class mplot(object):
             n=n+1
         #end scenario loop
                               
-        return {'fig': fig3}
+        return {'fig': fig3,'data_table':Data_Out}
     
     
     
     def line_hist(self):                #Histograms of individual line utilization factor for entire year
+        
+
+        
         Flow_Collection = {}            # Create Dictionary to hold Datframes for each scenario 
 
         
@@ -190,11 +194,20 @@ class mplot(object):
         fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
      
         n=0 #Counter for scenario subplots
-                              
+                 
+        Data_Out=pd.DataFrame()             
         for scenario in self.Multi_Scenario:
-            
+         
+           
             print("Scenario = " + str(scenario))
+            lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
+            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
+            lines_interregional=lines_interregional.xs(self.zone_input,level=self.AGG_BY)            
+            lines_intraregional=lines_intraregional.xs(self.zone_input,level=self.AGG_BY)            
+            zone_lines=pd.concat([lines_interregional,lines_intraregional],axis=0)
+            
             Flow = Flow_Collection.get(scenario)
+            Flow = Flow[Flow['line_name'].isin(zone_lines['line_name'])] #Limit to only lines touching to this zone
             
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no category selected, do nothing.
                 print("Line category = "+str(self.prop))
@@ -222,12 +235,14 @@ class mplot(object):
                 ax3.set_xlabel('Utilization',  color='black', rotation='horizontal')
                 ax3.spines['right'].set_visible(False)
                 ax3.spines['top'].set_visible(False)   
-              
+            
+            Annual_Util.rename(columns={0:scenario},inplace=True)
+            Data_Out=pd.concat([Data_Out,Annual_Util],axis=1)
             del Annual_Util  
             n=n+1
         #end scenario loop
                               
-        return {'fig': fig3}
+        return {'fig': fig3,'data_table':Data_Out}
     
     def region_region_interchange(self): 
 
