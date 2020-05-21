@@ -82,7 +82,7 @@ Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_i
 gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
 AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
-
+print("Aggregation selected: "+AGG_BY)
 # Facet Grid Labels (Based on Scenarios)
 ylabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze()).split(",")).str.strip().tolist() 
 if ylabels == ['nan']: ylabels = [""]
@@ -261,7 +261,7 @@ elif Region_Mapping.empty==True:
 else:     
     Region_Mapping = Regions_pkl.merge(Region_Mapping, how='left', on='region')
     Zones = Region_Mapping[AGG_BY].unique()
-    
+#Zones = Region_Mapping[AGG_BY].unique()    
 # Zones = ['NYISO', 'PJM', 'MISO', 'SERC', 'SPP', 'SaskPower', 'MH']    
 
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
@@ -397,12 +397,19 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out = fig.uf_fleet()
                 Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+            
+            elif row["Figure Type"] == "Utilization Factor Fleet by Type": 
+                fig = utilization_factor.mplot(argument_list)
+                Figure_Out = fig.uf_fleet_by_type()
+                Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == "Utilization Factor Generators": 
                 fig = utilization_factor.mplot(argument_list)
                 Figure_Out = fig.uf_gen()
                 Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-            
+                Figure_Out["data_table"].to_csv(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+
             elif row["Figure Type"] == "Line Utilization Hourly": 
                 if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
                     fig = transmission.mplot(argument_list)
