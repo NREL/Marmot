@@ -285,3 +285,68 @@ class mplot(object):
                            
         return {'fig': fig3, 'data_table': CF_all_scenarios}             
 
+    def GW_fleet(self):
+        # Create Dictionary to hold Datframes for each scenario 
+        Gen_Collection = {} 
+        
+        for scenario in self.Multi_Scenario:
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
+
+        GW_all_scenarios = pd.DataFrame()
+        print("Zone = " + self.zone_input)
+        
+        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
+     
+        n=0 #Counter for scenario subplots
+        
+        for scenario in self.Multi_Scenario:
+            
+            print("Scenario = " + str(scenario))
+            Gen = Gen_Collection.get(scenario)
+            try:
+                Gen = Gen.xs(self.zone_input,level = self.AGG_BY)
+            except KeyError:
+                print("No generation in "+self.zone_input+".")
+                break
+            
+            Gen = df_process_gen_inputs(Gen,self)
+        
+                       
+            Total_Gen = Gen.groupby(["tech"],as_index=True).sum(axis=0)
+            
+
+            for i in sorted(Gen.reset_index()['tech'].unique()):
+                duration_curve = Gen.xs(i,level="tech").sort_values(by=0,ascending=False).reset_index()
+                        
+                if len(self.Multi_Scenario)>1:
+                    ax3[n].plot(duration_curve[0]/1000,color=self.PLEXOS_color_dict.get(i, '#333333'),label=i)
+                    ax3[n].legend()
+                    ax3[n].set_ylabel('GW \n'+scenario,  color='black', rotation='vertical')
+                    ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
+                    ax3[n].spines['right'].set_visible(False)
+                    ax3[n].spines['top'].set_visible(False)                         
+                
+                else:
+                    ax3.plot(duration_curve[0]/1000,color=self.PLEXOS_color_dict.get(i, '#333333'),label=i)
+                    ax3.legend()
+                    ax3.set_ylabel('GW \n'+scenario,  color='black', rotation='vertical')
+                    ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
+                    ax3.spines['right'].set_visible(False)
+                    ax3.spines['top'].set_visible(False)   
+                               
+                del duration_curve
+                  
+            n=n+1
+            
+            #Calculate CF
+            Total_Gen.rename(columns={0:scenario}, inplace = True)
+            GW_all_scenarios = pd.concat([GW_all_scenarios, Total_Gen], axis=1, sort=False)
+            GW_all_scenarios = GW_all_scenarios.dropna(axis = 0)
+            
+            del Gen,Total_Gen 
+            #end scenario loop
+
+        GW_all_scenarios.index = GW_all_scenarios.index.str.wrap(10, break_long_words = False)
+        
+                           
+        return {'fig': fig3, 'data_table': GW_all_scenarios}

@@ -53,7 +53,11 @@ class mplot(object):
             print("Scenario = " + scenario)
             
             Total_Installed_Capacity = Installed_Capacity_Collection.get(scenario)
-            Total_Installed_Capacity = Total_Installed_Capacity.xs(self.zone_input,level=self.AGG_BY)
+            try:
+                Total_Installed_Capacity = Total_Installed_Capacity.xs(self.zone_input,level=self.AGG_BY)
+            except KeyError:
+                print("No installed capacity in : "+self.zone_input)
+                return pd.DataFrame()
             Total_Installed_Capacity = df_process_gen_inputs(Total_Installed_Capacity, self)
             Total_Installed_Capacity.reset_index(drop=True, inplace=True)
             Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)

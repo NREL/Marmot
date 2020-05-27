@@ -163,8 +163,15 @@ class mplot(object):
             print("Scenario = " + scenario)
             Total_Systems_Cost = pd.DataFrame()
             
+            
             Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
-            Total_Gen_Cost = Total_Gen_Cost.xs(self.zone_input,level=self.AGG_BY)
+
+            try:
+                Total_Gen_Cost = Total_Gen_Cost.xs(self.zone_input,level=self.AGG_BY)
+            except KeyError:
+                print("No Generators found for : "+self.zone_input)
+                return pd.DataFrame()
+            
             Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
             Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
             
@@ -268,7 +275,10 @@ class mplot(object):
             print("Scenario = " + scenario)
             
             Fuel_Cost = Fuel_Cost_Collection.get(scenario)
-            Fuel_Cost = Fuel_Cost.xs(self.zone_input,level=self.AGG_BY)
+            try:
+                Fuel_Cost = Fuel_Cost.xs(self.zone_input,level=self.AGG_BY)
+            except KeyError:
+                return pd.DataFrame()
             Fuel_Cost = Fuel_Cost.sum(axis=0)
             Fuel_Cost.rename("Fuel_Cost", inplace=True)
             
