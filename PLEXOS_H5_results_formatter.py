@@ -590,6 +590,33 @@ for Scenario_name in Scenario_List:
     except KeyError:
         print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
 
+    ## Get line <-> region mapping and save to pickle. Combine inter and intra regional lines.
+    try:
+        region_exportinglines = pd.DataFrame(np.asarray(data['metadata/relations/region_exportinglines']))
+        region_exportinglines["region"] = region_exportinglines["parent"].str.decode("utf-8")
+        region_exportinglines["line"] = region_exportinglines["child"].str.decode("utf-8")
+        region_exportinglines = region_exportinglines.drop(columns = ['parent','child'])
+
+        region_intraregionallines = pd.DataFrame(np.asarray(data['metadata/relations/region_intraregionallines']))
+        region_intraregionallines["region"] = region_intraregionallines["parent"].str.decode("utf-8")
+        region_intraregionallines["line"] = region_intraregionallines["child"].str.decode("utf-8")
+        region_intraregionallines = region_intraregionallines.drop(columns = ['parent','child'])
+
+        region_lines = region_exportinglines.append(region_intraregionallines)
+        region_lines.to_pickle(PLEXOS_Scenarios+"/line2region.pkl")
+    except KeyError:
+        print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n")
+
+    ## Get line <-> interface mapping and save to pickle.
+    try:
+        interface_lines = pd.DataFrame(np.asarray(data['metadata/relations/interface_lines']))
+        interface_lines["interface"] = interface_lines["parent"].str.decode("utf-8")
+        interface_lines["line"] = interface_lines["child"].str.decode("utf-8")
+        interface_lines = interface_lines.drop(columns = ['parent','child'])
+        interface_lines.to_pickle(PLEXOS_Scenarios+"/line2interface.pkl")
+    except KeyError:
+        print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n")
+
     # Read in all HDF5 files into dictionary
     print("Loading all HDF5 files to prepare for processing")
     hdf5_collection = {}
@@ -624,8 +651,7 @@ for Scenario_name in Scenario_List:
             print("     "+ model)
             db = hdf5_collection.get(model)
 
-            processed_data = get_data(row["group"], row["data_set"],
-                                             row["data_type"], db, overlap)
+            processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, overlap)
 
             if processed_data.empty == True:
                 print("\n")

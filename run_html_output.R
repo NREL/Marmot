@@ -1,12 +1,10 @@
 #Read in file locations
+start_time = Sys.time()
+#setwd("C:/Users/mschwarz/Desktop/Marmot")
+setwd('/home/mschwarz/PLEXOS results analysis/Marmot')
 library(data.table)
-setwd("C:/Users/mschwarz/Desktop/Marmot")
 inputs = data.table(read.csv('Marmot_user_defined_inputs.csv', header = T))
 parent_dir = as.character(inputs[Input == 'Processed_Solutions_folder']$User_defined_value)
-scenario_dir = as.character(inputs[Input == 'Main_scenario_plot']$User_defined_value)
-agg_by_prefix = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
-
-output.dir = paste0(parent_dir,'/',scenario_dir)
-
 rmarkdown::render(input = file.path('HTML_out.Rmd'),c('html_document'),
-                  output_file = paste0(parent_dir,'_by ',agg_by_prefix,'.html'),output_dir = output.dir)
+                  output_file = paste0(parent_dir,'test.html'),output_dir = parent_dir)
+message(paste0('HTML compiled in ',Sys.time() - start_time,'minutes.'))

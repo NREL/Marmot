@@ -23,8 +23,6 @@ def df_process_gen_inputs(df, self):
     df = df.pivot(index='timestamp', columns='tech', values=0)
     return df
 
-
-
 class mplot(object):
     def __init__(self, argument_list):
         self.prop = argument_list[0]
@@ -202,7 +200,7 @@ class mplot(object):
         sb = Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
-        ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
+        ax.set_ylabel('Total Cost (Million $)',  color='black', rotation='vertical')
         ax.tick_params(axis='y', which='major', length=5, width=1)
         ax.tick_params(axis='x', which='major', length=5, width=1)
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.2g}'))
@@ -248,49 +246,40 @@ class mplot(object):
 
 
 
-    def detailed_gen_cost(self):
-        Total_Gen_Cost_Collection = {}
-        Fuel_Cost_Collection = {}
-        VOM_Cost_Collection = {}
-        Start_Shutdown_Cost_Collection = {}
-        Emissions_Cost_Collection = {}
-        for scenario in self.Multi_Scenario:
-
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
-            Fuel_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
-            VOM_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
-            Start_Shutdown_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
-            try:
-                Emissions_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
-            except Exception:
-                print("\ngenerator_Emissions_Cost not included in " + scenario + " results,\nEmissions_Cost will not be included in plot\n")
-                Emissions_Cost_Collection[scenario] = Start_Shutdown_Cost_Collection[scenario].copy()
-                Emissions_Cost_Collection[scenario].iloc[:,0] = 0
-                pass
+    def detailed_production_cost(self):
 
         print("Zone = "+ self.zone_input)
-
         Detailed_Gen_Cost_Out = pd.DataFrame()
 
         for scenario in self.Multi_Scenario:
             print("Scenario = " + scenario)
 
-            Fuel_Cost = Fuel_Cost_Collection.get(scenario)
+            Gen = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Generation")
+            Gen = Gen.xs(self.zone_input,level=self.AGG_BY)
+            Total_gen = Gen.sum().iloc[0] #Total energy produced, in MWh.
+
+            Fuel_Cost = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
             Fuel_Cost = Fuel_Cost.xs(self.zone_input,level=self.AGG_BY)
             Fuel_Cost = Fuel_Cost.sum(axis=0)
             Fuel_Cost.rename("Fuel_Cost", inplace=True)
 
-            VOM_Cost = VOM_Cost_Collection.get(scenario)
+            VOM_Cost = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
             VOM_Cost = VOM_Cost.xs(self.zone_input,level=self.AGG_BY)
             VOM_Cost = VOM_Cost.sum(axis=0)
             VOM_Cost.rename("VO&M_Cost", inplace=True)
 
-            Start_Shutdown_Cost = Start_Shutdown_Cost_Collection.get(scenario)
+            Start_Shutdown_Cost = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
             Start_Shutdown_Cost = Start_Shutdown_Cost.xs(self.zone_input,level=self.AGG_BY)
             Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
             Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
 
-            Emissions_Cost = Emissions_Cost_Collection.get(scenario)
+            try:
+                Emissions_Cost = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
+            except Exception:
+                print("\ngenerator_Emissions_Cost not included in " + scenario + " results,\nEmissions_Cost will not be included in plot\n")
+                Emissions_Cost = Start_Shutdown_Cost.copy()
+                Emissions_Cost.iloc[:,0] = 0
+                pass
             Emissions_Cost = Emissions_Cost.xs(self.zone_input,level=self.AGG_BY)
             Emissions_Cost = Emissions_Cost.sum(axis=0)
             Emissions_Cost.rename("Emissions_Cost", inplace=True)
@@ -303,7 +292,7 @@ class mplot(object):
 
             Detailed_Gen_Cost_Out = pd.concat([Detailed_Gen_Cost_Out, Detailed_Gen_Cost], axis=1, sort=False)
 
-        Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
+        Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/Total_gen #Normalize by total generation.
 
         Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
         Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(10, break_long_words=False)
@@ -318,7 +307,7 @@ class mplot(object):
         sb = Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
-        ax.set_ylabel('Total Generation Cost (Million $)',  color='black', rotation='vertical')
+        ax.set_ylabel('Total production cost, normalized by total generation ($/MWh)',  color='black', rotation='vertical')
         ax.tick_params(axis='y', which='major', length=5, width=1)
         ax.tick_params(axis='x', which='major', length=5, width=1)
         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))

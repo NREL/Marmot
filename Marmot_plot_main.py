@@ -29,6 +29,7 @@ import ramping
 import utilization_factor
 import prices
 import capacity_out
+import thermal_cap_reserve
 # import constraints
 
 try:
@@ -125,6 +126,14 @@ try:
 except FileExistsError:
     # directory already exists
     pass
+
+thermal_cap_reserve_figures = os.path.join(figure_folder, AGG_BY + '_Thermal_Capacity_Reserves')
+try:
+    os.makedirs(thermal_cap_reserve_figures)
+except FileExistsError:
+    # directory already exists
+    pass
+
 tot_gen_stack_figures = os.path.join(figure_folder, AGG_BY + '_Total_Gen_Stack')
 try:
     os.makedirs(tot_gen_stack_figures)
@@ -155,12 +164,20 @@ try:
 except FileExistsError:
     # directory already exists
     pass
-system_cost_figures = os.path.join(figure_folder, AGG_BY + '_Total_System_Cost')
+production_cost_figures = os.path.join(figure_folder, AGG_BY + '_Production_Cost')
 try:
-    os.makedirs(system_cost_figures)
+    os.makedirs(production_cost_figures)
 except FileExistsError:
     # directory already exists
     pass
+
+region_price_figures = os.path.join(figure_folder, AGG_BY + '_Region_Price')
+try:
+    os.makedirs(region_price_figures)
+except FileExistsError:
+    # directory already exists
+    pass
+
 reserve_timeseries_figures = os.path.join(figure_folder, AGG_BY + '_Reserve_Timeseries')
 try:
     os.makedirs(reserve_timeseries_figures)
@@ -203,7 +220,9 @@ vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeez
 
 thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
-thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
+facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
+
+
 
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
                     print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
@@ -325,23 +344,29 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping]
+               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,facet_gen_cat]
 
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list)
                 Figure_Out = fig.gen_stack()
-                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
-            elif row["Figure Type"] == "Generation Stack Facet Grid":
-                fig = generation_stack.mplot(argument_list)
-                Figure_Out = fig.gen_stack_facet()
-                Figure_Out.savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
-
-            elif row["Figure Type"] == "Capacity Out Stack Facet Grid":
+            elif row["Figure Type"] == "Capacity Out Stack":
                 fig = capacity_out.mplot(argument_list)
-                Figure_Out = fig.capacity_out_stack_facet()
-                Figure_Out.savefig(os.path.join(outage_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out = fig.capacity_out_stack()
+                Figure_Out["fig"].savefig(os.path.join(outage_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(outage_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+
+            elif row["Figure Type"] == "Committed Capacity Stack":
+                fig = generation_stack.mplot(argument_list)
+                fig.committed_stack().savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=100, bbox_inches='tight')
+
+            elif row["Figure Type"] == "Thermal Capacity reserves":
+                fig = thermal_cap_reserve.mplot(argument_list)
+                Figure_Out = fig.thermal_cap_reserves()
+                Figure_Out["fig"].savefig(os.path.join(thermal_cap_reserve_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(thermal_cap_reserve_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == "Total Generation":
                 fig = total_generation.mplot(argument_list)
@@ -397,7 +422,7 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out = fig.uf_gen()
                 Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
 
-            elif row["Figure Type"] == "Line Utilization Hourly":
+            elif row["Figure Type"] == "Line Utilization Duration Curve":
                 if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
                     fig = transmission.mplot(argument_list)
                     Figure_Out = fig.line_util()
@@ -417,7 +442,8 @@ for index, row in Marmot_plot_select.iterrows():
             elif row["Figure Type"] == "Region Price Timeseries":
                     fig = prices.mplot(argument_list)
                     Figure_Out = fig.price_region_chron()
-                    Figure_Out["fig"].savefig(os.path.join(figure_folder, zone_input + "_" +row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["fig"].savefig(os.path.join(region_price_figures, zone_input + "_" +row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(region_price_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == "Constraint Violation":
                 if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
@@ -450,11 +476,11 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
-            elif row["Figure Type"] == "Detailed Total Generation Cost":
+            elif row["Figure Type"] == "Detailed Production Cost":
                 fig = production_cost.mplot(argument_list)
-                Figure_Out = fig.detailed_gen_cost()
-                Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+                Figure_Out = fig.detailed_production_cost()
+                Figure_Out["fig"].savefig(os.path.join(production_cost_figures, zone_input + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(production_cost_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == "Generation Timeseries Difference":
                 fig = generation_stack.mplot(argument_list)
@@ -483,13 +509,8 @@ for index, row in Marmot_plot_select.iterrows():
             elif row["Figure Type"] == "Generation Unstacked":
                 fig = generation_unstack.mplot(argument_list)
                 Figure_Out = fig.gen_unstack()
-                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
-
-            elif row["Figure Type"] == "Generation Unstacked Facet Grid":
-                fig = generation_unstack.mplot(argument_list)
-                Figure_Out = fig.gen_unstack_facet()
-                Figure_Out.savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + "_"  + ".csv"))
 
             elif row["Figure Type"] == 'Net Export':
                 fig = transmission.mplot(argument_list)
@@ -500,6 +521,11 @@ for index, row in Marmot_plot_select.iterrows():
             elif row["Figure Type"] == 'Zone-Zone Net Interchange':
                 fig = transmission.mplot(argument_list)
                 Figure_Out = fig.zone_zone_interchange()
+                Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+
+            elif row["Figure Type"] == 'Hours Congested':
+                fig = transmission.mplot(argument_list)
+                Figure_Out = fig.hours_congested()
                 Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
 
             mpl.pyplot.close('all')
