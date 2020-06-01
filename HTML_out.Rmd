@@ -1,20 +1,13 @@
 ---
-#title: "Heat Wave: July 17th - 25th, 2011"
-#title: "Cold Wave: February 1st - 5th, 2011"
-#title: "High Net Load: February 19th - 23rd, 2008"
-#title: "High Net Load: August 8th - 11th, 2010"
-title: "Low VG Resource: February 2nd - 6th, 2010"
-#title: "Lowest Net Load: April 17th, 2011"
-#title: "Winter Storms: December 4th - 12th, 2013"
-
+title: "PLEXOS Results"
 author: "Created by: National Renewable Energy Laboratory (NREL)"
 date: "`r format(Sys.time(), '%d %B %Y')`"
-output:
-  html_document:
+output: 
+  html_document: 
     css: custom.css
-    toc: true
+    toc: yes
     toc_float:
-      collapsed: true
+      collapsed: false
     number_sections: true
     df_print: paged
 ---
@@ -32,378 +25,121 @@ if(!require("pacman")){
 }
 
 pacman::p_load(ggplot2, data.table, maptools, mapproj, RColorBrewer,tidyverse,magick,cowplot,
-               rgeos, scales, stringr, rmarkdown, gdata, zoo, viridis,png,grid,dplyr,highlight)
+               rgeos, scales, stringr, rmarkdown, gdata, zoo, viridis,png,grid,dplyr)
 
 #Read in file locations
 inputs = data.table(read.csv('Marmot_user_defined_inputs.csv', header = T))
 parent_dir = as.character(inputs[Input == 'Processed_Solutions_folder']$User_defined_value)
 scenario_dir = as.character(inputs[Input == 'Main_scenario_plot']$User_defined_value)
-#agg_by_prefix = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
-interconnection_dir = paste0(parent_dir,'/',scenario_dir,'/Figures_Output/Interconnection_')
-zone_dir = paste0(parent_dir,'/',scenario_dir,'/Figures_Output/superzone_')
+agg_by_prefix = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
+plots_dir = paste0(parent_dir,'/',scenario_dir,'/Figures_Output/',agg_by_prefix,'_')
 
 #Read in list of regions.
-groupings = data.table(read.csv('mapping_folder/Regions_Zones_Mapping_Full.csv'))
-regions = sort(unique(groupings[['superzone']]))
-interconnections = unique(groupings[['Interconnection']])
+regions = data.table(read.csv('mapping_folder/Region_mapping.csv'))
+regions = as.character(unique(pull(regions,agg_by_prefix)))
 
 # set up default options for chunks, turn off error or warning messages
-knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='png', cache = F, fig.width = 10)
+knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T, 
+                      dev='png', cache = F, fig.width = 5)
 
 ```
 
-# Generation
-## Total Generation
-### By Interconnection
-```{r total generation interconnection, out.width = "50%", fig.asp = 0.675}
+***
+#Capacity Factor
+##Capacity Factor (average output for all hours)
+```{r capacity-factor, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- plots_subdir = paste0(interconnection_dir,'Total_Gen_Stack')
- for (interconnection in interconnections){
-   img_fn = paste0(plots_subdir,'/',interconnection,'_Total_Generation.png')
-   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
-                                                                   draw_image(img_fn) +
-                                                                   draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
- }
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-
-### By zone
-```{r total generation zone, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- plots_subdir = paste0(zone_dir,'Total_Gen_Stack')
- for (region in regions){
-   img_fn = paste0(plots_subdir,'/',region,'_Total_Generation.png')
-   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
-                                                                   draw_image(img_fn) +
-                                                                   draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
- }
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-## Generation Stacks
-### By Interconnection
-```{r stacked-generation interconnection, out.width = "50%", fig.asp = 1.1}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
- plots_subdir = paste0(interconnection_dir,'Gen_Stack')
- #Alternate stacked and unstacked plots, so they can be showed side by side for each superzone/interconnection.
- for (interconnection in interconnections){
-   img_fn_stacked = paste0(plots_subdir,'/',interconnection,'_Stacked_Gen.png')
-   img_fn_unstacked = paste0(plots_subdir,'/',interconnection,'_Unstacked_Gen.png')
-   if (img_fn_stacked %in% list.files(plots_subdir, full.names = T)){
-                    print(ggdraw() +
-                    draw_image(img_fn_stacked) +
-                    draw_label(interconnection, y = 0.985, x = 1, hjust = 1, fontfamily = 'serif', size = 24) +
-                    theme(plot.margin = unit(c(1,0,1,0), "cm"))) } else {  message('Plots not found.') }
-
-   if (img_fn_unstacked %in% list.files(plots_subdir, full.names = T)){print(ggdraw() +
-                                                                          draw_image(img_fn_unstacked) +
-                                                                          theme(plot.margin = unit(c(1,0,1,0), "cm"))) } else { message('Plots not found.')}
-  }
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r stacked-generation zone, out.width = "50%", fig.asp = 1.1}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Gen_Stack')
+plots_subdir = paste0(plots_dir,'Capacity_Factor/')
 for (region in regions){
-  img_fn_stacked = paste0(plots_subdir,'/',region,'_Stacked_Gen.png')
-  img_fn_unstacked = paste0(plots_subdir,'/',region,'_Unstacked_Gen.png')
-  if (img_fn_stacked %in% list.files(plots_subdir, full.names = T)){
-    print(ggdraw() +
-      draw_image(img_fn_stacked) +
-      draw_label(region, y = 0.985, x = 1, hjust = 1, fontfamily = 'serif', size = 24) +
-      theme(plot.margin = unit(c(1,0,1,0), "cm")))
-    }
-  if (img_fn_unstacked %in% list.files(plots_subdir, full.names = T)){
-  print(ggdraw() +
-    draw_image(img_fn_unstacked) +
-    theme(plot.margin = unit(c(1,0,1,0), "cm")))
-    }
-  }
+  img_fn = paste0(plots_subdir,region,'_Capacity_Factor.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
+}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
-## Committed Capacity
-### By Interconnection
-```{r committed-capacity interconnection, out.width = "100%", fig.asp = 0.675}
+##Average Output When Committed
+```{r Average-Capacity-Out-When-Committed, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Gen_Stack')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Committed_Capacity_Stack.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
-                                                                     draw_image(img_fn) +
-                                                                     draw_label(interconnection, y = 0.985, fontfamily = "serif", size = 24) +
-                                                                     theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
-  }
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r committed-capacity zone, out.width = "100%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Gen_Stack')
+plots_subdir = paste0(plots_dir,'Capacity_Factor/')
 for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Committed_Capacity_Stack.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
-                                                                     draw_image(img_fn) +
-                                                                     draw_label(region, y = 0.985, fontfamily = "serif", size = 24) +
-                                                                     theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
-  }
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-
-## Outage Stacks
-```{r outage-stacks zone, out.width = "100%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Outage_Stack')
-for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Capacity_Out_Stacked.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
-                                                                     draw_image(img_fn) +
-                                                                     draw_label(region, y = 0.985, fontfamily = "serif", size = 24) +
-                                                                     theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
-  }
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-## Thermal Capacity Reserves
-### By Interconnection
-```{r thermal-cap-reserves interconnection, out.width = "100%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Thermal_Capacity_Reserves')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Thermal_Capacity_Reserves.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
-                                                                     draw_image(img_fn) +
-                                                                     draw_label(interconnection, y = 0.985, fontfamily = "serif", size = 24) +
-                                                                     theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
-  }
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r thermal-cap-reserves zone, out.width = "100%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Thermal_Capacity_Reserves')
-for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Thermal_Capacity_Reserves.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
-                                                                     draw_image(img_fn) +
-                                                                     draw_label(region, y = 0.985, fontfamily = "serif", size = 24) +
-                                                                     theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
-  }
+  img_fn = paste0(plots_subdir,region,'_Avg_Out_Committed.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
+}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
 ***
-
-# Transmission
-## Net Export
-### By Interconnection
-```{r Net export interconnection, out.width = "50%", fig.asp = 0.675}
+#Generation
+##Stacked generation
+```{r stacked-generation, out.width = "100%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Transmission')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Net_Export_',scenario_dir,'.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975,fontfamily = "serif", size = 24) +
-                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+plots_subdir = paste0(plots_dir,'Gen_stack/')
+for (region in regions){
+  img_fn = paste0(plots_subdir,region,'_Stacked_Gen_',scenario_dir,'.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
+  }
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
+
+##Unstacked generation
+```{r unstacked-generation, out.width = "100%", fig.asp = 0.675}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plots_subdir = paste0(plots_dir,'Gen_stack/')
+for (region in regions){
+  img_fn = paste0(plots_subdir,region,'_Unstacked_Gen_',scenario_dir,'.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
-### By Zone
-```{r Net export zone, out.width = "50%", fig.asp = 0.675}
+#Ramping
+##Capacity Started
+```{r Capacity Started, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Transmission')
+plots_subdir = paste0(plots_dir,'Ramping/')
 for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Net_Export_',scenario_dir,'.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975,fontfamily = "serif", size = 24) +
-                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+  img_fn = paste0(plots_subdir,region,'_Capacity_Started.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
-## Zonal Interchange
-```{r Zonal Interchange zone, out.width = "100%", fig.asp = 0.675}
+***
+#Total Generation
+```{r total generation, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Transmission')
+plots_subdir = paste0(plots_dir,'Total_Gen_Stack/')
 for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Zone-Zone_Net_Interchange_',scenario_dir,'.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
-                                                                     draw_image(img_fn) +
-                                                                     draw_label(region, y = 0.985,fontfamily = "serif", size = 24) +
-                                                                     theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
+  img_fn = paste0(plots_subdir,region,'_Total_Generation .png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
 
 ***
-
-# Thermal and Hydro Unit Analysis
-## Capacity Factor (average output for all hours)
-### By Interconnection
-```{r capacity-factor interconnection, out.width = "50%", fig.asp = 0.675}
+#Installed Capacity
+```{r Installed Capacity, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Capacity_Factor')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Capacity_Factor.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r capacity-factor zone, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Capacity_Factor')
+plots_subdir = paste0(plots_dir,'Total_Installed_Capacity/')
 for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Capacity_Factor.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  img_fn = paste0(plots_subdir,region,'_Total_Installed_Capacity.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
-## Average Output When Committed
-### By Interconnection
-```{r Average-Capacity-Out-When-Committed interconnection, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Capacity_Factor')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Avg_Out_Committed.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r Average-Capacity-Out-When-Committed zone, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Capacity_Factor')
-for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Avg_Out_Committed.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-## Time At Minimum Generation
-### By Interconnection
-```{r Time-at-min-gen interconnection, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Capacity_Factor')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Time_at_Min_Gen.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r Time-at-min-gen zone, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Capacity_Factor')
-for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Time_at_Min_Gen.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-## Capacity Started
-### By Interconnection
-```{r Capacity Started interconnection, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Ramping')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Capacity_Started.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r Capacity Started zone, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Ramping')
-for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Capacity_Started.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
 
 ***
-
-# Installed Capacity
-## By Interconnection
-```{r Installed Capacity interconnection, out.width = "50%", fig.asp = 0.675}
+#Transmission
+##Net Export
+```{r Net export, out.width = "50%", fig.asp = 0.675}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Total_Installed_Capacity')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Total_Installed_Capacity.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-## By Zone
-```{r Installed Capacity zone, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Total_Installed_Capacity')
+plots_subdir = paste0(plots_dir,'Transmission/')
 for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Total_Installed_Capacity.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  img_fn = paste0(plots_subdir,region,'_Net_Export_',scenario_dir,'.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975)) }
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
-# Cost
-## Production Cost
-### By Interconnection
-```{r Detailed Generation Cost interconnection, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Production_Cost')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Detailed_Production_Cost.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r Detailed Generation Cost zone, out.width = "50%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Production_Cost')
-for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Detailed_Production_Cost.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-## Regional Price
-### By Interconnection
-```{r Regional Price interconnection, out.width = "100%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(interconnection_dir,'Region_Price')
-for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Region_Price_Timeseries.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
-
-### By Zone
-```{r Regional Price zone, out.width = "100%", fig.asp = 0.675}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-plots_subdir = paste0(zone_dir,'Region_Price')
-for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Region_Price_Timeseries.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
-}
-# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-```
