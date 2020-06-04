@@ -1,12 +1,9 @@
 Generator,Colour
 Nuclear,#820000
 Coal,#222222
-Steam Turbine,#222223
 Gas-CC,#52216B
-Combined Cycle Gas Turbine,#52216B
 Gas-CC CCS,#5E1688
 Gas-CT,#C2A1DB
-Combustion Turbine,#C2A1DB
 Dual Fuel,#000080
 Oil-Gas-Steam,#3D3376
 Hydro,#187F94
@@ -21,4 +18,3 @@ Storage,#FF4A88
 Other,#FF7FBB
 Net Imports,#193A71
 Curtailment,#5B6272
-Hydro,blue
