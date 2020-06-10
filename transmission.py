@@ -275,7 +275,7 @@ class mplot(object):
                               
         return {'fig': fig3,'data_table':Data_Out}
     
-  def line_hist(self):                #Histograms of individual line utilization factor for entire year
+    def line_hist(self):                #Histograms of individual line utilization factor for entire year
         
         print("For all lines touching Zone = "+self.zone_input)
         
