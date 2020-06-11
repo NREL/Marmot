@@ -31,6 +31,7 @@ import prices
 import hydro
 import capacity_out
 import thermal_cap_reserve
+
 # import constraints
 
 try:
@@ -69,7 +70,7 @@ Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].squeeze().strip()
 
 # Folder to save your processed solutions
-Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions_folder'].to_string(index=False).strip()
+Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
 
 Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_scenario_plot'].squeeze().split(",")).str.strip().tolist()
 
@@ -97,9 +98,9 @@ if xlabels == ['nan']: xlabels = [""]
 #===============================================================================
 
 
-PLEXOS_Scenarios = os.path.join(Processed_Solutions_folder)
+# PLEXOS_Scenarios = os.path.join(Processed_Solutions_folder)
 
-figure_folder = os.path.join(PLEXOS_Scenarios, Scenario_name, 'Figures_Output')
+figure_folder = os.path.join(Marmot_Solutions_folder, Scenario_name, 'Figures_Output')
 try:
     os.makedirs(figure_folder)
 except FileExistsError:
@@ -107,7 +108,7 @@ except FileExistsError:
     pass
 
 
-hdf_out_folder = os.path.join(PLEXOS_Scenarios, Scenario_name,'Processed_HDF5_folder')
+hdf_out_folder = os.path.join(Marmot_Solutions_folder, Scenario_name,'Processed_HDF5_folder')
 try:
     os.makedirs(hdf_out_folder)
 except FileExistsError:
@@ -288,8 +289,8 @@ marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
 
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
-Zones_pkl = pd.read_pickle(os.path.join(PLEXOS_Scenarios, Scenario_name,"zones.pkl"))
-Regions_pkl = pd.read_pickle(os.path.join(PLEXOS_Scenarios, Scenario_name,'regions.pkl'))
+Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
+Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
 
 if AGG_BY=="zone": 
     Zones = Zones_pkl['name'].unique()
@@ -327,7 +328,7 @@ for index, row in Marmot_plot_select.iterrows():
 
             argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7], row.iloc[8],
                                   hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
-                                  Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
+                                  Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
                                   re_gen_cat, vre_gen_cat, region, thermal_gen_cat]
 
             if row["Figure Type"] == "Reserve Timeseries":
@@ -384,7 +385,7 @@ for index, row in Marmot_plot_select.iterrows():
 
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
-               Scenario_Diff, PLEXOS_Scenarios, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
+               Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
                re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,facet_gen_cat]
 
             if row["Figure Type"] == "Generation Stack":

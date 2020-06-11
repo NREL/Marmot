@@ -34,7 +34,7 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.color_list = argument_list[16]
@@ -48,7 +48,7 @@ class mplot(object):
         Price_Collection = {}        # Create Dictionary to hold Datframes for each scenario
 
         for scenario in self.Multi_Scenario:
-            Price_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"region_Price")
+            Price_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"region_Price")
 
 
         print("Zone = " + self.zone_input)
@@ -132,7 +132,7 @@ class mplot(object):
 
             print("Scenario = " + str(scenario))
 
-            Price = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"region_Price")
+            Price = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"region_Price")
             Price = Price.xs(self.zone_input,level = self.AGG_BY,drop_level=False) #Filter to the AGGBY level and keep all levels
 
             locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
@@ -147,7 +147,7 @@ class mplot(object):
             Data_Table_Out = Price
             for region in Price.index.get_level_values(level='region').unique() :
                 timeseries = Price.xs(region,level="region").reset_index().set_index('timestamp')
-                if '2008' not in self.PLEXOS_Scenarios and '2012' not in self.PLEXOS_Scenarios and timeseries.index[0] > dt.datetime(2024,2,28,0,0):
+                if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and timeseries.index[0] > dt.datetime(2024,2,28,0,0):
                     timeseries.index = timeseries.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
                 if len(self.Multi_Scenario) > 1:
                     axs[i].plot(timeseries[0],label = region)

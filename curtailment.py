@@ -35,7 +35,7 @@ class mplot(object):
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.color_list = argument_list[16]
         self.marker_style = argument_list[17]
         self.gen_names_dict = argument_list[18]
@@ -51,10 +51,10 @@ class mplot(object):
         Total_Gen_Cost_Collection = {}
         
         for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
-            Avail_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"), "generator_Available_Capacity")
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"),  "generator_Curtailment")
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Total_Generation_Cost")
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
+            Avail_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"), "generator_Available_Capacity")
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"),  "generator_Curtailment")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Total_Generation_Cost")
             
         
         Penetration_Curtailment_out = pd.DataFrame()
@@ -202,7 +202,7 @@ class mplot(object):
         print("Zone = " + self.zone_input)
         
         for scenario in self.Multi_Scenario:
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
             
         RE_Curtailment_DC = pd.DataFrame()
         PV_Curtailment_DC = pd.DataFrame()

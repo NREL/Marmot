@@ -20,7 +20,6 @@ import h5py
 import sys
 import pathlib
 import time
-import dask as dasky
 
 sys.path.append('../h5plexos')
 from h5plexos.query import PLEXOSSolution
@@ -64,7 +63,7 @@ Scenario_List = pd.Series(Marmot_user_defined_inputs.loc['Scenario_process_list'
 PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
 
 # Folder to save your processed solutions
-Processed_Solutions_folder = Marmot_user_defined_inputs.loc['Processed_Solutions_folder'].to_string(index=False).strip()
+Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
 
 # This folder contains all the csv required for mapping and selecting outputs to process
 # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
@@ -444,7 +443,8 @@ def get_data(loc, prop,t, db, overlap, model):
     else:
         df = pd.DataFrame()
         print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
-
+        return df
+    
 #===================================================================================
 # Main
 #===================================================================================
@@ -459,13 +459,13 @@ for Scenario_name in Scenario_List:
 
     HDF5_output = Scenario_name + "_formatted.h5"
 
-    PLEXOS_Scenarios = os.path.join(Processed_Solutions_folder, Scenario_name)
+    Marmot_Scenario = os.path.join(Marmot_Solutions_folder, Scenario_name)
     try:
-        os.makedirs(PLEXOS_Scenarios)
+        os.makedirs(Marmot_Scenario )
     except FileExistsError:
         # directory already exists
         pass
-    hdf_out_folder = os.path.join(PLEXOS_Scenarios, 'Processed_HDF5_folder')
+    hdf_out_folder = os.path.join(Marmot_Scenario , 'Processed_HDF5_folder')
     try:
         os.makedirs(hdf_out_folder)
     except FileExistsError:
@@ -477,7 +477,7 @@ for Scenario_name in Scenario_List:
     except FileExistsError:
         # directory already exists
         pass
-    figure_folder = os.path.join(PLEXOS_Scenarios, 'Figures_Output')
+    figure_folder = os.path.join(Marmot_Scenario , 'Figures_Output')
     try:
         os.makedirs(figure_folder)
     except FileExistsError:
@@ -580,7 +580,7 @@ for Scenario_name in Scenario_List:
         regions["category"]=regions["category"].str.decode("utf-8")
         regions.rename(columns={'name':'region'}, inplace=True)
         regions.sort_values(['category','region'],inplace=True)
-        regions.to_pickle(PLEXOS_Scenarios+"/regions.pkl")    
+        regions.to_pickle(Marmot_Scenario +"/regions.pkl")    
     except KeyError:
         print("\Regional data not included in h5plexos results.\nSkipping Regional properties\n")
 
@@ -592,7 +592,7 @@ for Scenario_name in Scenario_List:
             zones = pd.DataFrame(np.asarray(data['metadata/objects/zone']))
         zones["name"]=zones["name"].str.decode("utf-8")
         zones["category"]=zones["category"].str.decode("utf-8")
-        zones.to_pickle(PLEXOS_Scenarios+"/zones.pkl")
+        zones.to_pickle(Marmot_Scenario +"/zones.pkl")
     except KeyError:
         print("\nZonal data not included in h5plexos results.\nSkipping Zonal properties\n")
 
@@ -604,7 +604,7 @@ for Scenario_name in Scenario_List:
             line_relations=pd.DataFrame(np.asarray(data['metadata/objects/line']))
         line_relations["name"]=line_relations["name"].str.decode("utf-8")
         line_relations["category"]=line_relations["category"].str.decode("utf-8")
-        line_relations.to_pickle(PLEXOS_Scenarios+"/line_relations.pkl")
+        line_relations.to_pickle(Marmot_Scenario +"/line_relations.pkl")
     except KeyError:
         print("\nLine data not included in h5plexos results.\nSkipping Line property\n")  
     
@@ -621,7 +621,7 @@ for Scenario_name in Scenario_List:
         line_relations_interregional["child"]= line_relations_interregional["child"].str.decode("utf-8")
         line_relations_interregional.rename(columns={"parent":"region","child":"line_name"},inplace=True)
         line_relations_interregional=pd.merge(line_relations_interregional,Region_Mapping,how='left',on="region")
-        line_relations_interregional.to_pickle(PLEXOS_Scenarios+"/line_relations_interregional.pkl")   
+        line_relations_interregional.to_pickle(Marmot_Scenario +"/line_relations_interregional.pkl")   
     except KeyError:      
         print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
 
@@ -638,7 +638,7 @@ for Scenario_name in Scenario_List:
         region_intraregionallines = region_intraregionallines.drop(columns = ['parent','child'])
 
         region_lines = region_exportinglines.append(region_intraregionallines)
-        region_lines.to_pickle(PLEXOS_Scenarios+"/line2region.pkl")
+        region_lines.to_pickle(Marmot_Scenario +"/line2region.pkl")
     except KeyError:
         print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n")
 
@@ -648,7 +648,7 @@ for Scenario_name in Scenario_List:
         interface_lines["interface"] = interface_lines["parent"].str.decode("utf-8")
         interface_lines["line"] = interface_lines["child"].str.decode("utf-8")
         interface_lines = interface_lines.drop(columns = ['parent','child'])
-        interface_lines.to_pickle(PLEXOS_Scenarios+"/line2interface.pkl")
+        interface_lines.to_pickle(Marmot_Scenario +"/line2interface.pkl")
     except KeyError:
         print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n")
 
@@ -658,7 +658,7 @@ for Scenario_name in Scenario_List:
     hdf5_collection = {}
     for file in files_list:
         hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
-
+        
     ######### Process the Outputs################################################
 
     # Creates Initial HDF5 file for ouputing formated data
@@ -789,7 +789,12 @@ for Scenario_name in Scenario_List:
     print('Main loop took ' + str(elapsed/60) + ' minutes.')
     ###################################################################
 
-# test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+
+  # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')  
+  # test = test.xs("Xcel_Energy_EI",level='zone')
+  # test = test.reset_index(['timestamp','tech'])
+  # test = test.groupby(["timestamp", "tech"], as_index=False).sum()
+  # test = test.pivot(index='timestamp', columns='tech', values=0)
 # test = test.reset_index()
 
 # test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")

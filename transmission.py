@@ -36,7 +36,7 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.color_list = argument_list[16]
@@ -55,7 +55,7 @@ class mplot(object):
 
             print("Scenario = " + str(scenario))
 
-            Net_Export_read = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,scenario, 'Processed_HDF5_folder', scenario + '_formatted.h5'),'region_Net_Interchange')
+            Net_Export_read = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,scenario, 'Processed_HDF5_folder', scenario + '_formatted.h5'),'region_Net_Interchange')
 
             Net_Export = Net_Export_read.xs(self.zone_input, level = self.AGG_BY)
             Net_Export = Net_Export.reset_index()
@@ -79,7 +79,7 @@ class mplot(object):
             dictionary = {column : self.color_list[idx]}
             scenario_color_dict.update(dictionary)
 
-        if '2008' not in self.PLEXOS_Scenarios and '2012' not in self.PLEXOS_Scenarios and Net_Export_all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
+        if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Net_Export_all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
             Net_Export_all_scenarios.index = Net_Export_all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
         fig1, ax = plt.subplots(figsize=(9,6))
         for idx,column in enumerate(Net_Export_all_scenarios.columns):
@@ -125,7 +125,7 @@ class mplot(object):
         Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario
 
         for scenario in self.Multi_Scenario:
-            Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
+            Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
 
         print("Line analysis done only once (not per zone).")
 
@@ -141,7 +141,7 @@ class mplot(object):
 
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no scenario selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations=pd.read_pickle(os.path.join(self.Marmot_Solutions_folder,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop]
                 Flow=Flow.drop('category',axis=1)
@@ -184,7 +184,7 @@ class mplot(object):
         Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario
 
         for scenario in self.Multi_Scenario:
-            Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
+            Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
 
         print("Line analysis done only once (not per zone).")
 
@@ -194,8 +194,8 @@ class mplot(object):
                 
         for scenario in self.Multi_Scenario:
             print("Scenario = " + str(scenario))
-            lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
-            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
+            lines_interregional=pd.read_pickle(os.path.join(self.Marmot_Solutions_folder,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
+            lines_intraregional=pd.read_pickle(os.path.join(self.Marmot_Solutions_folder,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
             except KeyError:
@@ -220,7 +220,7 @@ class mplot(object):
 
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no scenario selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations=pd.read_pickle(os.path.join(self.Marmot_Solutions_folder,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop] 
                 Flow=Flow.drop('category',axis=1) 
@@ -282,8 +282,8 @@ class mplot(object):
         Flow_Collection = {}            # Create Dictionary to hold Datframes for each scenario 
         Limit_Collection = {}
         for scenario in self.Multi_Scenario:
-            Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
-            Limit_Collection[scenario]= pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Import_Limit")
+            Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
+            Limit_Collection[scenario]= pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Import_Limit")
         
         fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
      
@@ -293,8 +293,8 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
                     
             print("Scenario = " + str(scenario))
-            lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
-            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
+            lines_interregional=pd.read_pickle(os.path.join(self.Marmot_Solutions_folder,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
+            lines_intraregional=pd.read_pickle(os.path.join(self.Marmot_Solutions_folder,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
             except KeyError:
@@ -318,7 +318,7 @@ class mplot(object):
 
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no category selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations=pd.read_pickle(os.path.join(self.Marmot_Solutions_folder,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop] 
                 Flow=Flow.drop('category',axis=1)
@@ -363,7 +363,7 @@ class mplot(object):
     
     def region_region_interchange(self): 
 
-        rr_int = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
+        rr_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
         agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
 
         rr_int = rr_int.reset_index()
@@ -449,7 +449,7 @@ class mplot(object):
 
         for scenario in self.Multi_Scenario:
             print('Scenario = ' + scenario)
-            zz_int = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"region_regions_Net_Interchange")
+            zz_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"region_regions_Net_Interchange")
             zz_int = zz_int.reset_index()
             zz_int['parent'] = zz_int['parent'].map(region2superzone)
             zz_int['child']  = zz_int['child'].map(region2superzone)
@@ -463,7 +463,7 @@ class mplot(object):
             one_zone = zz_int_agg[zz_int_agg['parent'] == self.zone_input]    #Select only this particular zone.
             one_zone = one_zone.pivot(index = 'timestamp',columns = 'child',values = 0)
             one_zone = one_zone.loc[:,(one_zone != 0).any(axis = 0)] #Remove all 0 columns (uninteresting).
-            if '2008' not in self.PLEXOS_Scenarios and '2012' not in self.PLEXOS_Scenarios and one_zone.index[0] > dt.datetime(2024,2,28,0,0):
+            if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and one_zone.index[0] > dt.datetime(2024,2,28,0,0):
                 one_zone.index = one_zone.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
             #Neaten up lines: if more than 4 total interchanges, aggregated all but the highest 3.
@@ -542,7 +542,7 @@ class mplot(object):
 
     def region_region_checkerboard(self): 
 
-        rr_int = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
+        rr_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
         agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
 
         rr_int = rr_int.reset_index()
@@ -594,7 +594,7 @@ class mplot(object):
     
     def region_region_duration(self): 
 
-        rr_int = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
+        rr_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
         agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
 
         rr_int = rr_int.reset_index()
@@ -667,9 +667,9 @@ class mplot(object):
             print("Scenario = " + str(scenario))
 
             #Load data
-            lineflow = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
-            intflow = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"interface_Flow")
-            linelim = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Export_Limit")
+            lineflow = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
+            intflow = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"interface_Flow")
+            linelim = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Export_Limit")
             linelim = linelim.reset_index().drop('timestamp', axis = 1).set_index('line_name')
 
             #Calculate utilization.
@@ -678,7 +678,7 @@ class mplot(object):
             lineutil['flow'] = abs(lineutil['flow'])
 
             #Merge in region ID and aggregate by region.
-            line2region = pd.read_pickle(os.path.join(PLEXOS_Scenarios,scenario,'line2region.pkl'))
+            line2region = pd.read_pickle(os.path.join(Marmot_Solutions_folder,scenario,'line2region.pkl'))
             line2region = line2region.rename(columns = {'line':'line_name'})
             lineutil = lineutil.reset_index()
             lineutil = lineutil.merge(line2region, on = 'line_name')
@@ -689,22 +689,22 @@ class mplot(object):
             #Aggregate by region.
 
 
-            line_relations=  pd.read_pickle(os.path.join(PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
+            line_relations=  pd.read_pickle(os.path.join(Marmot_Solutions_folder,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
 
     # def line_violations(self):
     #
     #     print('Zone = ' + self.zone_input)
     #
-    #     line2region = pd.read_pickle(os.path.join(PLEXOS_Scenarios,scenario,'line2region.pkl'))
+    #     line2region = pd.read_pickle(os.path.join(Marmot_Solutions_folder,scenario,'line2region.pkl'))
     #     line2region = line2region.rename(columns={"line":"line_name"})
-    #     line_relations =  pd.read_pickle(os.path.join(PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"})
+    #     line_relations =  pd.read_pickle(os.path.join(Marmot_Solutions_folder,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"})
     #     line_relations = line_relations.reset_index()
     #     line_relations = line_relations.drop(columns = ['index'])
     #     region2cat = pd.merge(line2region,line_relations, on = 'line_name').drop(columns = 'line_name')
     #
     #     for scenario in self.Multi_Scenario:
     #         print("Scenario = " + str(scenario))
-    #         line_v = pd.read_hdf(os.path.join(PLEXOS_Scenarios,scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"line_Violation")
+    #         line_v = pd.read_hdf(os.path.join(Marmot_Solutions_folder,scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"line_Violation")
     #         line_v = line_v.reset_index()
     #
     #         viol = pd.merge(line_v,line2region, on = 'line_name')
