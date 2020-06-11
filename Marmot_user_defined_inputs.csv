@@ -1,15 +1,15 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\h5plexos_0.6_test
-Processed_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\h5plexos_0.6_test
-Scenario_process_list,List,required,Test_File
-overlap,int,required,0
+PLEXOS_Solutions_folder,folder,required,\\folder\folder\folder\
+Marmot_Solutions_folder,folder,required,\\folder\folder\folder\
+Scenario_process_list,List,required,"Scenario1, Scenraio2"
+overlap,int,required,72
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 reserve_region_type.csv_name,string,required(default),reserve_region_type.csv
-Main_scenario_plot,string,required,Test_File
-Multi_scenario_plot,List,required,Test_File
-Scenario_Diff_plot,List [Max 2],optional,
-AGG_BY,string ,required,zone
-Facet_ylabels,List,optional,
+Main_scenario_plot,string,required,Scenario1
+Multi_scenario_plot,List,required,"Scenario1, Scenraio2"
+Scenario_Diff_plot,List [Max 2],optional,"Scenario1, Scenraio2"
+AGG_BY,string,required,zone
+Facet_ylabels,List,optional,Scenario1
 Facet_xlabels,List,optional,
