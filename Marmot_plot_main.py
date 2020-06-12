@@ -29,9 +29,8 @@ import ramping
 import utilization_factor
 import prices
 import hydro
-import capacity_out
-import thermal_cap_reserve
-
+# import capacity_out
+# import thermal_cap_reserve
 # import constraints
 
 try:
@@ -97,8 +96,6 @@ if xlabels == ['nan']: xlabels = [""]
 # Input and Output Directories
 #===============================================================================
 
-
-# PLEXOS_Scenarios = os.path.join(Processed_Solutions_folder)
 
 figure_folder = os.path.join(Marmot_Solutions_folder, Scenario_name, 'Figures_Output')
 try:
@@ -239,7 +236,7 @@ vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeez
 
 thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
-facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
+# facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
                     print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
@@ -300,8 +297,7 @@ else:
     Region_Mapping = Regions_pkl.merge(Region_Mapping, how='left', on='region')
     Zones = Region_Mapping[AGG_BY].unique()
 
-# Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead. 
-# Zones = ['NYISO', 'PJM', 'MISO', 'SERC', 'SPP', 'SaskPower', 'MH']    
+# Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.    
 
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
@@ -386,7 +382,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,facet_gen_cat]
+               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder]
 
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list)
