@@ -29,7 +29,7 @@ class mplot(object):
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.color_list = argument_list[16]
@@ -45,7 +45,7 @@ class mplot(object):
             
             print("Scenario = " + str(scenario))
             
-            Gen = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
+            Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
             Gen = Gen.xs(self.zone_input,level = self.AGG_BY)
       
             Gen = Gen.reset_index()
@@ -55,7 +55,7 @@ class mplot(object):
             Gen = Gen.rename(columns = {0:"Output (MWh)"})
             Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.
             
-            Cap = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
+            Cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
             Cap = Cap.xs(self.zone_input,level = self.AGG_BY)
             Cap = Cap.reset_index()
             Cap = Cap.drop(columns = ['timestamp','region','tech'])
@@ -141,7 +141,7 @@ class mplot(object):
             
             print("Scenario = " + str(scenario))
             
-            Gen = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
+            Gen = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
             Gen = Gen.xs(zone_input,level = AGG_BY)
       
             Gen = Gen.reset_index()
@@ -151,7 +151,7 @@ class mplot(object):
             Gen = Gen[['timestamp','gen_name','tech','Output (MWh)']]
             Gen = Gen[Gen['tech'].isin(thermal_gen_cat)]    #We are only interested in thermal starts/stops.tops.
             
-            Cap = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
+            Cap = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
             Cap = Cap.xs(zone_input,level = AGG_BY)
             Cap = Cap.reset_index()
             Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
@@ -160,7 +160,7 @@ class mplot(object):
             Gen.index = Gen.timestamp
             Gen = Gen.drop(columns = ['timestamp'])
             
-            # Min = pd.read_hdf(os.path.join(PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
+            # Min = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
             # Min = Min.xs(zone_input, level = AGG_BY)
                  
             if self.prop == 'Date Range':

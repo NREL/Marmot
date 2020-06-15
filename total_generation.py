@@ -48,7 +48,7 @@ class mplot(object):
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
@@ -64,21 +64,21 @@ class mplot(object):
         Unserved_Energy_Collection = {}
         
         for scenario in self.Multi_Scenario:
-            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
-            Pump_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Pump_Load" )
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Curtailment")
+            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
+            Pump_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Pump_Load" )
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Curtailment")
             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
-                Stacked_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
+                Stacked_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
                 try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
                 except:
                     Unserved_Energy_Collection[scenario] = Stacked_Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
             else:
-                Stacked_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "region_Load")
+                Stacked_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "region_Load")
                 try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
                 except:
                     Unserved_Energy_Collection[scenario] = Stacked_Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
@@ -250,13 +250,13 @@ class mplot(object):
         
     #     for scenario in self.Multi_Scenario:
     #         try:
-    #             Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
-    #             Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "generator_Curtailment")
+    #             Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
+    #             Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "generator_Curtailment")
     #             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
     #             if self.AGG_BY == "zone":
-    #                 Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
+    #                 Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
     #             else:
-    #                 Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "region_Load")
+    #                 Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "region_Load")
                 
     #         except Exception:
     #             pass

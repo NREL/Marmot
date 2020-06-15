@@ -45,7 +45,7 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
@@ -216,22 +216,22 @@ class mplot(object):
 
 
         for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Curtailment")
-            Avail_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Available_Capacity")
-            Pump_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Pump_Load" )
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Curtailment")
+            Avail_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Available_Capacity")
+            Pump_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Pump_Load" )
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
-                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "zone_Load")
+                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "zone_Load")
                 try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
                 except:
                     Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
             else:
-                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "region_Load")
+                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "region_Load")
                 try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
                 except:
                     Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
@@ -330,7 +330,7 @@ class mplot(object):
             else:
                 print("Plotting graph for entire timeperiod")
 
-            if '2008' not in self.PLEXOS_Scenarios and '2012' not in self.PLEXOS_Scenarios and Stacked_Gen.index[0] > dt.datetime(2024,2,28,0,0):
+            if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Stacked_Gen.index[0] > dt.datetime(2024,2,28,0,0):
               Stacked_Gen.index = Stacked_Gen.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
               Load.index = Load.index.shift(1,freq = 'D')
               Unserved_Energy.index = Unserved_Energy.index.shift(1,freq = 'D')
