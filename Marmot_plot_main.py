@@ -507,6 +507,18 @@ for index, row in Marmot_plot_select.iterrows():
                     Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                     Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
 
+            elif row["Figure Type"] == "Line Violations Timeseries":
+                fig = transmission.mplot(argument_list)
+                Figure_Out = fig.line_violations_timeseries()
+                Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input.replace('.','') + "_" +row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+
+            elif row["Figure Type"] == "Line Violations Totals":
+                if zone_input == Zones[0]:
+                    fig = transmission.mplot(argument_list)
+                    Figure_Out = fig.line_violations_totals()
+                    Figure_Out["fig"].figure.savefig(os.path.join(transmission_figures, row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == "Region Price":
                 fig = prices.mplot(argument_list)

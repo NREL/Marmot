@@ -103,7 +103,7 @@ except Exception:
 def df_process_region(df, overlap_hour):
     df = df.droplevel(level=["band", "property", "category"])
     df.index.rename('region', level='name', inplace=True)
-    if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty 
+    if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty
         mapping_idx = pd.MultiIndex.from_frame(regions.merge(Region_Mapping,
                             how="left", on='region').drop(['region','category'], axis=1))
         mapping_idx = mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
@@ -134,13 +134,13 @@ def df_process_zone(df, overlap_hour):
 def df_process_gen(df, overlap_hour, m):
     df = df.droplevel(level=["band", "property"])
     df.index.rename(['tech','gen_name'], level=['category','name'], inplace=True)
-    try: 
+    try:
         region_gen_idx = pd.CategoricalIndex(MetaData(m).region_generator_category().index.get_level_values(0))
         region_gen_idx = region_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
         idx_region = pd.MultiIndex(levels= df.index.levels + [region_gen_idx.categories]
                             ,codes= df.index.codes +  [region_gen_idx.codes],
-                            names= df.index.names + region_gen_idx.names)   
+                            names= df.index.names + region_gen_idx.names)
     except KeyError:
         idx_region = df.index
 
@@ -444,7 +444,7 @@ def get_data(loc, prop,t, db, overlap, model):
         df = pd.DataFrame()
         print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
         return df
-    
+
 #===================================================================================
 # Main
 #===================================================================================
@@ -492,12 +492,12 @@ for Scenario_name in Scenario_List:
     #===============================================================================
     # MetaData
     #===============================================================================
-    
+
     class MetaData:
-        
+
         def __init__(self, model):
             self.data = h5py.File(os.path.join(HDF5_folder_in, model), 'r')
-              
+
         # Generator categories mapping
         def generator_category(self):
             try:
@@ -508,7 +508,7 @@ for Scenario_name in Scenario_List:
             gen_category.rename(columns={'category':'tech'}, inplace=True)
             gen_category = gen_category.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return gen_category
-    
+
         # Region generators mapping
         def region_generators(self):
             try:
@@ -520,33 +520,33 @@ for Scenario_name in Scenario_List:
             region_gen = region_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
             return region_gen
-        
+
         def region_generator_category(self):
             region_gen = self.region_generators()
             gen_category = self.generator_category()
             region_gen_cat = region_gen.merge(gen_category,
                             how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('region')
             return region_gen_cat
-        
+
          # Zone generators mapping
         def zone_generators(self):
             try:
                 zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zones_generators']))
             except KeyError:
-                zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_generators']))    
+                zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_generators']))
             zone_gen.rename(columns={'child':'gen_name'}, inplace=True)
             zone_gen.rename(columns={'parent':'zone'}, inplace=True)
             zone_gen = zone_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
             return zone_gen
-        
-        def zone_generator_category(self): 
+
+        def zone_generator_category(self):
             zone_gen = self.zone_generators()
             gen_category = self.generator_category()
             zone_gen_cat = zone_gen.merge(gen_category,
                             how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('zone')
             return zone_gen_cat
-        
+
         # Generator head and tail torage mapping
         def generator_storage(self):
             try:
@@ -561,14 +561,14 @@ for Scenario_name in Scenario_List:
             gen_storage = gen_storage.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return gen_storage
 
-    
+
     files_list = []
     for names in files:
         if names.endswith(".h5"):
             files_list.append(names) # Creates a list of only the hdf5 files
 
     hdf5_read = os.path.join(HDF5_folder_in, files_list[0]) #The first file is used for metadata.
-    
+
     data = h5py.File(hdf5_read, 'r')
     # Outputs Regions in results to pickle file
     try:
@@ -580,7 +580,7 @@ for Scenario_name in Scenario_List:
         regions["category"]=regions["category"].str.decode("utf-8")
         regions.rename(columns={'name':'region'}, inplace=True)
         regions.sort_values(['category','region'],inplace=True)
-        regions.to_pickle(Marmot_Scenario +"/regions.pkl")    
+        regions.to_pickle(Marmot_Scenario +"/regions.pkl")
     except KeyError:
         print("\Regional data not included in h5plexos results.\nSkipping Regional properties\n")
 
@@ -606,9 +606,9 @@ for Scenario_name in Scenario_List:
         line_relations["category"]=line_relations["category"].str.decode("utf-8")
         line_relations.to_pickle(Marmot_Scenario +"/line_relations.pkl")
     except KeyError:
-        print("\nLine data not included in h5plexos results.\nSkipping Line property\n")  
-    
-    ## Get Line relations and save to pickle 
+        print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
+
+    ## Get Line relations and save to pickle
     try:
         try:
             line_relations_interregional=pd.DataFrame(np.asarray(data['metadata/relations/region_interregionallines']))
@@ -616,13 +616,13 @@ for Scenario_name in Scenario_List:
 
         except KeyError:
             line_relations_interregional=pd.DataFrame(np.asarray(data['metadata/relations/region_interregionalline']))
-            line_relations_intraregional=pd.DataFrame(np.asarray(data['metadata/relations/region_interregionalline']))        
+            line_relations_intraregional=pd.DataFrame(np.asarray(data['metadata/relations/region_interregionalline']))
         line_relations_interregional["parent"]=line_relations_interregional["parent"].str.decode("utf-8")
         line_relations_interregional["child"]= line_relations_interregional["child"].str.decode("utf-8")
         line_relations_interregional.rename(columns={"parent":"region","child":"line_name"},inplace=True)
         line_relations_interregional=pd.merge(line_relations_interregional,Region_Mapping,how='left',on="region")
-        line_relations_interregional.to_pickle(Marmot_Scenario +"/line_relations_interregional.pkl")   
-    except KeyError:      
+        line_relations_interregional.to_pickle(Marmot_Scenario +"/line_relations_interregional.pkl")
+    except KeyError:
         print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
 
     ## Get line <-> region mapping and save to pickle. Combine inter and intra regional lines.
@@ -631,14 +631,20 @@ for Scenario_name in Scenario_List:
         region_exportinglines["region"] = region_exportinglines["parent"].str.decode("utf-8")
         region_exportinglines["line"] = region_exportinglines["child"].str.decode("utf-8")
         region_exportinglines = region_exportinglines.drop(columns = ['parent','child'])
+        region_exportinglines.to_pickle(Marmot_Scenario +"/exportline2region.pkl")
+
+        region_importinglines = pd.DataFrame(np.asarray(data['metadata/relations/region_importinglines']))
+        region_importinglines["region"] = region_importinglines["parent"].str.decode("utf-8")
+        region_importinglines["line"] = region_importinglines["child"].str.decode("utf-8")
+        region_importinglines = region_importinglines.drop(columns = ['parent','child'])
+        region_importinglines.to_pickle(Marmot_Scenario +"/importline2region.pkl")
 
         region_intraregionallines = pd.DataFrame(np.asarray(data['metadata/relations/region_intraregionallines']))
         region_intraregionallines["region"] = region_intraregionallines["parent"].str.decode("utf-8")
         region_intraregionallines["line"] = region_intraregionallines["child"].str.decode("utf-8")
         region_intraregionallines = region_intraregionallines.drop(columns = ['parent','child'])
+        region_intraregionallines.to_pickle(Marmot_Scenario +"/intraregionalline2region.pkl")
 
-        region_lines = region_exportinglines.append(region_intraregionallines)
-        region_lines.to_pickle(Marmot_Scenario +"/line2region.pkl")
     except KeyError:
         print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n")
 
@@ -658,7 +664,7 @@ for Scenario_name in Scenario_List:
     hdf5_collection = {}
     for file in files_list:
         hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
-        
+
     ######### Process the Outputs################################################
 
     # Creates Initial HDF5 file for ouputing formated data
@@ -790,7 +796,7 @@ for Scenario_name in Scenario_List:
     ###################################################################
 
 
-  # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')  
+  # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
   # test = test.xs("Xcel_Energy_EI",level='zone')
   # test = test.reset_index(['timestamp','tech'])
   # test = test.groupby(["timestamp", "tech"], as_index=False).sum()

@@ -56,5 +56,7 @@ Line Utilization Timeseries,TRUE,Line_Utilization_Time_Series_Category,ReEDS_Exp
 Time at Minimum Generation,TRUE,Time_at_Min_Gen,,,,,,
 Total Generation,TRUE,Total_Generation,,,,,,
 Total Installed Capacity,TRUE,Total_Installed_Capacity,,,,,,
+Line Violations Timeseries,TRUE,Line_Violations_Time_Series,,,,EST,,
+Line Violations Totals,TRUE,Line_Violations_Totals,,,,,,
 Zone-Zone Net Interchange,TRUE,Zone-Zone_Net_Interchange,,,,EST,,
 Capacity Out Stack,TRUE,Capacity_Out_Stacked,,,,EST,,
