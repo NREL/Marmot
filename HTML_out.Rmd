@@ -3,9 +3,9 @@
 #title: "Cold Wave: February 1st - 5th, 2011"
 #title: "High Net Load: February 19th - 23rd, 2008"
 #title: "High Net Load: August 8th - 11th, 2010"
-title: "Low VG Resource: February 2nd - 6th, 2010"
+#title: "Low VG Resource: February 2nd - 6th, 2010"
 #title: "Lowest Net Load: April 17th, 2011"
-#title: "Winter Storms: December 4th - 12th, 2013"
+title: "Winter Storms: December 4th - 12th, 2013"
 
 author: "Created by: National Renewable Energy Laboratory (NREL)"
 date: "`r format(Sys.time(), '%d %B %Y')`"
@@ -236,6 +236,31 @@ for (region in regions){
                                                                      draw_image(img_fn) +
                                                                      draw_label(region, y = 0.985,fontfamily = "serif", size = 24) +
                                                                      theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
+}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
+
+## Line Utilization
+### By Interconnection
+```{r line utilinterconnection, out.width = "50%", fig.asp = 0.675}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plots_subdir = paste0(interconnection_dir,'Transmission')
+for (interconnection in interconnections){
+  img_fn = paste0(plots_subdir,'/',interconnection,'_Line_Utilization_Time_Series_',scenario_dir,'.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975,fontfamily = "serif", size = 24) +
+                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+```
+
+### By Zone
+```{r line util zone, out.width = "50%", fig.asp = 0.675}
+# %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+plots_subdir = paste0(zone_dir,'Transmission')
+for (region in regions){
+  img_fn = paste0(plots_subdir,'/',region,'_Line_Utilization_Time_Series_',scenario_dir,'.png')
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975,fontfamily = "serif", size = 24) +
+                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```

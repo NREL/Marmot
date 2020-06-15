@@ -1,25 +1,24 @@
 Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d]
-Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,
-Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,2/1/2024,2/5/2024
-Capacity Factor,FALSE,Capacity_Factor,,,,EST,,
-Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,8/12/2024,8/18/2024
-Capacity Started,FALSE,Capacity_Started,,,,EST,,
-Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,8/12/2024,8/18/2024
-Committed Capacity Stack,FALSE,Committed_Capacity_Stack,,,,,,
+Average Output When Committed,TRUE,Avg_Out_Committed,,,,EST,,
+Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,2/1/24,2/5/24
+Capacity Factor,TRUE,Capacity_Factor,,,,EST,,
+Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,8/12/24,8/18/24
+Capacity Started,TRUE,Capacity_Started,,,,EST,,
+Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,8/12/24,8/18/24
+Committed Capacity Stack,TRUE,Committed_Capacity_Stack,,,,,,
 Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,,,
 Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,,,
 Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,
 Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,
-Detailed Production Cost,FALSE,Detailed_Production_Cost,,,,,,
-Generation Stack,FALSE,Stacked_Gen,,,,EST,,
+Detailed Production Cost,TRUE,Detailed_Production_Cost,,,,,,
+Generation Stack,TRUE,Stacked_Gen,,,,EST,,
 Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,
 Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,4,4,EST,,
-Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/2024,2/5/2024
+Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/24,2/5/24
 Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,7,,,
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,
 Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,
 Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Peak Demand,3,3,EST,,
-Generation Stack,TRUE,Stacked_Gen,,,,EST,,
 Generation Unstacked,TRUE,Unstacked_Gen,,,,EST,,
 Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,2/19/24,2/23/24
 Production Cost,FALSE,Production_Cost,,,,,,
@@ -27,7 +26,6 @@ Reserve Timeseries,FALSE,Reserve_Timeseries,Peak Demand,1,1,EST,,
 Reserve Timeseries Facet Grid,FALSE,Reserve_Timeseries_Facet_Grid,Peak Demand,1,1,EST,,
 Reserve Total,FALSE,Reserve_Total,,,,,,
 Net Export,TRUE,Net_Export,,,,EST,,
-Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,
 Total System Cost,FALSE,Total_System_Cost,,,,,,
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,
 Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,
@@ -47,14 +45,14 @@ Reserve Provision Region,FALSE,Reserve_Provision_Region,,,,,,
 Reserve Shortage Region,FALSE,Reserve_Shortage_Region,,,,,,
 Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries,,,,,,
 Reserve Shortage Hours,FALSE,Reserve_Shortage_Hours,,,,,,
-Detailed Total Generation Cost,TRUE,Detailed_Total_Generation_Cost,,,,,,
 Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,
 Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_Checkerboard,,,,,,
 Region-Region Net Interchange Duration,FALSE,Region-Region_Net_Interchange_Duration,,,,,,
 Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,
-Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,10/1/2024,3/1/2024
+Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,10/1/24,3/1/24
 Thermal Capacity reserves,TRUE,Thermal_Capacity_Reserves,,,,EST,,
-Hours Congested,FALSE,Hours_Congested_Line,,,,,,
+Line Utilization Timeseries,TRUE,Line_Utilization_Time_Series,,,,EST,,
+Line Utilization Timeseries,TRUE,Line_Utilization_Time_Series_Category,ReEDS_Expansion,,,EST,,
 Time at Minimum Generation,TRUE,Time_at_Min_Gen,,,,,,
 Total Generation,TRUE,Total_Generation,,,,,,
 Total Installed Capacity,TRUE,Total_Installed_Capacity,,,,,,
