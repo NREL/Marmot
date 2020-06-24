@@ -293,7 +293,7 @@ class mplot(object):
 
         grid_size = xdimension*ydimension
 
-        fig2, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharey=True)
+        fig2, axs = plt.subplots(ydimension,xdimension, figsize=((9*xdimension),(6*ydimension)), sharey=True)
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
         if len(self.Multi_Scenario) > 1:
             axs = axs.ravel()

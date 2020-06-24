@@ -1,15 +1,15 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,/projects/continental/pcm/solutions_for_Marmot_formatter
-Marmot_Solutions_folder,folder,required,/projects/continental/pcm/Results/LowVG_Feb2010
-Scenario_process_list,List,required,"LowVG_Feb2010_bc2050, LowVG_Feb2010_Icing"
-overlap,int,required,0
+PLEXOS_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS CEII\Projects\Xcel_H2@Scale\Results_Analysis\PLEXOS_Scenarios
+Marmot_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS CEII\Projects\Xcel_H2@Scale\Results_Analysis\PLEXOS_Scenarios
+Scenario_process_list,List,required,h2hybrid_2026_BAU
+overlap,int,required,72
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 reserve_region_type.csv_name,string,required(default),reserve_region_type.csv
-Main_scenario_plot,string,required,Icing_2050
-Multi_scenario_plot,List,required,"Basecase_2050, Icing_2050"
-Scenario_Diff_plot,List [Max 2],optional,"Basecase_2050, Icing_2050"
-AGG_BY,string,required,superzone
-Facet_ylabels,List,optional,"Basecase_2050, Icing_2050"
-Facet_xlabels,List,optional,
+Main_scenario_plot,string,required,h2hybrid_2026_BAU
+Multi_scenario_plot,List,required,h2hybrid_2026_BAU
+Scenario_Diff_plot,List [Max 2],optional,"Scenario1, Scenraio2"
+AGG_BY,string,required,zone
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,EST
