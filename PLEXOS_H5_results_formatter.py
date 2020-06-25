@@ -21,7 +21,7 @@ import sys
 import pathlib
 import time
 
-sys.path.append('../h5plexos')
+sys.path.append('../../h5plexos')
 from h5plexos.query import PLEXOSSolution
 
 try:
@@ -130,8 +130,9 @@ def df_process_zone(df, overlap_hour):
     df[0] = pd.to_numeric(df[0], downcast='float')
     return df
 
+# This function was named df_process_gen(), but was changed to be more consistent
 # Function for formatting data which comes form the PLEXOS Generator Category
-def df_process_gen(df, overlap_hour, m):
+def df_process_generator(df, overlap_hour, m):
     df = df.droplevel(level=["band", "property"])
     df.index.rename(['tech','gen_name'], level=['category','name'], inplace=True)
     try: 
@@ -178,6 +179,18 @@ def df_process_gen(df, overlap_hour, m):
     df = df.reorder_levels(df_col, axis=0)
     df[0] = pd.to_numeric(df[0], downcast='float')
 
+    
+# This code was part of get_data(), but has been moved here    
+# Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
+    
+    if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
+        print("\n !! The Following Generators do not have a correct category mapping:")
+        missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
+        print(missing_gen_cat)
+        print("")
+        
+        
+
     # t0=time.time()
     # df = df.reset_index() # unzip the levels in index
     # df = df.drop(["band", "property"],axis=1)
@@ -197,6 +210,8 @@ def df_process_gen(df, overlap_hour, m):
     # df_old=df
     # t1=time.time()
     # print(t1-t0)
+        
+        
     return df
 
 # Function for formatting data which comes form the PLEXOS Line Category
@@ -322,128 +337,181 @@ def report_prop_error(prop,loc):
     df = pd.DataFrame()
     return df
 
+
+
+
+
 # This function handles the pulling of the data from the H5plexos hdf5 file and then passes the data to one of the formating functions
 def get_data(loc, prop,t, db, overlap, model):
-    if loc == 'constraint':
-        try:
-            df = db.constraint(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_constraint(df, overlap)
-        return df
+    
+###############################################################################
 
-    elif loc == 'emission':
-        try:
-            df = db.emission(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_emission(df, overlap)
-        return df
+# Potential changes     
+    
+    try:
 
-    elif loc == 'fuel':
-        try:
-            df = db.fuel(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_fuel(df, overlap)
+# This does not work, because PLEXOSSOlution attribute loc cannot be found
+# in the usual places, so the class uses __getattr__ .  Cannot find a way to use 
+# getattr for __getattr__ 
+    
+        #df = getattr(PLEXOSSolution,loc)(db, prop, timescale=t)
+        
+# all __getattr__ does is calling the function query_object_property,
+# so we can just call that instead ?
+        
+        df = db.query_object_property(loc,prop,timescale=t)
+        
+    
+    except KeyError:
+        df = report_prop_error(prop,loc)
         return df
+    
+    
+    # some of the df_process functions use model as a third parameter
+    
+    try:
+        process_att = 'df_process_' + loc
+        method = globals()[process_att]
+        df = method(df, overlap, model)
+    
+    except TypeError:
+        process_att = 'df_process_' + loc
+        method = globals()[process_att]
+        df = method(df, overlap)
+    
+    if loc == 'region' and prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
+        print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
+    
+    
+    return df
+    
+    
+##############################################################################    
+    
+# Original code
+    
+    # if loc == 'constraint':
+    #     try:
+    #         df = db.constraint(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_constraint(df, overlap)
+    #     return df
 
-    elif loc == 'generator':
-        try:
-            df = db.generator(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_gen(df, overlap, model)
-        # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
-        if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
-            print("\n !! The Following Generators do not have a correct category mapping:")
-            missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
-            print(missing_gen_cat)
-            print("")
-        return df
+    # elif loc == 'emission':
+    #     try:
+    #         df = db.emission(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_emission(df, overlap)
+    #     return df
 
-    elif loc == 'line':
-        try:
-            df = db.line(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_line(df, overlap)
-        return df
+    # elif loc == 'fuel':
+    #     try:
+    #         df = db.fuel(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_fuel(df, overlap)
+    #     return df
 
-    elif loc == 'interface':
-        try:
-            df = db.interface(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_interface(df, overlap)
-        return df
+    # elif loc == 'generator':
+    #     try:
+    #         df = db.generator(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_generator(df, overlap, model)
+        
+        
+    #     # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
+    #     # if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
+    #     #     print("\n !! The Following Generators do not have a correct category mapping:")
+    #     #     missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
+    #     #     print(missing_gen_cat)
+    #     #     print("")
+    #     # return df
 
-    elif loc == 'region':
-        try:
-            df = db.region(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_region(df, overlap)
-        if prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
-            print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
-        return df
+    # elif loc == 'line':
+    #     try:
+    #         df = db.line(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_line(df, overlap)
+    #     return df
 
-    elif loc == 'reserve':
-        try:
-            df = db.reserve(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_reserve(df, overlap)
-        return df
+    # elif loc == 'interface':
+    #     try:
+    #         df = db.interface(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_interface(df, overlap)
+    #     return df
 
-    elif loc == 'reserve_generators':
-        try:
-            df = db.reserve_generators(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_reserve_generators(df, overlap, model)
-        return df
+    # elif loc == 'region':
+    #     try:
+    #         df = db.region(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_region(df, overlap)
+    #     if prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
+    #         print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
+    #     return df
 
-    elif loc == 'storage':
-        try:
-            df = db.storage(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_storage(df, overlap, model)
-        return df
+    # elif loc == 'reserve':
+    #     try:
+    #         df = db.reserve(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_reserve(df, overlap)
+    #     return df
 
-    elif loc == 'region_regions':
-        try:
-            df = db.region_regions(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_region_regions(df, overlap)
-        return df
+    # elif loc == 'reserve_generators':
+    #     try:
+    #         df = db.reserve_generators(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_reserve_generators(df, overlap, model)
+    #     return df
 
-    elif loc == 'zone':
-        try:
-            df = db.zone(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_zone(df, overlap)
-        return df
+    # elif loc == 'storage':
+    #     try:
+    #         df = db.storage(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_storage(df, overlap, model)
+    #     return df
 
-    else:
-        df = pd.DataFrame()
-        print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
-        return df
+    # elif loc == 'region_regions':
+    #     try:
+    #         df = db.region_regions(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_region_regions(df, overlap)
+    #     return df
+
+    # elif loc == 'zone':
+    #     try:
+    #         df = db.zone(prop, timescale=t)
+    #     except KeyError:
+    #         df = report_prop_error(prop,loc)
+    #         return df
+    #     df = df_process_zone(df, overlap)
+    #     return df
+
+    # else:
+    #     df = pd.DataFrame()
+    #     print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
+    #     return df
     
 #===================================================================================
 # Main
@@ -547,7 +615,7 @@ for Scenario_name in Scenario_List:
                             how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('zone')
             return zone_gen_cat
         
-        # Generator head and tail torage mapping
+        # Generator head and tail storage mapping
         def generator_storage(self):
             try:
                 generator_headstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generators_headstorage']))
@@ -560,6 +628,7 @@ for Scenario_name in Scenario_List:
             gen_storage.rename(columns={'parent':'gen_name'}, inplace=True)
             gen_storage = gen_storage.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return gen_storage
+        
 
     
     files_list = []
