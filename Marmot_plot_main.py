@@ -295,7 +295,6 @@ else:
     Zones = Region_Mapping[AGG_BY].unique()
 
 #Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
-# Zones = ['NYISO', 'PJM', 'MISO', 'SERC', 'SPP', 'SaskPower', 'MH']
 
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 

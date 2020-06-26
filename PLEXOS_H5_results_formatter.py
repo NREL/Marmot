@@ -316,6 +316,47 @@ def df_process_region_regions(df, overlap_hour):
     df[0] = pd.to_numeric(df[0], downcast='float')
     return df
 
+def df_process_node(df, overlap_hour,m):
+    df = df.droplevel(level=["band","property","category"])
+    df.index.rename('node', level='name', inplace=True)
+    df.sort_index(level=['node'], inplace=True)
+    try: 
+        node_region_idx = pd.CategoricalIndex(MetaData(m).node_region().index.get_level_values(0))
+        node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+
+        idx_region = pd.MultiIndex(levels= df.index.levels + [node_region_idx.categories]
+                            ,codes= df.index.codes +  [node_region_idx.codes],
+                            names= df.index.names + node_region_idx.names)   
+    except KeyError:
+        idx_region = df.index  
+    try:
+        node_zone_idx = pd.CategoricalIndex(MetaData(m).node_zone().index.get_level_values(0))
+        node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+
+        idx_zone = pd.MultiIndex(levels= idx_region.levels + [node_zone_idx.categories]
+                            ,codes= idx_region.codes + [node_zone_idx.codes] ,
+                            names= idx_region.names + node_zone_idx.names)
+    except KeyError:
+        idx_zone = idx_region
+    try:
+        region_mapping_idx = pd.MultiIndex.from_frame(MetaData(m).node_region().merge(Region_Mapping,
+                            how="left", on='region').drop(['region','node'], axis=1))
+        region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+    
+        idx_map = pd.MultiIndex(levels= idx_zone.levels + region_mapping_idx.levels
+                            ,codes= idx_zone.codes + region_mapping_idx.codes,
+                            names = idx_zone.names + region_mapping_idx.names)
+    except KeyError:
+        idx_map = idx_zone
+    
+    df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
+    df_col = list(df.index.names) # Gets names of all columns in df and places in list
+    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+    df = df.reorder_levels(df_col, axis=0)
+    df[0] = pd.to_numeric(df[0], downcast='float')
+    return df
+
+
 # This fucntion prints a warning message when the get_data function cannot find the specified property in the H5plexos hdf5 file
 def report_prop_error(prop,loc):
     print('CAN NOT FIND {} FOR {}. {} DOES NOT EXIST'.format(prop,loc,prop))
@@ -332,6 +373,7 @@ def get_data(loc, prop,t, db, overlap, model):
             return df
         df = df_process_constraint(df, overlap)
         return df
+
 
     elif loc == 'emission':
         try:
@@ -439,7 +481,16 @@ def get_data(loc, prop,t, db, overlap, model):
             return df
         df = df_process_zone(df, overlap)
         return df
-
+    
+    elif loc == 'node':
+        try:
+           df = db.node(prop, timescale=t)
+        except KeyError:
+            df = report_prop_error(prop,loc)
+            return df
+        df = df_process_node(df,overlap,model)
+        return df   
+    
     else:
         df = pd.DataFrame()
         print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
@@ -504,8 +555,7 @@ for Scenario_name in Scenario_List:
                 gen_category = pd.DataFrame(np.asarray(self.data['metadata/objects/generators']))
             except KeyError:
                 gen_category = pd.DataFrame(np.asarray(self.data['metadata/objects/generator']))
-            gen_category.rename(columns={'name':'gen_name'}, inplace=True)
-            gen_category.rename(columns={'category':'tech'}, inplace=True)
+            gen_category.rename(columns={'name':'gen_name','category':'tech'}, inplace=True)
             gen_category = gen_category.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return gen_category
 
@@ -515,8 +565,7 @@ for Scenario_name in Scenario_List:
                 region_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/regions_generators']))
             except KeyError:
                 region_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/region_generators']))
-            region_gen.rename(columns={'child':'gen_name'}, inplace=True)
-            region_gen.rename(columns={'parent':'region'}, inplace=True)
+            region_gen.rename(columns={'child':'gen_name','parent':'region'}, inplace=True)
             region_gen = region_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
             return region_gen
@@ -533,9 +582,8 @@ for Scenario_name in Scenario_List:
             try:
                 zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zones_generators']))
             except KeyError:
-                zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_generators']))
-            zone_gen.rename(columns={'child':'gen_name'}, inplace=True)
-            zone_gen.rename(columns={'parent':'zone'}, inplace=True)
+                zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_generators']))    
+            zone_gen.rename(columns={'child':'gen_name','parent':'zone'}, inplace=True)
             zone_gen = zone_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
             return zone_gen
@@ -546,6 +594,26 @@ for Scenario_name in Scenario_List:
             zone_gen_cat = zone_gen.merge(gen_category,
                             how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('zone')
             return zone_gen_cat
+        
+        def node_region(self):
+            try:
+                node_region = pd.DataFrame(np.asarray(self.data['metadata/relations/nodes_region']))
+            except KeyError:
+                node_region = pd.DataFrame(np.asarray(self.data['metadata/relations/node_region']))
+            node_region.rename(columns={'child':'region','parent':'node'}, inplace=True)
+            node_region = node_region.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            node_region = node_region.sort_values(by=['node']).set_index('region')
+            return node_region
+        
+        def node_zone(self):
+            try:
+                node_zone = pd.DataFrame(np.asarray(self.data['metadata/relations/nodes_zone']))
+            except KeyError:
+                node_zone = pd.DataFrame(np.asarray(self.data['metadata/relations/node_zone']))
+            node_zone.rename(columns={'child':'zone','parent':'node'}, inplace=True)
+            node_zone = node_zone.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            node_zone = node_zone.sort_values(by=['node']).set_index('zone')
+            return node_zone
 
         # Generator head and tail torage mapping
         def generator_storage(self):
@@ -556,8 +624,7 @@ for Scenario_name in Scenario_List:
                 generator_headstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generator_headstorage']))
                 generator_tailtorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generator_tailstorage']))
             gen_storage = pd.concat([generator_headstorage, generator_tailtorage])
-            gen_storage.rename(columns={'child':'name'}, inplace=True)
-            gen_storage.rename(columns={'parent':'gen_name'}, inplace=True)
+            gen_storage.rename(columns={'child':'name','parent':'gen_name'}, inplace=True)
             gen_storage = gen_storage.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return gen_storage
 
@@ -742,53 +809,56 @@ for Scenario_name in Scenario_List:
             continue
 
     ######### Calculate Extra Ouputs################################################
-    try:
-        print("Processing generator Curtailment")
+    if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
         try:
-            Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
-            Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
-            if Total_Gen_Out.empty==True:
+            print("Processing generator Curtailment")
+            try:
+                Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
+                Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+                if Total_Gen_Out.empty==True:
+                    print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+            except KeyError:
                 print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+            # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+            vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+    
+            if not vre_gen_cat:
+                print("\nvre_gen_cat is not set up correctly with your gen_names")
+                print("To Process Curtailment add correct names to vre_gen_cat.csv")
+                print("For more information see Marmot Readme under 'Mapping Files'")
+            # Output Curtailment#
+            Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), vre_gen_cat),:]) -
+                                (Total_Gen_Out.loc[(slice(None), vre_gen_cat),:]))
+    
+            Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
+    
+            #Clear Some Memory
+            del Total_Gen_Out
+            del Avail_Gen_Out
+            del Curtailment_Out
+        except Exception:
+            print("NOTE!! Curtailment not calculated, processing skipped\n")
+            pass
+    
+    if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
+        try:
+            print("Calculating Cost Unserved Energy: Regions")
+            Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
+            Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
+            Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
         except KeyError:
-            print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
-        # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-        vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+            print("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
+            pass
 
-        if not vre_gen_cat:
-            print("\nvre_gen_cat is not set up correctly with your gen_names")
-            print("To Process Curtailment add correct names to vre_gen_cat.csv")
-            print("For more information see Marmot Readme under 'Mapping Files'")
-        # Output Curtailment#
-        Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), vre_gen_cat),:]) -
-                            (Total_Gen_Out.loc[(slice(None), vre_gen_cat),:]))
-
-        Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
-
-        #Clear Some Memory
-        del Total_Gen_Out
-        del Avail_Gen_Out
-        del Curtailment_Out
-    except Exception:
-        print("NOTE!! Curtailment not calculated, processing skipped\n")
-        pass
-
-    try:
-        print("Calculating Cost Unserved Energy: Regions")
-        Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
-        Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
-        Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
-    except KeyError:
-        print("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
-        pass
-
-    try:
-        print("Calculating Cost Unserved Energy: Zones")
-        Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
-        Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
-        Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
-    except KeyError:
-        print("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
-        pass
+    if "zone_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
+        try:
+            print("Calculating Cost Unserved Energy: Zones")
+            Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
+            Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
+            Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
+        except KeyError:
+            print("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
+            pass
 
     end = time.time()
     elapsed = end - start
@@ -796,33 +866,35 @@ for Scenario_name in Scenario_List:
     ###################################################################
 
 
-  # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
-  # test = test.xs("Xcel_Energy_EI",level='zone')
-  # test = test.reset_index(['timestamp','tech'])
-  # test = test.groupby(["timestamp", "tech"], as_index=False).sum()
-  # test = test.pivot(index='timestamp', columns='tech', values=0)
-# test = test.reset_index()
+    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'node_Price')  
+    # test = test.xs("Xcel_Energy_EI",level='zone')
+    # test = test.reset_index(['timestamp','node'])
+    # test = test.groupby(["timestamp", "node"], as_index=False).sum()
+    # test = test.pivot(index='timestamp', columns='node', values=0)
+    
+    # test = test.reset_index()
+    
+    # test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")
+    
+    # test['timestamp'] = test['timestamp'].astype("category")
+    
+    # test.index = test.index.set_levels(test.index.levels[-1].astype('category'), level=-1)
+    
+    # test.memory_usage(deep=True)
+    # test[0] = pd.to_numeric(test[0], downcast='float')
+    
+    # test.memory_usage(deep=False)
+    
+    # Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
+    # Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
+    #         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1)
+        # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
+        #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
+    
+        #storage = db.storage("Generation")
+        #storage = df_process_storage(storage, overlap)
+    
+    # df_old = df
+    # t =df.loc[~df.index.duplicated()]
+    # df_old.equals(df)
 
-# test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")
-
-# test['timestamp'] = test['timestamp'].astype("category")
-
-# test.index = test.index.set_levels(test.index.levels[-1].astype('category'), level=-1)
-
-# test.memory_usage(deep=True)
-# test[0] = pd.to_numeric(test[0], downcast='float')
-
-# test.memory_usage(deep=False)
-
-# Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
-# Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
-#         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1)
-    # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
-    #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
-
-    #storage = db.storage("Generation")
-    #storage = df_process_storage(storage, overlap)
-
-# df_old = df
-# t =df.loc[~df.index.duplicated()]
-# df_old.equals(df)

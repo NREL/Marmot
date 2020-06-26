@@ -27,7 +27,7 @@ interval,constraint,Price,TRUE,1,,
 interval,constraint,Hours Binding,TRUE,1,,
 interval,emission,Cost,TRUE,1,$,"The cost of emissions charged at ""Price"" (if defined, otherwise at ""Shodow Price"""
 interval,emission,Production,TRUE,1,kg,Total emissions production by timestep.
-interval,emission_generators,Production,FALSE,1,kg,Emissions produced by generator for each timestep
+interval,emission_generators,Production,TRUE,1,kg,Emissions produced by generator for each timestep
 interval,fuel,Cost,TRUE,1,$,Cost of fuel by timestep.
 interval,fuel,Offtake,TRUE,1,GJ or MMBTU,Fuel consumed by generator and timestep.
 interval,fuel,Price,TRUE,1,,
@@ -81,3 +81,24 @@ year,generator,VO&M Cost,TRUE,1000,$0 ,
 year,interface,Hours Congested,TRUE,1,hours,
 interval,interface,Import Limit,TRUE,1,MW,
 interval,interface,Export Limit,TRUE,1,MW,
+interval,generator,Total Generation Cost,TRUE,1,$,The total cost for operating a generator during each timestep.
+interval,generator,Net Reserves Revenue,TRUE,1,,
+interval,generator,Reserves VO&M Cost,TRUE,1,,
+interval,emission,Intensity,TRUE,1,,
+interval,reserve,Cost,TRUE,1,,
+interval,region,Total Generation Cost,TRUE,1,,
+interval,zone,Cost to Load,TRUE,1,,
+interval,zone,Emissions Cost,TRUE,1,,
+interval,zone,Generator FO&M Cost,TRUE,1,,
+interval,zone,Generator Net Profit,TRUE,1,,
+interval,zone,Generator Net Revenue,TRUE,1,,
+interval,zone,Generator Pool Revenue,TRUE,1,,
+interval,zone,Import Revenue,TRUE,1,,
+interval,zone,Net Cost of Exports,TRUE,1,,
+interval,zone,Settlement Surplus,TRUE,1,,
+interval,zone,Total Fixed Costs,TRUE,1,,
+interval,zone,Total Generation Cost,TRUE,1,,
+interval,node,Price,TRUE,1,,
+interval,node,Load,TRUE,1,,
+interval,node,Generation,TRUE,1,,
+interval,node,Dump Energy,TRUE,1,,
