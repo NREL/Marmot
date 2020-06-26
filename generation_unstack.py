@@ -264,6 +264,7 @@ class mplot(object):
                 continue
             Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
 
+
             Avail_Gen = Avail_Gen_Collection.get(scenario)
             Avail_Gen = Avail_Gen.xs(self.zone_input,level=self.AGG_BY)
             Avail_Gen = df_process_gen_inputs(Avail_Gen, self)
@@ -286,16 +287,19 @@ class mplot(object):
             Net_Load = Net_Load.sum(axis=1)
 
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
+            Stacked_Gen = Stacked_Gen / 1000 #MW -> GW
 
             Load = Load_Collection.get(scenario)
             Load = Load.xs(self.zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
+            Load = Load / 1000
 
             Pump_Load = Pump_Load_Collection.get(scenario)
             Pump_Load = Pump_Load.xs(self.zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
+            Pump_Load = Pump_Load / 1000
             if (Pump_Load == 0).all() == False:
                 Pump_Load = Load - Pump_Load
 
@@ -303,7 +307,7 @@ class mplot(object):
             Unserved_Energy = Unserved_Energy.xs(self.zone_input,level=self.AGG_BY)
             Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
             Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
-
+            Unserved_Energy = Unserved_Energy / 1000
 
 
             if self.prop == "Peak Demand":
@@ -421,6 +425,6 @@ class mplot(object):
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel('Genertaion (MW)',  color='black', rotation='vertical', labelpad=60)
+        plt.ylabel('Genertaion (GW)',  color='black', rotation='vertical', labelpad=60)
 
         return {'fig': fig2, 'data_table': Data_Table_Out}

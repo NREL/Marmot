@@ -63,7 +63,7 @@ class mplot(object):
           one_zone = capacity_out[capacity_out[self.AGG_BY] == self.zone_input]    #Select only this particular zone.
           one_zone = one_zone.drop(columns = ['DATETIME',self.AGG_BY])
           one_zone = one_zone.dropna(axis = 'columns')
-
+          one_zone = one_zone / 1000 #MW -> GW
           #Calculate average outage for all technology for all year.
           sum_ts = one_zone.sum(axis = 'columns')
           overall_avg = sum_ts.mean()
@@ -88,6 +88,7 @@ class mplot(object):
               one_zone.index = one_zone.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
           overall_avg_vec = pd.DataFrame(np.repeat(np.array(overall_avg),len(one_zone.index)), index = one_zone.index, columns = ['Annual average'])
+          overall_avg_vec = overall_avg_vec / 1000
           Data_Table_Out = pd.concat([one_zone,overall_avg_vec], axis = 'columns')
 
           locator = mdates.AutoDateLocator(minticks=4, maxticks=8)

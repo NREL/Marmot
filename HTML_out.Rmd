@@ -55,6 +55,7 @@ knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='p
    if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
                                                                    draw_image(img_fn) +
                                                                    draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
+   else {message(paste0(img_fn,' not found.'))}
  }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -69,7 +70,8 @@ knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='p
    if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
                                                                    draw_image(img_fn) +
                                                                    draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
- }
+   else {message(paste0(img_fn,' not found.'))}
+  }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
@@ -86,11 +88,12 @@ knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='p
                     print(ggdraw() +
                     draw_image(img_fn_stacked) +
                     draw_label(interconnection, y = 0.985, x = 1, hjust = 1, fontfamily = 'serif', size = 24) +
-                    theme(plot.margin = unit(c(1,0,1,0), "cm"))) } else {  message('Plots not found.') }
+                    theme(plot.margin = unit(c(1,0,1,0), "cm"))) } else {  message(paste0(img_fn_stacked,' not found.')) }
 
    if (img_fn_unstacked %in% list.files(plots_subdir, full.names = T)){print(ggdraw() +
                                                                           draw_image(img_fn_unstacked) +
-                                                                          theme(plot.margin = unit(c(1,0,1,0), "cm"))) } else { message('Plots not found.')}
+                                                                          theme(plot.margin = unit(c(1,0,1,0), "cm"))) } 
+   else {message(paste0(img_fn_unstacked,' not found.'))}
   }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -107,12 +110,12 @@ for (region in regions){
       draw_image(img_fn_stacked) +
       draw_label(region, y = 0.985, x = 1, hjust = 1, fontfamily = 'serif', size = 24) +
       theme(plot.margin = unit(c(1,0,1,0), "cm")))
-    }
+    } else {message(paste0(img_fn_stacked,' not found.'))}
   if (img_fn_unstacked %in% list.files(plots_subdir, full.names = T)){
   print(ggdraw() +
     draw_image(img_fn_unstacked) +
     theme(plot.margin = unit(c(1,0,1,0), "cm")))
-    }
+    } else {message(paste0(img_fn_unstacked,' not found.'))}
   }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -128,6 +131,7 @@ for (interconnection in interconnections){
                                                                      draw_image(img_fn) +
                                                                      draw_label(interconnection, y = 0.985, fontfamily = "serif", size = 24) +
                                                                      theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
   }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -142,6 +146,7 @@ for (region in regions){
                                                                      draw_image(img_fn) +
                                                                      draw_label(region, y = 0.985, fontfamily = "serif", size = 24) +
                                                                      theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
   }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -157,6 +162,7 @@ for (region in regions){
                                                                      draw_image(img_fn) +
                                                                      draw_label(region, y = 0.985, fontfamily = "serif", size = 24) +
                                                                      theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
   }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -172,6 +178,7 @@ for (interconnection in interconnections){
                                                                      draw_image(img_fn) +
                                                                      draw_label(interconnection, y = 0.985, fontfamily = "serif", size = 24) +
                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
   }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -186,6 +193,7 @@ for (region in regions){
                                                                      draw_image(img_fn) +
                                                                      draw_label(region, y = 0.985, fontfamily = "serif", size = 24) +
                                                                      theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
   }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -199,9 +207,10 @@ for (region in regions){
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plots_subdir = paste0(interconnection_dir,'Transmission')
 for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Net_Export_',scenario_dir,'.png')
+  img_fn = paste0(plots_subdir,'/',interconnection,'_Net_Export.png')
   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975,fontfamily = "serif", size = 24) +
                                                                       theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -211,9 +220,10 @@ for (interconnection in interconnections){
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plots_subdir = paste0(zone_dir,'Transmission')
 for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Net_Export_',scenario_dir,'.png')
+  img_fn = paste0(plots_subdir,'/',region,'_Net_Export.png')
   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975,fontfamily = "serif", size = 24) +
                                                                       theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -223,11 +233,12 @@ for (region in regions){
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plots_subdir = paste0(zone_dir,'Transmission')
 for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Zone-Zone_Net_Interchange_',scenario_dir,'.png')
+  img_fn = paste0(plots_subdir,'/',region,'_Zone-Zone_Net_Interchange.png')
   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() +
                                                                      draw_image(img_fn) +
                                                                      draw_label(region, y = 0.985,fontfamily = "serif", size = 24) +
                                                                      theme(plot.margin = unit(c(0.1,0,0.1,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -238,9 +249,10 @@ for (region in regions){
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plots_subdir = paste0(interconnection_dir,'Transmission')
 for (interconnection in interconnections){
-  img_fn = paste0(plots_subdir,'/',interconnection,'_Line_Utilization_Time_Series_',scenario_dir,'.png')
+  img_fn = paste0(plots_subdir,'/',interconnection,'_Line_Utilization_Time_Series.png')
   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975,fontfamily = "serif", size = 24) +
                                                                       theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -250,9 +262,10 @@ for (interconnection in interconnections){
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 plots_subdir = paste0(zone_dir,'Transmission')
 for (region in regions){
-  img_fn = paste0(plots_subdir,'/',region,'_Line_Utilization_Time_Series_',scenario_dir,'.png')
+  img_fn = paste0(plots_subdir,'/',region,'_Line_Utilization_Time_Series.png')
   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975,fontfamily = "serif", size = 24) +
                                                                       theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+     else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -264,7 +277,7 @@ for (region in regions){
 plots_subdir = paste0(interconnection_dir,'Transmission')
 img_fn = paste0(plots_subdir,'/Line_Violations_Totals.png')
 if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label('Summary', y = 0.975,fontfamily = "serif", size = 24) +
-                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) } else {message(paste0(img_fn,' not found.'))}
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
 
@@ -273,8 +286,7 @@ if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw
 plots_subdir = paste0(interconnection_dir,'Transmission')
 for (interconnection in interconnections){
   img_fn = paste0(plots_subdir,'/',interconnection,'_Line_Violations_Time_Series.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label('Summary'), y = 0.975,fontfamily = "serif", size = 24) +
-                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label('Summary', y = 0.975,fontfamily = "serif", size = 24) + theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -285,7 +297,7 @@ for (interconnection in interconnections){
 plots_subdir = paste0(zone_dir,'Transmission')
 img_fn = paste0(plots_subdir,'/Line_Violations_Totals.png')
 if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975,fontfamily = "serif", size = 24) +
-                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) } else {message(paste0(img_fn,' not found.'))}
 
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -296,7 +308,7 @@ plots_subdir = paste0(zone_dir,'Transmission')
 for (region in regions){
   img_fn = paste0(plots_subdir,'/',region,'_Line_Violations_Time_Series.png')
   if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975,fontfamily = "serif", size = 24) +
-                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) }
+                                                                      theme(plot.margin = unit(c(0.75,0,0.75,0), "cm"))) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -311,7 +323,7 @@ for (region in regions){
 plots_subdir = paste0(interconnection_dir,'Capacity_Factor')
 for (interconnection in interconnections){
   img_fn = paste0(plots_subdir,'/',interconnection,'_Capacity_Factor.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -322,7 +334,7 @@ for (interconnection in interconnections){
 plots_subdir = paste0(zone_dir,'Capacity_Factor')
 for (region in regions){
   img_fn = paste0(plots_subdir,'/',region,'_Capacity_Factor.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -334,7 +346,7 @@ for (region in regions){
 plots_subdir = paste0(interconnection_dir,'Capacity_Factor')
 for (interconnection in interconnections){
   img_fn = paste0(plots_subdir,'/',interconnection,'_Avg_Out_Committed.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -345,7 +357,7 @@ for (interconnection in interconnections){
 plots_subdir = paste0(zone_dir,'Capacity_Factor')
 for (region in regions){
   img_fn = paste0(plots_subdir,'/',region,'_Avg_Out_Committed.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -357,7 +369,7 @@ for (region in regions){
 plots_subdir = paste0(interconnection_dir,'Capacity_Factor')
 for (interconnection in interconnections){
   img_fn = paste0(plots_subdir,'/',interconnection,'_Time_at_Min_Gen.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -368,7 +380,7 @@ for (interconnection in interconnections){
 plots_subdir = paste0(zone_dir,'Capacity_Factor')
 for (region in regions){
   img_fn = paste0(plots_subdir,'/',region,'_Time_at_Min_Gen.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -380,7 +392,7 @@ for (region in regions){
 plots_subdir = paste0(interconnection_dir,'Ramping')
 for (interconnection in interconnections){
   img_fn = paste0(plots_subdir,'/',interconnection,'_Capacity_Started.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -391,7 +403,7 @@ for (interconnection in interconnections){
 plots_subdir = paste0(zone_dir,'Ramping')
 for (region in regions){
   img_fn = paste0(plots_subdir,'/',region,'_Capacity_Started.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -405,7 +417,7 @@ for (region in regions){
 plots_subdir = paste0(interconnection_dir,'Total_Installed_Capacity')
 for (interconnection in interconnections){
   img_fn = paste0(plots_subdir,'/',interconnection,'_Total_Installed_Capacity.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -416,7 +428,7 @@ for (interconnection in interconnections){
 plots_subdir = paste0(zone_dir,'Total_Installed_Capacity')
 for (region in regions){
   img_fn = paste0(plots_subdir,'/',region,'_Total_Installed_Capacity.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -429,7 +441,7 @@ for (region in regions){
 plots_subdir = paste0(interconnection_dir,'Production_Cost')
 for (interconnection in interconnections){
   img_fn = paste0(plots_subdir,'/',interconnection,'_Detailed_Production_Cost.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -440,7 +452,7 @@ for (interconnection in interconnections){
 plots_subdir = paste0(zone_dir,'Production_Cost')
 for (region in regions){
   img_fn = paste0(plots_subdir,'/',region,'_Detailed_Production_Cost.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -452,7 +464,7 @@ for (region in regions){
 plots_subdir = paste0(interconnection_dir,'Region_Price')
 for (interconnection in interconnections){
   img_fn = paste0(plots_subdir,'/',interconnection,'_Region_Price_Timeseries.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(interconnection, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```
@@ -463,7 +475,7 @@ for (interconnection in interconnections){
 plots_subdir = paste0(zone_dir,'Region_Price')
 for (region in regions){
   img_fn = paste0(plots_subdir,'/',region,'_Region_Price_Timeseries.png')
-  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) }
+  if (img_fn %in% list.files(plots_subdir, full.names = T)){ print(ggdraw() + draw_image(img_fn) + draw_label(region, y = 0.975, fontfamily = "serif", size = 24)) } else {message(paste0(img_fn,' not found.'))}
 }
 # %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 ```

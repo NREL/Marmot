@@ -385,8 +385,8 @@ for index, row in Marmot_plot_select.iterrows():
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list)
                 Figure_Out = fig.gen_stack()
-                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == "Generation Stack All Periods":
                 fig = generation_stack.mplot(argument_list)
@@ -499,13 +499,13 @@ for index, row in Marmot_plot_select.iterrows():
                     if zone_input == Zones[0]:
                         fig = transmission.mplot(argument_list)
                         Figure_Out = fig.line_util_agged()
-                        Figure_Out["fig"].savefig(os.path.join(transmission_figures, row.iloc[3] + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-                        Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, row.iloc[3] + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                        Figure_Out["fig"].savefig(os.path.join(transmission_figures, row.iloc[3] + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                        Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, row.iloc[3] + "_" + row["Figure Output Name"] + ".csv"))
                 else:
                     fig = transmission.mplot(argument_list)
                     Figure_Out = fig.line_util_agged()
-                    Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-                    Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                    Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == "Line Violations Timeseries":
                 fig = transmission.mplot(argument_list)
@@ -609,8 +609,8 @@ for index, row in Marmot_plot_select.iterrows():
             elif row["Figure Type"] == 'Net Export':
                 fig = transmission.mplot(argument_list)
                 Figure_Out = fig.net_export()
-                Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(transmission_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
 
             elif row["Figure Type"] == 'Region-Region Net Interchange':
                 if zone_input == Zones[0]: # Only do this once. Not differentiated by zone.
@@ -645,12 +645,12 @@ for index, row in Marmot_plot_select.iterrows():
             elif row["Figure Type"] == 'Zone-Zone Net Interchange':
                 fig = transmission.mplot(argument_list)
                 Figure_Out = fig.zone_zone_interchange()
-                Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+                Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
 
             elif row["Figure Type"] == 'Hours Congested':
                 fig = transmission.mplot(argument_list)
                 Figure_Out = fig.hours_congested()
-                Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+                Figure_Out["fig"].savefig(os.path.join(transmission_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
 
             mpl.pyplot.close('all')
 

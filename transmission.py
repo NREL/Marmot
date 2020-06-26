@@ -70,6 +70,7 @@ class mplot(object):
             all_scenarios = pd.concat([all_scenarios,Net_Export], axis = 1)
 
         # Data table of values to return to main program
+        all_scenarios = all_scenarios / 1000 #MW -> GW
         Data_Table_Out = all_scenarios
 
         #Make scenario/color dictionary.
@@ -87,7 +88,7 @@ class mplot(object):
             ax.plot(all_scenarios.index.values,all_scenarios[column], linewidth=2, color = scenario_color_dict.get(column,'#333333'),label=column)
 
 
-        ax.set_ylabel('Net exports (MW)',  color='black', rotation='vertical')
+        ax.set_ylabel('Net exports (GW)',  color='black', rotation='vertical')
         ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
@@ -465,12 +466,14 @@ class mplot(object):
             one_zone = zz_int_agg[zz_int_agg['parent'] == self.zone_input]    #Select only this particular zone.
             one_zone = one_zone.pivot(index = 'timestamp',columns = 'child',values = 0)
             one_zone = one_zone.loc[:,(one_zone != 0).any(axis = 0)] #Remove all 0 columns (uninteresting).
+            one_zone = one_zone / 1000 #MW -> GW
             if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and one_zone.index[0] > dt.datetime(2024,2,28,0,0):
                 one_zone.index = one_zone.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
             #Neaten up lines: if more than 4 total interchanges, aggregated all but the highest 3.
             if len(one_zone.columns) > 4:
-                cols_dontagg = one_zone.max().abs().sort_values(ascending = False)[0:3].index
+                if i == 0: #Set the "three highest zonal interchanges" for all three scenarios.
+                    cols_dontagg = one_zone.max().abs().sort_values(ascending = False)[0:3].index
                 df_dontagg = one_zone[cols_dontagg]
                 df_toagg = one_zone.drop(columns = cols_dontagg)
                 agged = df_toagg.sum(axis = 1)
@@ -538,7 +541,7 @@ class mplot(object):
         fig5.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal', labelpad = 40)
-        plt.ylabel('Flow to zone indicated in legend (MW)',  color='black', rotation='vertical', labelpad = 60)
+        plt.ylabel('Flow to zone indicated in legend (GW)',  color='black', rotation='vertical', labelpad = 60)
 
         return {'fig': fig5}
 
