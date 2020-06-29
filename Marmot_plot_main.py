@@ -29,8 +29,15 @@ import ramping
 import utilization_factor
 import prices
 import hydro
-import capacity_out
-import thermal_cap_reserve
+
+# Import MetaData class and use this to retreive metadata instead of reading pickle files
+# Changes to code and comments begin line 316
+
+from MetaData import MetaData
+
+
+#import capacity_out
+#import thermal_cap_reserve
 
 # import constraints
 
@@ -72,7 +79,20 @@ Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].squeeze().s
 # Folder to save your processed solutions
 Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
 
+
+
+
+# These variables (along with Region_Mapping) are used to initialize MetaData
+PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
+Marmot_Scenario = os.path.join(Marmot_Solutions_folder, Scenario_name)
+HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
+
+
+
+
+
 Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_scenario_plot'].squeeze().split(",")).str.strip().tolist()
+
 
 # For plots using the differnec of the values between two scenarios.
 # Max two entries, the second scenario is subtracted from the first.
@@ -239,7 +259,7 @@ vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeez
 
 thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
-facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
+#facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
                     print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
@@ -289,15 +309,32 @@ marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
 
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
-Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
-Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
+
+
+
+
+# Instead of reading in pickle files, an instance of metadata is initialized with the appropriate parameters
+# Methods within that class are used to retreive the data that was stored in pickle files
+
+# In Marmot_plot_main.py these are the only place where pickle files were read in
+# I'm not sure where the other metadata pickle files are read in.  Those will need to be updated 
+# to retreive data through the MetaData class
+
+metadata = MetaData(HDF5_folder_in, Marmot_Scenario, Region_Mapping)
+zones = metadata.zones()
+regions = metadata.regions()
+
+
+# Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
+# Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
+
 
 if AGG_BY=="zone": 
-    Zones = Zones_pkl['name'].unique()
+    Zones = zones['name'].unique()
 elif Region_Mapping.empty==True:
-    Zones = Regions_pkl['region'].unique()
+    Zones = regions['region'].unique()
 else:
-    Region_Mapping = Regions_pkl.merge(Region_Mapping, how='left', on='region')
+    Region_Mapping = regions.merge(Region_Mapping, how='left', on='region')
     Zones = Region_Mapping[AGG_BY].unique()
 
 # Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead. 
@@ -386,7 +423,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,facet_gen_cat]
+               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping] #,facet_gen_cat]
 
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list)
