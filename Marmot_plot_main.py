@@ -33,7 +33,7 @@ import hydro
 # Import MetaData class and use this to retreive metadata instead of reading pickle files
 # Changes to code and comments begin line 316
 
-from metadata import MetaData
+from meta_data import MetaData
 
 
 #import capacity_out

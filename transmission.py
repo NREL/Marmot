@@ -15,7 +15,7 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import numpy as np 
 
-from metadata import MetaData
+from meta_data import MetaData
 
 
 
@@ -244,11 +244,11 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
                     
             print("Scenario = " + str(scenario))
-            #lines_interregional = meta.regional_line_relations()
-            #lines_intraregional = meta.region_lines()
+            lines_interregional = meta.regional_line_relations()
+            lines_intraregional = meta.region_lines()
             
-            lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
-            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line2region.pkl")).set_index([self.AGG_BY]) # "line_relations_intraregional.pkl")).set_index([self.AGG_BY])
+            # lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
+            # lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line2region.pkl")).set_index([self.AGG_BY]) # "line_relations_intraregional.pkl")).set_index([self.AGG_BY])
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
             except KeyError:

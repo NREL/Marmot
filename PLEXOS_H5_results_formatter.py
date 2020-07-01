@@ -24,7 +24,7 @@ import time
 # Import MetaData class from MetaData.py
 # An instance of MetaData is created for each model before it is run through get_data
 
-from metadata import MetaData
+from meta_data import MetaData
 
 sys.path.append('../../h5plexos')
 from h5plexos.query import PLEXOSSolution
@@ -105,20 +105,20 @@ except Exception:
 
 class Process:
     
-    def __init__(self, df, meta_data):
+    def __init__(self, df, metadata):
         
         # certain methods require information from metadata.  metadata is now 
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
-        self.meta_data = meta_data
-        self.region_generator_category = self.meta_data.region_generator_category()
-        self.zone_generator_category = self.meta_data.zone_generator_category()
-        self.generator_cat = self.meta_data.generator_category()
-        self.generator_storage = self.meta_data.generator_storage()
-        self.region_generators = self.meta_data.region_generators()
-        self.zone_generators = self.meta_data.zone_generators()
-        # self.node_region = self.meta_data.node_region()
-        # self.node_zone = self.meta_data.node_zone()
+        self.metadata = metadata
+        self.region_generator_category = self.metadata.region_generator_category()
+        self.zone_generator_category = self.metadata.zone_generator_category()
+        self.generator_cat = self.metadata.generator_category()
+        self.generator_storage = self.metadata.generator_storage()
+        self.region_generators = self.metadata.region_generators()
+        self.zone_generators = self.metadata.zone_generators()
+        # self.node_region = self.metadata.node_region()
+        # self.node_zone = self.metadata.node_zone()
         
         
         
@@ -185,7 +185,7 @@ class Process:
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
         if Region_Mapping.empty==False: #checks if Region_Mapping contains data to merge, skips if empty 
-            mapping_idx = pd.MultiIndex.from_frame(self.meta_data.regions().merge(Region_Mapping,
+            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions().merge(Region_Mapping,
                                 how="left", on='region').drop(['region','category'], axis=1))
             mapping_idx = mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
     
@@ -329,8 +329,8 @@ class Process:
         return df
     
     def df_process_node(self):
-        node_region = self.meta_data.node_region()
-        node_zone = self.meta_data.node_zone()
+        node_region = self.metadata.node_region()
+        node_zone = self.metadata.node_zone()
         
         df = self.df.droplevel(level=["band","property","category"])
         df.index.rename('node', level='name', inplace=True)
@@ -384,7 +384,7 @@ def report_prop_error(prop,loc):
 
 # This function handles the pulling of the data from the H5plexos hdf5 file and then passes the data to one of the formating functions
 # metadata is now a parameter of get data
-def get_data(loc, prop,t, db, meta_data):
+def get_data(loc, prop,t, db, metadata):
             
     try:        
         if "_" in loc:
@@ -398,7 +398,7 @@ def get_data(loc, prop,t, db, meta_data):
 
     # Instantiate instance of Process Class
     # metadata is used as a paramter to initialize process_cl
-    process_cl = Process(df, meta_data)
+    process_cl = Process(df, metadata)
     # Instantiate Method of Process Class 
     process_att = getattr(process_cl,'df_process_' + loc)
     # Process attribute and return to df
@@ -722,8 +722,6 @@ for Scenario_name in Scenario_List:
             
             
             meta = MetaData(HDF5_folder_in, Region_Mapping,model)
-            meta.regional_line_relations()
-            meta.region_lines()
             
             print("     "+ model)
             db = hdf5_collection.get(model)
