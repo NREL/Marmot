@@ -22,9 +22,8 @@ class MetaData:
 # Marmot_Scenario and Region mapping were referred to in the original setup of one pickle file
 # There are comments regarding that code below (line )
     
-    def __init__(self, HDF5_folder_in, Marmot_Scenario, Region_Mapping, model=None):
+    def __init__(self, HDF5_folder_in, Region_Mapping, model=None):
         self.HDF5_folder_in = HDF5_folder_in
-        self.Marmot_Scenario = Marmot_Scenario
         self.Region_Mapping = Region_Mapping
         if model == None: 
             startdir=os.getcwd()
@@ -47,9 +46,9 @@ class MetaData:
             gen_category = pd.DataFrame(np.asarray(self.data['metadata/objects/generators']))
         except KeyError:
             gen_category = pd.DataFrame(np.asarray(self.data['metadata/objects/generator']))
-            gen_category.rename(columns={'name':'gen_name'}, inplace=True)
-            gen_category.rename(columns={'category':'tech'}, inplace=True)
-            gen_category = gen_category.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+        gen_category.rename(columns={'name':'gen_name'}, inplace=True)
+        gen_category.rename(columns={'category':'tech'}, inplace=True)
+        gen_category = gen_category.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
         return gen_category
     
     
@@ -99,6 +98,8 @@ class MetaData:
         head_tail = [0,0]
         # I assume its preferable to use both head_storage & tail_storage if they're available
         # Check for all options (generator or generators for both and use whatever is available)
+        generator_headstorage = pd.DataFrame()
+        generator_tailstorage = pd.DataFrame()
         
         try:
             generator_headstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generators_headstorage']))
@@ -148,6 +149,26 @@ class MetaData:
         gen_storage.rename(columns={'parent':'gen_name'}, inplace=True)
         gen_storage = gen_storage.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
         return gen_storage
+    
+    def node_region(self):
+        try:
+            node_region = pd.DataFrame(np.asarray(self.data['metadata/relations/nodes_region']))
+        except KeyError:
+            node_region = pd.DataFrame(np.asarray(self.data['metadata/relations/node_region']))
+        node_region.rename(columns={'child':'region','parent':'node'}, inplace=True)
+        node_region = node_region.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+        node_region = node_region.sort_values(by=['node']).set_index('region')
+        return node_region
+        
+    def node_zone(self):
+        try:
+            node_zone = pd.DataFrame(np.asarray(self.data['metadata/relations/nodes_zone']))
+        except KeyError:
+            node_zone = pd.DataFrame(np.asarray(self.data['metadata/relations/node_zone']))
+        node_zone.rename(columns={'child':'zone','parent':'node'}, inplace=True)
+        node_zone = node_zone.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+        node_zone = node_zone.sort_values(by=['node']).set_index('zone')
+        return node_zone
     
     
 ##############################################################################
@@ -217,48 +238,85 @@ class MetaData:
             
             
     # return metadata interregional line relations
+#     def regional_line_relations(self):
+#         try:
+#             try:
+#                 line_relations_interregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionallines']))
+#                 line_relations_intraregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
+    
+#             except KeyError:
+#                 line_relations_interregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionalline']))
+#                 line_relations_intraregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionalline']))        
+            
+#             line_relations_interregional["parent"]=line_relations_interregional["parent"].str.decode("utf-8")
+#             line_relations_interregional["child"]= line_relations_interregional["child"].str.decode("utf-8")
+#             line_relations_interregional.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+# # Region Mapping referenced
+#             line_relations_interregional=pd.merge(line_relations_interregional,self.Region_Mapping,how='left',on="region")
+# # Marmot Scenario referenced   
+#             line_relations_interregional.to_pickle(self.Marmot_Scenario +"/line_relations_interregional.pkl")   
+#         except KeyError:      
+#             print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
+            
+            
+    
+#     # Get line <-> region mapping and save to pickle. Combine inter and intra regional lines.
+#         try:
+#             region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))
+#             region_exportinglines["region"] = region_exportinglines["parent"].str.decode("utf-8")
+#             region_exportinglines["line"] = region_exportinglines["child"].str.decode("utf-8")
+#             region_exportinglines = region_exportinglines.drop(columns = ['parent','child'])
+    
+# # Is this the same line_relations_intraregional variable as above, just a different name?
+#             region_intraregionallines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
+           
+#             region_intraregionallines["region"] = region_intraregionallines["parent"].str.decode("utf-8")
+#             region_intraregionallines["line"] = region_intraregionallines["child"].str.decode("utf-8")
+#             region_intraregionallines = region_intraregionallines.drop(columns = ['parent','child'])
+    
+#             region_lines = region_exportinglines.append(region_intraregionallines)
+#             region_lines.to_pickle(self.Marmot_Scenario +"/line2region.pkl")
+#         except KeyError:
+#             print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
+            
+            
     def regional_line_relations(self):
         try:
             try:
                 line_relations_interregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionallines']))
-                line_relations_intraregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
-    
             except KeyError:
                 line_relations_interregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionalline']))
-
-# The following line used 'metadata/relations/region_interregionalline' this has now been corrected
-# What happens to the line_relations_intraregional variable?
-                
-                line_relations_intraregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionalline']))        
             
             line_relations_interregional["parent"]=line_relations_interregional["parent"].str.decode("utf-8")
             line_relations_interregional["child"]= line_relations_interregional["child"].str.decode("utf-8")
             line_relations_interregional.rename(columns={"parent":"region","child":"line_name"},inplace=True)
-# Region Mapping referenced
             line_relations_interregional=pd.merge(line_relations_interregional,self.Region_Mapping,how='left',on="region")
-# Marmot Scenario referenced            
-            line_relations_interregional.to_pickle(self.Marmot_Scenario +"/line_relations_interregional.pkl")   
+            return line_relations_interregional
         except KeyError:      
             print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
             
             
     
     # Get line <-> region mapping and save to pickle. Combine inter and intra regional lines.
+    def region_lines(self):
         try:
-            region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))
+            try:
+                region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))
+                region_intraregionallines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
+            except KeyError:
+                region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportingline']))
+                region_intraregionallines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionalline']))
+    # Try decoding all in one line
             region_exportinglines["region"] = region_exportinglines["parent"].str.decode("utf-8")
-            region_exportinglines["line"] = region_exportinglines["child"].str.decode("utf-8")
+            region_exportinglines["line_name"] = region_exportinglines["child"].str.decode("utf-8")
             region_exportinglines = region_exportinglines.drop(columns = ['parent','child'])
-    
-# Is this the same line_relations_intraregional variable as above, just a different name?
-            region_intraregionallines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
-           
+               
             region_intraregionallines["region"] = region_intraregionallines["parent"].str.decode("utf-8")
-            region_intraregionallines["line"] = region_intraregionallines["child"].str.decode("utf-8")
+            region_intraregionallines["line_name"] = region_intraregionallines["child"].str.decode("utf-8")
             region_intraregionallines = region_intraregionallines.drop(columns = ['parent','child'])
-    
+            
             region_lines = region_exportinglines.append(region_intraregionallines)
-            region_lines.to_pickle(self.Marmot_Scenario +"/line2region.pkl")
+            return region_lines
         except KeyError:
             print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
             

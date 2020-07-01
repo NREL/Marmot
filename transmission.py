@@ -15,6 +15,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import numpy as np 
 
+from metadata import MetaData
+
 
 
 #===============================================================================
@@ -42,7 +44,7 @@ class mplot(object):
         self.gen_names_dict = argument_list[18]
         self.re_gen_cat = argument_list[20]
         self.Region_Mapping = argument_list[24]
-        
+        self.HDF5_folder_in = argument_list[25]
         
     
     def net_export(self):
@@ -117,6 +119,8 @@ class mplot(object):
   
     def line_util(self):          #Duration curve of individual line utilization for all hours
         
+        meta = MetaData(self.HDF5_folder_in, self.Region_Mapping)
+        
         Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario 
         Limit_Collection = {}
         
@@ -135,8 +139,11 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
             
             print("Scenario = " + str(scenario))
-            lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
-            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
+            lines_interregional = meta.regional_line_relations()
+            lines_intraregional = meta.region_lines()
+            
+            # lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
+            # lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
             except KeyError:
@@ -160,7 +167,8 @@ class mplot(object):
             
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no scenario selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations = meta.line_relations()
+                #line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop] 
                 Flow=Flow.drop('category',axis=1) 
@@ -218,6 +226,8 @@ class mplot(object):
     
     def line_hist(self):                #Histograms of individual line utilization factor for entire year
         
+        meta = MetaData(self.HDF5_folder_in, self.Region_Mapping)
+        
         print("For all lines touching Zone = "+self.zone_input)
         
         Flow_Collection = {}            # Create Dictionary to hold Datframes for each scenario 
@@ -234,8 +244,11 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
                     
             print("Scenario = " + str(scenario))
+            #lines_interregional = meta.regional_line_relations()
+            #lines_intraregional = meta.region_lines()
+            
             lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
-            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
+            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line2region.pkl")).set_index([self.AGG_BY]) # "line_relations_intraregional.pkl")).set_index([self.AGG_BY])
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
             except KeyError:
@@ -247,6 +260,7 @@ class mplot(object):
                 lines_intraregional=pd.DataFrame()
                 print("No intraregional lines in "+self.zone_input+".")
             
+
             zone_lines=pd.concat([lines_interregional,lines_intraregional],axis=0,sort=False)
             zone_lines=zone_lines['line_name'].unique()
             
@@ -259,7 +273,8 @@ class mplot(object):
 
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no category selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations = meta.line_relations()
+                #line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop] 
                 Flow=Flow.drop('category',axis=1)

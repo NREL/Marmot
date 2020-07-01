@@ -24,7 +24,7 @@ import time
 # Import MetaData class from MetaData.py
 # An instance of MetaData is created for each model before it is run through get_data
 
-from MetaData import MetaData
+from metadata import MetaData
 
 sys.path.append('../../h5plexos')
 from h5plexos.query import PLEXOSSolution
@@ -105,20 +105,21 @@ except Exception:
 
 class Process:
     
-    def __init__(self, df, overlap_hour, m, metadata):
+    def __init__(self, df, meta_data):
         
         # certain methods require information from metadata.  metadata is now 
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
-        self.m = m
-        self.overlap_hour = overlap_hour
-        self.metadata = metadata
-        self.region_generator_category = self.metadata.region_generator_category()
-        self.zone_generator_category = self.metadata.zone_generator_category()
-        self.generator_cat = self.metadata.generator_category()
-        self.generator_storage = self.metadata.generator_storage()
-        self.region_generators = self.metadata.region_generators()
-        self.zone_generators = self.metadata.zone_generators()
+        self.meta_data = meta_data
+        self.region_generator_category = self.meta_data.region_generator_category()
+        self.zone_generator_category = self.meta_data.zone_generator_category()
+        self.generator_cat = self.meta_data.generator_category()
+        self.generator_storage = self.meta_data.generator_storage()
+        self.region_generators = self.meta_data.region_generators()
+        self.zone_generators = self.meta_data.zone_generators()
+        # self.node_region = self.meta_data.node_region()
+        # self.node_zone = self.meta_data.node_zone()
+        
         
         
     # This function was named df_process_gen(), but was changed to be more consistent
@@ -184,7 +185,7 @@ class Process:
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
         if Region_Mapping.empty==False: #checks if Region_Mapping contains data to merge, skips if empty 
-            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions().merge(Region_Mapping,
+            mapping_idx = pd.MultiIndex.from_frame(self.meta_data.regions().merge(Region_Mapping,
                                 how="left", on='region').drop(['region','category'], axis=1))
             mapping_idx = mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
     
@@ -326,6 +327,47 @@ class Process:
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
+    
+    def df_process_node(self):
+        node_region = self.meta_data.node_region()
+        node_zone = self.meta_data.node_zone()
+        
+        df = self.df.droplevel(level=["band","property","category"])
+        df.index.rename('node', level='name', inplace=True)
+        df.sort_index(level=['node'], inplace=True)
+        try: 
+            node_region_idx = pd.CategoricalIndex(node_region.index.get_level_values(0))
+            node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+            idx_region = pd.MultiIndex(levels= df.index.levels + [node_region_idx.categories]
+                                ,codes= df.index.codes +  [node_region_idx.codes],
+                                names= df.index.names + node_region_idx.names)   
+        except KeyError:
+            idx_region = df.index  
+        try:
+            node_zone_idx = pd.CategoricalIndex(node_zone.index.get_level_values(0))
+            node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+            idx_zone = pd.MultiIndex(levels= idx_region.levels + [node_zone_idx.categories]
+                                ,codes= idx_region.codes + [node_zone_idx.codes] ,
+                                names= idx_region.names + node_zone_idx.names)
+        except KeyError:
+            idx_zone = idx_region
+        try:
+            region_mapping_idx = pd.MultiIndex.from_frame(node_region.merge(Region_Mapping,
+                                how="left", on='region').drop(['region','node'], axis=1))
+            region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+        
+            idx_map = pd.MultiIndex(levels= idx_zone.levels + region_mapping_idx.levels
+                                ,codes= idx_zone.codes + region_mapping_idx.codes,
+                                names = idx_zone.names + region_mapping_idx.names)
+        except KeyError:
+            idx_map = idx_zone
+        
+        df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
+        return df
 
 
 ###############################################################################
@@ -342,7 +384,7 @@ def report_prop_error(prop,loc):
 
 # This function handles the pulling of the data from the H5plexos hdf5 file and then passes the data to one of the formating functions
 # metadata is now a parameter of get data
-def get_data(loc, prop,t, db, overlap, model, metadata):
+def get_data(loc, prop,t, db, meta_data):
             
     try:        
         if "_" in loc:
@@ -356,7 +398,7 @@ def get_data(loc, prop,t, db, overlap, model, metadata):
 
     # Instantiate instance of Process Class
     # metadata is used as a paramter to initialize process_cl
-    process_cl = Process(df,overlap,model,metadata)
+    process_cl = Process(df, meta_data)
     # Instantiate Method of Process Class 
     process_att = getattr(process_cl,'df_process_' + loc)
     # Process attribute and return to df
@@ -545,9 +587,9 @@ for Scenario_name in Scenario_List:
         if names.endswith(".h5"):
             files_list.append(names) # Creates a list of only the hdf5 files
 
-    hdf5_read = os.path.join(HDF5_folder_in, files_list[0]) #The first file is used for metadata.
+    # hdf5_read = os.path.join(HDF5_folder_in, files_list[0]) #The first file is used for metadata.
     
-    data = h5py.File(hdf5_read, 'r')
+    # data = h5py.File(hdf5_read, 'r')
 
 
     
@@ -679,11 +721,14 @@ for Scenario_name in Scenario_List:
             # through a year
             
             
-            metadata = MetaData(HDF5_folder_in, Marmot_Scenario, Region_Mapping,model)
+            meta = MetaData(HDF5_folder_in, Region_Mapping,model)
+            meta.regional_line_relations()
+            meta.region_lines()
+            
             print("     "+ model)
             db = hdf5_collection.get(model)
 
-            processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, overlap, model, metadata)
+            processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, meta)
 
             if processed_data.empty == True:
                 print("\n")

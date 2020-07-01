@@ -33,7 +33,7 @@ import hydro
 # Import MetaData class and use this to retreive metadata instead of reading pickle files
 # Changes to code and comments begin line 316
 
-from MetaData import MetaData
+from metadata import MetaData
 
 
 #import capacity_out
@@ -84,7 +84,6 @@ Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folde
 
 # These variables (along with Region_Mapping) are used to initialize MetaData
 PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
-Marmot_Scenario = os.path.join(Marmot_Solutions_folder, Scenario_name)
 HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
 
 
@@ -320,10 +319,9 @@ gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["Ne
 # I'm not sure where the other metadata pickle files are read in.  Those will need to be updated 
 # to retreive data through the MetaData class
 
-metadata = MetaData(HDF5_folder_in, Marmot_Scenario, Region_Mapping)
-zones = metadata.zones()
-regions = metadata.regions()
-
+meta = MetaData(HDF5_folder_in, Region_Mapping)
+zones = meta.zones()
+regions = meta.regions()
 
 # Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
 # Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
@@ -423,7 +421,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping] #,facet_gen_cat]
+               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,HDF5_folder_in] #,facet_gen_cat]
 
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list)
