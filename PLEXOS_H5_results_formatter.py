@@ -117,8 +117,8 @@ class Process:
         self.generator_storage = self.metadata.generator_storage()
         self.region_generators = self.metadata.region_generators()
         self.zone_generators = self.metadata.zone_generators()
-        # self.node_region = self.metadata.node_region()
-        # self.node_zone = self.metadata.node_zone()
+        self.node_region = self.metadata.node_region()
+        self.node_zone = self.metadata.node_zone()
         
         
         
@@ -328,15 +328,12 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
     
-    def df_process_node(self):
-        node_region = self.metadata.node_region()
-        node_zone = self.metadata.node_zone()
-        
+    def df_process_node(self):        
         df = self.df.droplevel(level=["band","property","category"])
         df.index.rename('node', level='name', inplace=True)
         df.sort_index(level=['node'], inplace=True)
         try: 
-            node_region_idx = pd.CategoricalIndex(node_region.index.get_level_values(0))
+            node_region_idx = pd.CategoricalIndex(self.node_region.index.get_level_values(0))
             node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
             idx_region = pd.MultiIndex(levels= df.index.levels + [node_region_idx.categories]
                                 ,codes= df.index.codes +  [node_region_idx.codes],
@@ -344,7 +341,7 @@ class Process:
         except KeyError:
             idx_region = df.index  
         try:
-            node_zone_idx = pd.CategoricalIndex(node_zone.index.get_level_values(0))
+            node_zone_idx = pd.CategoricalIndex(self.node_zone.index.get_level_values(0))
             node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
             idx_zone = pd.MultiIndex(levels= idx_region.levels + [node_zone_idx.categories]
                                 ,codes= idx_region.codes + [node_zone_idx.codes] ,
@@ -352,7 +349,7 @@ class Process:
         except KeyError:
             idx_zone = idx_region
         try:
-            region_mapping_idx = pd.MultiIndex.from_frame(node_region.merge(Region_Mapping,
+            region_mapping_idx = pd.MultiIndex.from_frame(self.node_region.merge(Region_Mapping,
                                 how="left", on='region').drop(['region','node'], axis=1))
             region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
         
