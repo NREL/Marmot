@@ -564,6 +564,43 @@ for index, row in Marmot_plot_select.iterrows():
                 else:
                     Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                     Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
+            
+            elif row["Figure Type"] == "Total System Cost Type": 
+                fig = production_cost.mplot(argument_list)
+                Figure_Out = fig.sys_cost_type()
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No generators in "+zone_input)
+                else:
+                    Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
+            
+            elif row["Figure Type"] == "Total System Cost Difference": 
+                fig = production_cost.mplot(argument_list)
+                Figure_Out = fig.sys_cost_diff()
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No generators in "+zone_input)
+                else:
+                    Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
+            
+            elif row["Figure Type"] == "Total System Cost Type Difference": 
+                fig = production_cost.mplot(argument_list)
+                Figure_Out = fig.sys_cost_type_diff()
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No generators in "+zone_input)
+                else:
+                    Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
+            
+            elif row["Figure Type"] == "Detailed Total Generation Cost Difference": 
+                fig = production_cost.mplot(argument_list)
+                Figure_Out = fig.detailed_gen_cost_diff()
+                if isinstance(Figure_Out, pd.DataFrame):
+                    print("No generators in "+zone_input)
+                else:
+                    Figure_Out["fig"].savefig(os.path.join(system_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(system_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
+            
 
             elif row["Figure Type"] == "Detailed Production Cost":
                 fig = production_cost.mplot(argument_list)
