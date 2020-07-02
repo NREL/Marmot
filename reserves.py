@@ -350,7 +350,10 @@ class mplot(object):
             reserve_short_timeseries = reserve_short_timeseries.xs(self.region,level="Reserve_Region").reset_index().set_index('timestamp')
                            
             if len(self.Multi_Scenario)>1:
-                ax2[n].plot(reserve_short_timeseries[0])
+                
+                for restype in reserve_short_timeseries['Type'].unique():
+                    ax2[n].plot(reserve_short_timeseries[reserve_short_timeseries['Type']==restype][0],label=restype)
+                
                 ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
                 ax2[n].spines['right'].set_visible(False)
                 ax2[n].spines['top'].set_visible(False)
@@ -369,6 +372,9 @@ class mplot(object):
                 ax2[n].xaxis.set_major_formatter(formatter)
                 
             else:
+                for restype in reserve_short_timeseries['Type'].unique():
+                    ax2.plot(reserve_short_timeseries[reserve_short_timeseries['Type']==restype][0],label=restype)
+                
                 ax2.plot(reserve_short_timeseries[0])
                 ax2.set_ylabel(scenario,color='black',rotation='vertical')
                 ax2.spines['right'].set_visible(False)
@@ -386,10 +392,18 @@ class mplot(object):
                 formatter.show_offset = False
                 ax2.xaxis.set_major_locator(locator)
                 ax2.xaxis.set_major_formatter(formatter)
+                
+            if len(self.Multi_Scenario)>1:
+                ax2[n].legend(loc='upper right')
+            else:
+                ax2.legend(loc='upper right')
+            
             n=n+1
+         
             
         #End scenario loop
 
+            
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical', labelpad=60)
