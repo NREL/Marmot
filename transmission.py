@@ -9,15 +9,10 @@ This code creates generation stack plots and is called from Marmot_plot_main.py
 
 import os
 import pandas as pd
-import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import numpy as np 
-
-from meta_data import MetaData
-
-
 
 #===============================================================================
 
@@ -48,9 +43,8 @@ class mplot(object):
     
         self.lines_interregional = self.meta.regional_line_relations()
         self.lines_intraregional = self.meta.region_lines()
-        self.line_relations = self.meta.line_relations()
+        self.lines = self.meta.lines()
         
-    
     def net_export(self):
         
         print("Zone = " + self.zone_input)
@@ -89,7 +83,6 @@ class mplot(object):
         for idx,column in enumerate(Net_Export_all_scenarios.columns):
             ax.plot(Net_Export_all_scenarios.index.values,Net_Export_all_scenarios[column], linewidth=2, color = scenario_color_dict.get(column,'#333333'),label=column)
 
-        
         ax.set_ylabel('Net exports (MW)',  color='black', rotation='vertical')
         ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
         ax.spines['right'].set_visible(False)
@@ -113,14 +106,11 @@ class mplot(object):
         handles, labels = ax.get_legend_handles_labels()
         
         #Legend 1
-        leg1 = ax.legend(reversed(handles), reversed(labels), loc='best',facecolor='inherit', frameon=True)  
-        
+        leg1 = ax.legend(reversed(handles), reversed(labels), loc='best',facecolor='inherit', frameon=True)   
         # Manually add the first legend back
         ax.add_artist(leg1)
-
         return {'fig': fig1, 'data_table': Data_Table_Out}
     
-  
     def line_util(self):          #Duration curve of individual line utilization for all hours
                 
         Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario 
@@ -142,12 +132,12 @@ class mplot(object):
             
             print("Scenario = " + str(scenario))
             
-            if self.AGG_BY != "region":
-                self.lines_interregional.rename(columns={"region":self.AGG_BY},inplace=True)
-                self.lines_intraregional.rename(columns={"region":self.AGG_BY},inplace=True)
-            
-            lines_interregional = self.lines_interregional.set_index([self.AGG_BY])
-            lines_intraregional = self.lines_intraregional.set_index([self.AGG_BY])
+            try:
+                lines_interregional = self.lines_interregional.set_index([self.AGG_BY])
+                lines_intraregional = self.lines_intraregional.set_index([self.AGG_BY])
+            except:
+                print("Column to Aggregate by is missing")
+                return None
             
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
@@ -220,7 +210,6 @@ class mplot(object):
             
             del Flow, Annual_Util
             
-               
             n=n+1
         #end scenario loop
                               
@@ -246,12 +235,12 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
                     
             print("Scenario = " + str(scenario))
-            if self.AGG_BY != "region":
-                self.lines_interregional.rename(columns={"region":self.AGG_BY},inplace=True)
-                self.lines_intraregional.rename(columns={"region":self.AGG_BY},inplace=True)
-            
-            lines_interregional = self.lines_interregional.set_index([self.AGG_BY])
-            lines_intraregional = self.lines_intraregional.set_index([self.AGG_BY])
+            try:
+                lines_interregional = self.lines_interregional.set_index([self.AGG_BY])
+                lines_intraregional = self.lines_intraregional.set_index([self.AGG_BY])
+            except:
+                print("Column to Aggregate by is missing")
+                return None
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
             except KeyError:
@@ -263,10 +252,8 @@ class mplot(object):
                 lines_intraregional=pd.DataFrame()
                 print("No intraregional lines in "+self.zone_input+".")
             
-
             zone_lines=pd.concat([lines_interregional,lines_intraregional],axis=0,sort=False)
             zone_lines=zone_lines['line_name'].unique()
-            #print(zone_lines)
             
             Flow = Flow_Collection.get(scenario).reset_index('line_name')
             Flow = Flow[Flow['line_name'].isin(zone_lines)] #Limit to only lines touching to this zone
