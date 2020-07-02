@@ -417,7 +417,14 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["fig"].savefig(os.path.join(thermal_cap_reserve_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(thermal_cap_reserve_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
-            elif row["Figure Type"] == "Total Generation Facet Grid":
+            
+            elif row["Figure Type"] == "Total Generation Difference": 
+                fig = total_generation.mplot(argument_list) 
+                Figure_Out = fig.total_gen_diff()
+                Figure_Out["fig"].savefig(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+             
+            elif row["Figure Type"] == "Total Generation Facet Grid": 
                 print("Total Generation Facet Grid currently unavailable for plotting, code not stable and needs testing")
                 fig = total_generation.mplot(argument_list)
                 Figure_Out = fig.total_gen_facet()

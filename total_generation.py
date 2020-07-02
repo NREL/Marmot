@@ -239,8 +239,97 @@ class mplot(object):
 
 
         return {'fig': fig1, 'data_table': Data_Table_Out}
+    
+    
+    def total_gen_diff(self):
+        # Create Dictionary to hold Datframes for each scenario 
+        Stacked_Gen_Collection = {} 
+        Curtailment_Collection = {}
+        
+        for scenario in self.Multi_Scenario:
+            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Curtailment")
+ 
+                
+        Total_Generation_Stack_Out = pd.DataFrame()
+        
+        print("Zone = " + self.zone_input)
+            
+            
+        for scenario in self.Multi_Scenario:
+            
+            print("Scenario = " + scenario)
+            
+            Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
+            Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)
+            Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
+            
+            # Calculates interval step to correct for MWh of generation
+            time_delta = Total_Gen_Stack.index[1]- Total_Gen_Stack.index[0]
+            # Finds intervals in 60 minute period
+            interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+
+            
+            try:
+                Stacked_Curt = Curtailment_Collection.get(scenario)
+                Stacked_Curt = Stacked_Curt.xs(self.zone_input,level=self.AGG_BY)
+                Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
+                Stacked_Curt = Stacked_Curt.sum(axis=1)
+                Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into 
+                Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
+            except Exception:
+                pass
+            
+            Total_Gen_Stack = Total_Gen_Stack/interval_count
+            Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
+            Total_Gen_Stack.rename(scenario, inplace=True)
+            Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
+            
+
+        Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
+        Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to GWh
+        Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
+        Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+        Total_Generation_Stack_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
+        # Data table of values to return to main program
+        Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
+
+        Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
+        Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
+    
+        fig1, ax = plt.subplots(figsize=(9,6))
+
+        
+        bp = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0, 
+                         color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
+        
+        
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        #adds comma to y axis data 
+        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+        ax.tick_params(axis='y', which='major', length=5, width=1)
+        ax.tick_params(axis='x', which='major', length=5, width=1)
+        
+        locs,labels=plt.xticks()
+        ax.set_ylabel('Generation Change (GWh) \n relative to '+self.xlabels[0],  color='black', rotation='vertical')
+        self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
+        plt.xticks(ticks=locs,labels=self.xlabels[1:])
+        ax.margins(x=0.01)
+
+        plt.axhline(linewidth=0.5,linestyle='--',color='grey')
+               
+        handles, labels = ax.get_legend_handles_labels()
+        
+        #Legend 1
+        ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
+                      facecolor='inherit', frameon=True)  
+               
 
 
+        
+        return {'fig': fig1, 'data_table': Data_Table_Out}
+    
     #===============================================================================
     ## Total Gen Facet Plots removed for now, code not stable and needs testing
     #===============================================================================
