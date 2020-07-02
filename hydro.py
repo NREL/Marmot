@@ -159,10 +159,10 @@ class mplot(object):
         #Scatter plot 
         fig2, ax2 = plt.subplots(figsize=(9,6))
 
-        ax2.scatter(Net_Load,Hydro_Gen,color='black',s=5)        
+        ax2.scatter(Net_Load,Hydro_Gen,color='black',s=0.5,alpha=0.25)        
 
-        ax2.set_ylabel('In-Region Hydro Generation (MW)',  color='black', rotation='vertical')
-        ax2.set_xlabel('In-Region Net Load (MW)',  color='black', rotation='horizontal')
+        ax2.set_ylabel(self.zone_input+' Hydro Generation (MW)',  color='black', rotation='vertical')
+        ax2.set_xlabel(self.zone_input+' Net Load (MW)',  color='black', rotation='horizontal')
         ax2.spines['right'].set_visible(False)
         ax2.spines['top'].set_visible(False)
         ax2.tick_params(axis='y', which='major', length=5, width=1)
@@ -221,11 +221,11 @@ class mplot(object):
 
         ax2.scatter(Net_Load[self.end_date:self.start_date],
                     Hydro_Gen[self.end_date:self.start_date],color='black',s=5,label='Non-winter')        
-        ax2.scatter(Net_Load[self.start_date:],Hydro_Gen[self.start_date:],color='blue',s=5,label='Winter',alpha=0.5)
-        ax2.scatter(Net_Load[:self.end_date],Hydro_Gen[:self.end_date],color='blue',s=5,alpha=0.5)
+        ax2.scatter(Net_Load[self.start_date:],Hydro_Gen[self.start_date:],color='blue',s=0.5,label='Winter',alpha=0.5)
+        ax2.scatter(Net_Load[:self.end_date],Hydro_Gen[:self.end_date],color='blue',s=0.5,alpha=0.5)
 
 
-        ax2.set_ylabel('In Region Hydro Generation (MW)',  color='black', rotation='vertical')
+        ax2.set_ylabel(self.zone_input+' Hydro Generation (MW)',  color='black', rotation='vertical')
         ax2.set_xlabel('Continent Net Load (MW)',  color='black', rotation='horizontal')
         ax2.spines['right'].set_visible(False)
         ax2.spines['top'].set_visible(False)
