@@ -389,7 +389,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder]
+               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta]
 
 
             if row["Figure Type"] == "Generation Stack":
@@ -492,7 +492,7 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(utilization_factor_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
 
-            elif row["Figure Type"] == "Line Utilization Duration Curve": 
+            elif row["Figure Type"] == "Line Utilization Hourly": #"Line Utilization Duration Curve": 
                 fig = transmission.mplot(argument_list)
                 Figure_Out = fig.line_util()
                 if Figure_Out != None:

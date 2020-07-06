@@ -39,7 +39,7 @@ class mplot(object):
         self.gen_names_dict = argument_list[18]
         self.re_gen_cat = argument_list[20]
         self.Region_Mapping = argument_list[24]
-        self.meta = argument_list[25]
+        self.meta = argument_list[26]
     
         self.lines_interregional = self.meta.regional_line_relations()
         self.lines_intraregional = self.meta.region_lines()
@@ -111,8 +111,7 @@ class mplot(object):
         ax.add_artist(leg1)
         return {'fig': fig1, 'data_table': Data_Table_Out}
     
-    def line_util(self):          #Duration curve of individual line utilization for all hours
-                
+    def line_util(self):          #Duration curve of individual line utilization for all hours      
         Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario 
         Limit_Collection = {}
         
