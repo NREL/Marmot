@@ -89,9 +89,7 @@ vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeez
 #===============================================================================
 # Region mapping
 #===============================================================================
-print(Region_Mapping.dtypes)
 Region_Mapping = Region_Mapping.astype(str)
-print(Region_Mapping.dtypes)
 try:
     Region_Mapping = Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
 except Exception:
