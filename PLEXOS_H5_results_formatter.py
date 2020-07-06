@@ -16,7 +16,7 @@ it can be read into the Marmot_results_plotting.py file
 import pandas as pd
 #import numpy as np
 import os
-#import h5py
+import h5py
 import sys
 import pathlib
 import time
@@ -126,7 +126,7 @@ def get_data(loc, prop,t, db, metadata):
         print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
     
     return df
-    
+
 # This fucntion prints a warning message when the get_data function cannot find the specified property in the H5plexos hdf5 file
 def report_prop_error(prop,loc):
     print('CAN NOT FIND {} FOR {}. {} DOES NOT EXIST'.format(prop,loc,prop))
@@ -437,7 +437,6 @@ for Scenario_name in Scenario_List:
     os.chdir(startdir)
 
 ##############################################################################
-   
     files_list = []
     for names in files:
         if names.endswith(".h5"):
@@ -450,7 +449,7 @@ for Scenario_name in Scenario_List:
     hdf5_collection = {}
     for file in files_list:
         hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
-        
+
 ######### Process the Outputs##################################################
 
     # Creates Initial HDF5 file for ouputing formated data
@@ -531,54 +530,57 @@ for Scenario_name in Scenario_List:
         else:
             continue
 
-    ######### Calculate Extra Ouputs################################################
-    try:
-        print("Processing generator Curtailment")
+######### Calculate Extra Ouputs################################################
+    if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
         try:
-            Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
-            Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
-            if Total_Gen_Out.empty==True:
+            print("Processing generator Curtailment")
+            try:
+                Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
+                Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+                if Total_Gen_Out.empty==True:
+                    print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+            except KeyError:
                 print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+            # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+            vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+    
+            if not vre_gen_cat:
+                print("\nvre_gen_cat is not set up correctly with your gen_names")
+                print("To Process Curtailment add correct names to vre_gen_cat.csv")
+                print("For more information see Marmot Readme under 'Mapping Files'")
+            # Output Curtailment#
+            Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), vre_gen_cat),:]) -
+                                (Total_Gen_Out.loc[(slice(None), vre_gen_cat),:]))
+    
+            Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
+    
+            #Clear Some Memory
+            del Total_Gen_Out
+            del Avail_Gen_Out
+            del Curtailment_Out
+        except Exception:
+            print("NOTE!! Curtailment not calculated, processing skipped\n")
+            pass
+    
+    if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
+        try:
+            print("Calculating Cost Unserved Energy: Regions")
+            Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
+            Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
+            Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
         except KeyError:
-            print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
-        # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-        vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+            print("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
+            pass
 
-        if not vre_gen_cat:
-            print("\nvre_gen_cat is not set up correctly with your gen_names")
-            print("To Process Curtailment add correct names to vre_gen_cat.csv")
-            print("For more information see Marmot Readme under 'Mapping Files'")
-        # Output Curtailment#
-        Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), vre_gen_cat),:]) -
-                            (Total_Gen_Out.loc[(slice(None), vre_gen_cat),:]))
-
-        Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
-
-        #Clear Some Memory
-        del Total_Gen_Out
-        del Avail_Gen_Out
-        del Curtailment_Out
-    except Exception:
-        print("NOTE!! Curtailment not calculated, processing skipped\n")
-        pass
-
-    try:
-        print("Calculating Cost Unserved Energy: Regions")
-        Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
-        Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
-        Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
-    except KeyError:
-        print("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
-        pass
-
-    try:
-        print("Calculating Cost Unserved Energy: Zones")
-        Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
-        Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
-        Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
-    except KeyError:
-        print("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
-        pass
+    if "zone_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
+        try:
+            print("Calculating Cost Unserved Energy: Zones")
+            Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
+            Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
+            Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
+        except KeyError:
+            print("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
+            pass
 
     end = time.time()
     elapsed = end - start
@@ -587,33 +589,35 @@ for Scenario_name in Scenario_List:
 
 # Code that can be used to test PLEXOS_H5_results_formatter
 
-  # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')  
-  # test = test.xs("Xcel_Energy_EI",level='zone')
-  # test = test.reset_index(['timestamp','tech'])
-  # test = test.groupby(["timestamp", "tech"], as_index=False).sum()
-  # test = test.pivot(index='timestamp', columns='tech', values=0)
-# test = test.reset_index()
+    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'node_Price')  
+    # test = test.xs("Xcel_Energy_EI",level='zone')
+    # test = test.reset_index(['timestamp','node'])
+    # test = test.groupby(["timestamp", "node"], as_index=False).sum()
+    # test = test.pivot(index='timestamp', columns='node', values=0)
+    
+    # test = test.reset_index()
+    
+    # test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")
+    
+    # test['timestamp'] = test['timestamp'].astype("category")
+    
+    # test.index = test.index.set_levels(test.index.levels[-1].astype('category'), level=-1)
+    
+    # test.memory_usage(deep=True)
+    # test[0] = pd.to_numeric(test[0], downcast='float')
+    
+    # test.memory_usage(deep=False)
+    
+    # Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
+    # Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
+    #         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1)
+        # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
+        #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
+    
+        #storage = db.storage("Generation")
+        #storage = df_process_storage(storage, overlap)
+    
+    # df_old = df
+    # t =df.loc[~df.index.duplicated()]
+    # df_old.equals(df)
 
-# test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")
-
-# test['timestamp'] = test['timestamp'].astype("category")
-
-# test.index = test.index.set_levels(test.index.levels[-1].astype('category'), level=-1)
-
-# test.memory_usage(deep=True)
-# test[0] = pd.to_numeric(test[0], downcast='float')
-
-# test.memory_usage(deep=False)
-
-# Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
-# Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
-#         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1)
-    # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
-    #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
-
-    #storage = db.storage("Generation")
-    #storage = df_process_storage(storage, overlap)
-
-# df_old = df
-# t =df.loc[~df.index.duplicated()]
-# df_old.equals(df)

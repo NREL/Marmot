@@ -61,7 +61,11 @@ class mplot(object):
     def gen_stack(self):
         
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-        Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
+        try:
+            Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
+        except:
+            Pump_Load_read = Stacked_Gen_read.copy()
+            Pump_Load_read.iloc[:,0] = 0
         Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Curtailment" )
         
         # If data is to be aggregated by zone, then zone properties are loaded, else region properties are loaded
