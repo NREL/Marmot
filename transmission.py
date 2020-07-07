@@ -9,13 +9,10 @@ This code creates generation stack plots and is called from Marmot_plot_main.py
 
 import os
 import pandas as pd
-import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import numpy as np 
-
-
 
 #===============================================================================
 
@@ -42,9 +39,12 @@ class mplot(object):
         self.gen_names_dict = argument_list[18]
         self.re_gen_cat = argument_list[20]
         self.Region_Mapping = argument_list[24]
-        
-        
+        self.meta = argument_list[26]
     
+        self.lines_interregional = self.meta.regional_line_relations()
+        self.lines_intraregional = self.meta.region_lines()
+        self.lines = self.meta.lines()
+        
     def net_export(self):
         
         print("Zone = " + self.zone_input)
@@ -83,7 +83,6 @@ class mplot(object):
         for idx,column in enumerate(Net_Export_all_scenarios.columns):
             ax.plot(Net_Export_all_scenarios.index.values,Net_Export_all_scenarios[column], linewidth=2, color = scenario_color_dict.get(column,'#333333'),label=column)
 
-        
         ax.set_ylabel('Net exports (MW)',  color='black', rotation='vertical')
         ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
         ax.spines['right'].set_visible(False)
@@ -107,16 +106,12 @@ class mplot(object):
         handles, labels = ax.get_legend_handles_labels()
         
         #Legend 1
-        leg1 = ax.legend(reversed(handles), reversed(labels), loc='best',facecolor='inherit', frameon=True)  
-        
+        leg1 = ax.legend(reversed(handles), reversed(labels), loc='best',facecolor='inherit', frameon=True)   
         # Manually add the first legend back
         ax.add_artist(leg1)
-
         return {'fig': fig1, 'data_table': Data_Table_Out}
     
-  
-    def line_util(self):          #Duration curve of individual line utilization for all hours
-        
+    def line_util(self):          #Duration curve of individual line utilization for all hours      
         Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario 
         Limit_Collection = {}
         
@@ -135,8 +130,14 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
             
             print("Scenario = " + str(scenario))
-            lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
-            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
+            
+            try:
+                lines_interregional = self.lines_interregional.set_index([self.AGG_BY])
+                lines_intraregional = self.lines_intraregional.set_index([self.AGG_BY])
+            except:
+                print("Column to Aggregate by is missing")
+                return None
+            
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
             except KeyError:
@@ -160,7 +161,7 @@ class mplot(object):
             
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no scenario selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations = self.line_relations.rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop] 
                 Flow=Flow.drop('category',axis=1) 
@@ -203,12 +204,11 @@ class mplot(object):
                 del duration_curve
             
             Annual_Util=Annual_Util.groupby("line_name").mean()
-            Annual_Util.rename(columns={0:scenario},inplace=True)
+            Annual_Util.rename({0:scenario},inplace=True)
             Data_Out=pd.concat([Data_Out,Annual_Util],axis=1,sort=False)
             
             del Flow, Annual_Util
             
-               
             n=n+1
         #end scenario loop
                               
@@ -217,7 +217,7 @@ class mplot(object):
     
     
     def line_hist(self):                #Histograms of individual line utilization factor for entire year
-        
+    
         print("For all lines touching Zone = "+self.zone_input)
         
         Flow_Collection = {}            # Create Dictionary to hold Datframes for each scenario 
@@ -234,8 +234,12 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
                     
             print("Scenario = " + str(scenario))
-            lines_interregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_interregional.pkl")).set_index([self.AGG_BY])
-            lines_intraregional=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations_intraregional.pkl")).set_index([self.AGG_BY])
+            try:
+                lines_interregional = self.lines_interregional.set_index([self.AGG_BY])
+                lines_intraregional = self.lines_intraregional.set_index([self.AGG_BY])
+            except:
+                print("Column to Aggregate by is missing")
+                return None
             try:
                 lines_interregional=lines_interregional.xs(self.zone_input)            
             except KeyError:
@@ -259,7 +263,7 @@ class mplot(object):
 
             if (self.prop!=self.prop)==False: # This checks for a nan in string. If no category selected, do nothing.
                 print("Line category = "+str(self.prop))
-                line_relations=pd.read_pickle(os.path.join(self.PLEXOS_Scenarios,scenario,"line_relations.pkl")).rename(columns={"name":"line_name"}).set_index(["line_name"])
+                line_relations = self.line_relations.rename(columns={"name":"line_name"}).set_index(["line_name"])
                 Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
                 Flow=Flow[Flow["category"]==self.prop] 
                 Flow=Flow.drop('category',axis=1)
@@ -293,8 +297,7 @@ class mplot(object):
                 ax3.set_xlabel('Utilization',  color='black', rotation='horizontal')
                 ax3.spines['right'].set_visible(False)
                 ax3.spines['top'].set_visible(False)   
-            
-            Annual_Util.rename(columns={0:scenario},inplace=True)
+            Annual_Util.rename({0:scenario},inplace=True) 
             Data_Out=pd.concat([Data_Out,Annual_Util],axis=1,sort=False)
             del Annual_Util  
             n=n+1
