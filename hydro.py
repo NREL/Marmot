@@ -56,7 +56,7 @@ class mplot(object):
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
         self.vre_gen_cat = argument_list[21]
-        self.figure_folder = argument_list[25]
+        self.figure_folder = argument_list[26]
     
 
     def hydro_net_load(self):
