@@ -11,6 +11,7 @@ import os
 import pathlib
 import matplotlib as mpl
 import sys
+import time
 
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
@@ -655,36 +656,36 @@ for index, row in Marmot_plot_select.iterrows():
             Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
             re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta]
 
-        # for zone_input in Zones:
-        #     print(zone_input)
         
         if row["Figure Type"] == "Generation Stack":
             fig = generation_stack.mplot(argument_list)
+            #print (Multi_Scenario)
             Figure_Out = fig.gen_stack(False)
             for zone_input in Zones:
-                Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbok_inches='tight')
-                Figure_Out[zone_input]["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
- 
+                Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+                Figure_Out[zone_input]["data_tables"][Multi_Scenario[0]].to_csv(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                
+        
         elif row["Figure Type"] == "Generation Stack Facet Grid":
+            start = time.time()
             fig = generation_stack.mplot(argument_list)
             Figure_Out = fig.gen_stack(True)
             for zone_input in Zones:
-                Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbok_inches='tight')
+                Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
                 tables_folder = os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                 try:
                     os.makedirs(tables_folder)
                 except FileExistsError:
                     # directory already exists
                     pass
-                # if zone_input == "Columbia_Grid_WI":
-                #     continue
                 for scenario in Multi_Scenario:
-                    if scenario == "Unexpected_Wind_Cutoff_RT":
-                        sc = "UWC"
-                    else:
-                        sc = scenario
-                    s = zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + sc + ".csv"
+ # CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
+                    s = zone_input.replace('.','') + "_" + scenario + ".csv"
                     Figure_Out[zone_input]["data_tables"][scenario].to_csv(os.path.join(tables_folder, s))
+            end = time.time()
+            elapsed = end - start
+            print("time elapsed: " + str(elapsed) + " seconds" )
+        
         
         elif row["Figure Type"] == "Generation Stack All Periods":
             fig = generation_stack.mplot(argument_list) 

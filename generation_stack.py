@@ -14,6 +14,7 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
+import time
 
 
 
@@ -90,11 +91,15 @@ class mplot(object):
                     Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
         
-        if facet:
-            for scenario in self.Multi_Scenario:
-                set_dicts(scenario)
-        else:
-            set_dicts(self.Multi_Scenario[0])
+        # s = time.time()
+        # if facet:
+        #     for scenario in self.Multi_Scenario:
+        #         set_dicts(scenario)
+        # else:
+        #     set_dicts(self.Multi_Scenario[0])
+            
+        # f = time.time()
+        # print("set dicts time: " + str(f-s))
             
         def setup_data(zone_input, scenario, Stacked_Gen):
             try:
@@ -200,175 +205,45 @@ class mplot(object):
             data["Min_Net_Load"] = Min_Net_Load
             return data
         
-                
-        outputs = {}
-        for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
+        
+        def mkplot(outputs, data_tables, all_scenarios):
+            xdimension=len(self.xlabels)
+            if xdimension == 0:
+                xdimension = 1
+            ydimension=len(self.ylabels)
+            if ydimension == 0:
+                ydimension = 1
             
-            if facet:
-                xdimension=len(self.xlabels)
-                if xdimension == 0:
-                    xdimension = 1
-                ydimension=len(self.ylabels)
-                if ydimension == 0:
-                    ydimension = 1
-                    
-                grid_size = xdimension*ydimension
-                
-                fig2, axs = plt.subplots(ydimension,xdimension, figsize=((4*xdimension),(4*ydimension)), sharey=True)
-                plt.subplots_adjust(wspace=0.05, hspace=0.2)
-                axs = axs.ravel()
-                i=0
-                
-                data_tables = {}
-                for scenario in self.Multi_Scenario:
-                    print("Scenario = " + scenario)
-                    
-                    try:
-                        Stacked_Gen = Gen_Collection.get(scenario)
-                        Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)  
-                    except Exception:
-                        i=i+1
-                        continue
-                    
-                    if Stacked_Gen.empty == True:
-                        continue
-                    Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
-                    
-                    data = setup_data(zone_input, scenario, Stacked_Gen)
-                    
-                    data = data_prop(data)
-                    
-                    Stacked_Gen = data["Stacked_Gen"]
-                    Load = data["Load"]
-                    Pump_Load = data["Pump_Load"]
-                    Total_Demand = data["Total_Demand"]
-                    Unserved_Energy = data["Unserved_Energy"]
-                    unserved_eng_data_table = data["ue_data_table"]
-                    Peak_Demand = data["Peak_Demand"]
-                    peak_demand_t = data["peak_demand_t"]
-                    min_net_load_t = data["min_net_load_t"] 
-                    Min_Net_Load = data["Min_Net_Load"] 
-                    
-                    Load = Load.rename('Total Load (Demand + Pumped Load)')
-                    Total_Demand = Total_Demand.rename('Total Demand')
-                    unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
-                    # Data table of values to return to main program
-                    Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
-                    data_tables[scenario] = Data_Table_Out                           
-                    # if scenario == "Unexpected_Wind_Cutoff_RT":
-                    #     print(Data_Table_Out)
-#Variables defined, but never used
-                    sp = axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
-                          colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
-             
+    # If the plot is not a facet plot, grid size should be 1x1 
+            if not facet:
+                xdimension = 1
+                ydimension = 1
             
-                    if (Unserved_Energy == 0).all() == False:
-                        lp2 = axs[i].plot(Unserved_Energy,
-                                          #color='#EE1289'  OLD MARMOT COLOR
-                                          color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
-                                          )
-                    
-                    lp = axs[i].plot(Load, color='black')
-                    
-                    if (Pump_Load == 0).all() == False:
-                        lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
-                        
-                    
-                    axs[i].spines['right'].set_visible(False)
-                    axs[i].spines['top'].set_visible(False)
-                    axs[i].tick_params(axis='y', which='major', length=5, width=1)
-                    axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                    axs[i].margins(x=0.01)
+            grid_size = xdimension*ydimension
             
-                    if self.prop == "Min Net Load":
-                        axs[i].annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
-                            fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
+            plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            axs = axs.ravel()
+            i=0
+            
+            for scenario in all_scenarios:
+                print("Scenario = " + scenario)
                 
-                    elif self.prop == "Peak Demand":
-                        axs[i].annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
-                                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-                    
-                    
-                    locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
-                    formatter = mdates.ConciseDateFormatter(locator)
-                    formatter.formats[2] = '%d\n %b'
-                    formatter.zero_formats[1] = '%b\n %Y'
-                    formatter.zero_formats[2] = '%d\n %b'
-                    formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                    formatter.offset_formats[3] = '%b %Y'
-                    formatter.show_offset = False
-                    axs[i].xaxis.set_major_locator(locator)
-                    axs[i].xaxis.set_major_formatter(formatter)
-                    
-                    if (Unserved_Energy == 0).all() == False:
-                        axs[i].fill_between(Load.index, Load,Unserved_Energy, 
-                                           # facecolor='#EE1289' OLD MARMOT COLOR
-                                            facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
-                                            alpha=0.5)
-                    
-                    handles, labels = axs[grid_size-1].get_legend_handles_labels()
-                    
-                 
-                    #Legend 1
-                    leg1 = axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
-                                  facecolor='inherit', frameon=True)  
-                    #Legend 2
-                    if (Pump_Load == 0).all() == False:
-                        leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.55), 
-                                  facecolor='inherit', frameon=True)
-                    else:
-                        leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.55), 
-                                  facecolor='inherit', frameon=True)
-                    
-                    #Legend 3
-                    if (Unserved_Energy == 0).all() == False:
-                        leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.35), 
-                              facecolor='inherit', frameon=True)
-                        
-# Variable defined, but never used
-                    #Legend 4
-                    if (Pump_Load == 0).all() == False:
-                        leg4 = axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.45), 
-                                  facecolor='inherit', frameon=True)
-                    
-                    # Manually add the first legend back
-                    axs[grid_size-1].add_artist(leg1)
-                    axs[grid_size-1].add_artist(leg2)
-                    if (Unserved_Energy == 0).all() == False:
-                        axs[grid_size-1].add_artist(leg3)
-                        
-                    i=i+1  
-                    
-                print(" ") 
-                all_axes = fig2.get_axes()
-                self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
-                j=0
-                k=0
-                for ax in all_axes:
-                    if ax.is_last_row():
-                        ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
-                        j=j+1
-                    if ax.is_first_col(): 
-                        ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
-                        k=k+1
-                        
-                fig2.add_subplot(111, frameon=False)
-                plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-                plt.ylabel('Generation (MW)',  color='black', rotation='vertical', labelpad=60)
+                try:
+                    Stacked_Gen = Gen_Collection.get(scenario)
+                    Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)  
+                except Exception:
+                    i=i+1
+                    pass
+            
+                if Stacked_Gen.empty == True:
+                    pass
                 
-                out = {'fig':fig2, 'data_tables':data_tables}
-                outputs[zone_input] = out
-                
-            else:
-                scenario = self.Multi_Scenario[0]
-                Stacked_Gen = Gen_Collection.get(scenario)
-                Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
                 
                 data = setup_data(zone_input, scenario, Stacked_Gen)
                 data = data_prop(data)
+                
                 
                 Stacked_Gen = data["Stacked_Gen"]
                 Load = data["Load"]
@@ -376,56 +251,55 @@ class mplot(object):
                 Total_Demand = data["Total_Demand"]
                 Unserved_Energy = data["Unserved_Energy"]
                 unserved_eng_data_table = data["ue_data_table"]
-                peak_demand_t = data["peak_demand_t"]
                 Peak_Demand = data["Peak_Demand"]
+                peak_demand_t = data["peak_demand_t"]
                 min_net_load_t = data["min_net_load_t"] 
                 Min_Net_Load = data["Min_Net_Load"] 
                 
                 Load = Load.rename('Total Load (Demand + Pumped Load)')
                 Total_Demand = Total_Demand.rename('Total Demand')
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
-                
                 # Data table of values to return to main program
                 Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
-                fig1, ax = plt.subplots(figsize=(9,6))
-        
-# These two variables are defined, but were never used
+                data_tables[scenario] = Data_Table_Out
                 
-                sp = ax.stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=5,
-                              colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
+                # only difference linewidth = 0,5
+                axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
+                      colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
+                 
                 
                 if (Unserved_Energy == 0).all() == False:
-                    lp2 = plt.plot(Unserved_Energy, 
-                                    #color='#EE1289'  OLD MARMOT COLOR
-                                    color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
-                                    )
-        
-                lp1 = plt.plot(Load, color='black')
+                    axs[i].plot(Unserved_Energy,
+                                      #color='#EE1289'  OLD MARMOT COLOR
+                                      color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                                      )
                 
-                
+                lp = axs[i].plot(Load, color='black')
                 
                 if (Pump_Load == 0).all() == False:
-                    lp3 = plt.plot(Total_Demand, color='black', linestyle="--")
-                    
+                    lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
                 
-                ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-                ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                ax.spines['right'].set_visible(False)
-                ax.spines['top'].set_visible(False)
-                ax.tick_params(axis='y', which='major', length=5, width=1)
-                ax.tick_params(axis='x', which='major', length=5, width=1)
-                ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                ax.margins(x=0.01)
+                    
+                # ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
+                # ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
+                axs[i].spines['right'].set_visible(False)
+                axs[i].spines['top'].set_visible(False)
+                axs[i].tick_params(axis='y', which='major', length=5, width=1)
+                axs[i].tick_params(axis='x', which='major', length=5, width=1)
+                axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[i].margins(x=0.01)
                 
                 if self.prop == "Min Net Load":
-                    ax.annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
-                            fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                    axs[i].annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
+                        fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
                 
+# Peak Demand label overlaps other labels on a facet plot
                 elif self.prop == "Peak Demand":
-                        ax.annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
-                                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-        
-                locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
+                    axs[i].annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand))), # + Total_Demand[peak_demand_t]*0.1)),
+                                fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                
+                
+                locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
                 formatter = mdates.ConciseDateFormatter(locator)
                 formatter.formats[2] = '%d\n %b'
                 formatter.zero_formats[1] = '%b\n %Y'
@@ -433,56 +307,389 @@ class mplot(object):
                 formatter.zero_formats[3] = '%H:%M\n %d-%b'
                 formatter.offset_formats[3] = '%b %Y'
                 formatter.show_offset = False
-                ax.xaxis.set_major_locator(locator)
-                ax.xaxis.set_major_formatter(formatter)
-                 
-                        
+                axs[i].xaxis.set_major_locator(locator)
+                axs[i].xaxis.set_major_formatter(formatter)
+                
+                
                 if (Unserved_Energy == 0).all() == False:
-                    ax.fill_between(Load.index, Load,Unserved_Energy, 
-                                    #facecolor='#EE1289'
-                                    facecolor = '#DD0200',
-                                    alpha=0.5)
+                    axs[i].fill_between(Load.index, Load,Unserved_Energy, 
+                                        # facecolor='#EE1289' OLD MARMOT COLOR
+                                        facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                                        alpha=0.5)
                 
-                handles, labels = ax.get_legend_handles_labels()
+                handles, labels = axs[grid_size-1].get_legend_handles_labels()
                 
-             
+                 
                 #Legend 1
-                leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
+                leg1 = axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
                               facecolor='inherit', frameon=True)  
                 #Legend 2
                 if (Pump_Load == 0).all() == False:
-                    leg2 = ax.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 0.9), 
+                    leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.55), 
                               facecolor='inherit', frameon=True)
                 else:
-                    leg2 = ax.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9), 
+                    leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.55), 
                               facecolor='inherit', frameon=True)
                 
                 #Legend 3
                 if (Unserved_Energy == 0).all() == False:
-                    leg3 = ax.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 0.82), 
-                              facecolor='inherit', frameon=True)
+                    leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.35), 
+                          facecolor='inherit', frameon=True)
                     
-# This variable is defined, but never used
+                # Variable defined, but never used
                 #Legend 4
                 if (Pump_Load == 0).all() == False:
-                    leg4 = ax.legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.885), 
+                    axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.45), 
                               facecolor='inherit', frameon=True)
                 
-                
                 # Manually add the first legend back
-                ax.add_artist(leg1)
-                ax.add_artist(leg2)
+                axs[grid_size-1].add_artist(leg1)
+                axs[grid_size-1].add_artist(leg2)
                 if (Unserved_Energy == 0).all() == False:
-                    ax.add_artist(leg3)
-                
-                # val = 1
-                # s = 'zone' + str(val)
-                # s = {'fig': fig1, 'data_table': Data_Table_Out}
-                # val = val + 1
-                out = {'fig': fig1, 'data_table': Data_Table_Out}
-                outputs[zone_input] = out
+                    axs[grid_size-1].add_artist(leg3)
+                    
+                i=i+1 
             
+            print(" ") 
+            all_axes = fig1.get_axes()
+            self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
+            j=0
+            k=0
+            for ax in all_axes:
+                if ax.is_last_row():
+                    ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
+                    j=j+1
+                if ax.is_first_col(): 
+                    ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
+                    k=k+1
+                    
+            fig1.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.ylabel('Generation (MW)',  color='black', rotation='vertical', labelpad=60)
+            
+            out = {'fig':fig1, 'data_tables':data_tables}
+            plt.close(fig1)
+            
+            return out
+        
+##############################################################################             
+        
+        s = time.time()
+        if facet:
+            for scenario in self.Multi_Scenario:
+                set_dicts(scenario)
+        else:
+            set_dicts(self.Multi_Scenario[0])
+        f = time.time()
+        print("set dicts time: " + str(f-s))
+        
+        outputs = {}
+        for zone_input in self.Zones:
+            print("Zone = "+ zone_input)
+            
+            data_tables = {}
+            if facet:
+                #for scenario in self.Multi_Scenario:
+                    #set_dicts(scenario)
+                outputs[zone_input] = mkplot(outputs, data_tables, self.Multi_Scenario)
+                    
+            else:
+                #set_dicts(self.Multi_Scenario[0])
+                outputs[zone_input] = mkplot(outputs, data_tables, [self.Multi_Scenario[0]])
+                
+        
         return outputs
+        
+        
+###############################################################################        
+
+# This code has been combined and put into the mkplot function.  For whatever
+# reason it seems to run in a little over 80 % of the time the new code runs
+        
+    
+    
+#         outputs = {}
+#         for zone_input in self.Zones:
+#             print("Zone = "+ zone_input)
+            
+#             if facet:
+#                 xdimension=len(self.xlabels)
+#                 if xdimension == 0:
+#                     xdimension = 1
+#                 ydimension=len(self.ylabels)
+#                 if ydimension == 0:
+#                     ydimension = 1
+                    
+#                 grid_size = xdimension*ydimension
+                
+#                 fig2, axs = plt.subplots(ydimension,xdimension, figsize=((4*xdimension),(4*ydimension)), sharey=True)
+#                 plt.subplots_adjust(wspace=0.05, hspace=0.2)
+#                 axs = axs.ravel()
+#                 i=0
+                
+#                 data_tables = {}
+#                 for scenario in self.Multi_Scenario:
+#                     print("Scenario = " + scenario)
+                    
+#                     try:
+#                         Stacked_Gen = Gen_Collection.get(scenario)
+#                         Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)  
+#                     except Exception:
+#                         i=i+1
+#                         continue
+                    
+#                     if Stacked_Gen.empty == True:
+#                         continue
+#                     Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
+                    
+#                     data = setup_data(zone_input, scenario, Stacked_Gen)
+                    
+#                     data = data_prop(data)
+                    
+#                     Stacked_Gen = data["Stacked_Gen"]
+#                     Load = data["Load"]
+#                     Pump_Load = data["Pump_Load"]
+#                     Total_Demand = data["Total_Demand"]
+#                     Unserved_Energy = data["Unserved_Energy"]
+#                     unserved_eng_data_table = data["ue_data_table"]
+#                     Peak_Demand = data["Peak_Demand"]
+#                     peak_demand_t = data["peak_demand_t"]
+#                     min_net_load_t = data["min_net_load_t"] 
+#                     Min_Net_Load = data["Min_Net_Load"] 
+                    
+#                     Load = Load.rename('Total Load (Demand + Pumped Load)')
+#                     Total_Demand = Total_Demand.rename('Total Demand')
+#                     unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
+#                     # Data table of values to return to main program
+#                     Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
+#                     data_tables[scenario] = Data_Table_Out                           
+#                     # if scenario == "Unexpected_Wind_Cutoff_RT":
+#                     #     print(Data_Table_Out)
+# #Variables defined, but never used
+#                     sp = axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
+#                           colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
+             
+            
+#                     if (Unserved_Energy == 0).all() == False:
+#                         lp2 = axs[i].plot(Unserved_Energy,
+#                                           #color='#EE1289'  OLD MARMOT COLOR
+#                                           color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+#                                           )
+                    
+#                     lp = axs[i].plot(Load, color='black')
+                    
+#                     if (Pump_Load == 0).all() == False:
+#                         lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
+                        
+                    
+#                     axs[i].spines['right'].set_visible(False)
+#                     axs[i].spines['top'].set_visible(False)
+#                     axs[i].tick_params(axis='y', which='major', length=5, width=1)
+#                     axs[i].tick_params(axis='x', which='major', length=5, width=1)
+#                     axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+#                     axs[i].margins(x=0.01)
+            
+#                     if self.prop == "Min Net Load":
+#                         axs[i].annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
+#                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                
+#                     elif self.prop == "Peak Demand":
+#                         axs[i].annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
+#                                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                    
+                    
+#                     locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
+#                     formatter = mdates.ConciseDateFormatter(locator)
+#                     formatter.formats[2] = '%d\n %b'
+#                     formatter.zero_formats[1] = '%b\n %Y'
+#                     formatter.zero_formats[2] = '%d\n %b'
+#                     formatter.zero_formats[3] = '%H:%M\n %d-%b'
+#                     formatter.offset_formats[3] = '%b %Y'
+#                     formatter.show_offset = False
+#                     axs[i].xaxis.set_major_locator(locator)
+#                     axs[i].xaxis.set_major_formatter(formatter)
+                    
+#                     if (Unserved_Energy == 0).all() == False:
+#                         axs[i].fill_between(Load.index, Load,Unserved_Energy, 
+#                                             # facecolor='#EE1289' OLD MARMOT COLOR
+#                                             facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+#                                             alpha=0.5)
+                    
+#                     handles, labels = axs[grid_size-1].get_legend_handles_labels()
+                    
+                 
+#                     #Legend 1
+#                     leg1 = axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
+#                                   facecolor='inherit', frameon=True)  
+#                     #Legend 2
+#                     if (Pump_Load == 0).all() == False:
+#                         leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.55), 
+#                                   facecolor='inherit', frameon=True)
+#                     else:
+#                         leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.55), 
+#                                   facecolor='inherit', frameon=True)
+                    
+#                     #Legend 3
+#                     if (Unserved_Energy == 0).all() == False:
+#                         leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.35), 
+#                               facecolor='inherit', frameon=True)
+                        
+# # Variable defined, but never used
+#                     #Legend 4
+#                     if (Pump_Load == 0).all() == False:
+#                         leg4 = axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.45), 
+#                                   facecolor='inherit', frameon=True)
+                    
+#                     # Manually add the first legend back
+#                     axs[grid_size-1].add_artist(leg1)
+#                     axs[grid_size-1].add_artist(leg2)
+#                     if (Unserved_Energy == 0).all() == False:
+#                         axs[grid_size-1].add_artist(leg3)
+                        
+#                     i=i+1  
+                    
+#                 print(" ") 
+#                 all_axes = fig2.get_axes()
+#                 self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
+#                 j=0
+#                 k=0
+#                 for ax in all_axes:
+#                     if ax.is_last_row():
+#                         ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
+#                         j=j+1
+#                     if ax.is_first_col(): 
+#                         ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
+#                         k=k+1
+                        
+#                 fig2.add_subplot(111, frameon=False)
+#                 plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+#                 plt.ylabel('Generation (MW)',  color='black', rotation='vertical', labelpad=60)
+                
+#                 out = {'fig':fig2, 'data_tables':data_tables}
+#                 outputs[zone_input] = out
+                
+#             else:
+#                 scenario = self.Multi_Scenario[0]
+#                 Stacked_Gen = Gen_Collection.get(scenario)
+#                 Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
+#                 Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
+                
+#                 data = setup_data(zone_input, scenario, Stacked_Gen)
+#                 data = data_prop(data)
+                
+#                 Stacked_Gen = data["Stacked_Gen"]
+#                 Load = data["Load"]
+#                 Pump_Load = data["Pump_Load"]
+#                 Total_Demand = data["Total_Demand"]
+#                 Unserved_Energy = data["Unserved_Energy"]
+#                 unserved_eng_data_table = data["ue_data_table"]
+#                 peak_demand_t = data["peak_demand_t"]
+#                 Peak_Demand = data["Peak_Demand"]
+#                 min_net_load_t = data["min_net_load_t"] 
+#                 Min_Net_Load = data["Min_Net_Load"] 
+                
+#                 Load = Load.rename('Total Load (Demand + Pumped Load)')
+#                 Total_Demand = Total_Demand.rename('Total Demand')
+#                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
+                
+#                 # Data table of values to return to main program
+#                 Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
+#                 fig1, ax = plt.subplots(figsize=(9,6))
+        
+# # These two variables are defined, but were never used
+                
+#                 sp = ax.stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=5,
+#                               colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
+                
+#                 if (Unserved_Energy == 0).all() == False:
+#                     lp2 = plt.plot(Unserved_Energy, 
+#                                     #color='#EE1289'  OLD MARMOT COLOR
+#                                     color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+#                                     )
+        
+#                 lp1 = plt.plot(Load, color='black')
+                
+                
+                
+#                 if (Pump_Load == 0).all() == False:
+#                     lp3 = plt.plot(Total_Demand, color='black', linestyle="--")
+                    
+                
+#                 ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
+#                 ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
+#                 ax.spines['right'].set_visible(False)
+#                 ax.spines['top'].set_visible(False)
+#                 ax.tick_params(axis='y', which='major', length=5, width=1)
+#                 ax.tick_params(axis='x', which='major', length=5, width=1)
+#                 ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+#                 ax.margins(x=0.01)
+                
+#                 if self.prop == "Min Net Load":
+#                     ax.annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
+#                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                
+#                 elif self.prop == "Peak Demand":
+#                         ax.annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
+#                                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+        
+#                 locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
+#                 formatter = mdates.ConciseDateFormatter(locator)
+#                 formatter.formats[2] = '%d\n %b'
+#                 formatter.zero_formats[1] = '%b\n %Y'
+#                 formatter.zero_formats[2] = '%d\n %b'
+#                 formatter.zero_formats[3] = '%H:%M\n %d-%b'
+#                 formatter.offset_formats[3] = '%b %Y'
+#                 formatter.show_offset = False
+#                 ax.xaxis.set_major_locator(locator)
+#                 ax.xaxis.set_major_formatter(formatter)
+                 
+                        
+#                 if (Unserved_Energy == 0).all() == False:
+#                     ax.fill_between(Load.index, Load,Unserved_Energy, 
+#                                     #facecolor='#EE1289'
+#                                     facecolor = '#DD0200',
+#                                     alpha=0.5)
+                
+#                 handles, labels = ax.get_legend_handles_labels()
+                
+             
+#                 #Legend 1
+#                 leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
+#                               facecolor='inherit', frameon=True)  
+#                 #Legend 2
+#                 if (Pump_Load == 0).all() == False:
+#                     leg2 = ax.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 0.9), 
+#                               facecolor='inherit', frameon=True)
+#                 else:
+#                     leg2 = ax.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9), 
+#                               facecolor='inherit', frameon=True)
+                
+#                 #Legend 3
+#                 if (Unserved_Energy == 0).all() == False:
+#                     leg3 = ax.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 0.82), 
+#                               facecolor='inherit', frameon=True)
+                    
+# # This variable is defined, but never used
+#                 #Legend 4
+#                 if (Pump_Load == 0).all() == False:
+#                     leg4 = ax.legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.885), 
+#                               facecolor='inherit', frameon=True)
+                
+                
+#                 # Manually add the first legend back
+#                 ax.add_artist(leg1)
+#                 ax.add_artist(leg2)
+#                 if (Unserved_Energy == 0).all() == False:
+#                     ax.add_artist(leg3)
+                
+#                 # val = 1
+#                 # s = 'zone' + str(val)
+#                 # s = {'fig': fig1, 'data_table': Data_Table_Out}
+#                 # val = val + 1
+#                 out = {'fig': fig1, 'data_table': Data_Table_Out}
+#                 outputs[zone_input] = out
+            
+#         return outputs
                 
 ###############################################################################    
     
