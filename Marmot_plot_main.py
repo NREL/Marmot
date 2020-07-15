@@ -656,6 +656,7 @@ for index, row in Marmot_plot_select.iterrows():
             Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
             re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta]
 
+# updated
         
         if row["Figure Type"] == "Generation Stack":
             fig = generation_stack.mplot(argument_list)
@@ -665,13 +666,16 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 Figure_Out[zone_input]["data_tables"][Multi_Scenario[0]].to_csv(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
                 
-        
+# updated        
         elif row["Figure Type"] == "Generation Stack Facet Grid":
             start = time.time()
             fig = generation_stack.mplot(argument_list)
             Figure_Out = fig.gen_stack(True)
             for zone_input in Zones:
+        # png plots
                 Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+        # svg plots
+                #Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.svg'), dpi=600, bbox_inches='tight')
                 tables_folder = os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                 try:
                     os.makedirs(tables_folder)
@@ -686,20 +690,29 @@ for index, row in Marmot_plot_select.iterrows():
             elapsed = end - start
             print("time elapsed: " + str(elapsed) + " seconds" )
         
+###############################################################################
+# Merge generation stack all periods code into gen_stack
         
         elif row["Figure Type"] == "Generation Stack All Periods":
             fig = generation_stack.mplot(argument_list) 
             Figure_Out = fig.gen_stack_all_periods()
+###############################################################################
 
+# updated            
         elif row["Figure Type"] == "Total Generation": 
             fig = total_generation.mplot(argument_list) 
             Figure_Out = fig.total_gen()
-            Figure_Out["fig"].figure.savefig(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
-            Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
-            
+            for zone_input in Zones:
+                Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+                Figure_Out[zone_input]["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+
+# Total generation facets currently commented out            
         elif row["Figure Type"] == "Total Generation Facet Grid": 
             Figure_Out["fig"].savefig(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
             Figure_Out["data_table"].to_csv(os.path.join(gen_stack_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
+
+
+
 
         elif row["Figure Type"] == "Capacity Out Stack":
             fig = capacity_out.mplot(argument_list)

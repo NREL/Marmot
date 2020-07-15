@@ -14,7 +14,7 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
-import time
+#import time
 
 
 
@@ -58,9 +58,8 @@ class mplot(object):
         self.gen_names_dict = argument_list[18]
         self.vre_gen_cat = argument_list[21]
         self.figure_folder = argument_list[25]
-    
-    def gen_stack(self, facet):
         
+    def gen_stack(self, facet):
         # Create a dictionary to hold Dataframes
         Gen_Collection = {} 
         Load_Collection = {}
@@ -90,17 +89,7 @@ class mplot(object):
                 except:
                     Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
-        
-        # s = time.time()
-        # if facet:
-        #     for scenario in self.Multi_Scenario:
-        #         set_dicts(scenario)
-        # else:
-        #     set_dicts(self.Multi_Scenario[0])
-            
-        # f = time.time()
-        # print("set dicts time: " + str(f-s))
-            
+             
         def setup_data(zone_input, scenario, Stacked_Gen):
             try:
                 Stacked_Curt = Curtailment_Collection.get(scenario)
@@ -206,7 +195,7 @@ class mplot(object):
             return data
         
         
-        def mkplot(outputs, data_tables, all_scenarios):
+        def mkplot(outputs, zone_input, all_scenarios):
             xdimension=len(self.xlabels)
             if xdimension == 0:
                 xdimension = 1
@@ -221,11 +210,11 @@ class mplot(object):
             
             grid_size = xdimension*ydimension
             
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((9*xdimension),(6*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             axs = axs.ravel()
             i=0
-            
+            data_tables = {}
             for scenario in all_scenarios:
                 print("Scenario = " + scenario)
                 
@@ -295,7 +284,7 @@ class mplot(object):
                 
 # Peak Demand label overlaps other labels on a facet plot
                 elif self.prop == "Peak Demand":
-                    axs[i].annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand))), # + Total_Demand[peak_demand_t]*0.1)),
+                    axs[i].annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
                                 fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
                 
                 
@@ -374,39 +363,41 @@ class mplot(object):
         
 ##############################################################################             
         
-        s = time.time()
         if facet:
             for scenario in self.Multi_Scenario:
                 set_dicts(scenario)
         else:
             set_dicts(self.Multi_Scenario[0])
-        f = time.time()
-        print("set dicts time: " + str(f-s))
         
         outputs = {}
         for zone_input in self.Zones:
             print("Zone = "+ zone_input)
-            
-            data_tables = {}
+            #data_tables = {}
             if facet:
                 #for scenario in self.Multi_Scenario:
                     #set_dicts(scenario)
-                outputs[zone_input] = mkplot(outputs, data_tables, self.Multi_Scenario)
+                outputs[zone_input] = mkplot(outputs, zone_input, self.Multi_Scenario)
                     
             else:
                 #set_dicts(self.Multi_Scenario[0])
-                outputs[zone_input] = mkplot(outputs, data_tables, [self.Multi_Scenario[0]])
-                
-        
+                outputs[zone_input] = mkplot(outputs, zone_input, [self.Multi_Scenario[0]])
         return outputs
         
         
 ###############################################################################        
 
 # This code has been combined and put into the mkplot function.  For whatever
-# reason it seems to run in a little over 80 % of the time the new code runs
+# reason it seems to run 20% faster than the new code
         
-    
+#         s = time.time()
+#         if facet:
+#             for scenario in self.Multi_Scenario:
+#                 set_dicts(scenario)
+#         else:
+#             set_dicts(self.Multi_Scenario[0])
+            
+#         f = time.time()
+#         print("set dicts time: " + str(f-s))
     
 #         outputs = {}
 #         for zone_input in self.Zones:
@@ -688,7 +679,9 @@ class mplot(object):
 #                 # val = val + 1
 #                 out = {'fig': fig1, 'data_table': Data_Table_Out}
 #                 outputs[zone_input] = out
-            
+        
+#         f2 = time.time()
+#         print("function time: " + str(f2-s2))    
 #         return outputs
                 
 ###############################################################################    
