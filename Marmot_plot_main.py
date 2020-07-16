@@ -97,6 +97,10 @@ gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.
 AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
 print("Aggregation selected: "+AGG_BY)
 # Facet Grid Labels (Based on Scenarios)
+zone_region_sublist = pd.Series(str(Marmot_user_defined_inputs.loc['zone_region_sublist'].squeeze()).split(",")).str.strip().tolist()
+if zone_region_sublist != ['nan']:
+    print("Only plotting " + AGG_BY + "s: " + str(zone_region_sublist))
+
 ylabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze()).split(",")).str.strip().tolist()
 if ylabels == ['nan']: ylabels = [""]
 xlabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_xlabels'].squeeze()).split(",")).str.strip().tolist()
@@ -302,12 +306,36 @@ regions = meta.regions()
 # Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
 if AGG_BY=="zone": 
     Zones = zones['name'].unique()
+    if zone_region_sublist != ['nan']:
+        zsub = []
+        for zone in zone_region_sublist:
+            if zone in Zones:
+                zsub.append(zone)
+            else:
+                print("metadata does not contain zone: " + zone + ", SKIPPING ZONE")
+        Zones = zsub
 
 elif Region_Mapping.empty==True:
     Zones = regions['region'].unique()
+    if zone_region_sublist != ['nan']:
+        zsub = []
+        for region in zone_region_sublist:
+            if region in Zones:
+                zsub.append(region)
+            else:
+                print("metadata does not contain region: " + region + ", SKIPPING REGION")
+        Zones = zsub
 else:
     Region_Mapping = regions.merge(Region_Mapping, how='left', on='region')
     Zones = Region_Mapping[AGG_BY].unique()
+    if zone_region_sublist != ['nan']:
+        zsub = []
+        for region in zone_region_sublist:
+            if region in Zones:
+                zsub.append(region)
+            else:
+                print("metadata does not contain region: " + region + ", SKIPPING REGION")
+        Zones = zsub
 
 # Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.    
 
@@ -663,7 +691,10 @@ for index, row in Marmot_plot_select.iterrows():
             #print (Multi_Scenario)
             Figure_Out = fig.gen_stack(False)
             for zone_input in Zones:
+        # png plots
                 Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
+        # svg plots
+                #Figure_Out[zone_input]["fig"].savefig(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.svg'), dpi=600, bbox_inches='tight')
                 Figure_Out[zone_input]["data_tables"][Multi_Scenario[0]].to_csv(os.path.join(gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
                 
 # updated        
@@ -703,7 +734,10 @@ for index, row in Marmot_plot_select.iterrows():
             fig = total_generation.mplot(argument_list) 
             Figure_Out = fig.total_gen()
             for zone_input in Zones:
+        # png plots
                 Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
+        # svg plots
+                #Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.svg'), dpi=600, bbox_inches='tight')
                 Figure_Out[zone_input]["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
 
 # Total generation facets currently commented out            
