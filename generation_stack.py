@@ -1,9 +1,7 @@
-# -*- coding: utf-8 -*-
+
 """
 Created on Mon Dec  9 10:34:48 2019
-
 This code creates generation stack plots and is called from Marmot_plot_main.py
-
 @author: dlevie
 """
 

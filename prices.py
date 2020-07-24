@@ -58,6 +58,7 @@ class mplot(object):
         n=0 #Counter for scenario subplots
 
         Data_Out=pd.DataFrame()
+
         for scenario in self.Multi_Scenario:
 
             print("Scenario = " + str(scenario))
@@ -110,27 +111,28 @@ class mplot(object):
         plt.ylabel('Region Price $/MWh ',  color='black', rotation='vertical', labelpad=60)
         return {'fig': fig3, 'data_table':Data_Out}
 
-
     def price_region_chron(self):          #Timeseries of individual region prices
 
-      print('Zone = ' + str(self.zone_input))
+        Price_Collection = {}        # Create Dictionary to hold Datframes for each scenario
 
-      xdimension=len(self.xlabels)
-      if xdimension == 0:
-          xdimension = 1
-      ydimension=len(self.ylabels)
-      if ydimension == 0:
-          ydimension = 1
-      grid_size = xdimension*ydimension
-      fig3, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharey=True)
-      plt.subplots_adjust(wspace=0.05, hspace=0.2)
-      if len(self.Multi_Scenario) >1:
-          axs = axs.ravel()
-      i=0
+        for scenario in self.Multi_Scenario:
+            Price_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"region_Price")
 
-      for scenario in self.Multi_Scenario:
+
+        print("Zone = " + self.zone_input)
+
+        fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
+
+        n=0 #Counter for scenario subplots
+
+        Data_Out=pd.DataFrame()
+
+        for scenario in self.Multi_Scenario:
 
             print("Scenario = " + str(scenario))
+
+            Price = Price_Collection.get(scenario)
+            Price = Price.xs(self.zone_input,level=self.AGG_BY,drop_level=False) #Filter to the AGGBY level and keep all levels
 
             Price = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"region_Price")
             Price = Price.xs(self.zone_input,level = self.AGG_BY,drop_level=False) #Filter to the AGGBY level and keep all levels
@@ -171,7 +173,7 @@ class mplot(object):
                     if len(Price.index.get_level_values(level='region').unique()) <10:
                         axs.legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
 
-                del timeseries 
+                del timeseries
             del Price
             i = i + 1
 
@@ -190,9 +192,45 @@ class mplot(object):
                 k=k+1
 
 
-      fig3.add_subplot(111, frameon=False)
-      plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-      plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal', labelpad = 40)
-      plt.ylabel('Regional price ($/MWh)',  color='black', rotation='vertical', labelpad = 60)
+                else:
 
-      return {'fig' : fig3, 'data_table' : Data_Table_Out}
+                    ax3.plot(timeseries[0],label=region)
+                    ax3.set_ylabel(scenario,  color='black', rotation='vertical')
+                    ax3.spines['right'].set_visible(False)
+                    ax3.spines['top'].set_visible(False)
+                    locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
+                    formatter = mdates.ConciseDateFormatter(locator)
+                    formatter.formats[2] = '%d\n %b'
+                    formatter.zero_formats[1] = '%b\n %Y'
+                    formatter.zero_formats[2] = '%d\n %b'
+                    formatter.zero_formats[3] = '%H:%M\n %d-%b'
+                    formatter.offset_formats[3] = '%b %Y'
+                    formatter.show_offset = False
+                    ax3.xaxis.set_major_locator(locator)
+                    ax3.xaxis.set_major_formatter(formatter)
+
+                    if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
+                        plt.ylim(top=int(self.prop))
+
+                del timeseries
+
+            if len(Price.index.get_level_values(level='region').unique()) <10:# Add legend if legible
+                    if len(self.Multi_Scenario)>1:
+                        ax3[n].legend()
+                    else:
+                        ax3.legend()
+
+            Price=Price.reset_index(['timestamp','region']).set_index(['timestamp'])
+            Price.rename(columns={0:scenario},inplace=True)
+            Data_Out=pd.concat([Data_Out,Price],axis=1)
+
+            del Price
+
+
+            n=n+1
+        #end scenario loop
+        fig3.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel('Region Price $/MWh ',  color='black', rotation='vertical', labelpad=60)
+
+        return {'fig': fig3, 'data_table':Data_Out}

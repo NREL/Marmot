@@ -29,9 +29,15 @@ import ramping
 import utilization_factor
 import prices
 import hydro
+
+# Import MetaData class and use this to retreive metadata instead of reading pickle files
+# Changes to code and comments begin line 316
 import capacity_out
 import thermal_cap_reserve
+from meta_data import MetaData
 
+# import capacity_out
+# import thermal_cap_reserve
 # import constraints
 
 try:
@@ -40,7 +46,6 @@ try:
 except IndexError:
     #No arguments passed
     pass
-
 
 #===============================================================================
 # Graphing Defaults
@@ -52,11 +57,9 @@ mpl.rc('axes', labelsize=16)
 mpl.rc('legend', fontsize=11)
 mpl.rc('font', family='serif')
 
-
 #===============================================================================
 # Load Input Properties
 #===============================================================================
-
 
 #A bug in pandas requires this to be included, otherwise df.to_string truncates long strings
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
@@ -72,6 +75,10 @@ Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].squeeze().s
 # Folder to save your processed solutions
 Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
 
+# These variables (along with Region_Mapping) are used to initialize MetaData
+PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
+HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
+
 Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_scenario_plot'].squeeze().split(",")).str.strip().tolist()
 
 # For plots using the differnec of the values between two scenarios.
@@ -82,6 +89,8 @@ if Scenario_Diff == ['nan']: Scenario_Diff = [""]
 Mapping_folder = 'mapping_folder'
 
 Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
+Region_Mapping = Region_Mapping.astype(str)
+
 Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['reserve_region_type.csv_name'].to_string(index=False).strip()))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
@@ -97,16 +106,12 @@ if xlabels == ['nan']: xlabels = [""]
 # Input and Output Directories
 #===============================================================================
 
-
-# PLEXOS_Scenarios = os.path.join(Processed_Solutions_folder)
-
 figure_folder = os.path.join(Marmot_Solutions_folder, Scenario_name, 'Figures_Output')
 try:
     os.makedirs(figure_folder)
 except FileExistsError:
     # directory already exists
     pass
-
 
 hdf_out_folder = os.path.join(Marmot_Solutions_folder, Scenario_name,'Processed_HDF5_folder')
 try:
@@ -233,7 +238,7 @@ vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeez
 
 thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
-facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
+# facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
                     print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
@@ -264,16 +269,13 @@ if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
 #                     'Net Imports':'#efbbff',
 #                     'Curtailment': '#FF0000'}
 
-
 #STANDARD SEAC COLORS (AS OF MARCH 9, 2020)
 PLEXOS_color_dict = pd.read_csv(os.path.join(Mapping_folder, 'colour_dictionary.csv'))
 PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
 PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
 PLEXOS_color_dict = PLEXOS_color_dict[['Generator','Colour']].set_index("Generator").to_dict()["Colour"]
 
-
 color_list = ['#396AB1', '#CC2529','#3E9651','#ff7f00','#6B4C9A','#922428','#cab2d6', '#6a3d9a', '#fb9a99', '#b15928']
-
 
 marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
 
@@ -283,18 +285,25 @@ marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
 
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
-Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
-Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
+# Instead of reading in pickle files, an instance of metadata is initialized with the appropriate parameters
+# Methods within that class are used to retreive the data that was stored in pickle files
+
+meta = MetaData(HDF5_folder_in, Region_Mapping)
+zones = meta.zones()
+regions = meta.regions()
+
+# Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
+# Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
 
 if AGG_BY=="zone":
-    Zones = Zones_pkl['name'].unique()
+    Zones = zones['name'].unique()
 elif Region_Mapping.empty==True:
-    Zones = Regions_pkl['region'].unique()
+    Zones = regions['region'].unique()
 else:
-    Region_Mapping = Regions_pkl.merge(Region_Mapping, how='left', on='region')
+    Region_Mapping = regions.merge(Region_Mapping, how='left', on='region')
     Zones = Region_Mapping[AGG_BY].unique()
 
-#Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
+# Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
 
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
@@ -304,8 +313,6 @@ if (len(sys.argv)-1) == 1: # If passed one argument (not including file name whi
     Marmot_plot_select = Marmot_plot_select.iloc[int(sys.argv[1])-1].to_frame().T
 else:
     Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == True]
-
-
 
 #%%
 # Main loop to process each figure and pass data to functions
@@ -322,7 +329,7 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6], row.iloc[7], row.iloc[8],
                                   hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                                   Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-                                  re_gen_cat, vre_gen_cat, region, thermal_gen_cat]
+                                  re_gen_cat, vre_gen_cat, region, thermal_gen_cat,meta]
 
             if row["Figure Type"] == "Reserve Timeseries":
                 fig = reserves.mplot(argument_list)
@@ -369,9 +376,7 @@ for index, row in Marmot_plot_select.iterrows():
                 else:
                     Figure_Out["fig"].savefig(os.path.join(reserve_total_figures , region + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
 
-
             mpl.pyplot.close('all')
-
     else:
 
         for zone_input in Zones:
@@ -379,7 +384,8 @@ for index, row in Marmot_plot_select.iterrows():
             argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                hdf_out_folder, zone_input, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
                Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,facet_gen_cat,figure_folder]
+               re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta,facet_gen_cat]
+
 
             if row["Figure Type"] == "Generation Stack":
                 fig = generation_stack.mplot(argument_list)
@@ -417,14 +423,14 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["fig"].savefig(os.path.join(thermal_cap_reserve_figures, zone_input + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(thermal_cap_reserve_figures, zone_input + "_" + row["Figure Output Name"] + ".csv"))
 
-            
-            elif row["Figure Type"] == "Total Generation Difference": 
-                fig = total_generation.mplot(argument_list) 
+
+            elif row["Figure Type"] == "Total Generation Difference":
+                fig = total_generation.mplot(argument_list)
                 Figure_Out = fig.total_gen_diff()
                 Figure_Out["fig"].savefig(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]), dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(tot_gen_stack_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
-             
-            elif row["Figure Type"] == "Total Generation Facet Grid": 
+
+            elif row["Figure Type"] == "Total Generation Facet Grid":
                 print("Total Generation Facet Grid currently unavailable for plotting, code not stable and needs testing")
                 fig = total_generation.mplot(argument_list)
                 Figure_Out = fig.total_gen_facet()
@@ -488,17 +494,24 @@ for index, row in Marmot_plot_select.iterrows():
                 Figure_Out["fig"].savefig(os.path.join(utilization_factor_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                 Figure_Out["data_table"].to_csv(os.path.join(utilization_factor_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
 
-            elif row["Figure Type"] == "Line Utilization Duration Curve":
+            elif row["Figure Type"] == "Line Utilization Hourly": #"Line Utilization Duration Curve":
                 fig = transmission.mplot(argument_list)
                 Figure_Out = fig.line_util()
-                Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, zone_input.replace('.','')+ "_"+row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(line_utilization_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+                if Figure_Out != None:
+                    Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, zone_input.replace('.','')+ "_"+row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(line_utilization_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+                else:
+                    print("Unable to plot Line Utilization Duration Curve")
 
             elif row["Figure Type"] == "Line Utilization Annual":
                 fig = transmission.mplot(argument_list)
                 Figure_Out = fig.line_hist()
-                Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, zone_input.replace('.','') + "_" +row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
-                Figure_Out["data_table"].to_csv(os.path.join(line_utilization_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+                if Figure_Out != None:
+                    Figure_Out["fig"].savefig(os.path.join(line_utilization_figures, zone_input.replace('.','') + "_" +row["Figure Output Name"]) , dpi=200, bbox_inches='tight')
+                    Figure_Out["data_table"].to_csv(os.path.join(line_utilization_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+                else:
+                    print("Unable to plot Line Utilization Annual")
+
 
             elif row["Figure Type"] == 'Line Utilization Timeseries':
                 if (row.iloc[3] != row.iloc[3])==False:  #For the ReEDS_Expansion category only, only need to run it once (not for every zone).
@@ -571,8 +584,8 @@ for index, row in Marmot_plot_select.iterrows():
                 else:
                     Figure_Out["fig"].savefig(os.path.join(production_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                     Figure_Out["data_table"].to_csv(os.path.join(production_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
-            
-            elif row["Figure Type"] == "Total System Cost Type": 
+
+            elif row["Figure Type"] == "Total System Cost Type":
                 fig = production_cost.mplot(argument_list)
                 Figure_Out = fig.sys_cost_type()
                 if isinstance(Figure_Out, pd.DataFrame):
@@ -580,8 +593,8 @@ for index, row in Marmot_plot_select.iterrows():
                 else:
                     Figure_Out["fig"].savefig(os.path.join(production_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                     Figure_Out["data_table"].to_csv(os.path.join(production_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
-            
-            elif row["Figure Type"] == "Total System Cost Difference": 
+
+            elif row["Figure Type"] == "Total System Cost Difference":
                 fig = production_cost.mplot(argument_list)
                 Figure_Out = fig.sys_cost_diff()
                 if isinstance(Figure_Out, pd.DataFrame):
@@ -589,8 +602,8 @@ for index, row in Marmot_plot_select.iterrows():
                 else:
                     Figure_Out["fig"].savefig(os.path.join(production_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                     Figure_Out["data_table"].to_csv(os.path.join(production_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
-            
-            elif row["Figure Type"] == "Total System Cost Type Difference": 
+
+            elif row["Figure Type"] == "Total System Cost Type Difference":
                 fig = production_cost.mplot(argument_list)
                 Figure_Out = fig.sys_cost_type_diff()
                 if isinstance(Figure_Out, pd.DataFrame):
@@ -598,8 +611,8 @@ for index, row in Marmot_plot_select.iterrows():
                 else:
                     Figure_Out["fig"].savefig(os.path.join(production_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                     Figure_Out["data_table"].to_csv(os.path.join(production_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
-            
-            elif row["Figure Type"] == "Detailed Total Generation Cost Difference": 
+
+            elif row["Figure Type"] == "Detailed Total Generation Cost Difference":
                 fig = production_cost.mplot(argument_list)
                 Figure_Out = fig.detailed_gen_cost_diff()
                 if isinstance(Figure_Out, pd.DataFrame):
@@ -607,7 +620,7 @@ for index, row in Marmot_plot_select.iterrows():
                 else:
                     Figure_Out["fig"].savefig(os.path.join(production_cost_figures, zone_input.replace('.','') + "_" + row["Figure Output Name"]) , dpi=600, bbox_inches='tight')
                     Figure_Out["data_table"].to_csv(os.path.join(production_cost_figures, zone_input.replace('.','')+ "_" + row["Figure Output Name"] + ".csv"))
-            
+
 
             elif row["Figure Type"] == "Detailed Production Cost":
                 fig = production_cost.mplot(argument_list)

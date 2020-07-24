@@ -14,14 +14,15 @@ it can be read into the Marmot_results_plotting.py file
 #===============================================================================
 
 import pandas as pd
-import numpy as np
+#import numpy as np
 import os
 import h5py
 import sys
 import pathlib
 import time
+from meta_data import MetaData
 
-sys.path.append('../h5plexos')
+sys.path.append('../../h5plexos')
 from h5plexos.query import PLEXOSSolution
 
 try:
@@ -58,7 +59,6 @@ Plexos_Properties = pd.read_csv('plexos_properties.csv')
 
 # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
 Scenario_List = pd.Series(Marmot_user_defined_inputs.loc['Scenario_process_list'].squeeze().split(",")).str.strip().tolist()
-
 # The folder that contains all PLEXOS h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
 PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
 
@@ -89,7 +89,7 @@ vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeez
 #===============================================================================
 # Region mapping
 #===============================================================================
-
+Region_Mapping = Region_Mapping.astype(str)
 try:
     Region_Mapping = Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
 except Exception:
@@ -99,236 +99,47 @@ except Exception:
 # FUNCTIONS FOR PLEXOS DATA EXTRACTION
 #=============================================================================
 
-# Function for formating data which comes from the PLEXOS Region Category
-def df_process_region(df, overlap_hour):
-    df = df.droplevel(level=["band", "property", "category"])
-    df.index.rename('region', level='name', inplace=True)
-    if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty
-        mapping_idx = pd.MultiIndex.from_frame(regions.merge(Region_Mapping,
-                            how="left", on='region').drop(['region','category'], axis=1))
-        mapping_idx = mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
-
-        idx = pd.MultiIndex(levels= df.index.levels + mapping_idx.levels
-                            ,codes= df.index.codes + mapping_idx.codes,
-                            names = df.index.names + mapping_idx.names)
-
-    df = pd.DataFrame(data=df.values.reshape(-1), index=idx)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formating data which comes from the PLEXOS Zone Category
-def df_process_zone(df, overlap_hour):
-    df = df.droplevel(level=["band", "property", "category"])
-    df.index.rename('zone', level='name', inplace=True)
-    df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS Generator Category
-def df_process_gen(df, overlap_hour, m):
-    df = df.droplevel(level=["band", "property"])
-    df.index.rename(['tech','gen_name'], level=['category','name'], inplace=True)
-    try:
-        region_gen_idx = pd.CategoricalIndex(MetaData(m).region_generator_category().index.get_level_values(0))
-        region_gen_idx = region_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
-
-        idx_region = pd.MultiIndex(levels= df.index.levels + [region_gen_idx.categories]
-                            ,codes= df.index.codes +  [region_gen_idx.codes],
-                            names= df.index.names + region_gen_idx.names)
-    except KeyError:
-        idx_region = df.index
+# This function handles the pulling of the data from the H5plexos hdf5 file and then passes the data to one of the formating functions
+# metadata is now a parameter of get data
+def get_data(loc, prop,t, db, metadata):
 
     try:
-        zone_gen_idx = pd.CategoricalIndex(MetaData(m).zone_generator_category().index.get_level_values(0))
-        zone_gen_idx = zone_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+        if "_" in loc:
+            df = db.query_relation_property(loc,prop,timescale=t)
+        else:
+            df = db.query_object_property(loc,prop,timescale=t)
 
-        idx_zone = pd.MultiIndex(levels= idx_region.levels + [zone_gen_idx.categories]
-                            ,codes= idx_region.codes + [zone_gen_idx.codes] ,
-                            names= idx_region.names + zone_gen_idx.names)
     except KeyError:
-        idx_zone = idx_region
+        df = report_prop_error(prop,loc)
+        return df
 
-    try:
-        region_gen_mapping_idx = pd.MultiIndex.from_frame(MetaData(m).region_generator_category().merge(Region_Mapping,
-                            how="left", on='region').sort_values(by=['tech','gen_name']).drop(['region','tech','gen_name'], axis=1))
-        region_gen_mapping_idx = region_gen_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+    # Instantiate instance of Process Class
+    # metadata is used as a paramter to initialize process_cl
+    process_cl = Process(df, metadata)
+    # Instantiate Method of Process Class
+    process_att = getattr(process_cl,'df_process_' + loc)
+    # Process attribute and return to df
+    df = process_att()
 
-        idx_map = pd.MultiIndex(levels= idx_zone.levels + region_gen_mapping_idx.levels
-                            ,codes= idx_zone.codes + region_gen_mapping_idx.codes,
-                            names = idx_zone.names + region_gen_mapping_idx.names)
-    except KeyError:
-        idx_map = idx_zone
 
-    idx_map = idx_map.droplevel(level=["tech"])
-    df_tech = pd.CategoricalIndex(df.index.get_level_values('tech').map(lambda x: gen_names_dict.get(x,x)))
+    if loc == 'region' and prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
+        print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
 
-    idx =  pd.MultiIndex(levels= [df_tech.categories] + idx_map.levels
-                            ,codes= [df_tech.codes] + idx_map.codes,
-                            names = df_tech.names + idx_map.names)
-
-    df = pd.DataFrame(data=df.values.reshape(-1), index=idx)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-
-    # t0=time.time()
-    # df = df.reset_index() # unzip the levels in index
-    # df = df.drop(["band", "property"],axis=1)
-    # df.rename(columns={'category':'tech', 'name':'gen_name'}, inplace=True)
-    # if region_generators.empty==False: #checks if region_generators contains data to merge, skips if empty
-    #     df = df.merge(region_generators, how='left', on='gen_name') # Merges in regions where generators are located
-    # if zone_generators.empty==False: #checks if zone_generators contains data to merge, skips if empty
-    #     df = df.merge(zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
-    # if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
-    #     df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
-    # df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
-    # df_col = list(df.columns) # Gets names of all columns in df and places in list
-    # df_col.remove(0) # Removes 0, the data column from the list
-    # df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    # df.set_index(df_col, inplace=True)#moves all columns to multiindex except 0 column
-    # # df.sort_values(by=['tech','gen_name'], inplace=True)
-    # df_old=df
-    # t1=time.time()
-    # print(t1-t0)
-    return df
-
-# Function for formatting data which comes form the PLEXOS Line Category
-def df_process_line(df, overlap_hour):
-    df = df.droplevel(level=["band", "property", "category"])
-    df.index.rename('line_name', level='name', inplace=True)
-    df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS Line Category
-def df_process_interface(df, overlap_hour):
-    df = df.droplevel(level=["band", "property"])
-    df.index.rename(['interface_name', 'interface_category'], level=['name','category'], inplace=True)
-    df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS Reserve Category (To Fix: still uses old merging method)
-def df_process_reserve(df, overlap_hour):
-    df = df.droplevel(level=["band", "property", "category"])
-    df.index.rename(['parent'], level=['name'], inplace=True)
-    df = df.reset_index() # unzip the levels in index
-    df = df.merge(reserve_region_type, how='left', on='parent')
-    df_col = list(df.columns) # Gets names of all columns in df and places in list
-    df_col.remove(0)
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df.set_index(df_col, inplace=True)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS Reserve_generators Category
-def df_process_reserve_generators(df, overlap_hour, m):
-    df = df.droplevel(level=["band", "property"])
-    df.index.rename(['gen_name'], level=['child'], inplace=True)
-    df = df.reset_index() # unzip the levels in index
-    generator_cat = MetaData(m).generator_category()
-    df = df.merge(generator_cat, how='left', on='gen_name')
-    df = df.merge(reserve_region_type, how='left', on='parent')
-    df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
-    df_col = list(df.columns) # Gets names of all columns in df and places in list
-    df_col.remove(0)
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df.set_index(df_col, inplace=True)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS Fuel Category
-def df_process_fuel(df, overlap_hour):
-    df = df.droplevel(level=["band", "property", "category"])
-    df.index.rename('fuel_type', level='name', inplace=True)
-    df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS Constraint Category
-def df_process_constraint(df, overlap_hour):
-    df = df.droplevel(level=["band", "property"])
-    df.index.rename(['constraint_category', 'constraint'], level=['category', 'name'], inplace=True)
-    df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS emission Category
-def df_process_emission(df, overlap_hour):
-    df = df.droplevel(level=["band", "property"])
-    df.index.rename('emission_type', level='name', inplace=True)
-    df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS storage Category (To Fix: still uses old merging method)
-def df_process_storage(df, overlap_hour, m):
-    df = df.droplevel(level=["band", "property", "category"])
-    df = df.reset_index() # unzip the levels in index
-    df = df.merge(MetaData(m).generator_storage(), how='left', on='name')
-    try:
-        df = df.merge(MetaData(m).region_generators(), how='left', on='gen_name') # Merges in regions where generators are located
-    except KeyError:
-        pass
-    try:
-        df = df.merge(MetaData(m).zone_generators(), how='left', on='gen_name') # Merges in zones where generators are located
-    except KeyError:
-        pass
-    if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
-        df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
-    df.rename(columns={'name':'storage_resource'}, inplace=True)
-    df_col = list(df.columns) # Gets names of all columns in df and places in list
-    df_col.remove(0) # Removes 0, the data column from the list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df.set_index(df_col, inplace=True)
-    df[0] = pd.to_numeric(df[0], downcast='float')
-    return df
-
-# Function for formatting data which comes form the PLEXOS region_regions Category
-def df_process_region_regions(df, overlap_hour):
-    df = df.droplevel(level=["band", "property"])
-    df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-    df_col = list(df.index.names) # Gets names of all columns in df and places in list
-    df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
-    df = df.reorder_levels(df_col, axis=0)
-    df[0] = pd.to_numeric(df[0], downcast='float')
     return df
 
 def df_process_node(df, overlap_hour,m):
     df = df.droplevel(level=["band","property","category"])
     df.index.rename('node', level='name', inplace=True)
     df.sort_index(level=['node'], inplace=True)
-    try: 
+    try:
         node_region_idx = pd.CategoricalIndex(MetaData(m).node_region().index.get_level_values(0))
         node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
         idx_region = pd.MultiIndex(levels= df.index.levels + [node_region_idx.categories]
                             ,codes= df.index.codes +  [node_region_idx.codes],
-                            names= df.index.names + node_region_idx.names)   
+                            names= df.index.names + node_region_idx.names)
     except KeyError:
-        idx_region = df.index  
+        idx_region = df.index
     try:
         node_zone_idx = pd.CategoricalIndex(MetaData(m).node_zone().index.get_level_values(0))
         node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
@@ -342,13 +153,13 @@ def df_process_node(df, overlap_hour,m):
         region_mapping_idx = pd.MultiIndex.from_frame(MetaData(m).node_region().merge(Region_Mapping,
                             how="left", on='region').drop(['region','node'], axis=1))
         region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
-    
+
         idx_map = pd.MultiIndex(levels= idx_zone.levels + region_mapping_idx.levels
                             ,codes= idx_zone.codes + region_mapping_idx.codes,
                             names = idx_zone.names + region_mapping_idx.names)
     except KeyError:
         idx_map = idx_zone
-    
+
     df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
     df_col = list(df.index.names) # Gets names of all columns in df and places in list
     df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
@@ -363,6 +174,7 @@ def report_prop_error(prop,loc):
     df = pd.DataFrame()
     return df
 
+<<<<<<< HEAD
 # This function handles the pulling of the data from the H5plexos hdf5 file and then passes the data to one of the formating functions
 def get_data(loc, prop,t, db, overlap, model):
     if loc == 'constraint':
@@ -378,28 +190,80 @@ def get_data(loc, prop,t, db, overlap, model):
     elif loc == 'emission':
         try:
             df = db.emission(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_emission(df, overlap)
-        return df
+=======
+# Process Class contains methods for processing data
+class Process:
 
-    elif loc == 'fuel':
-        try:
-            df = db.fuel(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_fuel(df, overlap)
-        return df
+    def __init__(self, df, metadata):
 
-    elif loc == 'generator':
+        # certain methods require information from metadata.  metadata is now
+        # passed in as an instance of MetaData class for the appropriate model
+        self.df = df
+        self.metadata = metadata
+        self.region_generator_category = self.metadata.region_generator_category()
+        self.zone_generator_category = self.metadata.zone_generator_category()
+        self.generator_cat = self.metadata.generator_category()
+        self.generator_storage = self.metadata.generator_storage()
+        self.region_generators = self.metadata.region_generators()
+        self.zone_generators = self.metadata.zone_generators()
+        self.node_region = self.metadata.node_region()
+        self.node_zone = self.metadata.node_zone()
+
+    # Function for formatting data which comes form the PLEXOS Generator Category
+    def df_process_generator(self):
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename(['tech','gen_name'], level=['category','name'], inplace=True)
         try:
-            df = db.generator(prop, timescale=t)
+            region_gen_idx = pd.CategoricalIndex(self.region_generator_category.index.get_level_values(0))
+            region_gen_idx = region_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+
+            idx_region = pd.MultiIndex(levels= df.index.levels + [region_gen_idx.categories]
+                                ,codes= df.index.codes +  [region_gen_idx.codes],
+                                names= df.index.names + region_gen_idx.names)
+>>>>>>> master
         except KeyError:
+            idx_region = df.index
+
+        try:
+            zone_gen_idx = pd.CategoricalIndex(self.zone_generator_category.index.get_level_values(0))
+            zone_gen_idx = zone_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+
+            idx_zone = pd.MultiIndex(levels= idx_region.levels + [zone_gen_idx.categories]
+                                ,codes= idx_region.codes + [zone_gen_idx.codes] ,
+                                names= idx_region.names + zone_gen_idx.names)
+        except KeyError:
+            idx_zone = idx_region
+
+        try:
+            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.region_generator_category.merge(Region_Mapping,
+                                how="left", on='region').sort_values(by=['tech','gen_name']).drop(['region','tech','gen_name'], axis=1))
+            region_gen_mapping_idx = region_gen_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+
+            idx_map = pd.MultiIndex(levels= idx_zone.levels + region_gen_mapping_idx.levels
+                                ,codes= idx_zone.codes + region_gen_mapping_idx.codes,
+                                names = idx_zone.names + region_gen_mapping_idx.names)
+        except KeyError:
+<<<<<<< HEAD
             df = report_prop_error(prop,loc)
             return df
         df = df_process_gen(df, overlap, model)
+=======
+            idx_map = idx_zone
+
+        idx_map = idx_map.droplevel(level=["tech"])
+        df_tech = pd.CategoricalIndex(df.index.get_level_values('tech').map(lambda x: gen_names_dict.get(x,x)))
+
+        idx =  pd.MultiIndex(levels= [df_tech.categories] + idx_map.levels
+                                ,codes= [df_tech.codes] + idx_map.codes,
+                                names = df_tech.names + idx_map.names)
+
+        df = pd.DataFrame(data=df.values.reshape(-1), index=idx)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
+
+>>>>>>> master
         # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
         if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
             print("\n !! The Following Generators do not have a correct category mapping:")
@@ -408,92 +272,189 @@ def get_data(loc, prop,t, db, overlap, model):
             print("")
         return df
 
-    elif loc == 'line':
-        try:
-            df = db.line(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_line(df, overlap)
+    # Function for formating data which comes from the PLEXOS Region Category
+    def df_process_region(self):
+        df = self.df.droplevel(level=["band", "property", "category"])
+        df.index.rename('region', level='name', inplace=True)
+        if Region_Mapping.empty==False: #checks if Region_Mapping contains data to merge, skips if empty
+            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions().merge(Region_Mapping,
+                                how="left", on='region').drop(['region','category'], axis=1))
+            mapping_idx = mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+
+            idx = pd.MultiIndex(levels= df.index.levels + mapping_idx.levels
+                                ,codes= df.index.codes + mapping_idx.codes,
+                                names = df.index.names + mapping_idx.names)
+
+        df = pd.DataFrame(data=df.values.reshape(-1), index=idx)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    elif loc == 'interface':
-        try:
-            df = db.interface(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_interface(df, overlap)
+    # Function for formating data which comes from the PLEXOS Zone Category
+    def df_process_zone(self):
+        df = self.df.droplevel(level=["band", "property", "category"])
+        df.index.rename('zone', level='name', inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    elif loc == 'region':
-        try:
-            df = db.region(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_region(df, overlap)
-        if prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
-            print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
+    # Function for formatting data which comes form the PLEXOS Line Category
+    def df_process_line(self):
+        df = self.df.droplevel(level=["band", "property", "category"])
+        df.index.rename('line_name', level='name', inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    elif loc == 'reserve':
-        try:
-            df = db.reserve(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_reserve(df, overlap)
+    # Function for formatting data which comes form the PLEXOS Line Category
+    def df_process_interface(self):
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename(['interface_name', 'interface_category'], level=['name','category'], inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    elif loc == 'reserve_generators':
-        try:
-            df = db.reserve_generators(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_reserve_generators(df, overlap, model)
+    # Function for formatting data which comes form the PLEXOS Reserve Category (To Fix: still uses old merging method)
+    def df_process_reserve(self):
+        df = self.df.droplevel(level=["band", "property", "category"])
+        df.index.rename(['parent'], level=['name'], inplace=True)
+        df = df.reset_index() # unzip the levels in index
+        df = df.merge(reserve_region_type, how='left', on='parent')
+        df_col = list(df.columns) # Gets names of all columns in df and places in list
+        df_col.remove(0)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df.set_index(df_col, inplace=True)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    elif loc == 'storage':
-        try:
-            df = db.storage(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_storage(df, overlap, model)
+    # Function for formatting data which comes form the PLEXOS Reserve_generators Category
+    def df_process_reserve_generators(self):
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename(['gen_name'], level=['child'], inplace=True)
+        df = df.reset_index() # unzip the levels in index
+        df = df.merge(self.generator_cat, how='left', on='gen_name')
+        df = df.merge(reserve_region_type, how='left', on='parent')
+        df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
+        df_col = list(df.columns) # Gets names of all columns in df and places in list
+        df_col.remove(0)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df.set_index(df_col, inplace=True)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    elif loc == 'region_regions':
-        try:
-            df = db.region_regions(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_region_regions(df, overlap)
+    # Function for formatting data which comes form the PLEXOS Fuel Category
+    def df_process_fuel(self):
+        df = self.df.droplevel(level=["band", "property", "category"])
+        df.index.rename('fuel_type', level='name', inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    elif loc == 'zone':
-        try:
-            df = db.zone(prop, timescale=t)
-        except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_zone(df, overlap)
+    # Function for formatting data which comes form the PLEXOS Constraint Category
+    def df_process_constraint(self):
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename(['constraint_category', 'constraint'], level=['category', 'name'], inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
-    
-    elif loc == 'node':
+
+    # Function for formatting data which comes form the PLEXOS emission Category
+    def df_process_emission(self):
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename('emission_type', level='name', inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
+        return df
+
+    # Function for formatting data which comes form the PLEXOS storage Category (To Fix: still uses old merging method)
+    def df_process_storage(self):
+        df = self.df.droplevel(level=["band", "property", "category"])
+        df = df.reset_index() # unzip the levels in index
+        df = df.merge(self.generator_storage, how='left', on='name')
         try:
-           df = db.node(prop, timescale=t)
+            df = df.merge(self.region_generators, how='left', on='gen_name') # Merges in regions where generators are located
         except KeyError:
-            df = report_prop_error(prop,loc)
-            return df
-        df = df_process_node(df,overlap,model)
-        return df   
-    
-    else:
-        df = pd.DataFrame()
-        print('{} NOT RETRIEVED.\nNO H5 CATEGORY: {}'.format(prop,loc))
+            pass
+        try:
+            df = df.merge(self.zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
+        except KeyError:
+            pass
+        if Region_Mapping.empty==False: #checks if Region_Maping contains data to merge, skips if empty (Default)
+            df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
+        df.rename(columns={'name':'storage_resource'}, inplace=True)
+        df_col = list(df.columns) # Gets names of all columns in df and places in list
+        df_col.remove(0) # Removes 0, the data column from the list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df.set_index(df_col, inplace=True)
+        df[0] = pd.to_numeric(df[0], downcast='float')
+        return df
+
+    # Function for formatting data which comes form the PLEXOS region_regions Category
+    def df_process_region_regions(self):
+        df = self.df.droplevel(level=["band", "property"])
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
+        return df
+
+    def df_process_node(self):
+        df = self.df.droplevel(level=["band","property","category"])
+        df.index.rename('node', level='name', inplace=True)
+        df.sort_index(level=['node'], inplace=True)
+        try:
+            node_region_idx = pd.CategoricalIndex(self.node_region.index.get_level_values(0))
+            node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+            idx_region = pd.MultiIndex(levels= df.index.levels + [node_region_idx.categories]
+                                ,codes= df.index.codes +  [node_region_idx.codes],
+                                names= df.index.names + node_region_idx.names)
+        except KeyError:
+            idx_region = df.index
+        try:
+            node_zone_idx = pd.CategoricalIndex(self.node_zone.index.get_level_values(0))
+            node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+            idx_zone = pd.MultiIndex(levels= idx_region.levels + [node_zone_idx.categories]
+                                ,codes= idx_region.codes + [node_zone_idx.codes] ,
+                                names= idx_region.names + node_zone_idx.names)
+        except KeyError:
+            idx_zone = idx_region
+        try:
+            region_mapping_idx = pd.MultiIndex.from_frame(self.node_region.merge(Region_Mapping,
+                                how="left", on='region').drop(['region','node'], axis=1))
+            region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+
+            idx_map = pd.MultiIndex(levels= idx_zone.levels + region_mapping_idx.levels
+                                ,codes= idx_zone.codes + region_mapping_idx.codes,
+                                names = idx_zone.names + region_mapping_idx.names)
+        except KeyError:
+            idx_map = idx_zone
+
+        df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
+        df_col = list(df.index.names) # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
 #===================================================================================
@@ -582,7 +543,7 @@ for Scenario_name in Scenario_List:
             try:
                 zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zones_generators']))
             except KeyError:
-                zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_generators']))    
+                zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_generators']))
             zone_gen.rename(columns={'child':'gen_name','parent':'zone'}, inplace=True)
             zone_gen = zone_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
@@ -594,7 +555,7 @@ for Scenario_name in Scenario_List:
             zone_gen_cat = zone_gen.merge(gen_category,
                             how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('zone')
             return zone_gen_cat
-        
+
         def node_region(self):
             try:
                 node_region = pd.DataFrame(np.asarray(self.data['metadata/relations/nodes_region']))
@@ -604,7 +565,7 @@ for Scenario_name in Scenario_List:
             node_region = node_region.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             node_region = node_region.sort_values(by=['node']).set_index('region')
             return node_region
-        
+
         def node_zone(self):
             try:
                 node_zone = pd.DataFrame(np.asarray(self.data['metadata/relations/nodes_zone']))
@@ -732,7 +693,7 @@ for Scenario_name in Scenario_List:
     for file in files_list:
         hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
 
-    ######### Process the Outputs################################################
+######### Process the Outputs##################################################
 
     # Creates Initial HDF5 file for ouputing formated data
     Processed_Data_Out=pd.DataFrame()
@@ -757,10 +718,14 @@ for Scenario_name in Scenario_List:
         data_chuncks = []
         print("Processing " + row["group"] + " " + row["data_set"])
         for model in files_list:
+
+            # Create an instance of metadata, and pass that as a variable to get data.
+            meta = MetaData(HDF5_folder_in, Region_Mapping,model)
+
             print("     "+ model)
             db = hdf5_collection.get(model)
 
-            processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, overlap, model)
+            processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, meta)
 
             if processed_data.empty == True:
                 print("\n")
@@ -808,7 +773,7 @@ for Scenario_name in Scenario_List:
         else:
             continue
 
-    ######### Calculate Extra Ouputs################################################
+######### Calculate Extra Ouputs################################################
     if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
         try:
             print("Processing generator Curtailment")
@@ -821,7 +786,7 @@ for Scenario_name in Scenario_List:
                 print("WARNING!! generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
             # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
             vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
-    
+
             if not vre_gen_cat:
                 print("\nvre_gen_cat is not set up correctly with your gen_names")
                 print("To Process Curtailment add correct names to vre_gen_cat.csv")
@@ -829,9 +794,9 @@ for Scenario_name in Scenario_List:
             # Output Curtailment#
             Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), vre_gen_cat),:]) -
                                 (Total_Gen_Out.loc[(slice(None), vre_gen_cat),:]))
-    
+
             Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
-    
+
             #Clear Some Memory
             del Total_Gen_Out
             del Avail_Gen_Out
@@ -839,7 +804,7 @@ for Scenario_name in Scenario_List:
         except Exception:
             print("NOTE!! Curtailment not calculated, processing skipped\n")
             pass
-    
+
     if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
         try:
             print("Calculating Cost Unserved Energy: Regions")
@@ -863,38 +828,38 @@ for Scenario_name in Scenario_List:
     end = time.time()
     elapsed = end - start
     print('Main loop took ' + str(elapsed/60) + ' minutes.')
-    ###################################################################
+###############################################################################
 
+# Code that can be used to test PLEXOS_H5_results_formatter
 
-    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'node_Price')  
+    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'node_Price')
     # test = test.xs("Xcel_Energy_EI",level='zone')
     # test = test.reset_index(['timestamp','node'])
     # test = test.groupby(["timestamp", "node"], as_index=False).sum()
     # test = test.pivot(index='timestamp', columns='node', values=0)
-    
+
     # test = test.reset_index()
-    
+
     # test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")
-    
+
     # test['timestamp'] = test['timestamp'].astype("category")
-    
+
     # test.index = test.index.set_levels(test.index.levels[-1].astype('category'), level=-1)
-    
+
     # test.memory_usage(deep=True)
     # test[0] = pd.to_numeric(test[0], downcast='float')
-    
+
     # test.memory_usage(deep=False)
-    
+
     # Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
     # Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
     #         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1)
         # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
         #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
-    
+
         #storage = db.storage("Generation")
         #storage = df_process_storage(storage, overlap)
-    
+
     # df_old = df
     # t =df.loc[~df.index.duplicated()]
     # df_old.equals(df)
-

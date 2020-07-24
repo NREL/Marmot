@@ -108,7 +108,7 @@ class mplot(object):
     def avg_output_when_committed(self):
 
         CF_all_scenarios = pd.DataFrame()
-        print("Zone = " + str(self.zone_input))
+        print("Zone = " + self.zone_input)
 
         for scenario in self.Multi_Scenario:
             print("Scenario = " + str(scenario))
@@ -236,7 +236,7 @@ class mplot(object):
 
             fig3.spines['right'].set_visible(False)
             fig3.spines['top'].set_visible(False)
-            fig3.set_ylabel('Percentage of at minimum generation when committed',  color='black', rotation='vertical')
+            fig3.set_ylabel('Percentage of time online at minimum generation',  color='black', rotation='vertical')
             #adds % to y axis data
             fig3.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig3.tick_params(axis='y', which='major', length=5, width=1)
