@@ -58,8 +58,27 @@ class mplot(object):
         self.gen_names_dict = argument_list[18]
         self.vre_gen_cat = argument_list[21]
         self.figure_folder = argument_list[25]
+        self.facet = argument_list[27]
         
-    def gen_stack(self, facet):
+###############################################################################
+        
+# run plot method based on figure output name 
+            
+    def Stacked_Gen_Peak_Demand(self):
+        outputs = self.gen_stack(False)
+        return outputs
+    
+    def Stacked_Gen_Min_Net_Load(self):
+        outputs = self.gen_stack(False)
+        return outputs
+    
+    
+###############################################################################
+    
+    
+    
+    
+    def gen_stack(self):
         # Create a dictionary to hold Dataframes
         Gen_Collection = {} 
         Load_Collection = {}
@@ -204,7 +223,7 @@ class mplot(object):
                 ydimension = 1
             
     # If the plot is not a facet plot, grid size should be 1x1 
-            if not facet:
+            if not self.facet:
                 xdimension = 1
                 ydimension = 1
             
@@ -356,14 +375,18 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Generation (MW)',  color='black', rotation='vertical', labelpad=60)
             
-            out = {'fig':fig1, 'data_tables':data_tables}
+            
+            if not self.facet:
+                data_tables = data_tables[self.Multi_Scenario[0]]
+            out = {'fig':fig1, 'data_table':data_tables}
+
             plt.close(fig1)
             
             return out
                     
 
 # Main loop for gen_stack
-        if facet:
+        if self.facet:
             for scenario in self.Multi_Scenario:
                 set_dicts(scenario)
         else:
@@ -373,7 +396,7 @@ class mplot(object):
         for zone_input in self.Zones:
             print("Zone = "+ zone_input)
             #data_tables = {}
-            if facet:
+            if self.facet:
                 #for scenario in self.Multi_Scenario:
                     #set_dicts(scenario)
                 outputs[zone_input] = mkplot(outputs, zone_input, self.Multi_Scenario)

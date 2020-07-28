@@ -88,13 +88,7 @@ class mplot(object):
                     Unserved_Energy_Collection[scenario] = Stacked_Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
                 
-        # Total_Generation_Stack_Out = pd.DataFrame()
-        # Total_Load_Out = pd.DataFrame()
-        # Pump_Load_Out = pd.DataFrame()
-        # Total_Demand_Out = pd.DataFrame()
-        # Unserved_Energy_Out = pd.DataFrame()
-        # unserved_eng_data_table_out = pd.DataFrame()
-        
+                
         outputs = {}
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
@@ -215,7 +209,7 @@ class mplot(object):
                 
                 if Unserved_Energy_Out[scenario].values.sum() > 0:
                     height3 = [int(Unserved_Energy_Out[scenario])]*2
-                    lp3 = plt.plot(x,height3, c='#DD0200', linewidth=1.5)   
+                    plt.plot(x,height3, c='#DD0200', linewidth=1.5)   
                     fig1.fill_between(x, height3, height1, 
                                 facecolor = '#DD0200',
                                 alpha=0.5)
@@ -241,7 +235,7 @@ class mplot(object):
                 
             #Legend 4
             if Pump_Load_Out.values.sum() > 0:
-                leg4 = fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.82), 
+                fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.82), 
                           facecolor='inherit', frameon=True)
             
             # Manually add the first legend back

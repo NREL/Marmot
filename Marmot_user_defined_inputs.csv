@@ -1,16 +1,17 @@
-Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,C:\Users\rhousema\Documents\Marmot\HDF5-file-examples\5_minute_scenario_data
-Marmot_Solutions_folder,folder,required,C:\Users\rhousema\Documents\Marmot\HDF5-file-examples\5_minute_scenario_data
-Scenario_process_list,List,required,"Base_Case_RT, Gas_Outage_RT, Wind_Cutoff_RT, Unexpected_Wind_Cutoff_RT"
-overlap,int,required,0
-VoLL,int,required,10000
-Region_Mapping.csv_name,string,required(default),region_mapping_naerm.csv
-gen_names.csv_name,string,required(default),gen_names.csv
-reserve_region_type.csv_name,string,required(default),reserve_region_type.csv
-Main_scenario_plot,string,required,Base_Case_RT
-Multi_scenario_plot,List,required,"Base_Case_RT, Gas_Outage_RT, Wind_Cutoff_RT, Unexpected_Wind_Cutoff_RT"
+﻿Input,Input_type,Importance,User_defined_value
+PLEXOS_Solutions_folder,folder,required,
+Marmot_Solutions_folder,folder,required,
+Scenario_process_list,List,required,
+overlap,int,required,
+VoLL,int,required,
+Region_Mapping.csv_name,string,required(default),
+gen_names.csv_name,string,required(default),
+reserve_region_type.csv_name,string,required(default),
+Main_scenario_plot,string,required,
+Multi_scenario_plot,List,required,
 Scenario_Diff_plot,List [Max 2],optional,
-AGG_BY,string,required,zone
+AGG_BY,string,required,
 zone_region_sublist,List,optional,
-Facet_ylabels,List,optional,"Base_Case_RT, Gas_Outage_RT"
-Facet_xlabels,List,optional,"Wind_Cutoff_RT, Unexpected_Wind_Cutoff_RT"
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,
+Figure_Format,string,optional,
