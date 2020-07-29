@@ -6,14 +6,12 @@ This code creates generation UNstacked plots and is called from Marmot_plot_main
 
 @author: dlevie
 """
-
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
-
 
 #===============================================================================
 
@@ -26,7 +24,6 @@ def df_process_gen_inputs(df, self):
     df = df.sort_values(["tech"]) 
     df = df.pivot(index='timestamp', columns='tech', values=0)
     return df  
-
 
 class mplot(object):
         
@@ -50,7 +47,6 @@ class mplot(object):
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
         self.re_gen_cat = argument_list[20]
-   
     
     def gen_unstack(self):
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
@@ -103,19 +99,15 @@ class mplot(object):
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
         
-    
             Pump_Load = Pump_Load_read.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
             if (Pump_Load == 0).all() == False:
-                Pump_Load = Load - Pump_Load
-    
-    
+                Pump_Load = Load - Pump_Load 
             
             Unserved_Energy = Unserved_Energy_read.xs(zone_input,level=self.AGG_BY)
             Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
-            Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
-            
+            Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series          
     
             if self.prop == "Peak Demand":
                  peak_pump_load_t = Pump_Load.idxmax() 
@@ -126,8 +118,7 @@ class mplot(object):
                  Load = Load[start_date : end_date]
                  Unserved_Energy = Unserved_Energy[start_date : end_date]
                  Pump_Load = Pump_Load[start_date : end_date]
-    
-                 
+                  
             elif self.prop == "Min Net Load":
                 min_net_load_t = Net_Load.idxmin()
                 end_date = min_net_load_t + dt.timedelta(days=self.end)
@@ -137,8 +128,7 @@ class mplot(object):
                 Load = Load[start_date : end_date]
                 Unserved_Energy = Unserved_Energy[start_date : end_date]
                 Pump_Load = Pump_Load[start_date : end_date]
-                
-                
+                             
             elif self.prop == 'Date Range':
                 print("Plotting specific date range:")
                 print(str(self.start_date) + '  to  ' + str(self.end_date))
@@ -147,7 +137,6 @@ class mplot(object):
                 Load = Load[self.start_date : self.end_date]
                 Unserved_Energy = Unserved_Energy[self.start_date : self.end_date]
                 Pump_Load = Pump_Load[self.start_date : self.end_date]
-    
     
             else:
                 print("Plotting graph for entire timeperiod")
@@ -162,8 +151,7 @@ class mplot(object):
             
             if (Unserved_Energy == 0).all() == False:
                 lp2 = plt.plot(Unserved_Energy, color='#DD0200')
-            
-            
+                   
             ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
             ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
             ax.spines['right'].set_visible(False)
@@ -184,11 +172,8 @@ class mplot(object):
             ax.xaxis.set_major_locator(locator)
             ax.xaxis.set_major_formatter(formatter)
              
-                    
-    
             handles, labels = ax.get_legend_handles_labels()
             
-         
             #Legend 1
             leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
                           facecolor='inherit', frameon=True)  
@@ -198,8 +183,6 @@ class mplot(object):
                 leg3 = ax.legend(lp2, ['Unserved Energy'], loc='upper left',bbox_to_anchor=(1, 0.82), 
                           facecolor='inherit', frameon=True)
                 
-    
-            
             # Manually add the first legend back
             ax.add_artist(leg1)
             if (Unserved_Energy == 0).all() == False:
@@ -245,7 +228,7 @@ class mplot(object):
             ydimension=len(self.ylabels)
             grid_size = xdimension*ydimension
             
-            fig2, axs = plt.subplots(ydimension,xdimension, figsize=((4*xdimension),(4*ydimension)), sharey=True)
+            fig2, axs = plt.subplots(ydimension,xdimension, figsize=((9*xdimension),(6*ydimension)), sharey=True)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             axs = axs.ravel()
             i=0
@@ -403,7 +386,7 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Genertaion (MW)',  color='black', rotation='vertical', labelpad=60)
             
-            outputs[zone_input] = {'fig':fig2, 'data_tables':data_table}
+            outputs[zone_input] = {'fig':fig2, 'data_table':data_table}
         return outputs
     
     
