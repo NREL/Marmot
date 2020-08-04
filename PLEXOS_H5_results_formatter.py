@@ -120,8 +120,7 @@ def get_data(loc, prop,t, db, metadata):
     process_att = getattr(process_cl,'df_process_' + loc)
     # Process attribute and return to df
     df = process_att()
-    
-    
+      
     if loc == 'region' and prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
         print("\n WARNING! Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
     
