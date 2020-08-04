@@ -396,6 +396,7 @@ class mplot(object):
     def gen_diff(self):
         outputs = {}
         for zone_input in self.Zones:
+            print("Zone = "+ zone_input)
             # Create Dictionary to hold Datframes for each scenario 
             Gen_Collection = {} 
             
@@ -419,6 +420,7 @@ class mplot(object):
             print('Scenario 2 =  ' + self.Scenario_Diff[1])
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
             # Removes columns that only equal 0
+            Gen_Stack_Out.dropna(inplace=True)
             Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]
             
             # Data table of values to return to main program
