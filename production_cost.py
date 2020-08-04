@@ -293,6 +293,7 @@ class mplot(object):
                 
                 VOM_Cost = VOM_Cost_Collection.get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
+                VOM_Cost[VOM_Cost<0]=0
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
                 
