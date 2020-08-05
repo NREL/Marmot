@@ -3,6 +3,9 @@
 Created on Wed Dec 11 15:23:06 2019
 
 @author: dlevie
+
+This module creates plots that show curtailment
+
 """
 
 import pandas as pd
@@ -170,7 +173,7 @@ class mplot(object):
             Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
             
             
-            fig1, ax = plt.subplots(figsize=(9,6))
+            fig1, ax = plt.subplots(figsize=(6,4))
             for index, row in Penetration_Curtailment_out.iterrows():
                 if self.prop == "PV":
                     ax.scatter(row["% PV Penetration"], row["% PV Curtailment"],
@@ -248,7 +251,7 @@ class mplot(object):
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
             
             
-            fig2, ax = plt.subplots(figsize=(9,6))
+            fig2, ax = plt.subplots(figsize=(6,4))
             
             if self.prop == "PV":
                 Data_Table_Out = PV_Curtailment_DC
@@ -282,5 +285,95 @@ class mplot(object):
             
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
-        
-        
+    
+    
+    def curt_total(self):
+        Curtailment_Collection = {}
+        Avail_Gen_Collection = {}
+        for scenario in self.Multi_Scenario:
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
+            Avail_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"), "generator_Available_Capacity")
+
+        outputs = {}
+        for zone_input in self.Zones:
+            print(self.AGG_BY +  " = " + zone_input)
+            
+            Total_Curtailment_out = pd.DataFrame()
+            Total_Available_gen = pd.DataFrame()
+
+            for scenario in self.Multi_Scenario:
+                print("Scenario = " + scenario)
+                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+                self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Curtailment_Collection.get(scenario).index.unique(level="tech")]
+                
+                vre_collection = {}
+                avail_gen_collection = {}
+                
+                vre_curt = Curtailment_Collection.get(scenario)
+                vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
+                vre_curt = (vre_curt.loc[(slice(None), self.vre_gen_cat),:])
+                
+                avail_gen = Avail_Gen_Collection.get(scenario)
+                avail_gen = avail_gen.xs(zone_input,level=self.AGG_BY)
+                avail_gen = (avail_gen.loc[(slice(None), self.vre_gen_cat),:])
+                
+                for vre_type in self.vre_gen_cat:
+                    
+                    vre_curt_type = vre_curt.xs(vre_type,level='tech')
+                    vre_collection[vre_type] = float(vre_curt_type.sum())
+                    
+                    avail_gen_type = avail_gen.xs(vre_type,level='tech')
+                    avail_gen_collection[vre_type] = float(avail_gen_type.sum())
+            
+                vre_table = pd.DataFrame(vre_collection,index=[scenario])
+                avail_gen_table = pd.DataFrame(avail_gen_collection,index=[scenario])
+                
+                     
+                Total_Curtailment_out = pd.concat([Total_Curtailment_out, vre_table], axis=0, sort=False)
+                Total_Available_gen = pd.concat([Total_Available_gen, avail_gen_table], axis=0, sort=False)
+                
+            vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
+            
+            Total_Curtailment_out = Total_Curtailment_out/1000 #Convert to GWh
+            
+            # Data table of values to return to main program
+            Data_Table_Out = Total_Curtailment_out
+
+            Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
+            Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(6, break_long_words=False)
+            
+            
+            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(6,4), rot=0, 
+                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns], 
+                             edgecolor='black', linewidth='0.1')
+            fig3.spines['right'].set_visible(False)
+            fig3.spines['top'].set_visible(False)
+            fig3.set_ylabel('Total Curtailment (GWh)',  color='black', rotation='vertical')
+            fig3.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig3.tick_params(axis='y', which='major', length=5, width=1)
+            fig3.tick_params(axis='x', which='major', length=5, width=1)
+            fig3.margins(x=0.01)
+            
+            handles, labels = fig3.get_legend_handles_labels()
+            fig3.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
+                          facecolor='inherit', frameon=True)  
+            
+            curt_totals = Total_Curtailment_out.sum(axis=1)
+            #inserts total bar value above each bar
+            k=0   
+            for i in fig3.patches:
+                height = curt_totals[k]
+                width = i.get_width()
+                x, y = i.get_xy() 
+                fig3.text(x+width/2, 
+                    y+height + 0.05*max(fig3.get_ylim()), 
+                    '{:.2%}\n|{:,.0f}|'.format(vre_pct_curt[k],curt_totals[k]), 
+                    horizontalalignment='center', 
+                    verticalalignment='center', fontsize=11, color='red') 
+                k=k+1
+                if k>=len(vre_pct_curt):
+                    break
+                
+            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
+        return outputs
+            
