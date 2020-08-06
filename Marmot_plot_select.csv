@@ -1,72 +1,77 @@
-Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d]
-Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,
-Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,2/1/24,2/5/24
-Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,10/1/24,3/1/24
-Capacity Factor,FALSE,Capacity_Factor,,,,EST,,
-Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,2/1/24,2/5/24
-Capacity Out Stack,FALSE,Capacity_Out_Stacked,,,,EST,,
-Capacity Started,FALSE,Capacity_Started,,,,EST,,
-Committed Capacity Stack,FALSE,Committed_Capacity_Stack,,,,,,
-Constraint Violation,FALSE,Constraint_Violation_Timeseries,,,,,,
-Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,,,
-Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,,,
-Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,
-Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,
-Detailed Production Cost,FALSE,Detailed_Production_Cost,,,,,,
-Detailed Total Generation Cost,FALSE,Detailed_Total_Generation_Cost,,,,,,
-Detailed Total Generation Cost Difference,FALSE,Detailed_Total_Generation_Cost_Diff,,,,,,
-Generation Stack,FALSE,Stacked_Gen,,,,EST,,
-Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,
-Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,3,3,EST,,
-Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/24,2/5/24
-Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,7,EST,,
-Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,
-Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,
-Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Peak Demand,3,3,EST,,
-Generation Unstacked,FALSE,Unstacked_Gen,,,,EST,,
-Hours Congested,FALSE,Hours_Congested_Line,,,,,,
-Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,
-Line Utilization Annual,FALSE,Line_Utilization_Histogram,,,,,,
-Line Utilization Annual,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,
-Line Utilization Duration Curve,FALSE,Line_Utilization_Duration,,,,,,
-Line Utilization Duration Curve,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,
-Line Utilization Hourly,FALSE,Line_Utilization_Duration,,,,,,
-Line Utilization Hourly,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,
-Line Utilization Timeseries,FALSE,Line_Utilization_Time_Series,,,,EST,,
-Line Utilization Timeseries,FALSE,Line_Utilization_Time_Series_Category,ReEDS_Expansion,,,EST,,
-Line Violations Timeseries,FALSE,Line_Violations_Time_Series,,,,EST,,
-Line Violations Totals,FALSE,Line_Violations_Totals,,,,,,
-Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,2/1/24,2/5/24
-Net Export,FALSE,Net_Export,,,,EST,,
-Production Cost,FALSE,Production_Cost,,,,,,
-Region Price,FALSE,Region_Price_Duration,,,,,,
-Region Price,FALSE,Region_Price_Duration_Threshold,300,,,,,
-Region Price Timeseries,FALSE,Region_Price_Timeseries,150,,,EST,,
-Region Price Timeseries,FALSE,Region_Price_Timeseries_Threshold,4100,,,,,
-Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,
-Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_Checkerboard,,,,,,
-Region-Region Net Interchange Duration,FALSE,Region-Region_Net_Interchange_Duration,,,,,,
-Reserve Provision Region,FALSE,Reserve_Provision_Region,,,,,,
-Reserve Shortage Hours,FALSE,Reserve_Shortage_Hours,,,,,,
-Reserve Shortage Region,FALSE,Reserve_Shortage_Region,,,,,,
-Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries,,,,,,
-Reserve Timeseries,FALSE,Reserve_Timeseries,Peak Demand,1,1,EST,,
-Reserve Timeseries Facet Grid,FALSE,Reserve_Timeseries_Facet_Grid,Peak Demand,3,3,EST,,
-Reserve Total,FALSE,Reserve_Total,,,,,,
-Thermal Capacity reserves,FALSE,Thermal_Capacity_Reserves,,,,EST,,
-Time at Minimum Generation,FALSE,Time_at_Min_Gen,,,,,,
-Total Generation,FALSE,Total_Generation,,,,,,
-Total Generation Difference,TRUE,Total_Generation_Diff,,,,,,
-Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,
-Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,,,
-Total System Cost,FALSE,Total_System_Cost,,,,,,
-Total System Cost Difference,FALSE,Total_System_Cost_Diff,,,,,,
-Total System Cost Type,FALSE,Total_System_Cost_Type,,,,,,
-Total System Cost Type Difference,FALSE,Total_System_Cost_Type_Diff,,,,,,
-Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,
-Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,
-Utilization Factor Fleet,FALSE,Utilization_Factor_Fleet,,,,EST,,
-Utilization Factor Fleet by Type,FALSE,Utilization_Factor_Fleet_Type,,,,,,
-Utilization Factor Generators,FALSE,Utilization_Factor_Generators,,,,EST,,
-Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,
-Zone-Zone Net Interchange,FALSE,Zone-Zone_Net_Interchange,,,,EST,,
+Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
+Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,,capacity_factor,avg_output_when_committed
+Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,2/1/24,2/5/24,capacity_factor,avg_output_when_committed
+Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,10/1/24,3/1/24,hydro,hydro_continent_net_load
+Capacity Factor,FALSE,Capacity_Factor,,,,EST,,,capacity_factor,cf
+Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,2/1/24,2/5/24,capacity_factor,cf
+Capacity Out Stack,FALSE,Capacity_Out_Stacked,,,,EST,,,capacity_out,capacity_out_stack
+Capacity Started,FALSE,Capacity_Started,,,,EST,,,ramping,capacity_started
+Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,8/12/24,8/18/24,ramping,capacity_started
+Committed Capacity Stack,FALSE,Committed_Capacity_Stack,,,,,,,generation_stack,committed_stack
+Constraint Violation,FALSE,Constraint_Violation_Timeseries,,,,,,,constraints,constraint_violation
+Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,,,,curtailment,curt_duration_curve
+Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,,,,curtailment,curt_duration_curve
+Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,,curtailment,curt_pen
+Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,,curtailment,curt_pen
+Detailed Production Cost,FALSE,Detailed_Production_Cost,,,,,,,production_cost,prod_cost
+Detailed Total Generation Cost,FALSE,Detailed_Total_Generation_Cost,,,,,,,production_cost,detailed_gen_cost
+Detailed Total Generation Cost Difference,FALSE,Detailed_Total_Generation_Cost_Diff,,,,,,,production_cost,detailed_gen_cost_diff
+Generation Stack,FALSE,Stacked_Gen,,,,EST,,,generation_stack,gen_stack
+Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
+Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
+Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/24,2/5/24,generation_stack,gen_stack
+Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,7,EST,,,generation_stack,gen_stack_all_periods
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Range,Date Range,,,EST,2/1/24,2/5/24,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid,,,,,,,generation_stack,gen_stack
+Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,,generation_stack,gen_diff
+Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
+Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
+Generation Unstacked,FALSE,Unstacked_Gen,,,,EST,,,generation_unstack,gen_unstack
+Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,MT,,,generation_unstack,gen_unstack_facet
+Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,,,,,,generation_unstack,gen_unstack_facet
+Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid,,3,3,MT,,,generation_unstack,gen_unstack_facet
+Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,,hydro,hydro_net_load
+Line Utilization Annual,FALSE,Line_Utilization_Histogram,,,,,,,transmission,line_hist
+Line Utilization Annual,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,,transmission,line_hist
+Line Utilization Duration Curve,FALSE,Line_Utilization_Duration,,,,,,,transmission,line_util
+Line Utilization Duration Curve,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,,transmission,line_util
+Line Utilization Timeseries,FALSE,Line_Utilization_Time_Series,,,,EST,,,transmission,line_util_agged
+Line Utilization Timeseries,FALSE,Line_Utilization_Time_Series_Category,ReEDS_Expansion,,,EST,,,transmission,line_util_agged
+Line Violations Timeseries,FALSE,Line_Violations_Time_Series,,,,EST,,,transmission,line_violations_timeseries
+Line Violations Totals,FALSE,Line_Violations_Totals,,,,,,,transmission,line_violations_totals
+Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,2/1/24,2/5/24,transmission,net_export
+Net Export,FALSE,Net_Export,,,,EST,,,transmission,net_export
+Production Cost,FALSE,Production_Cost,,,,,,,production_cost,prod_cost
+Region Price,FALSE,Region_Price_Duration,,,,,,,prices,price_region
+Region Price,FALSE,Region_Price_Duration_Threshold,300,,,,,,prices,price_region
+Region Price Timeseries,FALSE,Region_Price_Timeseries,150,,,EST,,,prices,price_region_chron
+Region Price Timeseries,FALSE,Region_Price_Timeseries_Threshold,4100,,,,,,prices,price_region_chron
+Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange
+Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_Checkerboard,,,,,,,transmission,region_region_checkerboard
+Region-Region Net Interchange Duration,FALSE,Region-Region_Net_Interchange_Duration,,,,,,,transmission,region_region_duration
+Reserve Provision Region,FALSE,Reserve_Provision_Region,,,,,,,reserves,reg_reserve_provision
+Reserve Shortage Hours,FALSE,Reserve_Shortage_Hours,,,,,,,reserves,reg_reserve_shortage_hrs
+Reserve Shortage Region,FALSE,Reserve_Shortage_Region,,,,,,,reserves,reg_reserve_shortage_hrs
+Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries,,,,,,,reserves,reg_reserve_shortage_timeseries
+Reserve Timeseries,FALSE,Reserve_Timeseries,Peak Demand,1,1,EST,,,reserves,reserve_timeseries
+Reserve Timeseries Facet Grid,FALSE,Reserve_Timeseries_Facet_Grid,Peak Demand,3,3,EST,,,reserves,reserve_timeseries_facet
+Reserve Total,FALSE,Reserve_Total,,,,,,,reserves ,???
+Thermal Capacity reserves,FALSE,Thermal_Capacity_Reserves,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves
+Time at Minimum Generation,FALSE,Time_at_Min_Gen,,,,,,,capacity_factor,time_at_min_gen
+Total Generation,FALSE,Total_Generation,,,,,,,total_generation,total_gen
+Total Generation Difference,TRUE,Total_Generation_Diff,,,,,,,total_generation,total_gen_diff
+Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,,total_generation,total_gen_facet
+Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,,,,total_installed_capacity,total_cap
+Total System Cost,FALSE,Total_System_Cost,,,,,,,production_cost,sys_cost
+Total System Cost Difference,FALSE,Total_System_Cost_Diff,,,,,,,production_cost,sys_cost_diff
+Total System Cost Type,FALSE,Total_System_Cost_Type,,,,,,,production_cost,sys_cost_type
+Total System Cost Type Difference,FALSE,Total_System_Cost_Type_Diff,,,,,,,production_cost,sys_cost_type_diff
+Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,,unserved_energy,tot_unserved_energy
+Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,,unserved_energy,unserved_energy_timeseries
+Utilization Factor Fleet,FALSE,Utilization_Factor_Fleet,,,,EST,,,utilization_factor,uf_fleet
+Utilization Factor Fleet by Type,FALSE,Utilization_Factor_Fleet_Type,,,,,,,utilization_factor,uf_fleet_by_type
+Utilization Factor Generators,FALSE,Utilization_Factor_Generators,,,,EST,,,utilization_factor,uf_gen
+Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,,utilization_factor,GW_fleet
+Zone-Zone Net Interchange,FALSE,Zone-Zone_Net_Interchange,,,,EST,,,transmission,zone_zone_interchange
