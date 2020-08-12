@@ -340,7 +340,7 @@ class mplot(object):
             Data_Table_Out = Total_Curtailment_out
 
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
-            Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(6, break_long_words=False)
+            Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
             
             
             fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(6,4), rot=0, 
