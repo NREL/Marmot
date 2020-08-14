@@ -14,9 +14,9 @@ Generation Stack,FALSE,Stacked_Gen_Peak_Demand,Peak Demand,4,4,EST,,,generation_
 Generation Stack,FALSE,Stacked_Gen,,,,EST,,,generation_stack,gen_stack
 Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,2/1/2024,2/5/2024,generation_stack,gen_stack
 Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,7,,,,generation_stack,gen_stack_all_periods
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Range,Date Range,,,EST,2/1/2024,2/5/2024,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,4,4,EST,,,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,4,4,EST,,,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Range,Date Range,,,EST,10/1/2024,10/10/2024,generation_stack,gen_stack
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid,,,,,,,generation_stack,gen_stack
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,,generation_stack,gen_diff
 Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,MT,,,generation_unstack,gen_unstack
@@ -61,5 +61,9 @@ Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_C
 Region-Region Net Interchange Duration,FALSE,Region-Region_Net_Interchange_Duration,,,,,,,transmission,region_region_duration
 Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,,hydro,hydro_net_load
 Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,10/1/2024,3/1/2024,hydro,hydro_continent_net_load
+<<<<<<< HEAD
 All Regions PDC,FALSE,All_Regions_Price_Duration_Curve,150,,,,,,prices,pdc_all_regions
 All Regions Timeseries Price,TRUE,All_Regions_Price_Timeseries,,,,,,,prices,timeseries_price_all_regions
+=======
+Total Curtailment,False,Total_Curtailment,,,,,,,curtailment,curt_total
+>>>>>>> master
