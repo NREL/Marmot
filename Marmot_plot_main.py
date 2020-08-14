@@ -298,7 +298,7 @@ for index, row in Marmot_plot_select.iterrows():
                 except AttributeError:
                     Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
             
-            if Figure_Out[zone_input]['data_table'] == None:
+            if Figure_Out[zone_input]['data_table'].empty:
                 print(row["Figure Output Name"] + 'does not return a data table')
                 continue
             

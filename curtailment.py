@@ -35,7 +35,7 @@ class mplot(object):
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
-        self.Marmot_Solutions_folder = argument_list[13]
+        self.PLEXOS_Scenarios = argument_list[13]
         self.color_list = argument_list[16]
         self.marker_style = argument_list[17]
         self.gen_names_dict = argument_list[18]
@@ -170,7 +170,7 @@ class mplot(object):
             Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
             
             
-            fig1, ax = plt.subplots(figsize=(9,6))
+            fig1, ax = plt.subplots(figsize=(6,4))
             for index, row in Penetration_Curtailment_out.iterrows():
                 if self.prop == "PV":
                     ax.scatter(row["% PV Penetration"], row["% PV Curtailment"],
@@ -180,7 +180,7 @@ class mplot(object):
     
                 elif self.prop == "PV+Wind":
                     ax.scatter(row["% RE Penetration"], row["% RE Curtailment"],
-                          marker=row["marker"],  c=row["colour"], s=100, label = row["Scenario"])
+                          marker=row["marker"],  c=row["colour"], s=40, label = row["Scenario"])
                     ax.set_ylabel('% PV + Wind Curtailment',  color='black', rotation='vertical')
                     ax.set_xlabel('% PV + Wind Penetration',  color='black', rotation='horizontal')
             
@@ -193,7 +193,7 @@ class mplot(object):
         
             handles, labels = plt.gca().get_legend_handles_labels()
             by_label = OrderedDict(zip(labels, handles))
-            plt.legend(by_label.values(), by_label.keys())
+            plt.legend(by_label.values(), by_label.keys(), loc = 'lower right')
             
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -201,7 +201,7 @@ class mplot(object):
     def curt_duration_curve(self):
         Curtailment_Collection = {}
         for scenario in self.Multi_Scenario:
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
+            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
             
         RE_Curtailment_DC = pd.DataFrame()
         PV_Curtailment_DC = pd.DataFrame()

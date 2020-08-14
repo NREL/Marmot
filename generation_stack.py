@@ -47,7 +47,7 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.Marmot_Solutions_folder = argument_list[13]
+        self.PLEXOS_Scenarios = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
@@ -74,16 +74,16 @@ class mplot(object):
                 Pump_Load_Collection[scenario] = Gen_Collection[scenario].copy()
                 Pump_Load_Collection[scenario].iloc[:,0] = 0
             if self.AGG_BY == "zone":
-                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "zone_Load")
+                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "zone_Load")
                 try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
                 except:
                     Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
             else:
-                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "region_Load")
+                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "region_Load")
                 try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
+                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
                 except:
                     Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
                     Unserved_Energy_Collection[scenario].iloc[:,0] = 0
@@ -211,7 +211,7 @@ class mplot(object):
             
             grid_size = xdimension*ydimension
             
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((9*xdimension),(6*ydimension)), sharey=True, squeeze=False)
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             axs = axs.ravel()
             i=0
@@ -311,10 +311,10 @@ class mplot(object):
                               facecolor='inherit', frameon=True)  
                 #Legend 2
                 if (Pump_Load == 0).all() == False:
-                    leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.55), 
+                    leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(0.8, 1.3), 
                               facecolor='inherit', frameon=True)
                 else:
-                    leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.55), 
+                    leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.2), 
                               facecolor='inherit', frameon=True)
                 
                 #Legend 3
@@ -325,7 +325,7 @@ class mplot(object):
                 # Variable defined, but never used
                 #Legend 4
                 if (Pump_Load == 0).all() == False:
-                    axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.45), 
+                    axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(0.8, 1.2), 
                               facecolor='inherit', frameon=True)
                 
                 # Manually add the first legend back
@@ -351,7 +351,7 @@ class mplot(object):
                     
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Generation (MW)',  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel('Generation (GW)',  color='black', rotation='vertical', labelpad=60)
             
             
             if not self.facet:
@@ -485,7 +485,7 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
 
-print("Zone = "+ zone_input)
+            print("Zone = "+ zone_input)
             
             
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
@@ -645,7 +645,7 @@ print("Zone = "+ zone_input)
             print('Zone = ' + str(zone_input))
 
             #Get technology list.
-            gens = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, self.Multi_Scenario[0], "Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"), "generator_Installed_Capacity")
+            gens = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, self.Multi_Scenario[0], "Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"), "generator_Installed_Capacity")
             tech_list = list(gens.reset_index().tech.unique())
             tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.facet_gen_cat]
 
@@ -669,9 +669,9 @@ print("Zone = "+ zone_input)
                 formatter.offset_formats[3] = '%b %Y'
                 formatter.show_offset = False
 
-                gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
-                units_gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Units_Generating")
-                avail_cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Available_Capacity")
+                gen = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
+                units_gen = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Units_Generating")
+                avail_cap = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Available_Capacity")
 
                 #Calculate  committed cap (for thermal only).
                 thermal_commit_cap = units_gen * avail_cap
@@ -733,7 +733,7 @@ print("Zone = "+ zone_input)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Generation or Committed Capacity (GW)',  color='black', rotation='vertical', labelpad=60)
 
-            data_table = None
+            data_table = pd.DataFrame()
             outputs[zone_input] = {'fig':fig4, 'data_table':data_table}
         return outputs
 

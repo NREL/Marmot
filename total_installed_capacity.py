@@ -33,7 +33,7 @@ class mplot(object):
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
-        self.Marmot_Solutions_folder = argument_list[13]
+        self.PLEXOS_Scenarios = argument_list[13]
         self.gen_names_dict = argument_list[18]
         
     def total_cap(self):
@@ -41,7 +41,7 @@ class mplot(object):
         Installed_Capacity_Collection = {} 
         
         for scenario in self.Multi_Scenario:
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),   "generator_Installed_Capacity")
+            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),   "generator_Installed_Capacity")
             
         outputs = {}
         for zone_input in self.Zones:        

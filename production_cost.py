@@ -39,7 +39,7 @@ class mplot(object):
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
-        self.Marmot_Solutions_folder = argument_list[13]
+        self.PLEXOS_Scenarios = argument_list[13]
         self.xlabels = argument_list[15]
         self.color_list = argument_list[16]
         self.marker_style = argument_list[17]
@@ -156,17 +156,17 @@ class mplot(object):
         Cost_Unserved_Energy_Collection = {}
         for scenario in self.Multi_Scenario:
 
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
                 try:
-                    Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "zone_Cost_Unserved_Energy")
+                    Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "zone_Cost_Unserved_Energy")
                 except:
                     Cost_Unserved_Energy_Collection[scenario] = Total_Gen_Cost_Collection[scenario].copy()
                     Cost_Unserved_Energy_Collection[scenario].iloc[:,0] = 0
             else:
                 try:
-                    Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "region_Cost_Unserved_Energy")
+                    Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "region_Cost_Unserved_Energy")
                 except:
                     Cost_Unserved_Energy_Collection[scenario] = Total_Gen_Cost_Collection[scenario].copy()
                     Cost_Unserved_Energy_Collection[scenario].iloc[:,0] = 0
@@ -286,34 +286,34 @@ class mplot(object):
         
         outputs = {}
         for zone_input in self.Zones:
-            print("Zone = "+ self.zone_input)
+            print("Zone = "+ zone_input)
     
             Detailed_Gen_Cost_Out = pd.DataFrame()
     
             for scenario in self.Multi_Scenario:
                 print("Scenario = " + scenario)
     
-                Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Generation")
+                Gen = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Generation")
                 Gen = Gen.xs(zone_input,level=self.AGG_BY)
                 #Total_gen = Gen.sum().iloc[0] #Total energy produced, in MWh.
     
-                Fuel_Cost = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
+                Fuel_Cost = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
                 Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
     
-                VOM_Cost = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
+                VOM_Cost = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
     
-                Start_Shutdown_Cost = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
+                Start_Shutdown_Cost = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
                 Start_Shutdown_Cost = Start_Shutdown_Cost.xs(zone_input,level=self.AGG_BY)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
     
                 try:
-                    Emissions_Cost = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
+                    Emissions_Cost = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
                 except Exception:
                     print("\ngenerator_Emissions_Cost not included in " + scenario + " results,\nEmissions_Cost will not be included in plot\n")
                     Emissions_Cost = Start_Shutdown_Cost.copy()
@@ -341,7 +341,7 @@ class mplot(object):
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out
     
-            fig3, ax = plt.subplots(figsize=(9,6))
+            fig3, ax = plt.subplots(figsize=(6,4))
     
             sb = Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
@@ -360,14 +360,14 @@ class mplot(object):
             """adds annotations to bar plots"""
     
             cost_totals = Detailed_Gen_Cost_Out.sum(axis=1) #holds total of each bar
-    
+            
             #inserts values into bar stacks
             for i in ax.patches:
-               width, height = i.get_width(), i.get_height()
-               if height<=1:
+                width, height = i.get_width(), i.get_height()
+                if height<=2:
                    continue
-               x, y = i.get_xy()
-               ax.text(x+width/2,
+                x, y = i.get_xy()
+                ax.text(x+width/2,
                     y+height/2,
                     '{:,.0f}'.format(height),
                     horizontalalignment='center',
@@ -398,7 +398,7 @@ class mplot(object):
 
 
         for scenario in self.Multi_Scenario:
-            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Total_Generation_Cost")
+            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Total_Generation_Cost")
             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
 
         outputs = {}
@@ -474,12 +474,12 @@ class mplot(object):
         Cost_Unserved_Energy_Collection = {}
         for scenario in self.Multi_Scenario:
 
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
-                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "zone_Cost_Unserved_Energy")
+                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "zone_Cost_Unserved_Energy")
             else:
-                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "region_Cost_Unserved_Energy")
+                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "region_Cost_Unserved_Energy")
 
         outputs = {}
         for zone_input in self.Zones:
@@ -556,7 +556,7 @@ class mplot(object):
 
 
         for scenario in self.Multi_Scenario:
-            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Total_Generation_Cost")
+            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Total_Generation_Cost")
             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
 
         outputs = {}
@@ -643,12 +643,12 @@ class mplot(object):
         Emissions_Cost_Collection = {}
         for scenario in self.Multi_Scenario:
 
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
-            Fuel_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
-            VOM_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
-            Start_Shutdown_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
+            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
+            Fuel_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
+            VOM_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
+            Start_Shutdown_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
             try:
-                Emissions_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
+                Emissions_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
             except Exception:
                 print("\ngenerator_Emissions_Cost not included in " + scenario + " results,\nEmissions_Cost will not be included in plot\n")
                 Emissions_Cost_Collection[scenario] = Start_Shutdown_Cost_Collection[scenario].copy()
