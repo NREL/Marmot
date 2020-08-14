@@ -3,7 +3,7 @@
 
 price analysis
 
-@author: adyreson
+@author: adyreson and Daniel Levie
 """
 
 import os
@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 #import matplotlib as mpl
 import matplotlib.dates as mdates
 #import numpy as np 
-
+import math
 
 
 #===============================================================================
@@ -34,172 +34,292 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.color_list = argument_list[16]
         self.gen_names_dict = argument_list[18]
         self.re_gen_cat = argument_list[20]
+        self.figure_folder = argument_list[25]
+        self.facet = argument_list[27]
         
-       
-  
-    def price_region(self):          #Duration curve of individual region prices 
-        Price_Collection = {}        # Create Dictionary to hold Datframes for each scenario 
+      
+    def region_pdc(self):          
+        #Duration curve of individual region prices
+        # Create Dictionary to hold Datframes for each scenario 
+        Price_Collection = {}        
+        self._getdata(Price_Collection)
         
-        for scenario in self.Multi_Scenario:
-            Price_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),self.AGG_BY + "_Price")
+        outputs = {}
+        for zone_input in self.Zones:              
+            print(self.AGG_BY + " = " + zone_input)
+            
+            all_prices=[]
+            for scenario in self.Multi_Scenario:
+                
+                price = self._process_data(Price_Collection,scenario,zone_input)
+                price.sort_values(by=scenario,ascending=False,inplace=True)
+                price.reset_index(drop=True,inplace=True)
+                all_prices.append(price)
+            
+            duration_curve = pd.concat(all_prices, axis=1)
+            duration_curve.columns = duration_curve.columns.str.replace('_',' ')  
+            
+            Data_Out = duration_curve.copy()
+            
+            xdimension=len(self.xlabels)
+            if xdimension == 0:
+                xdimension = 1
+            ydimension=len(self.ylabels)
+            if ydimension == 0:
+                ydimension = 1
+            
+            # If the plot is not a facet plot, grid size should be 1x1 
+            if not self.facet:
+                xdimension = 1
+                ydimension = 1
+            
+            color_dict = dict(zip(duration_curve.columns,self.color_list))
+            
+            #setup plot
+            fig1, axs = self._setup_plot(xdimension,ydimension)
+            
+            n=0
+            for column in duration_curve:
+                self._create_plot(axs,n,duration_curve,column,color_dict)
+                axs[n].set_xlim(0,len(duration_curve))
+                axs[n].legend(loc='best', facecolor='inherit', frameon=True)
+                if self.facet:
+                    n+=1
+                    
+            fig1.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=20) 
+            plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20) 
+            
+            outputs[zone_input] = {'fig': fig1, 'data_table':Data_Out}
+        return outputs
+    
+    
+    def pdc_all_regions(self):          
+        # Duration curve of individual region prices 
+        # Create Dictionary to hold Datframes for each scenario
+        Price_Collection = {}            
+        self._getdata(Price_Collection)
+        
+        #Location to save to
+        save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
+        
+        outputs = {}       
+        n=0
+        region_number = len(self.Zones)
+        # determine x,y length for plot
+        xdimension, ydimension =  self._set_x_y_dimension(region_number)  
+        
+        #setup plot
+        fig2, axs = self._setup_plot(xdimension,ydimension)
+        
+        data_table = []
+        for zone_input in self.Zones: 
+            outputs[zone_input] = pd.DataFrame()
+            all_prices=[]
+            for scenario in self.Multi_Scenario:
+                price = self._process_data(Price_Collection,scenario,zone_input)
+                price.sort_values(by=scenario,ascending=False,inplace=True)
+                price.reset_index(drop=True,inplace=True)
+                all_prices.append(price)
+        
+            duration_curve = pd.concat(all_prices, axis=1)
+            duration_curve.columns = duration_curve.columns.str.replace('_',' ')  
+        
+            data_out = duration_curve.copy()
+            data_out.columns = [zone_input + "_" + str(col) for col in data_out.columns]
+            data_table.append(data_out)
+            
+            color_dict = dict(zip(duration_curve.columns,self.color_list))
+    
+            for column in duration_curve:
+                self._create_plot(axs,n,duration_curve,column,color_dict)
+                axs[n].set_xlim(0,len(duration_curve))
+                axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
 
-        outputs = {}
-        for zone_input in self.Zones:              
-            print(self.AGG_BY + " = " + zone_input)
-            
-            fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
-         
-            n=0 #Counter for scenario subplots
-            
-            Data_Out=pd.DataFrame()
-            
-            for scenario in self.Multi_Scenario:
-                
-                print("Scenario = " + str(scenario))
-                
-                Price = Price_Collection.get(scenario)
-                Price = Price.xs(zone_input,level=self.AGG_BY,drop_level=False) #Filter to the AGGBY level and keep all levels
-                
-                
-                for region in Price.index.get_level_values(level=self.AGG_BY).unique() :
-                    duration_curve = Price.xs(region,level=self.AGG_BY).sort_values(by=0,ascending=False).reset_index()
-                            
-                    if len(self.Multi_Scenario)>1:                  #Multi scenario
-                        ax3[n].plot(duration_curve[0],label=region)
-                        ax3[n].set_ylabel(scenario,  color='black', rotation='vertical')
-                        ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
-                        ax3[n].spines['right'].set_visible(False)
-                        ax3[n].spines['top'].set_visible(False)                         
-                       
-                        if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
-                            ax3[n].set_ylim(top=int(self.prop))           
-                    else: #Single scenario
-                        ax3.plot(duration_curve[0],label=region)
-                     
-                        ax3.set_ylabel(scenario,  color='black', rotation='vertical')
-                        ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
-                        ax3.spines['right'].set_visible(False)
-                        ax3.spines['top'].set_visible(False)   
-                       
-                        if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
-                            plt.ylim(top=int(self.prop))   
-                                          
-                    del duration_curve
-                   
-                if len(Price.index.get_level_values(level=self.AGG_BY).unique()) <10:# Add legend if legible
-                    if len(self.Multi_Scenario)>1:
-                        ax3[n].legend(loc='upper right')
-                    else:
-                        ax3.legend(loc='upper right')
-                
-                Price=Price.reset_index(['timestamp',self.AGG_BY]).set_index(['timestamp'])
-                Price.rename(columns={0:scenario},inplace=True)
-                Data_Out=pd.concat([Data_Out,Price],axis=1)
-    
-                del Price 
-                   
-                n=n+1
-            #end scenario loop
-            fig3.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(self.AGG_BY + ' Price $/MWh ',  color='black', rotation='vertical', labelpad=60)                      
-            outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
-        return outputs
-    
-    def price_region_chron(self):          #Timeseries of individual region prices 
-        Price_Collection = {}        # Create Dictionary to hold Datframes for each scenario 
+                handles, labels = axs[region_number-1].get_legend_handles_labels()       
+                #Legend
+                axs[region_number-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0), 
+                              facecolor='inherit', frameon=True)  
+            n+=1
         
-        for scenario in self.Multi_Scenario:
-            Price_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), self.AGG_BY + "_Price")
+        fig2.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=30) 
+        plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20) 
+        
+        Data_Table_Out = pd.concat(data_table, axis=1)
+        fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
+        return outputs
+            
+    
+    def region_timeseries_price(self):          
+        # Timeseries of individual region prices 
+        # Create Dictionary to hold Datframes for each scenario
+        Price_Collection = {}           
+        self._getdata(Price_Collection)
         
         outputs = {}
         for zone_input in self.Zones:              
             print(self.AGG_BY + " = " + zone_input)
             
-            fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
-         
-            n=0 #Counter for scenario subplots
-            
-            Data_Out=pd.DataFrame()
-            
+            all_prices=[]
             for scenario in self.Multi_Scenario:
-                
-                print("Scenario = " + str(scenario))
-                
-                Price = Price_Collection.get(scenario)
-                Price = Price.xs(zone_input,level=self.AGG_BY,drop_level=False) #Filter to the AGGBY level and keep all levels
-    
-                for region in Price.index.get_level_values(level=self.AGG_BY).unique() :
-                    timeseries = Price.xs(region,level=self.AGG_BY).reset_index().set_index('timestamp')
-                            
-                    if len(self.Multi_Scenario)>1:
-                        ax3[n].plot(timeseries[0],label=region)
-                        ax3[n].set_ylabel(scenario,  color='black', rotation='vertical')
-                        ax3[n].spines['right'].set_visible(False)
-                        ax3[n].spines['top'].set_visible(False)                         
-                       
-                        locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-                        formatter = mdates.ConciseDateFormatter(locator)
-                        formatter.formats[2] = '%d\n %b'
-                        formatter.zero_formats[1] = '%b\n %Y'
-                        formatter.zero_formats[2] = '%d\n %b'
-                        formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                        formatter.offset_formats[3] = '%b %Y'
-                        formatter.show_offset = False
-                        ax3[n].xaxis.set_major_locator(locator)
-                        ax3[n].xaxis.set_major_formatter(formatter)
-                        
-                        if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
-                            ax3[n].set_ylim(top=int(self.prop))           
-    
-    
-                    else:
-    
-                        ax3.plot(timeseries[0],label=region)
-                        ax3.set_ylabel(scenario,  color='black', rotation='vertical')
-                        ax3.spines['right'].set_visible(False)
-                        ax3.spines['top'].set_visible(False)   
-                        locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-                        formatter = mdates.ConciseDateFormatter(locator)
-                        formatter.formats[2] = '%d\n %b'
-                        formatter.zero_formats[1] = '%b\n %Y'
-                        formatter.zero_formats[2] = '%d\n %b'
-                        formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                        formatter.offset_formats[3] = '%b %Y'
-                        formatter.show_offset = False
-                        ax3.xaxis.set_major_locator(locator)
-                        ax3.xaxis.set_major_formatter(formatter)
-                        
-                        if (self.prop!=self.prop)==False: # This checks for a nan in string. If no limit selected, do nothing
-                            plt.ylim(top=int(self.prop))   
-                    
-                    del timeseries
-                    
-                if len(Price.index.get_level_values(level=self.AGG_BY).unique()) <10:# Add legend if legible
-                        if len(self.Multi_Scenario)>1:
-                            ax3[n].legend()
-                        else:
-                            ax3.legend()
-                                
-                Price=Price.reset_index(['timestamp',self.AGG_BY]).set_index(['timestamp'])
-                Price.rename(columns={0:scenario},inplace=True)
-                Data_Out=pd.concat([Data_Out,Price],axis=1)
-                
-                del Price 
-                
-                               
-                n=n+1
-            #end scenario loop
+                price = self._process_data(Price_Collection,scenario,zone_input)
+                all_prices.append(price)
+            
+            timeseries = pd.concat(all_prices, axis=1)
+            timeseries.columns = timeseries.columns.str.replace('_',' ')  
+            
+            Data_Out = timeseries.copy()
+            
+            xdimension=len(self.xlabels)
+            if xdimension == 0:
+                xdimension = 1
+            ydimension=len(self.ylabels)
+            if ydimension == 0:
+                ydimension = 1
+            
+            # If the plot is not a facet plot, grid size should be 1x1 
+            if not self.facet:
+                xdimension = 1
+                ydimension = 1
+            
+            color_dict = dict(zip(timeseries.columns,self.color_list))
+            
+            #setup plot
+            fig3, axs = self._setup_plot(xdimension,ydimension)
+            
+            n=0 #Counter for scenario subplots
+            for column in timeseries:
+                self._create_plot(axs,n,timeseries,column,color_dict)
+                axs[n].legend(loc='best',facecolor='inherit', frameon=True)
+                self._set_plot_timeseries_format(axs,n)
+                if self.facet:
+                    n+=1
+            
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(self.AGG_BY + ' Price $/MWh ',  color='black', rotation='vertical', labelpad=60)          
-                          
+            plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=20) 
+            plt.xlabel(self.timezone,  color='black', rotation='horizontal', labelpad=20) 
+            
             outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
         return outputs
+            
+    def timeseries_price_all_regions(self):
+        # Create Dictionary to hold Datframes for each scenario 
+        Price_Collection = {}           
+        self._getdata(Price_Collection)
+        
+        #Location to save to
+        save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
+        
+        outputs = {}       
+        n=0
+        
+        region_number = len(self.Zones)
+        xdimension, ydimension =  self._set_x_y_dimension(region_number)
+
+        #setup plot
+        fig4, axs = self._setup_plot(xdimension,ydimension)
+        
+        data_table = []
+        for zone_input in self.Zones: 
+            # print(zone_input)
+            outputs[zone_input] = pd.DataFrame()
+            all_prices=[]
+            for scenario in self.Multi_Scenario:
+                price = self._process_data(Price_Collection,scenario,zone_input)
+                all_prices.append(price)
+                
+            timeseries = pd.concat(all_prices, axis=1)
+            timeseries.columns = timeseries.columns.str.replace('_',' ')  
+            
+            data_out = timeseries.copy()
+            data_out.columns = [zone_input + "_" + str(col) for col in data_out.columns]
+            data_table.append(data_out)
+            
+            color_dict = dict(zip(timeseries.columns,self.color_list))
+            
+            for column in timeseries:
+                self._create_plot(axs,n,timeseries,column,color_dict)
+                axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
+                self._set_plot_timeseries_format(axs,n)
+                
+                handles, labels = axs[region_number-1].get_legend_handles_labels()       
+                #Legend
+                axs[region_number-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0), 
+                              facecolor='inherit', frameon=True)  
+            n+=1
+        
+        fig4.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=30) 
+        plt.xlabel(self.timezone,  color='black', rotation='horizontal', labelpad=20) 
+        
+        Data_Table_Out = pd.concat(data_table, axis=1)
+        fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
+
+        return outputs
     
+    # Internal functions to process data 
+    def _getdata(self,data_collection):
+         for scenario in self.Multi_Scenario:
+                if self.AGG_BY == "zone":
+                    data_collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"zone_Price")
+                else:
+                    data_collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"region_Price")
+    
+    def _process_data(self,data_collection,scenario,zone_input):
+        df = data_collection.get(scenario)
+        df = df.xs(zone_input,level=self.AGG_BY) 
+        df = df.rename(columns={0:scenario})
+        return df
+    
+    def _setup_plot(self,xdimension,ydimension):
+        fig, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
+        plt.subplots_adjust(wspace=0.05, hspace=0.2)
+        axs = axs.ravel()
+        return fig,axs
+    
+    def _create_plot(self,axs,n,data,column,color_dict):
+        axs[n].plot(data[column], linewidth=1, color=color_dict[column], 
+                    label=column)
+        axs[n].spines['right'].set_visible(False)
+        axs[n].spines['top'].set_visible(False)   
+        # This checks for a nan in string. If no limit selected, do nothing
+        if (self.prop!=self.prop)==False: 
+            axs[n].set_ylim(bottom=0,top=int(self.prop))    
+    
+    def _set_x_y_dimension(self,region_number):
+        if region_number >= 5:
+            xdimension = 3
+            ydimension = math.ceil(region_number/3)
+        if region_number <= 3:
+            xdimension = region_number
+            ydimension = 1 
+        if region_number == 4:  
+            xdimension = 2
+            ydimension = 2
+        return xdimension,ydimension
+    
+    def _set_plot_timeseries_format(self,axs,n):
+        locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
+        formatter = mdates.ConciseDateFormatter(locator)
+        formatter.formats[2] = '%d\n %b'
+        formatter.zero_formats[1] = '%b\n %Y'
+        formatter.zero_formats[2] = '%d\n %b'
+        formatter.zero_formats[3] = '%H:%M\n %d-%b'
+        formatter.offset_formats[3] = '%b %Y'
+        formatter.show_offset = False
+        axs[n].xaxis.set_major_locator(locator)
+        axs[n].xaxis.set_major_formatter(formatter)
+        
