@@ -61,9 +61,6 @@ Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_C
 Region-Region Net Interchange Duration,FALSE,Region-Region_Net_Interchange_Duration,,,,,,,transmission,region_region_duration
 Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,,hydro,hydro_net_load
 Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,10/1/2024,3/1/2024,hydro,hydro_continent_net_load
-<<<<<<< HEAD
 All Regions PDC,FALSE,All_Regions_Price_Duration_Curve,150,,,,,,prices,pdc_all_regions
 All Regions Timeseries Price,TRUE,All_Regions_Price_Timeseries,,,,,,,prices,timeseries_price_all_regions
-=======
 Total Curtailment,False,Total_Curtailment,,,,,,,curtailment,curt_total
->>>>>>> master
