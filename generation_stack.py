@@ -216,9 +216,19 @@ class mplot(object):
                 xdimension = 1
                 ydimension = 1
             
+            
+            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot 
+            if xdimension > 1:
+                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
+                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
+                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
+                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+            
+            
             grid_size = xdimension*ydimension
             
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((9*xdimension),(6*ydimension)), sharey=True, squeeze=False)
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             axs = axs.ravel()
             i=0
@@ -318,21 +328,21 @@ class mplot(object):
                               facecolor='inherit', frameon=True)  
                 #Legend 2
                 if (Pump_Load == 0).all() == False:
-                    leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.55), 
+                    leg2 = axs[grid_size-1].legend(lp, ['Demand + Pumped Load'], loc='upper left',bbox_to_anchor=(1, 1.2), 
                               facecolor='inherit', frameon=True)
                 else:
-                    leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.55), 
+                    leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.2), 
                               facecolor='inherit', frameon=True)
                 
                 #Legend 3
                 if (Unserved_Energy == 0).all() == False:
-                    leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.35), 
+                    leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15), 
                           facecolor='inherit', frameon=True)
                     
                 # Variable defined, but never used
                 #Legend 4
                 if (Pump_Load == 0).all() == False:
-                    axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.45), 
+                    axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1), 
                               facecolor='inherit', frameon=True)
                 
                 # Manually add the first legend back

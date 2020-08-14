@@ -178,14 +178,14 @@ class mplot(object):
             Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Demand_Out/1000, unserved_eng_data_table_out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
     
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
         
             Total_Load_Out = Total_Load_Out.T/1000 #Convert to GWh
             Pump_Load_Out = Pump_Load_Out.T/1000 #Convert to GWh
             Total_Demand_Out = Total_Demand_Out.T/1000 #Convert to GWh
             Unserved_Energy_Out = Unserved_Energy_Out.T/1000
             
-            fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0, 
+            fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0, 
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
             
             
@@ -222,20 +222,20 @@ class mplot(object):
                           facecolor='inherit', frameon=True)  
             #Legend 2
             if Pump_Load_Out.values.sum() > 0:
-                leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 0.9), 
+                leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2), 
                           facecolor='inherit', frameon=True)
             else:
-                leg2 = fig1.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9), 
+                leg2 = fig1.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2), 
                           facecolor='inherit', frameon=True)
             
             #Legend 3
             if Unserved_Energy_Out.values.sum() > 0:
-                leg3 = fig1.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 0.885), 
+                leg3 = fig1.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15), 
                           facecolor='inherit', frameon=True)
                 
             #Legend 4
             if Pump_Load_Out.values.sum() > 0:
-                fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.82), 
+                fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1), 
                           facecolor='inherit', frameon=True)
             
             # Manually add the first legend back
