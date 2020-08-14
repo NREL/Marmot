@@ -47,9 +47,9 @@ Line Utilization Annual,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansio
 Line Utilization Hourly,FALSE,Line_Utilization_Duration,,,,,,,transmission,line_util
 Line Utilization Hourly,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,,transmission,line_util
 Region Price,FALSE,Region_Price_Duration,,,,,,,prices,price_region
-Region Price,FALSE,Region_Price_Duration_Threshold,300,,,,,,prices,price_region
-Region Price Timeseries,FALSE,Region_Price_Timeseries,,,,,,,prices,price_region_chron
-Region Price Timeseries,FALSE,Region_Price_Timeseries_Threshold,4100,,,,,,prices,price_region_chron
+Region Price,FALSE,Region_Price_Duration_Threshold,150,,,,,,prices,region_pdc
+Region Price Timeseries,FALSE,Region_Price_Timeseries,,,,,,,prices,region_timeseries_price
+Region Price Timeseries,TRUE,Region_Price_Timeseries_Threshold,150,,,,,,prices,region_timeseries_price
 Constraint Violation,FALSE,Constraint_Violation_Timeseries,,,,,,,constraints,constraint_violation
 Reserve Provision Region,FALSE,Reserve_Provision_Region,,,,,,,reserves,reg_reserve_provision
 Reserve Shortage Region,FALSE,Reserve_Shortage_Region,,,,,,,reserves,reg_reserve_shortage
@@ -61,4 +61,6 @@ Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_C
 Region-Region Net Interchange Duration,FALSE,Region-Region_Net_Interchange_Duration,,,,,,,transmission,region_region_duration
 Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,,hydro,hydro_net_load
 Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,10/1/2024,3/1/2024,hydro,hydro_continent_net_load
+All Regions PDC,FALSE,All_Regions_Price_Duration_Curve,150,,,,,,prices,pdc_all_regions
+All Regions Timeseries Price,TRUE,All_Regions_Price_Timeseries,,,,,,,prices,timeseries_price_all_regions
 Total Curtailment,False,Total_Curtailment,,,,,,,curtailment,curt_total
