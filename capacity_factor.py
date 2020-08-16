@@ -20,8 +20,8 @@ import os
 
 def df_process_gen_inputs(df,self):
     df = df.reset_index()
-    df['tech'].replace(self.gen_names_dict, inplace=True)
-    df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show.
+    # df['tech'].replace(self.gen_names_dict, inplace=True)
+    # df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show. 
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
     df.tech = df.tech.astype("category")
     df.tech.cat.set_categories(self.ordered_gen, inplace=True)
@@ -50,6 +50,13 @@ class mplot(object):
         self.thermal_gen_cat = argument_list[23]
 
     def cf(self):
+        
+        Gen_Collection = {}
+        Cap_Collection = {}
+        for scenario in self.Multi_Scenario:
+            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Generation")
+            Cap_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
+        
         outputs = {}
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -58,7 +65,7 @@ class mplot(object):
             for scenario in self.Multi_Scenario:
                 
                 print("Scenario = " + str(scenario))
-                Gen = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
+                Gen = Gen_Collection.get(scenario)
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 Gen = df_process_gen_inputs(Gen,self)
                 if self.prop == 'Date Range':
@@ -78,7 +85,7 @@ class mplot(object):
                 Total_Gen = Gen.sum(axis=0)
                 Total_Gen.rename(scenario, inplace = True)
                 
-                Cap = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
+                Cap = Cap_Collection.get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = df_process_gen_inputs(Cap, self)
                 Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
@@ -88,8 +95,9 @@ class mplot(object):
                 CF = Total_Gen/(Cap * duration_hours) 
                 CF.rename(scenario, inplace = True)
                 CF_all_scenarios = pd.concat([CF_all_scenarios, CF], axis=1, sort=False)
-                CF_all_scenarios = CF_all_scenarios.dropna(axis = 0)
-    
+                CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
+            
+            CF_all_scenarios.columns = CF_all_scenarios.columns.str.replace('_',' ')
             CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
             
             fig1 = CF_all_scenarios.plot.bar(stacked = False, figsize=(9,6), rot=0, 
@@ -102,7 +110,13 @@ class mplot(object):
             fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
-                             
+            
+            # handles, labels = fig1.get_legend_handles_labels()
+            
+            # #Legend 1
+            # leg1 = fig1.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0), 
+            #               facecolor='inherit', frameon=True)  
+               
             outputs[zone_input] = {'fig': fig1, 'data_table': CF_all_scenarios}
             
         return outputs
@@ -115,7 +129,7 @@ class mplot(object):
                 
             for scenario in self.Multi_Scenario:
                 print("Scenario = " + str(scenario))
-                Gen = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
+                Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
           
                 Gen = Gen.reset_index()
@@ -125,7 +139,7 @@ class mplot(object):
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]
                 
-                Cap = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Installed_Capacity")
+                Cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Installed_Capacity")
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.drop(columns = ['timestamp','region','tech'])
@@ -170,7 +184,7 @@ class mplot(object):
                     
                 CF_all_scenarios = CF_all_scenarios.append(CF) 
                 
-            fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0, 
+            fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(6,4), rot=0, 
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
             
             fig2.spines['right'].set_visible(False)
@@ -196,7 +210,7 @@ class mplot(object):
             for scenario in self.Multi_Scenario:
                 print("Scenario = " + str(scenario))
        
-                Min = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
+                Min = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
                 Min = Min.xs(zone_input,level = self.AGG_BY)
                 Min = Min.reset_index()
                 Min.index = Min.gen_name
@@ -204,7 +218,7 @@ class mplot(object):
                 Min = Min.rename(columns = {0:"Hours at Minimum"})
 
 
-                Gen = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
+                Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
@@ -214,7 +228,7 @@ class mplot(object):
                 Gen = Gen[~Gen['tech'].isin(['PV','Wind','Hydro','CSP','Storage','Other'])]
                 Gen.index = Gen.timestamp
     
-                Cap = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Installed_Capacity")
+                Cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Installed_Capacity")
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Caps = Cap.groupby('gen_name').mean()
                 Caps.reset_index()

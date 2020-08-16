@@ -43,7 +43,7 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
@@ -130,7 +130,7 @@ class mplot(object):
             Reserve_Provision_Collection = {} 
              
             for scenario in self.Multi_Scenario:
-                 Reserve_Provision_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "reserve_generators_Provision")
+                 Reserve_Provision_Collection[scenario] = pd.read_hdf(self.Marmot_Solutions_folder + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "reserve_generators_Provision")
                  
             
             xdimension=len(self.xlabels)
@@ -232,7 +232,7 @@ class mplot(object):
             Data_Table_Out=pd.DataFrame()
     
             for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
                 
             fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
     
@@ -290,7 +290,7 @@ class mplot(object):
             Reserve_Provision_Collection = {}
             Data_Table_Out=pd.DataFrame()
             for scenario in self.Multi_Scenario:
-                Reserve_Provision_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Provision")
+                Reserve_Provision_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Provision")
                 
             fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
     
@@ -346,7 +346,7 @@ class mplot(object):
             Reserve_Shortage_Collection = {}
             
             for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
             
             fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
             Data_Out = pd.DataFrame()
@@ -415,7 +415,7 @@ class mplot(object):
             Reserve_Shortage_Collection = {}
     
             for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
                 
             fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
             Data_Out=pd.DataFrame()
@@ -466,7 +466,7 @@ class mplot(object):
 #        Reserve_Shortage_Collection = {}
 #
 #        for scenario in self.Multi_Scenario:
-#            Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+#            Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
 #
 #        Reserve_Shortage_Timeseries_Out = pd.DataFrame()
 #        Total_Reserve_Shortage_Out = pd.DataFrame()

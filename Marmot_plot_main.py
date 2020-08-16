@@ -23,12 +23,19 @@ from meta_data import MetaData
 
 class plottypes:
     
-    def __init__(self, figure_type, figure_output_name, argument_list):
+    def __init__(self, figure_type, figure_output_name, argument_list,font_defaults):
         self.figure_type = figure_type
         self.figure_output_name = figure_output_name
         self.argument_list = argument_list
+        self.font_defaults = font_defaults
         
     def runmplot(self):
+        mpl.rc('xtick', labelsize=self.font_defaults['xtick_size'])
+        mpl.rc('ytick', labelsize=self.font_defaults['ytick_size'])
+        mpl.rc('axes', labelsize=self.font_defaults['axes_size'])
+        mpl.rc('legend', fontsize=self.font_defaults['legend_size'])
+        mpl.rc('font', family=self.font_defaults['font_family'])
+        
         plot = importlib.import_module(self.figure_type)
         fig = plot.mplot(self.argument_list)
         
@@ -45,14 +52,15 @@ except IndexError:
     pass
 
 #===============================================================================
-# Graphing Defaults
+# Set Graphing Font Defaults
 #===============================================================================
 
-mpl.rc('xtick', labelsize=11)
-mpl.rc('ytick', labelsize=12)
-mpl.rc('axes', labelsize=16)
-mpl.rc('legend', fontsize=11)
-mpl.rc('font', family='serif')
+font_defaults = {'xtick_size':11,
+                 'ytick_size':12,
+                 'axes_size':16,
+                 'legend_size':11,
+                 'font_family':'serif'}
+
 
 #===============================================================================
 # Load Input Properties
@@ -274,7 +282,7 @@ for index, row in Marmot_plot_select.iterrows():
         os.makedirs(figures)
     except FileExistsError:
         pass
-    fig = plottypes(module, method, argument_list)
+    fig = plottypes(module, method, argument_list,font_defaults)
     Figure_Out = fig.runmplot()
      
     if 'Reserve' in row['Figure Type']:
@@ -298,9 +306,10 @@ for index, row in Marmot_plot_select.iterrows():
                 except AttributeError:
                     Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
             
-            if Figure_Out[zone_input]['data_table'].empty:
-                print(row["Figure Output Name"] + 'does not return a data table')
-                continue
+            if not facet:
+                if Figure_Out[zone_input]['data_table'].empty:
+                    print(row["Figure Output Name"] + 'does not return a data table')
+                    continue
             
             if not facet:
                 Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))

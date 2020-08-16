@@ -26,7 +26,7 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.color_list = argument_list[16]
@@ -53,7 +53,7 @@ class mplot(object):
                 axs = axs.ravel()
             i=0
       
-            met_year = self.PLEXOS_Scenarios[-4:] #Extract met year from PLEXOS parent scenario.
+            met_year = self.Marmot_Solutions_folder[-4:] #Extract met year from PLEXOS parent scenario.
       
             for scenario in self.Multi_Scenario:
                 print("Scenario = " + str(scenario))
@@ -70,7 +70,7 @@ class mplot(object):
                 overall_avg = sum_ts.mean()
     
                #Subset to match dispatch time horizon.
-                Gen = pd.read_hdf(os.path.join(self. PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Generation")
+                Gen = pd.read_hdf(os.path.join(self. Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Generation")
                 start = Gen.index.get_level_values('timestamp')[0]
                 end =  Gen.index.get_level_values('timestamp')[-1]
     
@@ -85,7 +85,7 @@ class mplot(object):
                 tech_list = [tech_type for tech_type in self.ordered_gen if tech_type in one_zone.columns]  #Order columns.
                 one_zone = one_zone[tech_list]
     
-                if '2008' not in self.PLEXOS_Scenarios and '2012' not in self.PLEXOS_Scenarios and one_zone.index[0] > dt.datetime(2024,2,28,0,0):
+                if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and one_zone.index[0] > dt.datetime(2024,2,28,0,0):
                     one_zone.index = one_zone.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
     
                 overall_avg_vec = pd.DataFrame(np.repeat(np.array(overall_avg),len(one_zone.index)), index = one_zone.index, columns = ['Annual average'])
