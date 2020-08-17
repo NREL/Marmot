@@ -175,7 +175,7 @@ class Process:
         else:
             idx_zone = idx_region
 
-        if len(Region_Mapping.columns)<2 == False:
+        if len(Region_Mapping.columns)>1 == True:
             region_gen_mapping_idx = pd.MultiIndex.from_frame(self.region_generator_category.merge(Region_Mapping,
                                 how="left", on='region').sort_values(by=['tech','gen_name']).drop(['region','tech','gen_name'], axis=1))
             region_gen_mapping_idx = region_gen_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
@@ -211,7 +211,7 @@ class Process:
     def df_process_region(self):
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
-        if len(Region_Mapping.columns)<2 == False: #checks if Region_Mapping contains data to merge, skips if empty
+        if len(Region_Mapping.columns)>1 == True: #checks if Region_Mapping contains data to merge, skips if empty
             mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions().merge(Region_Mapping,
                                 how="left", on='region').drop(['region','category'], axis=1))
             mapping_idx = mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
@@ -331,7 +331,7 @@ class Process:
             df = df.merge(self.region_generators, how='left', on='gen_name') # Merges in regions where generators are located
         if self.zone_generators.empty == False:
             df = df.merge(self.zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
-        if len(Region_Mapping.columns)<2 == False: #checks if Region_Maping contains data to merge, skips if empty (Default)
+        if len(Region_Mapping.columns)>1 == True: #checks if Region_Maping contains data to merge, skips if empty (Default)
             df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
         df.rename(columns={'name':'storage_resource'}, inplace=True)
         df_col = list(df.columns) # Gets names of all columns in df and places in list
@@ -371,7 +371,7 @@ class Process:
                                 names= idx_region.names + node_zone_idx.names)
         else:
             idx_zone = idx_region
-        if len(Region_Mapping.columns)<2 == False:
+        if len(Region_Mapping.columns)>1 == True:
             region_mapping_idx = pd.MultiIndex.from_frame(self.node_region.merge(Region_Mapping,
                                 how="left", on='region').drop(['region','node'], axis=1))
             region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
@@ -586,7 +586,7 @@ for Scenario_name in Scenario_List:
 
 # Code that can be used to test PLEXOS_H5_results_formatter
 
-    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'storage_Generation')
+    test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
     # test = test.xs("Xcel_Energy_EI",level='zone')
     # test = test.reset_index(['timestamp','node'])
     # test = test.groupby(["timestamp", "node"], as_index=False).sum()
