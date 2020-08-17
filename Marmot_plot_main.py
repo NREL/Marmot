@@ -11,15 +11,12 @@ import os
 import pathlib
 import matplotlib as mpl
 import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/plottingmodules")
 import importlib 
-#changes working directory to location of this python file
-os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
-
 from meta_data import MetaData
 
-# import capacity_out
-# import thermal_cap_reserve
-# import constraints
+#changes working directory to location of this python file
+os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
 
 class plottypes:
     
