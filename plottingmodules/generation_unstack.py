@@ -148,10 +148,10 @@ class mplot(object):
                 print("Plotting graph for entire timeperiod")
 
             # Code for leap years
-            if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Stacked_Gen.index[0] > dt.datetime(2024,2,28,0,0):
-              Stacked_Gen.index = Stacked_Gen.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
-              Load.index = Load.index.shift(1,freq = 'D')
-              Unserved_Energy.index = Unserved_Energy.index.shift(1,freq = 'D')
+       #     if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Stacked_Gen.index[0] > dt.datetime(2024,2,28,0,0):
+       #       Stacked_Gen.index = Stacked_Gen.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
+       #       Load.index = Load.index.shift(1,freq = 'D')
+       #       Unserved_Energy.index = Unserved_Energy.index.shift(1,freq = 'D')
 
 
             # Data_Table_Out = Stacked_Gen
