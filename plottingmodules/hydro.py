@@ -51,12 +51,12 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
         self.vre_gen_cat = argument_list[21]
-        self.figure_folder = argument_list[25]
+        self.figure_folder = argument_list[26]
     
 
     def hydro_net_load(self):
@@ -207,6 +207,8 @@ class mplot(object):
             Stacked_Gen= df_process_gen_inputs(Stacked_Gen, self)
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)] #Removes columns only containing 0
     
+        #end weekly loop
+        
             try:
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
@@ -215,9 +217,7 @@ class mplot(object):
                 continue
                 
             del Stacked_Gen
-            
-                   
-            
+           
             #Scatter plot by season
             fig2, ax2 = plt.subplots(figsize=(9,6))
     
@@ -241,10 +241,9 @@ class mplot(object):
                 
             leg1 = ax2.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
                               facecolor='inherit', frameon=True)  
-         
-              
+                      
             ax2.add_artist(leg1)
-            
+
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Continent_Net_Load" + "_" + self.Multi_Scenario[0]), dpi=600, bbox_inches='tight')
             outputs[zone_input] = pd.DataFrame()
         return outputs

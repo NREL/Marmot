@@ -33,7 +33,7 @@ class mplot(object):
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.gen_names_dict = argument_list[18]
         
     def total_cap(self):
@@ -41,7 +41,7 @@ class mplot(object):
         Installed_Capacity_Collection = {} 
         
         for scenario in self.Multi_Scenario:
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),   "generator_Installed_Capacity")
+            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),   "generator_Installed_Capacity")
             
         outputs = {}
         for zone_input in self.Zones:        
@@ -58,8 +58,8 @@ class mplot(object):
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     print("No installed capacity in : "+zone_input)
-                    outputs[zone_input] =  pd.DataFrame()
-                    continue
+                    break
+                
                 Total_Installed_Capacity = df_process_gen_inputs(Total_Installed_Capacity, self)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
@@ -69,14 +69,20 @@ class mplot(object):
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000 #Convert to GW
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
             
+            # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot 
+            if Total_Installed_Capacity_Out.empty:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
+            
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Data_Table_Out, Total_Installed_Capacity_Out],  axis=1, sort=False)
             
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
-            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(10, break_long_words=False)
+            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
             
             
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(9,6), rot=0, 
+            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(6,4), rot=0, 
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
            
             fig1.spines['right'].set_visible(False) 

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-price analysis
+price analysis plots, price duration cureves = timeseries plots
 
 @author: adyreson and Daniel Levie
 """
@@ -20,9 +20,9 @@ import math
 
 class mplot(object):
     def __init__(self,argument_list):
-        
+
         self.prop = argument_list[0]
-        self.start = argument_list[1]     
+        self.start = argument_list[1]
         self.end = argument_list[2]
         self.timezone = argument_list[3]
         self.start_date = argument_list[4]
@@ -44,14 +44,21 @@ class mplot(object):
         self.facet = argument_list[27]
         
       
-    def region_pdc(self):          
+    def region_pdc(self):
+
+        """
+        This method creates a price duration curve for each region.
+        The code will create either a facet plot or a single plot depening on if the Facet argument is active.
+        If a facet plot is created, each scenario is plotted on a seperate facet, otherwise all scenarios are 
+        plotted on a single plot.
+        """          
         #Duration curve of individual region prices
         # Create Dictionary to hold Datframes for each scenario 
         Price_Collection = {}        
         self._getdata(Price_Collection)
         
         outputs = {}
-        for zone_input in self.Zones:              
+        for zone_input in self.Zones:
             print(self.AGG_BY + " = " + zone_input)
             
             all_prices=[]
@@ -102,6 +109,14 @@ class mplot(object):
     
     
     def pdc_all_regions(self):          
+        
+        """
+        This method creates a price duration curve for all regions/zones and plots them on 
+        a single facet plot.
+        The code automatically creates a facet plot based on the number of regions/zones in the input.
+        All scenarios are plotted on a single facet for each region/zone
+        """         
+        
         # Duration curve of individual region prices 
         # Create Dictionary to hold Datframes for each scenario
         Price_Collection = {}            
@@ -161,18 +176,27 @@ class mplot(object):
             
     
     def region_timeseries_price(self):          
+        
+        """
+        This method creates price timeseries plot for each region.
+        The code will create either a facet plot or a single plot depening on if the Facet argument is active.
+        If a facet plot is created, each scenario is plotted on a seperate facet, otherwise all scenarios are 
+        plotted on a single plot.
+        """
+        
         # Timeseries of individual region prices 
         # Create Dictionary to hold Datframes for each scenario
         Price_Collection = {}           
         self._getdata(Price_Collection)
         
         outputs = {}
-        for zone_input in self.Zones:              
+        for zone_input in self.Zones:
             print(self.AGG_BY + " = " + zone_input)
             
             all_prices=[]
             for scenario in self.Multi_Scenario:
                 price = self._process_data(Price_Collection,scenario,zone_input)
+                price = price.groupby(["timestamp"]).sum()
                 all_prices.append(price)
             
             timeseries = pd.concat(all_prices, axis=1)
@@ -197,6 +221,8 @@ class mplot(object):
             #setup plot
             fig3, axs = self._setup_plot(xdimension,ydimension)
             
+           
+            
             n=0 #Counter for scenario subplots
             for column in timeseries:
                 self._create_plot(axs,n,timeseries,column,color_dict)
@@ -214,6 +240,14 @@ class mplot(object):
         return outputs
             
     def timeseries_price_all_regions(self):
+        
+        """
+        This method creates a price timeseries plot for all regions/zones and plots them on 
+        a single facet plot.
+        The code automatically creates a facet plot based on the number of regions/zones in the input.
+        All scenarios are plotted on a single facet for each region/zone
+        """        
+        
         # Create Dictionary to hold Datframes for each scenario 
         Price_Collection = {}           
         self._getdata(Price_Collection)
@@ -237,6 +271,7 @@ class mplot(object):
             all_prices=[]
             for scenario in self.Multi_Scenario:
                 price = self._process_data(Price_Collection,scenario,zone_input)
+                price = price.groupby(["timestamp"]).sum()
                 all_prices.append(price)
                 
             timeseries = pd.concat(all_prices, axis=1)
@@ -249,7 +284,8 @@ class mplot(object):
             color_dict = dict(zip(timeseries.columns,self.color_list))
             
             for column in timeseries:
-                self._create_plot(axs,n,timeseries,column,color_dict)
+                axs[n].plot(timeseries[column], linewidth=1, color=color_dict[column],label=column)
+                # self._create_plot(axs,n,timeseries,column,color_dict)
                 axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
                 self._set_plot_timeseries_format(axs,n)
                 
@@ -270,7 +306,7 @@ class mplot(object):
 
         return outputs
     
-    # Internal functions to process data 
+    # Internal methods to process data, not designed to be accessed from outside the mplot class. 
     def _getdata(self,data_collection):
          for scenario in self.Multi_Scenario:
                 if self.AGG_BY == "zone":
@@ -291,8 +327,7 @@ class mplot(object):
         return fig,axs
     
     def _create_plot(self,axs,n,data,column,color_dict):
-        axs[n].plot(data[column], linewidth=1, color=color_dict[column], 
-                    label=column)
+        axs[n].plot(data[column], linewidth=1, color=color_dict[column],label=column)
         axs[n].spines['right'].set_visible(False)
         axs[n].spines['top'].set_visible(False)   
         # This checks for a nan in string. If no limit selected, do nothing
@@ -322,4 +357,3 @@ class mplot(object):
         formatter.show_offset = False
         axs[n].xaxis.set_major_locator(locator)
         axs[n].xaxis.set_major_formatter(formatter)
-        

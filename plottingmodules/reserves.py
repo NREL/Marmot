@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
-import numpy as np 
+import numpy as np
 
 
 #===============================================================================
@@ -23,15 +23,15 @@ def df_process_gen_inputs(df, self):
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
     df.tech = df.tech.astype("category")
     df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"]) 
+    df = df.sort_values(["tech"])
     df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df  
+    return df
 
 
 class mplot(object):
     def __init__(self, argument_list):
         self.prop = argument_list[0]
-        self.start = argument_list[1]     
+        self.start = argument_list[1]
         self.end = argument_list[2]
         self.timezone = argument_list[3]
         self.start_date = argument_list[4]
@@ -43,7 +43,7 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.gen_names_dict = argument_list[18]
@@ -51,7 +51,7 @@ class mplot(object):
         self.Reserve_Regions = argument_list[22]
         self.color_list = argument_list[16]
         self.Region_Mapping = argument_list[23]
-          
+
     def reserve_timeseries(self):
         outputs = {}
         for region in self.Reserve_Regions:
@@ -61,16 +61,16 @@ class mplot(object):
             
             Reserve_Provision_Timeseries = Reserve_Provision.xs(region,level="Reserve_Region")          
             Reserve_Provision_Timeseries = df_process_gen_inputs(Reserve_Provision_Timeseries, self)
-            
+        
             if self.prop == "Peak Demand":
                 print("Plotting Peak Demand period")
-                
+
                 peak_reserve_t =  Reserve_Provision_Timeseries.sum(axis=1).idxmax()
                 start_date = peak_reserve_t - dt.timedelta(days=self.start)
                 end_date = peak_reserve_t + dt.timedelta(days=self.end)
                 Reserve_Provision_Timeseries = Reserve_Provision_Timeseries[start_date : end_date]
                 Peak_Reserve = Reserve_Provision_Timeseries.sum(axis=1)[peak_reserve_t]
-                
+             
             else:
                 print("Plotting graph for entire timeperiod")
                 
@@ -99,6 +99,7 @@ class mplot(object):
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
             
             locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
+            
             formatter = mdates.ConciseDateFormatter(locator)
             formatter.formats[2] = '%d\n %b'
             formatter.zero_formats[1] = '%b\n %Y'
@@ -106,6 +107,7 @@ class mplot(object):
             formatter.zero_formats[3] = '%H:%M\n %d-%b'
             formatter.offset_formats[3] = '%b %Y'
             formatter.show_offset = False
+            
             ax.xaxis.set_major_locator(locator)
             ax.xaxis.set_major_formatter(formatter)
             
@@ -128,7 +130,7 @@ class mplot(object):
             Reserve_Provision_Collection = {} 
              
             for scenario in self.Multi_Scenario:
-                 Reserve_Provision_Collection[scenario] = pd.read_hdf(self.PLEXOS_Scenarios + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "reserve_generators_Provision")
+                 Reserve_Provision_Collection[scenario] = pd.read_hdf(self.Marmot_Solutions_folder + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "reserve_generators_Provision")
                  
             
             xdimension=len(self.xlabels)
@@ -230,7 +232,7 @@ class mplot(object):
             Data_Table_Out=pd.DataFrame()
     
             for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
                 
             fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
     
@@ -288,7 +290,7 @@ class mplot(object):
             Reserve_Provision_Collection = {}
             Data_Table_Out=pd.DataFrame()
             for scenario in self.Multi_Scenario:
-                Reserve_Provision_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Provision")
+                Reserve_Provision_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Provision")
                 
             fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
     
@@ -344,7 +346,7 @@ class mplot(object):
             Reserve_Shortage_Collection = {}
             
             for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
             
             fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
             Data_Out = pd.DataFrame()
@@ -413,7 +415,7 @@ class mplot(object):
             Reserve_Shortage_Collection = {}
     
             for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
                 
             fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
             Data_Out=pd.DataFrame()
@@ -456,22 +458,23 @@ class mplot(object):
     
             outputs[region] = {'fig': fig2,'data_table':Data_Out}
        return outputs
+            
 #    def tot_reserve_shortage(self):
-#        
+#
 #        print("     "+ self.zone_input)
-#        
+#
 #        Reserve_Shortage_Collection = {}
 #
 #        for scenario in self.Multi_Scenario:
-#            Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
-#            
+#            Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
+#
 #        Reserve_Shortage_Timeseries_Out = pd.DataFrame()
-#        Total_Reserve_Shortage_Out = pd.DataFrame()    
-#            
+#        Total_Reserve_Shortage_Out = pd.DataFrame()
+#
 #        for scenario in self.Multi_Scenario:
-#            
+#
 #            print('Scenario = ' + scenario)
-#            
+#
 #            reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
 #            rto_Mapping=self.Region_Mapping[['rto',self.AGG_BY]].drop_duplicates().reset_index().drop('index',axis=1)
 #            reserve_short_timeseries = pd.merge(reserve_short_timeseries.reset_index(),rto_Mapping,left_on='Reserve_Region',right_on='rto')
@@ -481,26 +484,26 @@ class mplot(object):
 #            reserve_short_timeseries = reserve_short_timeseries.squeeze() #Convert to Series
 #            reserve_short_timeseries.rename(scenario, inplace=True)
 #            Reserve_Shortage_Timeseries_Out = pd.concat([Reserve_Shortage_Timeseries_Out, reserve_short_timeseries], axis=1, sort=False).fillna(0)
-#            
-#        Reserve_Shortage_Timeseries_Out.columns = Reserve_Shortage_Timeseries_Out.columns.str.replace('_',' ')     
-#    
+#
+#        Reserve_Shortage_Timeseries_Out.columns = Reserve_Shortage_Timeseries_Out.columns.str.replace('_',' ')
+#
 #        Total_Reserve_Shortage_Out = Reserve_Shortage_Timeseries_Out.sum(axis=0)
-#        
+#
 #        Total_Reserve_Shortage_Out.index = Total_Reserve_Shortage_Out.index.str.replace('_',' ')
 #        Total_Reserve_Shortage_Out.index = Total_Reserve_Shortage_Out.index.str.wrap(10, break_long_words=False)
-#        
+#
 #        # Data table of values to return to main program
 #        Data_Table_Out = Total_Reserve_Shortage_Out
-#        
+#
 #        # Converts color_list into an iterable list for use in a loop
 #        iter_colour = iter(self.color_list)
-#        
+#
 #        fig2, ax = plt.subplots(figsize=(9,6))
-#    
-#        bp = Total_Reserve_Shortage_Out.plot.bar(stacked=False, rot=0, edgecolor='black', 
-#                                                color=next(iter_colour), linewidth='0.1', 
+#
+#        bp = Total_Reserve_Shortage_Out.plot.bar(stacked=False, rot=0, edgecolor='black',
+#                                                color=next(iter_colour), linewidth='0.1',
 #                                                width=0.35, ax=ax)
-#       
+#
 #        ax.set_ylabel('Total Reserve Shortage (MWh)',  color='black', rotation='vertical')
 #        ax.spines['right'].set_visible(False)
 #        ax.spines['top'].set_visible(False)
@@ -513,11 +516,11 @@ class mplot(object):
 #           width, height = i.get_width(), i.get_height()
 #           if height<=1:
 #               continue
-#           x, y = i.get_xy() 
-#           ax.text(x+width/2, 
-#                y+(height+100)/2, 
-#                '{:,.0f}'.format(height), 
-#                horizontalalignment='center', 
+#           x, y = i.get_xy()
+#           ax.text(x+width/2,
+#                y+(height+100)/2,
+#                '{:,.0f}'.format(height),
+#                horizontalalignment='center',
 #                verticalalignment='center', fontsize=13)
 #
 #        return {'fig': fig2, 'data_table': Data_Table_Out}

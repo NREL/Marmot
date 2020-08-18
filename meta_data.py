@@ -261,6 +261,58 @@ class MetaData:
         except KeyError:
             print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n")
  
+
+    def region_exporting_lines(self):
+        try:
+            try:
+                region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))
+            except KeyError:
+                region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportingline']))
+            region_exportinglines = region_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            region_exportinglines = region_exportinglines.rename(columns={'parent':'region','child':'line_name'})
+            return region_exportinglines 
+        except KeyError:
+            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
+            
+    
+    def zone_exporting_lines(self):
+        try:
+            try:
+                zone_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_exportinglines']))
+            except KeyError:
+                zone_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_exportingline']))
+            zone_exportinglines = zone_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            zone_exportinglines = zone_exportinglines.rename(columns={'parent':'region','child':'line_name'})
+            return zone_exportinglines 
+        except KeyError:
+            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
+        
+    
+    def region_importing_lines(self):
+        try:
+            try:
+                region_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_importinglines']))
+            except KeyError:
+                region_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_importingline']))
+            region_importinglines = region_importinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            region_importinglines = region_importinglines.rename(columns={'parent':'region','child':'line_name'})
+            return region_importinglines 
+        except KeyError:
+            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
+            
+    
+    def zone_importing_lines(self):
+        try:
+            try:
+                zone_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_importinglines']))
+            except KeyError:
+                zone_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_importingline']))
+            zone_importinglines = zone_importinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            zone_importinglines = zone_importinglines.rename(columns={'parent':'region','child':'line_name'})
+            return zone_importinglines 
+        except KeyError:
+            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
+
 ###############################################################################
             
 ###############################################################################

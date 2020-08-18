@@ -9,16 +9,13 @@ This code creates unserved energy timeseries line plots and total bat plots and 
 
 
 import pandas as pd
-import datetime as dt
+#import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
 
-
-
 #===============================================================================
-
 
 class mplot(object):
     def __init__(self, argument_list):
@@ -36,7 +33,7 @@ class mplot(object):
         self.PLEXOS_color_dict = argument_list[10]
         self.Multi_Scenario = argument_list[11]
         self.Scenario_Diff = argument_list[12]
-        self.PLEXOS_Scenarios = argument_list[13]
+        self.Marmot_Solutions_folder = argument_list[13]
         self.ylabels = argument_list[14]
         self.xlabels = argument_list[15]
         self.color_list = argument_list[16]
@@ -50,9 +47,9 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy")
+                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy")
             else:
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios,scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy")
+                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy")
                 
         outputs = {}
         for zone_input in self.Zones:
@@ -129,9 +126,9 @@ class mplot(object):
         for scenario in self.Multi_Scenario:
             # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
             if self.AGG_BY == "zone":
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy")
+                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy")
             else:
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.PLEXOS_Scenarios, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy")
+                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy")
             
         # Unserved_Energy_Timeseries_Out = pd.DataFrame()
         # Total_Unserved_Energy_Out = pd.DataFrame()    
@@ -173,7 +170,7 @@ class mplot(object):
                 # Converts color_list into an iterable list for use in a loop
                 iter_colour = iter(self.color_list)
                 
-                fig2, ax = plt.subplots(figsize=(9,6))
+                fig2, ax = plt.subplots(figsize=(6,4))
             
                 Total_Unserved_Energy_Out.plot.bar(stacked=False, rot=0, edgecolor='black', 
                                                         color=next(iter_colour), linewidth='0.1', 

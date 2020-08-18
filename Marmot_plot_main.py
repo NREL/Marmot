@@ -11,15 +11,12 @@ import os
 import pathlib
 import matplotlib as mpl
 import sys
+sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/plottingmodules")
 import importlib 
-#changes working directory to location of this python file
-os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
-
 from meta_data import MetaData
 
-# import capacity_out
-# import thermal_cap_reserve
-# import constraints
+#changes working directory to location of this python file
+os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
 
 class plottypes:
     
@@ -203,6 +200,7 @@ regions = meta.regions()
 
 # Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
 # Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
+
 if AGG_BY=="zone": 
     Zones = zones['name'].unique()
     # print(zones)
@@ -242,7 +240,7 @@ else:
                 print("metadata does not contain region: " + region + ", SKIPPING REGION")
         Zones = zsub
 
-# Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.    
+# Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
 
 Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
 
@@ -304,7 +302,12 @@ for index, row in Marmot_plot_select.iterrows():
                     Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
                 except AttributeError:
                     Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
-                    
+            
+            if not facet:
+                if Figure_Out[zone_input]['data_table'].empty:
+                    print(row["Figure Output Name"] + 'does not return a data table')
+                    continue
+            
             if not facet:
                 Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
             else:
@@ -321,6 +324,5 @@ for index, row in Marmot_plot_select.iterrows():
 
 ###############################################################################
         mpl.pyplot.close('all')
-
  #%%
 #subprocess.call("/usr/bin/Rscript --vanilla /Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/Marmot/run_html_output.R", shell=True)
