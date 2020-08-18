@@ -44,7 +44,7 @@ class mplot(object):
         self.start_date = argument_list[4]
         self.end_date = argument_list[5]
         self.hdf_out_folder = argument_list[6]
-        self.zone_input =argument_list[7]
+        self.Zones =argument_list[7]
         self.AGG_BY = argument_list[8]
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]
@@ -69,7 +69,9 @@ class mplot(object):
             ydimension=len(self.ylabels)
             if ydimension == 0:
                 ydimension = 1
-    
+            
+            Data_Table_Out = pd.DataFrame()
+            
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharey=True)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             if len(self.Multi_Scenario) > 1:
@@ -82,20 +84,33 @@ class mplot(object):
     
                 avail_cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Available_Capacity")
                 Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
-    
-                avail_cap = avail_cap.xs(zone_input,level = self.AGG_BY)
+                
+                # Check if zone is in avail_cap
+                try:
+                    avail_cap = avail_cap.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                    print("No installed capacity in : "+zone_input)
+                    break
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 avail_cap = df_process_gen_inputs(avail_cap,self)
                 Gen = df_process_gen_inputs(Gen,self)
                 Gen = Gen.loc[:, (Gen != 0).any(axis=0)]
     
                 thermal_reserve = avail_cap - Gen
-    
-                if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and thermal_reserve.index[0] > dt.datetime(2024,2,28,0,0):
-                    thermal_reserve.index = thermal_reserve.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
+                
+                # Check if thermal_reserve contains data, if not skips
+                if thermal_reserve.empty == True:
+                    df = pd.DataFrame()
+                    outputs[zone_input] = df
+                    continue   
+                
+                # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and thermal_reserve.index[0] > dt.datetime(2024,2,28,0,0):
+                #     thermal_reserve.index = thermal_reserve.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
     
                 Data_Table_Out = thermal_reserve
-    
+                
+                
+                
                 locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
                 formatter = mdates.ConciseDateFormatter(locator)
                 formatter.formats[2] = '%d\n %b'
@@ -162,6 +177,12 @@ class mplot(object):
             plt.ylabel('Thermal capacity reserve (MW)',  color='black', rotation='vertical', labelpad=60)
     
             #fig1.savefig('/home/mschwarz/PLEXOS results analysis/test/SPP_thermal_cap_reserves_test', dpi=600, bbox_inches='tight') #Test
-    
+            
+            # If Data_Table_Out is empty, does not return data or figure
+            if Data_Table_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
+            
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs

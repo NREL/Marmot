@@ -20,7 +20,7 @@ class mplot(object):
         self.start_date = argument_list[4]
         self.end_date = argument_list[5]
         self.hdf_out_folder = argument_list[6]
-        self.zone_input =argument_list[7]
+        self.Zones =argument_list[7]
         self.AGG_BY = argument_list[8]
         self.ordered_gen = argument_list[9]
         self.PLEXOS_color_dict = argument_list[10]

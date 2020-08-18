@@ -87,8 +87,8 @@ class mplot(object):
                 dictionary = {column : self.color_list[idx]}
                 scenario_color_dict.update(dictionary)
                 
-            if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Net_Export_all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
-                Net_Export_all_scenarios.index = Net_Export_all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
+            # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Net_Export_all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
+            #     Net_Export_all_scenarios.index = Net_Export_all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
                 
             fig1, ax = plt.subplots(figsize=(9,6))
             for idx,column in enumerate(Net_Export_all_scenarios.columns):

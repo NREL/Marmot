@@ -196,6 +196,7 @@ class mplot(object):
             all_prices=[]
             for scenario in self.Multi_Scenario:
                 price = self._process_data(Price_Collection,scenario,zone_input)
+                price = price.groupby(["timestamp"]).sum()
                 all_prices.append(price)
             
             timeseries = pd.concat(all_prices, axis=1)
@@ -219,6 +220,8 @@ class mplot(object):
             
             #setup plot
             fig3, axs = self._setup_plot(xdimension,ydimension)
+            
+           
             
             n=0 #Counter for scenario subplots
             for column in timeseries:
@@ -268,6 +271,7 @@ class mplot(object):
             all_prices=[]
             for scenario in self.Multi_Scenario:
                 price = self._process_data(Price_Collection,scenario,zone_input)
+                price = price.groupby(["timestamp"]).sum()
                 all_prices.append(price)
                 
             timeseries = pd.concat(all_prices, axis=1)
@@ -280,7 +284,8 @@ class mplot(object):
             color_dict = dict(zip(timeseries.columns,self.color_list))
             
             for column in timeseries:
-                self._create_plot(axs,n,timeseries,column,color_dict)
+                axs[n].plot(timeseries[column], linewidth=1, color=color_dict[column],label=column)
+                # self._create_plot(axs,n,timeseries,column,color_dict)
                 axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
                 self._set_plot_timeseries_format(axs,n)
                 
@@ -322,8 +327,7 @@ class mplot(object):
         return fig,axs
     
     def _create_plot(self,axs,n,data,column,color_dict):
-        axs[n].plot(data[column], linewidth=1, color=color_dict[column], 
-                    label=column)
+        axs[n].plot(data[column], linewidth=1, color=color_dict[column],label=column)
         axs[n].spines['right'].set_visible(False)
         axs[n].spines['top'].set_visible(False)   
         # This checks for a nan in string. If no limit selected, do nothing

@@ -70,7 +70,12 @@ class mplot(object):
                 Total_Systems_Cost = pd.DataFrame()
                 
                 Total_Installed_Capacity = Installed_Capacity_Collection.get(scenario)
-                Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
+                #Check if zone has installed generation, if not skips 
+                try:
+                    Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    print("No installed capacity in : "+zone_input)
+                    continue 
                 Total_Installed_Capacity = df_process_gen_inputs(Total_Installed_Capacity, self)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity = Total_Installed_Capacity.iloc[0]
@@ -111,6 +116,12 @@ class mplot(object):
                     
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000
             Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
+            
+            #Checks if Net_Revenue contains data, if not skips zone and does not return a plot
+            if Net_Revenue.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
             
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
@@ -187,7 +198,6 @@ class mplot(object):
                     Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     print("No Generators found for : "+zone_input)
-                    outputs[zone_input] = pd.DataFrame()
                     continue
                 
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
@@ -210,6 +220,12 @@ class mplot(object):
     
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')  
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(5, break_long_words=False)
+            
+             #Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
+            if Total_Systems_Cost_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
             
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
@@ -294,7 +310,13 @@ class mplot(object):
                 print("Scenario = " + scenario)
     
                 Fuel_Cost = Fuel_Cost_Collection.get(scenario)
-                Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
+                # Check if Fuel_cost contains zone_input, skips if not 
+                try:
+                    Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    print("No Generators found for : "+zone_input)
+                    continue
+
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
     
@@ -328,7 +350,13 @@ class mplot(object):
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(5, break_long_words=False)
             # Deletes columns that are all 0
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
-    
+            
+            # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
+            if Detailed_Gen_Cost_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
+            
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out
     
@@ -379,7 +407,6 @@ class mplot(object):
                 if k>=len(cost_totals):
                     break
     
-    
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
     
@@ -387,22 +414,25 @@ class mplot(object):
         # Create Dictionary to hold Datframes for each scenario
         Stacked_Gen_Collection = {}
 
-
         for scenario in self.Multi_Scenario:
             Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Total_Generation_Cost")
-            # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
 
         outputs = {}
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
-            print("Zone = " + self.zone_input)
+            print("Zone = " + zone_input)
     
             for scenario in self.Multi_Scenario:
     
                 print("Scenario = " + scenario)
     
                 Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
-                Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                # Check if Total_Gen_Stack contains zone_input, skips if not 
+                try:
+                    Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    print("No Generators found for : "+zone_input)
+                    continue
                 Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
     
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -412,16 +442,22 @@ class mplot(object):
             Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
-    
+            
+            # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
+            if Total_Generation_Stack_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue   
+            
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
     
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
     
-            fig1, ax = plt.subplots(figsize=(9,6))
+            fig1, ax = plt.subplots(figsize=(6,4))
     
-            bp = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0,
+            bp = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
     
     
@@ -436,8 +472,8 @@ class mplot(object):
             ax.margins(x=0.01)
     
             handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='upper center',bbox_to_anchor=(0.5,-0.15),
-                         facecolor='inherit', frameon=True, ncol=2)
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0), 
+                          facecolor='inherit', frameon=True)  
     
     #        handles, labels = fig1.get_legend_handles_labels()
     
@@ -482,7 +518,7 @@ class mplot(object):
                     Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     print("No Generators found for : "+ zone_input)
-                    return pd.DataFrame()
+                    continue
     
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
@@ -501,16 +537,27 @@ class mplot(object):
                 Total_Systems_Cost_Out = pd.concat([Total_Systems_Cost_Out, Total_Systems_Cost], axis=0, sort=False)
     
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
-            Total_Systems_Cost_Out=Total_Systems_Cost_Out-Total_Systems_Cost_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            #Ensures region has generation, else skips
+            try:
+                Total_Systems_Cost_Out = Total_Systems_Cost_Out-Total_Systems_Cost_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            except KeyError:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue     
             Total_Systems_Cost_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
     
     #        Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
     #        Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(10, break_long_words=False)
-    
+            
+            # Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
+            if Total_Systems_Cost_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue   
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
     
-            fig2, ax = plt.subplots(figsize=(9,6))
+            fig2, ax = plt.subplots(figsize=(6,4))
     
             sb = Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
@@ -549,36 +596,47 @@ class mplot(object):
             Total_Generation_Stack_Out = pd.DataFrame()
             print("Zone = " + zone_input)
     
-    
             for scenario in self.Multi_Scenario:
     
                 print("Scenario = " + scenario)
     
                 Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
-                Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                
+                try:
+                    Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    print("No Generators found for : "+zone_input)
+                    continue
                 Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
-    
-
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
     
-    
-    
             Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            #Ensures region has generation, else skips
+            try:
+                Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            except KeyError:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue     
             Total_Generation_Stack_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
     
-    
+            # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
+            if Total_Generation_Stack_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue   
+            
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
     
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
     
-            fig1, ax = plt.subplots(figsize=(9,6))
+            fig1, ax = plt.subplots(figsize=(6,4))
     
             bp = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
@@ -653,7 +711,8 @@ class mplot(object):
                 try:
                     Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    return pd.DataFrame()
+                    print("No Generators found for : "+zone_input)
+                    continue
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
     
@@ -681,18 +740,30 @@ class mplot(object):
                 Detailed_Gen_Cost_Out = pd.concat([Detailed_Gen_Cost_Out, Detailed_Gen_Cost], axis=1, sort=False)
     
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
-            Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out-Detailed_Gen_Cost_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            #Ensures region has generation, else skips
+            try:
+                Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out-Detailed_Gen_Cost_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            except KeyError:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue     
             Detailed_Gen_Cost_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
     
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(10, break_long_words=False)
             # Deletes columns that are all 0
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
-    
+            
+            # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
+            if Detailed_Gen_Cost_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue   
+            
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out
     
-            fig3, ax = plt.subplots(figsize=(9,6))
+            fig3, ax = plt.subplots(figsize=(6,4))
     
             sb = Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)

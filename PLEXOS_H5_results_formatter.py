@@ -586,7 +586,7 @@ for Scenario_name in Scenario_List:
 
 # Code that can be used to test PLEXOS_H5_results_formatter
 
-    test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Curtailment')
     # test = test.xs("Xcel_Energy_EI",level='zone')
     # test = test.reset_index(['timestamp','node'])
     # test = test.groupby(["timestamp", "node"], as_index=False).sum()

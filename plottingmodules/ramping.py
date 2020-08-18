@@ -47,24 +47,28 @@ class mplot(object):
                 print("Scenario = " + str(scenario))
                 
                 Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
-                Gen = Gen.xs(zone_input,level = self.AGG_BY)
-          
+                
+                try:
+                    Gen = Gen.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                    print("No installed capacity in : "+zone_input)
+                    break
+                
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
-                Gen = Gen.drop(columns = ['region'])
+                # Gen = Gen.drop(columns = ['region'])
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.
                 
                 Cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
-                Cap = Cap.drop(columns = ['timestamp','region','tech'])
+                Cap = Cap.drop(columns = ['timestamp','tech'])
                 Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.index = Gen.timestamp
                 Gen = Gen.drop(columns = ['timestamp'])
-                
                 if self.prop == 'Date Range':
                     print("Plotting specific date range:")
                     print(str(self.start_date) + '  to  ' + str(self.end_date))
@@ -96,7 +100,8 @@ class mplot(object):
     
                 cap_started_all_scenarios = cap_started_all_scenarios.append(Cap_started)
             
-                    # import time
+                    
+                # import time
                     # start = time.time()
                     # for gen in gen_names:
                     #     sgt = stt.loc[stt['gen_name'] == gen]
@@ -119,7 +124,11 @@ class mplot(object):
                 # end = time.time()
                 # elapsed = end - start
                 # print('Method 2 (first making a data frame with only 0s, then checking if timestamps > 1 hour) took ' + str(elapsed) + ' seconds')
-                        
+            
+            if cap_started_all_scenarios.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue           
                     
             fig1 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0, 
                                  color = self.color_list,edgecolor='black', linewidth='0.1')

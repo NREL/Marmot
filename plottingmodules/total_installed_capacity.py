@@ -58,8 +58,8 @@ class mplot(object):
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     print("No installed capacity in : "+zone_input)
-                    outputs[zone_input] =  pd.DataFrame()
-                    continue
+                    break
+                
                 Total_Installed_Capacity = df_process_gen_inputs(Total_Installed_Capacity, self)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
@@ -68,6 +68,12 @@ class mplot(object):
     
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000 #Convert to GW
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
+            
+            # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot 
+            if Total_Installed_Capacity_Out.empty:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
             
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Data_Table_Out, Total_Installed_Capacity_Out],  axis=1, sort=False)

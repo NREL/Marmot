@@ -103,7 +103,13 @@ class mplot(object):
                 print("Scenario = " + scenario)
                 
                 Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
-                Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                
+                #Check if zone has generation, if not skips 
+                try:
+                    Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    print("No installed capacity in : "+zone_input)
+                    break
                 Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
                 
                 # Calculates interval step to correct for MWh of generation
@@ -182,6 +188,11 @@ class mplot(object):
             Pump_Load_Out = Pump_Load_Out.T/1000 #Convert to GWh
             Total_Demand_Out = Total_Demand_Out.T/1000 #Convert to GWh
             Unserved_Energy_Out = Unserved_Energy_Out.T/1000
+            
+            if Total_Generation_Stack_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
             
             fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0, 
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
@@ -267,7 +278,14 @@ class mplot(object):
                 print("Scenario = " + scenario)
                 
                 Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
-                Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                
+                #Check if zone has generation, if not skips and breaks out of Multi_Scenario loop
+                try:
+                    Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    print("No installed capacity in : "+zone_input)
+                    break
+                
                 Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
                 
                 # Calculates interval step to correct for MWh of generation
@@ -290,12 +308,17 @@ class mplot(object):
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
-                
     
             Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to GWh
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            #Ensures region has generation, else skips
+            try:
+                Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            except KeyError:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue     
             Total_Generation_Stack_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
@@ -303,8 +326,13 @@ class mplot(object):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
             
-            fig1, ax = plt.subplots(figsize=(9,6))
-    
+            if Total_Generation_Stack_Out.empty == True:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
+            
+            fig1, ax = plt.subplots(figsize=(6,4))
+
             
             Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0, 
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)

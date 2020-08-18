@@ -139,6 +139,11 @@ class mplot(object):
     
             CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
             
+            # If CF_all_scenarios df is empty returns a empty dataframe and does not return plot 
+            if CF_all_scenarios.empty:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
                                
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
@@ -218,7 +223,11 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Generators',  color='black', rotation='vertical', labelpad=60)
                 
-    
+            # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot 
+            if CF_all_scenarios.empty:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
                               
             outputs[zone_input] = {'fig': fig2, 'data_table': CF_all_scenarios}
         return outputs
@@ -244,7 +253,11 @@ class mplot(object):
                 
                 print("Scenario = " + str(scenario))
                 Gen = Gen_Collection.get(scenario)
-                Gen = Gen.xs(zone_input,level = self.AGG_BY)
+                try:
+                    Gen = Gen.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                    print("No generation in "+zone_input+".")
+                    break
                 Gen = df_process_gen_inputs(Gen,self)
              
                 Ava = Ava_Collection.get(scenario)
@@ -261,12 +274,15 @@ class mplot(object):
                 
                 Gen=pd.merge(Gen,Ava,on=['tech','timestamp'])
                 Gen['Type CF']=Gen['0_x']/Gen['0_y'] #Calculation of fleet wide capacity factor by hour and type
-                
                 n=0 #Counter for type subplots
         
                 for i in self.thermal_gen_cat: #Gen.reset_index()['tech'].unique():
-                    duration_curve = Gen.xs(i,level="tech").sort_values(by='Type CF',ascending=False).reset_index()
-                            
+                    try:
+                        duration_curve = Gen.xs(i,level="tech").sort_values(by='Type CF',ascending=False).reset_index()
+                    except KeyError:
+                        print("{} not in {}, skipping technology".format(i, zone_input))
+                        continue
+                    
                     ax3[n].plot(duration_curve['Type CF'],label=scenario)
                     ax3[n].legend()
                     ax3[n].set_ylabel('CF \n'+i,  color='black', rotation='vertical')
@@ -289,7 +305,12 @@ class mplot(object):
     
             CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
             
-                               
+            # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot 
+            if CF_all_scenarios.empty:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
+            
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}             
         return outputs
     
@@ -355,9 +376,14 @@ class mplot(object):
                 
                 del Gen,Total_Gen 
                 #end scenario loop
-    
+                
             GW_all_scenarios.index = GW_all_scenarios.index.str.wrap(10, break_long_words = False)
             
+            # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot 
+            if GW_all_scenarios.empty:
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue        
                                
             outputs[zone_input] = {'fig': fig3, 'data_table': GW_all_scenarios}
         return outputs
