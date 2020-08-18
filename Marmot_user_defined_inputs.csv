@@ -8,8 +8,8 @@ Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 reserve_region_type.csv_name,string,required(default),reserve_region_type.csv
 Main_scenario_plot,string,required,Scenario1
-Multi_scenario_plot,List,required,"Scenario1, Scenraio2"
-Scenario_Diff_plot,List [Max 2],optional,"Scenario1, Scenraio2"
+Multi_scenario_plot,List,required,"Scenario1, Scenario2"
+Scenario_Diff_plot,List [Max 2],optional,"Scenario1, Scenario2"
 AGG_BY,string,required,zone
 zone_region_sublist,List,optional,
 Facet_ylabels,List,optional,Scenario1

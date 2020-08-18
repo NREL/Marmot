@@ -22,7 +22,7 @@ import pathlib
 import time
 from meta_data import MetaData
 
-sys.path.append('../../h5plexos')
+sys.path.append('../h5plexos')
 from h5plexos.query import PLEXOSSolution
 
 try:
@@ -154,7 +154,7 @@ class Process:
     def df_process_generator(self):
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['tech','gen_name'], level=['category','name'], inplace=True)
-        
+
         if self.region_generator_category.empty == False:
             region_gen_idx = pd.CategoricalIndex(self.region_generator_category.index.get_level_values(0))
             region_gen_idx = region_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
@@ -164,7 +164,7 @@ class Process:
                                 names= df.index.names + region_gen_idx.names)
         else:
             idx_region = df.index
-        
+
         if self.zone_generator_category.empty == False:
             zone_gen_idx = pd.CategoricalIndex(self.zone_generator_category.index.get_level_values(0))
             zone_gen_idx = zone_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
@@ -206,7 +206,7 @@ class Process:
             print(missing_gen_cat)
             print("")
         return df
-    
+
     # Function for formating data which comes from the PLEXOS Region Category
     def df_process_region(self):
         df = self.df.droplevel(level=["band", "property", "category"])
@@ -388,7 +388,7 @@ class Process:
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
-    
+
 #===================================================================================
 # Main
 #===================================================================================
