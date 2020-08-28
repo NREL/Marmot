@@ -20,10 +20,10 @@ os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you h
 
 class plottypes:
     
-    def __init__(self, figure_type, figure_output_name, argument_list,font_defaults):
+    def __init__(self, figure_type, figure_output_name, argument_dict, font_defaults):
         self.figure_type = figure_type
         self.figure_output_name = figure_output_name
-        self.argument_list = argument_list
+        self.argument_dict = argument_dict
         self.font_defaults = font_defaults
         
     def runmplot(self):
@@ -34,7 +34,7 @@ class plottypes:
         mpl.rc('font', family=self.font_defaults['font_family'])
         
         plot = importlib.import_module(self.figure_type)
-        fig = plot.mplot(self.argument_list)
+        fig = plot.mplot(self.argument_dict)
         
         process_attr = getattr(fig, self.figure_output_name)
         
@@ -266,10 +266,19 @@ for index, row in Marmot_plot_select.iterrows():
     if 'Facet' in row["Figure Output Name"]:
         facet = True
     
-    argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
-        hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
-        Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-        re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet]
+    # dictionary of arguments passed to plotting modules; key_list names match the property names in each module 
+    # while arguments contains the property value
+    key_list = ["prop", "start", "end", "timezone", "start_date", "end_date", 
+                "hdf_out_folder", "Zones", "AGG_BY", "ordered_gen", "PLEXOS_color_dict", "Multi_Scenario", 
+                "Scenario_Diff", "Marmot_Solutions_folder", "ylabels", "xlabels", "color_list", "market_style", "gen_names_dict", "pv_gen_cat", 
+                "re_gen_cat", "vre_gen_cat", "Reserve_Regions", "thermal_gen_cat", "Region_mapping", "figure_folder", "meta", "facet"]
+                    
+    argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
+                     hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
+                     Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
+                     re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet]
+    
+    argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))} 
     
 ##############################################################################
 
@@ -279,7 +288,7 @@ for index, row in Marmot_plot_select.iterrows():
         os.makedirs(figures)
     except FileExistsError:
         pass
-    fig = plottypes(module, method, argument_list,font_defaults)
+    fig = plottypes(module, method, argument_dict, font_defaults)
     Figure_Out = fig.runmplot()
      
     if 'Reserve' in row['Figure Type']:

@@ -19,36 +19,19 @@ import matplotlib.ticker as mtick
 #===============================================================================
 
 class mplot(object):
-    def __init__(self,argument_list):
 
-        self.prop = argument_list[0]
-        self.start = argument_list[1]
-        self.end = argument_list[2]
-        self.timezone = argument_list[3]
-        self.start_date = argument_list[4]
-        self.end_date = argument_list[5]
-        self.hdf_out_folder = argument_list[6]
-        self.Zones = argument_list[7]
-        self.AGG_BY = argument_list[8]
-        self.ordered_gen = argument_list[9]
-        self.PLEXOS_color_dict = argument_list[10]
-        self.Multi_Scenario = argument_list[11]
-        self.Scenario_Diff = argument_list[12]
-        self.Marmot_Solutions_folder = argument_list[13]
-        self.ylabels = argument_list[14]
-        self.xlabels = argument_list[15]
-        self.color_list = argument_list[16]
-        self.gen_names_dict = argument_list[18]
-        self.re_gen_cat = argument_list[20]
-        self.Region_Mapping = argument_list[24]
-        self.meta = argument_list[26]
-        
+    def __init__(self, argument_dict):
+        # iterate over items in argument_dict and set as properties of class
+        # see key_list in Marmot_plot_main for list of properties
+        for prop in argument_dict:
+            self.__setattr__(prop, argument_dict[prop])
+
         self.region_export_lines = self.meta.region_exporting_lines()
         self.region_import_lines = self.meta.region_importing_lines()
-        
+
         self.zone_export_lines = self.meta.zone_exporting_lines()
         self.zone_import_lines = self.meta.zone_importing_lines()
-        
+
         self.lines_interregional = self.meta.regional_line_relations()
         self.lines_intraregional = self.meta.region_lines()
         self.lines = self.meta.lines()
@@ -58,42 +41,42 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
             print(self.AGG_BY + " = " + zone_input)
-            
+
             Net_Export_all_scenarios = pd.DataFrame()
-    
+
             for scenario in self.Multi_Scenario:
-                
+
                 print("Scenario = " + str(scenario))
                 Net_Export_read = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,scenario, 'Processed_HDF5_folder', scenario + '_formatted.h5'),self.AGG_BY + '_Net_Interchange')
                 Net_Export = Net_Export_read.xs(zone_input, level = self.AGG_BY)
                 Net_Export = Net_Export.reset_index()
                 Net_Export = Net_Export.groupby(["timestamp"]).sum()
                 Net_Export.columns = [scenario]
-                
+
                 if self.prop == 'Date Range':
                     print("Plotting specific date range:")
                     print(str(self.start_date) + '  to  ' + str(self.end_date))
-                    
+
                     Net_Export = Net_Export[self.start_date : self.end_date]
-    
-                Net_Export_all_scenarios = pd.concat([Net_Export_all_scenarios,Net_Export], axis = 1) 
-                
+
+                Net_Export_all_scenarios = pd.concat([Net_Export_all_scenarios,Net_Export], axis = 1)
+
             # Data table of values to return to main program
             Data_Table_Out = Net_Export_all_scenarios
-            
+
             #Make scenario/color dictionary.
             scenario_color_dict = {}
             for idx,column in enumerate(Net_Export_all_scenarios.columns):
                 dictionary = {column : self.color_list[idx]}
                 scenario_color_dict.update(dictionary)
-                
+
             # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Net_Export_all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
             #     Net_Export_all_scenarios.index = Net_Export_all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
-                
+
             fig1, ax = plt.subplots(figsize=(9,6))
             for idx,column in enumerate(Net_Export_all_scenarios.columns):
                 ax.plot(Net_Export_all_scenarios.index.values,Net_Export_all_scenarios[column], linewidth=2, color = scenario_color_dict.get(column,'#333333'),label=column)
-    
+
             ax.set_ylabel('Net exports (MW)',  color='black', rotation='vertical')
             ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
             ax.spines['right'].set_visible(False)
@@ -102,7 +85,7 @@ class mplot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             ax.margins(x=0.01)
-            
+
             locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
             formatter = mdates.ConciseDateFormatter(locator)
             formatter.formats[2] = '%d\n %b'
@@ -113,39 +96,39 @@ class mplot(object):
             formatter.show_offset = False
             ax.xaxis.set_major_locator(locator)
             ax.xaxis.set_major_formatter(formatter)
-            
+
             handles, labels = ax.get_legend_handles_labels()
-            
+
             #Legend 1
-            leg1 = ax.legend(reversed(handles), reversed(labels), loc='best',facecolor='inherit', frameon=True)   
+            leg1 = ax.legend(reversed(handles), reversed(labels), loc='best',facecolor='inherit', frameon=True)
             # Manually add the first legend back
             ax.add_artist(leg1)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
-        
-    
-    def line_util(self):          #Duration curve of individual line utilization for all hours      
-        Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario 
+
+
+    def line_util(self):          #Duration curve of individual line utilization for all hours
+        Flow_Collection = {}        # Create Dictionary to hold Datframes for each scenario
         Limit_Collection = {}
-        
+
         for scenario in self.Multi_Scenario:
             Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
             Limit_Collection[scenario]= pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Import_Limit")
-        
+
         outputs = {}
-        for zone_input in self.Zones:    
+        for zone_input in self.Zones:
             print("For all lines touching Zone = "+zone_input)
-            
+
             fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
-         
+
             n=0 #Counter for scenario subplots
-            
+
             Data_Out=pd.DataFrame()
-                    
+
             for scenario in self.Multi_Scenario:
-                
+
                 print("Scenario = " + str(scenario))
-                
+
                 try:
                     lines_interregional = self.lines_interregional.set_index([self.AGG_BY])
                     lines_intraregional = self.lines_intraregional.set_index([self.AGG_BY])
@@ -153,35 +136,35 @@ class mplot(object):
                     print("Column to Aggregate by is missing")
                     outputs[zone_input] = pd.DataFrame()
                     continue
-                
+
                 try:
-                    lines_interregional=lines_interregional.xs(zone_input)            
+                    lines_interregional=lines_interregional.xs(zone_input)
                 except KeyError:
                     lines_interregional=pd.DataFrame()
                     print("No interregional lines touching "+zone_input+".")
                 try:
-                    lines_intraregional=lines_intraregional.xs(zone_input)            
+                    lines_intraregional=lines_intraregional.xs(zone_input)
                 except KeyError:
                     lines_intraregional=pd.DataFrame()
                     print("No intraregional lines in "+zone_input+".")
-                
+
                 zone_lines=pd.concat([lines_interregional,lines_intraregional],axis=0,sort=False)
                 zone_lines=zone_lines['line_name'].unique()
-                
+
                 Flow = Flow_Collection.get(scenario).reset_index('line_name')
                 Flow = Flow[Flow['line_name'].isin(zone_lines)]                 #Limit to only lines touching to this zone
-                Flow.set_index(['line_name'],inplace=True,append=True)            
-                
+                Flow.set_index(['line_name'],inplace=True,append=True)
+
                 Limits= Limit_Collection.get(scenario).droplevel('timestamp')
                 Limits.mask(Limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
-                
+
                 if (self.prop!=self.prop)==False: # This checks for a nan in string. If no scenario selected, do nothing.
                     print("Line category = "+str(self.prop))
                     line_relations = self.line_relations.rename(columns={"name":"line_name"}).set_index(["line_name"])
                     Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
-                    Flow=Flow[Flow["category"]==self.prop] 
-                    Flow=Flow.drop('category',axis=1) 
-                    
+                    Flow=Flow[Flow["category"]==self.prop]
+                    Flow=Flow.drop('category',axis=1)
+
     #            AbsMaxFlow = Flow.abs().groupby(["line_name"]).max()
     #            AbsMaxFlow = pd.merge(AbsMaxFlow[0],Limits[0].abs(),left_index=True,right_index=True,how='left')
     #            AbsMaxFlow['Limit']=AbsMaxFlow[['0_x','0_y']]
@@ -190,11 +173,11 @@ class mplot(object):
                 Flow['Util']=Flow['0_x'].abs()/Flow['0_y']
     #            Flow[Flow['Util'].isna()==True]['Util']=1.0
                 Flow.mask(Flow['Util']>1.0,other=1.0,inplace=True) #If greater than 1 because exceeds flow limit, report as 1
-                Annual_Util=Flow['Util'].groupby(["line_name"]).mean()      
-                
+                Annual_Util=Flow['Util'].groupby(["line_name"]).mean()
+
                 for line in Flow.index.get_level_values(level='line_name').unique() :
                     duration_curve = Flow.xs(line,level="line_name").sort_values(by='Util',ascending=False).reset_index()
-                            
+
                     if len(self.Multi_Scenario)>1:
                         ax3[n].plot(duration_curve['Util'])
                         if (self.prop!=self.prop)==False: # This checks if a category was passed
@@ -203,9 +186,9 @@ class mplot(object):
                                 ax3[n].set_ylabel(scenario+' Line Utilization',  color='black', rotation='vertical')
                         ax3[n].set_xlabel('Intervals',  color='black', rotation='horizontal')
                         ax3[n].spines['right'].set_visible(False)
-                        ax3[n].spines['top'].set_visible(False)                         
-                        plt.ylim((0,1.1))           
-    
+                        ax3[n].spines['top'].set_visible(False)
+                        plt.ylim((0,1.1))
+
                     else:
                         ax3.plot(duration_curve['Util'])
                         if (self.prop!=self.prop)==False: # This checks if a category was passed
@@ -214,42 +197,42 @@ class mplot(object):
                                 ax3.set_ylabel(scenario+' Line Utilization',  color='black', rotation='vertical')
                         ax3.set_xlabel('Intervals',  color='black', rotation='horizontal')
                         ax3.spines['right'].set_visible(False)
-                        ax3.spines['top'].set_visible(False)   
-                        plt.ylim((0,1.1))           
-                    
+                        ax3.spines['top'].set_visible(False)
+                        plt.ylim((0,1.1))
+
                     del duration_curve
-                
+
                 Annual_Util=Annual_Util.groupby("line_name").mean()
                 Annual_Util.rename({0:scenario},inplace=True)
                 Data_Out=pd.concat([Data_Out,Annual_Util],axis=1,sort=False)
-                
+
                 del Flow, Annual_Util
-                
+
                 n=n+1
             #end scenario loop
-                                  
+
             outputs[zone_input] = {'fig': fig3,'data_table':Data_Out}
             plt.close(fig3)
         return outputs
-    
-    
+
+
     def line_hist(self):                #Histograms of individual line utilization factor for entire year
-        Flow_Collection = {}            # Create Dictionary to hold Datframes for each scenario 
+        Flow_Collection = {}            # Create Dictionary to hold Datframes for each scenario
         Limit_Collection = {}
         for scenario in self.Multi_Scenario:
             Flow_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
             Limit_Collection[scenario]= pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Import_Limit")
-        
+
         outputs = {}
         for zone_input in self.Zones:
             print("For all lines touching Zone = "+zone_input)
             fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(9,6)) # Set up subplots for all scenarios
-         
+
             n=0 #Counter for scenario subplots
-                     
-            Data_Out=pd.DataFrame()             
+
+            Data_Out=pd.DataFrame()
             for scenario in self.Multi_Scenario:
-                        
+
                 print("Scenario = " + str(scenario))
                 try:
                     lines_interregional = self.lines_interregional.set_index([self.AGG_BY])
@@ -259,71 +242,71 @@ class mplot(object):
                     outputs[zone_input] = pd.DataFrame()
                     continue
                 try:
-                    lines_interregional=lines_interregional.xs(zone_input)            
+                    lines_interregional=lines_interregional.xs(zone_input)
                 except KeyError:
                     lines_interregional=pd.DataFrame()
                     print("No interregional lines touching "+zone_input+".")
                 try:
-                    lines_intraregional=lines_intraregional.xs(zone_input)            
+                    lines_intraregional=lines_intraregional.xs(zone_input)
                 except KeyError:
                     lines_intraregional=pd.DataFrame()
                     print("No intraregional lines in "+zone_input+".")
-                
+
                 zone_lines=pd.concat([lines_interregional,lines_intraregional],axis=0,sort=False)
                 zone_lines=zone_lines['line_name'].unique()
-                
+
                 Flow = Flow_Collection.get(scenario).reset_index('line_name')
                 Flow = Flow[Flow['line_name'].isin(zone_lines)] #Limit to only lines touching to this zone
                 Flow.set_index(['line_name'],inplace=True,append=True)
-                
+
                 Limits= Limit_Collection.get(scenario).droplevel('timestamp')
                 Limits.mask(Limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
-    
+
                 if (self.prop!=self.prop)==False: # This checks for a nan in string. If no category selected, do nothing.
                     print("Line category = "+str(self.prop))
                     line_relations = self.line_relations.rename(columns={"name":"line_name"}).set_index(["line_name"])
                     Flow=pd.merge(Flow,line_relations,left_index=True,right_index=True)
-                    Flow=Flow[Flow["category"]==self.prop] 
+                    Flow=Flow[Flow["category"]==self.prop]
                     Flow=Flow.drop('category',axis=1)
-                
+
                 Flow = pd.merge(Flow,Limits[0].abs(),left_index=True, right_index=True,how='left')
                 del Limits
                 Flow['Util']=Flow['0_x'].abs()/Flow['0_y']
     #            Flow[Flow['Util'].isna()==True]['Util']=1.0
                 Flow.mask(Flow['Util']>1.0,other=1.0,inplace=True) #If greater than 1 because exceeds flow limit, report as 1
-                Annual_Util=Flow['Util'].groupby(["line_name"]).mean() 
+                Annual_Util=Flow['Util'].groupby(["line_name"]).mean()
                 del Flow
-                                    
+
                 if len(self.Multi_Scenario)>1:
                     ax3[n].hist(Annual_Util.replace([np.inf,np.nan]),bins=20,range=(0,1),label=scenario)
                     if (self.prop!=self.prop)==False: # This checks if a category was passed
                         ax3[n].set_ylabel(scenario+' Number of lines '+'\n'+'Line cateogory: '+str(self.prop),  color='black', rotation='vertical')
                     else:
                         ax3[n].set_ylabel(scenario+' Number of lines',  color='black', rotation='vertical')
-    
+
                     ax3[n].set_xlabel('Utilization',  color='black', rotation='horizontal')
                     ax3[n].spines['right'].set_visible(False)
-                    ax3[n].spines['top'].set_visible(False)                       
-                
+                    ax3[n].spines['top'].set_visible(False)
+
                 else:
                     ax3.hist(Annual_Util.replace([np.inf,np.nan]),bins=20,range=(0,1),label=scenario)
                     if (self.prop!=self.prop)==False: # This checks if a category was passed
                         ax3.set_ylabel(scenario+' Number of lines '+'\n'+'Line cateogory: '+str(self.prop),  color='black', rotation='vertical')
                     else:
                         ax3.set_ylabel(scenario+' Number of lines',  color='black', rotation='vertical')
-    
+
                     ax3.set_xlabel('Utilization',  color='black', rotation='horizontal')
                     ax3.spines['right'].set_visible(False)
-                    ax3.spines['top'].set_visible(False)   
-                Annual_Util.rename({0:scenario},inplace=True) 
+                    ax3.spines['top'].set_visible(False)
+                Annual_Util.rename({0:scenario},inplace=True)
                 Data_Out=pd.concat([Data_Out,Annual_Util],axis=1,sort=False)
-                del Annual_Util  
+                del Annual_Util
                 n=n+1
             #end scenario loop
-                                  
+
             outputs[zone_input] = {'fig': fig3,'data_table':Data_Out}
         return outputs
-    
+
     def region_region_interchange(self):
 
         rr_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,self.Multi_Scenario[0],"Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"),"region_regions_Net_Interchange")
@@ -615,24 +598,24 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
             print('Zone = ' + str(zone_input))
-    
+
             all_scenarios = pd.DataFrame()
-    
+
             for scenario in self.Multi_Scenario:
                 print("Scenario = " + str(scenario))
-    
+
                 #Load data
                 lineflow = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Flow")
                 intflow = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"interface_Flow")
                 linelim = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"line_Export_Limit")
                 intlim = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"interface_Export_Limit")
                 linelim = linelim.reset_index().drop('timestamp', axis = 1).set_index('line_name')
-    
+
                 #Calculate utilization.
                 alllines = pd.merge(lineflow,linelim,left_index=True,right_index=True)
                 alllines = alllines.rename(columns = {'0_x':'flow','0_y':'capacity'})
                 alllines['flow'] = abs(alllines['flow'])
-    
+
                 #Merge in region ID and aggregate by region.
                 if self.AGG_BY == 'region':
                     exportline2region = self.region_export_lines
@@ -640,48 +623,48 @@ class mplot(object):
                 elif self.AGG_BY == 'zone':
                     exportline2region = self.zone_export_lines
                     importline2region = self.zone_import_lines
-                
+
                 exportline2region = exportline2region.rename(columns={"line":"line_name"})
                 importline2region = importline2region.rename(columns={"line":"line_name"})
-                
+
                 intraregionalline2region = self.lines_intraregional
                 intraregionalline2region = intraregionalline2region.rename(columns={"line":"line_name"})
-                
+
                 line2region = pd.concat([exportline2region,importline2region,intraregionalline2region])
                 alllines = alllines.reset_index()
                 alllines = alllines.merge(line2region, on = 'line_name')
                 alllines = alllines.merge(self.Region_Mapping, on = 'region')
-    
+
                 #Extract ReEDS expansion lines for next section.
                 reeds_exp = alllines.merge((self.lines.rename(columns={"name":"line_name"})), on = 'line_name')
                 reeds_exp = reeds_exp[reeds_exp['category'] == 'ReEDS_Expansion']
                 reeds_agg = reeds_exp.groupby(['timestamp',self.AGG_BY],as_index = False).sum()
-    
+
                 #Subset only enforced lines. This will subset to only EI lines.
                 enforced = pd.read_csv('/projects/continental/pcm/Results/enforced_lines.csv')
                 enforced.columns = ['line_name']
                 lineutil = pd.merge(enforced,alllines, on = 'line_name')
-    
+
                 lineutil['line util'] = lineutil['flow'] / lineutil['capacity']
                 lineutil = lineutil[lineutil.capacity < 10000]
-    
+
                 #Drop duplicates if AGG_BY == Interconnection.
-    
+
                 #Aggregate by region, merge in region mapping.
                 agg = alllines.groupby(['timestamp',self.AGG_BY],as_index = False).sum()
                 agg['util'] = agg['flow'] / agg['capacity']
                 agg = agg.rename(columns = {'util' : scenario})
                 onezone = agg[agg[self.AGG_BY] == zone_input]
                 onezone = onezone.set_index('timestamp')[scenario]
-    
+
                 #If zone_input is in WI or ERCOT, the dataframe will be empty here. Lines are not enforced here. Instead, use interfaces.
                 if onezone.empty:
-    
+
                     #Start with interface flow.
                     allint = pd.merge(intflow,intlim,left_index=True,right_index=True)
                     allint = allint.rename(columns = {'0_x':'flow','0_y':'capacity'})
                     allint = allint.reset_index()
-    
+
                     #Merge in interface/line/region mapping.
                     line2int = self.interface_lines
                     line2int = line2int.rename(columns = {'line' : 'line_name','interface' : 'interface_name'})
@@ -690,7 +673,7 @@ class mplot(object):
                     allint = allint.merge(self.Region_Mapping, on = 'region')
                     allint = allint.drop(columns = 'line_name')
                     allint = allint.drop_duplicates() #Merging in line info duplicated most of the interfaces.
-    
+
                     agg = allint.groupby(['timestamp',self.AGG_BY],as_index = False).sum()
                     agg = pd.concat([agg,reeds_agg]) #Add in ReEDS expansion lines, re-aggregate.
                     agg = agg.groupby(['timestamp',self.AGG_BY],as_index = False).sum()
@@ -698,32 +681,32 @@ class mplot(object):
                     agg = agg.rename(columns = {'util' : scenario})
                     onezone = agg[agg[self.AGG_BY] == zone_input]
                     onezone = onezone.set_index('timestamp')[scenario]
-    
+
                 if (self.prop != self.prop) == False: #Show only subset category of lines.
                     reeds_agg = reeds_agg.groupby('timestamp',as_index = False).sum()
                     reeds_agg['util'] = reeds_agg['flow'] / reeds_agg['capacity']
                     onezone = reeds_agg.rename(columns = {'util' : scenario})
                     onezone = onezone.set_index('timestamp')[scenario]
-    
+
                 all_scenarios = pd.concat([all_scenarios,onezone], axis = 1)
-    
+
             # Data table of values to return to main program
             Data_Table_Out = all_scenarios.copy()
-    
+
             #Make scenario/color dictionary.
             scenario_color_dict = {}
             for idx,column in enumerate(all_scenarios.columns):
                 dictionary = {column : self.color_list[idx]}
                 scenario_color_dict.update(dictionary)
-    
+
             all_scenarios.index = pd.to_datetime(all_scenarios.index)
             if all_scenarios.empty == False and '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
                 all_scenarios.index = all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
-    
+
             fig5, ax = plt.subplots(figsize=(9,6))
             for idx,column in enumerate(all_scenarios.columns):
                 ax.plot(all_scenarios.index.values,all_scenarios[column], linewidth=2, color = scenario_color_dict.get(column,'#333333'),label=column)
-    
+
             ax.set_ylabel('Transmission utilization (%)',  color='black', rotation='vertical')
             ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
             ax.spines['right'].set_visible(False)
@@ -732,7 +715,7 @@ class mplot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             ax.margins(x=0.01)
-    
+
             locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
             formatter = mdates.ConciseDateFormatter(locator)
             formatter.formats[2] = '%d\n %b'
@@ -745,15 +728,15 @@ class mplot(object):
             ax.xaxis.set_major_formatter(formatter)
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             ax.hlines(y = 1, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':') #Add horizontal line at 100%.
-    
+
             handles, labels = ax.get_legend_handles_labels()
-    
+
             #Legend 1
             leg1 = ax.legend(reversed(handles), reversed(labels), loc='best',facecolor='inherit', frameon=True)
-    
+
             # Manually add the first legend back
             ax.add_artist(leg1)
-    
+
             outputs[zone_input] = {'fig': fig5, 'data_table': Data_Table_Out}
         return outputs
 
@@ -771,13 +754,13 @@ class mplot(object):
             elif self.AGG_BY == 'zone':
                 exportline2region = self.zone_export_lines
                 importline2region = self.zone_import_lines
-            
+
             exportline2region = exportline2region.rename(columns={"line":"line_name"})
             importline2region = importline2region.rename(columns={"line":"line_name"})
-            
+
             intraregionalline2region = self.lines_intraregional
             intraregionalline2region = intraregionalline2region.rename(columns={"line":"line_name"})
-                
+
             line2region = pd.concat([exportline2region,importline2region,intraregionalline2region])
 
             line_v = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"line_Violation")
@@ -856,13 +839,13 @@ class mplot(object):
             elif self.AGG_BY == 'zone':
                 exportline2region = self.zone_export_lines
                 importline2region = self.zone_import_lines
-            
+
             exportline2region = exportline2region.rename(columns={"line":"line_name"})
             importline2region = importline2region.rename(columns={"line":"line_name"})
-            
+
             intraregionalline2region = self.lines_intraregional
             intraregionalline2region = intraregionalline2region.rename(columns={"line":"line_name"})
-            
+
             line2region = pd.concat([exportline2region,importline2region,intraregionalline2region])
 
             line_v = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"line_Violation")
