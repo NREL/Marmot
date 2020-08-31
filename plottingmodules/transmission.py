@@ -102,6 +102,7 @@ class mplot(object):
                 axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
                 axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
                 axs[n].margins(x=0.01)
+                axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':')
                 self._set_plot_timeseries_format(axs,n)
         
             handles, labels = axs[n].get_legend_handles_labels()
@@ -563,8 +564,6 @@ class mplot(object):
                 axs[n].margins(x=0.01)
                 self._set_plot_timeseries_format(axs,minticks=6,maxticks=12)
                 axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')    
-       
-                axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
                 handles, labels = axs[n].get_legend_handles_labels()
                 axs[n].legend(handles, labels, loc='best',facecolor='inherit', frameon=True)
                 
