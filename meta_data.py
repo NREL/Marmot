@@ -186,9 +186,8 @@ class MetaData:
             regions.sort_values(['category','region'],inplace=True)
             return regions   
         except KeyError:
-            print("\Regional data not included in h5plexos results.\nSkipping Regional properties\n")
+            print("\Regional data not included in h5plexos results")
     
-# returns metadata zones
     def zones(self):
         try:
             try:
@@ -198,9 +197,8 @@ class MetaData:
             zones = zones.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return zones
         except KeyError:
-            print("\nZonal data not included in h5plexos results.\nSkipping Zonal properties\n")
+            print("\nZonal data not included in h5plexos results")
              
-# return metadata lines
     def lines(self):
         try:
             try:
@@ -208,73 +206,108 @@ class MetaData:
             except KeyError:
                 lines=pd.DataFrame(np.asarray(self.data['metadata/objects/line']))
             lines = lines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            lines.rename(columns={"name":"line_name"},inplace=True)
             return lines
         except KeyError:
-            print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
-
-# return regional_line_relations
-    def regional_line_relations(self):
-        try:
-            try:
-                line_relations_interregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionallines']))
-            except KeyError:
-                line_relations_interregional=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionalline']))
-            
-            # line_relations_interregional["parent"]=line_relations_interregional["parent"].str.decode("utf-8")
-            # line_relations_interregional["child"]= line_relations_interregional["child"].str.decode("utf-8")
-            line_relations_interregional = line_relations_interregional.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            line_relations_interregional.rename(columns={"parent":"region","child":"line_name"},inplace=True)
-            line_relations_interregional=pd.merge(line_relations_interregional,self.Region_Mapping,how='left',on="region")
-            return line_relations_interregional
-        except KeyError:      
-            print("\nLine data not included in h5plexos results.\nSkipping Line property\n")
-            
-# return region <-> lines mapping
-    def region_lines(self):
-        try:
-            try:
-                region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))
-                region_intraregionallines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
-            except KeyError:
-                region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportingline']))
-                region_intraregionallines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionalline']))
-            region_exportinglines = region_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            region_exportinglines = region_exportinglines.rename(columns={'parent':'region','child':'line_name'})
-            region_intraregionallines = region_intraregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            region_intraregionallines = region_intraregionallines.rename(columns={'parent':'region','child':'line_name'})           
-            region_lines = region_exportinglines.append(region_intraregionallines)
-            return region_lines
-        except KeyError:
-            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
-                                  
-# return line <-> interface mapping
-    def interface_line_relations(self):
-        try:
-            interface_lines = pd.DataFrame(np.asarray(self.data['metadata/relations/interface_lines']))
-            # interface_lines["interface"] = interface_lines["parent"].str.decode("utf-8")
-            # interface_lines["line"] = interface_lines["child"].str.decode("utf-8")
-            # interface_lines = interface_lines.drop(columns = ['parent','child'])
-            interface_lines = interface_lines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            interface_lines = interface_lines.rename(columns={'parent':'interface','child':'line'})
-            return interface_lines
-        
-        except KeyError:
-            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n")
- 
-
-    def region_exporting_lines(self):
-        try:
-            try:
-                region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))
-            except KeyError:
-                region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportingline']))
-            region_exportinglines = region_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            region_exportinglines = region_exportinglines.rename(columns={'parent':'region','child':'line_name'})
-            return region_exportinglines 
-        except KeyError:
-            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
-            
+            print("\nLine data not included in h5plexos results")
     
+    def region_regions(self):
+        try:
+            region_regions = pd.DataFrame(np.asarray(self.data['metadata/relations/region_regions']))
+            region_regions = region_regions.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            return region_regions
+        except KeyError:
+            print("\region_regions data not included in h5plexos results")
+    
+    
+    def region_interregionallines(self):
+        try:
+            try:
+                region_interregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionallines']))
+            except KeyError:
+                region_interregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionalline']))
+            
+            region_interregionallines = region_interregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            region_interregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+            region_interregionallines=pd.merge(region_interregionallines,self.Region_Mapping,how='left',on="region")
+            return region_interregionallines
+        except KeyError:
+            region_interregionallines = pd.DataFrame()
+            print("\nRegion Interregionallines data not included in h5plexos results")
+            return region_interregionallines
+            
+      
+    def region_intraregionallines(self):
+       try:
+           try:
+               region_intraregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
+           except KeyError:
+               region_intraregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionalline']))
+           region_intraregionallines = region_intraregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+           region_intraregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+           region_intraregionallines=pd.merge(region_intraregionallines,self.Region_Mapping,how='left',on="region")
+           return region_intraregionallines
+       except KeyError: 
+           region_intraregionallines = pd.DataFrame()
+           print("\nRegion Intraregionallines Lines data not included in h5plexos results")  
+           return region_intraregionallines
+                
+      
+    def region_exporting_lines(self):
+      try:
+          try:
+              region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))
+          except KeyError:
+              region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportingline']))
+          region_exportinglines = region_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+          region_exportinglines = region_exportinglines.rename(columns={'parent':'region','child':'line_name'})
+          region_exportinglines=pd.merge(region_exportinglines,self.Region_Mapping,how='left',on="region")
+          return region_exportinglines 
+      except KeyError:
+          print("\nRegion Exporting Lines data not included in h5plexos results") 
+      
+    def region_importing_lines(self):
+        try:
+            try:
+                region_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_importinglines']))
+            except KeyError:
+                region_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_importingline']))
+            region_importinglines = region_importinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            region_importinglines = region_importinglines.rename(columns={'parent':'region','child':'line_name'})
+            region_importinglines=pd.merge(region_importinglines,self.Region_Mapping,how='left',on="region")
+            return region_importinglines 
+        except KeyError:
+            print("\nRegion Importing Lines data not included in h5plexos results") 
+
+    def zone_interzonallines(self):
+            try:
+                try:
+                    zone_interzonallines=pd.DataFrame(np.asarray(self.data['metadata/relations/zone_interzonallines']))
+                except KeyError:
+                    zone_interzonallines=pd.DataFrame(np.asarray(self.data['metadata/relations/zone_interzonalline']))
+                
+                zone_interzonallines = zone_interzonallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+                zone_interzonallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+                return zone_interzonallines
+            except KeyError:      
+                zone_interzonallines = pd.DataFrame()
+                print("\Zone Interzonallines data not included in h5plexos results")
+                return zone_interzonallines
+                
+    def zone_intrazonallines(self):
+       try:
+           try:
+               zone_intrazonallines=pd.DataFrame(np.asarray(self.data['metadata/relations/zone_intrazonallines']))
+           except KeyError:
+               zone_intrazonallines=pd.DataFrame(np.asarray(self.data['metadata/relations/zone_intrazonalline']))
+           zone_intrazonallines = zone_intrazonallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+           zone_intrazonallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+           return zone_intrazonallines
+       except KeyError:      
+           zone_intrazonallines = pd.DataFrame()
+           print("\nZone Intrazonallines Lines data not included in h5plexos results") 
+           return zone_intrazonallines
+                 
     def zone_exporting_lines(self):
         try:
             try:
@@ -285,21 +318,7 @@ class MetaData:
             zone_exportinglines = zone_exportinglines.rename(columns={'parent':'region','child':'line_name'})
             return zone_exportinglines 
         except KeyError:
-            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
-        
-    
-    def region_importing_lines(self):
-        try:
-            try:
-                region_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_importinglines']))
-            except KeyError:
-                region_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_importingline']))
-            region_importinglines = region_importinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            region_importinglines = region_importinglines.rename(columns={'parent':'region','child':'line_name'})
-            return region_importinglines 
-        except KeyError:
-            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
-            
+            print("\nzone exporting lines data not included in h5plexos results") 
     
     def zone_importing_lines(self):
         try:
@@ -311,10 +330,36 @@ class MetaData:
             zone_importinglines = zone_importinglines.rename(columns={'parent':'region','child':'line_name'})
             return zone_importinglines 
         except KeyError:
-            print("\nLine relation data not included in h5plexos results.\nSkipping Line property\n") 
+            print("\nzone importing lines data not included in h5plexos results") 
 
-###############################################################################
-            
-###############################################################################
+    def interface_lines(self):
+            try:
+                try:
+                    interface_lines = pd.DataFrame(np.asarray(self.data['metadata/relations/interface_lines']))
+                except KeyError:
+                    interface_lines = pd.DataFrame(np.asarray(self.data['metadata/relations/interfaces_lines']))
+                interface_lines = interface_lines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+                interface_lines = interface_lines.rename(columns={'parent':'interface','child':'line'})
+                return interface_lines
+            except KeyError:
+                print("\nInterface Lines data not included in h5plexos results")
+    
+    # All Regional lines
+    def region_lines(self):
+        region_interregionallines = self.region_interregionallines()
+        region_intraregionallines = self.region_intraregionallines()
+        region_lines = pd.concat([region_interregionallines,region_intraregionallines])
+        return region_lines
+    
+    # All Zonal lines
+    def zone_lines(self):
+        zone_interzonallines = self.zone_interzonallines()
+        zone_intrazonallines = self.zone_intrazonallines()
+        zone_lines = pd.concat([zone_interzonallines,zone_intrazonallines])
+        zone_lines = zone_lines.rename(columns={'region':'zone'})
+        return zone_lines
+        # except:
+        #     zone_lines = pd.DataFrame()
+        #     return zone_lines  
 
-
+    
