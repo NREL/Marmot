@@ -51,7 +51,7 @@ class mplot(object):
         
         """
         This method creates a net export line graph for each region.
-        All sceanrios are plotted on a single figure.
+        All scenarios are plotted on a single figure.
         Figures and data tables are returned to plot_main
         """        
         net_interchange_collection = {} 
@@ -118,7 +118,7 @@ class mplot(object):
         Utilization is plotted between 0 and 1 on the y-axis
         The plot will default to showing the 10 highest utilized lines, a Line category can also be passed 
         instead using the property field in the Marmot_plot_select.csv
-        Each sceanrios is plotted on a seperate Facet plot.
+        Each scenarios is plotted on a seperate Facet plot.
         Figures and data tables are returned to plot_main
         """     
         outputs = self._util()
@@ -132,7 +132,7 @@ class mplot(object):
         Each bar is eqaul to a 0.05 utilization rate 
         The plot will default to showing all lines, a Line category can also be passed 
         instead using the property field in the Marmot_plot_select.csv
-        Each sceanrios is plotted on a seperate Facet plot.
+        Each scenarios is plotted on a seperate Facet plot.
         Figures and data tables are returned to plot_main
         """     
         outputs = self._util(hist=True)
@@ -235,7 +235,7 @@ class mplot(object):
         This method creates a timeseries line plot of interchange flows between the selected region
         to each conecting region.
         If there are more than 4 total interchanges, all other interchanges are aggregated into an 'other' grouping
-        Each sceanrios is plotted on a seperate Facet plot.
+        Each scenarios is plotted on a seperate Facet plot.
         Figures and data tables are returned to plot_main
         """     
         outputs = self._region_region_interchange(self.Multi_Scenario)
