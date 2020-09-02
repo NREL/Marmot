@@ -96,7 +96,7 @@ class mplot(object):
                 Stacked_Curt = Stacked_Curt.sum(axis=1)
                 Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                 Stacked_Gen.insert(len(Stacked_Gen.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
-            except Exception:
+            except KeyError:
                 pass
 
             # Calculates Net Load by removing variable gen + curtailment
@@ -232,18 +232,21 @@ class mplot(object):
                 try:
                     Stacked_Gen = Gen_Collection.get(scenario)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
-                except Exception:
+                except KeyError:
                     i=i+1
-                    print('No generation in ' + zone_input)
-                    data_tables[scenario] = pd.DataFrame()
-                    continue
-
-                if Stacked_Gen.empty == True:
-                    pass
+                    print('No generation in ' + zone_input + '\n')
+                    out = pd.DataFrame()
+                    return out
 
                 Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
-
                 data = setup_data(zone_input, scenario, Stacked_Gen)
+                
+                # if no Generation return empty dataframe
+                if data["Stacked_Gen"].empty == True:
+                    print('No generation during time period in ' + zone_input + '\n')
+                    out = pd.DataFrame()
+                    return out
+                
                 data = data_prop(data)
 
                 Stacked_Gen = data["Stacked_Gen"]
@@ -263,6 +266,7 @@ class mplot(object):
                 # Data table of values to return to main program
                 Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
                 data_tables[scenario] = Data_Table_Out
+                
 
                 # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
