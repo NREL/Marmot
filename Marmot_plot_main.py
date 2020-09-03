@@ -14,6 +14,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/plottingmodules")
 import importlib 
 from meta_data import MetaData
+import pdb
 
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
@@ -107,6 +108,10 @@ ylabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze(
 if ylabels == ['nan']: ylabels = [""]
 xlabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_xlabels'].squeeze()).split(",")).str.strip().tolist()
 if xlabels == ['nan']: xlabels = [""]
+
+# option to change tick labels on plot
+ticklabels = pd.Series(str(Marmot_user_defined_inputs.loc['Tick_labels'].squeeze()).split(",")).str.strip().tolist()
+if ticklabels == ['nan']: ticklabels = [""]
 
 figure_format = str(Marmot_user_defined_inputs.loc['Figure_Format'].squeeze()).strip()
 if figure_format == 'nan':
@@ -270,12 +275,14 @@ for index, row in Marmot_plot_select.iterrows():
     # while arguments contains the property value
     key_list = ["prop", "start", "end", "timezone", "start_date", "end_date", 
                 "hdf_out_folder", "Zones", "AGG_BY", "ordered_gen", "PLEXOS_color_dict", "Multi_Scenario", 
-                "Scenario_Diff", "Marmot_Solutions_folder", "ylabels", "xlabels", "color_list", "market_style", "gen_names_dict", "pv_gen_cat", 
+                "Scenario_Diff", "Marmot_Solutions_folder", "ylabels", "xlabels", "ticklabels",
+                "color_list", "market_style", "gen_names_dict", "pv_gen_cat", 
                 "re_gen_cat", "vre_gen_cat", "Reserve_Regions", "thermal_gen_cat", "Region_mapping", "figure_folder", "meta", "facet"]
                     
     argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                      hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
-                     Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
+                     Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, ticklabels,
+                     color_list, marker_style, gen_names_dict, pv_gen_cat,
                      re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet]
     
     argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))} 
@@ -316,20 +323,23 @@ for index, row in Marmot_plot_select.iterrows():
                 if Figure_Out[zone_input]['data_table'].empty:
                     print(row["Figure Output Name"] + 'does not return a data table')
                     continue
-            
+             
             if not facet:
                 Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
-            else:
-                tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
-                try:
-                     os.makedirs(tables_folder)
-                except FileExistsError:
-                     # directory already exists
-                    pass
-                for scenario in Multi_Scenario:
-    #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
-                    s = zone_input.replace('.','') + "_" + scenario + ".csv"
-                    Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
+            else:                
+                if Figure_Out[zone_input]['data_table'].empty:
+                    print(row["Figure Output Name"] + 'does not return a data table')
+                else:
+                    tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
+                    try:
+                         os.makedirs(tables_folder)
+                    except FileExistsError:
+                         # directory already exists
+                        pass
+                    for scenario in Multi_Scenario:
+                        #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
+                        s = zone_input.replace('.','') + "_" + scenario + ".csv"
+                        Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
 
 ###############################################################################
         mpl.pyplot.close('all')
