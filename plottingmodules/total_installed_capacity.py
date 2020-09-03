@@ -6,9 +6,12 @@ Created on Tue Dec 10 08:51:15 2019
 """
 
 import pandas as pd
-#import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
+import total_generation as gen
+import pdb
+from matplotlib.patches import Patch
 
 
 #===============================================================================
@@ -23,7 +26,9 @@ def df_process_gen_inputs(df, self):
     df = df.pivot(index='timestamp', columns='tech', values=0)
     return df
 
-
+custom_legend_elements = [Patch(facecolor='#DD0200',
+                            alpha=0.5, edgecolor='#DD0200',
+                         label='Unserved Energy')]
 
 class mplot(object):
     def __init__(self, argument_dict):
@@ -31,6 +36,9 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # used for combined cap/gen plot
+        self.argument_dict = argument_dict
 
     def total_cap(self):
         # Create Dictionary to hold Datframes for each scenario
@@ -95,4 +103,133 @@ class mplot(object):
 
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+        return outputs
+
+    def total_cap_and_gen_facet(self):
+        # generation figure
+        print("Generation data")
+        gen_obj = gen.mplot(self.argument_dict)
+        gen_outputs = gen_obj.total_gen()
+
+        print("Installed capacity data")
+        cap_outputs = self.total_cap()
+
+        outputs = {}
+        for zone_input in self.Zones:
+
+            # create canvas for panel figure
+            fig, axs = plt.subplots(1, 2, figsize=(10, 4))
+            ax1 = axs[0]
+            ax2 = axs[1]
+
+            plt.subplots_adjust(wspace=0.35, hspace=0.2)
+            axs = axs.ravel()
+
+            # left panel: installed capacity
+            Total_Installed_Capacity_Out = cap_outputs[zone_input]["data_table"]
+            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
+            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
+
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=ax1,
+                                 color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
+                                 edgecolor='black', linewidth='0.1')
+
+            ax1.spines['right'].set_visible(False)
+            ax1.spines['top'].set_visible(False)
+            ax1.set_ylabel('Total Installed Capacity (GW)',  color='black', rotation='vertical')
+            #adds comma to y axis data
+            ax1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax1.tick_params(axis='y', which='major', length=5, width=1)
+            ax1.tick_params(axis='x', which='major', length=5, width=1)
+            ax1.get_legend().remove()
+            
+            # replace x-axis with custom labels
+            if len(self.ticklabels) > 1:
+                self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
+                ax1.set_xticklabels(self.ticklabels)
+
+            # right panel: annual generation
+            Total_Gen_Results = gen_outputs[zone_input]["data_table"]
+
+            Total_Load_Out = Total_Gen_Results.loc[:, "Total Load (Demand + Pumped Load)"]
+            Total_Demand_Out = Total_Gen_Results.loc[:, "Total Demand"]
+            Unserved_Energy_Out = Total_Gen_Results.loc[:, "Unserved Energy"]
+            Total_Generation_Stack_Out = Total_Gen_Results.drop(["Total Load (Demand + Pumped Load)", "Total Demand", "Unserved Energy"], axis=1)
+            Pump_Load_Out = Total_Load_Out - Total_Demand_Out
+
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
+
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=ax2,
+                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
+
+            ax2.spines['right'].set_visible(False)
+            ax2.spines['top'].set_visible(False)
+            ax2.set_ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical')
+            #adds comma to y axis data
+            ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax2.tick_params(axis='y', which='major', length=5, width=1)
+            ax2.tick_params(axis='x', which='major', length=5, width=1)
+
+            n=0
+            for scenario in self.Multi_Scenario:
+
+                x = [ax2.patches[n].get_x(), ax2.patches[n].get_x() + ax2.patches[n].get_width()]
+                height1 = [int(Total_Load_Out[scenario])]*2
+                lp1 = plt.plot(x,height1, c='black', linewidth=1.5)
+                height2 = [int(Total_Demand_Out[scenario])]*2
+                lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)
+                if Unserved_Energy_Out[scenario].sum() > 0:
+                    height3 = [int(Unserved_Energy_Out[scenario])]*2
+                    plt.plot(x,height3, c='#DD0200', linewidth=1.5)
+                    ax2.fill_between(x, height3, height1,
+                                facecolor = '#DD0200',
+                                alpha=0.5)
+                n=n+1
+            
+            # replace x-axis with custom labels
+            if len(self.ticklabels) > 1:
+                self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
+                ax2.set_xticklabels(self.ticklabels)
+
+            handles, labels = ax2.get_legend_handles_labels()
+
+            #Legend 1
+            leg1 = ax2.legend(reversed(handles), reversed(labels), loc='lower left', bbox_to_anchor=(1,-0.1),
+                          facecolor='inherit', frameon=True, prop={"size":10})
+            #Legend 2
+            if Pump_Load_Out.values.sum() > 0:
+              leg2 = ax2.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
+                        facecolor='inherit', frameon=True, prop={"size":10})
+            else:
+              leg2 = ax2.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
+                        facecolor='inherit', frameon=True, prop={"size":10})
+
+            #Legend 3
+            if Unserved_Energy_Out.values.sum() > 0:
+                leg3 = ax2.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
+                          facecolor='inherit', frameon=True, prop={"size":10})
+
+            #Legend 4
+            if Pump_Load_Out.values.sum() > 0:
+                leg4 = ax2.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.18),
+                          facecolor='inherit', frameon=True, prop={"size":10})
+
+            # Manually add the first legend back
+            fig.add_artist(leg1)
+            fig.add_artist(leg2)
+            if Unserved_Energy_Out.values.sum() > 0:
+                fig.add_artist(leg3)
+            if Pump_Load_Out.values.sum() > 0:
+                fig.add_artist(leg4)
+                
+            # add labels to panels
+            ax1.set_title("A.", fontdict={"weight":"bold"}, loc='left')
+            ax2.set_title("B.", fontdict={"weight":"bold"}, loc='left')
+                
+            # output figure
+            df = pd.DataFrame()
+            outputs[zone_input] = {'fig': fig, 'data_table': df}
+
+
         return outputs
