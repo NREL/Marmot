@@ -58,21 +58,18 @@ Total Generation,FALSE,Total_Generation,,,,,,,total_generation,total_gen
 Total Generation Difference,FALSE,Total_Generation_Diff,,,,,,,total_generation,total_gen_diff
 Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,,total_generation,total_gen_facet
 Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,,,,total_installed_capacity,total_cap
-Total Installed Capacity and Generation Facet,TRUE,Total_Installed_Capacity_and_Generation_Facet,,,,,,,total_installed_capacity,total_cap_and_gen_facet
-Line Utilization Annual,FALSE,Line_Utilization_Histogram,,,,,,,transmission,line_hist
-Line Utilization Annual,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,,transmission,line_hist
+Total Installed Capacity and Generation Facet,FALSE,Total_Installed_Capacity_and_Generation_Facet,,,,,,,total_installed_capacity,total_cap_and_gen_facet
+Line Utilization Histogram,FALSE,Line_Utilization_Histogram,,,,,,,transmission,line_hist
+Line Utilization Histogram,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,,transmission,line_hist
+Line Utilization Duration Curve,FALSE,Line_Utilization_Duration,,,,,,,transmission,line_util
 Line Utilization Duration Curve,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,,transmission,line_util
-Line Utilization Hourly,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,,transmission,line_util
-Line Utilization Timeseries,FALSE,Line_Utilization_Time_Series,,,,EST,,,transmission,line_util_agged
-Line Utilization Timeseries,FALSE,Line_Utilization_Time_Series_Category,ReEDS_Expansion,,,EST,,,transmission,line_util_agged
 Line Violations Timeseries,FALSE,Line_Violations_Time_Series,,,,EST,,,transmission,line_violations_timeseries
 Line Violations Totals,FALSE,Line_Violations_Totals,,,,,,,transmission,line_violations_totals
-Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,2/1/24,2/5/24,transmission,net_export
+Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,7/1/24,7/14/24,transmission,net_export
 Net Export,FALSE,Net_Export,,,,EST,,,transmission,net_export
 Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_Checkerboard,,,,,,,transmission,region_region_checkerboard
-Region-Region Net Interchange Duration,FALSE,Region-Region_Net_Interchange_Duration,,,,,,,transmission,region_region_duration
-Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange
-Zone-Zone Net Interchange,FALSE,Zone-Zone_Net_Interchange,,,,EST,,,transmission,zone_zone_interchange
+Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_scenarios
+All Region-Region Net Interchange,FALSE,All_Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_regions
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,,unserved_energy,tot_unserved_energy
 Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,,unserved_energy,unserved_energy_timeseries
 Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,,utilization_factor,GW_fleet
