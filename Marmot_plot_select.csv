@@ -31,7 +31,7 @@ Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak 
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,,,,,,generation_unstack,gen_unstack_facet
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid,,3,3,MT,,,generation_unstack,gen_unstack_facet
 Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,10/1/24,3/1/24,hydro,hydro_continent_net_load
-Hydro Analysis,TRUE,Hydro_Versus_Net_Load,,,7,EST,,,hydro,hydro_net_load
+Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,,hydro,hydro_net_load
 All Regions PDC,FALSE,All_Regions_Price_Duration_Curve,150,,,,,,prices,pdc_all_regions
 Region Price,FALSE,Region_Price_Duration,,,,,,,prices,region_pdc
 Region Price,FALSE,Region_Price_Duration_Threshold,150,,,,,,prices,region_pdc
@@ -58,6 +58,7 @@ Total Generation,FALSE,Total_Generation,,,,,,,total_generation,total_gen
 Total Generation Difference,FALSE,Total_Generation_Diff,,,,,,,total_generation,total_gen_diff
 Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,,total_generation,total_gen_facet
 Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,,,,total_installed_capacity,total_cap
+Total Installed Capacity and Generation Facet,TRUE,Total_Installed_Capacity_and_Generation_Facet,,,,,,,total_installed_capacity,total_cap_and_gen_facet
 Line Utilization Annual,FALSE,Line_Utilization_Histogram,,,,,,,transmission,line_hist
 Line Utilization Annual,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,,transmission,line_hist
 Line Utilization Duration Curve,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,,transmission,line_util
