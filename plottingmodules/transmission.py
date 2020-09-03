@@ -27,17 +27,6 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
 
-        self.region_export_lines = self.meta.region_exporting_lines()
-        self.region_import_lines = self.meta.region_importing_lines()
-
-        self.zone_export_lines = self.meta.zone_exporting_lines()
-        self.zone_import_lines = self.meta.zone_importing_lines()
-
-        self.lines_interregional = self.meta.regional_line_relations()
-        self.lines_intraregional = self.meta.region_lines()
-        self.lines = self.meta.lines()
-        self.interface_lines = self.meta.interface_line_relations()
-
     def net_export(self):
 
         """
