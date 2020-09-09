@@ -12,6 +12,7 @@ import os
 import total_generation as gen
 import pdb
 from matplotlib.patches import Patch
+import numpy as np
 
 
 #===============================================================================
@@ -117,11 +118,8 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
 
-            # create canvas for panel figure
             fig, axs = plt.subplots(1, 2, figsize=(10, 4))
-            ax1 = axs[0]
-            ax2 = axs[1]
-
+            
             plt.subplots_adjust(wspace=0.35, hspace=0.2)
             axs = axs.ravel()
 
@@ -130,23 +128,23 @@ class mplot(object):
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
-            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=ax1,
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=axs[0],
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
                                  edgecolor='black', linewidth='0.1')
 
-            ax1.spines['right'].set_visible(False)
-            ax1.spines['top'].set_visible(False)
-            ax1.set_ylabel('Total Installed Capacity (GW)',  color='black', rotation='vertical')
+            axs[0].spines['right'].set_visible(False)
+            axs[0].spines['top'].set_visible(False)
+            axs[0].set_ylabel('Total Installed Capacity (GW)',  color='black', rotation='vertical')
             #adds comma to y axis data
-            ax1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-            ax1.tick_params(axis='y', which='major', length=5, width=1)
-            ax1.tick_params(axis='x', which='major', length=5, width=1)
-            ax1.get_legend().remove()
+            axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            axs[0].tick_params(axis='y', which='major', length=5, width=1)
+            axs[0].tick_params(axis='x', which='major', length=5, width=1)
+            axs[0].get_legend().remove()
             
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
                 self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
-                ax1.set_xticklabels(self.ticklabels)
+                axs[0].set_xticklabels(self.ticklabels)
 
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
@@ -160,21 +158,21 @@ class mplot(object):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=ax2,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=axs[1],
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
 
-            ax2.spines['right'].set_visible(False)
-            ax2.spines['top'].set_visible(False)
-            ax2.set_ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical')
+            axs[1].spines['right'].set_visible(False)
+            axs[1].spines['top'].set_visible(False)
+            axs[1].set_ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical')
             #adds comma to y axis data
-            ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-            ax2.tick_params(axis='y', which='major', length=5, width=1)
-            ax2.tick_params(axis='x', which='major', length=5, width=1)
+            axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            axs[1].tick_params(axis='y', which='major', length=5, width=1)
+            axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
             n=0
             for scenario in self.Multi_Scenario:
 
-                x = [ax2.patches[n].get_x(), ax2.patches[n].get_x() + ax2.patches[n].get_width()]
+                x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + axs[1].patches[n].get_width()]
                 height1 = [int(Total_Load_Out[scenario])]*2
                 lp1 = plt.plot(x,height1, c='black', linewidth=1.5)
                 height2 = [int(Total_Demand_Out[scenario])]*2
@@ -182,7 +180,7 @@ class mplot(object):
                 if Unserved_Energy_Out[scenario].sum() > 0:
                     height3 = [int(Unserved_Energy_Out[scenario])]*2
                     plt.plot(x,height3, c='#DD0200', linewidth=1.5)
-                    ax2.fill_between(x, height3, height1,
+                    axs[1].fill_between(x, height3, height1,
                                 facecolor = '#DD0200',
                                 alpha=0.5)
                 n=n+1
@@ -190,29 +188,46 @@ class mplot(object):
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
                 self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
-                ax2.set_xticklabels(self.ticklabels)
+                axs[1].set_xticklabels(self.ticklabels)
 
-            handles, labels = ax2.get_legend_handles_labels()
-
+            
+            # get names of generator to create custom legend 
+            l1 = Total_Installed_Capacity_Out.columns.tolist()
+            l2 = Total_Generation_Stack_Out.columns.tolist()
+            l1.extend(l2)
+            
+            handles = np.unique(np.array(l1)).tolist()            
+            handles.sort(key = lambda i:self.ordered_gen.index(i)) 
+            handles = reversed(handles)
+            
+            # create custom gen_tech legend 
+            gen_tech_legend = []
+            for tech in handles:
+                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0,
+                         label=tech)]
+                gen_tech_legend.extend(legend_handles)
+                
             #Legend 1
-            leg1 = ax2.legend(reversed(handles), reversed(labels), loc='lower left', bbox_to_anchor=(1,-0.1),
+            leg1 = axs[1].legend(handles = gen_tech_legend, loc='lower left', bbox_to_anchor=(1,-0.1),
                           facecolor='inherit', frameon=True, prop={"size":10})
+        
             #Legend 2
             if Pump_Load_Out.values.sum() > 0:
-              leg2 = ax2.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
+              leg2 = axs[1].legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
                         facecolor='inherit', frameon=True, prop={"size":10})
             else:
-              leg2 = ax2.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
+              leg2 = axs[1].legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
                         facecolor='inherit', frameon=True, prop={"size":10})
 
             #Legend 3
             if Unserved_Energy_Out.values.sum() > 0:
-                leg3 = ax2.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
+                leg3 = axs[1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
                           facecolor='inherit', frameon=True, prop={"size":10})
 
             #Legend 4
             if Pump_Load_Out.values.sum() > 0:
-                leg4 = ax2.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.18),
+                leg4 = axs[1].legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.18),
                           facecolor='inherit', frameon=True, prop={"size":10})
 
             # Manually add the first legend back
@@ -224,8 +239,8 @@ class mplot(object):
                 fig.add_artist(leg4)
                 
             # add labels to panels
-            ax1.set_title("A.", fontdict={"weight":"bold"}, loc='left')
-            ax2.set_title("B.", fontdict={"weight":"bold"}, loc='left')
+            axs[0].set_title("A.", fontdict={"weight":"bold"}, loc='left')
+            axs[1].set_title("B.", fontdict={"weight":"bold"}, loc='left')
                 
             # output figure
             df = pd.DataFrame()

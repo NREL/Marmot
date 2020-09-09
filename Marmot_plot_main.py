@@ -277,7 +277,7 @@ for index, row in Marmot_plot_select.iterrows():
                 "hdf_out_folder", "Zones", "AGG_BY", "ordered_gen", "PLEXOS_color_dict",
                 "Multi_Scenario", "Scenario_Diff", "Scenario_name", "Marmot_Solutions_folder",
                 "ylabels", "xlabels", "ticklabels",
-                "color_list", "market_style", "gen_names_dict", "pv_gen_cat",
+                "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
                 "re_gen_cat", "vre_gen_cat", "Reserve_Regions", "thermal_gen_cat", "Region_mapping", "figure_folder", "meta", "facet"]
 
     argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
@@ -329,8 +329,12 @@ for index, row in Marmot_plot_select.iterrows():
             if not facet:
                 Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
             else:
-                if Figure_Out[zone_input]['data_table'].empty:
-                    print(row["Figure Output Name"] + 'does not return a data table')
+                try:
+                    if not Figure_Out[zone_input]['data_table']:
+                        print(row["Figure Output Name"] + 'does not return a data table')
+                except ValueError:
+                    if Figure_Out[zone_input]['data_table'].empty:
+                        print(row["Figure Output Name"] + 'does not return a data table')
                 else:
                     tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                     try:

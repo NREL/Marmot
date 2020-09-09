@@ -13,6 +13,7 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
+import numpy as np
 
 #===============================================================================
 
@@ -23,7 +24,6 @@ def df_process_gen_inputs(df, self):
     df.tech.cat.set_categories(self.ordered_gen, inplace=True)
     df = df.sort_values(["tech"])
     df = df.pivot(index='timestamp', columns='tech', values=0)
-
     return df
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
@@ -192,7 +192,6 @@ class mplot(object):
                 xdimension = 1
                 ydimension = 1
 
-
             # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
             if xdimension > 1:
                 font_scaling_ratio = 1 + ((xdimension-1)*0.09)
@@ -203,12 +202,18 @@ class mplot(object):
 
 
             grid_size = xdimension*ydimension
-
+            
+            # Used to calculate any excess axis to delete 
+            plot_number = len(all_scenarios)
+            excess_axs = grid_size - plot_number
+            
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             axs = axs.ravel()
             i=0
             data_tables = {}
+            unique_tech_names = []
+            
             for scenario in all_scenarios:
                 print("Scenario = " + scenario)
 
@@ -280,7 +285,7 @@ class mplot(object):
                     axs[i].annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
                         fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
-# Peak Demand label overlaps other labels on a facet plot
+                # Peak Demand label overlaps other labels on a facet plot
                 elif self.prop == "Peak Demand":
                     axs[i].annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
                                 fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
@@ -302,38 +307,53 @@ class mplot(object):
                                         # facecolor='#EE1289' OLD MARMOT COLOR
                                         facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
                                         alpha=0.5)
+                
+                # create list of gen technologies
+                l1 = Stacked_Gen.columns.tolist()
+                unique_tech_names.extend(l1)
+                
+                i=i+1
+            
+            # create handles list of unique tech names then order
+            handles = np.unique(np.array(unique_tech_names)).tolist()            
+            handles.sort(key = lambda i:self.ordered_gen.index(i)) 
+            handles = reversed(handles)
+            
+            # create custom gen_tech legend 
+            gen_tech_legend = []
+            for tech in handles:
+                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0,
+                         label=tech)]
+                gen_tech_legend.extend(legend_handles)    
 
-                handles, labels = axs[grid_size-1].get_legend_handles_labels()
-
-                #Legend 1
-                leg1 = axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                #Legend 2
-                if (Pump_Load == 0).all() == False:
-                    leg2 = axs[grid_size-1].legend(lp, ['Demand + Storage Charging'], loc='upper left',bbox_to_anchor=(1, 1.2),
-                              facecolor='inherit', frameon=True)
-                else:
-                    leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.2),
-                              facecolor='inherit', frameon=True)
-
-                #Legend 3
-                if (Unserved_Energy == 0).all() == False:
-                    leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
+            #Legend 1
+            leg1 = axs[grid_size-1].legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
+            #Legend 2
+            if (Pump_Load == 0).all() == False:
+                leg2 = axs[grid_size-1].legend(lp, ['Demand + Storage Charging'], loc='upper left',bbox_to_anchor=(1, 1.2),
+                          facecolor='inherit', frameon=True)
+            else:
+                leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.2),
                           facecolor='inherit', frameon=True)
 
-                # Variable defined, but never used
-                #Legend 4
-                if (Pump_Load == 0).all() == False:
-                    axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1),
-                              facecolor='inherit', frameon=True)
+            #Legend 3
+            if (Unserved_Energy == 0).all() == False:
+                leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
+                      facecolor='inherit', frameon=True)
 
-                # Manually add the first legend back
-                axs[grid_size-1].add_artist(leg1)
-                axs[grid_size-1].add_artist(leg2)
-                if (Unserved_Energy == 0).all() == False:
-                    axs[grid_size-1].add_artist(leg3)
+            # Variable defined, but never used
+            #Legend 4
+            if (Pump_Load == 0).all() == False:
+                axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1),
+                          facecolor='inherit', frameon=True)
 
-                i=i+1
+            # Manually add the first legend back
+            axs[grid_size-1].add_artist(leg1)
+            axs[grid_size-1].add_artist(leg2)
+            if (Unserved_Energy == 0).all() == False:
+                axs[grid_size-1].add_artist(leg3)
 
             print(" ")
             all_axes = fig1.get_axes()
@@ -351,7 +371,18 @@ class mplot(object):
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Generation (MW)',  color='black', rotation='vertical', labelpad=60)
-
+            
+            #Remove extra axis
+            if excess_axs != 0:
+                while excess_axs > 0:
+                    axs[(grid_size)-excess_axs].spines['right'].set_visible(False)
+                    axs[(grid_size)-excess_axs].spines['left'].set_visible(False)
+                    axs[(grid_size)-excess_axs].spines['bottom'].set_visible(False)
+                    axs[(grid_size)-excess_axs].spines['top'].set_visible(False)
+                    axs[(grid_size)-excess_axs].tick_params(axis='both',         
+                                                            which='both',      
+                                                            colors='white')
+                    excess_axs-=1
 
             if not self.facet:
                 data_tables = data_tables[self.Multi_Scenario[0]]
