@@ -202,18 +202,18 @@ class mplot(object):
 
 
             grid_size = xdimension*ydimension
-            
-            # Used to calculate any excess axis to delete 
+
+            # Used to calculate any excess axis to delete
             plot_number = len(all_scenarios)
             excess_axs = grid_size - plot_number
-            
+
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             axs = axs.ravel()
             i=0
             data_tables = {}
             unique_tech_names = []
-            
+
             for scenario in all_scenarios:
                 print("Scenario = " + scenario)
 
@@ -228,13 +228,13 @@ class mplot(object):
 
                 Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
                 data = setup_data(zone_input, scenario, Stacked_Gen)
-                
+
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
                     print('No generation during time period in ' + zone_input + '\n')
                     out = pd.DataFrame()
                     return out
-                
+
                 data = data_prop(data)
 
                 Stacked_Gen = data["Stacked_Gen"]
@@ -254,7 +254,7 @@ class mplot(object):
                 # Data table of values to return to main program
                 Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
                 data_tables[scenario] = Data_Table_Out
-                
+
 
                 # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
@@ -307,25 +307,25 @@ class mplot(object):
                                         # facecolor='#EE1289' OLD MARMOT COLOR
                                         facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
                                         alpha=0.5)
-                
+
                 # create list of gen technologies
                 l1 = Stacked_Gen.columns.tolist()
                 unique_tech_names.extend(l1)
-                
+
                 i=i+1
-            
+
             # create handles list of unique tech names then order
-            handles = np.unique(np.array(unique_tech_names)).tolist()            
-            handles.sort(key = lambda i:self.ordered_gen.index(i)) 
+            handles = np.unique(np.array(unique_tech_names)).tolist()
+            handles.sort(key = lambda i:self.ordered_gen.index(i))
             handles = reversed(handles)
-            
-            # create custom gen_tech legend 
+
+            # create custom gen_tech legend
             gen_tech_legend = []
             for tech in handles:
                 legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
                             alpha=1.0,
                          label=tech)]
-                gen_tech_legend.extend(legend_handles)    
+                gen_tech_legend.extend(legend_handles)
 
             #Legend 1
             leg1 = axs[grid_size-1].legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
@@ -371,7 +371,7 @@ class mplot(object):
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Generation (MW)',  color='black', rotation='vertical', labelpad=60)
-            
+
             #Remove extra axis
             if excess_axs != 0:
                 while excess_axs > 0:
@@ -379,8 +379,8 @@ class mplot(object):
                     axs[(grid_size)-excess_axs].spines['left'].set_visible(False)
                     axs[(grid_size)-excess_axs].spines['bottom'].set_visible(False)
                     axs[(grid_size)-excess_axs].spines['top'].set_visible(False)
-                    axs[(grid_size)-excess_axs].tick_params(axis='both',         
-                                                            which='both',      
+                    axs[(grid_size)-excess_axs].tick_params(axis='both',
+                                                            which='both',
                                                             colors='white')
                     excess_axs-=1
 
@@ -677,7 +677,7 @@ class mplot(object):
             #Get technology list.
             gens = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, self.Multi_Scenario[0], "Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"), "generator_Installed_Capacity")
             tech_list = list(gens.reset_index().tech.unique())
-            tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.facet_gen_cat]
+            tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
 
             xdimension = len(self.Multi_Scenario)
             ydimension = len(tech_list_sort)
