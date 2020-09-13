@@ -39,20 +39,11 @@ custom_legend_elements = [Patch(facecolor='#DD0200',
 
 class mplot(object):
 
-    def __init__(self, argument_list):
-
-        self.hdf_out_folder = argument_list[6]
-        self.Zones = argument_list[7]
-        self.AGG_BY = argument_list[8]
-        self.ordered_gen = argument_list[9]
-        self.PLEXOS_color_dict = argument_list[10]
-        self.Multi_Scenario = argument_list[11]
-        self.Marmot_Solutions_folder = argument_list[13]
-        self.ylabels = argument_list[14]
-        self.xlabels = argument_list[15]
-        self.gen_names_dict = argument_list[18]
-
-
+    def __init__(self, argument_dict):
+        # iterate over items in argument_dict and set as properties of class
+        # see key_list in Marmot_plot_main for list of properties
+        for prop in argument_dict:
+            self.__setattr__(prop, argument_dict[prop])
 
     def total_gen(self):
         # Create Dictionary to hold Datframes for each scenario

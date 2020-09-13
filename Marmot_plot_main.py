@@ -12,32 +12,33 @@ import pathlib
 import matplotlib as mpl
 import sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/plottingmodules")
-import importlib 
+import importlib
 from meta_data import MetaData
+import pdb
 
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
 
 class plottypes:
-    
-    def __init__(self, figure_type, figure_output_name, argument_list,font_defaults):
+
+    def __init__(self, figure_type, figure_output_name, argument_dict, font_defaults):
         self.figure_type = figure_type
         self.figure_output_name = figure_output_name
-        self.argument_list = argument_list
+        self.argument_dict = argument_dict
         self.font_defaults = font_defaults
-        
+
     def runmplot(self):
         mpl.rc('xtick', labelsize=self.font_defaults['xtick_size'])
         mpl.rc('ytick', labelsize=self.font_defaults['ytick_size'])
         mpl.rc('axes', labelsize=self.font_defaults['axes_size'])
         mpl.rc('legend', fontsize=self.font_defaults['legend_size'])
         mpl.rc('font', family=self.font_defaults['font_family'])
-        
+
         plot = importlib.import_module(self.figure_type)
-        fig = plot.mplot(self.argument_list)
-        
+        fig = plot.mplot(self.argument_dict)
+
         process_attr = getattr(fig, self.figure_output_name)
-        
+
         Figure_Out = process_attr()
         return Figure_Out
 
@@ -107,6 +108,10 @@ ylabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze(
 if ylabels == ['nan']: ylabels = [""]
 xlabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_xlabels'].squeeze()).split(",")).str.strip().tolist()
 if xlabels == ['nan']: xlabels = [""]
+
+# option to change tick labels on plot
+ticklabels = pd.Series(str(Marmot_user_defined_inputs.loc['Tick_labels'].squeeze()).split(",")).str.strip().tolist()
+if ticklabels == ['nan']: ticklabels = [""]
 
 figure_format = str(Marmot_user_defined_inputs.loc['Figure_Format'].squeeze()).strip()
 if figure_format == 'nan':
@@ -201,7 +206,7 @@ regions = meta.regions()
 # Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
 # Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
 
-if AGG_BY=="zone": 
+if AGG_BY=="zone":
     Zones = zones['name'].unique()
     # print(zones)
     # sys.exit()
@@ -250,7 +255,7 @@ if (len(sys.argv)-1) == 1: # If passed one argument (not including file name whi
     Marmot_plot_select = Marmot_plot_select.iloc[int(sys.argv[1])-1].to_frame().T
 else:
     Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == True]
-    
+
 
 #%%
 # Main loop to process each figure and pass data to functions
@@ -258,19 +263,32 @@ for index, row in Marmot_plot_select.iterrows():
 
     print("\n\n\n")
     print("Plot =  " + row["Figure Output Name"])
-    
+
     module = row['Marmot Module']
     method = row['Method']
-    
+
     facet = False
     if 'Facet' in row["Figure Output Name"]:
         facet = True
-    
-    argument_list =  [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
-        hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict, Multi_Scenario,
-        Scenario_Diff, Marmot_Solutions_folder, ylabels, xlabels, color_list, marker_style, gen_names_dict, pv_gen_cat,
-        re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet, Scenario_name]
-    
+
+    # dictionary of arguments passed to plotting modules; key_list names match the property names in each module
+    # while arguments contains the property value
+    key_list = ["prop", "start", "end", "timezone", "start_date", "end_date",
+                "hdf_out_folder", "Zones", "AGG_BY", "ordered_gen", "PLEXOS_color_dict",
+                "Multi_Scenario", "Scenario_Diff", "Scenario_name", "Marmot_Solutions_folder",
+                "ylabels", "xlabels", "ticklabels",
+                "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
+                "re_gen_cat", "vre_gen_cat", "Reserve_Regions", "thermal_gen_cat", "Region_mapping", "figure_folder", "meta", "facet"]
+
+    argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
+                     hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict,
+                     Multi_Scenario, Scenario_Diff, Scenario_name, Marmot_Solutions_folder,
+                     ylabels, xlabels, ticklabels,
+                     color_list, marker_style, gen_names_dict, pv_gen_cat,
+                     re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet]
+
+    argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
+
 ##############################################################################
 
 # Use run_plot_types to run any plotting module
@@ -279,9 +297,9 @@ for index, row in Marmot_plot_select.iterrows():
         os.makedirs(figures)
     except FileExistsError:
         pass
-    fig = plottypes(module, method, argument_list,font_defaults)
+    fig = plottypes(module, method, argument_dict, font_defaults)
     Figure_Out = fig.runmplot()
-     
+
     if 'Reserve' in row['Figure Type']:
         Zones = Reserve_Regions
         facet = False
@@ -293,7 +311,7 @@ for index, row in Marmot_plot_select.iterrows():
                 print("Data missing for "+zone_input)
         else:
             if figure_format == 'png':
-                try: 
+                try:
                     Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
                 except AttributeError:
                     Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
@@ -302,25 +320,32 @@ for index, row in Marmot_plot_select.iterrows():
                     Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
                 except AttributeError:
                     Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
-            
+
             if not facet:
                 if Figure_Out[zone_input]['data_table'].empty:
                     print(row["Figure Output Name"] + 'does not return a data table')
                     continue
-            
+
             if not facet:
                 Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
             else:
-                tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                 try:
-                     os.makedirs(tables_folder)
-                except FileExistsError:
-                     # directory already exists
-                    pass
-                for scenario in Multi_Scenario:
-    #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
-                    s = zone_input.replace('.','') + "_" + scenario + ".csv"
-                    Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
+                    if not Figure_Out[zone_input]['data_table']:
+                        print(row["Figure Output Name"] + 'does not return a data table')
+                except ValueError:
+                    if Figure_Out[zone_input]['data_table'].empty:
+                        print(row["Figure Output Name"] + 'does not return a data table')
+                else:
+                    tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
+                    try:
+                         os.makedirs(tables_folder)
+                    except FileExistsError:
+                         # directory already exists
+                        pass
+                    for scenario in Multi_Scenario:
+                        #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
+                        s = zone_input.replace('.','') + "_" + scenario + ".csv"
+                        Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
 
 ###############################################################################
         mpl.pyplot.close('all')
