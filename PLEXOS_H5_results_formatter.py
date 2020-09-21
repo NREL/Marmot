@@ -149,6 +149,8 @@ class Process:
         self.zone_generators = self.metadata.zone_generators()
         self.node_region = self.metadata.node_region()
         self.node_zone = self.metadata.node_zone()
+        self.reserves_regions = self.metadata.reserves_regions()
+        self.reserves_zones = self.metadata.reserves_zones()
 
 # Function for formatting data which comes form the PLEXOS Generator Category
     def df_process_generator(self):
@@ -263,10 +265,14 @@ class Process:
 
     # Function for formatting data which comes form the PLEXOS Reserve Category (To Fix: still uses old merging method)
     def df_process_reserve(self):
-        df = self.df.droplevel(level=["band", "property", "category"])
-        df.index.rename(['parent'], level=['name'], inplace=True)
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename(['parent','Type'], level=['name','category'], inplace=True)
         df = df.reset_index() # unzip the levels in index
-        df = df.merge(reserve_region_type, how='left', on='parent')
+        if self.reserves_regions.empty == False:
+            df = df.merge(self.reserves_regions, how='left', on='parent') # Merges in regions where reserves are located
+        if self.reserves_zones.empty == False:
+            df = df.merge(self.reserves_zones, how='left', on='parent') # Merges in zones where reserves are located
+        # df = df.merge(reserve_region_type, how='left', on='parent')
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
@@ -280,7 +286,11 @@ class Process:
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df = df.reset_index() # unzip the levels in index
         df = df.merge(self.generator_cat, how='left', on='gen_name')
-        df = df.merge(reserve_region_type, how='left', on='parent')
+        if self.reserves_regions.empty == False:
+            df = df.merge(self.reserves_regions, how='left', on='parent') # Merges in regions where reserves are located
+        if self.reserves_zones.empty == False:
+            df = df.merge(self.reserves_zones, how='left', on='parent') # Merges in zones where reserves are located
+        # df = df.merge(reserve_region_type, how='left', on='parent')
         df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
@@ -586,11 +596,11 @@ for Scenario_name in Scenario_List:
 
 # Code that can be used to test PLEXOS_H5_results_formatter
 
-    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Curtailment')
+    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'reserve_Provision')
     # test = test.xs("Xcel_Energy_EI",level='zone')
-    # test = test.reset_index(['timestamp','node'])
-    # test = test.groupby(["timestamp", "node"], as_index=False).sum()
-    # test = test.pivot(index='timestamp', columns='node', values=0)
+    # test = test.reset_index(['timestamp','Type'])
+    # test = test.groupby(["timestamp", "Type"], as_index=False).sum()
+    # test = test.pivot(index='timestamp', columns='Type', values=0)
 
     # test = test.reset_index()
 

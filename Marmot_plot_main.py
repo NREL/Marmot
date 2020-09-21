@@ -300,9 +300,9 @@ for index, row in Marmot_plot_select.iterrows():
     fig = plottypes(module, method, argument_dict, font_defaults)
     Figure_Out = fig.runmplot()
 
-    if 'Reserve' in row['Figure Type']:
-        Zones = Reserve_Regions
-        facet = False
+    # if 'Reserve' in row['Figure Type']:
+    #     Zones = Reserve_Regions
+    #     facet = False
     for zone_input in Zones:
         if isinstance(Figure_Out[zone_input], pd.DataFrame):
             if module == 'hydro' or method == 'gen_stack_all_periods':

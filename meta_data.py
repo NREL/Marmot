@@ -15,6 +15,16 @@ import numpy as np
 class MetaData:
     
     def __init__(self, HDF5_folder_in, Region_Mapping, model=None):
+        """
+        Parameters
+        ----------
+        HDF5_folder_in : folder
+            Folder containing h5plexos h5 files .
+        Region_Mapping : DataFrame
+            DataFrame of extra regions to map.
+        model : string, optional
+            Name of model h5 file. The default is None.
+        """
         self.HDF5_folder_in = HDF5_folder_in
         self.Region_Mapping = Region_Mapping
         if model == None: 
@@ -358,8 +368,54 @@ class MetaData:
         zone_lines = pd.concat([zone_interzonallines,zone_intrazonallines])
         zone_lines = zone_lines.rename(columns={'region':'zone'})
         return zone_lines
-        # except:
-        #     zone_lines = pd.DataFrame()
-        #     return zone_lines  
 
+    def reserves(self):
+        try:
+            try:
+                reserves = pd.DataFrame(np.asarray(self.data['metadata/objects/reserves']))
+            except KeyError:
+                reserves = pd.DataFrame(np.asarray(self.data['metadata/objects/reserve']))
+            reserves = reserves.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            return reserves 
+        except KeyError:
+            print("\nReserves data not included in h5plexos results") 
+            
+    def reserves_generators(self):
+        try:
+            try:
+                reserves_generators = pd.DataFrame(np.asarray(self.data['metadata/relations/reserves_generators']))
+            except KeyError:
+                reserves_generators = pd.DataFrame(np.asarray(self.data['metadata/relations/reserve_generators']))
+            reserves_generators = reserves_generators.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            reserves_generators = reserves_generators.rename(columns={'child':'gen_name'})
+            return reserves_generators 
+        except KeyError:
+            print("\nReserves data not included in h5plexos results") 
+            return pd.DataFrame()
     
+    def reserves_regions(self):
+        reserves_generators = self.reserves_generators()
+        region_generators = self.region_generators()
+        try:
+            reserves_regions = reserves_generators.merge(region_generators, how='left', on='gen_name')
+        except KeyError:
+            print("\nReserves Region data not available in h5plexos results") 
+            return pd.DataFrame()
+        reserves_regions=pd.merge(reserves_regions,self.Region_Mapping,how='left',on="region")
+        reserves_regions.drop('gen_name', axis=1, inplace=True)
+        reserves_regions.drop_duplicates(inplace=True)
+        reserves_regions.reset_index(drop=True,inplace=True)
+        return reserves_regions
+        
+    def reserves_zones(self):
+        reserves_generators = self.reserves_generators()
+        zone_generators = self.zone_generators()
+        try:
+            reserves_zones = reserves_generators.merge(zone_generators, how='left', on='gen_name')
+        except KeyError:
+            print("\nReserves Zone data not available in h5plexos results") 
+            return pd.DataFrame()
+        reserves_zones.drop('gen_name', axis=1, inplace=True)
+        reserves_zones.drop_duplicates(inplace=True)
+        reserves_zones.reset_index(drop=True,inplace=True)
+        return reserves_zones

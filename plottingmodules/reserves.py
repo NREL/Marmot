@@ -2,30 +2,23 @@
 """
 Created on Tue Jan 21 15:59:45 2020
 
-@author: dlevie
-"""
+Updated on Monday 21 Sep 2020
 
+This module creates plots of reserve provision and shortage at the generation and region level 
+
+@author: Daniel Levie
+"""
 
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.dates as mdates
-import os
 import numpy as np
+from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 
-
+import marmot_plot_functions as mfunc
 #===============================================================================
-
-def df_process_gen_inputs(df, self):
-    df = df.reset_index()
-    df['tech'].replace(self.gen_names_dict, inplace=True)
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
 
 
 class mplot(object):
@@ -35,475 +28,320 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
 
-    def reserve_timeseries(self):
+
+    def reserve_gen_timeseries(self):
+        """
+        This method creates a generation stackplot of reserve provision for each region.
+        A Facet Plot is created if multiple scenarios are compared.
+        Generation is ordered by tech type that provides reserves
+        Figures and data tables are returned to plot_main
+        """
+        # If not facet plot, only plot first sceanrio
+        if not self.facet:
+            self.Multi_Scenario = [self.Multi_Scenario[0]]
+        
+        reserve_provision_collection = {}
+        mfunc.get_data(reserve_provision_collection,"reserve_generators_Provision", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        
         outputs = {}
-        for region in self.Reserve_Regions:
-            print("     "+ region)
-
-            Reserve_Provision = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5",  "reserve_generators_Provision")
-
-            Reserve_Provision_Timeseries = Reserve_Provision.xs(region,level="Reserve_Region")
-            Reserve_Provision_Timeseries = df_process_gen_inputs(Reserve_Provision_Timeseries, self)
-
-            if self.prop == "Peak Demand":
-                print("Plotting Peak Demand period")
-
-                peak_reserve_t =  Reserve_Provision_Timeseries.sum(axis=1).idxmax()
-                start_date = peak_reserve_t - dt.timedelta(days=self.start)
-                end_date = peak_reserve_t + dt.timedelta(days=self.end)
-                Reserve_Provision_Timeseries = Reserve_Provision_Timeseries[start_date : end_date]
-                Peak_Reserve = Reserve_Provision_Timeseries.sum(axis=1)[peak_reserve_t]
-
-            else:
-                print("Plotting graph for entire timeperiod")
-
-            # Data table of values to return to main program
-            Data_Table_Out = Reserve_Provision_Timeseries
-
-            fig1, ax = plt.subplots(figsize=(9,6))
-            ax.stackplot(Reserve_Provision_Timeseries.index.values,
-                              Reserve_Provision_Timeseries.values.T, labels=Reserve_Provision_Timeseries.columns,
-                              linewidth=5,
-                              colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Reserve_Provision_Timeseries.T.index])
-
-
-            ax.set_ylabel('Reserve Provision (MW)',  color='black', rotation='vertical')
-            ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-            ax.margins(x=0.01)
-
-            if self.prop == "Peak Demand":
-                ax.annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve),
-                            xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
-                            fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
-
-            locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-
-            formatter = mdates.ConciseDateFormatter(locator)
-            formatter.formats[2] = '%d\n %b'
-            formatter.zero_formats[1] = '%b\n %Y'
-            formatter.zero_formats[2] = '%d\n %b'
-            formatter.zero_formats[3] = '%H:%M\n %d-%b'
-            formatter.offset_formats[3] = '%b %Y'
-            formatter.show_offset = False
-
-            ax.xaxis.set_major_locator(locator)
-            ax.xaxis.set_major_formatter(formatter)
-
-            handles, labels = ax.get_legend_handles_labels()
-
-
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-
-            outputs[region] = {'fig': fig1, 'data_table': Data_Table_Out}
-        return outputs
-
-
-    def reserve_timeseries_facet(self):
-        outputs = {}
-        for region in self.Reserve_Regions:
-            print("     "+ region)
-
-            # Create Dictionary to hold Datframes for each scenario
-            Reserve_Provision_Collection = {}
-
-            for scenario in self.Multi_Scenario:
-                 Reserve_Provision_Collection[scenario] = pd.read_hdf(self.Marmot_Solutions_folder + r"\\" + scenario + r"\Processed_HDF5_folder" + "/" + scenario+"_formatted.h5",  "reserve_generators_Provision")
-
-
-            xdimension=len(self.xlabels)
-            ydimension=len(self.ylabels)
+        for region in self.Zones:
+            print("Zone = "+ region)
+            
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario=self.Multi_Scenario)
             grid_size = xdimension*ydimension
-
-            fig2, axs = plt.subplots(ydimension,xdimension, figsize=((4*xdimension),(4*ydimension)), sharey=True)
+            excess_axs = grid_size - len(self.Multi_Scenario)
+            
+            fig1, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
-            axs = axs.ravel()
-            i=0
-
-            Data_Out = pd.DataFrame()
+            
+            data_tables = {}
+            unique_tech_names = []
+            n=0 #Counter for scenario subplots
             for scenario in self.Multi_Scenario:
-                print("     " + scenario)
-
-                Reserve_Provision_Timeseries = Reserve_Provision_Collection.get(scenario)
-                Reserve_Provision_Timeseries = Reserve_Provision_Timeseries.xs(region,level="Reserve_Region")
-                Reserve_Provision_Timeseries = df_process_gen_inputs(Reserve_Provision_Timeseries, self)
-
+                print("Scenario = " + scenario)
+                
+                reserve_provision_timeseries = reserve_provision_collection.get(scenario)
+                
+                #Check if zone has reserves, if not skips
+                try:
+                    reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
+                except KeyError:
+                    print("No reserves in : " + region)
+                    break
+                reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
+                data_tables[scenario] = reserve_provision_timeseries
+                
                 if self.prop == "Peak Demand":
                     print("Plotting Peak Demand period")
-
-                    peak_reserve_t =  Reserve_Provision_Timeseries.sum(axis=1).idxmax()
+                    
+                    total_reserve = reserve_provision_timeseries.sum(axis=1)
+                    peak_reserve_t =  total_reserve.idxmax()
                     start_date = peak_reserve_t - dt.timedelta(days=self.start)
                     end_date = peak_reserve_t + dt.timedelta(days=self.end)
-                    Reserve_Provision_Timeseries = Reserve_Provision_Timeseries[start_date : end_date]
-                    Peak_Reserve = Reserve_Provision_Timeseries.sum(axis=1)[peak_reserve_t]
-
+                    reserve_provision_timeseries = reserve_provision_timeseries[start_date : end_date]                    
+                    Peak_Reserve = total_reserve[peak_reserve_t]
+                    
+                elif self.prop == 'Date Range':
+                    print("Plotting specific date range:")
+                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    reserve_provision_timeseries = reserve_provision_timeseries[self.start_date : self.end_date]                                
                 else:
                     print("Plotting graph for entire timeperiod")
-
-                Reserve_Provision_Timeseries.rename(columns={0:scenario},inplace=True)
-                Data_Out=pd.concat([Data_Out,Reserve_Provision_Timeseries],axis=1)
-
-
-                axs[i].stackplot(Reserve_Provision_Timeseries.index.values, Reserve_Provision_Timeseries.values.T, labels=Reserve_Provision_Timeseries.columns, linewidth=5,
-                             colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Reserve_Provision_Timeseries.T.index])
-
-
-                axs[i].spines['right'].set_visible(False)
-                axs[i].spines['top'].set_visible(False)
-                axs[i].tick_params(axis='y', which='major', length=5, width=1)
-                axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                axs[i].margins(x=0.01)
+                
+                mfunc.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, label=reserve_provision_timeseries.columns,n=n)
+                mfunc.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
 
                 if self.prop == "Peak Demand":
-                    axs[i].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve),
+                    axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve),
                             xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                
+                # create list of gen technologies
+                l1 = reserve_provision_timeseries.columns.tolist()
+                unique_tech_names.extend(l1)
 
-                locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
-                formatter = mdates.ConciseDateFormatter(locator)
-                formatter.formats[2] = '%d\n %b'
-                formatter.zero_formats[1] = '%b\n %Y'
-                formatter.zero_formats[2] = '%d\n %b'
-                formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                formatter.offset_formats[3] = '%b %Y'
-                formatter.show_offset = False
-                axs[i].xaxis.set_major_locator(locator)
-                axs[i].xaxis.set_major_formatter(formatter)
+                if self.facet:
+                    n=n+1
+            
+            # create handles list of unique tech names then order
+            handles = np.unique(np.array(unique_tech_names)).tolist()
+            handles.sort(key = lambda i:self.ordered_gen.index(i))
+            handles = reversed(handles)
 
-                handles, labels = axs[grid_size-1].get_legend_handles_labels()
-
-
-                axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                         facecolor='inherit', frameon=True)
-
-                i=i+1
-
-            all_axes = fig2.get_axes()
-
-            self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
-
-            j=0
-            k=0
-            for ax in all_axes:
-                if ax.is_last_row():
-                    ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
-                    j=j+1
-                if ax.is_first_col():
-                    ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
-                    k=k+1
-
-            fig2.add_subplot(111, frameon=False)
+            # create custom gen_tech legend
+            gen_tech_legend = []
+            for tech in handles:
+                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0,
+                         label=tech)]
+                gen_tech_legend.extend(legend_handles)
+            
+            # Add legend
+            axs[grid_size-1].legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
+                     facecolor='inherit', frameon=True)
+            
+            #Remove extra axes
+            if excess_axs != 0:
+                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                    
+            # add facet labels
+            mfunc.add_facet_labels(fig1, self.xlabels, self.ylabels)
+            
+            fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Reserve Provision (MW)',  color='black', rotation='vertical', labelpad=60)
-
-            outputs[region] = {'fig': fig2, 'data table': Data_Out}
+            plt.ylabel('Reserve Provision (MW)',  color='black', rotation='vertical', labelpad=30)
+            
+            if not self.facet:
+                data_tables = data_tables[self.Multi_Scenario[0]]
+            
+            outputs[region] = {'fig': fig1, 'data_table': data_tables}
         return outputs
+
 
     def reg_reserve_shortage(self):
+        """
+        This method creates a bar plot of reserve shortage for each region in MWh.
+        Bars are grouped by reserve type 
+        Figures and data tables are returned to plot_main
+        """
+        outputs = self._reserve_bar_plots("Shortage")
+        return outputs
+     
+    def reg_reserve_provision(self):
+        """
+        This method creates a bar plot of reserve provision for each region in MWh.
+        Bars are grouped by reserve type 
+        Figures and data tables are returned to plot_main
+        """
+        outputs = self._reserve_bar_plots("Provision")
+        return outputs
+    
+    def reg_reserve_shortage_hrs(self): 
+        """
+        This method creates a bar plot of reserve shortage for each region in hrs.
+        Bars are grouped by reserve type 
+        Figures and data tables are returned to plot_main
+        """
+        outputs = self._reserve_bar_plots("Shortage",count_hours=True)
+        return outputs
+
+    def _reserve_bar_plots(self, data_set, count_hours=False):
+        reserve_collection = {}
+        mfunc.get_data(reserve_collection,"reserve_{}".format(data_set),self.Marmot_Solutions_folder, self.Multi_Scenario)
 
         outputs = {}
-        for region in self.Reserve_Regions:
+        for region in self.Zones:
             print("     "+ region)
 
-            Reserve_Shortage_Collection = {}
             Data_Table_Out=pd.DataFrame()
-
-            for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
-
-            fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
-
-            n=0 #Counter for scenario subplots
+            reserve_total_chunk = []
             for scenario in self.Multi_Scenario:
 
                 print('Scenario = ' + scenario)
 
-                reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
-                reserve_short_timeseries = reserve_short_timeseries.xs(region,level="Reserve_Region")
-                timestamps=reserve_short_timeseries.reset_index(['timestamp'])['timestamp']
-                time_delta = timestamps.iloc[1]- timestamps.iloc[0]                # Calculates interval step to correct for MWh of generation
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))            # Finds intervals in 60 minute period
-                print("Identified timestep was: "+str(time_delta))
-
-                reserve_short_total = reserve_short_timeseries.groupby(["Type"]).sum()/interval_count
-
-
-
-                if len(self.Multi_Scenario)>1:
-                    ax2[n].bar(reserve_short_total.index,reserve_short_total[0])
-                    ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
-                    ax2[n].spines['right'].set_visible(False)
-                    ax2[n].spines['top'].set_visible(False)
-                    ax2[n].tick_params(axis='y', which='major', length=5, width=1)
-                    ax2[n].tick_params(axis='x', which='major', length=5, width=1)
-                    ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                    ax2[n].margins(x=0.1)
-                else:
-                    ax2.bar(reserve_short_total.index,reserve_short_total[0])
-                    ax2.set_ylabel(scenario,color='black',rotation='vertical')
-                    ax2.spines['right'].set_visible(False)
-                    ax2.spines['top'].set_visible(False)
-                    ax2.tick_params(axis='y', which='major', length=5, width=1)
-                    ax2.tick_params(axis='x', which='major', length=5, width=1)
-                    ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                    ax2.margins(x=0.1)
-                n=n+1
-                reserve_short_total.rename(columns={0:scenario},inplace=True)
-                Data_Table_Out=pd.concat([Data_Table_Out,reserve_short_total],axis=1)
-            #End scenario loop
-
-            fig2.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Reserve Shortage [MWh]',  color='black', rotation='vertical', labelpad=60)
-
+                reserve_timeseries = reserve_collection.get(scenario)
+                # Check if zone has reserves, if not skips
+                try:
+                    reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
+                except KeyError:
+                    print("No reserves in : " + region)
+                    break
+                timestamps = reserve_timeseries.index.get_level_values('timestamp').unique()
+                # Calculates interval step to correct for MWh of generation
+                time_delta = timestamps[1]- timestamps[0]                
+                # Finds intervals in 60 minute period
+                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))            
+                
+                reserve_timeseries = reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False)
+                # Drop duplicates to remove double counting
+                reserve_timeseries.drop_duplicates(inplace=True)
+                # Set Type equal to parent value if Type eqauls '-'
+                reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', reserve_timeseries['parent'])
+                reserve_timeseries.set_index(["timestamp","Type","parent"],append=True,inplace=True)
+                
+                # Groupby Type
+                if count_hours == False:
+                    reserve_total = reserve_timeseries.groupby(["Type"]).sum()/interval_count
+                elif count_hours == True:
+                    reserve_total = reserve_timeseries[reserve_timeseries[0]>0] #Filter for non zero values
+                    reserve_total = reserve_total.groupby("Type").count()/interval_count
+                    
+                reserve_total.rename(columns={0:scenario},inplace=True)
+                
+                reserve_total_chunk.append(reserve_total)
+                
+            reserve_out = pd.concat(reserve_total_chunk,axis=1, sort='False')
+            # remove any rows that all eqaul 0
+            reserve_out = reserve_out.loc[(reserve_out != 0).any(axis=1),:]
+            
+            # If no reserves return nothing
+            if reserve_out.empty == True:
+                df = pd.DataFrame()
+                outputs[region] = df
+                continue
+            
+            reserve_out.columns = reserve_out.columns.str.replace('_',' ')
+            
+            Data_Table_Out=pd.concat([Data_Table_Out,reserve_out],axis=1)
+            # create color dictionary 
+            color_dict = dict(zip(reserve_out.columns,self.color_list))
+            
+            fig2 = mfunc.create_grouped_bar_plot(reserve_out,color_dict)
+            if count_hours == False:
+                fig2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                fig2.set_ylabel('Reserve {} [MWh]'.format(data_set),  color='black', rotation='vertical')
+            elif count_hours == True:
+                fig2.set_ylabel('Reserve {} Hours'.format(data_set),  color='black', rotation='vertical')
+            handles, labels = fig2.get_legend_handles_labels()
+            fig2.legend(handles,labels, loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
+    
             outputs[region] = {'fig': fig2,'data_table': Data_Table_Out}
         return outputs
 
-    def reg_reserve_provision(self):
-       outputs = {}
-       for region in self.Reserve_Regions:
-            print("     "+ region)
-
-            Reserve_Provision_Collection = {}
-            Data_Table_Out=pd.DataFrame()
-            for scenario in self.Multi_Scenario:
-                Reserve_Provision_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Provision")
-
-            fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
-
-            n=0 #Counter for scenario subplots
-            for scenario in self.Multi_Scenario:
-
-                print('Scenario = ' + scenario)
-
-                reserve_provision_timeseries = Reserve_Provision_Collection.get(scenario)
-                reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level="Reserve_Region")
-                timestamps=reserve_provision_timeseries.reset_index(['timestamp'])['timestamp']
-                time_delta = timestamps.iloc[1]- timestamps.iloc[0]                # Calculates interval step to correct for MWh of generation
-                print("Identified timestep was: "+str(time_delta))
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))            # Finds intervals in 60 minute period
-                reserve_provision_total = reserve_provision_timeseries.groupby(["Type"]).sum()/interval_count
-
-
-                if len(self.Multi_Scenario)>1:
-                    ax2[n].bar(reserve_provision_total.index,reserve_provision_total[0])
-                    ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
-                    ax2[n].spines['right'].set_visible(False)
-                    ax2[n].spines['top'].set_visible(False)
-                    ax2[n].tick_params(axis='y', which='major', length=5, width=1)
-                    ax2[n].tick_params(axis='x', which='major', length=5, width=1)
-                    ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                    ax2[n].margins(x=0.1)
-                else:
-                    ax2.bar(reserve_provision_total.index,reserve_provision_total[0])
-                    ax2.set_ylabel(scenario,color='black',rotation='vertical')
-                    ax2.spines['right'].set_visible(False)
-                    ax2.spines['top'].set_visible(False)
-                    ax2.tick_params(axis='y', which='major', length=5, width=1)
-                    ax2.tick_params(axis='x', which='major', length=5, width=1)
-                    ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                    ax2.margins(x=0.1)
-                n=n+1
-                reserve_provision_total.rename(columns={0:scenario},inplace=True)
-                Data_Table_Out=pd.concat([Data_Table_Out,reserve_provision_total],axis=1)
-            #End scenario loop
-
-            fig2.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Reserve Provision [MWh]',  color='black', rotation='vertical', labelpad=60)
-
-            outputs[region] = {'fig': fig2,'data_table': Data_Table_Out}
-       return outputs
 
     def reg_reserve_shortage_timeseries(self):
+        """
+        This method creates a timeseries line plot of reserve shortage for each region.
+        A Facet Plot is created if multiple scenarios are compared.
+        A line is plotted for each reserve type shortage.
+        Figures and data tables are returned to plot_main
+        """
+        reserve_collection = {}
+        
+        # If not facet plot, only plot first sceanrio
+        if not self.facet:
+            self.Multi_Scenario = [self.Multi_Scenario[0]]
+        
+        mfunc.get_data(reserve_collection,"reserve_Shortage", self.Marmot_Solutions_folder, self.Multi_Scenario)
+                
         outputs = {}
-        for region in self.Reserve_Regions:
-            print("     "+ self.region)
-
-            Reserve_Shortage_Collection = {}
-
-            for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
-
-            fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
-            Data_Out = pd.DataFrame()
-            n=0 #Counter for scenario subplots
-            for scenario in self.Multi_Scenario:
-
-                print('Scenario = ' + scenario)
-
-                reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
-                reserve_short_timeseries = reserve_short_timeseries.xs(region,level="Reserve_Region").reset_index().set_index('timestamp')
-
-                if len(self.Multi_Scenario)>1:
-                    ax2[n].plot(reserve_short_timeseries[0])
-                    ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
-                    ax2[n].spines['right'].set_visible(False)
-                    ax2[n].spines['top'].set_visible(False)
-                    ax2[n].tick_params(axis='y', which='major', length=5, width=1)
-                    ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-
-                    locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-                    formatter = mdates.ConciseDateFormatter(locator)
-                    formatter.formats[2] = '%d\n %b'
-                    formatter.zero_formats[1] = '%b\n %Y'
-                    formatter.zero_formats[2] = '%d\n %b'
-                    formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                    formatter.offset_formats[3] = '%b %Y'
-                    formatter.show_offset = False
-                    ax2[n].xaxis.set_major_locator(locator)
-                    ax2[n].xaxis.set_major_formatter(formatter)
-
-                else:
-                    ax2.plot(reserve_short_timeseries[0])
-                    ax2.set_ylabel(scenario,color='black',rotation='vertical')
-                    ax2.spines['right'].set_visible(False)
-                    ax2.spines['top'].set_visible(False)
-                    ax2.tick_params(axis='y', which='major', length=5, width=1)
-                    ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-
-                    locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-                    formatter = mdates.ConciseDateFormatter(locator)
-                    formatter.formats[2] = '%d\n %b'
-                    formatter.zero_formats[1] = '%b\n %Y'
-                    formatter.zero_formats[2] = '%d\n %b'
-                    formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                    formatter.offset_formats[3] = '%b %Y'
-                    formatter.show_offset = False
-                    ax2.xaxis.set_major_locator(locator)
-                    ax2.xaxis.set_major_formatter(formatter)
-                n=n+1
-            reserve_short_timeseries.rename(columns={0:scenario},inplace=True)
-            Data_Out=pd.concat([Data_Out,reserve_short_timeseries],axis=1)
-            #End scenario loop
-
-            fig2.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical', labelpad=60)
-
-            outputs[region] =  {'fig': fig2, 'data_table': Data_Out}
-        return outputs
-
-    def reg_reserve_shortage_hrs(self):
-       outputs = {}
-       for region in self.Reserve_Regions:
+        for region in self.Zones:
             print("     "+ region)
-
-            Reserve_Shortage_Collection = {}
-
-            for scenario in self.Multi_Scenario:
-                Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
-
-            fig2, ax2 = plt.subplots(1,len(self.Multi_Scenario),figsize=(len(self.Multi_Scenario)*4,4),sharey=True)
-            Data_Out=pd.DataFrame()
+            
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario = self.Multi_Scenario)
+                        
+            grid_size = xdimension*ydimension
+            excess_axs = grid_size - len(self.Multi_Scenario)
+            
+            fig3, axs = mfunc.setup_plot(xdimension,ydimension)
+            plt.subplots_adjust(wspace=0.05, hspace=0.2)
+                        
+            reserve_timeseries_chunk = []
+            unique_reserve_types = []
             n=0 #Counter for scenario subplots
             for scenario in self.Multi_Scenario:
 
                 print('Scenario = ' + scenario)
 
-                reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
-                reserve_short_timeseries = reserve_short_timeseries.xs(region,level="Reserve_Region")
-                reserve_short_hrs = reserve_short_timeseries[reserve_short_timeseries[0]>0] #Filter for non zero values
-                reserve_short_hrs = reserve_short_hrs.groupby("Type").count()
-
-                if len(self.Multi_Scenario)>1:
-                    ax2[n].bar(reserve_short_hrs.index,reserve_short_hrs[0])
-                    ax2[n].set_ylabel(scenario,  color='black', rotation='vertical')
-                    ax2[n].spines['right'].set_visible(False)
-                    ax2[n].spines['top'].set_visible(False)
-                    ax2[n].tick_params(axis='y', which='major', length=5, width=1)
-                    ax2[n].tick_params(axis='x', which='major', length=5, width=1)
-                    ax2[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                    ax2[n].margins(x=0.1)
+                reserve_timeseries = reserve_collection.get(scenario)
+                # Check if zone has reserves, if not skips
+                try:
+                    reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
+                except KeyError:
+                    print("No reserves in : " + region)
+                    break                
+                reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False,inplace=True)
+                reserve_timeseries = reserve_timeseries.drop_duplicates()
+                # Set Type equal to parent value if Type eqauls '-'
+                reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', reserve_timeseries['parent'])
+                reserve_timeseries = reserve_timeseries.pivot(index='timestamp', columns='Type', values=0)
+                
+                if self.prop == 'Date Range':
+                    print("Plotting specific date range:")
+                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    reserve_timeseries = reserve_timeseries[self.start_date : self.end_date]                                
                 else:
-                    ax2.bar(reserve_short_hrs.index,reserve_short_hrs[0])
-                    ax2.set_ylabel(scenario,color='black',rotation='vertical')
-                    ax2.spines['right'].set_visible(False)
-                    ax2.spines['top'].set_visible(False)
-                    ax2.tick_params(axis='y', which='major', length=5, width=1)
-                    ax2.tick_params(axis='x', which='major', length=5, width=1)
-                    ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                    ax2.margins(x=0.1)
-                n=n+1
-            reserve_short_hrs.rename(columns={0:scenario},inplace=True)
-            Data_Out=pd.concat([Data_Out,reserve_short_hrs],axis=1)
-            #End scenario loop
-
-            fig2.add_subplot(111, frameon=False)
+                    print("Plotting graph for entire timeperiod")
+                    
+                # create color dictionary 
+                color_dict = dict(zip(reserve_timeseries.columns,self.color_list))
+                
+                for column in reserve_timeseries:
+                    mfunc.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)                    
+                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[n].margins(x=0.01)
+                mfunc.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
+                
+                scenario_names = pd.Series([scenario]*len(reserve_timeseries),name='Scenario')
+                reserve_timeseries = reserve_timeseries.set_index([scenario_names],append=True)
+                reserve_timeseries_chunk.append(reserve_timeseries)
+                
+                # create list of gen technologies
+                l1 = reserve_timeseries.columns.tolist()
+                unique_reserve_types.extend(l1)
+                
+                if self.facet:
+                    n=n+1
+            
+            # create handles list of unique reserve names
+            handles = np.unique(np.array(unique_reserve_types)).tolist()
+            
+            # create color dictionary 
+            color_dict = dict(zip(handles,self.color_list))
+            
+            # create custom gen_tech legend
+            reserve_legend = []
+            for Type in handles:
+                legend_handles = [Line2D([0], [0], color=color_dict[Type], lw=2, label=Type)]
+                reserve_legend.extend(legend_handles)
+            
+            axs[grid_size-1].legend(handles=reserve_legend,loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+            
+            #Remove extra axes
+            if excess_axs != 0:
+                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                    
+            # add facet labels
+            mfunc.add_facet_labels(fig3, self.xlabels, self.ylabels)
+            
+            fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Reserve Shortage Intervals',  color='black', rotation='vertical', labelpad=60)
+            # plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
+            plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 30)
+            
+            Data_Out=pd.concat(reserve_timeseries_chunk,axis=0)
 
-            outputs[region] = {'fig': fig2,'data_table':Data_Out}
-       return outputs
-
-#    def tot_reserve_shortage(self):
-#
-#        print("     "+ self.zone_input)
-#
-#        Reserve_Shortage_Collection = {}
-#
-#        for scenario in self.Multi_Scenario:
-#            Reserve_Shortage_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "reserve_Shortage")
-#
-#        Reserve_Shortage_Timeseries_Out = pd.DataFrame()
-#        Total_Reserve_Shortage_Out = pd.DataFrame()
-#
-#        for scenario in self.Multi_Scenario:
-#
-#            print('Scenario = ' + scenario)
-#
-#            reserve_short_timeseries = Reserve_Shortage_Collection.get(scenario)
-#            rto_Mapping=self.Region_Mapping[['rto',self.AGG_BY]].drop_duplicates().reset_index().drop('index',axis=1)
-#            reserve_short_timeseries = pd.merge(reserve_short_timeseries.reset_index(),rto_Mapping,left_on='Reserve_Region',right_on='rto')
-#            reserve_short_timeseries = reserve_short_timeseries.reset_index().set_index(['timestamp','Reserve_Region','Type','rto',AGG_BY])
-#            reserve_short_timeseries = reserve_short_timeseries.xs(self.zone_input,level=self.AGG_BY)
-#            reserve_short_timeseries = reserve_short_timeseries.groupby(["timestamp"]).sum()
-#            reserve_short_timeseries = reserve_short_timeseries.squeeze() #Convert to Series
-#            reserve_short_timeseries.rename(scenario, inplace=True)
-#            Reserve_Shortage_Timeseries_Out = pd.concat([Reserve_Shortage_Timeseries_Out, reserve_short_timeseries], axis=1, sort=False).fillna(0)
-#
-#        Reserve_Shortage_Timeseries_Out.columns = Reserve_Shortage_Timeseries_Out.columns.str.replace('_',' ')
-#
-#        Total_Reserve_Shortage_Out = Reserve_Shortage_Timeseries_Out.sum(axis=0)
-#
-#        Total_Reserve_Shortage_Out.index = Total_Reserve_Shortage_Out.index.str.replace('_',' ')
-#        Total_Reserve_Shortage_Out.index = Total_Reserve_Shortage_Out.index.str.wrap(10, break_long_words=False)
-#
-#        # Data table of values to return to main program
-#        Data_Table_Out = Total_Reserve_Shortage_Out
-#
-#        # Converts color_list into an iterable list for use in a loop
-#        iter_colour = iter(self.color_list)
-#
-#        fig2, ax = plt.subplots(figsize=(9,6))
-#
-#        bp = Total_Reserve_Shortage_Out.plot.bar(stacked=False, rot=0, edgecolor='black',
-#                                                color=next(iter_colour), linewidth='0.1',
-#                                                width=0.35, ax=ax)
-#
-#        ax.set_ylabel('Total Reserve Shortage (MWh)',  color='black', rotation='vertical')
-#        ax.spines['right'].set_visible(False)
-#        ax.spines['top'].set_visible(False)
-#        ax.tick_params(axis='y', which='major', length=5, width=1)
-#        ax.tick_params(axis='x', which='major', length=5, width=1)
-#        ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-#        ax.margins(x=0.01)
-#
-#        for i in ax.patches:
-#           width, height = i.get_width(), i.get_height()
-#           if height<=1:
-#               continue
-#           x, y = i.get_xy()
-#           ax.text(x+width/2,
-#                y+(height+100)/2,
-#                '{:,.0f}'.format(height),
-#                horizontalalignment='center',
-#                verticalalignment='center', fontsize=13)
-#
-#        return {'fig': fig2, 'data_table': Data_Table_Out}
+            outputs[region] =  {'fig': fig3, 'data_table': Data_Out}
+        return outputs
+    
