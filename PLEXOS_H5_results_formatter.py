@@ -6,7 +6,7 @@ Created on Wed May 22 14:29:48 2019
 
 This code was written to process PLEXOS HDF5 outputs to get them ready for plotting.
 Once the data is processed it is outputed as an intermediary HDF5 file format so that
-it can be read into the Marmot_results_plotting.py file
+it can be read into the Marmot_plot_main.py file
 
 """
 #===============================================================================
@@ -70,11 +70,7 @@ Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folde
 Mapping_folder = 'mapping_folder'
 
 Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
-reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['reserve_region_type.csv_name'].to_string(index=False).strip()))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
-
-# number of hours overlapped between two adjacent models
-overlap = pd.to_numeric(Marmot_user_defined_inputs.loc['overlap'].to_string(index=False))
 
 # Value of Lost Load for calculatinhg cost of unserved energy
 VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))
@@ -272,7 +268,6 @@ class Process:
             df = df.merge(self.reserves_regions, how='left', on='parent') # Merges in regions where reserves are located
         if self.reserves_zones.empty == False:
             df = df.merge(self.reserves_zones, how='left', on='parent') # Merges in zones where reserves are located
-        # df = df.merge(reserve_region_type, how='left', on='parent')
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
@@ -290,7 +285,6 @@ class Process:
             df = df.merge(self.reserves_regions, how='left', on='parent') # Merges in regions where reserves are located
         if self.reserves_zones.empty == False:
             df = df.merge(self.reserves_zones, how='left', on='parent') # Merges in zones where reserves are located
-        # df = df.merge(reserve_region_type, how='left', on='parent')
         df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
@@ -462,7 +456,7 @@ for Scenario_name in Scenario_List:
     # Creates Initial HDF5 file for ouputing formated data
     Processed_Data_Out=pd.DataFrame()
     if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
-        print("\nWarning: "+hdf_out_folder + "/" + HDF5_output+" already exists; new variables will be added.\n")
+        print("\nWarning: "+hdf_out_folder + "/" + HDF5_output+" already exists; new variables will be added.")
     else:
         Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
 
@@ -480,7 +474,7 @@ for Scenario_name in Scenario_List:
 
         Processed_Data_Out = pd.DataFrame()
         data_chuncks = []
-        print("Processing " + row["group"] + " " + row["data_set"])
+        print("\nProcessing " + row["group"] + " " + row["data_set"])
         for model in files_list:
 
             # Create an instance of metadata, and pass that as a variable to get data.
@@ -492,7 +486,6 @@ for Scenario_name in Scenario_List:
             processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, meta)
 
             if processed_data.empty == True:
-                print("\n")
                 break
 
             if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
@@ -506,7 +499,7 @@ for Scenario_name in Scenario_List:
             Processed_Data_Out = pd.concat(data_chuncks, copy=False)
 
         if Processed_Data_Out.empty == False:
-            if (row["data_type"]== "year") & (overlap>0):
+            if (row["data_type"]== "year"):
                 print("\nPlease Note: Year properties can not be checked for duplicates. \nOverlaping data can not be removed from 'Year' grouped data.")
                 print("This will effect Year data that differs between partitions such as cost results.\nIt will not effect Year data that is equal in all partitions such as Installed Capacity or Line Limit results.\n")
 
@@ -540,7 +533,7 @@ for Scenario_name in Scenario_List:
 ######### Calculate Extra Ouputs################################################
     if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
         try:
-            print("Processing generator Curtailment")
+            print("\nProcessing generator Curtailment")
             try:
                 Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
                 Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
@@ -596,8 +589,9 @@ for Scenario_name in Scenario_List:
 
 # Code that can be used to test PLEXOS_H5_results_formatter
 
-    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'reserve_Provision')
-    # test = test.xs("Xcel_Energy_EI",level='zone')
+    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'node_Price')
+    # test = test.xs("zone_name",level='zone')
+    # test = test.xs("node_name",level='node')
     # test = test.reset_index(['timestamp','Type'])
     # test = test.groupby(["timestamp", "Type"], as_index=False).sum()
     # test = test.pivot(index='timestamp', columns='Type', values=0)

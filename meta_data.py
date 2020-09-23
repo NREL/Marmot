@@ -2,7 +2,7 @@
 """
 Created on Mon Jun 22 16:14:56 2020
 
-@author: rhousema
+@author: Ryan Houseman
 """
 
 # This is the new MetaData class
