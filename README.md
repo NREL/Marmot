@@ -29,15 +29,11 @@ Settings to adjust in the **Marmot_user_defined_inputs.csv** required to run the
 
 - `Scenario_process_list` This is the list of scenarios to process. The h5plexos hdf5 results files should be saved in folders with these names. The list must contain at least one entry. 
 
-- `overlap` This is the number of hours overlapped between two adjacent models, default is 0
-
 - `VoLL` Value of lost load for calculating the Cost of Unserved Energy, default is 10,000 $/MWh
 
 - `Region_Mapping.csv_name` The name of the Region_Mapping.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) bellow.
 
 - `gen_names.csv_name` The name of the gen_names.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) bellow.
-
-- `reserve_region_type.csv_name` the name of the reserve_region_type.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) bellow.
 
 Finally adjust the PLEXOS properties to process in the **plexos_properties.csv**. This csv file determines which PLEXOS properties to pull from the h5plexos results and process. Under the *"collect_data"* column adjust the property to be TRUE or FALSE to change if the data is processed. If your property is not here, add it as a new line with the same format. See the table at the end of this README file to see which properties are necessary for which Marmot plots.
 
@@ -50,8 +46,6 @@ Examples of these files can be found within in the repo in the [mapping_folder](
 - **ordered_gen** Ordered list of generators which determines how they appear in a stack plot; generator names should equal those in the gen_names.csv *"New"* column
 
 - **Region_mapping.csv** This file allows you to group PLEXOS regions together to create aggregated regions. The first column in the file should always be called *"region"* and should contain the name of all the regions in your PLEXOS database. The names given to all other columns is up to you. In the example given in the repo, we aggregated NARIS regions to the country and interconnect level.   
-
-- **reserve_region_type.csv** This file allows you to adjust the Reserve Region names and reserve types. Check the file for an example. 
 
 - **colour_dictionary.csv** This allows the user to adjust the color used to plot generation technology types e.g Gas-CC, Wind, PV etc. The names in the generator column should equal those in the gen_names.csv *"New"* column. The current colors are the default SEAC colors recommended for use in publications.
 
