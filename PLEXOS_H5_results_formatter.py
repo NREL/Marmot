@@ -51,7 +51,7 @@ pd.set_option("display.max_colwidth", 1000)
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
-Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'],
+Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs_Dec2013.csv', usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
 
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
@@ -72,9 +72,6 @@ Mapping_folder = 'mapping_folder'
 Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
 reserve_region_type = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['reserve_region_type.csv_name'].to_string(index=False).strip()))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
-
-# number of hours overlapped between two adjacent models
-overlap = pd.to_numeric(Marmot_user_defined_inputs.loc['overlap'].to_string(index=False))
 
 # Value of Lost Load for calculatinhg cost of unserved energy
 VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))
@@ -477,6 +474,14 @@ for Scenario_name in Scenario_List:
             meta = MetaData(HDF5_folder_in, Region_Mapping,model)
 
             print("     "+ model)
+            
+            #if any(meta.regions()['region'] not in Region_Mapping['region']):
+            if set(meta.regions()['region']).issubset(Region_Mapping['region']) == False:
+                print('\n WARNING !! The Following PLEXOS REGIONS are missing from the "region" column of your mapping file:')
+                missing_regions = list(set(meta.regions()['region']) - set(Region_Mapping['region']))
+                print(missing_regions)
+                print("")
+
             db = hdf5_collection.get(model)
 
             processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, meta)
