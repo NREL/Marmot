@@ -33,9 +33,9 @@ SCL,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
 SPPC,West Connect,SW_NVE_WI,Southwest,USA,WI,USA-WI,All
 SRP,SPP,SW_Other_WI,Southwest,USA,WI,USA-WI,All
 TEPC,SPP,SW_Other_WI,Southwest,USA,WI,USA-WI,All
-TH,West Connect,TH_WI,NorthwestUS,USA,WI,USA-WI,All
-TH,West Connect,TH_WI,Southwest,USA,WI,USA-WI,All
-TH,West Connect,TH_WI,Southwest,USA,WI,USA-WI,All
+TH_Malin,West Connect,TH_WI,NorthwestUS,USA,WI,USA-WI,All
+TH_Mead,West Connect,TH_WI,Southwest,USA,WI,USA-WI,All
+TH_PV,West Connect,TH_WI,Southwest,USA,WI,USA-WI,All
 TIDC,CAISO,BANC_WI,California,USA,WI,USA-WI,All
 TPWR,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
 VEA,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
