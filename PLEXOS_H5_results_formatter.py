@@ -51,7 +51,7 @@ pd.set_option("display.max_colwidth", 1000)
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
-Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs_Dec2013.csv', usecols=['Input','User_defined_value'],
+Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
 
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
