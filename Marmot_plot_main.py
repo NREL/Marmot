@@ -296,7 +296,11 @@ for index, row in Marmot_plot_select.iterrows():
         pass
     fig = plottypes(module, method, argument_dict, font_defaults)
     Figure_Out = fig.runmplot()
-
+    
+    if isinstance(Figure_Out, type(None)):
+        print("Add Inputs With Formatter Before Attempting to Plot!")
+        continue
+    
     for zone_input in Zones:
         if isinstance(Figure_Out[zone_input], pd.DataFrame):
             if module == 'hydro' or method == 'gen_stack_all_periods':
@@ -305,17 +309,11 @@ for index, row in Marmot_plot_select.iterrows():
                 print("Data missing for {}".format(zone_input))
         else:
             # Save figures
-            if figure_format == 'png':
-                try:
-                    Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-                except AttributeError:
-                    Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-            else:
-                try:
-                    Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
-                except AttributeError:
-                    Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
-            
+            try:
+                Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
+            except AttributeError:
+                Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
+        
             # Save data tables to csv
             if not facet:
                 if Figure_Out[zone_input]['data_table'].empty:

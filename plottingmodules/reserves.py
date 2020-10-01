@@ -40,10 +40,15 @@ class mplot(object):
         if not self.facet:
             self.Multi_Scenario = [self.Multi_Scenario[0]]
         
-        reserve_provision_collection = {}
-        mfunc.get_data(reserve_provision_collection,"reserve_generators_Provision", self.Marmot_Solutions_folder, self.Multi_Scenario)
-        
         outputs = {}
+        check_input_data = []
+        reserve_provision_collection = {}
+        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserve_generators_Provision",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+             
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for region in self.Zones:
             print("Zone = "+ region)
             
@@ -167,8 +172,13 @@ class mplot(object):
 
     def _reserve_bar_plots(self, data_set, count_hours=False):
         reserve_collection = {}
-        mfunc.get_data(reserve_collection,"reserve_{}".format(data_set),self.Marmot_Solutions_folder, self.Multi_Scenario)
-
+        check_input_data = []
+        check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_{}".format(data_set),self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         outputs = {}
         for region in self.Zones:
             print("     "+ region)
@@ -248,13 +258,18 @@ class mplot(object):
         Figures and data tables are returned to plot_main
         """
         reserve_collection = {}
+        check_input_data = []
         
         # If not facet plot, only plot first sceanrio
         if not self.facet:
             self.Multi_Scenario = [self.Multi_Scenario[0]]
         
-        mfunc.get_data(reserve_collection,"reserve_Shortage", self.Marmot_Solutions_folder, self.Multi_Scenario)
-                
+        check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_Shortage", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         outputs = {}
         for region in self.Zones:
             print("     "+ region)

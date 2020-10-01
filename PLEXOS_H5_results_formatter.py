@@ -589,12 +589,12 @@ for Scenario_name in Scenario_List:
 
 # Code that can be used to test PLEXOS_H5_results_formatter
 
-    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'node_Price')
-    # test = test.xs("zone_name",level='zone')
-    # test = test.xs("node_name",level='node')
-    # test = test.reset_index(['timestamp','Type'])
-    # test = test.groupby(["timestamp", "Type"], as_index=False).sum()
-    # test = test.pivot(index='timestamp', columns='Type', values=0)
+    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+    # test = test.xs("region_name",level='zone')
+    # test = test.xs("Nuclear",level='tech')
+    # test = test.reset_index(['timestamp','gen_name'])
+    # test = test.groupby(["timestamp", "node"], as_index=False).sum()
+    # test = test.pivot(index='timestamp', columns='gen_name', values=0)
 
     # test = test.reset_index()
 

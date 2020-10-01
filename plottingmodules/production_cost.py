@@ -118,7 +118,7 @@ class mplot(object):
             # names = list(Net_Revenue.index)
             # values = list(Net_Revenue.values)
 
-            fig1, ax = plt.subplots(figsize=(9,6))
+            fig1, ax = plt.subplots(figsize=(6,4))
 
             net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', linestyle='None', marker='o')
             sb = Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)

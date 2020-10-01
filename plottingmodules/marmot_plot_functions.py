@@ -16,7 +16,7 @@ import math
 #===============================================================================
 
 
-def get_data(data_collection,data,Marmot_Solutions_folder,scenario_type):
+def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     """
     Used to get data from formatted h5 file
     Adds data to dictionary with scenario name as key
@@ -29,17 +29,24 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_type):
         name of data to pull from h5 file.
     Marmot_Solutions_folder : folder 
         Main Mamrmot folder
-    scenario_type : List
+    scenario_list : List
         List of scenarios to plot.
 
     Returns
     -------
-    None.
+    return_value : int
+        1 or 0 for checking data
     """
-    for scenario in scenario_type:
-        data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),data)
-
-
+    for scenario in scenario_list:
+        try:
+            data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),data)
+            return_value = 0
+        except KeyError:
+            print("'{}' is MISSING from the Marmot formatted h5 files".format(data))
+            return_value = 1
+            return return_value
+    return return_value
+        
 def df_process_gen_inputs(df,ordered_gen):
     """
     Processes generation data into a pivot 
