@@ -481,6 +481,14 @@ for Scenario_name in Scenario_List:
             meta = MetaData(HDF5_folder_in, Region_Mapping,model)
 
             print("     "+ model)
+            
+            #if any(meta.regions()['region'] not in Region_Mapping['region']):
+            if set(meta.regions()['region']).issubset(Region_Mapping['region']) == False:
+                print('\n WARNING !! The Following PLEXOS REGIONS are missing from the "region" column of your mapping file:')
+                missing_regions = list(set(meta.regions()['region']) - set(Region_Mapping['region']))
+                print(missing_regions)
+                print("")
+
             db = hdf5_collection.get(model)
 
             processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, meta)

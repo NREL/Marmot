@@ -199,17 +199,17 @@ Bio_CC_Whole,Biopower
 Bio_CT,Biopower
 Bio_ICE,Biopower
 Bio_ST,Biopower
-CC_AB_Cogen,Gas CC
-CC_Whole_NG_Aero,Gas CC
-CC_Whole_NG_Ind,Gas CC
-CC_Whole_NG_SS,Gas CC
+CC_AB_Cogen,Gas-CC
+CC_Whole_NG_Aero,Gas-CC
+CC_Whole_NG_Ind,Gas-CC
+CC_Whole_NG_SS,Gas-CC
 Coal_ST,Coal
 CrossCompoundWhole_Coal,Coal
 CSP_noTES,CSP
 CSP-TES,CSP
-CT_AB_Cogen,Gas CT
-CT_NG_Aero,Gas CT
-CT_NG_Ind,Gas CT
+CT_AB_Cogen,Gas-CT
+CT_NG_Aero,Gas-CT
+CT_NG_Ind,Gas-CT
 CT_Oil,Oil-Gas-Steam
 DC-Intertie,Other
 Dfuel_gen,Other
