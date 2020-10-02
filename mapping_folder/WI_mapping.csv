@@ -1,0 +1,44 @@
+region,superzone,category,Usual,Country,Interconnection,CountryInterconnect,Summary
+AESO,Columbia Grid,CANADA_WI,AB,Canada,WI,Canada-WI,All
+AVA,Columbia Grid,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
+AZPS,West Connect,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+BANC,CAISO,BANC_WI,California,USA,WI,USA-WI,All
+BCHA,Columbia Grid,CANADA_WI,BC,Canada,WI,Canada-WI,All
+BPAT,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
+CFE,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
+CHPD,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
+CIPB,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
+CIPV,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
+CISC,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
+CISD,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
+DOPD,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
+EPE,SPP,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+GCPD,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
+IID,CAISO,CA_IID_WI,California,USA,WI,USA-WI,All
+IPFE,Northern Tier,BS_IPCO_WI,RockiesUS,USA,WI,USA-WI,All
+IPMV,Northern Tier,BS_IPCO_WI,RockiesUS,USA,WI,USA-WI,All
+IPTV,Northern Tier,BS_IPCO_WI,RockiesUS,USA,WI,USA-WI,All
+LDWP,CAISO,CA_LDWP_WI,California,USA,WI,USA-WI,All
+NEVP,West Connect,SW_NVE_WI,Southwest,USA,WI,USA-WI,All
+NWMT,Northern Tier,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
+PACW,Northern Tier,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
+PAID,Northern Tier,BS_PACE_WI,RockiesUS,USA,WI,USA-WI,All
+PAUT,Northern Tier,BS_PACE_WI,RockiesUS,USA,WI,USA-WI,All
+PAWY,Northern Tier,BS_PACE_WI,RockiesUS,USA,WI,USA-WI,All
+PGE,Columbia Grid,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
+PNM,West Connect,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+PSCO,Mountain West,RM_WI,RockiesUS,USA,WI,USA-WI,All
+PSEI,Columbia Grid,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
+SCL,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
+SPPC,West Connect,SW_NVE_WI,Southwest,USA,WI,USA-WI,All
+SRP,SPP,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+TEPC,SPP,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+TH_Malin,West Connect,TH_WI,NorthwestUS,USA,WI,USA-WI,All
+TH_Mead,West Connect,TH_WI,Southwest,USA,WI,USA-WI,All
+TH_PV,West Connect,TH_WI,Southwest,USA,WI,USA-WI,All
+TIDC,CAISO,BANC_WI,California,USA,WI,USA-WI,All
+TPWR,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
+VEA,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
+WACM,Mountain West,RM_WI,RockiesUS,USA,WI,USA-WI,All
+WALC,Mountain West,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+WAUW,Northern Tier,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
