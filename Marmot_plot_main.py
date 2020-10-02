@@ -2,7 +2,7 @@
 """
 Created on Thu Dec  5 14:16:30 2019
 
-@author: dlevie
+@author: Daniel Levie
 """
 #%%
 
@@ -59,7 +59,6 @@ font_defaults = {'xtick_size':11,
                  'legend_size':11,
                  'font_family':'serif'}
 
-
 #===============================================================================
 # Load Input Properties
 #===============================================================================
@@ -94,7 +93,6 @@ Mapping_folder = 'mapping_folder'
 Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
 Region_Mapping = Region_Mapping.astype(str)
 
-Reserve_Regions = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['reserve_region_type.csv_name'].to_string(index=False).strip()))
 gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
 AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
@@ -247,8 +245,6 @@ else:
 
 # Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
 
-Reserve_Regions = Reserve_Regions["Reserve_Region"].unique()
-
 # Filter for chosen figures to plot
 if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
     print("Will plot row " +(sys.argv[1])+" of Marmot plot select regardless of T/F.")
@@ -278,20 +274,21 @@ for index, row in Marmot_plot_select.iterrows():
                 "Multi_Scenario", "Scenario_Diff", "Scenario_name", "Marmot_Solutions_folder",
                 "ylabels", "xlabels", "ticklabels",
                 "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
-                "re_gen_cat", "vre_gen_cat", "Reserve_Regions", "thermal_gen_cat", "Region_mapping", "figure_folder", "meta", "facet"]
+                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_mapping", "figure_folder", "meta", "facet"]
 
     argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                      hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict,
                      Multi_Scenario, Scenario_Diff, Scenario_name, Marmot_Solutions_folder,
                      ylabels, xlabels, ticklabels,
                      color_list, marker_style, gen_names_dict, pv_gen_cat,
-                     re_gen_cat, vre_gen_cat, Reserve_Regions, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet]
+                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet]
 
     argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
 
+
 ##############################################################################
 
-# Use run_plot_types to run any plotting module
+    # Use run_plot_types to run any plotting module
     figures = os.path.join(figure_folder, AGG_BY + '_' + module)
     try:
         os.makedirs(figures)
@@ -299,35 +296,32 @@ for index, row in Marmot_plot_select.iterrows():
         pass
     fig = plottypes(module, method, argument_dict, font_defaults)
     Figure_Out = fig.runmplot()
-
-    if 'Reserve' in row['Figure Type']:
-        Zones = Reserve_Regions
-        facet = False
+    
+    if isinstance(Figure_Out, type(None)):
+        print("Add Inputs With Formatter Before Attempting to Plot!")
+        continue
+    
     for zone_input in Zones:
         if isinstance(Figure_Out[zone_input], pd.DataFrame):
             if module == 'hydro' or method == 'gen_stack_all_periods':
                 print('plots & data saved within module')
             else:
-                print("Data missing for "+zone_input)
+                print("Data missing for {}".format(zone_input))
         else:
-            if figure_format == 'png':
-                try:
-                    Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-                except AttributeError:
-                    Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name), dpi=600, bbox_inches='tight')
-            else:
-                try:
-                    Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
-                except AttributeError:
-                    Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
-
+            # Save figures
+            try:
+                Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
+            except AttributeError:
+                Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
+        
+            # Save data tables to csv
             if not facet:
                 if Figure_Out[zone_input]['data_table'].empty:
                     print(row["Figure Output Name"] + 'does not return a data table')
                     continue
-
-            if not facet:
-                Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                else:
+                    Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+                
             else:
                 try:
                     if not Figure_Out[zone_input]['data_table']:

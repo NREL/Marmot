@@ -208,7 +208,7 @@ class mplot(object):
             excess_axs = grid_size - plot_number
 
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
-            plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            plt.subplots_adjust(wspace=0.05, hspace=0.25)
             axs = axs.ravel()
             i=0
             data_tables = {}
@@ -328,25 +328,25 @@ class mplot(object):
                 gen_tech_legend.extend(legend_handles)
 
             #Legend 1
-            leg1 = axs[grid_size-1].legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
+            leg1 = axs[grid_size-1].legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1.05,-0.2),
                           facecolor='inherit', frameon=True)
             #Legend 2
             if (Pump_Load == 0).all() == False:
-                leg2 = axs[grid_size-1].legend(lp, ['Demand + Storage Charging'], loc='upper left',bbox_to_anchor=(1, 1.2),
+                leg2 = axs[grid_size-1].legend(lp, ['Demand + Storage Charging'], loc='upper left',bbox_to_anchor=(1.05, 1.2),
                           facecolor='inherit', frameon=True)
             else:
-                leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.2),
+                leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1.05, 1.2),
                           facecolor='inherit', frameon=True)
 
             #Legend 3
             if (Unserved_Energy == 0).all() == False:
-                leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
+                leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1.05, 1.15),
                       facecolor='inherit', frameon=True)
 
             # Variable defined, but never used
             #Legend 4
             if (Pump_Load == 0).all() == False:
-                axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1),
+                axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1.05, 1.1),
                           facecolor='inherit', frameon=True)
 
             # Manually add the first legend back

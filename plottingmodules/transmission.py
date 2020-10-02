@@ -87,7 +87,8 @@ class mplot(object):
 
             handles, labels = axs[n].get_legend_handles_labels()
 
-            axs[n].legend(reversed(handles), reversed(labels), loc='best',facecolor='inherit', frameon=True)
+            axs[n].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
