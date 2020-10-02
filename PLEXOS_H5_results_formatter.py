@@ -137,24 +137,15 @@ class Process:
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
         self.metadata = metadata
-        self.region_generator_category = self.metadata.region_generator_category()
-        self.zone_generator_category = self.metadata.zone_generator_category()
-        self.generator_cat = self.metadata.generator_category()
-        self.generator_storage = self.metadata.generator_storage()
-        self.region_generators = self.metadata.region_generators()
-        self.zone_generators = self.metadata.zone_generators()
-        self.node_region = self.metadata.node_region()
-        self.node_zone = self.metadata.node_zone()
-        self.reserves_regions = self.metadata.reserves_regions()
-        self.reserves_zones = self.metadata.reserves_zones()
+
 
 # Function for formatting data which comes form the PLEXOS Generator Category
     def df_process_generator(self):
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['tech','gen_name'], level=['category','name'], inplace=True)
 
-        if self.region_generator_category.empty == False:
-            region_gen_idx = pd.CategoricalIndex(self.region_generator_category.index.get_level_values(0))
+        if self.metadata.region_generator_category().empty == False:
+            region_gen_idx = pd.CategoricalIndex(self.metadata.region_generator_category().index.get_level_values(0))
             region_gen_idx = region_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
             idx_region = pd.MultiIndex(levels= df.index.levels + [region_gen_idx.categories]
@@ -163,8 +154,8 @@ class Process:
         else:
             idx_region = df.index
 
-        if self.zone_generator_category.empty == False:
-            zone_gen_idx = pd.CategoricalIndex(self.zone_generator_category.index.get_level_values(0))
+        if self.metadata.zone_generator_category().empty == False:
+            zone_gen_idx = pd.CategoricalIndex(self.metadata.zone_generator_category().index.get_level_values(0))
             zone_gen_idx = zone_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
             idx_zone = pd.MultiIndex(levels= idx_region.levels + [zone_gen_idx.categories]
@@ -174,7 +165,7 @@ class Process:
             idx_zone = idx_region
 
         if len(Region_Mapping.columns)>1 == True:
-            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.region_generator_category.merge(Region_Mapping,
+            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.metadata.region_generator_category().merge(Region_Mapping,
                                 how="left", on='region').sort_values(by=['tech','gen_name']).drop(['region','tech','gen_name'], axis=1))
             region_gen_mapping_idx = region_gen_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
@@ -264,10 +255,10 @@ class Process:
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['parent','Type'], level=['name','category'], inplace=True)
         df = df.reset_index() # unzip the levels in index
-        if self.reserves_regions.empty == False:
-            df = df.merge(self.reserves_regions, how='left', on='parent') # Merges in regions where reserves are located
-        if self.reserves_zones.empty == False:
-            df = df.merge(self.reserves_zones, how='left', on='parent') # Merges in zones where reserves are located
+        if self.metadata.reserves_regions().empty == False:
+            df = df.merge(self.metadata.reserves_regions(), how='left', on='parent') # Merges in regions where reserves are located
+        if self.metadata.reserves_zones().empty == False:
+            df = df.merge(self.metadata.reserves_zones(), how='left', on='parent') # Merges in zones where reserves are located
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
@@ -276,15 +267,15 @@ class Process:
         return df
 
     # Function for formatting data which comes form the PLEXOS Reserve_generators Category
-    def df_process_reserve_generators(self):
+    def df_process_reserves_generators(self):
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df = df.reset_index() # unzip the levels in index
-        df = df.merge(self.generator_cat, how='left', on='gen_name')
-        if self.reserves_regions.empty == False:
-            df = df.merge(self.reserves_regions, how='left', on='parent') # Merges in regions where reserves are located
-        if self.reserves_zones.empty == False:
-            df = df.merge(self.reserves_zones, how='left', on='parent') # Merges in zones where reserves are located
+        df = df.merge(self.metadata.generator_category(), how='left', on='gen_name')
+        if self.metadata.reserves_regions().empty == False:
+            df = df.merge(self.metadata.reserves_regions(), how='left', on='parent') # Merges in regions where reserves are located
+        if self.metadata.reserves_zones().empty == False:
+            df = df.merge(self.metadata.reserves_zones(), how='left', on='parent') # Merges in zones where reserves are located
         df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
@@ -330,11 +321,11 @@ class Process:
     def df_process_storage(self):
         df = self.df.droplevel(level=["band", "property", "category"])
         df = df.reset_index() # unzip the levels in index
-        df = df.merge(self.generator_storage, how='left', on='name')
-        if self.region_generators.empty == False:
-            df = df.merge(self.region_generators, how='left', on='gen_name') # Merges in regions where generators are located
-        if self.zone_generators.empty == False:
-            df = df.merge(self.zone_generators, how='left', on='gen_name') # Merges in zones where generators are located
+        df = df.merge(self.metadata.generator_storage(), how='left', on='name')
+        if self.metadata.region_generators().empty == False:
+            df = df.merge(self.metadata.region_generators(), how='left', on='gen_name') # Merges in regions where generators are located
+        if self.metadata.zone_generators().empty == False:
+            df = df.merge(self.metadata.zone_generators(), how='left', on='gen_name') # Merges in zones where generators are located
         if len(Region_Mapping.columns)>1 == True: #checks if Region_Maping contains data to merge, skips if empty (Default)
             df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
         df.rename(columns={'name':'storage_resource'}, inplace=True)
@@ -359,16 +350,16 @@ class Process:
         df = self.df.droplevel(level=["band","property","category"])
         df.index.rename('node', level='name', inplace=True)
         df.sort_index(level=['node'], inplace=True)
-        if self.node_region.empty == False:
-            node_region_idx = pd.CategoricalIndex(self.node_region.index.get_level_values(0))
+        if self.metadata.node_region().empty == False:
+            node_region_idx = pd.CategoricalIndex(self.metadata.node_region().index.get_level_values(0))
             node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
             idx_region = pd.MultiIndex(levels= df.index.levels + [node_region_idx.categories]
                                 ,codes= df.index.codes +  [node_region_idx.codes],
                                 names= df.index.names + node_region_idx.names)
         else:
             idx_region = df.index
-        if self.node_zone.empty == False:
-            node_zone_idx = pd.CategoricalIndex(self.node_zone.index.get_level_values(0))
+        if self.metadata.node_zone().empty == False:
+            node_zone_idx = pd.CategoricalIndex(self.metadata.node_zone().index.get_level_values(0))
             node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
             idx_zone = pd.MultiIndex(levels= idx_region.levels + [node_zone_idx.categories]
                                 ,codes= idx_region.codes + [node_zone_idx.codes] ,
@@ -376,7 +367,7 @@ class Process:
         else:
             idx_zone = idx_region
         if len(Region_Mapping.columns)>1 == True:
-            region_mapping_idx = pd.MultiIndex.from_frame(self.node_region.merge(Region_Mapping,
+            region_mapping_idx = pd.MultiIndex.from_frame(self.metadata.node_region().merge(Region_Mapping,
                                 how="left", on='region').drop(['region','node'], axis=1))
             region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
@@ -589,13 +580,14 @@ for Scenario_name in Scenario_List:
 
 # Code that can be used to test PLEXOS_H5_results_formatter
 
-    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'reserve_Shortage')
     # test = test.xs("region_name",level='zone')
     # test = test.xs("Nuclear",level='tech')
     # test = test.reset_index(['timestamp','gen_name'])
     # test = test.groupby(["timestamp", "node"], as_index=False).sum()
     # test = test.pivot(index='timestamp', columns='gen_name', values=0)
 
+    # test = test[['600003_PR IS31G_20','600005_MNTCE31G_22']]
     # test = test.reset_index()
 
     # test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")

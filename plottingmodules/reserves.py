@@ -43,7 +43,7 @@ class mplot(object):
         outputs = {}
         check_input_data = []
         reserve_provision_collection = {}
-        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserve_generators_Provision",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Multi_Scenario)])
              
         if 1 in check_input_data:
             outputs = None
