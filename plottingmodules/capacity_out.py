@@ -20,6 +20,11 @@ class mplot(object):
     def capacity_out_stack(self):
         outputs = {}
         for zone_input in self.Zones:
+            
+            outputs[zone_input] = pd.DataFrame()
+            print('This module requires PASA files, and is under development. Skipping plot.')
+            continue
+            
             print('Zone = ' + str(zone_input))
 
             xdimension=len(self.xlabels)
