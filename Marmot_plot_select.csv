@@ -56,6 +56,7 @@ Reserve Shortage Timeseries Facet Grid,FALSE,Reserve_Shortage_Timeseries_Facet_G
 Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries,,,,EST,,,reserves,reserve_gen_timeseries
 Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Peak_Demand,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
 Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Date_Range,Date Range,,,EST,7/1/24,7/7/24,reserves,reserve_gen_timeseries
+Reserve Gen Timeseries Facet Grid,TRUE,Reserve_Gen_Timeseries_Facet_Grid,,,,,,,reserves,reserve_gen_timeseries
 Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
 Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Date_Range,Date Range,,,EST,7/1/24,7/7/24,reserves,reserve_gen_timeseries
 Thermal Capacity reserves,FALSE,Thermal_Capacity_Reserves,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves
@@ -64,7 +65,7 @@ Total Generation Difference,FALSE,Total_Generation_Diff,,,,,,,total_generation,t
 Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,,total_generation,total_gen_facet
 Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,,,,total_installed_capacity,total_cap
 Total Installed Capacity and Generation Facet,FALSE,Total_Installed_Capacity_and_Generation_Facet,,,,,,,total_installed_capacity,total_cap_and_gen_facet
-Total Reserve Gen Provision,TRUE,Total_Reserve_Gen_Provision,,,,,,,reserves,total_reserves_by_gen
+Total Reserve Gen Provision,FALSE,Total_Reserve_Gen_Provision,,,,,,,reserves,total_reserves_by_gen
 Line Utilization Histogram,FALSE,Line_Utilization_Histogram,,,,,,,transmission,line_hist
 Line Utilization Histogram,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,,transmission,line_hist
 Line Utilization Duration Curve,FALSE,Line_Utilization_Duration,,,,,,,transmission,line_util
