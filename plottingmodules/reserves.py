@@ -197,15 +197,8 @@ class mplot(object):
             # create figure
             fig1 = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict)
 
-            # figure formatting
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
+            # additional figure formatting
             fig1.set_ylabel('Total Reserve Provision (GWh)',  color='black', rotation='vertical')
-            #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
-            # plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
