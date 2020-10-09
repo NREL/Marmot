@@ -73,6 +73,28 @@ def df_process_gen_inputs(df,ordered_gen):
     df = df.pivot(index='timestamp', columns='tech', values=0)
     return df
 
+def df_process_categorical_index(df, ordered_gen):
+    """
+    Creates categorical index based on generators
+
+    Parameters
+    ----------
+    df : DataFrame
+        Dataframe to process.
+    ordered_gen : list
+        List of gen tech types ordered.
+
+    Returns
+    -------
+    df : DataFrame
+        Processed DataFrame
+    """
+    df=df
+    df.index = df.index.astype("category")
+    df.index = df.index.set_categories(ordered_gen)
+    df = df.sort_index()
+    return df
+
 def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
     """
     Sets facet plot x,y dimensions baded on provided labeles

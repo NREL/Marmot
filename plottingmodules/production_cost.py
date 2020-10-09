@@ -11,6 +11,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
 
+import marmot_plot_functions as mfunc
 
 #===============================================================================
 
@@ -21,13 +22,6 @@ def df_process_gen_inputs(df, self):
     df.tech.cat.set_categories(self.ordered_gen, inplace=True)
     df = df.sort_values(["tech"])
     df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
-
-def df_process_categorical_index(df, self):
-    df=df
-    df.index = df.index.astype("category")
-    df.index = df.index.set_categories(self.ordered_gen)
-    df = df.sort_index()
     return df
 
 class mplot(object):
@@ -428,7 +422,7 @@ class mplot(object):
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
 
-            Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
+            Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
@@ -601,7 +595,7 @@ class mplot(object):
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
 
-            Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
+            Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
             #Ensures region has generation, else skips
