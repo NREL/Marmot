@@ -15,19 +15,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 
+import marmot_plot_functions as mfunc
 
 #===============================================================================
-
-def df_process_gen_inputs(df,self):
-    df = df.reset_index(['timestamp','tech'])
-    df['tech'].replace(self.gen_names_dict, inplace=True)
-    df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show.
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df.set_index(['timestamp','tech'],inplace=True)
-    return df
 
 def df_process_gen_ind_inputs(df,self):
     df = df.reset_index(['timestamp','tech','gen_name'])
@@ -77,11 +67,11 @@ class mplot(object):
                     print("No generation in "+zone_input+".")
                     break
 
-                Gen = df_process_gen_inputs(Gen,self)
+                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
 
                 Ava = Ava_Collection.get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
-                Ava = df_process_gen_inputs(Ava,self)
+                Ava = df_process_gen_inputs(Ava,self.ordered_gen)
 
                 #Gen = Gen/interval_count
                 Total_Gen = Gen.groupby(["tech"],as_index=True).sum() #axis=0)
@@ -246,11 +236,11 @@ class mplot(object):
                 except KeyError:
                     print("No generation in "+zone_input+".")
                     break
-                Gen = df_process_gen_inputs(Gen,self)
+                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
 
                 Ava = Ava_Collection.get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
-                Ava = df_process_gen_inputs(Ava,self)
+                Ava = mfunc.df_process_gen_inputs(Ava,self.ordered_gen)
 
 
                 #Gen = Gen/interval_count
@@ -328,7 +318,7 @@ class mplot(object):
                     print("No generation in "+zone_input+".")
                     break
 
-                Gen = df_process_gen_inputs(Gen,self)
+                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
 
 
                 Total_Gen = Gen.groupby(["tech"],as_index=True).sum() #axis=0)

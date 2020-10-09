@@ -15,16 +15,8 @@ import os
 from matplotlib.patches import Patch
 import numpy as np
 
+import marmot_plot_functions as mfunc
 #===============================================================================
-
-def df_process_gen_inputs(df, self):
-    df = df.reset_index(['timestamp','tech'])
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
@@ -75,7 +67,7 @@ class mplot(object):
             try:
                 Stacked_Curt = Curtailment_Collection.get(scenario)
                 Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
+                Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                 Stacked_Curt = Stacked_Curt.sum(axis=1)
                 Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                 Stacked_Gen.insert(len(Stacked_Gen.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
@@ -226,7 +218,7 @@ class mplot(object):
                     out = pd.DataFrame()
                     return out
 
-                Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
+                Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
                 data = setup_data(zone_input, scenario, Stacked_Gen)
 
                 # if no Generation return empty dataframe
@@ -429,13 +421,13 @@ class mplot(object):
 
             Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[0])
             Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(zone_input,level=self.AGG_BY)
-            Total_Gen_Stack_1 = df_process_gen_inputs(Total_Gen_Stack_1, self)
+            Total_Gen_Stack_1 = mfunc.df_process_gen_inputs(Total_Gen_Stack_1, self.ordered_gen)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns = self.ordered_gen).fillna(0)
 
             Total_Gen_Stack_2 = Gen_Collection.get(self.Scenario_Diff[1])
             Total_Gen_Stack_2 = Total_Gen_Stack_2.xs(zone_input,level=self.AGG_BY)
-            Total_Gen_Stack_2 = df_process_gen_inputs(Total_Gen_Stack_2, self)
+            Total_Gen_Stack_2 = mfunc.df_process_gen_inputs(Total_Gen_Stack_2, self.ordered_gen)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns = self.ordered_gen).fillna(0)
 
@@ -521,12 +513,12 @@ class mplot(object):
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
             Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             del Stacked_Gen_read
-            Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
+            Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
 
             try:
                 Stacked_Curt = Stacked_Curt_read.xs(zone_input,level=self.AGG_BY)
                 del Stacked_Curt_read
-                Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
+                Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                 Stacked_Curt = Stacked_Curt.sum(axis=1)
                 Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                 Stacked_Gen.insert(len(Stacked_Gen.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
@@ -706,19 +698,19 @@ class mplot(object):
                 #Calculate  committed cap (for thermal only).
                 thermal_commit_cap = units_gen * avail_cap
                 thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
-                thermal_commit_cap = df_process_gen_inputs(thermal_commit_cap,self)
+                thermal_commit_cap = mfunc.df_process_gen_inputs(thermal_commit_cap,self.ordered_gen)
                 thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
                 thermal_commit_cap = thermal_commit_cap / 1000 #MW -> GW
 
                 #Process generation.
                 gen = gen.xs(zone_input,level = self.AGG_BY)
-                gen = df_process_gen_inputs(gen,self)
+                gen = mfunc.df_process_gen_inputs(gen,self.ordered_gen)
                 gen = gen.loc[:, (gen != 0).any(axis=0)]
                 gen = gen / 1000
 
                 #Process available capacity (for VG only).
                 avail_cap = avail_cap.xs(zone_input, level = self.AGG_BY)
-                avail_cap = df_process_gen_inputs(avail_cap,self)
+                avail_cap = mfunc.df_process_gen_inputs(avail_cap,self.ordered_gen)
                 avail_cap = avail_cap.loc[:, (avail_cap !=0).any(axis=0)]
                 avail_cap = avail_cap / 1000
 

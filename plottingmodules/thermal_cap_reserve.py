@@ -15,19 +15,9 @@ import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
 
+import marmot_plot_functions as mfunc
 
 #===============================================================================
-
-def df_process_gen_inputs(df, self):
-    df = df.reset_index()
-    df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show.
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
-
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
@@ -75,8 +65,8 @@ class mplot(object):
                     print("No installed capacity in : "+zone_input)
                     break
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
-                avail_cap = df_process_gen_inputs(avail_cap,self)
-                Gen = df_process_gen_inputs(Gen,self)
+                avail_cap = mfunc.df_process_gen_inputs(avail_cap,self.ordered_gen)
+                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
                 Gen = Gen.loc[:, (Gen != 0).any(axis=0)]
 
                 thermal_reserve = avail_cap - Gen

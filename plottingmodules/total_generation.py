@@ -18,15 +18,6 @@ import marmot_plot_functions as mfunc
 
 #===============================================================================
 
-def df_process_gen_inputs(df, self):
-    df = df.reset_index()
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
-
 custom_legend_elements = [Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
                          label='Unserved Energy')]
@@ -96,7 +87,7 @@ class mplot(object):
                 except KeyError:
                     print("No installed capacity in : "+zone_input)
                     break
-                Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
+                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
                 time_delta = Total_Gen_Stack.index[1]- Total_Gen_Stack.index[0]
@@ -107,7 +98,7 @@ class mplot(object):
                 try:
                     Stacked_Curt = Curtailment_Collection.get(scenario)
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                    Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
+                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
                     Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
                     Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -272,7 +263,7 @@ class mplot(object):
                     print("No installed capacity in : "+zone_input)
                     break
 
-                Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
+                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
                 time_delta = Total_Gen_Stack.index[1]- Total_Gen_Stack.index[0]
@@ -283,7 +274,7 @@ class mplot(object):
                 try:
                     Stacked_Curt = Curtailment_Collection.get(scenario)
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                    Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
+                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
                     Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
                     Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
