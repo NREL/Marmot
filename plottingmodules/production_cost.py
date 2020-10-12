@@ -11,24 +11,9 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
 
+import marmot_plot_functions as mfunc
 
 #===============================================================================
-
-def df_process_gen_inputs(df, self):
-    df = df.reset_index()
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
-
-def df_process_categorical_index(df, self):
-    df=df
-    df.index = df.index.astype("category")
-    df.index = df.index.set_categories(self.ordered_gen)
-    df = df.sort_index()
-    return df
 
 class mplot(object):
     def __init__(self, argument_dict):
@@ -65,20 +50,20 @@ class mplot(object):
                 except KeyError:
                     print("No installed capacity in : "+zone_input)
                     continue
-                Total_Installed_Capacity = df_process_gen_inputs(Total_Installed_Capacity, self)
+                Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity = Total_Installed_Capacity.iloc[0]
 
                 Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
-                Total_Gen_Cost = df_process_gen_inputs(Total_Gen_Cost, self)
+                Total_Gen_Cost = mfunc.df_process_gen_inputs(Total_Gen_Cost, self.ordered_gen)
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)*-1
                 Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/kW-year
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
 
                 Pool_Revenues = Pool_Revenues_Collection.get(scenario)
                 Pool_Revenues = Pool_Revenues.xs(zone_input,level=self.AGG_BY)
-                Pool_Revenues = df_process_gen_inputs(Pool_Revenues, self)
+                Pool_Revenues = mfunc.df_process_gen_inputs(Pool_Revenues, self.ordered_gen)
                 Pool_Revenues = Pool_Revenues.sum(axis=0)
                 Pool_Revenues = Pool_Revenues/Total_Installed_Capacity #Change to $/kW-year
                 Pool_Revenues.rename("Energy_Revenues", inplace=True)
@@ -86,7 +71,7 @@ class mplot(object):
                 ### Might cvhnage to Net Reserve Revenue at later date
                 Reserve_Revenues = Reserve_Revenues_Collection.get(scenario)
                 Reserve_Revenues = Reserve_Revenues.xs(zone_input,level=self.AGG_BY)
-                Reserve_Revenues = df_process_gen_inputs(Reserve_Revenues, self)
+                Reserve_Revenues = mfunc.df_process_gen_inputs(Reserve_Revenues, self.ordered_gen)
                 Reserve_Revenues = Reserve_Revenues.sum(axis=0)
                 Reserve_Revenues = Reserve_Revenues/Total_Installed_Capacity #Change to $/kW-year
                 Reserve_Revenues.rename("Reserve_Revenues", inplace=True)
@@ -422,13 +407,13 @@ class mplot(object):
                 except KeyError:
                     print("No Generators found for : "+zone_input)
                     continue
-                Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
+                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
 
-            Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
+            Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
@@ -596,12 +581,12 @@ class mplot(object):
                 except KeyError:
                     print("No Generators found for : "+zone_input)
                     continue
-                Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
+                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
 
-            Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
+            Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
             #Ensures region has generation, else skips

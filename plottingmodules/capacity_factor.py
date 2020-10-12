@@ -15,19 +15,9 @@ import matplotlib.ticker as mtick
 import numpy as np
 import os
 
+import marmot_plot_functions as mfunc
 
 #===============================================================================
-
-def df_process_gen_inputs(df,self):
-    df = df.reset_index()
-    # df['tech'].replace(self.gen_names_dict, inplace=True)
-    # df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show.
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
 
 class mplot(object):
 
@@ -59,7 +49,7 @@ class mplot(object):
                 except KeyError:
                         print('No data in ' + zone_input)
                         continue
-                Gen = df_process_gen_inputs(Gen,self)
+                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
                 if self.prop == 'Date Range':
                     print("Plotting specific date range:")
                     print(str(self.start_date) + '  to  ' + str(self.end_date))
@@ -79,7 +69,7 @@ class mplot(object):
 
                 Cap = Cap_Collection.get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
-                Cap = df_process_gen_inputs(Cap, self)
+                Cap = mfunc.df_process_gen_inputs(Cap, self.ordered_gen)
                 Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
                 Cap.rename(scenario, inplace = True)
 

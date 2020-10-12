@@ -10,17 +10,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
 
+import marmot_plot_functions as mfunc
 #===============================================================================
-
-def df_process_gen_inputs(df, self):
-    df = df.reset_index()
-    df['tech'].replace(self.gen_names_dict, inplace=True)
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
 
 class mplot(object):
 
@@ -60,14 +51,14 @@ class mplot(object):
                     outputs[zone_input] = pd.DataFrame()
                     continue
 
-            Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
+            Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
 
             Avail_Gen = Avail_Gen_read.xs(zone_input,level=self.AGG_BY)
-            Avail_Gen = df_process_gen_inputs(Avail_Gen, self)
+            Avail_Gen = mfunc.df_process_gen_inputs(Avail_Gen, self.ordered_gen)
 
             try:
                 Stacked_Curt = Stacked_Curt_read.xs(zone_input,level=self.AGG_BY)
-                Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
+                Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                 Stacked_Curt = Stacked_Curt.sum(axis=1)
                 Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                 Stacked_Gen.insert(len(Stacked_Gen.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
@@ -259,16 +250,16 @@ class mplot(object):
 
                 if Stacked_Gen.empty == True:
                     continue
-                Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
+                Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
 
                 Avail_Gen = Avail_Gen_Collection.get(scenario)
                 Avail_Gen = Avail_Gen.xs(zone_input,level=self.AGG_BY)
-                Avail_Gen = df_process_gen_inputs(Avail_Gen, self)
+                Avail_Gen = mfunc.df_process_gen_inputs(Avail_Gen, self.ordered_gen)
 
                 try:
                     Stacked_Curt = Curtailment_Collection.get(scenario)
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                    Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
+                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
                     Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                     Stacked_Gen.insert(len(Stacked_Gen.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into

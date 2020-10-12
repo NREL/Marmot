@@ -14,18 +14,9 @@ import pdb
 from matplotlib.patches import Patch
 import numpy as np
 
+import marmot_plot_functions as mfunc
 
 #===============================================================================
-
-def df_process_gen_inputs(df, self):
-    df = df.reset_index()
-    df['tech'].replace(self.gen_names_dict, inplace=True)
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
@@ -65,7 +56,7 @@ class mplot(object):
                     print("No installed capacity in : "+zone_input)
                     break
 
-                Total_Installed_Capacity = df_process_gen_inputs(Total_Installed_Capacity, self)
+                Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
@@ -119,7 +110,7 @@ class mplot(object):
         for zone_input in self.Zones:
 
             fig, axs = plt.subplots(1, 2, figsize=(10, 4))
-            
+
             plt.subplots_adjust(wspace=0.35, hspace=0.2)
             axs = axs.ravel()
 
@@ -140,7 +131,7 @@ class mplot(object):
             axs[0].tick_params(axis='y', which='major', length=5, width=1)
             axs[0].tick_params(axis='x', which='major', length=5, width=1)
             axs[0].get_legend().remove()
-            
+
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
                 self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
@@ -184,34 +175,34 @@ class mplot(object):
                                 facecolor = '#DD0200',
                                 alpha=0.5)
                 n=n+1
-            
+
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
                 self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
                 axs[1].set_xticklabels(self.ticklabels)
 
-            
-            # get names of generator to create custom legend 
+
+            # get names of generator to create custom legend
             l1 = Total_Installed_Capacity_Out.columns.tolist()
             l2 = Total_Generation_Stack_Out.columns.tolist()
             l1.extend(l2)
-            
-            handles = np.unique(np.array(l1)).tolist()            
-            handles.sort(key = lambda i:self.ordered_gen.index(i)) 
+
+            handles = np.unique(np.array(l1)).tolist()
+            handles.sort(key = lambda i:self.ordered_gen.index(i))
             handles = reversed(handles)
-            
-            # create custom gen_tech legend 
+
+            # create custom gen_tech legend
             gen_tech_legend = []
             for tech in handles:
                 legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
                             alpha=1.0,
                          label=tech)]
                 gen_tech_legend.extend(legend_handles)
-                
+
             #Legend 1
             leg1 = axs[1].legend(handles = gen_tech_legend, loc='lower left', bbox_to_anchor=(1,-0.1),
                           facecolor='inherit', frameon=True, prop={"size":10})
-        
+
             #Legend 2
             if Pump_Load_Out.values.sum() > 0:
               leg2 = axs[1].legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
@@ -237,11 +228,11 @@ class mplot(object):
                 fig.add_artist(leg3)
             if Pump_Load_Out.values.sum() > 0:
                 fig.add_artist(leg4)
-                
+
             # add labels to panels
             axs[0].set_title("A.", fontdict={"weight":"bold"}, loc='left')
             axs[1].set_title("B.", fontdict={"weight":"bold"}, loc='left')
-                
+
             # output figure
             df = pd.DataFrame()
             outputs[zone_input] = {'fig': fig, 'data_table': df}

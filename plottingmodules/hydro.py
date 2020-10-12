@@ -15,20 +15,9 @@ import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
 
-
+import marmot_plot_functions as mfunc
 
 #===============================================================================
-
-def df_process_gen_inputs(df, self):
-    df = df.reset_index(['timestamp','tech'])
-    df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
-    df = df.sort_values(["tech"])
-    df = df.pivot(index='timestamp', columns='tech', values=0)
-    return df
-
-
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
@@ -55,7 +44,7 @@ class mplot(object):
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
             Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             del Stacked_Gen_read
-            Stacked_Gen = df_process_gen_inputs(Stacked_Gen, self)
+            Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
 
             # Calculates Net Load by removing variable gen
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
@@ -178,7 +167,7 @@ class mplot(object):
             print("Zone = "+ zone_input)
             print("Winter is defined as date range:")
             print(str(self.start_date) + '  to  ' + str(self.end_date))
-            Net_Load = df_process_gen_inputs(Stacked_Gen_read, self)
+            Net_Load = mfunc.df_process_gen_inputs(Stacked_Gen_read, self.ordered_gen)
 
             # Calculates Net Load by removing variable gen
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
@@ -188,7 +177,7 @@ class mplot(object):
 
             Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             del Stacked_Gen_read
-            Stacked_Gen= df_process_gen_inputs(Stacked_Gen, self)
+            Stacked_Gen= mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)] #Removes columns only containing 0
 
         #end weekly loop

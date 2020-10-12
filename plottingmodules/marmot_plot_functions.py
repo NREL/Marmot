@@ -27,7 +27,7 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
         dictionary of data with scenarios as keys.
     data : string
         name of data to pull from h5 file.
-    Marmot_Solutions_folder : folder 
+    Marmot_Solutions_folder : folder
         Main Mamrmot folder
     scenario_list : List
         List of scenarios to plot.
@@ -46,12 +46,12 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
             return_value = 1
             return return_value
     return return_value
-        
+
 def df_process_gen_inputs(df,ordered_gen):
     """
-    Processes generation data into a pivot 
+    Processes generation data into a pivot
     Technology names as columns,
-    Timeseries as index    
+    Timeseries as index
 
     Parameters
     ----------
@@ -73,10 +73,31 @@ def df_process_gen_inputs(df,ordered_gen):
     df = df.pivot(index='timestamp', columns='tech', values=0)
     return df
 
+def df_process_categorical_index(df, ordered_gen):
+    """
+    Creates categorical index based on generators
+
+    Parameters
+    ----------
+    df : DataFrame
+        Dataframe to process.
+    ordered_gen : list
+        List of gen tech types ordered.
+
+    Returns
+    -------
+    df : DataFrame
+        Processed DataFrame
+    """
+    df=df
+    df.index = df.index.astype("category")
+    df.index = df.index.set_categories(ordered_gen)
+    df = df.sort_index()
+    return df
 
 def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
     """
-    Sets facet plot x,y dimensions baded on provided labeles 
+    Sets facet plot x,y dimensions baded on provided labeles
 
     Parameters
     ----------
@@ -111,8 +132,8 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
         print("Warning: Facet Labels not provided - Using Marmot default dimensions")
         xdimension, ydimension = set_x_y_dimension(len(multi_scenario))
     return xdimension, ydimension
-  
-  
+
+
 def set_x_y_dimension(region_number):
     """
     Sets X,Y dimension of plots without x,y labels
@@ -138,7 +159,7 @@ def set_x_y_dimension(region_number):
     if region_number == 4:
         xdimension = 2
         ydimension = 2
-    return xdimension,ydimension    
+    return xdimension,ydimension
 
 
 def setup_plot(xdimension=1,ydimension=1,sharey=True):
@@ -164,7 +185,7 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     fig, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=sharey, squeeze=False)
     axs = axs.ravel()
     return fig,axs
-    
+
 
 def create_grouped_bar_plot(df, colour):
     """
@@ -190,6 +211,32 @@ def create_grouped_bar_plot(df, colour):
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
 
+def create_stacked_bar_plot(df, colour):
+    """
+    Creates a stacked bar plot
+
+    Parameters
+    ----------
+    df : DataFrame
+        DataFrame of data to plot.
+    colour : dictionary
+        colour dictionary.
+
+    Returns
+    -------
+    fig : matplotlib fig
+        matplotlib fig.
+    """
+
+    fig = df.plot.bar(stacked=True, figsize=(6,4), rot=0, edgecolor='black', linewidth='0.1',
+                                                color=[colour.get(x, '#333333') for x in df.columns])
+    fig.spines['right'].set_visible(False)
+    fig.spines['top'].set_visible(False)
+    #adds comma to y axis data
+    fig.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    fig.tick_params(axis='y', which='major', length=5, width=1)
+    fig.tick_params(axis='x', which='major', length=5, width=1)
+    return fig
 
 def create_line_plot(axs,data,column,color_dict=None,label=None,n=0):
     """
@@ -311,8 +358,8 @@ def set_plot_timeseries_format(axs,n=0,minticks=6, maxticks=8):
     formatter.show_offset = False
     axs[n].xaxis.set_major_locator(locator)
     axs[n].xaxis.set_major_formatter(formatter)
-   
-    
+
+
 def remove_excess_axs(axs, excess_axs, grid_size):
     """
     Removes excess axes spins + tick marks
@@ -339,8 +386,8 @@ def remove_excess_axs(axs, excess_axs, grid_size):
                                                 which='both',
                                                 colors='white')
     excess_axs-=1
-   
-    
+
+
 def add_facet_labels(fig, xlabels, ylabels):
     """
     Adds labels to outside of Facet plot
