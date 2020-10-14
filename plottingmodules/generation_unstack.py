@@ -9,8 +9,9 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
-
 import marmot_plot_functions as mfunc
+import logging
+
 #===============================================================================
 
 class mplot(object):
@@ -20,6 +21,7 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def gen_unstack(self):
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
@@ -41,13 +43,13 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
 
-            print(self.AGG_BY + " = "+ zone_input)
+            self.logger.info(self.AGG_BY + " = "+ zone_input)
             Pump_Load = pd.Series() # Initiate pump load
 
             try:
                 Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             except Exception:
-                    print('No generation in ' + zone_input)
+                    self.logger.warning('No generation in ' + zone_input)
                     outputs[zone_input] = pd.DataFrame()
                     continue
 
@@ -112,8 +114,8 @@ class mplot(object):
                 Pump_Load = Pump_Load[start_date : end_date]
 
             elif self.prop == 'Date Range':
-                print("Plotting specific date range:")
-                print(str(self.start_date) + '  to  ' + str(self.end_date))
+                self.logger.info("Plotting specific date range: \
+                {} to {}".format(str(self.start_date),str(self.end_date)))
 
                 Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
                 Load = Load[self.start_date : self.end_date]
@@ -121,7 +123,7 @@ class mplot(object):
                 Pump_Load = Pump_Load[self.start_date : self.end_date]
 
             else:
-                print("Plotting graph for entire timeperiod")
+                self.logger.info("Plotting graph for entire timeperiod")
 
             # Code for leap years
        #     if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Stacked_Gen.index[0] > dt.datetime(2024,2,28,0,0):
@@ -223,7 +225,7 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
 
 
             xdimension=len(self.xlabels)
@@ -237,14 +239,14 @@ class mplot(object):
 
             data_table = {}
             for scenario in self.Multi_Scenario:
-                print("     " + scenario)
+                self.logger.info("     " + scenario)
                 Pump_Load = pd.Series() # Initiate pump load
 
                 try:
                     Stacked_Gen = Gen_Collection.get(scenario)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except Exception:
-                    print('No generation in ' + zone_input)
+                    self.logger.warning('No generation in ' + zone_input)
                     i=i+1
                     continue
 
@@ -316,7 +318,7 @@ class mplot(object):
                     Pump_Load = Pump_Load[start_date : end_date]
 
                 else:
-                    print("Plotting graph for entire timeperiod")
+                    self.logger.info("Plotting graph for entire timeperiod")
 
                 data_table[scenario] = Stacked_Gen
 

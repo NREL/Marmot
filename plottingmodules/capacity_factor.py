@@ -9,13 +9,11 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 """
 
 import pandas as pd
-#import matplotlib.pyplot as plt
-#import matplotlib as mpl
 import matplotlib.ticker as mtick
 import numpy as np
 import os
-
 import marmot_plot_functions as mfunc
+import logging
 
 #===============================================================================
 
@@ -26,6 +24,7 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def cf(self):
 
@@ -38,21 +37,21 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
                 Gen = Gen_Collection.get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No data in ' + zone_input)
+                        self.logger.warning('No data in ' + zone_input)
                         continue
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
                 if self.prop == 'Date Range':
-                    print("Plotting specific date range:")
-                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
                     Gen = Gen[self.start_date : self.end_date]
 
                 # Calculates interval step to correct for MWh of generation
@@ -110,15 +109,15 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
                 Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No data in ' + zone_input)
+                        self.logger.warning('No data in ' + zone_input)
                         continue
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
@@ -135,8 +134,8 @@ class mplot(object):
                 Gen.index = Gen.timestamp
                 Gen = Gen.drop(columns = ['timestamp'])
                 if self.prop == 'Date Range':
-                    print("Plotting specific date range:")
-                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
                     Gen = Gen[self.start_date : self.end_date]
 
                 #Calculate CF individually for each plant, since we need to take out all zero rows.
@@ -192,12 +191,12 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             time_at_min = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
 
                 Min = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
                 Min = Min.xs(zone_input,level = self.AGG_BY)
@@ -211,7 +210,7 @@ class mplot(object):
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No data in ' + zone_input)
+                        self.logger.warning('No data in ' + zone_input)
                         continue
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")

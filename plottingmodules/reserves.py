@@ -16,8 +16,9 @@ import matplotlib as mpl
 import numpy as np
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
-
 import marmot_plot_functions as mfunc
+import logging
+
 #===============================================================================
 
 
@@ -27,7 +28,7 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def reserve_gen_timeseries(self):
         """
@@ -50,7 +51,7 @@ class mplot(object):
             return outputs
 
         for region in self.Zones:
-            print("Zone = "+ region)
+            self.logger.info("Zone = "+ region)
 
             xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario=self.Multi_Scenario)
             grid_size = xdimension*ydimension
@@ -63,7 +64,7 @@ class mplot(object):
             unique_tech_names = []
             n=0 #Counter for scenario subplots
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 reserve_provision_timeseries = reserve_provision_collection.get(scenario)
 
@@ -71,13 +72,13 @@ class mplot(object):
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    print("No reserves in : " + region)
+                    self.logger.warning("No reserves in : " + region)
                     break
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
                 data_tables[scenario] = reserve_provision_timeseries
 
                 if self.prop == "Peak Demand":
-                    print("Plotting Peak Demand period")
+                    self.logger.info("Plotting Peak Demand period")
 
                     total_reserve = reserve_provision_timeseries.sum(axis=1)
                     peak_reserve_t =  total_reserve.idxmax()
@@ -87,11 +88,11 @@ class mplot(object):
                     Peak_Reserve = total_reserve[peak_reserve_t]
 
                 elif self.prop == 'Date Range':
-                    print("Plotting specific date range:")
-                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
                     reserve_provision_timeseries = reserve_provision_timeseries[self.start_date : self.end_date]
                 else:
-                    print("Plotting graph for entire timeperiod")
+                    self.logger.info("Plotting graph for entire timeperiod")
 
                 mfunc.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, label=reserve_provision_timeseries.columns,n=n)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
@@ -159,19 +160,19 @@ class mplot(object):
             return outputs
 
         for region in self.Zones:
-            print("Zone = "+ region)
+            self.logger.info("Zone = "+ region)
 
             Total_Reserves_Out = pd.DataFrame()
             unique_tech_names = []
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 reserve_provision_timeseries = reserve_provision_collection.get(scenario)
                 #Check if zone has reserves, if not skips
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    print("No reserves in : " + region)
+                    self.logger.warning("No reserves in : " + region)
                     break
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
 
@@ -268,20 +269,20 @@ class mplot(object):
 
         outputs = {}
         for region in self.Zones:
-            print("     "+ region)
+            self.logger.info("Zone = "+ region)
 
             Data_Table_Out=pd.DataFrame()
             reserve_total_chunk = []
             for scenario in self.Multi_Scenario:
 
-                print('Scenario = ' + scenario)
+                self.logger.info('Scenario = ' + scenario)
 
                 reserve_timeseries = reserve_collection.get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    print("No reserves in : " + region)
+                    self.logger.warning("No reserves in : " + region)
                     break
                 timestamps = reserve_timeseries.index.get_level_values('timestamp').unique()
                 # Calculates interval step to correct for MWh of generation
@@ -359,7 +360,7 @@ class mplot(object):
 
         outputs = {}
         for region in self.Zones:
-            print("     "+ region)
+            self.logger.info("Zone = "+ region)
 
             xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario = self.Multi_Scenario)
 
@@ -374,14 +375,14 @@ class mplot(object):
             n=0 #Counter for scenario subplots
             for scenario in self.Multi_Scenario:
 
-                print('Scenario = ' + scenario)
+                self.logger.info('Scenario = ' + scenario)
 
                 reserve_timeseries = reserve_collection.get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    print("No reserves in : " + region)
+                    self.logger.warning("No reserves in : " + region)
                     break
                 reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False,inplace=True)
                 reserve_timeseries = reserve_timeseries.drop_duplicates()
@@ -390,11 +391,11 @@ class mplot(object):
                 reserve_timeseries = reserve_timeseries.pivot(index='timestamp', columns='Type', values=0)
 
                 if self.prop == 'Date Range':
-                    print("Plotting specific date range:")
-                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
                     reserve_timeseries = reserve_timeseries[self.start_date : self.end_date]
                 else:
-                    print("Plotting graph for entire timeperiod")
+                    self.logger.info("Plotting graph for entire timeperiod")
 
                 # create color dictionary
                 color_dict = dict(zip(reserve_timeseries.columns,self.color_list))

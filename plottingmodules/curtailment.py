@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
 import os
+import logging
 
 #===============================================================================
 
@@ -22,7 +23,8 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
     def curt_pen(self):
         # Create Dictionary to hold Datframes for each scenario
         Gen_Collection = {}
@@ -41,16 +43,16 @@ class mplot(object):
 #        for zone_input in ['TWPR']:
             Penetration_Curtailment_out = pd.DataFrame()
 
-            print(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(self.AGG_BY +  " = " + zone_input)
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 gen = Gen_Collection.get(scenario)
                 try: #Check for regions missing all generation.
                     gen = gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No generation in ' + zone_input)
+                        self.logger.warning('No generation in ' + zone_input)
                         continue
 
                 avail_gen = Avail_Gen_Collection.get(scenario)
@@ -60,7 +62,7 @@ class mplot(object):
                 try:
                     re_curt = re_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                        print('No curtailment in ' + zone_input)
+                        self.logger.warning('No curtailment in ' + zone_input)
                         continue
 
                 # Finds the number of unique hours in the year
@@ -209,10 +211,10 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(self.AGG_BY +  " = " + zone_input)
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 re_curt = Curtailment_Collection.get(scenario)
 
@@ -220,7 +222,7 @@ class mplot(object):
                 try: #Check for regions missing all generation.
                     re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No curtailment in ' + zone_input)
+                        self.logger.warning('No curtailment in ' + zone_input)
                         continue
 
                 # Timeseries [MW] PV curtailment [MWh]
@@ -298,13 +300,13 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(self.AGG_BY +  " = " + zone_input)
 
             Total_Curtailment_out = pd.DataFrame()
             Total_Available_gen = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
                 self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Curtailment_Collection.get(scenario).index.unique(level="tech")]
 
@@ -315,7 +317,7 @@ class mplot(object):
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print('No curtailment in ' + zone_input)
+                    self.logger.warning('No curtailment in ' + zone_input)
                     continue
                 vre_curt = (vre_curt.loc[(slice(None), self.vre_gen_cat),:])
 
@@ -323,7 +325,7 @@ class mplot(object):
                 try: #Check for regions missing all generation.
                     avail_gen = avail_gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No available generation in ' + zone_input)
+                        self.logger.warning('No available generation in ' + zone_input)
                         continue
                 avail_gen = (avail_gen.loc[(slice(None), self.vre_gen_cat),:])
 
@@ -331,7 +333,7 @@ class mplot(object):
                     try:
                         vre_curt_type = vre_curt.xs(vre_type,level='tech')
                     except KeyError:
-                        print('No ' + vre_type + ' in ' + zone_input)
+                        self.logger.warning('No ' + vre_type + ' in ' + zone_input)
                         continue
                     vre_collection[vre_type] = float(vre_curt_type.sum())
 

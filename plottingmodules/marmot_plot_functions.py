@@ -13,6 +13,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import math
+import logging
+
+logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
 
 
@@ -42,7 +45,7 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
             data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),data)
             return_value = 0
         except KeyError:
-            print("'{}' is MISSING from the Marmot formatted h5 files".format(data))
+            logger.warning("'{}' is MISSING from the Marmot formatted h5 files".format(data))
             return_value = 1
             return return_value
     return return_value
@@ -129,7 +132,7 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
         ydimension = 1
     # If no labels were provided use Marmot default dimension settings
     if xlabels == [''] and ylabels == ['']:
-        print("Warning: Facet Labels not provided - Using Marmot default dimensions")
+        logger.warning("Warning: Facet Labels not provided - Using Marmot default dimensions")
         xdimension, ydimension = set_x_y_dimension(len(multi_scenario))
     return xdimension, ydimension
 

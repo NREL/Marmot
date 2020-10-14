@@ -13,8 +13,8 @@ import matplotlib as mpl
 import numpy as np
 import os
 from matplotlib.patches import Patch
-
 import marmot_plot_functions as mfunc
+import logging
 
 #===============================================================================
 
@@ -29,6 +29,7 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def total_gen(self):
         # Create Dictionary to hold Datframes for each scenario
@@ -72,12 +73,12 @@ class mplot(object):
             Total_Demand_Out = pd.DataFrame()
             Unserved_Energy_Out = pd.DataFrame()
             unserved_eng_data_table_out = pd.DataFrame()
-            print("Zone = " + zone_input)
+            self.logger.info("Zone = " + zone_input)
 
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
 
@@ -85,7 +86,7 @@ class mplot(object):
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No installed capacity in : "+zone_input)
+                    self.logger.warning("No installed capacity in : "+zone_input)
                     break
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
@@ -247,12 +248,12 @@ class mplot(object):
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
 
-            print("Zone = " + zone_input)
+            self.logger.info("Zone = " + zone_input)
 
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
 
@@ -260,7 +261,7 @@ class mplot(object):
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No installed capacity in : "+zone_input)
+                    self.logger.warning("No installed capacity in : "+zone_input)
                     break
 
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
@@ -365,11 +366,11 @@ class mplot(object):
 
     #     Total_Generation_Stack_Out = pd.DataFrame()
     #     Total_Load_Out = pd.DataFrame()
-    #     print("Zone = " + self.zone_input)
+    #     self.logger.info("Zone = " + self.zone_input)
 
 
     #     for scenario in self.Multi_Scenario:
-    #         print("Scenario = " + scenario)
+    #         self.logger.info("Scenario = " + scenario)
     #         try:
     #             Total_Gen_Stack = Gen_Collection.get(scenario)
     #             Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)
@@ -392,7 +393,7 @@ class mplot(object):
     #             Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
     #             Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
     #         except Exception:
-    #             print("Error: Skipping " + scenario)
+    #             self.logger.warning("Error: Skipping " + scenario)
     #             pass
 
     #     Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load'})

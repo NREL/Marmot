@@ -9,11 +9,11 @@ This code creates unserved energy timeseries line plots and total bat plots and 
 
 
 import pandas as pd
-#import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
+import logging
 
 #===============================================================================
 
@@ -23,7 +23,9 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
     def unserved_energy_timeseries(self):
 
         Unserved_Energy_Collection = {}
@@ -37,13 +39,13 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print('Zone = ' + zone_input)
+            self.logger.info('Zone = ' + zone_input)
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
             #Total_Unserved_Energy_Out = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
 
-                print('Scenario = ' + scenario)
+                self.logger.info('Scenario = ' + scenario)
 
                 unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
@@ -60,6 +62,7 @@ class mplot(object):
             Data_Table_Out = Unserved_Energy_Timeseries_Out
 
             if Unserved_Energy_Timeseries_Out.empty==True:
+                self.logger.warning('No Unserved Energy in {}'.format(zone_input))
                 df = pd.DataFrame()
                 outputs[zone_input] = df
                 continue
@@ -122,10 +125,10 @@ class mplot(object):
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
             Total_Unserved_Energy_Out = pd.DataFrame()
 
-            print(self.AGG_BY + ' = ' + zone_input)
+            self.logger.info(self.AGG_BY + ' = ' + zone_input)
             for scenario in self.Multi_Scenario:
 
-                print('Scenario = ' + scenario)
+                self.logger.info('Scenario = ' + scenario)
 
                 unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
@@ -142,6 +145,7 @@ class mplot(object):
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.wrap(10, break_long_words=False)
 
             if Total_Unserved_Energy_Out.values.sum() == 0:
+                self.logger.warning('No Unserved Energy in {}'.format(zone_input))
                 df = pd.DataFrame()
                 outputs[zone_input] = df
                 continue

@@ -14,8 +14,9 @@ import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
 import numpy as np
-
 import marmot_plot_functions as mfunc
+import logging
+
 #===============================================================================
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
@@ -29,6 +30,7 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
 ###############################################################################
 
@@ -153,8 +155,8 @@ class mplot(object):
                 unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
 
             elif self.prop == 'Date Range':
-                ("Plotting specific date range:")
-                print(str(self.start_date) + '  to  ' + str(self.end_date))
+                self.logger.info("Plotting specific date range: \
+                {} to {}".format(str(self.start_date),str(self.end_date)))
 
                 Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
                 Load = Load[self.start_date : self.end_date]
@@ -163,7 +165,7 @@ class mplot(object):
                 unserved_eng_data_table = unserved_eng_data_table[self.start_date : self.end_date]
 
             else:
-                print("Plotting graph for entire timeperiod")
+                self.logger.info("Plotting graph for entire timeperiod")
             data = {"Stacked_Gen":Stacked_Gen, "Load":Load, "Pump_Load":Pump_Load, "Total_Demand":Total_Demand, "Unserved_Energy":Unserved_Energy,"ue_data_table":unserved_eng_data_table}
             data["peak_demand_t"] = peak_demand_t
             data["Peak_Demand"] = Peak_Demand
@@ -207,14 +209,14 @@ class mplot(object):
             unique_tech_names = []
 
             for scenario in all_scenarios:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 try:
                     Stacked_Gen = Gen_Collection.get(scenario)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     i=i+1
-                    print('No generation in ' + zone_input + '\n')
+                    self.logger.warning('No generation in ' + zone_input + '\n')
                     out = pd.DataFrame()
                     return out
 
@@ -223,7 +225,7 @@ class mplot(object):
 
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
-                    print('No generation during time period in ' + zone_input + '\n')
+                    self.logger.warning('No generation during time period in ' + zone_input + '\n')
                     out = pd.DataFrame()
                     return out
 
@@ -347,7 +349,6 @@ class mplot(object):
             if (Unserved_Energy == 0).all() == False:
                 axs[grid_size-1].add_artist(leg3)
 
-            print(" ")
             all_axes = fig1.get_axes()
             self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
             j=0
@@ -393,7 +394,7 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
             #data_tables = {}
             if self.facet:
                 #for scenario in self.Multi_Scenario:
@@ -411,7 +412,7 @@ class mplot(object):
     def gen_diff(self):
         outputs = {}
         for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
             # Create Dictionary to hold Datframes for each scenario
             Gen_Collection = {}
 
@@ -431,8 +432,8 @@ class mplot(object):
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns = self.ordered_gen).fillna(0)
 
-            print('Scenario 1 = ' + self.Scenario_Diff[0])
-            print('Scenario 2 =  ' + self.Scenario_Diff[1])
+            self.logger.info('Scenario 1 = ' + self.Scenario_Diff[0])
+            self.logger.info('Scenario 2 =  ' + self.Scenario_Diff[1])
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
             # Removes columns that only equal 0
             Gen_Stack_Out.dropna(inplace=True)
@@ -507,7 +508,7 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
 
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
 
 
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
@@ -567,7 +568,7 @@ class mplot(object):
 
                 period_start=first_date+dt.timedelta(days=(wk-1)*7)
                 period_end=period_start+dt.timedelta(days=self.end)
-                print(str(period_start)+" and next "+str(self.end)+" days.")
+                self.logger.info(str(period_start)+" and next "+str(self.end)+" days.")
                 Stacked_Gen_Period = Stacked_Gen[period_start:period_end]
                 Load_Period = Load[period_start:period_end]
                 Unserved_Energy_Period = Unserved_Energy[period_start:period_end]
@@ -664,7 +665,7 @@ class mplot(object):
     def committed_stack(self):
         outputs = {}
         for zone_input in self.Zones:
-            print('Zone = ' + str(zone_input))
+            self.logger.info('Zone = ' + str(zone_input))
 
             #Get technology list.
             gens = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, self.Multi_Scenario[0], "Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"), "generator_Installed_Capacity")
@@ -680,7 +681,7 @@ class mplot(object):
             i=0
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
                 formatter = mdates.ConciseDateFormatter(locator)

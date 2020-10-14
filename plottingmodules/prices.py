@@ -8,13 +8,10 @@ price analysis plots, price duration cureves = timeseries plots
 
 import os
 import pandas as pd
-#import datetime as dt
 import matplotlib.pyplot as plt
-#import matplotlib as mpl
 import matplotlib.dates as mdates
-#import numpy as np
 import math
-
+import logging
 
 #===============================================================================
 
@@ -24,7 +21,8 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
     def region_pdc(self):
 
         """
@@ -40,7 +38,7 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             all_prices=[]
             for scenario in self.Multi_Scenario:
@@ -172,7 +170,7 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             all_prices=[]
             for scenario in self.Multi_Scenario:
@@ -247,7 +245,7 @@ class mplot(object):
 
         data_table = []
         for zone_input in self.Zones:
-            # print(zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
             outputs[zone_input] = pd.DataFrame()
             all_prices=[]
             for scenario in self.Multi_Scenario:

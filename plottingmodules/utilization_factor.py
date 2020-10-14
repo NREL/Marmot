@@ -10,12 +10,10 @@ This code creates plots of generator utilization factor (similiar to capacity fa
 
 import pandas as pd
 import matplotlib.pyplot as plt
-# import matplotlib as mpl
-# import matplotlib.ticker as mtick
 import numpy as np
 import os
-
 import marmot_plot_functions as mfunc
+import logging
 
 #===============================================================================
 
@@ -38,6 +36,7 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def uf_fleet(self):
         # Create Dictionary to hold Datframes for each scenario
@@ -51,7 +50,7 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
 
@@ -59,12 +58,12 @@ class mplot(object):
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
                 Gen = Gen_Collection.get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    print("No generation in "+zone_input+".")
+                    self.logger.warning("No generation in "+zone_input+".")
                     break
 
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
@@ -137,7 +136,7 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             fig2, ax2 = plt.subplots(len(self.Multi_Scenario),len(self.thermal_gen_cat),figsize=(len(self.thermal_gen_cat)*4,len(self.Multi_Scenario)*4),sharey=True)# Set up subplots for all scenarios & techs
             CF_all_scenarios=pd.DataFrame()
@@ -145,12 +144,12 @@ class mplot(object):
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
                 Gen = Gen_Collection.get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    print("No generation in "+ zone_input+".")
+                    self.logger.warning("No generation in "+ zone_input+".")
                     break
                 Gen=df_process_gen_ind_inputs(Gen,self)
 
@@ -222,19 +221,19 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             fig3, ax3 = plt.subplots(len(self.thermal_gen_cat),figsize=(4,4*len(self.thermal_gen_cat)),sharey=True) # Set up subplots for all scenarios
 
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
                 Gen = Gen_Collection.get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    print("No generation in "+zone_input+".")
+                    self.logger.warning("No generation in "+zone_input+".")
                     break
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
 
@@ -258,7 +257,7 @@ class mplot(object):
                     try:
                         duration_curve = Gen.xs(i,level="tech").sort_values(by='Type CF',ascending=False).reset_index()
                     except KeyError:
-                        print("{} not in {}, skipping technology".format(i, zone_input))
+                        self.logger.info("{} not in {}, skipping technology".format(i, zone_input))
                         continue
 
                     ax3[n].plot(duration_curve['Type CF'],label=scenario)
@@ -302,7 +301,7 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
             GW_all_scenarios = pd.DataFrame()
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
 
@@ -310,12 +309,12 @@ class mplot(object):
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
                 Gen = Gen_Collection.get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    print("No generation in "+zone_input+".")
+                    self.logger.warning("No generation in "+zone_input+".")
                     break
 
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)

@@ -14,8 +14,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
-
 import marmot_plot_functions as mfunc
+import logging
 
 #===============================================================================
 
@@ -30,11 +30,12 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
     def thermal_cap_reserves(self):
         outputs = {}
         for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
 
             xdimension=len(self.xlabels)
             if xdimension == 0:
@@ -53,7 +54,7 @@ class mplot(object):
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 avail_cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Available_Capacity")
                 Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
@@ -62,7 +63,7 @@ class mplot(object):
                 try:
                     avail_cap = avail_cap.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    print("No installed capacity in : "+zone_input)
+                    self.logger.warning("No installed capacity in : "+zone_input)
                     break
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 avail_cap = mfunc.df_process_gen_inputs(avail_cap,self.ordered_gen)

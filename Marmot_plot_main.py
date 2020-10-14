@@ -15,9 +15,21 @@ sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/plottingmodules"
 import importlib
 from meta_data import MetaData
 import pdb
+import logging 
+import logging.config
+import yaml
 
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
+
+with open('marmot_logging_config.yml', 'rt') as f:
+    conf = yaml.safe_load(f.read())
+    logging.config.dictConfig(conf)
+    
+logger = logging.getLogger('marmot_plot')
+# Creates a new log file for next run 
+logger.handlers[1].doRollover()
+logger.handlers[2].doRollover()
 
 class plottypes:
 
@@ -43,8 +55,8 @@ class plottypes:
         return Figure_Out
 
 try:
-    print("Will plot row:" +(sys.argv[1]))
-    print(str(len(sys.argv)-1)+" arguments were passed from commmand line.")
+    logger.info("Will plot row:" +(sys.argv[1]))
+    logger.info(str(len(sys.argv)-1)+" arguments were passed from commmand line.")
 except IndexError:
     #No arguments passed
     pass
@@ -96,11 +108,11 @@ Region_Mapping = Region_Mapping.astype(str)
 gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
 AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
-print("Aggregation selected: "+AGG_BY)
+logger.info("Aggregation selected: {}".format(AGG_BY))
 # Facet Grid Labels (Based on Scenarios)
 zone_region_sublist = pd.Series(str(Marmot_user_defined_inputs.loc['zone_region_sublist'].squeeze()).split(",")).str.strip().tolist()
 if zone_region_sublist != ['nan']:
-    print("Only plotting " + AGG_BY + "s: " + str(zone_region_sublist))
+    logger.info("Only plotting " + AGG_BY + "s: " + str(zone_region_sublist))
 
 ylabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze()).split(",")).str.strip().tolist()
 if ylabels == ['nan']: ylabels = [""]
@@ -150,8 +162,8 @@ thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'
 # facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
-                    print("\n WARNING!! The new categories from the gen_names csv do not exist in ordered_gen \n")
-                    print(set(gen_names["New"].unique()) - (set(ordered_gen)))
+                    logger.warning("The new categories from the gen_names csv do not exist in ordered_gen!:\
+                     {}".format(set(gen_names["New"].unique()) - (set(ordered_gen))))
 
 #===============================================================================
 # Colours and styles
@@ -214,12 +226,12 @@ if AGG_BY=="zone":
             if zone in Zones:
                 zsub.append(zone)
             else:
-                print("metadata does not contain zone: " + zone + ", SKIPPING ZONE")
+                logger.info("metadata does not contain zone: " + zone + ", SKIPPING ZONE")
         Zones = zsub
 
 elif Region_Mapping.empty==True:
     Zones = regions['region'].unique()
-    # print(Zones)
+    # logger.info(Zones)
     # sys.exit()
     if zone_region_sublist != ['nan']:
         zsub = []
@@ -227,7 +239,7 @@ elif Region_Mapping.empty==True:
             if region in Zones:
                 zsub.append(region)
             else:
-                print("metadata does not contain region: " + region + ", SKIPPING REGION")
+                logger.info("metadata does not contain region: " + region + ", SKIPPING REGION")
         Zones = zsub
 else:
     Region_Mapping = regions.merge(Region_Mapping, how='left', on='region')
@@ -240,14 +252,14 @@ else:
             if region in Zones:
                 zsub.append(region)
             else:
-                print("metadata does not contain region: " + region + ", SKIPPING REGION")
+                logger.info("metadata does not contain region: " + region + ", SKIPPING REGION")
         Zones = zsub
 
 # Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
 
 # Filter for chosen figures to plot
 if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
-    print("Will plot row " +(sys.argv[1])+" of Marmot plot select regardless of T/F.")
+    logger.info("Will plot row " +(sys.argv[1])+" of Marmot plot select regardless of T/F.")
     Marmot_plot_select = Marmot_plot_select.iloc[int(sys.argv[1])-1].to_frame().T
 else:
     Marmot_plot_select = Marmot_plot_select.loc[Marmot_plot_select["Plot Graph"] == True]
@@ -258,7 +270,7 @@ else:
 for index, row in Marmot_plot_select.iterrows():
 
     print("\n\n\n")
-    print("Plot =  " + row["Figure Output Name"])
+    logger.info("Plot =  " + row["Figure Output Name"])
 
     module = row['Marmot Module']
     method = row['Method']
@@ -298,17 +310,18 @@ for index, row in Marmot_plot_select.iterrows():
     Figure_Out = fig.runmplot()
     
     if isinstance(Figure_Out, type(None)):
-        print("Add Inputs With Formatter Before Attempting to Plot!")
+        logger.info("Add Inputs With Formatter Before Attempting to Plot!\n")
         continue
     
     for zone_input in Zones:
         if isinstance(Figure_Out[zone_input], pd.DataFrame):
             if module == 'hydro' or method == 'gen_stack_all_periods':
-                print('plots & data saved within module')
+                logger.info('plots & data saved within module\n')
             else:
-                print("Data missing for {}".format(zone_input))
+                logger.info("Data missing for {}\n".format(zone_input))
         else:
             # Save figures
+            logger.info('Saving Plots and Data\n')
             try:
                 Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
             except AttributeError:
@@ -317,7 +330,7 @@ for index, row in Marmot_plot_select.iterrows():
             # Save data tables to csv
             if not facet:
                 if Figure_Out[zone_input]['data_table'].empty:
-                    print(row["Figure Output Name"] + 'does not return a data table')
+                    logger.info(row["Figure Output Name"] + 'does not return a data table\n')
                     continue
                 else:
                     Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
@@ -325,10 +338,10 @@ for index, row in Marmot_plot_select.iterrows():
             else:
                 try:
                     if not Figure_Out[zone_input]['data_table']:
-                        print(row["Figure Output Name"] + 'does not return a data table')
+                        logger.info(row["Figure Output Name"] + 'does not return a data table\n')
                 except ValueError:
                     if Figure_Out[zone_input]['data_table'].empty:
-                        print(row["Figure Output Name"] + 'does not return a data table')
+                        logger.info(row["Figure Output Name"] + 'does not return a data table\n')
                 else:
                     tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                     try:

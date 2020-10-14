@@ -16,6 +16,7 @@ import numpy as np
 import datetime as dt
 import matplotlib.ticker as mtick
 import math
+import logging
 
 #===============================================================================
 
@@ -26,6 +27,7 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def net_export(self):
 
@@ -43,21 +45,21 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             net_export_all_scenarios = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
                 net_export_read = net_interchange_collection.get(scenario)
                 net_export = net_export_read.xs(zone_input, level = self.AGG_BY)
                 net_export = net_export.groupby("timestamp").sum()
                 net_export.columns = [scenario]
 
                 if self.prop == 'Date Range':
-                    print("Plotting specific date range:")
-                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
 
                     net_export = net_export[self.start_date : self.end_date]
 
@@ -129,7 +131,7 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print("For all lines touching Zone = "+zone_input)
+            self.logger.info("For all lines touching Zone = "+zone_input)
 
             fig2, axs = self._setup_plot(ydimension=len(self.Multi_Scenario))
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -139,7 +141,7 @@ class mplot(object):
             Data_Out=pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
 
                 # gets correct metadata based on area aggregation
                 if self.AGG_BY=='zone':
@@ -149,7 +151,7 @@ class mplot(object):
                 try:
                     zone_lines = zone_lines.set_index([self.AGG_BY])
                 except:
-                    print("Column to Aggregate by is missing")
+                    self.logger.warning("Column to Aggregate by is missing")
                     continue
 
                 zone_lines = zone_lines.xs(zone_input)
@@ -163,7 +165,7 @@ class mplot(object):
 
                 # This checks for a nan in string. If no scenario selected, do nothing.
                 if (self.prop != self.prop)==False:
-                    print("Line category = "+str(self.prop))
+                    self.logger.info("Line category = "+str(self.prop))
                     line_relations = self.meta.lines().rename(columns={"name":"line_name"}).set_index(["line_name"])
                     flow=pd.merge(flow,line_relations,left_index=True,right_index=True)
                     flow=flow[flow["category"] == self.prop]
@@ -486,11 +488,11 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            print('Zone = ' + zone_input)
+            self.logger.info('Zone = ' + zone_input)
             all_scenarios = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
 
                 if self.AGG_BY == 'zone':
                     lines = self.meta.zone_lines()
@@ -626,12 +628,12 @@ class mplot(object):
     #     outputs = {}
 
     #     for zone_input in self.Zones:
-    #         print('Zone = ' + str(zone_input))
+    #         self.logger.info('Zone = ' + str(zone_input))
 
     #         all_scenarios = pd.DataFrame()
 
     #         for scenario in self.Multi_Scenario:
-    #             print("Scenario = " + str(scenario))
+    #             self.logger.info("Scenario = " + str(scenario))
 
     #             lineflow = line_flow_collection.get(scenario)
     #             linelim = line_limit_collection.get(scenario)

@@ -5,8 +5,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import numpy as np
-
-
+import logging
 
 #===============================================================================
 
@@ -16,16 +15,17 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def capacity_out_stack(self):
         outputs = {}
         for zone_input in self.Zones:
             
             outputs[zone_input] = pd.DataFrame()
-            print('This module requires PASA files, and is under development. Skipping plot.')
+            self.logger.warning('This module requires PASA files, and is under development. Skipping plot.')
             continue
             
-            print('Zone = ' + str(zone_input))
+            self.logger.info('Zone = ' + str(zone_input))
 
             xdimension=len(self.xlabels)
             if xdimension == 0:
@@ -43,7 +43,7 @@ class mplot(object):
             met_year = self.Marmot_Solutions_folder[-4:] #Extract met year from PLEXOS parent scenario.
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
 
                 infra_year = scenario[-4:] #Extract infra year from scenario name.
                 capacity_out = pd.read_csv(os.path.join('/projects/continental/pcm/Outage Profiles/capacity out for plotting/',infra_year + '_' + met_year + '_capacity out.csv'))
@@ -63,8 +63,8 @@ class mplot(object):
 
                #OR select only time period of interest.
                 if self.prop == 'Date Range':
-                    print("Plotting specific date range:")
-                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
                     one_zone = one_zone[self.start_date : self.end_date]
                 else:
                     one_zone = one_zone[start:end]
