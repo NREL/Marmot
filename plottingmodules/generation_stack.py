@@ -435,10 +435,18 @@ class mplot(object):
             self.logger.info('Scenario 1 = ' + self.Scenario_Diff[0])
             self.logger.info('Scenario 2 =  ' + self.Scenario_Diff[1])
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
+
+            if self.prop == 'Date Range':
+                self.logger.info("Plotting specific date range: \
+                {} to {}".format(str(self.start_date),str(self.end_date)))
+                Gen_Stack_Out = Gen_Stack_Out[self.start_date : self.end_date]
+            else:
+                self.logger.info("Plotting graph for entire timeperiod")
+            
             # Removes columns that only equal 0
             Gen_Stack_Out.dropna(inplace=True)
             Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]
-
+            
             # Data table of values to return to main program
             Data_Table_Out = Gen_Stack_Out
             # Reverses order of columns
