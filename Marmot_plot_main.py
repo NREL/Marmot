@@ -108,11 +108,11 @@ Region_Mapping = Region_Mapping.astype(str)
 gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
 AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
-logger.info("Aggregation selected: {}".format(AGG_BY))
+logger.info("Aggregation selected: %s",AGG_BY)
 # Facet Grid Labels (Based on Scenarios)
 zone_region_sublist = pd.Series(str(Marmot_user_defined_inputs.loc['zone_region_sublist'].squeeze()).split(",")).str.strip().tolist()
 if zone_region_sublist != ['nan']:
-    logger.info("Only plotting " + AGG_BY + "s: " + str(zone_region_sublist))
+    logger.info("Only plotting %s: %s",AGG_BY,zone_region_sublist)
 
 ylabels = pd.Series(str(Marmot_user_defined_inputs.loc['Facet_ylabels'].squeeze()).split(",")).str.strip().tolist()
 if ylabels == ['nan']: ylabels = [""]
@@ -162,8 +162,8 @@ thermal_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'thermal_gen_cat.csv'
 # facet_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'facet_gen_cat.csv'), squeeze = True).str.strip().tolist()
 
 if set(gen_names["New"].unique()).issubset(ordered_gen) == False:
-                    logger.warning("The new categories from the gen_names csv do not exist in ordered_gen!:\
-                     {}".format(set(gen_names["New"].unique()) - (set(ordered_gen))))
+                    logger.warning("The new categories from the gen_names csv do not exist in ordered_gen!: \
+                    %s",set(gen_names["New"].unique()) - (set(ordered_gen)))
 
 #===============================================================================
 # Colours and styles
@@ -226,7 +226,7 @@ if AGG_BY=="zone":
             if zone in Zones:
                 zsub.append(zone)
             else:
-                logger.info("metadata does not contain zone: " + zone + ", SKIPPING ZONE")
+                logger.info("metadata does not contain zone: %s, SKIPPING ZONE",zone)
         Zones = zsub
 
 elif Region_Mapping.empty==True:
@@ -239,7 +239,7 @@ elif Region_Mapping.empty==True:
             if region in Zones:
                 zsub.append(region)
             else:
-                logger.info("metadata does not contain region: " + region + ", SKIPPING REGION")
+                logger.info("metadata does not contain region: %s, SKIPPING REGION",region)
         Zones = zsub
 else:
     Region_Mapping = regions.merge(Region_Mapping, how='left', on='region')
@@ -252,7 +252,7 @@ else:
             if region in Zones:
                 zsub.append(region)
             else:
-                logger.info("metadata does not contain region: " + region + ", SKIPPING REGION")
+                logger.info("metadata does not contain region: %s, SKIPPING REGION",region)
         Zones = zsub
 
 # Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
@@ -270,7 +270,7 @@ else:
 for index, row in Marmot_plot_select.iterrows():
 
     print("\n\n\n")
-    logger.info("Plot =  " + row["Figure Output Name"])
+    logger.info("Plot =  %s",row["Figure Output Name"])
 
     module = row['Marmot Module']
     method = row['Method']
@@ -318,7 +318,7 @@ for index, row in Marmot_plot_select.iterrows():
             if module == 'hydro' or method == 'gen_stack_all_periods':
                 logger.info('plots & data saved within module\n')
             else:
-                logger.info("Data missing for {}\n".format(zone_input))
+                logger.info("Data missing for %s\n",zone_input)
         else:
             # Save figures
             logger.info('Saving Plots and Data\n')
@@ -330,7 +330,7 @@ for index, row in Marmot_plot_select.iterrows():
             # Save data tables to csv
             if not facet:
                 if Figure_Out[zone_input]['data_table'].empty:
-                    logger.info(row["Figure Output Name"] + 'does not return a data table\n')
+                    logger.info('%s does not return a data table\n',row["Figure Output Name"])
                     continue
                 else:
                     Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
@@ -338,10 +338,10 @@ for index, row in Marmot_plot_select.iterrows():
             else:
                 try:
                     if not Figure_Out[zone_input]['data_table']:
-                        logger.info(row["Figure Output Name"] + 'does not return a data table\n')
+                        logger.info('%s does not return a data table\n',row["Figure Output Name"])
                 except ValueError:
                     if Figure_Out[zone_input]['data_table'].empty:
-                        logger.info(row["Figure Output Name"] + 'does not return a data table\n')
+                        logger.info('%s does not return a data table\n',row["Figure Output Name"])
                 else:
                     tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                     try:

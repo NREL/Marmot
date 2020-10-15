@@ -39,13 +39,13 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            self.logger.info('Zone = ' + zone_input)
+            self.logger.info('Zone = %s',zone_input)
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
             #Total_Unserved_Energy_Out = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
 
-                self.logger.info('Scenario = ' + scenario)
+                self.logger.info('Scenario = %s',scenario)
 
                 unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
@@ -62,7 +62,7 @@ class mplot(object):
             Data_Table_Out = Unserved_Energy_Timeseries_Out
 
             if Unserved_Energy_Timeseries_Out.empty==True:
-                self.logger.warning('No Unserved Energy in {}'.format(zone_input))
+                self.logger.warning('No Unserved Energy in %s',zone_input)
                 df = pd.DataFrame()
                 outputs[zone_input] = df
                 continue
@@ -128,7 +128,7 @@ class mplot(object):
             self.logger.info(self.AGG_BY + ' = ' + zone_input)
             for scenario in self.Multi_Scenario:
 
-                self.logger.info('Scenario = ' + scenario)
+                self.logger.info('Scenario = %s',scenario)
 
                 unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
@@ -145,7 +145,7 @@ class mplot(object):
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.wrap(10, break_long_words=False)
 
             if Total_Unserved_Energy_Out.values.sum() == 0:
-                self.logger.warning('No Unserved Energy in {}'.format(zone_input))
+                self.logger.warning('No Unserved Energy in %s',zone_input)
                 df = pd.DataFrame()
                 outputs[zone_input] = df
                 continue

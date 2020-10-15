@@ -130,12 +130,12 @@ def get_data(loc, prop,t, db, metadata):
     df = process_att()
 
     if loc == 'region' and prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
-        logger.warning("Scenario contains Unserved Energy: " + str(int(df.sum(axis=0))) + " MW\n")
+        logger.warning("Scenario contains Unserved Energy: %s MW\n", int(df.sum(axis=0)))
     return df
 
 # This fucntion prints a warning message when the get_data function cannot find the specified property in the H5plexos hdf5 file
 def report_prop_error(prop,loc):
-    logger.warning('CAN NOT FIND {} FOR {}. {} DOES NOT EXIST'.format(prop,loc,prop))
+    logger.warning('CAN NOT FIND "%s %s". "%s" DOES NOT EXIST',loc,prop,prop)
     logger.info('SKIPPING PROPERTY\n')
     df = pd.DataFrame()
     return df
@@ -203,7 +203,7 @@ class Process:
         # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
         if set(df.index.unique(level="tech")).issubset(gen_names["New"].unique()) == False:
             missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(gen_names["New"].unique())))
-            logger.warning("The Following Generators do not have a correct category mapping: {}\n".format(missing_gen_cat))
+            logger.warning("The Following Generators do not have a correct category mapping: %s\n",missing_gen_cat)
         return df
 
     # Function for formating data which comes from the PLEXOS Region Category
@@ -399,7 +399,7 @@ class Process:
 #===================================================================================
 for Scenario_name in Scenario_List:
 
-    logger.info("#### Processing " + Scenario_name + " PLEXOS Results ####")
+    logger.info("#### Processing %s PLEXOS Results ####", Scenario_name)
     
     #===============================================================================
     # Input and Output Directories
@@ -457,7 +457,7 @@ for Scenario_name in Scenario_List:
     # Creates Initial HDF5 file for ouputing formated data
     Processed_Data_Out=pd.DataFrame()
     if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
-        logger.info(hdf_out_folder + "/" + HDF5_output+" already exists; new variables will be added\n")
+        logger.info("'%s\%s' already exists: New variables will be added\n",hdf_out_folder,HDF5_output)
     else:
         Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
 
@@ -473,17 +473,17 @@ for Scenario_name in Scenario_List:
     #if any(meta.regions()['region'] not in Region_Mapping['region']):
     if set(MetaData(HDF5_folder_in, Region_Mapping).regions()['region']).issubset(Region_Mapping['region']) == False:
         missing_regions = list(set(MetaData(HDF5_folder_in, Region_Mapping).regions()['region']) - set(Region_Mapping['region']))
-        logger.warning('The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: {}\n'.format(missing_regions))
+        logger.warning('The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: %s\n',missing_regions)
     
     # Main loop to process each ouput and pass data to functions
     for index, row in Plexos_Properties.iterrows():
         Processed_Data_Out = pd.DataFrame()
         data_chuncks = []
         
-        logger.info("Processing " + row["group"] + " " + row["data_set"])
+        logger.info("Processing %s %s",row["group"],row["data_set"])
         
         for model in files_list:
-            logger.info("      {}".format(model))
+            logger.info("      %s",model)
             
             # Create an instance of metadata, and pass that as a variable to get data.
             meta = MetaData(HDF5_folder_in, Region_Mapping,model)
@@ -497,7 +497,7 @@ for Scenario_name in Scenario_List:
 
             if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
                 data_chuncks.append(processed_data*row["unit_multiplier"])
-                logger.info(row["data_set"]+" Year property reported from only the first partition")
+                logger.info("%s Year property reported from only the first partition",row["data_set"])
                 break
             else:
                 data_chuncks.append(processed_data*row["unit_multiplier"])
@@ -516,7 +516,7 @@ for Scenario_name in Scenario_List:
                 oldsize=Processed_Data_Out.size
                 Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
                 if  (oldsize-Processed_Data_Out.size) >0:
-                    logger.info('Drop duplicates removed '+str(oldsize-Processed_Data_Out.size)+' rows')
+                    logger.info('Drop duplicates removed %s rows',oldsize-Processed_Data_Out.size)
 
             row["data_set"] = row["data_set"].replace(' ', '_')
             try:
@@ -555,8 +555,8 @@ for Scenario_name in Scenario_List:
             vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
 
             if not vre_gen_cat:
-                logger.warning("vre_gen_cat is not set up correctly with your gen_names\n\
-                To Process Curtailment add correct names to vre_gen_cat.csv\n\
+                logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
+                logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
                 For more information see Marmot Readme under 'Mapping Files'")
 
             # Output Curtailment#
@@ -595,7 +595,8 @@ for Scenario_name in Scenario_List:
 
     end = time.time()
     elapsed = end - start
-    logger.info('Main loop took ' + str(elapsed/60) + ' minutes')
+    logger.info('Main loop took %s minutes',round(elapsed/60,2))
+    logger.info('Formatting COMPLETED for %s',Scenario_name)
     
 ###############################################################################
 
