@@ -18,6 +18,7 @@ import pdb
 import logging 
 import logging.config
 import yaml
+import time
 
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
@@ -266,6 +267,7 @@ else:
 
 
 #%%
+start_timer = time.time()
 # Main loop to process each figure and pass data to functions
 for index, row in Marmot_plot_select.iterrows():
 
@@ -316,12 +318,11 @@ for index, row in Marmot_plot_select.iterrows():
     for zone_input in Zones:
         if isinstance(Figure_Out[zone_input], pd.DataFrame):
             if module == 'hydro' or method == 'gen_stack_all_periods':
-                logger.info('plots & data saved within module\n')
+                logger.info('plots & data saved within module')
             else:
-                logger.info("Data missing for %s\n",zone_input)
+                logger.info("Data missing for %s",zone_input)
         else:
             # Save figures
-            logger.info('Saving Plots and Data\n')
             try:
                 Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
             except AttributeError:
@@ -330,7 +331,7 @@ for index, row in Marmot_plot_select.iterrows():
             # Save data tables to csv
             if not facet:
                 if Figure_Out[zone_input]['data_table'].empty:
-                    logger.info('%s does not return a data table\n',row["Figure Output Name"])
+                    logger.info('%s does not return a data table',row["Figure Output Name"])
                     continue
                 else:
                     Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
@@ -338,10 +339,10 @@ for index, row in Marmot_plot_select.iterrows():
             else:
                 try:
                     if not Figure_Out[zone_input]['data_table']:
-                        logger.info('%s does not return a data table\n',row["Figure Output Name"])
+                        logger.info('%s does not return a data table',row["Figure Output Name"])
                 except ValueError:
                     if Figure_Out[zone_input]['data_table'].empty:
-                        logger.info('%s does not return a data table\n',row["Figure Output Name"])
+                        logger.info('%s does not return a data table',row["Figure Output Name"])
                 else:
                     tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                     try:
@@ -353,8 +354,15 @@ for index, row in Marmot_plot_select.iterrows():
                         #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
                         s = zone_input.replace('.','') + "_" + scenario + ".csv"
                         Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
+    
+    logger.info('Plotting Completed for %s\n',row["Figure Output Name"])
 
 ###############################################################################
-        mpl.pyplot.close('all')
+    mpl.pyplot.close('all')
+
+end_timer = time.time()
+time_elapsed = end_timer - start_timer
+logger.info('Main Plotting loop took %s minutes',round(time_elapsed/60,2))
+logger.info('All Plotting COMPLETED')
  #%%
 #subprocess.call("/usr/bin/Rscript --vanilla /Users/mschwarz/EXTREME EVENTS/PLEXOS results analysis/Marmot/run_html_output.R", shell=True)

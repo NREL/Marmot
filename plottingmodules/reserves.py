@@ -29,7 +29,7 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-
+        
     def reserve_gen_timeseries(self):
         """
         This method creates a generation stackplot of reserve provision for each region.
@@ -40,7 +40,6 @@ class mplot(object):
         # If not facet plot, only plot first sceanrio
         if not self.facet:
             self.Multi_Scenario = [self.Multi_Scenario[0]]
-
         outputs = {}
         check_input_data = []
         reserve_provision_collection = {}
