@@ -344,6 +344,7 @@ class mplot(object):
         A line is plotted for each reserve type shortage.
         Figures and data tables are returned to plot_main
         """
+        outputs = {}
         reserve_collection = {}
         check_input_data = []
 
@@ -357,7 +358,6 @@ class mplot(object):
             outputs = None
             return outputs
 
-        outputs = {}
         for region in self.Zones:
             self.logger.info("Zone = "+ region)
 

@@ -34,13 +34,17 @@ class mplot(object):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def total_cap(self):
-        # Create Dictionary to hold Datframes for each scenario
-        Installed_Capacity_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),   "generator_Installed_Capacity")
-
         outputs = {}
+        installed_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Installed_Capacity_Out = pd.DataFrame()
             Data_Table_Out = pd.DataFrame()
@@ -50,7 +54,7 @@ class mplot(object):
 
                 self.logger.info("Scenario = " + scenario)
 
-                Total_Installed_Capacity = Installed_Capacity_Collection.get(scenario)
+                Total_Installed_Capacity = installed_capacity_collection.get(scenario)
                 try:
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
                 except KeyError:

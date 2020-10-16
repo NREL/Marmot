@@ -39,15 +39,19 @@ class mplot(object):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def uf_fleet(self):
-        # Create Dictionary to hold Datframes for each scenario
-        Gen_Collection = {}
-        Ava_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
-            Ava_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Available_Capacity")
-
         outputs = {}
+        generation_collection = {}
+        gen_available_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
@@ -59,18 +63,18 @@ class mplot(object):
             for scenario in self.Multi_Scenario:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = Gen_Collection.get(scenario)
+                Gen = generation_collection.get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
                     self.logger.warning("No generation in "+zone_input+".")
                     break
 
-                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
+                Gen = df_process_gen_ind_inputs(Gen,self)
 
-                Ava = Ava_Collection.get(scenario)
+                Ava = gen_available_capacity_collection.get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
-                Ava = df_process_gen_inputs(Ava,self.ordered_gen)
+                Ava = df_process_gen_ind_inputs(Ava,self)
 
                 #Gen = Gen/interval_count
                 Total_Gen = Gen.groupby(["tech"],as_index=True).sum() #axis=0)
@@ -126,15 +130,19 @@ class mplot(object):
         return outputs
 
     def uf_gen(self):
-        # Create Dictionary to hold Datframes for each scenario
-        Gen_Collection = {}
-        Ava_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
-            Ava_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Available_Capacity")
-
         outputs = {}
+        generation_collection = {}
+        gen_available_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             self.logger.info(self.AGG_BY + " = " + zone_input)
 
@@ -145,7 +153,7 @@ class mplot(object):
             for scenario in self.Multi_Scenario:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = Gen_Collection.get(scenario)
+                Gen = generation_collection.get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -153,7 +161,7 @@ class mplot(object):
                     break
                 Gen=df_process_gen_ind_inputs(Gen,self)
 
-                Ava = Ava_Collection.get(scenario)
+                Ava = gen_available_capacity_collection.get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
                 Ava = df_process_gen_ind_inputs(Ava,self)
 
@@ -210,15 +218,19 @@ class mplot(object):
         return outputs
 
     def uf_fleet_by_type(self):
-        # Create Dictionary to hold Datframes for each scenario
-        Gen_Collection = {}
-        Ava_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
-            Ava_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Available_Capacity")
-
         outputs = {}
+        generation_collection = {}
+        gen_available_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
@@ -229,17 +241,17 @@ class mplot(object):
             for scenario in self.Multi_Scenario:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = Gen_Collection.get(scenario)
+                Gen = generation_collection.get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
                     self.logger.warning("No generation in "+zone_input+".")
                     break
-                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
+                Gen = df_process_gen_ind_inputs(Gen,self)
 
-                Ava = Ava_Collection.get(scenario)
+                Ava = gen_available_capacity_collection.get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
-                Ava = mfunc.df_process_gen_inputs(Ava,self.ordered_gen)
+                Ava = df_process_gen_ind_inputs(Ava,self)
 
 
                 #Gen = Gen/interval_count
@@ -292,13 +304,17 @@ class mplot(object):
         return outputs
 
     def GW_fleet(self):
-        # Create Dictionary to hold Datframes for each scenario
-        Gen_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
-
         outputs = {}
+        generation_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             GW_all_scenarios = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
@@ -310,21 +326,21 @@ class mplot(object):
             for scenario in self.Multi_Scenario:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = Gen_Collection.get(scenario)
+                Gen = generation_collection.get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
                     self.logger.warning("No generation in "+zone_input+".")
                     break
 
-                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
+                Gen = df_process_gen_ind_inputs(Gen,self)
 
 
                 Total_Gen = Gen.groupby(["tech"],as_index=True).sum() #axis=0)
 
 
                 for i in sorted(Gen.reset_index()['tech'].unique()):
-                    duration_curve = Gen.xs(i,level="tech").sort_values(by=0,ascending=False).reset_index()
+                    duration_curve = Gen.xs(i,level="tech").sort_values(ascending=False).reset_index()
 
                     if len(self.Multi_Scenario)>1:
                         ax3[n].plot(duration_curve[0]/1000,color=self.PLEXOS_color_dict.get(i, '#333333'),label=i)

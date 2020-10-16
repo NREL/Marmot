@@ -34,6 +34,18 @@ class mplot(object):
         
     def thermal_cap_reserves(self):
         outputs = {}
+        generation_collection = {}
+        gen_available_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             self.logger.info("Zone = "+ zone_input)
 
@@ -46,19 +58,19 @@ class mplot(object):
 
             Data_Table_Out = pd.DataFrame()
 
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharey=True)
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
-            if len(self.Multi_Scenario) > 1:
-                axs = axs.ravel()
+            # if len(self.Multi_Scenario) > 1:
+            axs = axs.ravel()
             i=0
 
             for scenario in self.Multi_Scenario:
 
                 self.logger.info("Scenario = " + scenario)
 
-                avail_cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Available_Capacity")
-                Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
-
+                Gen = generation_collection.get(scenario)
+                avail_cap = gen_available_capacity_collection.get(scenario)
+               
                 # Check if zone is in avail_cap
                 try:
                     avail_cap = avail_cap.xs(zone_input,level = self.AGG_BY)
@@ -113,22 +125,22 @@ class mplot(object):
                     axs[i].add_artist(leg1)
 
                 else:
-                    sp = axs.stackplot(thermal_reserve.index.values, thermal_reserve.values.T, labels = thermal_reserve.columns, linewidth=0,
+                    sp = axs[i].stackplot(thermal_reserve.index.values, thermal_reserve.values.T, labels = thermal_reserve.columns, linewidth=0,
                                  colors = [self.PLEXOS_color_dict.get(x, '#333333') for x in thermal_reserve.T.index])
 
-                    axs.spines['right'].set_visible(False)
-                    axs.spines['top'].set_visible(False)
-                    axs.tick_params(axis='y', which='major', length=5, width=1)
-                    axs.tick_params(axis='x', which='major', length=5, width=1)
-                    axs.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                    axs.margins(x=0.01)
-                    axs.xaxis.set_major_locator(locator)
-                    axs.xaxis.set_major_formatter(formatter)
-                    handles, labels = axs.get_legend_handles_labels()
+                    axs[i].spines['right'].set_visible(False)
+                    axs[i].spines['top'].set_visible(False)
+                    axs[i].tick_params(axis='y', which='major', length=5, width=1)
+                    axs[i].tick_params(axis='x', which='major', length=5, width=1)
+                    axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                    axs[i].margins(x=0.01)
+                    axs[i].xaxis.set_major_locator(locator)
+                    axs[i].xaxis.set_major_formatter(formatter)
+                    handles, labels = axs[i].get_legend_handles_labels()
                     #Legend 1
-                    leg1 = axs.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+                    leg1 = axs[i].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
                     # Manually add the first legend back
-                    axs.add_artist(leg1)
+                    axs[i].add_artist(leg1)
 
                 i=i+1
 

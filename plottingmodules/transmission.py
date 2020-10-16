@@ -13,10 +13,9 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import numpy as np
-import datetime as dt
-import matplotlib.ticker as mtick
 import math
 import logging
+import marmot_plot_functions as mfunc
 
 #===============================================================================
 
@@ -37,11 +36,15 @@ class mplot(object):
         Figures and data tables are returned to plot_main
         """
         net_interchange_collection = {}
-
+        check_input_data = []
         if self.AGG_BY=='zone':
-            self._getdata(net_interchange_collection,"zone_Net_Interchange")
-        else:
-            self._getdata(net_interchange_collection,"region_Net_Interchange")
+            check_input_data.extend([mfunc.get_data(net_interchange_collection,"zone_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        else: 
+            check_input_data.extend([mfunc.get_data(net_interchange_collection,"region_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
 
         outputs = {}
         for zone_input in self.Zones:
@@ -74,18 +77,18 @@ class mplot(object):
             # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and Net_Export_all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
             #     Net_Export_all_scenarios.index = Net_Export_all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
-            fig1, axs = self._setup_plot()
+            fig1, axs = mfunc.setup_plot()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             n=0
             for column in net_export_all_scenarios:
-                self._create_line_plot(axs,net_export_all_scenarios,column,color_dict)
+                mfunc.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
                 axs[n].set_ylabel('Net exports (MW)',  color='black', rotation='vertical')
                 axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
                 axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
                 axs[n].margins(x=0.01)
                 axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':')
-                self._set_plot_timeseries_format(axs,n)
+                mfunc.set_plot_timeseries_format(axs,n)
 
             handles, labels = axs[n].get_legend_handles_labels()
 
@@ -125,15 +128,20 @@ class mplot(object):
     def _util(self,hist=None):
         Flow_Collection = {}
         Limit_Collection = {}
-
-        self._getdata(Flow_Collection,"line_Flow")
-        self._getdata(Limit_Collection,"line_Import_Limit")
-
         outputs = {}
+        
+        check_input_data = []
+        check_input_data.extend([mfunc.get_data(Flow_Collection,"line_Flow",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(Limit_Collection,"line_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+
         for zone_input in self.Zones:
             self.logger.info("For all lines touching Zone = "+zone_input)
-
-            fig2, axs = self._setup_plot(ydimension=len(self.Multi_Scenario))
+            
+            fig2, axs = mfunc.setup_plot(ydimension=len(self.Multi_Scenario))
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
 
@@ -182,12 +190,12 @@ class mplot(object):
                 color_dict = dict(zip(self.Multi_Scenario,self.color_list))
 
                 if hist == True:
-                    self._create_hist_plot(axs,annual_util,color_dict,label=scenario,n=n)
+                    mfunc.create_hist_plot(axs,annual_util,color_dict,label=scenario,n=n)
                     axs[n].set_ylabel(scenario.replace('_',' '),color='black', rotation='vertical')
                 else:
                     for line in top_utilization.index.get_level_values(level='line_name').unique():
                         duration_curve = flow.xs(line,level="line_name").sort_values(by='Util',ascending=False).reset_index(drop=True)
-                        self._create_line_plot(axs,duration_curve,'Util',label=line,n=n)
+                        mfunc.create_line_plot(axs,duration_curve,'Util',label=line,n=n)
                         axs[n].set_ylim((0,1.1))
                         axs[n].set_ylabel(scenario.replace('_',' '),color='black', rotation='vertical')
                         handles, labels = axs[n].get_legend_handles_labels()
@@ -239,22 +247,27 @@ class mplot(object):
         return outputs
 
     def _region_region_interchange(self,scenario_type,plot_scenario=True):
-
-        net_interchange_collection = {}
-        if self.AGG_BY=='zone':
-            self._getdata(net_interchange_collection,"zone_zones_Net_Interchange",scenario_type=scenario_type)
-        else:
-            self._getdata(net_interchange_collection,"region_regions_Net_Interchange",scenario_type=scenario_type)
-
+        
         outputs = {}
+        net_interchange_collection = {}
+        check_input_data = []
+        if self.AGG_BY=='zone':
+            check_input_data.extend([mfunc.get_data(net_interchange_collection,"zone_zones_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        else:
+            check_input_data.extend([mfunc.get_data(net_interchange_collection,"region_regions_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+            
         for zone_input in self.Zones:
 
             xdimension=len(self.xlabels)
             ydimension=len(self.ylabels)
             if xdimension == 0 or ydimension == 0:
-                xdimension, ydimension =  self._set_x_y_dimension(len(scenario_type))
+                xdimension, ydimension =  mfunc.set_x_y_dimension(len(scenario_type))
 
-            fig3, axs = self._setup_plot(xdimension,ydimension)
+            fig3, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.6, hspace=0.3)
 
             n=0 #Counter for subplots
@@ -288,8 +301,8 @@ class mplot(object):
                     #Make a facet plot, one panel for each parent zone.
                     parent_region = rr_int_agg['parent'].unique()
                     plot_number = len(parent_region)
-                    xdimension, ydimension =  self._set_x_y_dimension(plot_number)
-                    fig3, axs = self._setup_plot(xdimension,ydimension,sharey=False)
+                    xdimension, ydimension =  mfunc.set_x_y_dimension(plot_number)
+                    fig3, axs = mfunc.setup_plot(xdimension,ydimension,sharey=False)
                     plt.subplots_adjust(wspace=0.6, hspace=0.3)
 
                 else:
@@ -319,11 +332,11 @@ class mplot(object):
 
                     for column in single_parent.columns:
 
-                        self._create_line_plot(axs,single_parent,column,label=column,n=n)
+                        mfunc.create_line_plot(axs,single_parent,column,label=column,n=n)
                         axs[n].set_title(parent)
                         axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
                         axs[n].margins(x=0.01)
-                        self._set_plot_timeseries_format(axs,n)
+                        mfunc.set_plot_timeseries_format(axs,n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
                         axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
                     n+=1
@@ -372,19 +385,23 @@ class mplot(object):
         Each sceanrio is plotted on its own facet plot
         Figures and data tables are saved within method
         """
-        net_interchange_collection = {}
-        if self.AGG_BY=='zone':
-            self._getdata(net_interchange_collection,"zone_zones_Net_Interchange")
-        else:
-            self._getdata(net_interchange_collection,"region_regions_Net_Interchange")
-
         outputs = {}
+        net_interchange_collection = {}
+        check_input_data = []
+        if self.AGG_BY=='zone':
+            check_input_data.extend([mfunc.get_data(net_interchange_collection,"zone_zones_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        else:
+            check_input_data.extend([mfunc.get_data(net_interchange_collection,"region_regions_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
 
-        xdimension,ydimension = self._set_x_y_dimension(len(self.Multi_Scenario))
+        xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Multi_Scenario))
         grid_size = xdimension*ydimension
         excess_axs = grid_size - len(self.Multi_Scenario)
 
-        fig4, axs = self._setup_plot(xdimension,ydimension,sharey=False)
+        fig4, axs = mfunc.setup_plot(xdimension,ydimension,sharey=False)
         plt.subplots_adjust(wspace=0.02, hspace=0.4)
         max_flow_group = []
         Data_Out = []
@@ -483,10 +500,16 @@ class mplot(object):
         return outputs
 
     def _violations(self,total_violations=None):
-        line_violation_collection = {}
-        self._getdata(line_violation_collection,"line_Violation")
-
+        
         outputs = {}
+        line_violation_collection = {}
+        check_input_data = []
+        check_input_data.extend([mfunc.get_data(line_violation_collection,"line_Violation",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             self.logger.info('Zone = ' + zone_input)
             all_scenarios = pd.DataFrame()
@@ -527,7 +550,7 @@ class mplot(object):
             #Make scenario/color dictionary.
             color_dict = dict(zip(all_scenarios.columns,self.color_list))
 
-            fig5, axs = self._setup_plot()
+            fig5, axs = mfunc.setup_plot()
 
             n=0
             if total_violations==True:
@@ -542,10 +565,10 @@ class mplot(object):
 
             else:
                 for column in all_scenarios:
-                    self._create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
+                    mfunc.create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
                 axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
                 axs[n].margins(x=0.01)
-                self._set_plot_timeseries_format(axs,minticks=6,maxticks=12)
+                mfunc.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
                 axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
                 handles, labels = axs[n].get_legend_handles_labels()
                 axs[n].legend(handles, labels, loc='best',facecolor='inherit', frameon=True)
@@ -555,59 +578,6 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig5,'data_table':Data_Table_Out}
 
         return outputs
-
-
-    def _getdata(self,data_collection,data,scenario_type=None):
-        if scenario_type == None:
-            scenario_type = self.Multi_Scenario
-        for scenario in scenario_type:
-            data_collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),data)
-
-    def _setup_plot(self,xdimension=1,ydimension=1,sharey=True):
-        fig, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=sharey, squeeze=False)
-        axs = axs.ravel()
-        return fig,axs
-
-
-    def _create_line_plot(self,axs,data,column,color_dict=None,label=None,n=0):
-        if color_dict==None:
-            axs[n].plot(data[column], linewidth=1,label=label)
-        else:
-            axs[n].plot(data[column], linewidth=1, color=color_dict[column],label=column)
-        axs[n].spines['right'].set_visible(False)
-        axs[n].spines['top'].set_visible(False)
-        axs[n].tick_params(axis='y', which='major', length=5, width=1)
-        axs[n].tick_params(axis='x', which='major', length=5, width=1)
-
-    def _create_hist_plot(self,axs,data,color_dict,label=None,n=0):
-        axs[n].hist(data,bins=20, range=(0,1), color=color_dict[label], zorder=2, rwidth=0.8,label=label)
-        axs[n].spines['right'].set_visible(False)
-        axs[n].spines['top'].set_visible(False)
-        axs[n].tick_params(axis='y', which='major', length=5, width=1)
-
-    def _set_x_y_dimension(self,region_number):
-        if region_number >= 5:
-            xdimension = 3
-            ydimension = math.ceil(region_number/3)
-        if region_number <= 3:
-            xdimension = region_number
-            ydimension = 1
-        if region_number == 4:
-            xdimension = 2
-            ydimension = 2
-        return xdimension,ydimension
-
-    def _set_plot_timeseries_format(self,axs,n=0,minticks=6, maxticks=8):
-        locator = mdates.AutoDateLocator(minticks=minticks, maxticks=maxticks)
-        formatter = mdates.ConciseDateFormatter(locator)
-        formatter.formats[2] = '%d\n %b'
-        formatter.zero_formats[1] = '%b\n %Y'
-        formatter.zero_formats[2] = '%d\n %b'
-        formatter.zero_formats[3] = '%H:%M\n %d-%b'
-        formatter.offset_formats[3] = '%b %Y'
-        formatter.show_offset = False
-        axs[n].xaxis.set_major_locator(locator)
-        axs[n].xaxis.set_major_formatter(formatter)
 
 
     ### Archived Code ####

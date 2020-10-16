@@ -34,13 +34,24 @@ class mplot(object):
 
     def hydro_net_load(self):
         outputs = {}
+        gen_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-        #Location to save to
+            self.logger.info("Zone = "+ zone_input)
+            
+            #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-
-            self.logger.info("Zone = "+ zone_input)
+            Stacked_Gen_read = gen_collection.get(self.Multi_Scenario[0])
+            
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
             Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             del Stacked_Gen_read
@@ -158,11 +169,21 @@ class mplot(object):
 
     def hydro_continent_net_load(self):
         outputs = {}
+        gen_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
+            Stacked_Gen_read = gen_collection.get(self.Multi_Scenario[0])
 
             self.logger.info("Zone = "+ zone_input)
             self.logger.info("Winter is defined as date range: \

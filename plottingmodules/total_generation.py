@@ -11,7 +11,6 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
-import os
 from matplotlib.patches import Patch
 import marmot_plot_functions as mfunc
 import logging
@@ -33,39 +32,29 @@ class mplot(object):
 
     def total_gen(self):
         # Create Dictionary to hold Datframes for each scenario
-        Stacked_Gen_Collection = {}
-        Stacked_Load_Collection = {}
-        Pump_Load_Collection = {}
-        Curtailment_Collection = {}
-        Unserved_Energy_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
-            try:
-                Pump_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Pump_Load" )
-            except:
-
-                Pump_Load_Collection[scenario] = Stacked_Gen_Collection[scenario].copy()
-                Pump_Load_Collection[scenario].iloc[:,0] = 0
-
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Curtailment")
-            # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone":
-                Stacked_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
-                try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
-                except:
-                    Unserved_Energy_Collection[scenario] = Stacked_Load_Collection[scenario].copy()
-                    Unserved_Energy_Collection[scenario].iloc[:,0] = 0
-            else:
-                Stacked_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "region_Load")
-                try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
-                except:
-                    Unserved_Energy_Collection[scenario] = Stacked_Load_Collection[scenario].copy()
-                    Unserved_Energy_Collection[scenario].iloc[:,0] = 0
-
         outputs = {}
+        gen_collection = {}
+        load_collection = {}
+        pump_load_collection = {}
+        unserved_energy_collection = {}
+        curtailment_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        
+        if self.AGG_BY == "zone":
+            check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+            mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        else:
+            check_input_data.extend([mfunc.get_data(load_collection,"region_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+            mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+    
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
             Total_Load_Out = pd.DataFrame()
@@ -80,7 +69,7 @@ class mplot(object):
 
                 self.logger.info("Scenario = " + scenario)
 
-                Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
+                Total_Gen_Stack = gen_collection.get(scenario)
 
                 #Check if zone has generation, if not skips
                 try:
@@ -97,7 +86,7 @@ class mplot(object):
 
 
                 try:
-                    Stacked_Curt = Curtailment_Collection.get(scenario)
+                    Stacked_Curt = curtailment_collection.get(scenario)
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                     Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
@@ -112,14 +101,19 @@ class mplot(object):
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
                 #print(Total_Generation_Stack_Out)
 
-                Total_Load = Stacked_Load_Collection.get(scenario)
+                Total_Load = load_collection.get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
-
-                Unserved_Energy = Unserved_Energy_Collection.get(scenario)
+                
+                try:
+                    unserved_energy_collection[scenario]
+                except KeyError:
+                    unserved_energy_collection[scenario] = load_collection[scenario].copy()
+                    unserved_energy_collection[scenario].iloc[:,0] = 0
+                Unserved_Energy = unserved_energy_collection.get(scenario)
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
@@ -133,8 +127,12 @@ class mplot(object):
                     Unserved_Energy = Total_Load - Unserved_Energy
                 Unserved_Energy_Out = pd.concat([Unserved_Energy_Out, Unserved_Energy], axis=0, sort=False)
 
-
-                Pump_Load = Pump_Load_Collection.get(scenario)
+                try:
+                    pump_load_collection[scenario]
+                except KeyError:
+                    pump_load_collection[scenario] = gen_collection[scenario].copy()
+                    pump_load_collection[scenario].iloc[:,0] = 0
+                Pump_Load = pump_load_collection.get(scenario)
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
                 Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
@@ -237,25 +235,28 @@ class mplot(object):
 
     def total_gen_diff(self):
         # Create Dictionary to hold Datframes for each scenario
-        Stacked_Gen_Collection = {}
-        Curtailment_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Curtailment")
-
         outputs = {}
+        gen_collection = {}
+        curtailment_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
 
             self.logger.info("Zone = " + zone_input)
 
-
             for scenario in self.Multi_Scenario:
 
                 self.logger.info("Scenario = " + scenario)
 
-                Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
+                Total_Gen_Stack = gen_collection.get(scenario)
 
                 #Check if zone has generation, if not skips and breaks out of Multi_Scenario loop
                 try:
@@ -271,9 +272,8 @@ class mplot(object):
                 # Finds intervals in 60 minute period
                 interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
 
-
                 try:
-                    Stacked_Curt = Curtailment_Collection.get(scenario)
+                    Stacked_Curt = curtailment_collection.get(scenario)
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                     Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
@@ -290,7 +290,7 @@ class mplot(object):
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to GWh
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
-
+                        
             #Ensures region has generation, else skips
             try:
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
@@ -348,12 +348,12 @@ class mplot(object):
     # def total_gen_facet(self):
     #     Gen_Collection = {}
     #     Load_Collection = {}
-    #     Curtailment_Collection = {}
+    #     curtailment_collection = {}
 
     #     for scenario in self.Multi_Scenario:
     #         try:
     #             Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
-    #             Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "generator_Curtailment")
+    #             curtailment_collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "generator_Curtailment")
     #             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
     #             if self.AGG_BY == "zone":
     #                 Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
@@ -375,7 +375,7 @@ class mplot(object):
     #             Total_Gen_Stack = Gen_Collection.get(scenario)
     #             Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)
     #             Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
-    #             Stacked_Curt = Curtailment_Collection.get(scenario)
+    #             Stacked_Curt = curtailment_collection.get(scenario)
     #             Stacked_Curt = Stacked_Curt.xs(self.zone_input,level=self.AGG_BY)
     #             Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
     #             Stacked_Curt = Stacked_Curt.sum(axis=1)

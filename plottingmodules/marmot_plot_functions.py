@@ -190,6 +190,35 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     return fig,axs
 
 
+def create_bar_plot(df, axs, colour, stacked=False):
+    """
+    Creates a bar plot
+
+    Parameters
+    ----------
+    df : DataFrame
+        DataFrame of data to plot.
+    axs : matplotlib.axes
+        matplotlib.axes.
+    colour : dictionary
+        colour dictionary.
+    stacked : Bool
+        True/False for stacked bar
+
+    Returns
+    -------
+    fig : matplotlib fig
+        matplotlib fig.
+    """
+    fig = df.plot.bar(stacked=stacked, rot=0, edgecolor='white', linewidth='1.5',
+                     color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
+    fig.spines['right'].set_visible(False)
+    fig.spines['top'].set_visible(False)
+    fig.tick_params(axis='y', which='major', length=5, width=1)
+    fig.tick_params(axis='x', which='major', length=5, width=1)
+    return fig
+    
+
 def create_grouped_bar_plot(df, colour):
     """
     Creates a grouped bar plot
@@ -267,7 +296,7 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,n=0):
     if color_dict==None:
         axs[n].plot(data[column], linewidth=1,label=label)
     else:
-        axs[n].plot(data[column], linewidth=1, color=color_dict[column],label=column)
+        axs[n].plot(data[column], linewidth=1, color=color_dict[column],label=label)
     axs[n].spines['right'].set_visible(False)
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
