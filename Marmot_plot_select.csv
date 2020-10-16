@@ -24,9 +24,9 @@ Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Range,Date Range,,,EST,
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid,,,,,,,generation_stack,gen_stack
 Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,,EST,,,generation_stack,gen_stack_all_periods
 Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,,,,,generation_stack,gen_stack_all_periods
-Generation Unstacked,TRUE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked,TRUE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked,TRUE,Unstacked_Gen,,,,EST,,,generation_unstack,gen_unstack
+Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
+Generation Unstacked,FALSE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
+Generation Unstacked,FALSE,Unstacked_Gen,,,,EST,,,generation_unstack,gen_unstack
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
 Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid,,,,EST,,,generation_unstack,gen_unstack
