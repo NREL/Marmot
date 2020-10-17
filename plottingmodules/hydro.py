@@ -14,8 +14,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
-
 import marmot_plot_functions as mfunc
+import logging
 
 #===============================================================================
 
@@ -30,17 +30,28 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def hydro_net_load(self):
         outputs = {}
+        gen_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-        #Location to save to
+            self.logger.info("Zone = "+ zone_input)
+            
+            #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-
-            print("Zone = "+ zone_input)
+            Stacked_Gen_read = gen_collection.get(self.Multi_Scenario[0])
+            
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
             Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             del Stacked_Gen_read
@@ -57,7 +68,7 @@ class mplot(object):
             try:
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
-                print("No hydro in "+ zone_input+".")
+                self.logger.warning("No hydro in "+ zone_input+".")
                 Hydro_Gen=pd.DataFrame()
                 continue
 
@@ -68,7 +79,7 @@ class mplot(object):
 
                 period_start=first_date+dt.timedelta(days=(wk-1)*7)
                 period_end=period_start+dt.timedelta(days=self.end)
-                print(str(period_start)+" and next "+str(self.end)+" days.")
+                self.logger.info(str(period_start)+" and next "+str(self.end)+" days.")
                 Hydro_Period = Hydro_Gen[period_start:period_end]
                 Net_Load_Period = Net_Load[period_start:period_end]
                 #print(Net_Load_Period)
@@ -158,15 +169,25 @@ class mplot(object):
 
     def hydro_continent_net_load(self):
         outputs = {}
+        gen_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
+            Stacked_Gen_read = gen_collection.get(self.Multi_Scenario[0])
 
-            print("Zone = "+ zone_input)
-            print("Winter is defined as date range:")
-            print(str(self.start_date) + '  to  ' + str(self.end_date))
+            self.logger.info("Zone = "+ zone_input)
+            self.logger.info("Winter is defined as date range: \
+            {} to {}".format(str(self.start_date),str(self.end_date)))
             Net_Load = mfunc.df_process_gen_inputs(Stacked_Gen_read, self.ordered_gen)
 
             # Calculates Net Load by removing variable gen
@@ -185,7 +206,7 @@ class mplot(object):
             try:
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
-                print("No hydro in "+ zone_input+".")
+                self.logger.warning("No hydro in "+ zone_input+".")
                 Hydro_Gen=pd.DataFrame()
                 continue
 

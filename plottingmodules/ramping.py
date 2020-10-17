@@ -9,11 +9,9 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 """
 
 import pandas as pd
-#import matplotlib.pyplot as plt
-#import matplotlib as mpl
-#import matplotlib.ticker as mtick
-#import numpy as np
 import os
+import logging
+import marmot_plot_functions as mfunc
 
 #===============================================================================
 class mplot(object):
@@ -24,22 +22,35 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
 
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
     def capacity_started(self):
         outputs = {}
+        gen_collection = {}
+        cap_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-            print(self.AGG_BY + " =  " + zone_input)
+            self.logger.info(self.AGG_BY + " =  " + zone_input)
             cap_started_all_scenarios = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + str(scenario))
+                self.logger.info("Scenario = " + str(scenario))
 
-                Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Generation")
-
+                Gen = gen_collection.get(scenario)
+                
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    print("No installed capacity in : "+zone_input)
+                    self.logger.warning("No installed capacity in : "+zone_input)
                     break
 
                 Gen = Gen.reset_index()
@@ -49,7 +60,7 @@ class mplot(object):
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.
 
-                Cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
+                Cap = cap_collection.get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.drop(columns = ['timestamp','tech'])
@@ -58,8 +69,8 @@ class mplot(object):
                 Gen.index = Gen.timestamp
                 Gen = Gen.drop(columns = ['timestamp'])
                 if self.prop == 'Date Range':
-                    print("Plotting specific date range:")
-                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
                     Gen = Gen[self.start_date : self.end_date]
 
                 tech_names = Gen['tech'].unique()
@@ -135,14 +146,26 @@ class mplot(object):
 
     def count_ramps(self):
         outputs = {}
+        gen_collection = {}
+        cap_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-            print("Zone =  " + zone_input)
+            self.logger.info("Zone =  " + zone_input)
             cap_started_all_scenarios = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + str(scenario))
-                Gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Generation")
+                self.logger.info("Scenario = " + str(scenario))
+                Gen = gen_collection.get(scenario)
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
 
                 Gen = Gen.reset_index()
@@ -152,7 +175,7 @@ class mplot(object):
                 Gen = Gen[['timestamp','gen_name','tech','Output (MWh)']]
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.tops.
 
-                Cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Installed_Capacity")
+                Cap = cap_collection.get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
@@ -165,8 +188,8 @@ class mplot(object):
                 # Min = Min.xs(zone_input, level = AGG_BY)
 
                 if self.prop == 'Date Range':
-                    print("Plotting specific date range:")
-                    print(str(self.start_date) + '  to  ' + str(self.end_date))
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
                     Gen = Gen[self.start_date : self.end_date]
 
                 tech_names = Gen['tech'].unique()

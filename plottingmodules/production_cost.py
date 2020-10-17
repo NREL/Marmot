@@ -7,11 +7,10 @@ Created on Tue Dec 17 16:24:40 2019
 
 import pandas as pd
 import matplotlib.pyplot as plt
-#from collections import OrderedDict
 import matplotlib as mpl
 import os
-
 import marmot_plot_functions as mfunc
+import logging
 
 #===============================================================================
 
@@ -21,47 +20,52 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
     def prod_cost(self):
-
-        Total_Gen_Cost_Collection = {}
-        Pool_Revenues_Collection = {}
-        Reserve_Revenues_Collection = {}
-        Installed_Capacity_Collection = {}
-        for scenario in self.Multi_Scenario:
-
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
-            Pool_Revenues_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Pool_Revenue")
-            Reserve_Revenues_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Reserves_Revenue")
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Installed_Capacity")
-
+        
         outputs = {}
+        total_gen_cost_collection = {}
+        pool_revenues_collection = {}
+        reserve_revenues_collection = {}
+        installed_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(pool_revenues_collection,"generator_Pool_Revenue", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(reserve_revenues_collection,"generator_Reserves_Revenue", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Systems_Cost_Out = pd.DataFrame()
-            print(self.AGG_BY + " = "+ zone_input)
+            self.logger.info(self.AGG_BY + " = "+ zone_input)
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
                 Total_Systems_Cost = pd.DataFrame()
 
-                Total_Installed_Capacity = Installed_Capacity_Collection.get(scenario)
+                Total_Installed_Capacity = installed_capacity_collection.get(scenario)
                 #Check if zone has installed generation, if not skips
                 try:
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No installed capacity in : "+zone_input)
+                    self.logger.warning("No installed capacity in : "+zone_input)
                     continue
                 Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity = Total_Installed_Capacity.iloc[0]
 
-                Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
+                Total_Gen_Cost = total_gen_cost_collection.get(scenario)
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 Total_Gen_Cost = mfunc.df_process_gen_inputs(Total_Gen_Cost, self.ordered_gen)
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)*-1
                 Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/kW-year
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
 
-                Pool_Revenues = Pool_Revenues_Collection.get(scenario)
+                Pool_Revenues = pool_revenues_collection.get(scenario)
                 Pool_Revenues = Pool_Revenues.xs(zone_input,level=self.AGG_BY)
                 Pool_Revenues = mfunc.df_process_gen_inputs(Pool_Revenues, self.ordered_gen)
                 Pool_Revenues = Pool_Revenues.sum(axis=0)
@@ -69,7 +73,7 @@ class mplot(object):
                 Pool_Revenues.rename("Energy_Revenues", inplace=True)
 
                 ### Might cvhnage to Net Reserve Revenue at later date
-                Reserve_Revenues = Reserve_Revenues_Collection.get(scenario)
+                Reserve_Revenues = reserve_revenues_collection.get(scenario)
                 Reserve_Revenues = Reserve_Revenues.xs(zone_input,level=self.AGG_BY)
                 Reserve_Revenues = mfunc.df_process_gen_inputs(Reserve_Revenues, self.ordered_gen)
                 Reserve_Revenues = Reserve_Revenues.sum(axis=0)
@@ -137,47 +141,48 @@ class mplot(object):
         return outputs
 
     def sys_cost(self):
-        Total_Gen_Cost_Collection = {}
-        Cost_Unserved_Energy_Collection = {}
-        for scenario in self.Multi_Scenario:
-
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
-            # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone":
-                try:
-                    Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "zone_Cost_Unserved_Energy")
-                except:
-                    Cost_Unserved_Energy_Collection[scenario] = Total_Gen_Cost_Collection[scenario].copy()
-                    Cost_Unserved_Energy_Collection[scenario].iloc[:,0] = 0
-            else:
-                try:
-                    Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "region_Cost_Unserved_Energy")
-                except:
-                    Cost_Unserved_Energy_Collection[scenario] = Total_Gen_Cost_Collection[scenario].copy()
-                    Cost_Unserved_Energy_Collection[scenario].iloc[:,0] = 0
-
         outputs = {}
+        total_gen_cost_collection = {}
+        cost_unserved_energy_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        if self.AGG_BY == "zone":
+            mfunc.get_data(cost_unserved_energy_collection,"zone_Cost_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        else:
+            mfunc.get_data(cost_unserved_energy_collection,"region_Cost_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Systems_Cost_Out = pd.DataFrame()
-            print(self.AGG_BY + " = "+ zone_input)
+            self.logger.info(self.AGG_BY + " = "+ zone_input)
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
                 Total_Systems_Cost = pd.DataFrame()
 
 
-                Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
+                Total_Gen_Cost = total_gen_cost_collection.get(scenario)
 
                 try:
                     Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No Generators found for : "+zone_input)
+                    self.logger.warning("No Generators found for : "+zone_input)
                     continue
 
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
-
-                Cost_Unserved_Energy = Cost_Unserved_Energy_Collection.get(scenario)
+                
+                try:
+                    cost_unserved_energy_collection[scenario]
+                except KeyError:
+                    cost_unserved_energy_collection[scenario] = total_gen_cost_collection[scenario].copy()
+                    cost_unserved_energy_collection[scenario].iloc[:,0] = 0
+                Cost_Unserved_Energy = cost_unserved_energy_collection.get(scenario)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
@@ -255,57 +260,62 @@ class mplot(object):
         return outputs
 
     def detailed_gen_cost(self):
-        Total_Gen_Cost_Collection = {}
-        Fuel_Cost_Collection = {}
-        VOM_Cost_Collection = {}
-        Start_Shutdown_Cost_Collection = {}
-        Emissions_Cost_Collection = {}
-        for scenario in self.Multi_Scenario:
-
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
-            Fuel_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
-            VOM_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
-            Start_Shutdown_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
-            try:
-                Emissions_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
-            except Exception:
-                print("\ngenerator_Emissions_Cost not included in " + scenario + " results,\nEmissions_Cost will not be included in plot\n")
-                Emissions_Cost_Collection[scenario] = Start_Shutdown_Cost_Collection[scenario].copy()
-                Emissions_Cost_Collection[scenario].iloc[:,0] = 0
-                pass
-
         outputs = {}
+        total_gen_cost_collection = {}
+        fuel_cost_collection = {}
+        vom_cost_collection = {}
+        start_shutdown_cost_collection = {}
+        emissions_cost_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(fuel_cost_collection,"generator_Fuel_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(vom_cost_collection,"generator_VO&M_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(start_shutdown_cost_collection,"generator_Start_&_Shutdown_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        mfunc.get_data(emissions_cost_collection,"generator_Emissions_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
 
             Detailed_Gen_Cost_Out = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
-                Fuel_Cost = Fuel_Cost_Collection.get(scenario)
+                Fuel_Cost = fuel_cost_collection.get(scenario)
                 # Check if Fuel_cost contains zone_input, skips if not
                 try:
                     Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No Generators found for : "+zone_input)
+                    self.logger.warning("No Generators found for : "+zone_input)
                     continue
 
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
 
-                VOM_Cost = VOM_Cost_Collection.get(scenario)
+                VOM_Cost = vom_cost_collection.get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
                 VOM_Cost[VOM_Cost<0]=0
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
 
-                Start_Shutdown_Cost = Start_Shutdown_Cost_Collection.get(scenario)
+                Start_Shutdown_Cost = start_shutdown_cost_collection.get(scenario)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.xs(zone_input,level=self.AGG_BY)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
-
-                Emissions_Cost = Emissions_Cost_Collection.get(scenario)
+                
+                try:
+                    emissions_cost_collection[scenario]
+                except KeyError:
+                    self.logger.warning("generator_Emissions_Cost not included in %s results, Emissions_Cost will not be included in plot",scenario)
+                    emissions_cost_collection[scenario] = start_shutdown_cost_collection[scenario].copy()
+                    emissions_cost_collection[scenario].iloc[:,0] = 0
+                Emissions_Cost = emissions_cost_collection.get(scenario)
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)
@@ -386,26 +396,31 @@ class mplot(object):
 
     def sys_cost_type(self):
         # Create Dictionary to hold Datframes for each scenario
-        Stacked_Gen_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Total_Generation_Cost")
-
         outputs = {}
+        stacked_gen_cost_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(stacked_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
-            print("Zone = " + zone_input)
+            self.logger.info("Zone = " + zone_input)
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
-                Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
+                Total_Gen_Stack = stacked_gen_cost_collection.get(scenario)
                 # Check if Total_Gen_Stack contains zone_input, skips if not
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No Generators found for : "+zone_input)
+                    self.logger.warning("No Generators found for : "+zone_input)
                     continue
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
@@ -465,39 +480,48 @@ class mplot(object):
         return outputs
 
     def sys_cost_diff(self):
-        Total_Gen_Cost_Collection = {}
-        Cost_Unserved_Energy_Collection = {}
-        for scenario in self.Multi_Scenario:
-
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
-            # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone":
-                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "zone_Cost_Unserved_Energy")
-            else:
-                Cost_Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "region_Cost_Unserved_Energy")
-
         outputs = {}
+        total_gen_cost_collection = {}
+        cost_unserved_energy_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        if self.AGG_BY == "zone":
+            mfunc.get_data(cost_unserved_energy_collection,"zone_Cost_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        else:
+            mfunc.get_data(cost_unserved_energy_collection,"region_Cost_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Systems_Cost_Out = pd.DataFrame()
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
                 Total_Systems_Cost = pd.DataFrame()
 
 
-                Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
+                Total_Gen_Cost = total_gen_cost_collection.get(scenario)
 
                 try:
                     Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No Generators found for : "+ zone_input)
+                    self.logger.warning("No Generators found for : "+ zone_input)
                     continue
 
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
-
-                Cost_Unserved_Energy = Cost_Unserved_Energy_Collection.get(scenario)
+                
+                try:
+                    cost_unserved_energy_collection[scenario]
+                except KeyError:
+                    cost_unserved_energy_collection[scenario] = total_gen_cost_collection[scenario].copy()
+                    cost_unserved_energy_collection[scenario].iloc[:,0] = 0
+                Cost_Unserved_Energy = cost_unserved_energy_collection.get(scenario)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
@@ -558,28 +582,31 @@ class mplot(object):
 
     def sys_cost_type_diff(self):
         # Create Dictionary to hold Datframes for each scenario
-        Stacked_Gen_Collection = {}
-
-
-        for scenario in self.Multi_Scenario:
-            Stacked_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),"generator_Total_Generation_Cost")
-            # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
-
         outputs = {}
+        stacked_gen_cost_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(stacked_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
-            print("Zone = " + zone_input)
+            self.logger.info("Zone = " + zone_input)
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
-                Total_Gen_Stack = Stacked_Gen_Collection.get(scenario)
+                Total_Gen_Stack = stacked_gen_cost_collection.get(scenario)
 
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No Generators found for : "+zone_input)
+                    self.logger.warning("No Generators found for : "+zone_input)
                     continue
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -653,54 +680,60 @@ class mplot(object):
         return outputs
 
     def detailed_gen_cost_diff(self):
-        Total_Gen_Cost_Collection = {}
-        Fuel_Cost_Collection = {}
-        VOM_Cost_Collection = {}
-        Start_Shutdown_Cost_Collection = {}
-        Emissions_Cost_Collection = {}
-        for scenario in self.Multi_Scenario:
-
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Total_Generation_Cost")
-            Fuel_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Fuel_Cost")
-            VOM_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_VO&M_Cost")
-            Start_Shutdown_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Start_&_Shutdown_Cost")
-            try:
-                Emissions_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"), "generator_Emissions_Cost")
-            except Exception:
-                print("\ngenerator_Emissions_Cost not included in " + scenario + " results,\nEmissions_Cost will not be included in plot\n")
-                Emissions_Cost_Collection[scenario] = Start_Shutdown_Cost_Collection[scenario].copy()
-                Emissions_Cost_Collection[scenario].iloc[:,0] = 0
-                pass
-
         outputs = {}
+        total_gen_cost_collection = {}
+        fuel_cost_collection = {}
+        vom_cost_collection = {}
+        start_shutdown_cost_collection = {}
+        emissions_cost_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(fuel_cost_collection,"generator_Fuel_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(vom_cost_collection,"generator_VO&M_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(start_shutdown_cost_collection,"generator_Start_&_Shutdown_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        mfunc.get_data(emissions_cost_collection,"generator_Emissions_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
 
             Detailed_Gen_Cost_Out = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
-                Fuel_Cost = Fuel_Cost_Collection.get(scenario)
+                Fuel_Cost = fuel_cost_collection.get(scenario)
                 try:
                     Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No Generators found for : "+zone_input)
+                    self.logger.warning("No Generators found for: "+zone_input)
                     continue
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
 
-                VOM_Cost = VOM_Cost_Collection.get(scenario)
+                VOM_Cost = vom_cost_collection.get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
 
-                Start_Shutdown_Cost = Start_Shutdown_Cost_Collection.get(scenario)
+                Start_Shutdown_Cost = start_shutdown_cost_collection.get(scenario)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.xs(zone_input,level=self.AGG_BY)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
-
-                Emissions_Cost = Emissions_Cost_Collection.get(scenario)
+                
+                try:
+                    emissions_cost_collection[scenario]
+                except KeyError:
+                    self.logger.warning("generator_Emissions_Cost not included in %s results, Emissions_Cost will not be included in plot",scenario)
+                    emissions_cost_collection[scenario] = start_shutdown_cost_collection[scenario].copy()
+                    emissions_cost_collection[scenario].iloc[:,0] = 0
+                    
+                Emissions_Cost = emissions_cost_collection.get(scenario)
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)

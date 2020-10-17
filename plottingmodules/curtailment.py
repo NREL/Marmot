@@ -12,7 +12,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
-import os
+import logging
+import marmot_plot_functions as mfunc
 
 #===============================================================================
 
@@ -22,45 +23,50 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
     def curt_pen(self):
-        # Create Dictionary to hold Datframes for each scenario
-        Gen_Collection = {}
-        Avail_Gen_Collection = {}
-        Curtailment_Collection = {}
-        Total_Gen_Cost_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
-            Avail_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"), "generator_Available_Capacity")
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"),  "generator_Curtailment")
-            Total_Gen_Cost_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Total_Generation_Cost")
-
         outputs = {}
+        generation_collection = {}
+        avail_gen_collection = {}
+        curtailment_collection = {}
+        total_gen_cost_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(avail_gen_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
 #        for zone_input in ['TWPR']:
             Penetration_Curtailment_out = pd.DataFrame()
 
-            print(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(self.AGG_BY +  " = " + zone_input)
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
-                gen = Gen_Collection.get(scenario)
+                gen = generation_collection.get(scenario)
                 try: #Check for regions missing all generation.
                     gen = gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No generation in ' + zone_input)
+                        self.logger.warning('No generation in ' + zone_input)
                         continue
 
-                avail_gen = Avail_Gen_Collection.get(scenario)
+                avail_gen = avail_gen_collection.get(scenario)
                 avail_gen = avail_gen.xs(zone_input,level=self.AGG_BY)
 
-                re_curt = Curtailment_Collection.get(scenario)
+                re_curt = curtailment_collection.get(scenario)
                 try:
                     re_curt = re_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                        print('No curtailment in ' + zone_input)
+                        self.logger.warning('No curtailment in ' + zone_input)
                         continue
 
                 # Finds the number of unique hours in the year
@@ -134,7 +140,7 @@ class mplot(object):
                     Prct_PV_curt = (total_pv_curt/total_pv_avail)*100
 
                 # Total generation cost
-                Total_Gen_Cost = Total_Gen_Cost_Collection.get(scenario)
+                Total_Gen_Cost = total_gen_cost_collection.get(scenario)
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 Total_Gen_Cost = float(Total_Gen_Cost.sum())
 
@@ -200,27 +206,33 @@ class mplot(object):
         return outputs
 
     def curt_duration_curve(self):
-        Curtailment_Collection = {}
-        for scenario in self.Multi_Scenario:
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
-
+        outputs = {}
+        curtailment_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         RE_Curtailment_DC = pd.DataFrame()
         PV_Curtailment_DC = pd.DataFrame()
 
-        outputs = {}
         for zone_input in self.Zones:
-            print(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(self.AGG_BY +  " = " + zone_input)
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
-                re_curt = Curtailment_Collection.get(scenario)
+                re_curt = curtailment_collection.get(scenario)
 
                 # Timeseries [MW] RE curtailment [MWh]
                 try: #Check for regions missing all generation.
                     re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No curtailment in ' + zone_input)
+                        self.logger.warning('No curtailment in ' + zone_input)
                         continue
 
                 # Timeseries [MW] PV curtailment [MWh]
@@ -290,40 +302,46 @@ class mplot(object):
 
 
     def curt_total(self):
-        Curtailment_Collection = {}
-        Avail_Gen_Collection = {}
-        for scenario in self.Multi_Scenario:
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
-            Avail_Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder",scenario + "_formatted.h5"), "generator_Available_Capacity")
-
         outputs = {}
+        curtailment_collection = {}
+        avail_gen_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(avail_gen_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-            print(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(self.AGG_BY +  " = " + zone_input)
 
             Total_Curtailment_out = pd.DataFrame()
             Total_Available_gen = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Curtailment_Collection.get(scenario).index.unique(level="tech")]
+                self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
 
                 vre_collection = {}
-                avail_gen_collection = {}
+                avail_vre_collection = {}
 
-                vre_curt = Curtailment_Collection.get(scenario)
+                vre_curt = curtailment_collection.get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print('No curtailment in ' + zone_input)
+                    self.logger.info('No curtailment in ' + zone_input)
                     continue
                 vre_curt = (vre_curt.loc[(slice(None), self.vre_gen_cat),:])
 
-                avail_gen = Avail_Gen_Collection.get(scenario)
+                avail_gen = avail_gen_collection.get(scenario)
                 try: #Check for regions missing all generation.
                     avail_gen = avail_gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        print('No available generation in ' + zone_input)
+                        self.logger.info('No available generation in ' + zone_input)
                         continue
                 avail_gen = (avail_gen.loc[(slice(None), self.vre_gen_cat),:])
 
@@ -331,15 +349,15 @@ class mplot(object):
                     try:
                         vre_curt_type = vre_curt.xs(vre_type,level='tech')
                     except KeyError:
-                        print('No ' + vre_type + ' in ' + zone_input)
+                        self.logger.info('No ' + vre_type + ' in ' + zone_input)
                         continue
                     vre_collection[vre_type] = float(vre_curt_type.sum())
 
                     avail_gen_type = avail_gen.xs(vre_type,level='tech')
-                    avail_gen_collection[vre_type] = float(avail_gen_type.sum())
+                    avail_vre_collection[vre_type] = float(avail_gen_type.sum())
 
                 vre_table = pd.DataFrame(vre_collection,index=[scenario])
-                avail_gen_table = pd.DataFrame(avail_gen_collection,index=[scenario])
+                avail_gen_table = pd.DataFrame(avail_vre_collection,index=[scenario])
 
 
                 Total_Curtailment_out = pd.concat([Total_Curtailment_out, vre_table], axis=0, sort=False)

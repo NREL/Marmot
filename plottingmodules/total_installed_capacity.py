@@ -13,8 +13,8 @@ import total_generation as gen
 import pdb
 from matplotlib.patches import Patch
 import numpy as np
-
 import marmot_plot_functions as mfunc
+import logging
 
 #===============================================================================
 
@@ -31,29 +31,34 @@ class mplot(object):
 
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def total_cap(self):
-        # Create Dictionary to hold Datframes for each scenario
-        Installed_Capacity_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            Installed_Capacity_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),   "generator_Installed_Capacity")
-
         outputs = {}
+        installed_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
             Total_Installed_Capacity_Out = pd.DataFrame()
             Data_Table_Out = pd.DataFrame()
-            print(self.AGG_BY + " = " + zone_input)
+            self.logger.info(self.AGG_BY + " = " + zone_input)
 
             for scenario in self.Multi_Scenario:
 
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
-                Total_Installed_Capacity = Installed_Capacity_Collection.get(scenario)
+                Total_Installed_Capacity = installed_capacity_collection.get(scenario)
                 try:
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    print("No installed capacity in : "+zone_input)
+                    self.logger.warning("No installed capacity in : "+zone_input)
                     break
 
                 Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
@@ -99,11 +104,11 @@ class mplot(object):
 
     def total_cap_and_gen_facet(self):
         # generation figure
-        print("Generation data")
+        self.logger.info("Generation data")
         gen_obj = gen.mplot(self.argument_dict)
         gen_outputs = gen_obj.total_gen()
 
-        print("Installed capacity data")
+        self.logger.info("Installed capacity data")
         cap_outputs = self.total_cap()
 
         outputs = {}

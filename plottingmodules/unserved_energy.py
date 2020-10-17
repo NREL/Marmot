@@ -9,11 +9,12 @@ This code creates unserved energy timeseries line plots and total bat plots and 
 
 
 import pandas as pd
-#import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
+import logging
+import marmot_plot_functions as mfunc
 
 #===============================================================================
 
@@ -23,29 +24,35 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
-
+        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
     def unserved_energy_timeseries(self):
-
-        Unserved_Energy_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone":
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy")
-            else:
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy")
-
+        
         outputs = {}
+        unserved_energy_collection = {}
+        check_input_data = []
+        
+        if self.AGG_BY == "zone":
+            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        else:
+            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-            print('Zone = ' + zone_input)
+            self.logger.info('Zone = %s',zone_input)
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
             #Total_Unserved_Energy_Out = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
 
-                print('Scenario = ' + scenario)
+                self.logger.info('Scenario = %s',scenario)
 
-                unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
+                unserved_eng_timeseries = unserved_energy_collection.get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
@@ -60,6 +67,7 @@ class mplot(object):
             Data_Table_Out = Unserved_Energy_Timeseries_Out
 
             if Unserved_Energy_Timeseries_Out.empty==True:
+                self.logger.info('No Unserved Energy in %s',zone_input)
                 df = pd.DataFrame()
                 outputs[zone_input] = df
                 continue
@@ -105,29 +113,30 @@ class mplot(object):
         return outputs
 
     def tot_unserved_energy(self):
-        Unserved_Energy_Collection = {}
-
-        for scenario in self.Multi_Scenario:
-            # If data is to be agregated by zone, then zone properties are loaded, else region properties are loaded
-            if self.AGG_BY == "zone":
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy")
-            else:
-                Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy")
-
-        # Unserved_Energy_Timeseries_Out = pd.DataFrame()
-        # Total_Unserved_Energy_Out = pd.DataFrame()
-
         outputs = {}
+        unserved_energy_collection = {}
+        check_input_data = []
+        
+        if self.AGG_BY == "zone":
+            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        else:
+            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+
         for zone_input in self.Zones:
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
             Total_Unserved_Energy_Out = pd.DataFrame()
 
-            print(self.AGG_BY + ' = ' + zone_input)
+            self.logger.info(self.AGG_BY + ' = ' + zone_input)
             for scenario in self.Multi_Scenario:
 
-                print('Scenario = ' + scenario)
+                self.logger.info('Scenario = %s',scenario)
 
-                unserved_eng_timeseries = Unserved_Energy_Collection.get(scenario)
+                unserved_eng_timeseries = unserved_energy_collection.get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
@@ -142,6 +151,7 @@ class mplot(object):
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.wrap(10, break_long_words=False)
 
             if Total_Unserved_Energy_Out.values.sum() == 0:
+                self.logger.info('No Unserved Energy in %s',zone_input)
                 df = pd.DataFrame()
                 outputs[zone_input] = df
                 continue
@@ -151,20 +161,14 @@ class mplot(object):
                 # Data table of values to return to main program
                 Data_Table_Out = Total_Unserved_Energy_Out
 
-                # Converts color_list into an iterable list for use in a loop
-                iter_colour = iter(self.color_list)
+                # create color dictionary
+                color_dict = dict(zip(Total_Unserved_Energy_Out.columns,self.color_list))
 
                 fig2, ax = plt.subplots(figsize=(6,4))
-
-                Total_Unserved_Energy_Out.plot.bar(stacked=False, rot=0, edgecolor='black',
-                                                        color=next(iter_colour), linewidth='0.1',
-                                                        width=0.35, ax=ax)
-
+                
+                mfunc.create_bar_plot(Total_Unserved_Energy_Out,ax,color_dict)
+                
                 ax.set_ylabel('Total Unserved Energy (MWh)',  color='black', rotation='vertical')
-                ax.spines['right'].set_visible(False)
-                ax.spines['top'].set_visible(False)
-                ax.tick_params(axis='y', which='major', length=5, width=1)
-                ax.tick_params(axis='x', which='major', length=5, width=1)
                 ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
                 ax.margins(x=0.01)
 

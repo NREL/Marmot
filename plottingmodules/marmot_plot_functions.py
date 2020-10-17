@@ -13,6 +13,9 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import math
+import logging
+
+logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
 
 
@@ -42,7 +45,7 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
             data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),data)
             return_value = 0
         except KeyError:
-            print("'{}' is MISSING from the Marmot formatted h5 files".format(data))
+            logger.warning("'%s' is MISSING from the Marmot formatted h5 files",data)
             return_value = 1
             return return_value
     return return_value
@@ -129,7 +132,7 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
         ydimension = 1
     # If no labels were provided use Marmot default dimension settings
     if xlabels == [''] and ylabels == ['']:
-        print("Warning: Facet Labels not provided - Using Marmot default dimensions")
+        logger.warning("Warning: Facet Labels not provided - Using Marmot default dimensions")
         xdimension, ydimension = set_x_y_dimension(len(multi_scenario))
     return xdimension, ydimension
 
@@ -186,6 +189,35 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     axs = axs.ravel()
     return fig,axs
 
+
+def create_bar_plot(df, axs, colour, stacked=False):
+    """
+    Creates a bar plot
+
+    Parameters
+    ----------
+    df : DataFrame
+        DataFrame of data to plot.
+    axs : matplotlib.axes
+        matplotlib.axes.
+    colour : dictionary
+        colour dictionary.
+    stacked : Bool
+        True/False for stacked bar
+
+    Returns
+    -------
+    fig : matplotlib fig
+        matplotlib fig.
+    """
+    fig = df.plot.bar(stacked=stacked, rot=0, edgecolor='white', linewidth='1.5',
+                     color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
+    fig.spines['right'].set_visible(False)
+    fig.spines['top'].set_visible(False)
+    fig.tick_params(axis='y', which='major', length=5, width=1)
+    fig.tick_params(axis='x', which='major', length=5, width=1)
+    return fig
+    
 
 def create_grouped_bar_plot(df, colour):
     """
@@ -264,7 +296,7 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,n=0):
     if color_dict==None:
         axs[n].plot(data[column], linewidth=1,label=label)
     else:
-        axs[n].plot(data[column], linewidth=1, color=color_dict[column],label=column)
+        axs[n].plot(data[column], linewidth=1, color=color_dict[column],label=label)
     axs[n].spines['right'].set_visible(False)
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)

@@ -14,8 +14,9 @@ import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
 import numpy as np
-
 import marmot_plot_functions as mfunc
+import logging
+
 #===============================================================================
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
@@ -29,43 +30,36 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
 ###############################################################################
 
     def gen_stack(self):
         # Create a dictionary to hold Dataframes
-        Gen_Collection = {}
-        Load_Collection = {}
-        Pump_Load_Collection = {}
-        Unserved_Energy_Collection = {}
-        Curtailment_Collection = {}
-
-        def set_dicts(scenario):
-            Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
-            Curtailment_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "generator_Curtailment")
-            try:
-                Pump_Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario+"_formatted.h5"),  "generator_Pump_Load" )
-            except:
-                Pump_Load_Collection[scenario] = Gen_Collection[scenario].copy()
-                Pump_Load_Collection[scenario].iloc[:,0] = 0
+        gen_collection = {}
+        load_collection = {}
+        pump_load_collection = {}
+        unserved_energy_collection = {}
+        curtailment_collection = {}
+        check_input_data = []
+        
+        def set_dicts(scenario_list):
+            check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, scenario_list)])
+            check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, scenario_list)])
+            mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)
+            
             if self.AGG_BY == "zone":
-                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "zone_Load")
-                try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "zone_Unserved_Energy" )
-                except:
-                    Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
-                    Unserved_Energy_Collection[scenario].iloc[:,0] = 0
+                check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, scenario_list)])
+                mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, scenario_list)
             else:
-                Load_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"),  "region_Load")
-                try:
-                    Unserved_Energy_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "region_Unserved_Energy" )
-                except:
-                    Unserved_Energy_Collection[scenario] = Load_Collection[scenario].copy()
-                    Unserved_Energy_Collection[scenario].iloc[:,0] = 0
+                check_input_data.extend([mfunc.get_data(load_collection,"region_Load", self.Marmot_Solutions_folder, scenario_list)])
+                mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, scenario_list)
+            
+            return check_input_data
 
         def setup_data(zone_input, scenario, Stacked_Gen):
             try:
-                Stacked_Curt = Curtailment_Collection.get(scenario)
+                Stacked_Curt = curtailment_collection.get(scenario)
                 Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                 Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                 Stacked_Curt = Stacked_Curt.sum(axis=1)
@@ -85,13 +79,18 @@ class mplot(object):
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
             Stacked_Gen = Stacked_Gen #/ 1000 #MW -> GW
 
-            Load = Load_Collection.get(scenario)
+            Load = load_collection.get(scenario)
             Load = Load.xs(zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
             Load = Load #/ 1000 #MW -> GW
-
-            Pump_Load = Pump_Load_Collection.get(scenario)
+            
+            try:
+                pump_load_collection[scenario]
+            except KeyError:
+                pump_load_collection[scenario] = gen_collection[scenario].copy()
+                pump_load_collection[scenario].iloc[:,0] = 0
+            Pump_Load = pump_load_collection.get(scenario)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
@@ -100,8 +99,13 @@ class mplot(object):
                 Total_Demand = Load - Pump_Load
             else:
                 Total_Demand = Load
-
-            Unserved_Energy = Unserved_Energy_Collection.get(scenario)
+            
+            try:
+                unserved_energy_collection[scenario]
+            except KeyError:
+                unserved_energy_collection[scenario] = load_collection[scenario].copy()
+                unserved_energy_collection[scenario].iloc[:,0] = 0
+            Unserved_Energy = unserved_energy_collection.get(scenario)
             Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
             Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
             Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
@@ -153,8 +157,8 @@ class mplot(object):
                 unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
 
             elif self.prop == 'Date Range':
-                ("Plotting specific date range:")
-                print(str(self.start_date) + '  to  ' + str(self.end_date))
+                self.logger.info("Plotting specific date range: \
+                {} to {}".format(str(self.start_date),str(self.end_date)))
 
                 Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
                 Load = Load[self.start_date : self.end_date]
@@ -163,7 +167,7 @@ class mplot(object):
                 unserved_eng_data_table = unserved_eng_data_table[self.start_date : self.end_date]
 
             else:
-                print("Plotting graph for entire timeperiod")
+                self.logger.info("Plotting graph for entire timeperiod")
             data = {"Stacked_Gen":Stacked_Gen, "Load":Load, "Pump_Load":Pump_Load, "Total_Demand":Total_Demand, "Unserved_Energy":Unserved_Energy,"ue_data_table":unserved_eng_data_table}
             data["peak_demand_t"] = peak_demand_t
             data["Peak_Demand"] = Peak_Demand
@@ -179,7 +183,7 @@ class mplot(object):
             if ydimension == 0:
                 ydimension = 1
 
-    # If the plot is not a facet plot, grid size should be 1x1
+            # If the plot is not a facet plot, grid size should be 1x1
             if not self.facet:
                 xdimension = 1
                 ydimension = 1
@@ -207,14 +211,14 @@ class mplot(object):
             unique_tech_names = []
 
             for scenario in all_scenarios:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 try:
-                    Stacked_Gen = Gen_Collection.get(scenario)
+                    Stacked_Gen = gen_collection.get(scenario)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     i=i+1
-                    print('No generation in ' + zone_input + '\n')
+                    self.logger.warning('No generation in ' + zone_input + '\n')
                     out = pd.DataFrame()
                     return out
 
@@ -223,7 +227,7 @@ class mplot(object):
 
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
-                    print('No generation during time period in ' + zone_input + '\n')
+                    self.logger.warning('No generation during time period in ' + zone_input + '\n')
                     out = pd.DataFrame()
                     return out
 
@@ -347,7 +351,6 @@ class mplot(object):
             if (Unserved_Energy == 0).all() == False:
                 axs[grid_size-1].add_artist(leg3)
 
-            print(" ")
             all_axes = fig1.get_axes()
             self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
             j=0
@@ -384,24 +387,24 @@ class mplot(object):
 
             return out
 
-# Main loop for gen_stack
+        # Main loop for gen_stack
+        outputs = {}        
         if self.facet:
-            for scenario in self.Multi_Scenario:
-                set_dicts(scenario)
+            check_input_data = set_dicts(self.Multi_Scenario)
         else:
-            set_dicts(self.Multi_Scenario[0])
-
-        outputs = {}
+            check_input_data = set_dicts([self.Multi_Scenario[0]])  
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+    
         for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
-            #data_tables = {}
-            if self.facet:
-                #for scenario in self.Multi_Scenario:
-                    #set_dicts(scenario)
-                outputs[zone_input] = mkplot(outputs, zone_input, self.Multi_Scenario)
+            self.logger.info("Zone = "+ zone_input)
 
+            if self.facet:
+                outputs[zone_input] = mkplot(outputs, zone_input, self.Multi_Scenario)
             else:
-                #set_dicts(self.Multi_Scenario[0])
                 outputs[zone_input] = mkplot(outputs, zone_input, [self.Multi_Scenario[0]])
         return outputs
 
@@ -410,34 +413,58 @@ class mplot(object):
 ###############################################################################
     def gen_diff(self):
         outputs = {}
+        gen_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
             # Create Dictionary to hold Datframes for each scenario
-            Gen_Collection = {}
-
-            for scenario in self.Scenario_Diff:
-                Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
-
-
-            Total_Gen_Stack_1 = Gen_Collection.get(self.Scenario_Diff[0])
+            
+            Total_Gen_Stack_1 = gen_collection.get(self.Scenario_Diff[0])
+            if Total_Gen_Stack_1 is None:
+                self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue
+            
             Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_1 = mfunc.df_process_gen_inputs(Total_Gen_Stack_1, self.ordered_gen)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns = self.ordered_gen).fillna(0)
 
-            Total_Gen_Stack_2 = Gen_Collection.get(self.Scenario_Diff[1])
+            Total_Gen_Stack_2 = gen_collection.get(self.Scenario_Diff[1])
+            if Total_Gen_Stack_2 is None:
+                self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[1])
+                df = pd.DataFrame()
+                outputs[zone_input] = df
+                continue
+            
             Total_Gen_Stack_2 = Total_Gen_Stack_2.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_2 = mfunc.df_process_gen_inputs(Total_Gen_Stack_2, self.ordered_gen)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns = self.ordered_gen).fillna(0)
 
-            print('Scenario 1 = ' + self.Scenario_Diff[0])
-            print('Scenario 2 =  ' + self.Scenario_Diff[1])
+            self.logger.info('Scenario 1 = ' + self.Scenario_Diff[0])
+            self.logger.info('Scenario 2 =  ' + self.Scenario_Diff[1])
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
+
+            if self.prop == 'Date Range':
+                self.logger.info("Plotting specific date range: \
+                {} to {}".format(str(self.start_date),str(self.end_date)))
+                Gen_Stack_Out = Gen_Stack_Out[self.start_date : self.end_date]
+            else:
+                self.logger.info("Plotting graph for entire timeperiod")
+            
             # Removes columns that only equal 0
             Gen_Stack_Out.dropna(inplace=True)
             Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]
-
+            
             # Data table of values to return to main program
             Data_Table_Out = Gen_Stack_Out
             # Reverses order of columns
@@ -479,7 +506,7 @@ class mplot(object):
     def gen_stack_all_periods(self):
         #Location to save to
         gen_stack_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Gen_Stack')
-
+        
         Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
         try:
             Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
@@ -507,7 +534,7 @@ class mplot(object):
         outputs = {}
         for zone_input in self.Zones:
 
-            print("Zone = "+ zone_input)
+            self.logger.info("Zone = "+ zone_input)
 
 
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
@@ -567,7 +594,7 @@ class mplot(object):
 
                 period_start=first_date+dt.timedelta(days=(wk-1)*7)
                 period_end=period_start+dt.timedelta(days=self.end)
-                print(str(period_start)+" and next "+str(self.end)+" days.")
+                self.logger.info(str(period_start)+" and next "+str(self.end)+" days.")
                 Stacked_Gen_Period = Stacked_Gen[period_start:period_end]
                 Load_Period = Load[period_start:period_end]
                 Unserved_Energy_Period = Unserved_Energy[period_start:period_end]
@@ -663,24 +690,41 @@ class mplot(object):
 
     def committed_stack(self):
         outputs = {}
+        generation_collection = {}
+        installed_cap_collection = {}
+        units_generating_collection = {}
+        gen_available_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(installed_cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(units_generating_collection,"generator_Units_Generating", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+        
         for zone_input in self.Zones:
-            print('Zone = ' + str(zone_input))
+            self.logger.info('Zone = ' + str(zone_input))
 
             #Get technology list.
-            gens = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, self.Multi_Scenario[0], "Processed_HDF5_folder", self.Multi_Scenario[0] + "_formatted.h5"), "generator_Installed_Capacity")
+            gens = installed_cap_collection.get(self.Multi_Scenario[0])
+            gens = gens.xs(zone_input,level=self.AGG_BY)
             tech_list = list(gens.reset_index().tech.unique())
             tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
 
             xdimension = len(self.Multi_Scenario)
             ydimension = len(tech_list_sort)
 
-            fig4, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharex = True, sharey='row')
+            fig4, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharex = True, sharey='row',squeeze=False)
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
 
             i=0
-
+            
             for scenario in self.Multi_Scenario:
-                print("Scenario = " + scenario)
+                self.logger.info("Scenario = " + scenario)
 
                 locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
                 formatter = mdates.ConciseDateFormatter(locator)
@@ -690,11 +734,11 @@ class mplot(object):
                 formatter.zero_formats[3] = '%H:%M\n %d-%b'
                 formatter.offset_formats[3] = '%b %Y'
                 formatter.show_offset = False
+                
 
-                gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Generation")
-                units_gen = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Units_Generating")
-                avail_cap = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario, "Processed_HDF5_folder", scenario + "_formatted.h5"), "generator_Available_Capacity")
-
+                units_gen = units_generating_collection.get(scenario)
+                avail_cap = gen_available_capacity_collection.get(scenario)
+                
                 #Calculate  committed cap (for thermal only).
                 thermal_commit_cap = units_gen * avail_cap
                 thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
@@ -703,6 +747,7 @@ class mplot(object):
                 thermal_commit_cap = thermal_commit_cap / 1000 #MW -> GW
 
                 #Process generation.
+                gen = generation_collection.get(scenario)
                 gen = gen.xs(zone_input,level = self.AGG_BY)
                 gen = mfunc.df_process_gen_inputs(gen,self.ordered_gen)
                 gen = gen.loc[:, (gen != 0).any(axis=0)]
@@ -726,7 +771,7 @@ class mplot(object):
                     else:
                         gen_one_tech = gen[tech]
                         commit_cap = avail_cap[tech]
-
+                    
                     gen_line = axs[j,i].plot(gen_one_tech,alpha = 0, color = self.PLEXOS_color_dict[tech])[0]
                     gen_lines.append(gen_line)
                     gen_fill = axs[j,i].fill_between(gen_one_tech.index,gen_one_tech,0, color = self.PLEXOS_color_dict[tech], alpha = 0.5)

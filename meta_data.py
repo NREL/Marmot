@@ -11,6 +11,8 @@ import h5py
 import os
 import pandas as pd
 import numpy as np
+import logging
+
 
 class MetaData:
     
@@ -25,6 +27,7 @@ class MetaData:
         model : string, optional
             Name of model h5 file. The default is None.
         """
+        self.logger = logging.getLogger('marmot_format.'+__name__)        
         self.HDF5_folder_in = HDF5_folder_in
         self.Region_Mapping = Region_Mapping
         if model == None: 
@@ -196,7 +199,7 @@ class MetaData:
             regions.sort_values(['category','region'],inplace=True)
             return regions   
         except KeyError:
-            print("\Regional data not included in h5plexos results")
+            self.logger.warning("Regional data not included in h5plexos results")
     
     def zones(self):
         try:
@@ -207,7 +210,7 @@ class MetaData:
             zones = zones.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return zones
         except KeyError:
-            print("\nZonal data not included in h5plexos results")
+            self.logger.warning("Zonal data not included in h5plexos results")
              
     def lines(self):
         try:
@@ -219,7 +222,7 @@ class MetaData:
             lines.rename(columns={"name":"line_name"},inplace=True)
             return lines
         except KeyError:
-            print("\nLine data not included in h5plexos results")
+            self.logger.warning("Line data not included in h5plexos results")
     
     def region_regions(self):
         try:
@@ -227,7 +230,7 @@ class MetaData:
             region_regions = region_regions.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return region_regions
         except KeyError:
-            print("\region_regions data not included in h5plexos results")
+            self.logger.warning("region_regions data not included in h5plexos results")
     
     
     def region_interregionallines(self):
@@ -243,7 +246,7 @@ class MetaData:
             return region_interregionallines
         except KeyError:
             region_interregionallines = pd.DataFrame()
-            print("\nRegion Interregionallines data not included in h5plexos results")
+            self.logger.warning("Region Interregionallines data not included in h5plexos results")
             return region_interregionallines
             
       
@@ -259,7 +262,7 @@ class MetaData:
            return region_intraregionallines
        except KeyError: 
            region_intraregionallines = pd.DataFrame()
-           print("\nRegion Intraregionallines Lines data not included in h5plexos results")  
+           self.logger.warning("Region Intraregionallines Lines data not included in h5plexos results")  
            return region_intraregionallines
                 
       
@@ -274,7 +277,7 @@ class MetaData:
           region_exportinglines=pd.merge(region_exportinglines,self.Region_Mapping,how='left',on="region")
           return region_exportinglines 
       except KeyError:
-          print("\nRegion Exporting Lines data not included in h5plexos results") 
+          self.logger.warning("Region Exporting Lines data not included in h5plexos results") 
       
     def region_importing_lines(self):
         try:
@@ -287,7 +290,7 @@ class MetaData:
             region_importinglines=pd.merge(region_importinglines,self.Region_Mapping,how='left',on="region")
             return region_importinglines 
         except KeyError:
-            print("\nRegion Importing Lines data not included in h5plexos results") 
+            self.logger.warning("Region Importing Lines data not included in h5plexos results") 
 
     def zone_interzonallines(self):
             try:
@@ -301,7 +304,7 @@ class MetaData:
                 return zone_interzonallines
             except KeyError:      
                 zone_interzonallines = pd.DataFrame()
-                print("\Zone Interzonallines data not included in h5plexos results")
+                self.logger.warning("Zone Interzonallines data not included in h5plexos results")
                 return zone_interzonallines
                 
     def zone_intrazonallines(self):
@@ -315,7 +318,7 @@ class MetaData:
            return zone_intrazonallines
        except KeyError:      
            zone_intrazonallines = pd.DataFrame()
-           print("\nZone Intrazonallines Lines data not included in h5plexos results") 
+           self.logger.warning("Zone Intrazonallines Lines data not included in h5plexos results") 
            return zone_intrazonallines
                  
     def zone_exporting_lines(self):
@@ -328,7 +331,7 @@ class MetaData:
             zone_exportinglines = zone_exportinglines.rename(columns={'parent':'region','child':'line_name'})
             return zone_exportinglines 
         except KeyError:
-            print("\nzone exporting lines data not included in h5plexos results") 
+            self.logger.warning("zone exporting lines data not included in h5plexos results") 
     
     def zone_importing_lines(self):
         try:
@@ -340,7 +343,7 @@ class MetaData:
             zone_importinglines = zone_importinglines.rename(columns={'parent':'region','child':'line_name'})
             return zone_importinglines 
         except KeyError:
-            print("\nzone importing lines data not included in h5plexos results") 
+            self.logger.warning("zone importing lines data not included in h5plexos results") 
 
     def interface_lines(self):
             try:
@@ -352,7 +355,7 @@ class MetaData:
                 interface_lines = interface_lines.rename(columns={'parent':'interface','child':'line'})
                 return interface_lines
             except KeyError:
-                print("\nInterface Lines data not included in h5plexos results")
+                self.logger.warning("Interface Lines data not included in h5plexos results")
     
     # All Regional lines
     def region_lines(self):
@@ -378,7 +381,7 @@ class MetaData:
             reserves = reserves.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return reserves 
         except KeyError:
-            print("\nReserves data not included in h5plexos results") 
+            self.logger.warning("Reserves data not included in h5plexos results") 
             
     def reserves_generators(self):
         try:
@@ -390,7 +393,7 @@ class MetaData:
             reserves_generators = reserves_generators.rename(columns={'child':'gen_name'})
             return reserves_generators 
         except KeyError:
-            print("\nReserves data not included in h5plexos results") 
+            self.logger.warning("Reserves data not included in h5plexos results") 
             return pd.DataFrame()
     
     def reserves_regions(self):
@@ -399,7 +402,7 @@ class MetaData:
         try:
             reserves_regions = reserves_generators.merge(region_generators, how='left', on='gen_name')
         except KeyError:
-            print("\nReserves Region data not available in h5plexos results") 
+            self.logger.warning("Reserves Region data not available in h5plexos results") 
             return pd.DataFrame()
         reserves_regions=pd.merge(reserves_regions,self.Region_Mapping,how='left',on="region")
         reserves_regions.drop('gen_name', axis=1, inplace=True)
@@ -413,7 +416,7 @@ class MetaData:
         try:
             reserves_zones = reserves_generators.merge(zone_generators, how='left', on='gen_name')
         except KeyError:
-            print("\nReserves Zone data not available in h5plexos results") 
+            self.logger.warning("Reserves Zone data not available in h5plexos results") 
             return pd.DataFrame()
         reserves_zones.drop('gen_name', axis=1, inplace=True)
         reserves_zones.drop_duplicates(inplace=True)
