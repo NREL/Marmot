@@ -52,7 +52,7 @@ class mplot(object):
                 except KeyError:
                     self.logger.warning("No installed capacity in : "+zone_input)
                     break
-
+                
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
@@ -66,12 +66,13 @@ class mplot(object):
                 Cap = Cap.drop(columns = ['timestamp','tech'])
                 Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
-                Gen.index = Gen.timestamp
-                Gen = Gen.drop(columns = ['timestamp'])
+                Gen.set_index('timestamp',inplace=True)
+                
                 if self.prop == 'Date Range':
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Gen = Gen[self.start_date : self.end_date]
+                    # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
+                    Gen = Gen.sort_index()[self.start_date : self.end_date]
 
                 tech_names = Gen['tech'].unique()
                 Cap_started = pd.DataFrame(columns = tech_names,index = [scenario])

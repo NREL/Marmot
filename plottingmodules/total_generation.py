@@ -345,7 +345,14 @@ class mplot(object):
     ## Total Gen Facet Plots removed for now, code not stable and needs testing
     #===============================================================================
 
-    # def total_gen_facet(self):
+    def total_gen_facet(self):
+        outputs = {}
+        for zone_input in self.Zones:
+            
+            outputs[zone_input] = pd.DataFrame()
+            self.logger.warning('total_gen_facet is under development, not currently plottable. Skipping plot.')
+            continue
+        return outputs
     #     Gen_Collection = {}
     #     Load_Collection = {}
     #     curtailment_collection = {}

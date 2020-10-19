@@ -417,7 +417,7 @@ def remove_excess_axs(axs, excess_axs, grid_size):
         axs[(grid_size)-excess_axs].tick_params(axis='both',
                                                 which='both',
                                                 colors='white')
-    excess_axs-=1
+        excess_axs-=1
 
 
 def add_facet_labels(fig, xlabels, ylabels):
