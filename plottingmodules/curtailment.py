@@ -294,7 +294,7 @@ class mplot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             ax.margins(x=0.01)
-            ax.set_xlim=(0, 9490)
+            ax.set_xlim(0, 9490)
             ax.set_ylim(bottom=0)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
