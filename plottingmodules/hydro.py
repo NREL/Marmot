@@ -41,7 +41,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -53,7 +53,12 @@ class mplot(object):
             Stacked_Gen_read = gen_collection.get(self.Multi_Scenario[0])
             
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
-            Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
+            try:
+                Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
+            except KeyError:
+                self.logger.warning("No Generation in %s",zone_input)
+                continue
+
             del Stacked_Gen_read
             Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
 
@@ -68,8 +73,8 @@ class mplot(object):
             try:
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
-                self.logger.warning("No hydro in "+ zone_input+".")
-                Hydro_Gen=pd.DataFrame()
+                self.logger.warning("No Hydro Generation in %s", zone_input)
+                Hydro_Gen=mfunc.MissingZoneData()
                 continue
 
             del Stacked_Gen
@@ -164,7 +169,8 @@ class mplot(object):
             ax2.add_artist(leg1)
 
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Multi_Scenario[0]), dpi=600, bbox_inches='tight')
-            outputs[zone_input] = pd.DataFrame()
+        
+        outputs = mfunc.DataSavedInModule()
         return outputs
 
     def hydro_continent_net_load(self):
@@ -176,7 +182,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -195,8 +201,12 @@ class mplot(object):
             self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Net_Load.columns]
             Net_Load = Net_Load.drop(labels = self.vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1) # Continent net load
-
-            Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
+            
+            try:
+                Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
+            except KeyError:
+                self.logger.warning("No Generation in %s",zone_input)
+                continue
             del Stacked_Gen_read
             Stacked_Gen= mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)] #Removes columns only containing 0
@@ -206,8 +216,8 @@ class mplot(object):
             try:
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
-                self.logger.warning("No hydro in "+ zone_input+".")
-                Hydro_Gen=pd.DataFrame()
+                self.logger.warning("No Hydro Generation in %s", zone_input)
+                Hydro_Gen=mfunc.MissingZoneData()
                 continue
 
             del Stacked_Gen
@@ -239,5 +249,6 @@ class mplot(object):
             ax2.add_artist(leg1)
 
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Continent_Net_Load" + "_" + self.Multi_Scenario[0]), dpi=600, bbox_inches='tight')
-            outputs[zone_input] = pd.DataFrame()
+        
+        outputs = mfunc.DataSavedInModule()
         return outputs

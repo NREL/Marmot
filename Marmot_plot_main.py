@@ -14,11 +14,11 @@ import sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/plottingmodules")
 import importlib
 from meta_data import MetaData
-import pdb
 import logging 
 import logging.config
 import yaml
 import time
+import marmot_plot_functions as mfunc
 
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
@@ -46,6 +46,7 @@ class plottypes:
         mpl.rc('axes', labelsize=self.font_defaults['axes_size'])
         mpl.rc('legend', fontsize=self.font_defaults['legend_size'])
         mpl.rc('font', family=self.font_defaults['font_family'])
+        mpl.rc('figure', max_open_warning = 0)
 
         plot = importlib.import_module(self.figure_type)
         fig = plot.mplot(self.argument_dict)
@@ -311,16 +312,26 @@ for index, row in Marmot_plot_select.iterrows():
     fig = plottypes(module, method, argument_dict, font_defaults)
     Figure_Out = fig.runmplot()
     
-    if isinstance(Figure_Out, type(None)):
+    if isinstance(Figure_Out, mfunc.MissingInputData):
         logger.info("Add Inputs With Formatter Before Attempting to Plot!\n")
         continue
     
+    if isinstance(Figure_Out, mfunc.DataSavedInModule):
+        logger.info('Plotting Completed for %s\n',row["Figure Output Name"])
+        logger.info("Plots & Data Saved Within Module!\n")
+        continue
+    
+    if isinstance(Figure_Out, mfunc.UnderDevelopment):
+        logger.info("Plot is Under Development, Plotting Skipped!\n")
+        continue
+    
+    if isinstance(Figure_Out, mfunc.InputSheetError):
+        logger.info("Input Sheet Data Incorrect!\n")
+        continue
+    
     for zone_input in Zones:
-        if isinstance(Figure_Out[zone_input], pd.DataFrame):
-            if module == 'hydro' or method == 'gen_stack_all_periods':
-                logger.info('plots & data saved within module')
-            else:
-                logger.info("Data missing for %s",zone_input)
+        if isinstance(Figure_Out[zone_input], mfunc.MissingZoneData):
+            logger.info("No Data to Plot in %s",zone_input)
         else:
             # Save figures
             try:

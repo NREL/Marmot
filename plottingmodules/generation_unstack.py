@@ -59,7 +59,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         for zone_input in self.Zones:
@@ -107,8 +107,8 @@ class mplot(object):
                 try:
                     Stacked_Gen = gen_collection.get(scenario)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
-                except Exception:
-                    self.logger.warning('No generation in ' + zone_input)
+                except KeyError:
+                    # self.logger.info('No generation in %s',zone_input)
                     i=i+1
                     continue
 
@@ -222,6 +222,12 @@ class mplot(object):
                 unique_tech_names.extend(l1)
 
                 i=i+1
+            
+            if not data_table:
+                self.logger.warning('No generation in %s',zone_input)
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
             
             # create handles list of unique tech names then order
             handles = np.unique(np.array(unique_tech_names)).tolist()

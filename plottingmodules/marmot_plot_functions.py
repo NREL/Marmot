@@ -18,6 +18,41 @@ import logging
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
 
+class MissingInputData:
+    """
+    Exception Class for handling return of missing data
+    """
+    def __init__(self):
+       return 
+
+class MissingZoneData:
+    """
+    Exception Class for handling return of zones with no data
+    """
+    def __init__(self):
+        return
+
+class DataSavedInModule:
+    """
+    Exception Class for handling data saved within modules
+    """
+    def __init__(self):
+        return
+
+class UnderDevelopment:
+    """
+    Exception Class for handling methods under development
+    """
+    def __init__(self):
+        return
+    
+class InputSheetError:
+    """
+    Exception Class for handling user input sheet errors 
+    """
+    def __init__(self):
+        return
+                
 
 def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     """

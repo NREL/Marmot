@@ -23,6 +23,7 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+    
     def capacity_started(self):
         outputs = {}
         gen_collection = {}
@@ -34,7 +35,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -126,8 +127,8 @@ class mplot(object):
                 # print('Method 2 (first making a data frame with only 0s, then checking if timestamps > 1 hour) took ' + str(elapsed) + ' seconds')
 
             if cap_started_all_scenarios.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             fig1 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0,
@@ -156,12 +157,12 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
             self.logger.info("Zone =  " + zone_input)
-            cap_started_all_scenarios = pd.DataFrame()
+            cap_started_chunk = []
 
             for scenario in self.Multi_Scenario:
 
@@ -216,8 +217,9 @@ class mplot(object):
 
                     ramp_counts[tech_name] = up_ramps
 
-                cap_started_all_scenarios = cap_started_all_scenarios.append(ramp_counts)
-
+                cap_started_chunk.append(ramp_counts)
+            
+            cap_started_all_scenarios = pd.concat([cap_started_chunk])
 
             fig2 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0,
                                   color = self.color_list,edgecolor='black', linewidth='0.1')

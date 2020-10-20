@@ -46,7 +46,7 @@ class mplot(object):
         check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Multi_Scenario)])
 
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         for region in self.Zones:
@@ -71,8 +71,8 @@ class mplot(object):
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No reserves in : " + region)
-                    break
+                    self.info.info("No reserves deployed in : " + scenario)
+                    continue
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
                 data_tables[scenario] = reserve_provision_timeseries
 
@@ -107,7 +107,12 @@ class mplot(object):
 
                 if self.facet:
                     n=n+1
-
+            
+            if not data_tables:
+                self.logger.warning('No reserves in ' + region)
+                out = mfunc.MissingZoneData()
+                return out
+                
             # create handles list of unique tech names then order
             handles = np.unique(np.array(unique_tech_names)).tolist()
             handles.sort(key = lambda i:self.ordered_gen.index(i))
@@ -155,7 +160,7 @@ class mplot(object):
         check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Multi_Scenario)])
 
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         for region in self.Zones:
@@ -171,8 +176,8 @@ class mplot(object):
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No reserves in : " + region)
-                    break
+                    self.logger.info("No reserves deployed in %s", scenario)
+                    continue
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
@@ -193,7 +198,12 @@ class mplot(object):
 
             Total_Reserves_Out.index = Total_Reserves_Out.index.str.replace('_',' ')
             Total_Reserves_Out.index = Total_Reserves_Out.index.str.wrap(5, break_long_words=False)
-
+            
+            if Total_Reserves_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[region] = out
+                continue
+            
             # create figure
             fig1 = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict)
 
@@ -263,7 +273,7 @@ class mplot(object):
         check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_{}".format(data_set),self.Marmot_Solutions_folder, self.Multi_Scenario)])
 
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         outputs = {}
@@ -281,8 +291,8 @@ class mplot(object):
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No reserves in : " + region)
-                    break
+                    self.logger.info("No reserves deployed in %s", scenario)
+                    continue
                 timestamps = reserve_timeseries.index.get_level_values('timestamp').unique()
                 # Calculates interval step to correct for MWh of generation
                 time_delta = timestamps[1]- timestamps[0]
@@ -312,9 +322,9 @@ class mplot(object):
             reserve_out = reserve_out.loc[(reserve_out != 0).any(axis=1),:]
 
             # If no reserves return nothing
-            if reserve_out.empty == True:
-                df = pd.DataFrame()
-                outputs[region] = df
+            if reserve_out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[region] = out
                 continue
 
             reserve_out.columns = reserve_out.columns.str.replace('_',' ')
@@ -355,7 +365,7 @@ class mplot(object):
         check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_Shortage", self.Marmot_Solutions_folder, self.Multi_Scenario)])
 
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         for region in self.Zones:
@@ -381,8 +391,9 @@ class mplot(object):
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No reserves in : " + region)
-                    break
+                    self.logger.info("No reserves deployed in %s", scenario)
+                    continue
+                
                 reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False,inplace=True)
                 reserve_timeseries = reserve_timeseries.drop_duplicates()
                 # Set Type equal to parent value if Type eqauls '-'
@@ -415,7 +426,12 @@ class mplot(object):
 
                 if self.facet:
                     n=n+1
-
+            
+            if not reserve_timeseries_chunk:
+                out = mfunc.MissingZoneData()
+                outputs[region] = out
+                continue
+                
             # create handles list of unique reserve names
             handles = np.unique(np.array(unique_reserve_types)).tolist()
 
