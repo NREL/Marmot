@@ -40,6 +40,7 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     return_value : int
         1 or 0 for checking data
     """
+
     for scenario in scenario_list:
         try:
             data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),data)
@@ -448,3 +449,61 @@ def add_facet_labels(fig, xlabels, ylabels):
         if ax.is_first_col():
             ax.set_ylabel(ylabel=(ylabels[k]),  color='black', rotation='vertical', fontsize=16)
             k=k+1
+
+def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
+    """
+    Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
+    Modeled year must be included in the scenario parent directory name.
+
+    Parameters
+    ----------
+    df : Pandas multiindex dataframe
+        reported parameter (i.e. generator_Generation)
+    Marmot_Solutions_folder : string
+        Parent directory of scenario results
+    shift_leap_day : boolean
+        Switch to turn on/off leap day shifting.
+        Defined in the "shift_leap_day" field of Marmot_user_defined_inputs.csv.
+
+    Returns
+    -------
+    df: Pandas multiindex dataframe
+        same dataframe, which time index shifted
+
+    """
+    if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0) and shift_leap_day:
+        df.index.set_levels(
+            df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'), 
+            level = 'timestamp',
+            inplace = True)
+    return(df)
+
+
+def merge_new_agg(df,Region_Mapping,AGG_BY):
+
+    """
+    Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
+    Modeled year must be included in the scenario parent directory name.
+
+    Parameters
+    ----------
+    df : Pandas multiindex dataframe
+        reported parameter (i.e. generator_Generation)
+    Region_Mapping : Pandas dataframe
+        Dataframe that maps regions to user-specified aggregation levels. 
+    shift_leap_day : boolean
+        Switch to turn on/off leap day shifting.
+        Defined in the "shift_leap_day" field of Marmot_user_defined_inputs.csv.
+
+    Returns
+    -------
+    df: Pandas multiindex dataframe
+        same dataframe, which time index shifted
+
+    """
+
+    agg_new = Region_Mapping[['region',AGG_BY]]
+    agg_new = agg_new.set_index('region')
+    df = df.merge(agg_new,left_on = 'region', right_index = True)
+    return(df)
+

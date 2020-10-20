@@ -1,37 +1,37 @@
 Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
-Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,,capacity_factor,avg_output_when_committed
-Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,capacity_factor,avg_output_when_committed
-Capacity Factor,FALSE,Capacity_Factor,,,,EST,,,capacity_factor,cf
-Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,capacity_factor,cf
+Average Output When Committed,FALSE,Avg_Out_Committed,,,,PST,,,capacity_factor,avg_output_when_committed
+Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,PST,7/1/24,7/7/24,capacity_factor,avg_output_when_committed
+Capacity Factor,FALSE,Capacity_Factor,,,,PST,,,capacity_factor,cf
+Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,PST,7/1/24,7/7/24,capacity_factor,cf
 Time at Minimum Generation,FALSE,Time_at_Min_Gen,,,,,,,capacity_factor,time_at_min_gen
-Capacity Out Stack,FALSE,Capacity_Out_Stacked,,,,EST,,,capacity_out,capacity_out_stack
+Capacity Out Stack,FALSE,Capacity_Out_Stacked,,,,PST,,,capacity_out,capacity_out_stack
 Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,,,,curtailment,curt_duration_curve
 Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,,,,curtailment,curt_duration_curve
 Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,,curtailment,curt_pen
 Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,,curtailment,curt_pen
 Total Curtailment,FALSE,Total_Curtailment,,,,,,,curtailment,curt_total
 Committed Capacity Stack,FALSE,Committed_Capacity_Stack,,,,,,,generation_stack,committed_stack
-Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,,generation_stack,gen_diff
-Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff_Range,Date Range,,,EST,7/1/2024,7/7/2024,generation_stack,gen_diff
-Generation Stack,FALSE,Stacked_Gen,,,,EST,,,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Range,Date Range,,,EST,7/1/2024,7/7/2024,generation_stack,gen_stack
+Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,PST,,,generation_stack,gen_diff
+Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff_Range,Date Range,,,PST,7/1/24,7/7/24,generation_stack,gen_diff
+Generation Stack,FALSE,Stacked_Gen,,,,PST,,,generation_stack,gen_stack
+Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,PST,,,generation_stack,gen_stack
+Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,3,3,PST,,,generation_stack,gen_stack
+Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,PST,7/1/24,7/7/24,generation_stack,gen_stack
+Generation Stack,FALSE,Stacked_Gen_Peak_Demand,Peak Demand,3,3,PST,,,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,PST,,,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,PST,,,generation_stack,gen_stack
+Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Range,Date Range,,,PST,7/1/24,7/7/24,generation_stack,gen_stack
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid,,,,,,,generation_stack,gen_stack
-Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,,EST,,,generation_stack,gen_stack_all_periods
+Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,,PST,,,generation_stack,gen_stack_all_periods
 Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,,,,,generation_stack,gen_stack_all_periods
-Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked,FALSE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked,FALSE,Unstacked_Gen,,,,EST,,,generation_unstack,gen_unstack
-Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid,,,,EST,,,generation_unstack,gen_unstack
-Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,7/1/2024,7/7/2024,hydro,hydro_continent_net_load
-Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,,hydro,hydro_net_load
+Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,PST,,,generation_unstack,gen_unstack
+Generation Unstacked,FALSE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,PST,,,generation_unstack,gen_unstack
+Generation Unstacked,FALSE,Unstacked_Gen,,,,PST,,,generation_unstack,gen_unstack
+Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,PST,,,generation_unstack,gen_unstack
+Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,PST,,,generation_unstack,gen_unstack
+Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid,,,,PST,,,generation_unstack,gen_unstack
+Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,7/1/24,7/7/24,hydro,hydro_continent_net_load
+Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,PST,,,hydro,hydro_net_load
 All Regions PDC,FALSE,All_Regions_Price_Duration_Curve,150,,,,,,prices,pdc_all_regions
 Region Price,FALSE,Region_Price_Duration,,,,,,,prices,region_pdc
 Region Price,FALSE,Region_Price_Duration_Threshold,150,,,,,,prices,region_pdc
@@ -45,21 +45,21 @@ Total System Cost,FALSE,Total_System_Cost,,,,,,,production_cost,sys_cost
 Total System Cost Difference,FALSE,Total_System_Cost_Diff,,,,,,,production_cost,sys_cost_diff
 Total System Cost Type,FALSE,Total_System_Cost_Type,,,,,,,production_cost,sys_cost_type
 Total System Cost Type Difference,FALSE,Total_System_Cost_Type_Diff,,,,,,,production_cost,sys_cost_type_diff
-Capacity Started,FALSE,Capacity_Started,,,,EST,,,ramping,capacity_started
-Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,ramping,capacity_started
+Capacity Started,FALSE,Capacity_Started,,,,PST,,,ramping,capacity_started
+Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,PST,7/1/24,7/7/24,ramping,capacity_started
 Reserve Provision Region,FALSE,Reserve_Provision_Region,,,,,,,reserves,reg_reserve_provision
 Reserve Shortage Region,FALSE,Reserve_Shortage_Region,,,,,,,reserves,reg_reserve_shortage
 Reserve Shortage Hours,FALSE,Reserve_Shortage_Hours,,,,,,,reserves,reg_reserve_shortage_hrs
-Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries,,,,EST,,,reserves,reg_reserve_shortage_timeseries
-Reserve Shortage Timeseries Facet Grid,FALSE,Reserve_Shortage_Timeseries_Facet_Grid,,,,EST,,,reserves,reg_reserve_shortage_timeseries
-Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reg_reserve_shortage_timeseries
-Reserve Shortage Timeseries Facet Grid,FALSE,Reserve_Shortage_Timeseries_Facet_Grid_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reg_reserve_shortage_timeseries
-Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries,,,,EST,,,reserves,reserve_gen_timeseries
-Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Peak_Demand,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
-Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reserve_gen_timeseries
-Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
-Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reserve_gen_timeseries
-Thermal Capacity reserves,FALSE,Thermal_Capacity_Reserves,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves
+Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries,,,,PST,,,reserves,reg_reserve_shortage_timeseries
+Reserve Shortage Timeseries Facet Grid,FALSE,Reserve_Shortage_Timeseries_Facet_Grid,,,,PST,,,reserves,reg_reserve_shortage_timeseries
+Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries_Date_Range,Date Range,,,PST,7/1/24,7/7/24,reserves,reg_reserve_shortage_timeseries
+Reserve Shortage Timeseries Facet Grid,FALSE,Reserve_Shortage_Timeseries_Facet_Grid_Date_Range,Date Range,,,PST,7/1/24,7/7/24,reserves,reg_reserve_shortage_timeseries
+Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries,,,,PST,,,reserves,reserve_gen_timeseries
+Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Peak_Demand,Peak Demand,2,2,PST,,,reserves,reserve_gen_timeseries
+Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Date_Range,Date Range,,,PST,7/1/24,7/7/24,reserves,reserve_gen_timeseries
+Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,Peak Demand,2,2,PST,,,reserves,reserve_gen_timeseries
+Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Date_Range,Date Range,,,PST,7/1/24,7/7/24,reserves,reserve_gen_timeseries
+Thermal Capacity reserves,FALSE,Thermal_Capacity_Reserves,,,,PST,,,thermal_cap_reserve,thermal_cap_reserves
 Total Generation,FALSE,Total_Generation,,,,,,,total_generation,total_gen
 Total Generation Difference,FALSE,Total_Generation_Diff,,,,,,,total_generation,total_gen_diff
 Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,,total_generation,total_gen_facet
@@ -69,16 +69,20 @@ Line Utilization Histogram,FALSE,Line_Utilization_Histogram,,,,,,,transmission,l
 Line Utilization Histogram,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,,transmission,line_hist
 Line Utilization Duration Curve,FALSE,Line_Utilization_Duration,,,,,,,transmission,line_util
 Line Utilization Duration Curve,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,,transmission,line_util
-Line Violations Timeseries,FALSE,Line_Violations_Time_Series,,,,EST,,,transmission,line_violations_timeseries
+Line Violations Timeseries,FALSE,Line_Violations_Time_Series,,,,PST,,,transmission,line_violations_timeseries
 Line Violations Totals,FALSE,Line_Violations_Totals,,,,,,,transmission,line_violations_totals
-Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,transmission,net_export
-Net Export,FALSE,Net_Export,,,,EST,,,transmission,net_export
+Net Export,FALSE,Net_Export_Date_Range,Date Range,,,PST,7/1/24,7/7/24,transmission,net_export
+Net Export,FALSE,Net_Export,,,,PST,,,transmission,net_export
 Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_Checkerboard,,,,,,,transmission,region_region_checkerboard
-Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_scenarios
-All Region-Region Net Interchange,FALSE,All_Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_regions
+Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,PST,,,transmission,region_region_interchange_all_scenarios
+All Region-Region Net Interchange,FALSE,All_Region-Region_Net_Interchange,,,,PST,,,transmission,region_region_interchange_all_regions
+Individual Line Flow,TRUE,Individual_Line_Flow,"40181_CARLTON To 41075_TILLAMOK, 40243_CLATSOP To 40357_DRISCOLT, 40409_FAIRVIEW To 40881_RESTN TP, 40410_FAIRVEW2 To 40883_RESTON, 40627_LANE 1 To 41141_WENDSON, 41083_TOLEDO To 41165_WREN",,,PST,,,transmission,line_flow_ind
+Individual Interchange Flow,FALSE,Individual_Interchange_Flow,,,,PST,,,transmission,int_flow_ind
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,,unserved_energy,tot_unserved_energy
-Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,,unserved_energy,unserved_energy_timeseries
+Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,PST,,,unserved_energy,unserved_energy_timeseries
 Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,,utilization_factor,GW_fleet
-Utilization Factor Fleet,FALSE,Utilization_Factor_Fleet,,,,EST,,,utilization_factor,uf_fleet
+Utilization Factor Fleet,FALSE,Utilization_Factor_Fleet,,,,PST,,,utilization_factor,uf_fleet
 Utilization Factor Fleet by Type,FALSE,Utilization_Factor_Fleet_Type,,,,,,,utilization_factor,uf_fleet_by_type
-Utilization Factor Generators,FALSE,Utilization_Factor_Generators,,,,EST,,,utilization_factor,uf_gen
+Utilization Factor Generators,FALSE,Utilization_Factor_Generators,,,,PST,,,utilization_factor,uf_gen
+Sensitivities Difference,TRUE,Sensitivities_Difference_Hydro,Hydro,,,PST,,,sensitivities,sensitivities_gas
+Sensitivities Difference,TRUE,Sensitivities_Difference_Wind,Wind,,,PST,,,sensitivities,sensitivities_gas

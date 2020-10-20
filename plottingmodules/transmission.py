@@ -220,7 +220,162 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig2,'data_table':Data_Out}
         return outputs
 
+    def int_flow_ind(self):
 
+        """
+        This method plots flow, import and export limit, for individual transmission interchanges, with a facet for each interchange.
+        The plot includes every interchange that originates or ends in the aggregation zone. 
+        Figures and data tables are returned to plot_main
+        """
+
+        Flow_Collection = {}
+        Import_Limit_Collection = {}
+        Export_Limit_Collection = {}
+
+        mfunc.get_data(Flow_Collection,"interface_Flow",self.Marmot_Solutions_folder, self.Multi_Scenario)
+        mfunc.get_data(Import_Limit_Collection,"interface_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)
+        mfunc.get_data(Export_Limit_Collection,"interface_Export_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)
+
+        scenario = self.Scenario_name
+
+        outputs = {}
+        for zone_input in self.Zones:
+            self.logger.info("For all interfaces touching Zone = "+zone_input)
+
+            Data_Table_Out = pd.DataFrame()
+
+            flow = Flow_Collection.get(scenario)
+
+            # gets correct metadata based on area aggregation
+            if self.AGG_BY=='zone':
+                zone_lines = self.meta.zone_lines()
+            else:
+                zone_lines = self.meta.region_lines()
+            try:
+                zone_lines = zone_lines.set_index([self.AGG_BY])
+            except:
+                self.logger.info("Column to Aggregate by is missing")
+                continue
+
+            zone_lines = zone_lines.xs(zone_input)
+            zone_lines = zone_lines['line_name'].unique()
+
+            #Map lines to interfaces
+            all_ints = self.meta.interface_lines() #Map lines to interfaces
+            all_ints.index = all_ints.line
+            ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
+
+            flow = Flow_Collection.get(scenario)
+            flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
+            flow = flow.droplevel('interface_category')
+
+            export_limits = Export_Limit_Collection.get(scenario).droplevel('timestamp')
+            export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+            export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
+            export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+
+            import_limits = Import_Limit_Collection.get(scenario).droplevel('timestamp')
+            import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+            import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
+            import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+
+            interf_list = import_limits.index.get_level_values('interface_name').unique()
+            xdim,ydim = mfunc.set_x_y_dimension(len(interf_list))
+
+            fig2, axs = mfunc.setup_plot(xdim,ydim)
+            axs = axs.ravel()
+            plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            n = -1
+            for interf in interf_list:
+                n += 1
+                single_int = flow.xs(interf,level = 'interface_name') / 1000
+                single_exp_lim = export_limits.xs(interf, level = 'interface_name')[0].squeeze() / 1000
+                single_imp_lim = import_limits.xs(interf, level = 'interface_name')[0].squeeze() / 1000
+
+                mfunc.create_line_plot(axs,single_int,0, label=interf, n=n)
+                axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
+                axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
+                axs[n].set_title(interf)
+                handles, labels = axs[n].get_legend_handles_labels()
+                mfunc.set_plot_timeseries_format(axs, n=n)
+            fig2.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
+            plt.suptitle(self.Scenario_name)
+            plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+        return outputs
+
+    def line_flow_ind(self):
+
+
+        """
+        This method plots flow, import and export limit, for individual transmission lines, with a facet for each line.
+        The lines are specified in the plot properties field of Marmot_plot_select.csv (column 4).
+        The plot includes every interchange that originates or ends in the aggregation zone. 
+        Figures and data tables are returned to plot_main
+        """
+
+        Flow_Collection = {}
+        Import_Limit_Collection = {}
+        Export_Limit_Collection = {}
+
+        mfunc.get_data(Flow_Collection,"line_Flow",self.Marmot_Solutions_folder, self.Multi_Scenario)
+        mfunc.get_data(Import_Limit_Collection,"line_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)
+        mfunc.get_data(Export_Limit_Collection,"line_Export_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)
+
+        scenario = self.Scenario_name
+
+        #Select only lines specified in Marmot_plot_select.csv.
+        select_lines = self.prop.split(",") 
+        self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
+        self.logger.info(select_lines) 
+
+        flow = Flow_Collection.get(scenario)
+        flow = flow[flow.index.get_level_values('line_name').isin(select_lines)] #Limit to only lines touching to this zone
+        print(flow)
+
+        export_limits = Export_Limit_Collection.get(scenario).droplevel('timestamp')
+        export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+        export_limits = export_limits[export_limits.index.get_level_values('line_name').isin(select_lines)]
+        export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+
+        import_limits = Import_Limit_Collection.get(scenario).droplevel('timestamp')
+        import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+        import_limits = import_limits[import_limits.index.get_level_values('line_name').isin(select_lines)]
+        import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+
+        xdim,ydim = mfunc.set_x_y_dimension(len(select_lines))
+
+        fig2, axs = mfunc.setup_plot(xdim,ydim)
+        axs = axs.ravel()
+        plt.subplots_adjust(wspace=0.05, hspace=0.2)
+        n = -1
+        for line in select_lines:
+            n += 1
+            single_line = flow.xs(line,level = 'line_name') / 1000
+            single_exp_lim = export_limits.xs(line, level = 'line_name')[0].squeeze() / 1000
+            single_imp_lim = import_limits.xs(line, level = 'line_name')[0].squeeze() / 1000
+
+            mfunc.create_line_plot(axs,single_line,0, label=interf, n=n)
+            axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
+            axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
+            axs[n].set_title(line)
+            handles, labels = axs[n].get_legend_handles_labels()
+            mfunc.set_plot_timeseries_format(axs, n=n)
+        fig2.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
+        plt.suptitle(self.Scenario_name)
+        plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+        fig2.savefig(os.path.join(Marmot_Solutions_folder, Scenario_name, 'Figures_Output','Individual_Line_Flow.svg'), dpi=600, bbox_inches='tight')
+
+        outputs = {}
+        for zone_input in self.Zones:
+            outputs[zone_input] = pd.DataFrame()
+        return outputs
+
+    
     def region_region_interchange_all_scenarios(self):
 
         """

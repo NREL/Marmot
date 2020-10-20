@@ -317,7 +317,7 @@ for index, row in Marmot_plot_select.iterrows():
     
     for zone_input in Zones:
         if isinstance(Figure_Out[zone_input], pd.DataFrame):
-            if module == 'hydro' or method == 'gen_stack_all_periods':
+            if module == 'hydro' or method == 'gen_stack_all_periods' or method == 'line_flow_ind':
                 logger.info('plots & data saved within module')
             else:
                 logger.info("Data missing for %s",zone_input)
