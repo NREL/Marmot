@@ -76,7 +76,7 @@ Net Export,FALSE,Net_Export,,,,PST,,,transmission,net_export
 Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_Checkerboard,,,,,,,transmission,region_region_checkerboard
 Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,PST,,,transmission,region_region_interchange_all_scenarios
 All Region-Region Net Interchange,FALSE,All_Region-Region_Net_Interchange,,,,PST,,,transmission,region_region_interchange_all_regions
-Individual Line Flow,TRUE,Individual_Line_Flow,"40181_CARLTON To 41075_TILLAMOK, 40243_CLATSOP To 40357_DRISCOLT, 40409_FAIRVIEW To 40881_RESTN TP, 40410_FAIRVEW2 To 40883_RESTON, 40627_LANE 1 To 41141_WENDSON, 41083_TOLEDO To 41165_WREN",,,PST,,,transmission,line_flow_ind
+Individual Line Flow,TRUE,Individual_Line_Flow,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 40627_LANE 1 To 41141_WENDSON_2, 41083_TOLEDO To 41165_WREN_1_WI",,,PST,,,transmission,line_flow_ind
 Individual Interchange Flow,FALSE,Individual_Interchange_Flow,,,,PST,,,transmission,int_flow_ind
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,,unserved_energy,tot_unserved_energy
 Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,PST,,,unserved_energy,unserved_energy_timeseries
@@ -84,5 +84,5 @@ Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,,utilization_factor,GW_flee
 Utilization Factor Fleet,FALSE,Utilization_Factor_Fleet,,,,PST,,,utilization_factor,uf_fleet
 Utilization Factor Fleet by Type,FALSE,Utilization_Factor_Fleet_Type,,,,,,,utilization_factor,uf_fleet_by_type
 Utilization Factor Generators,FALSE,Utilization_Factor_Generators,,,,PST,,,utilization_factor,uf_gen
-Sensitivities Difference,TRUE,Sensitivities_Difference_Hydro,Hydro,,,PST,,,sensitivities,sensitivities_gas
-Sensitivities Difference,TRUE,Sensitivities_Difference_Wind,Wind,,,PST,,,sensitivities,sensitivities_gas
+Sensitivities Difference,FALSE,Sensitivities_Difference_Hydro,Hydro,,,PST,,,sensitivities,sensitivities_gas
+Sensitivities Difference,FALSE,Sensitivities_Difference_Wind,Wind,,,PST,,,sensitivities,sensitivities_gas

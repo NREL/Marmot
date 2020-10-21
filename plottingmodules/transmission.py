@@ -291,7 +291,6 @@ class mplot(object):
                 single_int = flow.xs(interf,level = 'interface_name') / 1000
                 single_exp_lim = export_limits.xs(interf, level = 'interface_name')[0].squeeze() / 1000
                 single_imp_lim = import_limits.xs(interf, level = 'interface_name')[0].squeeze() / 1000
-
                 mfunc.create_line_plot(axs,single_int,0, label=interf, n=n)
                 axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
                 axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
@@ -328,24 +327,21 @@ class mplot(object):
 
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = self.prop.split(",") 
+
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
 
-        flow = Flow_Collection.get(scenario)
-        flow = flow[flow.index.get_level_values('line_name').isin(select_lines)] #Limit to only lines touching to this zone
-        print(flow)
-
         export_limits = Export_Limit_Collection.get(scenario).droplevel('timestamp')
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
-        export_limits = export_limits[export_limits.index.get_level_values('line_name').isin(select_lines)]
-        export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+        export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 
         import_limits = Import_Limit_Collection.get(scenario).droplevel('timestamp')
         import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
-        import_limits = import_limits[import_limits.index.get_level_values('line_name').isin(select_lines)]
-        import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+        import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
 
         xdim,ydim = mfunc.set_x_y_dimension(len(select_lines))
+        grid_size = xdim * ydim
+        excess_axs = grid_size - len(select_lines)
 
         fig2, axs = mfunc.setup_plot(xdim,ydim)
         axs = axs.ravel()
@@ -353,22 +349,33 @@ class mplot(object):
         n = -1
         for line in select_lines:
             n += 1
-            single_line = flow.xs(line,level = 'line_name') / 1000
-            single_exp_lim = export_limits.xs(line, level = 'line_name')[0].squeeze() / 1000
-            single_imp_lim = import_limits.xs(line, level = 'line_name')[0].squeeze() / 1000
+            #Remove leading spaces
+            if line[0] == ' ':
+                line = line[1:]
+            try:
+                for scenario in self.Multi_Scenario:
+                    flow = Flow_Collection[scenario]
+                    single_line = flow.xs(line,level = 'line_name')
+                    mfunc.create_line_plot(axs,single_line,0, label = scenario + ' line flow', n = n)
+            except KeyError:
+                self.logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
+                continue
+            single_exp_lim = export_limits.loc[line].squeeze()
+            single_imp_lim = import_limits.loc[line].squeeze()
 
-            mfunc.create_line_plot(axs,single_line,0, label=interf, n=n)
             axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
             axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
             axs[n].set_title(line)
             handles, labels = axs[n].get_legend_handles_labels()
             mfunc.set_plot_timeseries_format(axs, n=n)
+            if n == len(select_lines) - 1:
+                axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
+        mfunc.remove_excess_axs(axs,excess_axs,grid_size)
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
-        plt.suptitle(self.Scenario_name)
         plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-        fig2.savefig(os.path.join(Marmot_Solutions_folder, Scenario_name, 'Figures_Output','Individual_Line_Flow.svg'), dpi=600, bbox_inches='tight')
+        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow.svg'), dpi=600, bbox_inches='tight')
 
         outputs = {}
         for zone_input in self.Zones:

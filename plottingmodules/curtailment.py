@@ -324,12 +324,13 @@ class mplot(object):
             for scenario in self.Multi_Scenario:
                 self.logger.info("Scenario = " + scenario)
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
+                #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
 
                 vre_collection = {}
                 avail_vre_collection = {}
 
                 vre_curt = curtailment_collection.get(scenario)
+                print(vre_curt.index.get_level_values('tech').unique())
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
