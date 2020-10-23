@@ -51,7 +51,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -70,8 +70,8 @@ class mplot(object):
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No generation in "+zone_input+".")
-                    break
+                    self.logger.warning("No generation in %s",zone_input)
+                    continue
 
                 Gen = df_process_gen_ind_inputs(Gen,self)
 
@@ -120,14 +120,19 @@ class mplot(object):
                 del CF, Gen, Ava, Total_Gen, Total_Ava
                 #end scenario loop
             
+            if not cf_chunk:
+                self.logger.warning("No generation in %s",zone_input)
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             CF_all_scenarios = pd.concat(cf_chunk, axis=1, sort=False)
             CF_all_scenarios = CF_all_scenarios.dropna(axis = 0)
             CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
 
             # If CF_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
@@ -144,7 +149,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -163,7 +168,7 @@ class mplot(object):
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
                     self.logger.warning("No generation in "+ zone_input+".")
-                    break
+                    continue
                 Gen=df_process_gen_ind_inputs(Gen,self)
 
                 Ava = gen_available_capacity_collection.get(scenario)
@@ -207,6 +212,12 @@ class mplot(object):
 
                 del Gen, thermal_generator_cf
             #End scenario loop
+                
+            if not th_gen_chunk:
+                self.logger.warning("No generation in %s",zone_input)
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             CF_all_scenarios=pd.concat(th_gen_chunk, axis=1, sort=False)
             
             fig2.add_subplot(111, frameon=False)
@@ -215,8 +226,8 @@ class mplot(object):
 
             # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             outputs[zone_input] = {'fig': fig2, 'data_table': CF_all_scenarios}
@@ -233,7 +244,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -251,7 +262,7 @@ class mplot(object):
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
                     self.logger.warning("No generation in "+zone_input+".")
-                    break
+                    continue
                 Gen = df_process_gen_ind_inputs(Gen,self)
 
                 Ava = gen_available_capacity_collection.get(scenario)
@@ -297,14 +308,19 @@ class mplot(object):
                 del CF, Gen, Ava, Total_Gen, Total_Ava
                 #end scenario loop
             
+            if not cf_chunk:
+                self.logger.warning("No generation in %s",zone_input)
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             CF_all_scenarios = pd.concat(cf_chunk, axis=1, sort=False)
             CF_all_scenarios = CF_all_scenarios.dropna(axis = 0)
             CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
 
             # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
@@ -319,7 +335,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -338,8 +354,7 @@ class mplot(object):
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No generation in "+zone_input+".")
-                    break
+                    continue
 
                 Gen = df_process_gen_ind_inputs(Gen,self)
 
@@ -374,15 +389,16 @@ class mplot(object):
                 del Gen,Total_Gen
                 #end scenario loop
             
+            if not total_gen_chunks:
+                self.logger.warning("No generation in %s",zone_input)
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+                
             GW_all_scenarios = pd.concat(total_gen_chunks, axis=1, sort=False)
             GW_all_scenarios = GW_all_scenarios.dropna(axis = 0)
             GW_all_scenarios.index = GW_all_scenarios.index.str.wrap(10, break_long_words = False)
 
             # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot
-            if GW_all_scenarios.empty:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
-                continue
 
             outputs[zone_input] = {'fig': fig3, 'data_table': GW_all_scenarios}
         return outputs

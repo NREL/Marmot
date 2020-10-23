@@ -38,7 +38,7 @@ class mplot(object):
         check_input_data = self._getdata(price_collection)
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -109,7 +109,7 @@ class mplot(object):
         check_input_data = self._getdata(price_collection)
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         #Location to save to
@@ -126,7 +126,7 @@ class mplot(object):
         
         data_table = []
         for zone_input in self.Zones:
-            outputs[zone_input] = pd.DataFrame()
+
             all_prices=[]
             for scenario in self.Multi_Scenario:
                 price = self._process_data(price_collection,scenario,zone_input)
@@ -164,6 +164,7 @@ class mplot(object):
         Data_Table_Out = pd.concat(data_table, axis=1)
         fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
+        outputs = mfunc.DataSavedInModule()
         return outputs
 
 
@@ -181,7 +182,7 @@ class mplot(object):
         check_input_data = self._getdata(price_collection)
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -250,7 +251,7 @@ class mplot(object):
         check_input_data = self._getdata(price_collection)
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         #Location to save to
@@ -269,7 +270,7 @@ class mplot(object):
         data_table = []
         for zone_input in self.Zones:
             self.logger.info(self.AGG_BY + " = " + zone_input)
-            outputs[zone_input] = pd.DataFrame()
+
             all_prices=[]
             for scenario in self.Multi_Scenario:
                 price = self._process_data(price_collection,scenario,zone_input)
@@ -306,7 +307,7 @@ class mplot(object):
         Data_Table_Out = pd.concat(data_table, axis=1)
         fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
-
+        outputs = mfunc.DataSavedInModule()
         return outputs
 
     # Internal methods to process data, not designed to be accessed from outside the mplot class.

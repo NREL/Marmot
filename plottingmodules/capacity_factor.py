@@ -37,7 +37,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -54,11 +54,7 @@ class mplot(object):
                         self.logger.warning('No data in ' + zone_input)
                         continue
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
-                if self.prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Gen = Gen[self.start_date : self.end_date]
-
+                
                 # Calculates interval step to correct for MWh of generation
                 time_delta = Gen.index[1] - Gen.index[0]
                 duration = Gen.index[len(Gen)-1] - Gen.index[0]
@@ -66,6 +62,12 @@ class mplot(object):
                 # Finds intervals in 60 minute period
                 #interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
                 duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
+
+                if self.prop == 'Date Range':
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    Gen = Gen[self.start_date : self.end_date]
+                
 
                 #Gen = Gen/interval_count
                 Total_Gen = Gen.sum(axis=0)
@@ -87,7 +89,7 @@ class mplot(object):
             CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
 
             if CF_all_scenarios.empty == True:
-                outputs[zone_input] = pd.DataFrame()
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             fig1 = CF_all_scenarios.plot.bar(stacked = False, figsize=(9,6), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
@@ -121,7 +123,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -188,7 +190,7 @@ class mplot(object):
                 CF_all_scenarios = CF_all_scenarios.append(CF)
 
             if CF_all_scenarios.empty == True:
-                outputs[zone_input] = pd.DataFrame()
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(6,4), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
@@ -218,7 +220,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -276,7 +278,7 @@ class mplot(object):
                 time_at_min = time_at_min.append(time_at_min_individ)
 
             if time_at_min.empty == True:
-                outputs[zone_input] = pd.DataFrame()
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             fig3 = time_at_min.T.plot.bar(stacked = False, figsize=(9,6), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')

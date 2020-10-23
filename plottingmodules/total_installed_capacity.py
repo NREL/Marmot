@@ -42,7 +42,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -58,8 +58,7 @@ class mplot(object):
                 try:
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No installed capacity in : "+zone_input)
-                    break
+                    continue
 
                 Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
@@ -72,8 +71,9 @@ class mplot(object):
 
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
             if Total_Installed_Capacity_Out.empty:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                self.logger.warning("No installed capacity in %s",zone_input)
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             # Data table of values to return to main program
@@ -120,7 +120,12 @@ class mplot(object):
             axs = axs.ravel()
 
             # left panel: installed capacity
-            Total_Installed_Capacity_Out = cap_outputs[zone_input]["data_table"]
+            try:
+                Total_Installed_Capacity_Out = cap_outputs[zone_input]["data_table"]
+            except TypeError:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 

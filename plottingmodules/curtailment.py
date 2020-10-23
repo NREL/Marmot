@@ -40,7 +40,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -56,7 +56,7 @@ class mplot(object):
                 try: #Check for regions missing all generation.
                     gen = gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.warning('No generation in ' + zone_input)
+                        self.logger.info('No generation in %s',zone_input)
                         continue
 
                 avail_gen = avail_gen_collection.get(scenario)
@@ -66,7 +66,7 @@ class mplot(object):
                 try:
                     re_curt = re_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                        self.logger.warning('No curtailment in ' + zone_input)
+                        self.logger.info('No curtailment in %s',zone_input)
                         continue
 
                 # Finds the number of unique hours in the year
@@ -175,7 +175,12 @@ class mplot(object):
 
             Penetration_Curtailment_out["colour"] = [colour_dict.get(x, '#333333') for x in Penetration_Curtailment_out.Scenario]
             Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
-
+            
+            if Penetration_Curtailment_out.empty:
+                self.logger.warning('No Generation in %s',zone_input)
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
 
             fig1, ax = plt.subplots(figsize=(6,4))
             for index, row in Penetration_Curtailment_out.iterrows():
@@ -214,7 +219,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         RE_Curtailment_DC = pd.DataFrame()
@@ -232,7 +237,7 @@ class mplot(object):
                 try: #Check for regions missing all generation.
                     re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.warning('No curtailment in ' + zone_input)
+                        self.logger.info('No curtailment in ' + zone_input)
                         continue
 
                 # Timeseries [MW] PV curtailment [MWh]
@@ -269,7 +274,12 @@ class mplot(object):
 
             if self.prop == "PV":
                 Data_Table_Out = PV_Curtailment_DC
-
+                
+                if PV_Curtailment_DC.empty:
+                    out = mfunc.MissingZoneData()
+                    outputs[zone_input] = out
+                    continue
+                
                 for column in PV_Curtailment_DC:
                     ax.plot(PV_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
                             label=column)
@@ -279,6 +289,11 @@ class mplot(object):
 
             if self.prop == "PV+Wind":
                 Data_Table_Out = RE_Curtailment_DC
+                
+                if RE_Curtailment_DC.empty:
+                    out = mfunc.MissingZoneData()
+                    outputs[zone_input] = out
+                    continue
 
                 for column in RE_Curtailment_DC:
                     ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
@@ -312,7 +327,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -374,7 +389,7 @@ class mplot(object):
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
 
             if Total_Curtailment_out.empty == True:
-                outputs[zone_input] = pd.DataFrame()
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(6,4), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],

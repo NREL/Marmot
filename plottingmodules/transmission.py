@@ -43,7 +43,7 @@ class mplot(object):
             check_input_data.extend([mfunc.get_data(net_interchange_collection,"region_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         outputs = {}
@@ -79,7 +79,12 @@ class mplot(object):
 
             fig1, axs = mfunc.setup_plot()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
-
+            
+            if net_export_all_scenarios.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
             n=0
             for column in net_export_all_scenarios:
                 mfunc.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
@@ -135,7 +140,7 @@ class mplot(object):
         check_input_data.extend([mfunc.get_data(Limit_Collection,"line_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         for zone_input in self.Zones:
@@ -257,10 +262,11 @@ class mplot(object):
             check_input_data.extend([mfunc.get_data(net_interchange_collection,"region_regions_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
             
         for zone_input in self.Zones:
+            self.logger.info("Zone = %s",zone_input)
 
             xdimension=len(self.xlabels)
             ydimension=len(self.ylabels)
@@ -327,7 +333,7 @@ class mplot(object):
                         df_toagg = single_parent.drop(columns = cols_dontagg)
                         agged = df_toagg.sum(axis = 1)
                         agged_flows = agged.copy()
-                        df_dontagg['Other'] = agged_flows
+                        df_dontagg['Other'] = agged_flows.copy()
                         single_parent = df_dontagg.copy()
 
                     for column in single_parent.columns:
@@ -372,6 +378,7 @@ class mplot(object):
                 save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_transmission')
                 fig3.savefig(os.path.join(save_figures, "Region_Region_Interchange_{}.svg".format(self.Scenario_name)), dpi=600, bbox_inches='tight')
                 Data_Table_Out.to_csv(os.path.join(save_figures, "Region_Region_Interchange_{}.csv".format(self.Scenario_name)))
+                outputs = mfunc.DataSavedInModule()
                 return outputs
 
             # if plotting all scenarios return figures to plot_main
@@ -394,7 +401,7 @@ class mplot(object):
             check_input_data.extend([mfunc.get_data(net_interchange_collection,"region_regions_Net_Interchange",self.Marmot_Solutions_folder, self.Multi_Scenario)])
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Multi_Scenario))
@@ -472,9 +479,7 @@ class mplot(object):
         fig4.savefig(os.path.join(save_figures, "region_region_checkerboard.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "region_region_checkerboard.csv"))
 
-        # For plot_main handeling - need to find better solution
-        for zone_input in self.Zones:
-                        outputs[zone_input] = pd.DataFrame()
+        outputs = mfunc.DataSavedInModule()
         return outputs
 
 
@@ -507,7 +512,7 @@ class mplot(object):
         check_input_data.extend([mfunc.get_data(line_violation_collection,"line_Violation",self.Marmot_Solutions_folder, self.Multi_Scenario)])
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -543,8 +548,8 @@ class mplot(object):
             Data_Table_Out = all_scenarios
 
             if all_scenarios.empty==True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             #Make scenario/color dictionary.

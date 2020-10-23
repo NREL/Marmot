@@ -40,7 +40,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -68,8 +68,8 @@ class mplot(object):
 
             if Unserved_Energy_Timeseries_Out.empty==True:
                 self.logger.info('No Unserved Energy in %s',zone_input)
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             else:
@@ -124,7 +124,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
 
         for zone_input in self.Zones:
@@ -149,15 +149,15 @@ class mplot(object):
 
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.replace('_',' ')
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.wrap(10, break_long_words=False)
-
+            Total_Unserved_Energy_Out = pd.DataFrame(Total_Unserved_Energy_Out.T)
+            
             if Total_Unserved_Energy_Out.values.sum() == 0:
                 self.logger.info('No Unserved Energy in %s',zone_input)
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             else:
-
                 # Data table of values to return to main program
                 Data_Table_Out = Total_Unserved_Energy_Out
 

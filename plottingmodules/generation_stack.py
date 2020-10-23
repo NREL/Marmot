@@ -218,8 +218,8 @@ class mplot(object):
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     i=i+1
-                    self.logger.warning('No generation in ' + zone_input + '\n')
-                    out = pd.DataFrame()
+                    self.logger.warning('No generation in %s',zone_input)
+                    out = mfunc.MissingZoneData()
                     return out
 
                 Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
@@ -227,8 +227,8 @@ class mplot(object):
 
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
-                    self.logger.warning('No generation during time period in ' + zone_input + '\n')
-                    out = pd.DataFrame()
+                    self.logger.warning('No generation during time period in %s',zone_input)
+                    out = mfunc.MissingZoneData()
                     return out
 
                 data = data_prop(data)
@@ -396,7 +396,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
     
         for zone_input in self.Zones:
@@ -419,7 +419,7 @@ class mplot(object):
         check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -429,9 +429,8 @@ class mplot(object):
             Total_Gen_Stack_1 = gen_collection.get(self.Scenario_Diff[0])
             if Total_Gen_Stack_1 is None:
                 self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
-                df = pd.DataFrame()
-                outputs[zone_input] = df
-                continue
+                outputs = mfunc.InputSheetError()
+                return outputs 
             
             Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_1 = mfunc.df_process_gen_inputs(Total_Gen_Stack_1, self.ordered_gen)
@@ -441,9 +440,8 @@ class mplot(object):
             Total_Gen_Stack_2 = gen_collection.get(self.Scenario_Diff[1])
             if Total_Gen_Stack_2 is None:
                 self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[1])
-                df = pd.DataFrame()
-                outputs[zone_input] = df
-                continue
+                outputs = mfunc.InputSheetError()
+                return outputs 
             
             Total_Gen_Stack_2 = Total_Gen_Stack_2.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_2 = mfunc.df_process_gen_inputs(Total_Gen_Stack_2, self.ordered_gen)
@@ -684,7 +682,7 @@ class mplot(object):
                 del Data_Table_Out
                 mpl.pyplot.close('all')
 
-            outputs[zone_input] = pd.DataFrame()
+        outputs = mfunc.DataSavedInModule()
         #end weekly loop
         return outputs
 
@@ -703,7 +701,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -711,10 +709,23 @@ class mplot(object):
 
             #Get technology list.
             gens = installed_cap_collection.get(self.Multi_Scenario[0])
-            gens = gens.xs(zone_input,level=self.AGG_BY)
+            try:
+                gens = gens.xs(zone_input,level=self.AGG_BY)
+            except KeyError:
+                self.logger.warning("No Generation in %s: ",zone_input)
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
             tech_list = list(gens.reset_index().tech.unique())
             tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
-
+            
+            if not tech_list_sort:
+                self.logger.info('No Thermal Generation in %s',zone_input)
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+                            
             xdimension = len(self.Multi_Scenario)
             ydimension = len(tech_list_sort)
 
