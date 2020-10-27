@@ -14,10 +14,45 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import math
 import logging
+import datetime as dt
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
 
+class MissingInputData:
+    """
+    Exception Class for handling return of missing data
+    """
+    def __init__(self):
+       return 
+
+class MissingZoneData:
+    """
+    Exception Class for handling return of zones with no data
+    """
+    def __init__(self):
+        return
+
+class DataSavedInModule:
+    """
+    Exception Class for handling data saved within modules
+    """
+    def __init__(self):
+        return
+
+class UnderDevelopment:
+    """
+    Exception Class for handling methods under development
+    """
+    def __init__(self):
+        return
+    
+class InputSheetError:
+    """
+    Exception Class for handling user input sheet errors 
+    """
+    def __init__(self):
+        return
 
 def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     """
@@ -271,7 +306,7 @@ def create_stacked_bar_plot(df, colour):
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
 
-def create_line_plot(axs,data,column,color_dict=None,label=None,n=0):
+def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'solid',n=0):
     """
     Creates a line plot
 
@@ -295,9 +330,9 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,n=0):
     None.
     """
     if color_dict==None:
-        axs[n].plot(data[column], linewidth=1,label=label)
+        axs[n].plot(data[column], linewidth=1,linestyle = linestyle,label=label)
     else:
-        axs[n].plot(data[column], linewidth=1, color=color_dict[column],label=label)
+        axs[n].plot(data[column], linewidth=1,linestyle = linestyle, color=color_dict[column],label=label)
     axs[n].spines['right'].set_visible(False)
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
@@ -418,7 +453,7 @@ def remove_excess_axs(axs, excess_axs, grid_size):
         axs[(grid_size)-excess_axs].tick_params(axis='both',
                                                 which='both',
                                                 colors='white')
-    excess_axs-=1
+        excess_axs-=1
 
 
 def add_facet_labels(fig, xlabels, ylabels):
@@ -468,7 +503,7 @@ def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
     Returns
     -------
     df: Pandas multiindex dataframe
-        same dataframe, which time index shifted
+        same dataframe, with time index shifted
 
     """
     if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0) and shift_leap_day:
@@ -482,8 +517,7 @@ def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
 def merge_new_agg(df,Region_Mapping,AGG_BY):
 
     """
-    Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
-    Modeled year must be included in the scenario parent directory name.
+    Adds new region aggregation in the plotting step. This allows one to create a new aggregation without re-formatting the .h5 file.
 
     Parameters
     ----------
@@ -491,14 +525,13 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
         reported parameter (i.e. generator_Generation)
     Region_Mapping : Pandas dataframe
         Dataframe that maps regions to user-specified aggregation levels. 
-    shift_leap_day : boolean
-        Switch to turn on/off leap day shifting.
-        Defined in the "shift_leap_day" field of Marmot_user_defined_inputs.csv.
+    AGG_BY : string
+        Name of new aggregation. Needs to match the appropriate column in the user defined Region Mapping file.
 
     Returns
     -------
     df: Pandas multiindex dataframe
-        same dataframe, which time index shifted
+        same dataframe, with new aggregation level added
 
     """
 

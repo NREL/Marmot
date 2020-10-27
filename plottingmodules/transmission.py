@@ -227,14 +227,18 @@ class mplot(object):
         The plot includes every interchange that originates or ends in the aggregation zone. 
         Figures and data tables are returned to plot_main
         """
-
+        check_input_data = []
         Flow_Collection = {}
         Import_Limit_Collection = {}
         Export_Limit_Collection = {}
 
-        mfunc.get_data(Flow_Collection,"interface_Flow",self.Marmot_Solutions_folder, self.Multi_Scenario)
-        mfunc.get_data(Import_Limit_Collection,"interface_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)
-        mfunc.get_data(Export_Limit_Collection,"interface_Export_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)
+        check_input_data.extend([mfunc.get_data(Flow_Collection,"interface_Flow",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(Import_Limit_Collection,"interface_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(Export_Limit_Collection,"interface_Export_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
 
         scenario = self.Scenario_name
 
@@ -315,13 +319,18 @@ class mplot(object):
         Figures and data tables are returned to plot_main
         """
 
+        check_input_data = []
         Flow_Collection = {}
         Import_Limit_Collection = {}
         Export_Limit_Collection = {}
 
-        mfunc.get_data(Flow_Collection,"line_Flow",self.Marmot_Solutions_folder, self.Multi_Scenario)
-        mfunc.get_data(Import_Limit_Collection,"line_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)
-        mfunc.get_data(Export_Limit_Collection,"line_Export_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)
+        check_input_data.extend([mfunc.get_data(Flow_Collection,"line_Flow",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(Import_Limit_Collection,"line_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(Export_Limit_Collection,"line_Export_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
 
         scenario = self.Scenario_name
 
