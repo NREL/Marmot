@@ -6,6 +6,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import numpy as np
 import logging
+import marmot_plot_functions as mfunc
+
 
 #===============================================================================
 
@@ -18,12 +20,12 @@ class mplot(object):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def capacity_out_stack(self):
+        outputs = mfunc.UnderDevelopment()
+        self.logger.warning('capacity_out_stack requires PASA files, and is under development. Skipping plot.')
+        return outputs 
+    
         outputs = {}
         for zone_input in self.Zones:
-            
-            outputs[zone_input] = pd.DataFrame()
-            self.logger.warning('This module requires PASA files, and is under development. Skipping plot.')
-            continue
             
             self.logger.info('Zone = ' + str(zone_input))
 

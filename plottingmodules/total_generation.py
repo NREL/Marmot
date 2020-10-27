@@ -52,7 +52,7 @@ class mplot(object):
             mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
     
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -76,7 +76,7 @@ class mplot(object):
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     self.logger.warning("No installed capacity in : "+zone_input)
-                    break
+                    continue
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
@@ -165,9 +165,9 @@ class mplot(object):
             Total_Demand_Out = Total_Demand_Out.T/1000 #Convert to GWh
             Unserved_Energy_Out = Unserved_Energy_Out.T/1000
 
-            if Total_Generation_Stack_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+            if Total_Generation_Stack_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
@@ -244,7 +244,7 @@ class mplot(object):
         check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
         
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -290,13 +290,13 @@ class mplot(object):
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to GWh
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
-                        
+            
             #Ensures region has generation, else skips
             try:
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
             except KeyError:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
             Total_Generation_Stack_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
             # Data table of values to return to main program
@@ -306,8 +306,8 @@ class mplot(object):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
 
             if Total_Generation_Stack_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             fig1, ax = plt.subplots(figsize=(6,4))
@@ -345,7 +345,11 @@ class mplot(object):
     ## Total Gen Facet Plots removed for now, code not stable and needs testing
     #===============================================================================
 
-    # def total_gen_facet(self):
+    def total_gen_facet(self):
+        outputs = mfunc.UnderDevelopment()
+        self.logger.warning('total_gen_facet is under development')
+        return outputs 
+        
     #     Gen_Collection = {}
     #     Load_Collection = {}
     #     curtailment_collection = {}

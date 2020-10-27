@@ -200,6 +200,7 @@ class MetaData:
             return regions   
         except KeyError:
             self.logger.warning("Regional data not included in h5plexos results")
+            return pd.DataFrame()
     
     def zones(self):
         try:
@@ -211,6 +212,7 @@ class MetaData:
             return zones
         except KeyError:
             self.logger.warning("Zonal data not included in h5plexos results")
+            return pd.DataFrame()
              
     def lines(self):
         try:

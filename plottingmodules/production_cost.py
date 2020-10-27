@@ -37,7 +37,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -96,9 +96,9 @@ class mplot(object):
             Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
 
             #Checks if Net_Revenue contains data, if not skips zone and does not return a plot
-            if Net_Revenue.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+            if Net_Revenue.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             # Data table of values to return to main program
@@ -154,7 +154,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -201,9 +201,9 @@ class mplot(object):
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(5, break_long_words=False)
 
              #Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
-            if Total_Systems_Cost_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+            if Total_Systems_Cost_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             # Data table of values to return to main program
@@ -276,7 +276,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -336,9 +336,9 @@ class mplot(object):
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
 
             # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
-            if Detailed_Gen_Cost_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+            if Detailed_Gen_Cost_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             # Data table of values to return to main program
@@ -404,7 +404,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -433,9 +433,9 @@ class mplot(object):
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
-            if Total_Generation_Stack_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+            if Total_Generation_Stack_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             # Data table of values to return to main program
@@ -493,7 +493,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -539,8 +539,8 @@ class mplot(object):
             try:
                 Total_Systems_Cost_Out = Total_Systems_Cost_Out-Total_Systems_Cost_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
             except KeyError:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
             Total_Systems_Cost_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
 
@@ -548,9 +548,9 @@ class mplot(object):
     #        Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(10, break_long_words=False)
 
             # Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
-            if Total_Systems_Cost_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+            if Total_Systems_Cost_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
@@ -575,8 +575,6 @@ class mplot(object):
             ax.legend(reversed(handles), reversed(labels), loc='upper center',bbox_to_anchor=(0.5,-0.15),
                          facecolor='inherit', frameon=True, ncol=2)
 
-
-
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
@@ -590,7 +588,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -620,15 +618,15 @@ class mplot(object):
             try:
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
             except KeyError:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
             Total_Generation_Stack_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
 
             # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
             if Total_Generation_Stack_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             # Data table of values to return to main program
@@ -646,7 +644,6 @@ class mplot(object):
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
-
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
@@ -655,7 +652,6 @@ class mplot(object):
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+self.xlabels[0],  color='black', rotation='vertical')
             self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
             plt.xticks(ticks=locs,labels=self.xlabels[1:])
-
 
             ax.margins(x=0.01)
     #        plt.ylim((0,600))
@@ -696,7 +692,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -751,8 +747,8 @@ class mplot(object):
             try:
                 Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out-Detailed_Gen_Cost_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
             except KeyError:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
             Detailed_Gen_Cost_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
 
@@ -763,8 +759,8 @@ class mplot(object):
 
             # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
             if Detailed_Gen_Cost_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             # Data table of values to return to main program

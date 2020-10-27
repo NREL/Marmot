@@ -43,7 +43,7 @@ class mplot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = None
+            outputs = mfunc.MissingInputData()
             return outputs
         
         for zone_input in self.Zones:
@@ -86,8 +86,8 @@ class mplot(object):
 
                 # Check if thermal_reserve contains data, if not skips
                 if thermal_reserve.empty == True:
-                    df = pd.DataFrame()
-                    outputs[zone_input] = df
+                    out = mfunc.MissingZoneData()
+                    outputs[zone_input] = out
                     continue
 
                 # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and thermal_reserve.index[0] > dt.datetime(2024,2,28,0,0):
@@ -166,8 +166,8 @@ class mplot(object):
 
             # If Data_Table_Out is empty, does not return data or figure
             if Data_Table_Out.empty == True:
-                df = pd.DataFrame()
-                outputs[zone_input] = df
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
                 continue
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}

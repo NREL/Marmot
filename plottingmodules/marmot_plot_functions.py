@@ -53,7 +53,7 @@ class InputSheetError:
     """
     def __init__(self):
         return
-
+      
 def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     """
     Used to get data from formatted h5 file

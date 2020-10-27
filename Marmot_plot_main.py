@@ -14,7 +14,6 @@ import sys
 sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/plottingmodules")
 import importlib
 from meta_data import MetaData
-import pdb
 import logging 
 import logging.config
 import yaml
@@ -47,6 +46,7 @@ class plottypes:
         mpl.rc('axes', labelsize=self.font_defaults['axes_size'])
         mpl.rc('legend', fontsize=self.font_defaults['legend_size'])
         mpl.rc('font', family=self.font_defaults['font_family'])
+        mpl.rc('figure', max_open_warning = 0)
 
         plot = importlib.import_module(self.figure_type)
         fig = plot.mplot(self.argument_dict)
@@ -209,20 +209,28 @@ marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
 
 gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
+
+try:
+    Region_Mapping = Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
+except Exception:
+    pass
+
 # Instead of reading in pickle files, an instance of metadata is initialized with the appropriate parameters
 # Methods within that class are used to retreive the data that was stored in pickle files
 
 meta = MetaData(HDF5_folder_in, Region_Mapping)
-zones = meta.zones()
-regions = meta.regions()
 
 # Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
 # Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
 
-if AGG_BY=="zone":
+if AGG_BY in {"zone", "zones", "Zone", "Zones"}:
+    AGG_BY = 'zone'
+    zones = meta.zones()
+    if zones.empty == True:
+        logger.warning("Input Sheet Data Incorrect! Your model does not contain Zones, enter a different aggregation")
+        sys.exit()
     Zones = zones['name'].unique()
-    # print(zones)
-    # sys.exit()
+
     if zone_region_sublist != ['nan']:
         zsub = []
         for zone in zone_region_sublist:
@@ -230,12 +238,19 @@ if AGG_BY=="zone":
                 zsub.append(zone)
             else:
                 logger.info("metadata does not contain zone: %s, SKIPPING ZONE",zone)
-        Zones = zsub
+        if zsub:
+            Zones = zsub
+        else:
+            logger.warning("None of: %s in model Zones. Plotting all Zones",zone_region_sublist)
 
-elif Region_Mapping.empty==True:
+elif AGG_BY in {"region", "regions", "Region", "Regions"}:
+    AGG_BY = 'region'
+    regions = meta.regions()
+    if regions.empty == True:
+        logger.warning("Input Sheet Data Incorrect! Your model does not contain Regions, enter a different aggregation")
+        sys.exit()
     Zones = regions['region'].unique()
-    # logger.info(Zones)
-    # sys.exit()
+
     if zone_region_sublist != ['nan']:
         zsub = []
         for region in zone_region_sublist:
@@ -243,20 +258,38 @@ elif Region_Mapping.empty==True:
                 zsub.append(region)
             else:
                 logger.info("metadata does not contain region: %s, SKIPPING REGION",region)
-        Zones = zsub
+        if zsub:
+            Zones = zsub
+        else:
+            logger.warning("None of: %s in model Regions. Plotting all Regions",zone_region_sublist)
+
 else:
+    logger.info("Plotting Custom region aggregation from Region_Mapping File")
+    regions = meta.regions()
     Region_Mapping = regions.merge(Region_Mapping, how='left', on='region')
-    Zones = Region_Mapping[AGG_BY].unique()
-    # print(Zones)
-    # sys.exit()
+    Region_Mapping.dropna(axis=1, how='all', inplace=True)
+    
+    try:
+        Zones = Region_Mapping[AGG_BY].unique()
+    except KeyError:
+        logger.warning("AGG_BY = '%s' is not in the Region_Mapping File, enter a different aggregation",AGG_BY)
+        sys.exit()
+    
+    # remove any nan that might end  up in list
+    Zones = [x for x in Zones if str(x) != 'nan']
+    
     if zone_region_sublist != ['nan']:
         zsub = []
         for region in zone_region_sublist:
             if region in Zones:
                 zsub.append(region)
             else:
-                logger.info("metadata does not contain region: %s, SKIPPING REGION",region)
-        Zones = zsub
+                logger.info("Region_Mapping File does not contain region: %s, SKIPPING REGION",region)
+        if zsub:
+            Zones = zsub
+        else:
+            logger.warning("None of: %s in Region_Mapping File. Plotting all Regions of aggregation '%s'",zone_region_sublist, AGG_BY)
+
 
 # Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
 
@@ -333,13 +366,7 @@ for index, row in Marmot_plot_select.iterrows():
     for zone_input in Zones:
         if isinstance(Figure_Out[zone_input], mfunc.MissingZoneData):
             logger.info("No Data to Plot in %s",zone_input)
-    
-    for zone_input in Zones:
-        if isinstance(Figure_Out[zone_input], pd.DataFrame):
-            if module == 'hydro' or method == 'gen_stack_all_periods' or method == 'line_flow_ind':
-                logger.info('plots & data saved within module')
-            else:
-                logger.info("Data missing for %s",zone_input)
+
         else:
             # Save figures
             try:
