@@ -298,8 +298,8 @@ class mplot(object):
             for interf in interf_list:
                 n += 1
                 single_int = flow.xs(interf,level = 'interface_name') / 1000
-                single_exp_lim = export_limits.xs(interf, level = 'interface_name')[0].squeeze() / 1000
-                single_imp_lim = import_limits.xs(interf, level = 'interface_name')[0].squeeze() / 1000
+                single_exp_lim = export_limits.xs(interf, level = 'interface_name')[0].squeeze()[0] / 1000
+                single_imp_lim = import_limits.xs(interf, level = 'interface_name')[0].squeeze()[0] / 1000
                 mfunc.create_line_plot(axs,single_int,0, label=interf, n=n)
                 axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
                 axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
@@ -391,9 +391,7 @@ class mplot(object):
         plt.tight_layout(rect=[0, 0.03, 1, 0.97])
         fig2.savefig(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow.svg'), dpi=600, bbox_inches='tight')
 
-        outputs = {}
-        for zone_input in self.Zones:
-            outputs[zone_input] = pd.DataFrame()
+        outputs = mfunc.DataSavedInModule()
         return outputs
 
     

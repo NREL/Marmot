@@ -1,4 +1,4 @@
-region,superzone,Midwest Agg,category,Usual,Country,Interconnection,CountryInterconnect,Summary
+region,superzone,Midwest_Agg,category,Usual,Country,Interconnection,CountryInterconnect,Summary
 01-Central_MX,NA,01-Central_MX,Mexico_MX,Mexico,Mexico,SEN,Mexico-SEN,All
 02-Oriental_MX,NA,02-Oriental_MX,Mexico_MX,Mexico,Mexico,SEN,Mexico-SEN,All
 03-Occidental_MX,NA,03-Occidental_MX,Mexico_MX,Mexico,Mexico,SEN,Mexico-SEN,All
@@ -90,7 +90,7 @@ Non-Ercot_ERC,ERCOT,Non-Ercot_ERC,ERCOT_ERC,ERCOT,USA,Texas,USA-Texas,All
 NORTH_EI,NYISO,NORTH_EI,NYISO,NYISO,USA,EI,USA-EI,All
 North_ERC,ERCOT,North_ERC,ERCOT_ERC,ERCOT,USA,Texas,USA-Texas,All
 NPPD_EI,SPP,NPPD_EI,SPP,SPP,USA,EI,USA-EI,All
-NWMT_WI,Northern Tier,NWMT_WI,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
+NWMT_WI,Northern Tier,NWMT_WI,NW_Other_WI,Montana,USA,WI,USA-WI,All
 NWPS_EI,SPP,NWPS_EI,SPP,SPP,USA,EI,USA-EI,All
 OKGE_EI,SPP,OKGE_EI,SPP,SPP,USA,EI,USA-EI,All
 ONTE_EI,Ontario,ONTE_EI,IESO,IESO,Canada,EI,Canada-EI,All
@@ -140,7 +140,7 @@ VT_EI,ISONE,VT_EI,ISONE,ISONE,USA,EI,USA-EI,All
 WACM_WI,Mountain West,WACM_WI,RM_WI,RockiesUS,USA,WI,USA-WI,All
 WALC_WI,Mountain West,WALC_WI,SW_Other_WI,Southwest,USA,WI,USA-WI,All
 WAPA_DK_EI,SPP,WAPA_DK_EI,SPP,SPP,USA,EI,USA-EI,All
-WAUW_WI,Northern Tier,WAUW_WI,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
+WAUW_WI,Northern Tier,WAUW_WI,NW_Other_WI,Montana,USA,WI,USA-WI,All
 WCMASS_EI,ISONE,WCMASS_EI,ISONE,ISONE,USA,EI,USA-EI,All
 WEST_EI,NYISO,WEST_EI,NYISO,NYISO,USA,EI,USA-EI,All
 West_ERC,ERCOT,West_ERC,ERCOT_ERC,ERCOT,USA,Texas,USA-Texas,All
