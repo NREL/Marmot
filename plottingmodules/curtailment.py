@@ -436,14 +436,14 @@ class mplot(object):
 
     def curt_ind(self):
 
-    """
-    This module calculates the curtailment, as a percentage of total generation, of individual generators.
-    The generators are specified as a list of strings in the fourth column of Marmot_plot_select.csv.  
-    The module prints out two .csvs: 
-        -one that contains curtailment, in percent, for each scenario and site. 
-        -the other contains total generation, in TWh, for each scenario and site.
-
-    """
+        """
+        This module calculates the curtailment, as a percentage of total generation, of individual generators.
+        The generators are specified as a list of strings in the fourth column of Marmot_plot_select.csv.  
+        The module prints out two .csvs: 
+            -one that contains curtailment, in percent, for each scenario and site. 
+            -the other contains total generation, in TWh, for each scenario and site.
+    
+        """
 
         outputs = {}
         curtailment_collection = {}

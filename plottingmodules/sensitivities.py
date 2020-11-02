@@ -5,6 +5,8 @@ import matplotlib.dates as mdates
 import marmot_plot_functions as mfunc
 import os
 from matplotlib.patches import Patch
+import logging
+
 
 #===============================================================================
 
@@ -19,6 +21,7 @@ class mplot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
 
     def _process_ts(self,df,zone_input):
         oz = df.xs(zone_input, level = self.AGG_BY)
@@ -44,7 +47,16 @@ class mplot(object):
         gen_collection = {}
         curt_collection = {}
         int_collection = {}
-
+        
+        if self.Scenario_Diff == ['']:
+            self.logger.warning('Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!')
+            outputs = mfunc.InputSheetError()
+            return outputs 
+        if len(self.Scenario_Diff) == 1:
+            self.logger.warning('Scenario_Diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!')
+            outputs = mfunc.InputSheetError()
+            return outputs 
+        
         check_input_data.extend([mfunc.get_data(gen_collection,'generator_Generation',self.Marmot_Solutions_folder,self.Scenario_Diff)])
         check_input_data.extend([mfunc.get_data(curt_collection,'generator_Curtailment',self.Marmot_Solutions_folder,self.Scenario_Diff)])
         check_input_data.extend([mfunc.get_data(int_collection,'region_Net_Interchange',self.Marmot_Solutions_folder,self.Scenario_Diff)])
@@ -53,11 +65,23 @@ class mplot(object):
             outputs = mfunc.MissingInputData()
             return outputs
 
-        bc = mfunc.shift_leap_day(gen_collection.get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder,self.shift_leap_day)
+        try:
+            bc = mfunc.shift_leap_day(gen_collection.get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder,self.shift_leap_day)
+        except IndexError:
+            self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
+            outputs = mfunc.InputSheetError()
+            return outputs 
+        
         bc_tech = bc.xs(self.prop,level = 'tech')
         bc_CT = bc.xs('Gas-CT',level = 'tech')
         bc_CC = bc.xs('Gas-CC',level = 'tech')
-        scen = mfunc.shift_leap_day(gen_collection.get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder,self.shift_leap_day)
+        try:
+            scen = mfunc.shift_leap_day(gen_collection.get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder,self.shift_leap_day)
+        except IndexError:
+            self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
+            outputs = mfunc.InputSheetError()
+            return outputs 
+        
         scen_tech = scen.xs(self.prop,level = 'tech')
         scen_CT = scen.xs('Gas-CT',level = 'tech')
         scen_CC = scen.xs('Gas-CC',level = 'tech')
