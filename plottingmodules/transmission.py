@@ -411,7 +411,7 @@ class mplot(object):
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
+        plt.ylabel('Flow (MW)',  color='black', rotation='vertical', labelpad=30)
         plt.tight_layout(rect=[0, 0.03, 1, 0.97])
         fig2.savefig(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow.svg'), dpi=600, bbox_inches='tight')
 
