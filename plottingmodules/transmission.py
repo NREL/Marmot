@@ -274,7 +274,6 @@ class mplot(object):
             all_ints.index = all_ints.line
             ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
 
-            flow = Flow_Collection.get(scenario)
             flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
             flow = flow.droplevel('interface_category')
 
@@ -340,7 +339,10 @@ class mplot(object):
         scenario = self.Scenario_name
 
         #Select only lines specified in Marmot_plot_select.csv.
-        select_lines = self.prop.split(",") 
+        select_lines = self.prop.split(",")
+        if select_lines == None:
+            outpus = mfunc.InputSheetError()
+            return outputs
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
@@ -360,23 +362,39 @@ class mplot(object):
         fig2, axs = mfunc.setup_plot(xdim,ydim)
         axs = axs.ravel()
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
+
+        reported_lines = Flow_Collection[self.Multi_Scenario[0]].index.get_level_values('line_name').unique()
         n = -1
+        missing_lines = 0
+        chunks = []
         for line in select_lines:
             n += 1
             #Remove leading spaces
             if line[0] == ' ':
                 line = line[1:]
-            try:
+            if line in reported_lines:
+                chunks_line = []
                 for scenario in self.Multi_Scenario:
                     flow = Flow_Collection[scenario]
                     single_line = flow.xs(line,level = 'line_name')
-                    mfunc.create_line_plot(axs,single_line,0, label = scenario + ' line flow', n = n)
-            except KeyError:
+                    single_line.columns = [line]
+                    mfunc.create_line_plot(axs,single_line,line, label = scenario + ' line flow', n = n)
+
+                    #For output .csv
+                    scenario_names = pd.Series([scenario] * len(single_line),name = 'Scenario')
+                    single_line_out = single_line.set_index([scenario_names],append = True)
+                    chunks_line.append(single_line_out)
+                Data_out_line = pd.concat(chunks_line,axis = 0)
+                chunks.append(Data_out_line)
+            else:
                 self.logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
+                excess_axs += 1
+                missing_lines += 1
                 continue
+
             single_exp_lim = export_limits.loc[line].squeeze()
             single_imp_lim = import_limits.loc[line].squeeze()
-
+            mfunc.remove_excess_axs(axs,excess_axs,grid_size)
             axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
             axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
             axs[n].set_title(line)
@@ -384,12 +402,21 @@ class mplot(object):
             mfunc.set_plot_timeseries_format(axs, n=n)
             if n == len(select_lines) - 1:
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
-        mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+
+        if missing_lines == len(select_lines):
+            outputs = mfunc.MissingInputData()
+            return outputs
+
+        Data_Table_Out = pd.concat(chunks,axis = 1)
+        print(Data_Table_Out)
+
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
         plt.tight_layout(rect=[0, 0.03, 1, 0.97])
         fig2.savefig(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow.svg'), dpi=600, bbox_inches='tight')
+
+        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow.csv'))
 
         outputs = mfunc.DataSavedInModule()
         return outputs
