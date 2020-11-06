@@ -12,7 +12,7 @@ CIPV,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
 CISC,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
 CISD,CAISO,CA_CISO_WI,California,USA,WI,USA-WI,All
 DOPD,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
-EPE,SPP,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+EPE,West Connect,SW_Other_WI,Southwest,USA,WI,USA-WI,All
 GCPD,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
 IID,CAISO,CA_IID_WI,California,USA,WI,USA-WI,All
 IPFE,Northern Tier,BS_IPCO_WI,RockiesUS,USA,WI,USA-WI,All
@@ -31,8 +31,8 @@ PSCO,Mountain West,RM_WI,RockiesUS,USA,WI,USA-WI,All
 PSEI,Columbia Grid,NW_Other_WI,NorthwestUS,USA,WI,USA-WI,All
 SCL,Columbia Grid,NW_BPA_WI,NorthwestUS,USA,WI,USA-WI,All
 SPPC,West Connect,SW_NVE_WI,Southwest,USA,WI,USA-WI,All
-SRP,SPP,SW_Other_WI,Southwest,USA,WI,USA-WI,All
-TEPC,SPP,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+SRP,West Connect,SW_Other_WI,Southwest,USA,WI,USA-WI,All
+TEPC,West Connect,SW_Other_WI,Southwest,USA,WI,USA-WI,All
 TH_Malin,West Connect,TH_WI,NorthwestUS,USA,WI,USA-WI,All
 TH_Mead,West Connect,TH_WI,Southwest,USA,WI,USA-WI,All
 TH_PV,West Connect,TH_WI,Southwest,USA,WI,USA-WI,All

@@ -207,9 +207,9 @@ Coal_ST,Coal
 CrossCompoundWhole_Coal,Coal
 CSP_noTES,CSP
 CSP-TES,CSP
-CT_AB_Cogen,Gas-CT
-CT_NG_Aero,Gas-CT
-CT_NG_Ind,Gas-CT
+CT_AB_Cogen,Gas-CC
+CT_NG_Aero,Gas-CC
+CT_NG_Ind,Gas-CC
 CT_Oil,Oil-Gas-Steam
 DC-Intertie,Other
 Dfuel_gen,Other
@@ -238,4 +238,3 @@ Wind_2028,Wind
 Renewable_Thermal,Geothermal
 Thermal,Oil-Gas-Steam
 OSW,Offshore Wind
-ICE,Oil-Gas-Steam

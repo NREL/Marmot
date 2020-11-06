@@ -129,6 +129,7 @@ figure_format = str(Marmot_user_defined_inputs.loc['Figure_Format'].squeeze()).s
 if figure_format == 'nan':
     figure_format = 'png'
 
+shift_leap_day = str(Marmot_user_defined_inputs.loc['shift_leap_day'].squeeze())
 #===============================================================================
 # Input and Output Directories
 #===============================================================================
@@ -322,14 +323,14 @@ for index, row in Marmot_plot_select.iterrows():
                 "Multi_Scenario", "Scenario_Diff", "Scenario_name", "Marmot_Solutions_folder",
                 "ylabels", "xlabels", "ticklabels",
                 "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
-                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet"]
+                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leap_day"]
 
     argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                      hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict,
                      Multi_Scenario, Scenario_Diff, Scenario_name, Marmot_Solutions_folder,
                      ylabels, xlabels, ticklabels,
                      color_list, marker_style, gen_names_dict, pv_gen_cat,
-                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet]
+                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet,shift_leap_day]
 
     argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
 
@@ -365,6 +366,7 @@ for index, row in Marmot_plot_select.iterrows():
     for zone_input in Zones:
         if isinstance(Figure_Out[zone_input], mfunc.MissingZoneData):
             logger.info("No Data to Plot in %s",zone_input)
+
         else:
             # Save figures
             try:

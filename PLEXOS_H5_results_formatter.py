@@ -24,7 +24,7 @@ import logging.config
 import yaml
 from meta_data import MetaData
 
-# sys.path.append('../h5plexos')
+sys.path.append('../h5plexos')
 from h5plexos.query import PLEXOSSolution
 
 with open('marmot_logging_config.yml', 'rt') as f:

@@ -14,6 +14,7 @@ from collections import OrderedDict
 import matplotlib as mpl
 import logging
 import marmot_plot_functions as mfunc
+import os
 
 #===============================================================================
 
@@ -317,6 +318,12 @@ class mplot(object):
 
 
     def curt_total(self):
+
+        """
+        This module calculates the total curtailment, broken down by technology. 
+        It produces a stacked bar plot, with a bar for each scenario.
+        """
+
         outputs = {}
         curtailment_collection = {}
         avail_gen_collection = {}
@@ -339,7 +346,7 @@ class mplot(object):
             for scenario in self.Multi_Scenario:
                 self.logger.info("Scenario = " + scenario)
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
+                #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
 
                 vre_collection = {}
                 avail_vre_collection = {}
@@ -424,3 +431,86 @@ class mplot(object):
 
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
+
+
+
+    def curt_ind(self):
+
+        """
+        This module calculates the curtailment, as a percentage of total generation, of individual generators.
+        The generators are specified as a list of strings in the fourth column of Marmot_plot_select.csv.  
+        The module prints out two .csvs: 
+            -one that contains curtailment, in percent, for each scenario and site. 
+            -the other contains total generation, in TWh, for each scenario and site.
+    
+        """
+
+        outputs = {}
+        curtailment_collection = {}
+        cap_collection = {}
+        gen_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = None
+            return outputs
+
+        Total_Curtailment_Out = pd.DataFrame()
+        Total_Gen = pd.DataFrame()
+
+        scen_idx = -1
+        for scenario in self.Multi_Scenario:
+            scen_idx += 1
+            self.logger.info("Scenario = " + scenario)
+
+            vre_curt = curtailment_collection.get(scenario)
+            gen = gen_collection.get(scenario)
+            cap = cap_collection.get(scenario)
+            
+            #Select only lines specified in Marmot_plot_select.csv.
+            select_sites = self.prop.split(",") 
+            select_sites = [site[1:] if site[0] == ' ' else site for site in select_sites]
+            self.logger.info('Plotting curtailment only for sites specified in Marmot_plot_select.csv')
+
+            site_idx = -1
+            sites = pd.Series()
+            sites_gen = pd.Series()
+            for site in select_sites:
+                if site in gen.index.get_level_values('gen_name').unique():
+                    site_idx += 1
+                    curt2 = vre_curt.xs(site,level = 'gen_name')
+                    gen_site = gen.xs(site,level = 'gen_name')
+                    cap_site = cap.xs(site,level = 'gen_name') 
+                    curt = cap_site - gen_site
+                    curt = vre_curt.xs(site,level = 'gen_name')
+                    curt_tot = curt.sum()
+                    gen_tot = gen_site.sum()
+                    curt_perc = pd.Series(100 * curt_tot / gen_tot)
+                else:
+                    curt_perc = pd.Series([0])
+                    gen_tot = pd.Series([0])
+                sites_gen = sites_gen.append(gen_tot)
+                sites = sites.append(curt_perc)
+            sites.name = scenario
+            sites.index = select_sites
+            sites_gen.name = scenario
+            sites_gen.index = select_sites
+            Total_Curtailment_Out = pd.concat([Total_Curtailment_Out,sites],axis = 1)
+            Total_Gen = pd.concat([Total_Gen,sites_gen],axis = 1)
+
+      #  Total_Curtailment_Out.index = self.Multi_Scenario
+        print(Total_Curtailment_Out)
+        Total_Gen = Total_Gen / 1000000
+        Total_Curtailment_Out.T.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
+        Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen.csv'))
+
+
+        outputs = mfunc.DataSavedInModule()
+        return outputs
+
+

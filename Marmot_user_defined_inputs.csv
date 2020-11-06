@@ -1,16 +1,17 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,\\folder\folder\folder\
-Marmot_Solutions_folder,folder,required,\\folder\folder\folder\
-Scenario_process_list,List,required,"Scenario1, Scenario2, Scenario3"
+PLEXOS_Solutions_folder,folder,required,/projects/continental/OR_OSW/OR_OSW_102620
+Marmot_Solutions_folder,folder,required,/projects/continental/OR_OSW/OR_OSW_102620
+Scenario_process_list,List,required,"0GW_OSW, 2GW_OSW, 3GW_OSW, 4GW_OSW, 5GW_OSW, HVDC_5GW_OSW"
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
-Main_scenario_plot,string,required,Scenario1
-Multi_scenario_plot,List,required,"Scenario1, Scenario2, Scenario3"
-Scenario_Diff_plot,List [Max 2],optional,"Scenario2, Scenario1"
-AGG_BY,string,required,zone
-zone_region_sublist,List,optional,Zone_X
-Facet_ylabels,List,optional,"BAU, Flex"
-Facet_xlabels,List,optional,"2026,2030,2034"
+Main_scenario_plot,string,required,5GW_OSW
+Multi_scenario_plot,List,required,"0GW_OSW, 2GW_OSW, 3GW_OSW, 4GW_OSW, 5GW_OSW"
+Scenario_Diff_plot,List [Max 2],optional,
+AGG_BY,string,required,Usual
+zone_region_sublist,List,optional,NorthwestUS
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,
 Figure_Format,string,optional,svg
-Tick_labels,List,optional,"2026,2030,2034"
+Tick_labels,List,optional,
+shift_leap_day,Boolean,required,TRUE

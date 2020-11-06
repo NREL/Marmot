@@ -2,14 +2,14 @@
 
 ############################ USER MODIFIED SECTION ########################
 export feature="0-04:00:00"
-export alloc="yourallocation"    #allcoation to use
+export alloc="continental"    #allcoation to use
 export partition="short" #only for debugging on eagle, otherwise not needed, but can choose standard or short
 export runscript="run_python_marmot_process_multiple.sh"
 export priority="high" #choose high or normal
-export myemail="\ana.dyreson@nrel.gov"
-export description="fast_process_5min_" #job name and scenario name
+export myemail="\Marty.Schwrz@nrel.gov"
+export description="OR_OSW_process_test" #job name and scenario name
 ##########################################################################
-models=$1 #List of items requested in call
+models=$24 #List of items requested in call
 
 rootdir=$(pwd)
 cd $rootdir
