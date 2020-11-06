@@ -408,7 +408,6 @@ class mplot(object):
             return outputs
 
         Data_Table_Out = pd.concat(chunks,axis = 1)
-        print(Data_Table_Out)
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
