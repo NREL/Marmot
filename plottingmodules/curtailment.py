@@ -462,8 +462,11 @@ class mplot(object):
 
         Total_Curtailment_Out = pd.DataFrame()
         Total_Gen = pd.DataFrame()
-
+        Gen_8760 = pd.DataFrame()
         scen_idx = -1
+
+        chunks = []
+
         for scenario in self.Multi_Scenario:
             scen_idx += 1
             self.logger.info("Scenario = " + scenario)
@@ -477,9 +480,12 @@ class mplot(object):
             select_sites = [site[1:] if site[0] == ' ' else site for site in select_sites]
             self.logger.info('Plotting curtailment only for sites specified in Marmot_plot_select.csv')
 
+            ti = gen.index.get_level_values('timestamp').unique()
+
             site_idx = -1
             sites = pd.Series()
             sites_gen = pd.Series()
+            chunks_scen = []
             for site in select_sites:
                 if site in gen.index.get_level_values('gen_name').unique():
                     site_idx += 1
@@ -491,11 +497,24 @@ class mplot(object):
                     curt_tot = curt.sum()
                     gen_tot = gen_site.sum()
                     curt_perc = pd.Series(100 * curt_tot / gen_tot)
+
+                    levels2drop = [level for level in gen_site.index.names if level != 'timestamp']
+                    gen_site = gen_site.droplevel(levels2drop)
+                    gen_site.columns = [site]
+
                 else:
                     curt_perc = pd.Series([0])
                     gen_tot = pd.Series([0])
+                    gen_site = pd.Series([0] * len(ti),name = site,index = ti)
                 sites_gen = sites_gen.append(gen_tot)
                 sites = sites.append(curt_perc)
+                chunks_scen.append(gen_site)
+
+            gen_8760_scen = pd.concat(chunks_scen,axis = 1)
+            scen_name = pd.Series([scenario] * len(ti),name = 'Scenario')
+            gen_8760_scen = gen_8760_scen.set_index(scen_name,append = True)
+            chunks.append(gen_8760_scen)
+
             sites.name = scenario
             sites.index = select_sites
             sites_gen.name = scenario
@@ -503,8 +522,9 @@ class mplot(object):
             Total_Curtailment_Out = pd.concat([Total_Curtailment_Out,sites],axis = 1)
             Total_Gen = pd.concat([Total_Gen,sites_gen],axis = 1)
 
-      #  Total_Curtailment_Out.index = self.Multi_Scenario
-        print(Total_Curtailment_Out)
+        Gen_8760 = pd.concat(chunks,axis = 0, copy = False)
+        Gen_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen_8760.csv'))
+
         Total_Gen = Total_Gen / 1000000
         Total_Curtailment_Out.T.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
         Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen.csv'))
