@@ -104,6 +104,7 @@ class mplot(object):
                 Total_Load = load_collection.get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
+                self.logger.info(Total_Load)
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
@@ -145,7 +146,7 @@ class mplot(object):
                 Total_Demand_Out = pd.concat([Total_Demand_Out, Total_Demand], axis=0, sort=False)
 
 
-            Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load (Demand + Pumped Load)'})
+            Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load (Demand + \n Storage Charging)'})
             Total_Demand_Out = Total_Demand_Out.rename(columns={0: 'Total Demand'})
             Unserved_Energy_Out = Unserved_Energy_Out.rename(columns={0: 'Unserved Energy'})
             unserved_eng_data_table_out = unserved_eng_data_table_out.rename(columns={0: 'Unserved Energy'})
@@ -302,6 +303,9 @@ class mplot(object):
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
 
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out / 1000 #GWh -> TWh
+            net_diff = Total_Generation_Stack_Out.sum(axis = 1)
+
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
 
@@ -311,8 +315,6 @@ class mplot(object):
                 continue
 
             fig1, ax = plt.subplots(figsize=(6,4))
-
-
             Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
@@ -324,8 +326,16 @@ class mplot(object):
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
 
+            #Add net gen difference line.
+            n=0
+            for scenario in self.Multi_Scenario[1:]:
+                x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
+                y_net = [net_diff.loc[scenario]] * 2
+                net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
+                n += 1
+
             locs,labels=plt.xticks()
-            ax.set_ylabel('Generation Change (GWh) \n relative to '+ self.Multi_Scenario[0],  color='black', rotation='vertical')
+            ax.set_ylabel('Generation Change (TWh) \n relative to '+ self.Multi_Scenario[0],  color='black', rotation='vertical')
             self.xlabels = pd.Series(self.Multi_Scenario).str.replace('_',' ').str.wrap(10, break_long_words=False)
             plt.xticks(ticks=locs,labels=self.xlabels[1:])
             ax.margins(x=0.01)
@@ -334,9 +344,13 @@ class mplot(object):
 
             handles, labels = ax.get_legend_handles_labels()
 
-            #Legend 1
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            #Main legend
+            leg_main = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+
+            #Net line legend
+            leg_net = ax.legend(net_line,['Net Gen Change'],loc='center left',bbox_to_anchor=(1, -0.05),facecolor='inherit', frameon=True)
+            ax.add_artist(leg_main)
+            ax.add_artist(leg_net)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs

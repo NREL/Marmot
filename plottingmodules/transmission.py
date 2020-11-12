@@ -146,7 +146,7 @@ class mplot(object):
         for zone_input in self.Zones:
             self.logger.info("For all lines touching Zone = "+zone_input)
             
-            fig2, axs = mfunc.setup_plot(ydimension=len(self.Multi_Scenario))
+            fig2, axs = mfunc.setup_plot(ydimension=len(self.Multi_Scenario),sharey = False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
 
@@ -253,8 +253,6 @@ class mplot(object):
 
             Data_Table_Out = pd.DataFrame()
 
-            flow = Flow_Collection.get(scenario)
-
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
                 zone_lines = self.meta.zone_lines()
@@ -274,8 +272,8 @@ class mplot(object):
             all_ints.index = all_ints.line
             ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
 
-            flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
-            flow = flow.droplevel('interface_category')
+            #flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
+            #flow = flow.droplevel('interface_category')
 
             export_limits = Export_Limit_Collection.get(scenario).droplevel('timestamp')
             export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
@@ -287,28 +285,60 @@ class mplot(object):
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
             import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
 
-            interf_list = import_limits.index.get_level_values('interface_name').unique()
+            reported_ints = import_limits.index.get_level_values('interface_name').unique()
+            if self.prop != '':
+                interf_list = self.prop.split(',')
+                self.logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
+                self.logger.info(interf_list) 
+            else:
+                interf_list = reported_ints.copy()
             xdim,ydim = mfunc.set_x_y_dimension(len(interf_list))
 
-            fig2, axs = mfunc.setup_plot(xdim,ydim)
+            fig2, axs = mfunc.setup_plot(xdim,ydim,sharey = False)
             axs = axs.ravel()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            missing_ints = 0
             n = -1
             for interf in interf_list:
                 n += 1
-                single_int = flow.xs(interf,level = 'interface_name') / 1000
-                single_exp_lim = export_limits.xs(interf, level = 'interface_name')[0].squeeze()[0] / 1000
-                single_imp_lim = import_limits.xs(interf, level = 'interface_name')[0].squeeze()[0] / 1000
-                mfunc.create_line_plot(axs,single_int,0, label=interf, n=n)
-                axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
-                axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
-                axs[n].set_title(interf)
-                handles, labels = axs[n].get_legend_handles_labels()
-                mfunc.set_plot_timeseries_format(axs, n=n)
+
+                #Remove leading spaces
+                if interf[0] == ' ':
+                    interf = interf[1:]
+                if interf in reported_ints:
+                    single_exp_lim = export_limits.xs(interf, level = 'interface_name')[0].squeeze()[0] / 1000
+                    single_imp_lim = import_limits.xs(interf, level = 'interface_name')[0].squeeze()[0] / 1000
+
+                    for scenario in self.Multi_Scenario:
+                        flow = Flow_Collection.get(scenario)
+                        single_int = flow.xs(interf,level = 'interface_name') / 1000
+                        single_int.columns = [interf]
+                        if self.duration_curve:
+                            single_int.sort_values(by = interf,ascending = False,inplace = True)
+                            single_int.reset_index(inplace = True)
+                            single_int.drop(columns = ['timestamp'],inplace = True)
+                        mfunc.create_line_plot(axs,single_int,interf, label = scenario, n=n)
+                    axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
+                    axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
+                    axs[n].set_title(interf)
+                    handles, labels = axs[n].get_legend_handles_labels()
+                    if not self.duration_curve:
+                        mfunc.set_plot_timeseries_format(axs, n=n)
+                    if n == len(interf_list) - 1:
+                        axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
+                else:
+                    self.logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
+                    excess_axs += 1
+                    missing_lines += 1
+                    continue
+
+            if missing_ints == len(interf_list):
+                outputs = mfunc.MissingInputData()
+                return outputs
+
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
-            plt.suptitle(self.Scenario_name)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
@@ -358,15 +388,14 @@ class mplot(object):
         xdim,ydim = mfunc.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
-
-        fig2, axs = mfunc.setup_plot(xdim,ydim)
-        axs = axs.ravel()
-        plt.subplots_adjust(wspace=0.05, hspace=0.2)
+        fig2, axs = mfunc.setup_plot(xdim,ydim,sharey = False)
+        #plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
         reported_lines = Flow_Collection[self.Multi_Scenario[0]].index.get_level_values('line_name').unique()
         n = -1
         missing_lines = 0
         chunks = []
+        limits_chunks = []
         for line in select_lines:
             n += 1
             #Remove leading spaces
@@ -374,16 +403,44 @@ class mplot(object):
                 line = line[1:]
             if line in reported_lines:
                 chunks_line = []
+
+                single_exp_lim = export_limits.loc[line]
+                single_imp_lim = import_limits.loc[line]
+
+                limits = pd.concat([single_exp_lim,single_imp_lim])
+                limits_chunks.append(limits)
+                single_exp_lim = single_exp_lim.squeeze()
+                single_imp_lim = single_imp_lim.squeeze()
+
                 for scenario in self.Multi_Scenario:
                     flow = Flow_Collection[scenario]
                     single_line = flow.xs(line,level = 'line_name')
                     single_line.columns = [line]
+                    if self.duration_curve:
+                        single_line.sort_values(by = line,ascending = False,inplace = True)
+                        single_line.reset_index(inplace = True)
+                        single_line.drop(columns = ['timestamp'],inplace = True)
                     mfunc.create_line_plot(axs,single_line,line, label = scenario + ' line flow', n = n)
 
-                    #For output .csv
+                    #Add %congested number to plot.
+                    if scenario == self.Scenario_name:
+                        viol_exp = single_line[single_line[line] > single_exp_lim].count()
+                        viol_imp = single_line[single_line[line] < single_imp_lim].count()
+                        viol_perc = 100 * (viol_exp + viol_imp) / len(single_line)
+                        viol_perc = round(viol_perc.squeeze(),3)
+                        axs[n].annotate('Violation = ' + str(viol_perc) + '% of hours', xy = (0.1,0.15),xycoords='axes fraction')
+
+                        cong_exp = single_line[single_line[line] == single_exp_lim].count()
+                        cong_imp = single_line[single_line[line] == single_imp_lim].count()
+                        cong_perc = 100 * (cong_exp + cong_imp) / len(single_line)
+                        cong_perc = round(cong_perc.squeeze(),0)
+                        axs[n].annotate('Congestion = ' + str(cong_perc) + '% of hours', xy = (0.1,0.1),xycoords='axes fraction')
+
+                    #For output time series .csv
                     scenario_names = pd.Series([scenario] * len(single_line),name = 'Scenario')
                     single_line_out = single_line.set_index([scenario_names],append = True)
                     chunks_line.append(single_line_out)
+
                 Data_out_line = pd.concat(chunks_line,axis = 0)
                 chunks.append(Data_out_line)
             else:
@@ -392,14 +449,13 @@ class mplot(object):
                 missing_lines += 1
                 continue
 
-            single_exp_lim = export_limits.loc[line].squeeze()
-            single_imp_lim = import_limits.loc[line].squeeze()
             mfunc.remove_excess_axs(axs,excess_axs,grid_size)
             axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
             axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
             axs[n].set_title(line)
             handles, labels = axs[n].get_legend_handles_labels()
-            mfunc.set_plot_timeseries_format(axs, n=n)
+            if not self.duration_curve:
+                mfunc.set_plot_timeseries_format(axs, n=n)
             if n == len(select_lines) - 1:
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
 
@@ -408,14 +464,20 @@ class mplot(object):
             return outputs
 
         Data_Table_Out = pd.concat(chunks,axis = 1)
+        Limits_Out = pd.concat(limits_chunks,axis = 1)
+        Limits_Out.index = ['Export Limit','Import Limit']
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Flow (MW)',  color='black', rotation='vertical', labelpad=30)
-        plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow.svg'), dpi=600, bbox_inches='tight')
+        #plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+        plt.tight_layout()
 
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow.csv'))
+        fn_suffix = '_duration_curve' if self.duration_curve else ''
+
+        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '.csv'))
+        Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
 
         outputs = mfunc.DataSavedInModule()
         return outputs

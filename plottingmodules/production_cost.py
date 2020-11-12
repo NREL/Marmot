@@ -349,7 +349,7 @@ class mplot(object):
             sb = Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.hlines(y = 0)
+            ax.axhline(y = 0)
             ax.set_ylabel('Total Generation Cost (Million $)',  color='black', rotation='vertical')
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -754,7 +754,7 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
             Detailed_Gen_Cost_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
-
+            net_cost = Detailed_Gen_Cost_Out.sum(axis = 1)
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(10, break_long_words=False)
             # Deletes columns that are all 0
@@ -774,7 +774,7 @@ class mplot(object):
             sb = Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.axhline(y = 0,xmin = 0,xmax = 1, color = 'black')
+            ax.axhline(y= 0 ,linewidth=0.5,linestyle='--',color='grey')
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
             locs,labels=plt.xticks()
@@ -786,10 +786,24 @@ class mplot(object):
             ax.margins(x=0.01)
     #        plt.ylim((0,600))
 
+            #Add net cost line.
+            n=0
+            for scenario in self.Multi_Scenario[1:]:
+                x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
+                y_net = [net_cost.loc[scenario]] * 2
+                net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
+                n += 1
+
             handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+
+            #Main Legend
+            leg_main = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
+            #Net cost legend
+            leg_net = ax.legend(net_line,['Net Cost Change'],loc='center left',bbox_to_anchor=(1, -0.05),facecolor='inherit', frameon=True)
+            ax.add_artist(leg_main)
+            ax.add_artist(leg_net)
 
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
