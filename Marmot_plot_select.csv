@@ -1,4 +1,4 @@
-Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
+Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada], Emissions to plot [CO2, SO2, NOx]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
 Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,,capacity_factor,avg_output_when_committed
 Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,7/1/24,7/7/24,capacity_factor,avg_output_when_committed
 Capacity Factor,FALSE,Capacity_Factor,,,,EST,,,capacity_factor,cf
@@ -11,6 +11,8 @@ Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,,curtailme
 Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,,curtailment,curt_pen
 Total Curtailment,FALSE,Total_Curtailment,,,,,,,curtailment,curt_total
 Total Curtailment Individual Sites,FALSE,Total_Curtailment_Individual,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
+Total CO2 Emissions by Generator Fuel Type,TRUE,Total_Emissions_By_Gen_Type_CO2,CO2,,,,,,emissions,total_emissions_by_type
+Total SO2 Emissions by Generator Fuel Type,FALSE,Total_Emissions_By_Gen_Type_SO2,SO2,,,,,,emissions,total_emissions_by_type
 Committed Capacity Stack,FALSE,Committed_Capacity_Stack,,,,,,,generation_stack,committed_stack
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,,generation_stack,gen_diff
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff_Range,Date Range,,,EST,7/1/24,7/7/24,generation_stack,gen_diff
@@ -78,7 +80,7 @@ Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_C
 Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_scenarios
 All Region-Region Net Interchange,FALSE,All_Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_regions
 Individual Line Flow,FALSE,Individual_Line_Flow,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI",,,EST,,,transmission,line_flow_ind
-Individual Interchange Flow,TRUE,Individual_Interchange_Flow,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
+Individual Interchange Flow,FALSE,Individual_Interchange_Flow,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,,unserved_energy,tot_unserved_energy
 Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,,unserved_energy,unserved_energy_timeseries
 Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,,utilization_factor,GW_fleet
