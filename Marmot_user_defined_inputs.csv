@@ -5,7 +5,7 @@ Scenario_process_list,List,required,"0GW_OSW, 2GW_OSW, 3GW_OSW, 4GW_OSW, 5GW_OSW
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
-emit_names.csv_name,string,optional,
+emit_names.csv_name,string,optional,emit_names.csv
 Main_scenario_plot,string,required,5GW_OSW
 Multi_scenario_plot,List,required,"0GW_OSW, 2GW_OSW, 3GW_OSW, 4GW_OSW, 5GW_OSW"
 Scenario_Diff_plot,List [Max 2],optional,
