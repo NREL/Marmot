@@ -11,7 +11,7 @@ Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,,curtailme
 Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,,curtailment,curt_pen
 Total Curtailment,FALSE,Total_Curtailment,,,,,,,curtailment,curt_total
 Total Curtailment Individual Sites,FALSE,Total_Curtailment_Individual,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
-Total CO2 Emissions by Generator Fuel Type,TRUE,Total_Emissions_By_Gen_Type_CO2,CO2,,,,,,emissions,total_emissions_by_type
+Total CO2 Emissions by Generator Fuel Type,FALSE,Total_Emissions_By_Gen_Type_CO2,CO2,,,,,,emissions,total_emissions_by_type
 Total SO2 Emissions by Generator Fuel Type,FALSE,Total_Emissions_By_Gen_Type_SO2,SO2,,,,,,emissions,total_emissions_by_type
 Committed Capacity Stack,FALSE,Committed_Capacity_Stack,,,,,,,generation_stack,committed_stack
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,,generation_stack,gen_diff
