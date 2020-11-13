@@ -368,7 +368,7 @@ class Process:
 
         # reclassify emissions as specified by user in mapping
         df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: emit_names_dict.get(x,x)))
-        
+
         # remove categoricals (otherwise h5 save will fail)
         df = df.astype({'tech':'object', 'pollutant':'object'})
 
@@ -538,7 +538,7 @@ for Scenario_name in Scenario_List:
     # Main loop to process each ouput and pass data to functions
     for index, row in Plexos_Properties.iterrows():
         Processed_Data_Out = pd.DataFrame()
-        data_chuncks = []
+        data_chunks = []
 
         logger.info("Processing %s %s",row["group"],row["data_set"])
 
@@ -556,14 +556,14 @@ for Scenario_name in Scenario_List:
                 break
 
             if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
-                data_chuncks.append(processed_data*row["unit_multiplier"])
+                data_chunks.append(processed_data*row["unit_multiplier"])
                 logger.info("%s Year property reported from only the first partition",row["data_set"])
                 break
             else:
-                data_chuncks.append(processed_data*row["unit_multiplier"])
+                data_chunks.append(processed_data*row["unit_multiplier"])
 
-        if data_chuncks:
-            Processed_Data_Out = pd.concat(data_chuncks, copy=False)
+        if data_chunks:
+            Processed_Data_Out = pd.concat(data_chunks, copy=False)
 
         if Processed_Data_Out.empty == False:
             if (row["data_type"]== "year"):
