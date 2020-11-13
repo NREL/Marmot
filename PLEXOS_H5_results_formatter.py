@@ -19,7 +19,7 @@ import h5py
 import sys
 import pathlib
 import time
-import logging 
+import logging
 import logging.config
 import yaml
 from meta_data import MetaData
@@ -30,9 +30,9 @@ from h5plexos.query import PLEXOSSolution
 with open('marmot_logging_config.yml', 'rt') as f:
     conf = yaml.safe_load(f.read())
     logging.config.dictConfig(conf)
-    
+
 logger = logging.getLogger('marmot_format')
-# Creates a new log file for next run 
+# Creates a new log file for next run
 logger.handlers[1].doRollover()
 logger.handlers[2].doRollover()
 
@@ -102,6 +102,23 @@ try:
     Region_Mapping = Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
 except Exception:
     pass
+
+
+#===============================================================================
+# Standard Naming of Emissions types (optional)
+#===============================================================================
+
+emit_names_csv = Marmot_user_defined_inputs.loc['emit_names.csv_name'].to_string(index=False).strip()
+emit_names_dict = {}
+
+if emit_names_csv == 'NaN' or emit_names_csv == '':
+    logger.info('No emissions mapping specified\n')
+else:
+    try:
+        emit_names = pd.read_csv(os.path.join(Mapping_folder, emit_names_csv))
+        emit_names_dict=emit_names[['Original','New']].set_index("Original").to_dict()["New"]
+    except Exception:
+        logger.warning('Could not find specified emissions mapping file; check file name\n')
 
 #=============================================================================
 # FUNCTIONS FOR PLEXOS DATA EXTRACTION
@@ -327,6 +344,49 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
+    # Function for formatting data which comes from the PLEXOS emissions_generators category
+    def df_process_emissions_generators(self):
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename(['gen_name'], level=['child'], inplace=True)
+        df.index.rename(['pollutant'], level=['parent'], inplace=True)
+
+        df = df.reset_index() # unzip the levels in index
+        df = df.merge(self.metadata.generator_category(), how='left', on='gen_name') # merge in tech information
+
+        # merge in region and zone information
+        if self.metadata.region_generator_category().empty == False:
+            # merge in region information
+            df = df.merge(self.metadata.region_generator_category().reset_index(), how='left', on=['gen_name', 'tech'])
+        if self.metadata.zone_generator_category().empty == False:
+            df = df.merge(self.metadata.zone_generator_category().reset_index(), how='left', on=['gen_name', 'tech']) # Merges in zones where reserves are located
+
+        if len(Region_Mapping.columns)>1 == True:
+            df = df.merge(Region_Mapping, how="left", on="region")
+
+        # reclassify gen tech categories
+        df['tech'] = pd.Categorical(df['tech'].map(lambda x: gen_names_dict.get(x,x)))
+
+        # reclassify emissions as specified by user in mapping
+        df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: emit_names_dict.get(x,x)))
+        
+        # remove categoricals (otherwise h5 save will fail)
+        df = df.astype({'tech':'object', 'pollutant':'object'})
+
+        # Checks if all emissions categorieses have been identified and matched. If not, lists categories that need a match
+        if emit_names_dict != {} and (set(df['pollutant'].unique()).issubset(emit_names["New"].unique())) == False:
+            missing_emit_cat = list((set(df['pollutant'].unique())) - (set(emit_names["New"].unique())))
+            logger.warning("The following emission objects do not have a correct category mapping: %s\n",missing_emit_cat)
+
+        df_col = list(df.columns) # Gets names of all columns in df and places in list
+        df_col.remove(0)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
+        df.set_index(df_col, inplace=True)
+        # downcast values to save on memory
+        df[0] = pd.to_numeric(df[0].values, downcast='float')
+        # convert to range index (otherwise h5 save will fail)
+        df.columns = pd.RangeIndex(0, 1, step=1)
+        return df
+
     # Function for formatting data which comes form the PLEXOS storage Category (To Fix: still uses old merging method)
     def df_process_storage(self):
         df = self.df.droplevel(level=["band", "property", "category"])
@@ -400,7 +460,7 @@ class Process:
 for Scenario_name in Scenario_List:
 
     logger.info("#### Processing %s PLEXOS Results ####", Scenario_name)
-    
+
     #===============================================================================
     # Input and Output Directories
     #===============================================================================
@@ -469,22 +529,22 @@ for Scenario_name in Scenario_List:
         Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
 
     start = time.time()
-    
+
     #if any(meta.regions()['region'] not in Region_Mapping['region']):
     if set(MetaData(HDF5_folder_in, Region_Mapping).regions()['region']).issubset(Region_Mapping['region']) == False:
         missing_regions = list(set(MetaData(HDF5_folder_in, Region_Mapping).regions()['region']) - set(Region_Mapping['region']))
         logger.warning('The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: %s\n',missing_regions)
-    
+
     # Main loop to process each ouput and pass data to functions
     for index, row in Plexos_Properties.iterrows():
         Processed_Data_Out = pd.DataFrame()
         data_chuncks = []
-        
+
         logger.info("Processing %s %s",row["group"],row["data_set"])
-        
+
         for model in files_list:
             logger.info("      %s",model)
-            
+
             # Create an instance of metadata, and pass that as a variable to get data.
             meta = MetaData(HDF5_folder_in, Region_Mapping,model)
 
@@ -597,7 +657,7 @@ for Scenario_name in Scenario_List:
     elapsed = end - start
     logger.info('Main loop took %s minutes',round(elapsed/60,2))
     logger.info('Formatting COMPLETED for %s',Scenario_name)
-    
+
 ###############################################################################
 
 # Code that can be used to test PLEXOS_H5_results_formatter
