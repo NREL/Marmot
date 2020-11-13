@@ -27,7 +27,7 @@ interval,constraint,Price,TRUE,1,,
 interval,constraint,Hours Binding,TRUE,1,,
 interval,emission,Cost,TRUE,1,$,"The cost of emissions charged at ""Price"" (if defined, otherwise at ""Shodow Price"""
 interval,emission,Production,TRUE,1,kg,Total emissions production by timestep.
-interval,emission_generators,Production,TRUE,1,kg,Emissions produced by generator for each timestep
+interval,emissions_generators,Production,TRUE,1,kg,Emissions produced by generator for each timestep. Check whether the xml you are using reports emissions in kg or lb.
 interval,fuel,Cost,TRUE,1,$,Cost of fuel by timestep.
 interval,fuel,Offtake,TRUE,1,GJ or MMBTU,Fuel consumed by generator and timestep.
 interval,fuel,Price,TRUE,1,,
