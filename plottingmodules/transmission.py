@@ -317,7 +317,9 @@ class mplot(object):
                             single_int.sort_values(by = interf,ascending = False,inplace = True)
                             single_int.reset_index(inplace = True)
                             single_int.drop(columns = ['timestamp'],inplace = True)
-                        mfunc.create_line_plot(axs,single_int,interf, label = scenario, n=n)
+                        else:
+                            single_int = single_int.reset_index().drop(columns = 'interface_category').set_index('timestamp')
+                        mfunc.create_line_plot(axs,single_int,interf, label = scenario, n=n,alpha = 1)
                     axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
                     axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
                     axs[n].set_title(interf)
@@ -378,6 +380,7 @@ class mplot(object):
         self.logger.info(select_lines) 
 
         export_limits = Export_Limit_Collection.get(scenario).droplevel('timestamp')
+        self.logger.info(export_limits)
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 

@@ -306,7 +306,7 @@ def create_stacked_bar_plot(df, colour):
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
 
-def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'solid',n=0):
+def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'solid',n=0,alpha = 1):
     """
     Creates a line plot
 
@@ -330,9 +330,9 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'sol
     None.
     """
     if color_dict==None:
-        axs[n].plot(data[column], linewidth=1,linestyle = linestyle,label=label)
+        axs[n].plot(data[column], linewidth=1,linestyle = linestyle,label=label,alpha = alpha)
     else:
-        axs[n].plot(data[column], linewidth=1,linestyle = linestyle, color=color_dict[column],label=label)
+        axs[n].plot(data[column], linewidth=1,linestyle = linestyle, color=color_dict[column],label=label,alpha = alpha)
     axs[n].spines['right'].set_visible(False)
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)

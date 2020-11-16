@@ -104,7 +104,6 @@ class mplot(object):
                 Total_Load = load_collection.get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
-                self.logger.info(Total_Load)
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
@@ -161,10 +160,10 @@ class mplot(object):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
 
-            Total_Load_Out = Total_Load_Out.T/1000 #Convert to GWh
-            Pump_Load_Out = Pump_Load_Out.T/1000 #Convert to GWh
-            Total_Demand_Out = Total_Demand_Out.T/1000 #Convert to GWh
-            Unserved_Energy_Out = Unserved_Energy_Out.T/1000
+            Total_Load_Out = Total_Load_Out.T/1000000 #Convert to TWh
+            Pump_Load_Out = Pump_Load_Out.T/1000000 #Convert to TWh
+            Total_Demand_Out = Total_Demand_Out.T/1000000 #Convert to TWh
+            Unserved_Energy_Out = Unserved_Energy_Out.T/1000000
 
             if Total_Generation_Stack_Out.empty:
                 out = mfunc.MissingZoneData()
@@ -177,7 +176,7 @@ class mplot(object):
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical')
+            fig1.set_ylabel('Total Genertaion (TWh)',  color='black', rotation='vertical')
             #adds comma to y axis data
             fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
@@ -304,7 +303,8 @@ class mplot(object):
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
 
             Total_Generation_Stack_Out = Total_Generation_Stack_Out / 1000 #GWh -> TWh
-            net_diff = Total_Generation_Stack_Out.sum(axis = 1)
+            net_diff = Total_Generation_Stack_Out.drop(columns = 'Curtailment')
+            net_diff = net_diff.sum(axis = 1)
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)

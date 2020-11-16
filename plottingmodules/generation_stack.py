@@ -166,6 +166,14 @@ class mplot(object):
                 Total_Demand = Total_Demand[self.start_date : self.end_date]
                 unserved_eng_data_table = unserved_eng_data_table[self.start_date : self.end_date]
 
+                #SHIFTING TIME ZONE, DON'T PUSH
+                # self.logger.info('Shifting EST -> PST')
+                # Stacked_Gen.index = Stacked_Gen.index.shift(-3,freq = 'H')
+                # Load.index = Load.index.shift(-3,freq = 'H')
+                # Total_Demand.index = Total_Demand.index.shift(-3,freq = 'H')
+                # Unserved_Energy.index = Unserved_Energy.index.shift(-3,freq = 'H')
+                # unserved_eng_data_table.index = unserved_eng_data_table.index.shift(-3,freq = 'H')
+
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
             data = {"Stacked_Gen":Stacked_Gen, "Load":Load, "Pump_Load":Pump_Load, "Total_Demand":Total_Demand, "Unserved_Energy":Unserved_Energy,"ue_data_table":unserved_eng_data_table}
@@ -234,23 +242,29 @@ class mplot(object):
                 data = data_prop(data)
 
                 Stacked_Gen = data["Stacked_Gen"]
-                Load = data["Load"]
+                Load = data["Load"] 
                 Pump_Load = data["Pump_Load"]
-                Total_Demand = data["Total_Demand"]
-                Unserved_Energy = data["Unserved_Energy"]
+                Total_Demand = data["Total_Demand"] 
+                Unserved_Energy = data["Unserved_Energy"] 
                 unserved_eng_data_table = data["ue_data_table"]
-                Peak_Demand = data["Peak_Demand"]
+                Peak_Demand = data["Peak_Demand"] 
                 peak_demand_t = data["peak_demand_t"]
                 min_net_load_t = data["min_net_load_t"]
                 Min_Net_Load = data["Min_Net_Load"]
 
-                Load = Load.rename('Total Load (Demand + Storage Charging)')
+                #Convert MW -> GW
+                Stacked_Gen = Stacked_Gen / 1000
+                Load = Load / 1000
+                Total_Demand = Total_Demand / 1000
+                Unserved_Energy = Unserved_Energy / 1000
+                unserved_eng_data_table = unserved_eng_data_table / 1000
+
+                Load = Load.rename('Total Load \n (Demand + Storage Charging)')
                 Total_Demand = Total_Demand.rename('Total Demand')
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
                 # Data table of values to return to main program
                 Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
                 data_tables[scenario] = Data_Table_Out
-
 
                 # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
@@ -328,21 +342,21 @@ class mplot(object):
                           facecolor='inherit', frameon=True)
             #Legend 2
             if (Pump_Load == 0).all() == False:
-                leg2 = axs[grid_size-1].legend(lp, ['Demand + Storage Charging'], loc='upper left',bbox_to_anchor=(1.05, 1.2),
+                leg2 = axs[grid_size-1].legend(lp, ['Demand + \n Storage Charging'], loc='upper left',bbox_to_anchor=(1.05, 1.45),
                           facecolor='inherit', frameon=True)
             else:
-                leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1.05, 1.2),
+                leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1.05, 1.3),
                           facecolor='inherit', frameon=True)
 
             #Legend 3
             if (Unserved_Energy == 0).all() == False:
-                leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1.05, 1.15),
+                leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1.05, 1.0),
                       facecolor='inherit', frameon=True)
 
             # Variable defined, but never used
             #Legend 4
             if (Pump_Load == 0).all() == False:
-                axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1.05, 1.1),
+                axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1.05, 1.15),
                           facecolor='inherit', frameon=True)
 
             # Manually add the first legend back
@@ -365,7 +379,7 @@ class mplot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Generation (MW)',  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel('Generation (GW)',  color='black', rotation='vertical', labelpad=60)
 
             #Remove extra axis
             if excess_axs != 0:
