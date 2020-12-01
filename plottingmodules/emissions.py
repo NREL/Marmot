@@ -68,7 +68,7 @@ class mplot(object):
             emitOut = pd.concat(emitList, axis=1)
 
             # format results
-            emitOut = emitOut.T/1E9 # Convert from kg to million metric tons
+            emitOut = emitOut.T/1E6 # Convert from metric tons to million metric tons
             emitOut = emitOut.loc[:, (emitOut != 0).any(axis=0)] # drop any generators with no emissions
             emitOut = emitOut.T  # transpose back (easier for slicing by pollutant later)
 
@@ -82,7 +82,7 @@ class mplot(object):
             try:
                 emitPlot = emitOut.xs(self.prop, level="pollutant").T
                 dataOut = emitPlot.copy()
-                
+
                 # formatting for plot
                 emitPlot.index = emitPlot.index.str.replace('_',' ')
                 emitPlot.index = emitPlot.index.str.wrap(10, break_long_words=False)
