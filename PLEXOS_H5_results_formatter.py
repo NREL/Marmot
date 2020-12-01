@@ -376,7 +376,7 @@ class Process:
         if emit_names_dict != {} and (set(df['pollutant'].unique()).issubset(emit_names["New"].unique())) == False:
             missing_emit_cat = list((set(df['pollutant'].unique())) - (set(emit_names["New"].unique())))
             logger.warning("The following emission objects do not have a correct category mapping: %s\n",missing_emit_cat)
-
+        
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
@@ -554,7 +554,18 @@ for Scenario_name in Scenario_List:
 
             if processed_data.empty == True:
                 break
-
+            
+            # special units processing for emissions
+            if row["group"]=="emissions_generators":
+                if (row["Units"] == "lb") | (row["Units"] == "lbs"):
+                    # convert lbs to kg
+                    kg_per_lb = 0.453592
+                    processed_data = processed_data*kg_per_lb
+                # convert kg to metric tons
+                kg_per_metric_ton = 1E3
+                data_chunks.append(processed_data/kg_per_metric_ton)
+            
+            # other unit multipliers
             if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
                 data_chunks.append(processed_data*row["unit_multiplier"])
                 logger.info("%s Year property reported from only the first partition",row["data_set"])
