@@ -39,22 +39,22 @@ class mplot(object):
         unserved_energy_collection = {}
         curtailment_collection = {}
         check_input_data = []
-        
+
         check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
         check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
         mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)
-        
+
         if self.AGG_BY == "zone":
             check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)])
             mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
         else:
             check_input_data.extend([mfunc.get_data(load_collection,"region_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)])
             mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
-    
+
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
-        
+
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
             Total_Load_Out = pd.DataFrame()
@@ -107,7 +107,7 @@ class mplot(object):
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
-                
+
                 try:
                     unserved_energy_collection[scenario]
                 except KeyError:
@@ -151,7 +151,7 @@ class mplot(object):
             unserved_eng_data_table_out = unserved_eng_data_table_out.rename(columns={0: 'Unserved Energy'})
 
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to GWh
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to TWh
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             # Data table of values to return to main program
@@ -239,14 +239,14 @@ class mplot(object):
         gen_collection = {}
         curtailment_collection = {}
         check_input_data = []
-        
+
         check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
         check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        
+
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
-        
+
         for zone_input in self.Zones:
             Total_Generation_Stack_Out = pd.DataFrame()
 
@@ -290,7 +290,7 @@ class mplot(object):
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to GWh
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
-            
+
             #Ensures region has generation, else skips
             try:
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
@@ -362,8 +362,8 @@ class mplot(object):
     def total_gen_facet(self):
         outputs = mfunc.UnderDevelopment()
         self.logger.warning('total_gen_facet is under development')
-        return outputs 
-        
+        return outputs
+
     #     Gen_Collection = {}
     #     Load_Collection = {}
     #     curtailment_collection = {}
