@@ -186,6 +186,14 @@ class mplot(object):
                     Unserved_Energy = Unserved_Energy[start_date : end_date]
                     Pump_Load = Pump_Load[start_date : end_date]
 
+                elif self.prop == 'Date Range':
+                	self.logger.info("Plotting specific date range: \
+                	{} to {}".format(str(self.start_date),str(self.end_date)))
+
+	                Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
+	                Load = Load[self.start_date : self.end_date]
+	                Unserved_Energy = Unserved_Energy[self.start_date : self.end_date]
+
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
                 

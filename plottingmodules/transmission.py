@@ -280,12 +280,22 @@ class mplot(object):
             export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
             export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
 
+            #Drop unnecessary columns.
+            export_limits.reset_index(inplace = True)
+            export_limits.drop(columns = 'interface_category',inplace = True)
+            export_limits.set_index('interface_name',inplace = True)
+
             import_limits = Import_Limit_Collection.get(scenario).droplevel('timestamp')
             import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
             import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
-
             reported_ints = import_limits.index.get_level_values('interface_name').unique()
+
+            #Drop unnecessary columns.
+            import_limits.reset_index(inplace = True)
+            import_limits.drop(columns = 'interface_category',inplace = True)
+            import_limits.set_index('interface_name',inplace = True)
+
             if self.prop != '':
                 interf_list = self.prop.split(',')
                 self.logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
@@ -298,6 +308,8 @@ class mplot(object):
             axs = axs.ravel()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             missing_ints = 0
+            chunks = []
+            limits_chunks = []
             n = -1
             for interf in interf_list:
                 n += 1
@@ -306,8 +318,14 @@ class mplot(object):
                 if interf[0] == ' ':
                     interf = interf[1:]
                 if interf in reported_ints:
-                    single_exp_lim = export_limits.xs(interf, level = 'interface_name')[0].squeeze()[0] / 1000
-                    single_imp_lim = import_limits.xs(interf, level = 'interface_name')[0].squeeze()[0] / 1000
+                    chunks_interf = []
+                    single_exp_lim = export_limits.loc[interf].iloc[0] / 1000
+                    single_imp_lim = import_limits.loc[interf].iloc[0] / 1000
+                    limits = pd.concat([single_exp_lim,single_imp_lim])
+                    limits_chunks.append(limits)
+
+                    single_exp_lim = single_exp_lim.squeeze()
+                    single_imp_lim = single_imp_lim.squeeze()
 
                     for scenario in self.Multi_Scenario:
                         flow = Flow_Collection.get(scenario)
@@ -320,33 +338,47 @@ class mplot(object):
                         else:
                             single_int = single_int.reset_index().drop(columns = 'interface_category').set_index('timestamp')
                         mfunc.create_line_plot(axs,single_int,interf, label = scenario, n=n,alpha = 1)
-                    axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
-                    axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
-                    axs[n].set_title(interf)
-                    handles, labels = axs[n].get_legend_handles_labels()
-                    if not self.duration_curve:
-                        mfunc.set_plot_timeseries_format(axs, n=n)
-                    if n == len(interf_list) - 1:
-                        axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
+
+                        #For output time series .csv
+                        scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
+                        single_int_out = single_int.set_index([scenario_names],append = True)
+                        chunks_interf.append(single_int_out)
+
+                    Data_out_line = pd.concat(chunks_interf,axis = 0)
+                    chunks.append(Data_out_line)
                 else:
-                    self.logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
+                    self.logger.warning(interf + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
                     excess_axs += 1
                     missing_lines += 1
                     continue
 
-            if missing_ints == len(interf_list):
-                outputs = mfunc.MissingInputData()
-                return outputs
+                axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit')
+                axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit')
+                axs[n].set_title(interf)
+                handles, labels = axs[n].get_legend_handles_labels()
+                if not self.duration_curve:
+                    mfunc.set_plot_timeseries_format(axs, n=n)
+                if n == len(interf_list) - 1:
+                    axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
+
+                if missing_ints == len(interf_list):
+                    outputs = mfunc.MissingInputData()
+                    return outputs
+
+            Data_Table_Out = pd.concat(chunks,axis = 1)
+            Limits_Out = pd.concat(limits_chunks,axis = 1)
+            Limits_Out.index = ['Export Limit','Import Limit']
 
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+            Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
+
         return outputs
 
     def line_flow_ind(self):
-
 
         """
         This method plots flow, import and export limit, for individual transmission lines, with a facet for each line.
@@ -368,8 +400,6 @@ class mplot(object):
             outputs = mfunc.MissingInputData()
             return outputs
 
-        scenario = self.Scenario_name
-
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = self.prop.split(",")
         if select_lines == None:
@@ -379,8 +409,9 @@ class mplot(object):
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
 
+        scenario = self.Scenario_name
+
         export_limits = Export_Limit_Collection.get(scenario).droplevel('timestamp')
-        self.logger.info(export_limits)
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 
@@ -409,7 +440,6 @@ class mplot(object):
 
                 single_exp_lim = export_limits.loc[line]
                 single_imp_lim = import_limits.loc[line]
-
                 limits = pd.concat([single_exp_lim,single_imp_lim])
                 limits_chunks.append(limits)
                 single_exp_lim = single_exp_lim.squeeze()
@@ -485,8 +515,85 @@ class mplot(object):
         outputs = mfunc.DataSavedInModule()
         return outputs
 
-    
-    def region_region_interchange_all_scenarios(self):
+    def extract_tx_cap(self):
+
+        check_input_data = []
+        Import_Limit_Collection = {}
+        Export_Limit_Collection = {}
+        Int_Import_Limit_Collection = {}
+        Int_Export_Limit_Collection = {}
+
+        check_input_data.extend([mfunc.get_data(Int_Import_Limit_Collection,"interface_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(Int_Export_Limit_Collection,"interface_Export_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(Import_Limit_Collection,"line_Import_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(Export_Limit_Collection,"line_Export_Limit",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+
+        for scenario in self.Multi_Scenario:
+            self.logger.info(scenario)
+            for zone_input in self.Zones:
+
+                #Lines
+                # lines = self.meta.region_interregionallines()
+                # if scenario == 'ADS':
+                #     zone_input = zone_input.split('_WI')[0]
+                #     lines = self.meta_ADS.region_interregionallines()
+
+                # lines = lines[lines['region'] == zone_input]
+                # import_lim = Import_Limit_Collection[scenario].reset_index()
+                # export_lim = Export_Limit_Collection[scenario].reset_index()
+                # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
+                # lines = lines[['line_name',0]]
+                # lines.columns = ['line_name','import_limit']
+                # lines = lines.merge(export_lim, how = 'inner',on = 'line_name')
+                # lines = lines[['line_name','import_limit',0]]
+                # lines.columns = ['line_name','import_limit','export_limit']
+
+                # fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interregional_Line_Limits_' + scenario + '.csv')  
+                # lines.to_csv(fn)
+
+                # lines = self.meta.region_intraregionallines()
+                # if scenario == 'ADS':
+                #     lines = self.meta_ADS.region_intraregionallines()
+
+                # lines = lines[lines['region'] == zone_input]
+                # import_lim = Import_Limit_Collection[scenario].reset_index()
+                # export_lim = Export_Limit_Collection[scenario].reset_index()
+                # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
+                # lines = lines[['line_name',0]]
+                # lines.columns = ['line_name','import_limit']
+                # lines = lines.merge(export_lim, how = 'inner',on = 'line_name')
+                # lines = lines[['line_name','import_limit',0]]
+                # lines.columns = ['line_name','import_limit','export_limit']
+
+                # fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','Individual_Intraregional_Line_Limits_' + scenario + '.csv')  
+                # lines.to_csv(fn)
+
+
+                #Interfaces
+                PSCo_ints = ['P39 TOT 5_WI','P40 TOT 7_WI']
+
+                int_import_lim = Int_Import_Limit_Collection[scenario].reset_index()
+                int_export_lim = Int_Export_Limit_Collection[scenario].reset_index()
+                if scenario == 'NARIS':
+                    last_timestamp = int_import_lim['timestamp'].unique()[-1] #Last because ADS uses the last timestamp.
+                    int_import_lim = int_import_lim[int_import_lim['timestamp'] == last_timestamp]
+                    int_export_lim = int_export_lim[int_export_lim['timestamp'] == last_timestamp]
+                    lines2ints = self.meta_ADS.interface_lines()
+                else:
+                    lines2ints = self.meta.interface_lines()
+
+                fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')  
+                lines2ints.to_csv(fn)
+
+
+                ints = pd.merge(int_import_lim,int_export_lim,how = 'inner', on = 'interface_name')
+                ints.rename(columns = {'0_x':'import_limit','0_y': 'export_limit'},inplace = True)
+                all_lines_in_ints = lines2ints['line'].unique()
+                test = [line for line in lines['line_name'].unique() if line in all_lines_in_ints]
+                print(test)
+                ints = ints.merge(lines2ints, how = 'inner', left_on = 'interface_name',right_on = 'interface')
+
+    def region_region_interchange_all_scenarios(self):  
 
         """
         This method creates a timeseries line plot of interchange flows between the selected region
@@ -527,7 +634,6 @@ class mplot(object):
             
         for zone_input in self.Zones:
             self.logger.info("Zone = %s",zone_input)
-
             xdimension=len(self.xlabels)
             ydimension=len(self.ylabels)
             if xdimension == 0 or ydimension == 0:

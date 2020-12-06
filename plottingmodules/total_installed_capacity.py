@@ -55,9 +55,16 @@ class mplot(object):
                 self.logger.info("Scenario = " + scenario)
 
                 Total_Installed_Capacity = installed_capacity_collection.get(scenario)
-                try:
-                    Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
-                except KeyError:
+                zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
+                if scenario == 'ADS':
+                    zone_input_adj = zone_input.split('_WI')[0]
+                else:
+                    zone_input_adj = zone_input
+                if zone_input_adj in zones_with_cap:
+                    Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input_adj,level=self.AGG_BY)
+                else:
+                    self.logger.warning("No installed capacity in %s",zone_input)
+                    outputs[zone_input] = mfunc.MissingZoneData()
                     continue
 
                 Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
@@ -82,7 +89,6 @@ class mplot(object):
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
-
             fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
 
@@ -101,6 +107,97 @@ class mplot(object):
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
+
+    def total_cap_diff(self):
+        outputs = {}
+        installed_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        for zone_input in self.Zones:
+            Total_Installed_Capacity_Out = pd.DataFrame()
+            Data_Table_Out = pd.DataFrame()
+            self.logger.info(self.AGG_BY + " = " + zone_input)
+
+            for scenario in self.Multi_Scenario:
+
+                self.logger.info("Scenario = " + scenario)
+
+                Total_Installed_Capacity = installed_capacity_collection.get(scenario)
+                zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
+                if scenario == 'ADS':
+                    zone_input_adj = zone_input.split('_WI')[0]
+                    Total_Installed_Capacity.index = pd.MultiIndex.from_frame(Total_Installed_Capacity.index.to_frame().fillna('All')) #Fix NaN values from formatter
+                    zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
+                else:
+                    zone_input_adj = zone_input
+                if zone_input_adj in zones_with_cap:
+                    Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input_adj,level=self.AGG_BY)
+                else:
+                    self.logger.warning("No installed capacity in %s",zone_input)
+                    outputs[zone_input] = mfunc.MissingZoneData()
+                    continue
+
+                #print(Total_Installed_Capacity.index.get_level_values('tech').unique())
+                fn = os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_total_installed_capacity','Individual_Gen_Cap_' + scenario + '.csv')  
+                Total_Installed_Capacity.reset_index().to_csv(fn)
+
+                Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
+                Total_Installed_Capacity.reset_index(drop=True, inplace=True)
+                Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
+                Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
+
+
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000 #Convert to GW
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
+
+            try:
+                Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+            except KeyError:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            Total_Installed_Capacity_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
+
+            # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
+            if Total_Installed_Capacity_Out.empty:
+                self.logger.warning("No installed capacity in %s",zone_input)
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+
+            # Data table of values to return to main program
+            Data_Table_Out = pd.concat([Data_Table_Out, Total_Installed_Capacity_Out],  axis=1, sort=False)
+
+            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
+            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
+
+
+            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+                                 color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
+
+            fig1.spines['right'].set_visible(False)
+            fig1.spines['top'].set_visible(False)
+            fig1.set_ylabel('Capacity Change (GW) \n relative to '+ self.Multi_Scenario[0],  color='black', rotation='vertical')
+            #adds comma to y axis data
+            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig1.tick_params(axis='y', which='major', length=5, width=1)
+            fig1.tick_params(axis='x', which='major', length=5, width=1)
+
+            handles, labels = fig1.get_legend_handles_labels()
+            fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
+
+
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+        return outputs
+
 
     def total_cap_and_gen_facet(self):
         # generation figure

@@ -95,7 +95,10 @@ Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folde
 PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
 HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
 
+
+
 Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_scenario_plot'].squeeze().split(",")).str.strip().tolist()
+HDF5_folder_in_ADS = os.path.join(PLEXOS_Solutions_folder, Multi_Scenario[1])
 
 # For plots using the differnec of the values between two scenarios.
 # Max two entries, the second scenario is subtracted from the first.
@@ -219,6 +222,7 @@ except Exception:
 # Methods within that class are used to retreive the data that was stored in pickle files
 
 meta = MetaData(HDF5_folder_in, Region_Mapping)
+meta_ADS = MetaData(HDF5_folder_in_ADS, Region_Mapping)
 
 # Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
 # Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
@@ -250,7 +254,7 @@ elif AGG_BY in {"region", "regions", "Region", "Regions"}:
         logger.warning("Input Sheet Data Incorrect! Your model does not contain Regions, enter a different aggregation")
         sys.exit()
     Zones = regions['region'].unique()
-
+    pd.DataFrame(Zones).to_csv('../compareADS2NARIS/region_list_' + Scenario_name + '.csv')
     if zone_region_sublist != ['nan']:
         zsub = []
         for region in zone_region_sublist:
@@ -323,14 +327,14 @@ for index, row in Marmot_plot_select.iterrows():
                 "Multi_Scenario", "Scenario_Diff", "Scenario_name", "Marmot_Solutions_folder",
                 "ylabels", "xlabels", "ticklabels",
                 "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
-                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leap_day"]
+                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "meta_ADS" , "facet","shift_leap_day"]
 
     argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                      hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict,
                      Multi_Scenario, Scenario_Diff, Scenario_name, Marmot_Solutions_folder,
                      ylabels, xlabels, ticklabels,
                      color_list, marker_style, gen_names_dict, pv_gen_cat,
-                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta, facet,shift_leap_day]
+                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta, meta_ADS,facet,shift_leap_day]
 
     argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
 

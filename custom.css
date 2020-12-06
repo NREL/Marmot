@@ -7,9 +7,12 @@ height: auto;
 overflow:auto;
 }
 
-body {
-  max-width: 1800px;
+body .main-container{
+  max-width: 1800px !important;
   margin: auto;
   margin-left:210px;
   line-height: 20px;
+}
+body {
+  max-width: 1800px !important;
 }
