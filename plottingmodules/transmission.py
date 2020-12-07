@@ -372,6 +372,8 @@ class mplot(object):
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
+            if self.duration_curve:
+                plt.xlabel('Sorted hour of the year', color = 'black', labelpad = 30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
             Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))

@@ -320,6 +320,10 @@ for index, row in Marmot_plot_select.iterrows():
     if 'Facet' in row["Figure Output Name"]:
         facet = True
 
+
+    duration_curve = False
+    if 'duration_curve' in row["Figure Output Name"]:
+    	duration_curve = True
     # dictionary of arguments passed to plotting modules; key_list names match the property names in each module
     # while arguments contains the property value
     key_list = ["prop", "start", "end", "timezone", "start_date", "end_date",
@@ -327,14 +331,14 @@ for index, row in Marmot_plot_select.iterrows():
                 "Multi_Scenario", "Scenario_Diff", "Scenario_name", "Marmot_Solutions_folder",
                 "ylabels", "xlabels", "ticklabels",
                 "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
-                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "meta_ADS" , "facet","shift_leap_day"]
+                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "meta_ADS" , "facet","shift_leap_day","duration_curve"]
 
     argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                      hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict,
                      Multi_Scenario, Scenario_Diff, Scenario_name, Marmot_Solutions_folder,
                      ylabels, xlabels, ticklabels,
                      color_list, marker_style, gen_names_dict, pv_gen_cat,
-                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta, meta_ADS,facet,shift_leap_day]
+                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta, meta_ADS,facet,shift_leap_day,duration_curve]
 
     argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
 

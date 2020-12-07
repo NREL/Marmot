@@ -155,7 +155,7 @@ class mplot(object):
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             # Data table of values to return to main program
-            Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Demand_Out/1000, unserved_eng_data_table_out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
+            Data_Table_Out = pd.concat([Total_Load_Out/1000000, Total_Demand_Out/1000000, unserved_eng_data_table_out/1000000, Total_Generation_Stack_Out],  axis=1, sort=False)
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)

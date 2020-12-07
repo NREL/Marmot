@@ -80,7 +80,9 @@ Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_C
 Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_scenarios
 All Region-Region Net Interchange,FALSE,All_Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_regions
 Individual Line Flow,FALSE,Individual_Line_Flow,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI",,,EST,,,transmission,line_flow_ind
-Individual Interchange Flow,FALSE,Individual_Interchange_Flow,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
+Individual Interface Flow,FALSE,Individual_Interface_Flow,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
+Individual Line Flow Duration Curve,FALSE,Individual_Line_Flow_duration_curve,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI",,,EST,,,transmission,line_flow_ind
+Individual Interface Flow Duration Curve,TRUE,Individual_Interface_Flow_duration_curve,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,,unserved_energy,tot_unserved_energy
 Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,,unserved_energy,unserved_energy_timeseries
 Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,,utilization_factor,GW_fleet
