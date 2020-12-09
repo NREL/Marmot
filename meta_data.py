@@ -12,7 +12,7 @@ import os
 import pandas as pd
 import numpy as np
 import logging
-
+import sys
 
 class MetaData:
     
@@ -39,7 +39,11 @@ class MetaData:
             for names in files:
                 if names.endswith(".h5"):
                     files_list.append(names) # Creates a list of only the hdf5 files
-            model=files_list[0]
+            if len(files_list) == 0:
+                self.logger.info("\n In order to initialize your database's metadata, Marmot is looking for an h5plexos solution file.  \n It is looking in " + self.HDF5_folder_in + ", but it cannot find any *.h5 files there. \n Please check the 'PLEXOS_Solutions_folder' input in row 2 of your 'Marmot_user_defined_inputs.csv'. \n Ensure that it matches the filepath containing the *.h5 files created by h5plexos. \n \n Marmot will now quit.")
+                sys.exit()
+            else:
+                model=files_list[0]
         self.data = h5py.File(os.path.join(self.HDF5_folder_in, model), 'r')
         
 # These methods are called in the Process class within results_formatter
