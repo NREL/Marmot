@@ -19,7 +19,7 @@ Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff_Range,Date Ran
 Generation Stack,FALSE,Stacked_Gen,,,,EST,,,generation_stack,gen_stack
 Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
 Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,7/1/24,7/7/24,generation_stack,gen_stack
+Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,,1/1/50,1/12/50,generation_stack,gen_stack
 Generation Stack,FALSE,Stacked_Gen_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
@@ -62,6 +62,8 @@ Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Peak_Demand,Peak Demand,2,2,
 Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Date_Range,Date Range,,,EST,7/1/24,7/7/24,reserves,reserve_gen_timeseries
 Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
 Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Date_Range,Date Range,,,EST,7/1/24,7/7/24,reserves,reserve_gen_timeseries
+Storage Volume ,FALSE,Storage_Volume,,,, ,,,storage,storage_volume
+Storage Volume Date Range,TRUE,Storage_Volume_Date_Range,Date Range,,, ,1/1/50,1/12/50,storage,storage_volume
 Thermal Capacity reserves,FALSE,Thermal_Capacity_Reserves,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves
 Total Generation,FALSE,Total_Generation,,,,,,,total_generation,total_gen
 Total Generation Difference,FALSE,Total_Generation_Diff,,,,,,,total_generation,total_gen_diff
@@ -82,7 +84,7 @@ All Region-Region Net Interchange,FALSE,All_Region-Region_Net_Interchange,,,,EST
 Individual Line Flow,FALSE,Individual_Line_Flow,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI",,,EST,,,transmission,line_flow_ind
 Individual Interface Flow,FALSE,Individual_Interface_Flow,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
 Individual Line Flow Duration Curve,FALSE,Individual_Line_Flow_duration_curve,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI",,,EST,,,transmission,line_flow_ind
-Individual Interface Flow Duration Curve,TRUE,Individual_Interface_Flow_duration_curve,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
+Individual Interface Flow Duration Curve,FALSE,Individual_Interface_Flow_duration_curve,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
 Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,,unserved_energy,tot_unserved_energy
 Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,,unserved_energy,unserved_energy_timeseries
 Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,,utilization_factor,GW_fleet

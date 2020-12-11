@@ -1,15 +1,15 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,/projects/continental/OR_OSW/OR_OSW_102620
-Marmot_Solutions_folder,folder,required,/projects/continental/OR_OSW/OR_OSW_102620
-Scenario_process_list,List,required,5GW_OSW
+PLEXOS_Solutions_folder,folder,required,/Users/mschwarz/Marmot local/Bradys_solutions
+Marmot_Solutions_folder,folder,required,/Users/mschwarz/Marmot local/Bradys_solutions
+Scenario_process_list,List,required,
 VoLL,int,required,10000
-Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
+Region_Mapping.csv_name,string,required(default),Region_mapping_ReEDS.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,optional,emit_names.csv
-Main_scenario_plot,string,required,5GW_OSW
-Multi_scenario_plot,List,required,"0GW_OSW, 2GW_OSW, 3GW_OSW, 4GW_OSW, 5GW_OSW, HVDC_5GW_OSW"
+Main_scenario_plot,string,required,2010
+Multi_scenario_plot,List,required,"2010, 2010_old"
 Scenario_Diff_plot,List [Max 2],optional,
-AGG_BY,string,required,Summary
+AGG_BY,string,required,State
 zone_region_sublist,List,optional,
 Facet_ylabels,List,optional,
 Facet_xlabels,List,optional,

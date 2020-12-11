@@ -1,24 +1,33 @@
 Generator,Colour
-Nuclear,#820000
-Coal,#222222
-Steam Turbine,#222223
-Gas-CC,#52216B
-Combined Cycle Gas Turbine,#52216B
-Gas-CC CCS,#5E1688
-Gas-CT,#C2A1DB
-Combustion Turbine,#C2A1DB
-Dual Fuel,#000080
-Oil-Gas-Steam,#3D3376
-Hydro,#187F94
-Ocean,#000080
-Geothermal,#A96235
-Biopower,#5B9844
+nuclear,#820000
+coal,#222222
+gas-cc,#52216B
+gas-cc-ccs,#5E1688
+gas-ct,#C2A1DB
+o-g-s,#3D3376
+hydro,#187F94
+geothermal,#A96235
+biopower,#5B9844
+lfill-gas,#88BA41
+re-ct,#A8C839
+onswind,#00B6EF
+ofswind,#106BA7
 Wind,#00B6EF
-CSP,#FC761A
-PV,#FFC903
-PV-Battery,#D1C202
-Storage,#FF4A88
-Other,#FF7FBB
-Net Imports,#193A71
-Curtailment,#E1E1E1
-Offshore Wind,#106BA7
+csp,#FC761A
+upv,#FFC903
+dupv,#FFAB02
+distpv,#FEE603
+Solar,#FEE603
+phs,#CC0079
+battery,#FF4A88
+battery_2,#FF7F9D
+battery_4,#FF6882
+battery_6,#DF5282
+battery_8,#CC015C
+battery_10,#9B014F
+caes,#FF4741
+storage-h2,#FF7FBB
+Canada,#193A71
+spill,#751515
+curtailment,#F43F55
+Unserved Energy,#881883
