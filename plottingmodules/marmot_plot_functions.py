@@ -547,13 +547,11 @@ def get_interval_count(df):
 
     Parameters
     ----------
-    df : Pandas multiindex dataframe
-        reported parameter (i.e. generator_Generation)
+    df : Pandas multiindex dataframe for some reported parameter (e.g. generator_Generation)
 
     Returns
     -------
-    df: Pandas multiindex dataframe
-        same dataframe, with new aggregation level added
+    interval_count : number of intervals per 60 minutes
 
     """
     time_delta = df.index[1]- df.index[0]
