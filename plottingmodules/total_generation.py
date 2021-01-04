@@ -80,10 +80,7 @@ class mplot(object):
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
-                time_delta = Total_Gen_Stack.index[1]- Total_Gen_Stack.index[0]
-                # Finds intervals in 60 minute period
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
-
+                interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
                 try:
                     Stacked_Curt = curtailment_collection.get(scenario)
@@ -268,9 +265,7 @@ class mplot(object):
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
-                time_delta = Total_Gen_Stack.index[1]- Total_Gen_Stack.index[0]
-                # Finds intervals in 60 minute period
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
                 try:
                     Stacked_Curt = curtailment_collection.get(scenario)

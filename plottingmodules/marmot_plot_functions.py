@@ -15,6 +15,7 @@ import matplotlib.dates as mdates
 import math
 import logging
 import datetime as dt
+import numpy as np
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
@@ -24,7 +25,7 @@ class MissingInputData:
     Exception Class for handling return of missing data
     """
     def __init__(self):
-       return 
+       return
 
 class MissingZoneData:
     """
@@ -46,14 +47,14 @@ class UnderDevelopment:
     """
     def __init__(self):
         return
-    
+
 class InputSheetError:
     """
-    Exception Class for handling user input sheet errors 
+    Exception Class for handling user input sheet errors
     """
     def __init__(self):
         return
-      
+
 def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     """
     Used to get data from formatted h5 file
@@ -253,7 +254,7 @@ def create_bar_plot(df, axs, colour, stacked=False):
     fig.tick_params(axis='y', which='major', length=5, width=1)
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
-    
+
 
 def create_grouped_bar_plot(df, colour):
     """
@@ -508,7 +509,7 @@ def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
     """
     if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0) and shift_leap_day:
         df.index.set_levels(
-            df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'), 
+            df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'),
             level = 'timestamp',
             inplace = True)
     return(df)
@@ -524,7 +525,7 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
     df : Pandas multiindex dataframe
         reported parameter (i.e. generator_Generation)
     Region_Mapping : Pandas dataframe
-        Dataframe that maps regions to user-specified aggregation levels. 
+        Dataframe that maps regions to user-specified aggregation levels.
     AGG_BY : string
         Name of new aggregation. Needs to match the appropriate column in the user defined Region Mapping file.
 
@@ -540,3 +541,20 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
     df = df.merge(agg_new,left_on = 'region', right_index = True)
     return(df)
 
+def get_interval_count(df):
+    """
+    Detects the interval spacing; used to adjust sums of certain for variables for sub-hourly runs
+
+    Parameters
+    ----------
+    df : Pandas multiindex dataframe for some reported parameter (e.g. generator_Generation)
+
+    Returns
+    -------
+    interval_count : number of intervals per 60 minutes
+
+    """
+    time_delta = df.index[1]- df.index[0]
+    # Finds intervals in 60 minute period
+    interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+    return(interval_count)
