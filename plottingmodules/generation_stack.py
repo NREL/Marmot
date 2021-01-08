@@ -324,46 +324,25 @@ class mplot(object):
 
                 i=i+1
 
-            # create handles list of unique tech names then order
-            handles = np.unique(np.array(unique_tech_names)).tolist()
-            handles.sort(key = lambda i:self.ordered_gen.index(i))
-            handles = reversed(handles)
+            #Combine all legends into one.
+            handles, labels = axs[grid_size-1].get_legend_handles_labels()
 
-            # create custom gen_tech legend
-            gen_tech_legend = []
-            for tech in handles:
-                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0,
-                         label=tech)]
-                gen_tech_legend.extend(legend_handles)
-
-            #Legend 1
-            leg1 = axs[grid_size-1].legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1.05,-0.2),
-                          facecolor='inherit', frameon=True)
-            #Legend 2
             if (Pump_Load == 0).all() == False:
-                leg2 = axs[grid_size-1].legend(lp, ['Demand + \n Storage Charging'], loc='upper left',bbox_to_anchor=(1.05, 1.45),
-                          facecolor='inherit', frameon=True)
+                handles.append(lp3[0])
+                handles.append(lp[0])
+                labels += ['Demand','Demand + \n Storage Charging']
+
             else:
-                leg2 = axs[grid_size-1].legend(lp, ['Demand'], loc='upper left',bbox_to_anchor=(1.05, 1.3),
-                          facecolor='inherit', frameon=True)
+                handles.append(lp[0])
+                labels += ['Demand']
 
-            #Legend 3
             if (Unserved_Energy == 0).all() == False:
-                leg3 = axs[grid_size-1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1.05, 1.0),
-                      facecolor='inherit', frameon=True)
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
 
-            # Variable defined, but never used
-            #Legend 4
-            if (Pump_Load == 0).all() == False:
-                axs[grid_size-1].legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1.05, 1.15),
-                          facecolor='inherit', frameon=True)
-
-            # Manually add the first legend back
-            axs[grid_size-1].add_artist(leg1)
-            axs[grid_size-1].add_artist(leg2)
-            if (Unserved_Energy == 0).all() == False:
-                axs[grid_size-1].add_artist(leg3)
+            axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                    facecolor='inherit', frameon=True)
 
             all_axes = fig1.get_axes()
             self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
@@ -659,36 +638,25 @@ class mplot(object):
                                     facecolor = '#DD0200',
                                     alpha=0.5)
 
-                handles, labels = ax.get_legend_handles_labels()
+                #Combine all legends into one.
+                handles, labels = axs[grid_size-1].get_legend_handles_labels()
 
-
-                #Legend 1
-                leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                #Legend 2
                 if (Pump_Load == 0).all() == False:
-                    leg2 = ax.legend(lp1, ['Demand + Storage Charging'], loc='center left',bbox_to_anchor=(1, 0.9),
-                              facecolor='inherit', frameon=True)
+                    handles.append(lp3[0])
+                    handles.append(lp[0])
+                    labels += ['Demand','Demand + \n Storage Charging']
+
                 else:
-                    leg2 = ax.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9),
-                              facecolor='inherit', frameon=True)
+                    handles.append(lp[0])
+                    labels += ['Demand']
 
-                #Legend 3
                 if (Unserved_Energy_Period == 0).all() == False:
-                    leg3 = ax.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 0.82),
-                              facecolor='inherit', frameon=True)
+                    handles.append(custom_legend_elements)
+                    labels += ['Unserved Energy']
 
-                #Legend 4
-                if (Pump_Load == 0).all() == False:
-                    ax.legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.885),
-                              facecolor='inherit', frameon=True)
-
-                # Manually add the first legend back
-                ax.add_artist(leg1)
-                ax.add_artist(leg2)
-                if (Unserved_Energy_Period == 0).all() == False:
-                    ax.add_artist(leg3)
-
+                axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                                        loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                        facecolor='inherit', frameon=True)
 
                 fig1.savefig(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Multi_Scenario[0]+"_period_"+str(wk)), dpi=600, bbox_inches='tight')
                 Data_Table_Out.to_csv(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Multi_Scenario[0]+"_period_"+str(wk)+ ".csv"))

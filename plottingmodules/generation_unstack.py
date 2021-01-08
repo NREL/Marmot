@@ -237,32 +237,25 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
             
-            # create handles list of unique tech names then order
-            handles = np.unique(np.array(unique_tech_names)).tolist()
-            handles.sort(key = lambda i:self.ordered_gen.index(i))
-            handles = reversed(handles)
-            
-            # create custom gen_tech legend
-            gen_tech_legend = []
-            for tech in handles:
-                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0,
-                         label=tech)]
-                gen_tech_legend.extend(legend_handles)
-            
-            #Legend 1
-            leg1 = axs[grid_size-1].legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1.05,-0.2),
-                          facecolor='inherit', frameon=True)
+            #Combine all legends into one.
+            handles, labels = axs[grid_size-1].get_legend_handles_labels()
 
-            #Legend 3
+            if (Pump_Load == 0).all() == False:
+                handles.append(lp3[0])
+                handles.append(lp[0])
+                labels += ['Demand','Demand + \n Storage Charging']
+
+            else:
+                handles.append(lp[0])
+                labels += ['Demand']
+
             if (Unserved_Energy == 0).all() == False:
-                leg3 = axs[grid_size-1].legend(lp2, ['Unserved Energy'], loc='upper left',bbox_to_anchor=(1.05, 1.15),
-                      facecolor='inherit', frameon=True)
-            
-            # Manually add the first legend back
-            axs[grid_size-1].add_artist(leg1)
-            if (Unserved_Energy == 0).all() == False:
-                axs[grid_size-1].add_artist(leg3)
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
+
+            axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                    facecolor='inherit', frameon=True)
             
             all_axes = fig1.get_axes()
 
