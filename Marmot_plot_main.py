@@ -380,14 +380,14 @@ for index, row in Marmot_plot_select.iterrows():
                 except AttributeError:
                     Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
             
-                # Save data tables to csv
+            # Save data tables to csv
 
-                    if Figure_Out[zone_input]['data_table'].empty:
-                        logger.info('%s does not return a data table',row["Figure Output Name"])
-                        continue
-                    else:
-                        Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
-                    
+                if Figure_Out[zone_input]['data_table'].empty:
+                    logger.info('%s does not return a data table',row["Figure Output Name"])
+                    continue
+                else:
+                    Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
+
             else:
                 try:
                     Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
