@@ -199,32 +199,24 @@ class mplot(object):
 
             handles, labels = fig1.get_legend_handles_labels()
 
-            #Legend 1
-            leg1 = fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            #Combine all legends into one.
             #Legend 2
             if Pump_Load_Out.values.sum() > 0:
-                leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
-                          facecolor='inherit', frameon=True)
+                handles.append(lp2[0])
+                handles.append(lp1[0])
+                labels += ['Demand','Demand + \n Storage Charging']
+   
             else:
-                leg2 = fig1.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
-                          facecolor='inherit', frameon=True)
+                handles.append(lp1[0])
+                labels += ['Demand']
 
             #Legend 3
             if Unserved_Energy_Out.values.sum() > 0:
-                leg3 = fig1.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
-                          facecolor='inherit', frameon=True)
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
 
-            #Legend 4
-            if Pump_Load_Out.values.sum() > 0:
-                fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1),
-                          facecolor='inherit', frameon=True)
+            fig1.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
-            # Manually add the first legend back
-            fig1.add_artist(leg1)
-            fig1.add_artist(leg2)
-            if Unserved_Energy_Out.values.sum() > 0:
-                fig1.add_artist(leg3)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 

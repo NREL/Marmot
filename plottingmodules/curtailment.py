@@ -387,7 +387,7 @@ class mplot(object):
 
             vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
 
-            Total_Curtailment_out = Total_Curtailment_out/1000 #Convert to GWh
+            Total_Curtailment_out = Total_Curtailment_out/1000000 #Convert to TWh
 
             # Data table of values to return to main program
             Data_Table_Out = Total_Curtailment_out
@@ -403,8 +403,8 @@ class mplot(object):
                              edgecolor='black', linewidth='0.1')
             fig3.spines['right'].set_visible(False)
             fig3.spines['top'].set_visible(False)
-            fig3.set_ylabel('Total Curtailment (GWh)',  color='black', rotation='vertical')
-            fig3.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig3.set_ylabel('Total Curtailment (TWh)',  color='black', rotation='vertical')
+            fig3.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.2f}'))
             fig3.tick_params(axis='y', which='major', length=5, width=1)
             fig3.tick_params(axis='x', which='major', length=5, width=1)
             fig3.margins(x=0.01)

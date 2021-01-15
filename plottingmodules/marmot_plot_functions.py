@@ -223,7 +223,7 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
         matplotlib axes.
     """
     fig, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=sharey, squeeze=False)
-    axs = axs.ravel()
+    #axs = axs.ravel()
     return fig,axs
 
 

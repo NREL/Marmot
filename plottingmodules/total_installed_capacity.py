@@ -55,6 +55,8 @@ class mplot(object):
                 self.logger.info("Scenario = " + scenario)
 
                 Total_Installed_Capacity = installed_capacity_collection.get(scenario)
+                
+                print(Total_Installed_Capacity.index.get_level_values('tech').unique())
                 zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 if scenario == 'ADS':
                     zone_input_adj = zone_input.split('_WI')[0]
