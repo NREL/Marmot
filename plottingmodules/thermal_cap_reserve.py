@@ -12,10 +12,9 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-import os
 from matplotlib.patches import Patch
-import marmot_plot_functions as mfunc
 import logging
+import plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 

@@ -10,7 +10,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 import numpy as np
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 import logging
 
 #===============================================================================
@@ -23,6 +24,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
 
     def gen_unstack(self):
@@ -92,8 +96,9 @@ class mplot(object):
              # Used to calculate any excess axis to delete
             plot_number = len(all_scenarios)
             excess_axs = grid_size - plot_number
-
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
+        
+            
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.25)
             axs = axs.ravel()
             i=0

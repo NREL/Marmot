@@ -1,18 +1,16 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,/folder/folder
-Marmot_Solutions_folder,folder,required,/folder/folder
-Scenario_process_list,List,required,"Scenario1, Scenario2, Scenario 3"
+PLEXOS_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\Ryan_h5
+Marmot_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\Ryan_h5
+Scenario_process_list,List,required,RTS_2016
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,optional,emit_names.csv
-Main_scenario_plot,string,required,Scenario1
-Multi_scenario_plot,List,required,"Scenario1, Scenario2, Scenario 3"
-Scenario_Diff_plot,List [Max 2],optional,"Scenario1,Scenario2"
+Main_scenario_plot,string,required,RTS_2016
+Multi_scenario_plot,List,required,RTS_2016
+Scenario_Diff_plot,List [Max 2],optional,
 AGG_BY,string,required,zone
 zone_region_sublist,List,optional,
-Facet_ylabels,List,optional,
-Facet_xlabels,List,optional,
-Figure_Format,string,optional,svg
+Facet_ylabels,List,optional,BAU
+Facet_xlabels,List,optional,2026
 Tick_labels,List,optional,
-shift_leap_day,Boolean,required,TRUE

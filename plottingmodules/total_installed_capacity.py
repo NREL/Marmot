@@ -5,16 +5,17 @@ Created on Tue Dec 10 08:51:15 2019
 @author: dlevie
 """
 
+import os
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import os
-import total_generation as gen
-import pdb
 from matplotlib.patches import Patch
-import numpy as np
-import marmot_plot_functions as mfunc
+import pdb
 import logging
+import plottingmodules.total_generation as gen
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 
 #===============================================================================
 
@@ -32,6 +33,9 @@ class mplot(object):
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
     def total_cap(self):
         outputs = {}
@@ -72,8 +76,6 @@ class mplot(object):
                 Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
 
-
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000 #Convert to GW
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
@@ -85,18 +87,21 @@ class mplot(object):
 
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Data_Table_Out, Total_Installed_Capacity_Out],  axis=1, sort=False)
-
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor'] 
+            
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Total Installed Capacity (GW)',  color='black', rotation='vertical')
+            fig1.set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
@@ -152,9 +157,7 @@ class mplot(object):
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
-
-
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000 #Convert to GW
+                
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             try:
@@ -174,19 +177,22 @@ class mplot(object):
 
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Data_Table_Out, Total_Installed_Capacity_Out],  axis=1, sort=False)
-
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor'] 
+            
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
 
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Capacity Change (GW) \n relative to '+ self.Multi_Scenario[0],  color='black', rotation='vertical')
+            fig1.set_ylabel('Capacity Change ({}) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0],  color='black', rotation='vertical')
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
@@ -225,6 +231,9 @@ class mplot(object):
             
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor'] 
 
             Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=axs[0],
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
@@ -232,9 +241,9 @@ class mplot(object):
 
             axs[0].spines['right'].set_visible(False)
             axs[0].spines['top'].set_visible(False)
-            axs[0].set_ylabel('Total Installed Capacity (GW)',  color='black', rotation='vertical')
+            axs[0].set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             axs[0].tick_params(axis='y', which='major', length=5, width=1)
             axs[0].tick_params(axis='x', which='major', length=5, width=1)
             axs[0].get_legend().remove()
@@ -247,23 +256,26 @@ class mplot(object):
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
 
-            Total_Load_Out = Total_Gen_Results.loc[:, "Total Load (Demand + Pumped Load)"]
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Gen_Results.sum()))
+            Total_Gen_Results = Total_Gen_Results/unitconversion['divisor'] 
+
+            Total_Load_Out = Total_Gen_Results.loc[:, "Total Load (Demand + \n Storage Charging)"]
             Total_Demand_Out = Total_Gen_Results.loc[:, "Total Demand"]
             Unserved_Energy_Out = Total_Gen_Results.loc[:, "Unserved Energy"]
-            Total_Generation_Stack_Out = Total_Gen_Results.drop(["Total Load (Demand + Pumped Load)", "Total Demand", "Unserved Energy"], axis=1)
+            Total_Generation_Stack_Out = Total_Gen_Results.drop(["Total Load (Demand + \n Storage Charging)", "Total Demand", "Unserved Energy"], axis=1)
             Pump_Load_Out = Total_Load_Out - Total_Demand_Out
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
-
+            
             Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=axs[1],
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
 
             axs[1].spines['right'].set_visible(False)
             axs[1].spines['top'].set_visible(False)
-            axs[1].set_ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical')
+            axs[1].set_ylabel('Total Generation ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             axs[1].tick_params(axis='y', which='major', length=5, width=1)
             axs[1].tick_params(axis='x', which='major', length=5, width=1)
 

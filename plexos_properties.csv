@@ -1,12 +1,12 @@
 data_type,group,data_set,collect_data,unit_multiplier,Units,description
 interval,generator,Available Capacity,FALSE,1,MW,Rated Capacity - maintenance - Forced Outage
 interval,generator,Capacity Curtailed,FALSE,1,MW,Amount of Capacity with ) VO&M costs that is not generating.
-interval,generator,Curtailment Factor,FALSE,1,%,Capacity curtailed but reported as a percentage.
+interval,generator,Curtailment Factor,TRUE,1,%,Capacity curtailed but reported as a percentage.
 interval,generator,Emissions Cost,FALSE,1,$,Emissions costs reported by generator.
 interval,generator,Forced Outage,FALSE,1,MW,Capacity lost to random forced outages.
 interval,generator,Fuel Cost,FALSE,1,$,Amount paid by each generator for fuel at each timestep.
 interval,generator,Fuel Offtake,FALSE,1,GJ or MMBTU,Amount of fuel consumed by generator and timestep.
-interval,generator,Generation,FALSE,1,MW,Output from each generator by timestep
+interval,generator,Generation,TRUE,1,MW,Output from each generator by timestep
 interval,generator,Maintenance,FALSE,1,MW,This depends on the simulation phase that is used. What simulation phase do we use???
 interval,generator,Price Received,FALSE,1,$/MWh,Default is for generators to receive the weighted-average price at the nodes they are connected to.
 interval,generator,Pump Load,FALSE,1,MW,The amount that a generator charges during a timestep.
@@ -27,7 +27,7 @@ interval,constraint,Price,FALSE,1,,
 interval,constraint,Hours Binding,FALSE,1,,
 interval,emission,Cost,FALSE,1,$,"The cost of emissions charged at ""Price"" (if defined, otherwise at ""Shodow Price"""
 interval,emission,Production,FALSE,1,kg,Total emissions production by timestep.
-interval,emissions_generators,Production,TRUE,1,lb,Emissions produced by generator for each timestep. Specify the units outputted by the xml you are using here (e.g. kg or lb); Marmot will do the appropriate conversion to metric tons. 
+interval,emissions_generators,Production,FALSE,1,lb,Emissions produced by generator for each timestep. Specify the units outputted by the xml you are using here (e.g. kg or lb); Marmot will do the appropriate conversion to metric tons. 
 interval,fuel,Cost,FALSE,1,$,Cost of fuel by timestep.
 interval,fuel,Offtake,FALSE,1,GJ or MMBTU,Fuel consumed by generator and timestep.
 interval,fuel,Price,FALSE,1,,

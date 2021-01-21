@@ -8,13 +8,14 @@ This module creates plots that show curtailment
 
 """
 
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
 import logging
-import marmot_plot_functions as mfunc
-import os
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 
 #===============================================================================
 
@@ -25,6 +26,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
         
     def curt_pen(self):
         outputs = {}
@@ -182,8 +186,8 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
-            fig1, ax = plt.subplots(figsize=(6,4))
+            
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
             for index, row in Penetration_Curtailment_out.iterrows():
                 if self.prop == "PV":
                     ax.scatter(row["% PV Penetration"], row["% PV Curtailment"],
@@ -271,7 +275,7 @@ class mplot(object):
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
 
 
-            fig2, ax = plt.subplots(figsize=(6,4))
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
             if self.prop == "PV":
                 Data_Table_Out = PV_Curtailment_DC
@@ -398,7 +402,7 @@ class mplot(object):
             if Total_Curtailment_out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1')
             fig3.spines['right'].set_visible(False)
