@@ -253,7 +253,8 @@ class mplot(object):
                 Min_Net_Load = data["Min_Net_Load"]
 
                 #Convert MW -> GW
-                Stacked_Gen = Stacked_Gen / 1000
+                mult = mfunc.unit_dict(max_val)[multiplier]
+                Stacked_Gen = Stacked_Gen / mult
                 Load = Load / 1000
                 Total_Demand = Total_Demand / 1000
                 Unserved_Energy = Unserved_Energy / 1000
@@ -324,8 +325,19 @@ class mplot(object):
 
                 i=i+1
 
+            # create handles list of unique tech names then order
+            handles = np.unique(np.array(unique_tech_names)).tolist()
+            handles.sort(key = lambda i:self.ordered_gen.index(i))
+            handles = reversed(handles)
+
+            # create custom gen_tech legend
+            for tech in handles:
+                labels = [Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0,
+                         label=tech)]
+
             #Combine all legends into one.
-            handles, labels = axs[grid_size-1].get_legend_handles_labels()
+            #handles, labels = axs[grid_size-1].get_legend_handles_labels()
 
             if (Pump_Load == 0).all() == False:
                 handles.append(lp3[0])
@@ -638,8 +650,19 @@ class mplot(object):
                                     facecolor = '#DD0200',
                                     alpha=0.5)
 
+                # create handles list of unique tech names then order
+                handles = np.unique(np.array(unique_tech_names)).tolist()
+                handles.sort(key = lambda i:self.ordered_gen.index(i))
+                handles = reversed(handles)
+
+                # create custom gen_tech legend
+                for tech in handles:
+                    labels = [Patch(facecolor=self.PLEXOS_color_dict[tech],
+                                alpha=1.0,
+                             label=tech)]
+
                 #Combine all legends into one.
-                handles, labels = axs[grid_size-1].get_legend_handles_labels()
+                #handles, labels = axs[grid_size-1].get_legend_handles_labels()
 
                 if (Pump_Load == 0).all() == False:
                     handles.append(lp3[0])
