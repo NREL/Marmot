@@ -14,6 +14,7 @@ import numpy as np
 import os
 import marmot_plot_functions as mfunc
 import logging
+import math
 
 #===============================================================================
 
@@ -25,92 +26,6 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-
-    def cf(self):
-        outputs = {}
-        gen_collection = {}
-        cap_collection = {}
-        check_input_data = []
-        
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        
-        # Checks if all data required by plot is available, if 1 in list required data is missing
-        if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-        
-        for zone_input in self.Zones:
-            CF_all_scenarios = pd.DataFrame()
-            self.logger.info(self.AGG_BY + " = " + zone_input)
-
-            for scenario in self.Multi_Scenario:
-
-                self.logger.info("Scenario = " + str(scenario))
-                Gen = gen_collection.get(scenario)
-                try: #Check for regions missing all generation.
-                    Gen = Gen.xs(zone_input,level = self.AGG_BY)
-                except KeyError:
-                        self.logger.warning('No data in ' + zone_input)
-                        continue
-                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
-                
-                # Calculates interval step to correct for MWh of generation
-                time_delta = Gen.index[1] - Gen.index[0]
-                duration = Gen.index[len(Gen)-1] - Gen.index[0]
-                duration = duration + time_delta #Account for last timestep.
-                # Finds intervals in 60 minute period
-                #interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
-                duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
-
-                if self.prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Gen = Gen[self.start_date : self.end_date]
-                
-
-                #Gen = Gen/interval_count
-                Total_Gen = Gen.sum(axis=0)
-                Total_Gen.rename(scenario, inplace = True)
-
-                Cap = cap_collection.get(scenario)
-                Cap = Cap.xs(zone_input,level = self.AGG_BY)
-                Cap = mfunc.df_process_gen_inputs(Cap, self.ordered_gen)
-                Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
-                Cap.rename(scenario, inplace = True)
-
-                #Calculate CF
-                CF = Total_Gen/(Cap * duration_hours)
-                CF.rename(scenario, inplace = True)
-                CF_all_scenarios = pd.concat([CF_all_scenarios, CF], axis=1, sort=False)
-                CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
-
-            CF_all_scenarios.columns = CF_all_scenarios.columns.str.replace('_',' ')
-            CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
-
-            if CF_all_scenarios.empty == True:
-                outputs[zone_input] = mfunc.MissingZoneData()
-                continue
-            fig1 = CF_all_scenarios.plot.bar(stacked = False, figsize=(9,6), rot=0,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1')
-
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
-            #adds % to y axis data
-            fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
-
-            # handles, labels = fig1.get_legend_handles_labels()
-
-            # #Legend 1
-            # leg1 = fig1.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
-            #               facecolor='inherit', frameon=True)
-
-            outputs[zone_input] = {'fig': fig1, 'data_table': CF_all_scenarios}
-
-        return outputs
 
     def avg_output_when_committed(self):
         outputs = {}
@@ -152,7 +67,7 @@ class mplot(object):
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
                 
-                if self.prop == 'Date Range':
+                if math.isnan(self.start_date) == False:
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(self.start_date),str(self.end_date)))
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
@@ -205,6 +120,93 @@ class mplot(object):
 
             outputs[zone_input] = {'fig': fig2, 'data_table': CF_all_scenarios.T}
         return outputs
+
+    def cf(self):
+        outputs = {}
+        gen_collection = {}
+        cap_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        for zone_input in self.Zones:
+            CF_all_scenarios = pd.DataFrame()
+            self.logger.info(self.AGG_BY + " = " + zone_input)
+
+            for scenario in self.Multi_Scenario:
+
+                self.logger.info("Scenario = " + str(scenario))
+                Gen = gen_collection.get(scenario)
+                try: #Check for regions missing all generation.
+                    Gen = Gen.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                        self.logger.warning('No data in ' + zone_input)
+                        continue
+                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
+                
+                # Calculates interval step to correct for MWh of generation
+                time_delta = Gen.index[1] - Gen.index[0]
+                duration = Gen.index[len(Gen)-1] - Gen.index[0]
+                duration = duration + time_delta #Account for last timestep.
+                # Finds intervals in 60 minute period
+                #interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
+
+                if self.start_date != 'Date Range':
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    Gen = Gen[self.start_date : self.end_date]
+                
+
+                #Gen = Gen/interval_count
+                Total_Gen = Gen.sum(axis=0)
+                Total_Gen.rename(scenario, inplace = True)
+
+                Cap = cap_collection.get(scenario)
+                Cap = Cap.xs(zone_input,level = self.AGG_BY)
+                Cap = mfunc.df_process_gen_inputs(Cap, self.ordered_gen)
+                Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
+                Cap.rename(scenario, inplace = True)
+
+                #Calculate CF
+                CF = Total_Gen/(Cap * duration_hours)
+                CF.rename(scenario, inplace = True)
+                CF_all_scenarios = pd.concat([CF_all_scenarios, CF], axis=1, sort=False)
+                CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
+
+            CF_all_scenarios.columns = CF_all_scenarios.columns.str.replace('_',' ')
+            CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
+
+            if CF_all_scenarios.empty == True:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            fig1 = CF_all_scenarios.plot.bar(stacked = False, figsize=(9,6), rot=0,
+                                 color = self.color_list,edgecolor='black', linewidth='0.1')
+
+            fig1.spines['right'].set_visible(False)
+            fig1.spines['top'].set_visible(False)
+            fig1.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
+            #adds % to y axis data
+            fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+            fig1.tick_params(axis='y', which='major', length=5, width=1)
+            fig1.tick_params(axis='x', which='major', length=5, width=1)
+
+            # handles, labels = fig1.get_legend_handles_labels()
+
+            # #Legend 1
+            # leg1 = fig1.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
+            #               facecolor='inherit', frameon=True)
+
+            outputs[zone_input] = {'fig': fig1, 'data_table': CF_all_scenarios}
+
+        return outputs
+
 
 
     def time_at_min_gen(self):

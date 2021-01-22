@@ -86,18 +86,15 @@ Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', useco
 
 Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
-Scenario_name = Marmot_user_defined_inputs.loc['Main_scenario_plot'].squeeze().strip()
-
 # Folder to save your processed solutions
 Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
 
+Scenarios = pd.Series(Marmot_user_defined_inputs.loc['Scenarios'].squeeze().split(",")).str.strip().tolist()
+
 # These variables (along with Region_Mapping) are used to initialize MetaData
 PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
-HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
+metadata_HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenarios[0])
 
-
-
-Multi_Scenario = pd.Series(Marmot_user_defined_inputs.loc['Multi_scenario_plot'].squeeze().split(",")).str.strip().tolist()
 
 # For plots using the differnec of the values between two scenarios.
 # Max two entries, the second scenario is subtracted from the first.
@@ -136,14 +133,14 @@ shift_leap_day = str(Marmot_user_defined_inputs.loc['shift_leap_day'].squeeze())
 # Input and Output Directories
 #===============================================================================
 
-figure_folder = os.path.join(Marmot_Solutions_folder, Scenario_name, 'Figures_Output')
+figure_folder = os.path.join(Marmot_Solutions_folder,'Figures_Output')
 try:
     os.makedirs(figure_folder)
 except FileExistsError:
     # directory already exists
     pass
 
-hdf_out_folder = os.path.join(Marmot_Solutions_folder, Scenario_name,'Processed_HDF5_folder')
+hdf_out_folder = os.path.join(Marmot_Solutions_folder,'Processed_HDF5_folder')
 try:
     os.makedirs(hdf_out_folder)
 except FileExistsError:
@@ -220,7 +217,7 @@ except Exception:
 # Instead of reading in pickle files, an instance of metadata is initialized with the appropriate parameters
 # Methods within that class are used to retreive the data that was stored in pickle files
 
-meta = MetaData(HDF5_folder_in, Region_Mapping)
+meta = MetaData(metadata_HDF5_folder_in, Region_Mapping)
 
 # Zones_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,"zones.pkl"))
 # Regions_pkl = pd.read_pickle(os.path.join(Marmot_Solutions_folder, Scenario_name,'regions.pkl'))
@@ -292,8 +289,8 @@ else:
             logger.warning("None of: %s in Region_Mapping File. Plotting all Regions of aggregation '%s'",zone_region_sublist, AGG_BY)
 
 
-# Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
-
+#Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
+Zones = ['Eastern Oregon','Western Oregon','Washington','Idaho']
 # Filter for chosen figures to plot
 if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
     logger.info("Will plot row " +(sys.argv[1])+" of Marmot plot select regardless of T/F.")
@@ -325,14 +322,14 @@ for index, row in Marmot_plot_select.iterrows():
     # while arguments contains the property value
     key_list = ["prop", "start", "end", "timezone", "start_date", "end_date",
                 "hdf_out_folder", "Zones", "AGG_BY", "ordered_gen", "PLEXOS_color_dict",
-                "Multi_Scenario", "Scenario_Diff", "Scenario_name", "Marmot_Solutions_folder",
+                "Scenarios", "Scenario_Diff", "Marmot_Solutions_folder",
                 "ylabels", "xlabels", "ticklabels",
                 "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
                 "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leap_day","duration_curve"]
 
     argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
                      hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict,
-                     Multi_Scenario, Scenario_Diff, Scenario_name, Marmot_Solutions_folder,
+                     Scenarios, Scenario_Diff, Marmot_Solutions_folder,
                      ylabels, xlabels, ticklabels,
                      color_list, marker_style, gen_names_dict, pv_gen_cat,
                      re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta,facet,shift_leap_day,duration_curve]
@@ -374,44 +371,29 @@ for index, row in Marmot_plot_select.iterrows():
 
         else:
             # Save figures
-            if not facet:
-                try:
-                    Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
-                except AttributeError:
-                    Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + '.' + figure_format), dpi=600, bbox_inches='tight')
-            
-            # Save data tables to csv
+            try:
+                Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
+            except AttributeError:
+                Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
 
+            try:
+                if not Figure_Out[zone_input]['data_table']:
+                    logger.info('%s does not return a data table',row["Figure Output Name"])
+            except ValueError:
                 if Figure_Out[zone_input]['data_table'].empty:
                     logger.info('%s does not return a data table',row["Figure Output Name"])
-                    continue
-                else:
-                    Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_" + Scenario_name + ".csv"))
-
             else:
+                tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                 try:
-                    Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
-                except AttributeError:
-                    Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
+                     os.makedirs(tables_folder)
+                except FileExistsError:
+                     # directory already exists
+                    pass
+                for scenario in Scenarios:
+                    #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
+                    s = zone_input.replace('.','') + "_" + scenario + ".csv"
+                    Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
 
-                try:
-                    if not Figure_Out[zone_input]['data_table']:
-                        logger.info('%s does not return a data table',row["Figure Output Name"])
-                except ValueError:
-                    if Figure_Out[zone_input]['data_table'].empty:
-                        logger.info('%s does not return a data table',row["Figure Output Name"])
-                else:
-                    tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
-                    try:
-                         os.makedirs(tables_folder)
-                    except FileExistsError:
-                         # directory already exists
-                        pass
-                    for scenario in Multi_Scenario:
-                        #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
-                        s = zone_input.replace('.','') + "_" + scenario + ".csv"
-                        Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
-    
     logger.info('Plotting Completed for %s\n',row["Figure Output Name"])
 
 ###############################################################################

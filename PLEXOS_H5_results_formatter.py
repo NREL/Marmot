@@ -61,7 +61,7 @@ except IndexError:
 pd.set_option("display.max_colwidth", 1000)
 
 #changes working directory to location of this python file
-os.chdir(pathlib.Path(__file__).parent.absolute())
+#os.chdir(pathlib.Path(__file__).parent.absolute())
 
 Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
@@ -466,32 +466,28 @@ for Scenario_name in Scenario_List:
     #===============================================================================
 
     HDF5_output = Scenario_name + "_formatted.h5"
-
-    Marmot_Scenario = os.path.join(Marmot_Solutions_folder, Scenario_name)
-    try:
-        os.makedirs(Marmot_Scenario )
-    except FileExistsError:
-        # directory already exists
-        pass
-    hdf_out_folder = os.path.join(Marmot_Scenario , 'Processed_HDF5_folder')
-    try:
-        os.makedirs(hdf_out_folder)
-    except FileExistsError:
-        # directory already exists
-        pass
+    
     HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
     try:
         os.makedirs(HDF5_folder_in)
     except FileExistsError:
         # directory already exists
         pass
-    figure_folder = os.path.join(Marmot_Scenario , 'Figures_Output')
+    
+    hdf_out_folder = os.path.join(Marmot_Solutions_folder,'Processed_HDF5_folder')
+    try:
+        os.makedirs(hdf_out_folder)
+    except FileExistsError:
+        # directory already exists
+        pass    
+    
+    figure_folder = os.path.join(Marmot_Solutions_folder, 'Figures_Output')
     try:
         os.makedirs(figure_folder)
     except FileExistsError:
         # directory already exists
         pass
-
+    
     startdir=os.getcwd()
     os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
     files = sorted(os.listdir()) # List of all files in hdf5 folder in alpha numeric order
