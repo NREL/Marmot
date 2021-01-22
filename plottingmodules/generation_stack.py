@@ -19,9 +19,8 @@ import logging
 
 #===============================================================================
 
-custom_legend_elements = [Patch(facecolor='#DD0200',
-                            alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')]
+custom_legend_elements = Patch(facecolor='#DD0200',
+                            alpha=0.5, edgecolor='#DD0200')
 
 class mplot(object):
 
@@ -253,8 +252,7 @@ class mplot(object):
                 Min_Net_Load = data["Min_Net_Load"]
 
                 #Convert MW -> GW
-                mult = mfunc.unit_dict(max_val)[multiplier]
-                Stacked_Gen = Stacked_Gen / mult
+                Stacked_Gen = Stacked_Gen / 1000
                 Load = Load / 1000
                 Total_Demand = Total_Demand / 1000
                 Unserved_Energy = Unserved_Energy / 1000
@@ -325,16 +323,16 @@ class mplot(object):
 
                 i=i+1
 
-            # create handles list of unique tech names then order
-            handles = np.unique(np.array(unique_tech_names)).tolist()
-            handles.sort(key = lambda i:self.ordered_gen.index(i))
-            handles = reversed(handles)
-
+            # create labels list of unique tech names then order
+            labels = np.unique(np.array(unique_tech_names)).tolist()
+            labels.sort(key = lambda i:self.ordered_gen.index(i))
+            
+            handles = []
             # create custom gen_tech legend
-            for tech in handles:
-                labels = [Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0,
-                         label=tech)]
+            for tech in labels:
+                gen_legend_patches = Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0)
+                handles.append(gen_legend_patches)
 
             #Combine all legends into one.
             #handles, labels = axs[grid_size-1].get_legend_handles_labels()
@@ -351,7 +349,7 @@ class mplot(object):
             if (Unserved_Energy == 0).all() == False:
                 handles.append(custom_legend_elements)
                 labels += ['Unserved Energy']
-
+            
             axs[grid_size-1].legend(reversed(handles),reversed(labels),
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
@@ -649,35 +647,23 @@ class mplot(object):
                                     #facecolor='#EE1289'
                                     facecolor = '#DD0200',
                                     alpha=0.5)
-
-                # create handles list of unique tech names then order
-                handles = np.unique(np.array(unique_tech_names)).tolist()
-                handles.sort(key = lambda i:self.ordered_gen.index(i))
-                handles = reversed(handles)
-
-                # create custom gen_tech legend
-                for tech in handles:
-                    labels = [Patch(facecolor=self.PLEXOS_color_dict[tech],
-                                alpha=1.0,
-                             label=tech)]
-
-                #Combine all legends into one.
-                #handles, labels = axs[grid_size-1].get_legend_handles_labels()
-
+                
+                handles, labels = ax.get_legend_handles_labels()
+                
                 if (Pump_Load == 0).all() == False:
                     handles.append(lp3[0])
-                    handles.append(lp[0])
+                    handles.append(lp1[0])
                     labels += ['Demand','Demand + \n Storage Charging']
 
                 else:
-                    handles.append(lp[0])
+                    handles.append(lp1[0])
                     labels += ['Demand']
 
                 if (Unserved_Energy_Period == 0).all() == False:
                     handles.append(custom_legend_elements)
                     labels += ['Unserved Energy']
 
-                axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                ax.legend(reversed(handles),reversed(labels),
                                         loc = 'lower left',bbox_to_anchor=(1.05,0),
                                         facecolor='inherit', frameon=True)
 

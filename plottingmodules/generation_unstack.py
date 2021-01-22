@@ -61,36 +61,35 @@ class mplot(object):
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
+        
+        xdimension=len(self.xlabels)
+        if xdimension == 0:
+            xdimension = 1
+        ydimension=len(self.ylabels)
+        if ydimension == 0:
+            ydimension = 1
 
+        # If the plot is not a facet plot, grid size should be 1x1
+        if not self.facet:
+            xdimension = 1
+            ydimension = 1
+
+        # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+        if xdimension > 1:
+            font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+            plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
+            plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
+            plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
+            plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+        
+        grid_size = xdimension*ydimension
+            
+        # Used to calculate any excess axis to delete
+        plot_number = len(all_scenarios)
+        
         for zone_input in self.Zones:
             self.logger.info("Zone = "+ zone_input)
-            
-            
-            xdimension=len(self.xlabels)
-            if xdimension == 0:
-                xdimension = 1
-            ydimension=len(self.ylabels)
-            if ydimension == 0:
-                ydimension = 1
-
-            # If the plot is not a facet plot, grid size should be 1x1
-            if not self.facet:
-                xdimension = 1
-                ydimension = 1
-
-            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
-            if xdimension > 1:
-                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-
-
-            grid_size = xdimension*ydimension
-            
-             # Used to calculate any excess axis to delete
-            plot_number = len(all_scenarios)
+        
             excess_axs = grid_size - plot_number
 
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
@@ -237,21 +236,21 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
             
-            #Combine all legends into one.
-            handles, labels = axs[grid_size-1].get_legend_handles_labels()
-
-            if (Pump_Load == 0).all() == False:
-                handles.append(lp3[0])
-                handles.append(lp[0])
-                labels += ['Demand','Demand + \n Storage Charging']
-
-            else:
-                handles.append(lp[0])
-                labels += ['Demand']
-
+            # create handles list of unique tech names then order
+            labels = np.unique(np.array(unique_tech_names)).tolist()
+            labels.sort(key = lambda i:self.ordered_gen.index(i))
+            
+            # create custom gen_tech legend
+            handles = []
+            for tech in labels:
+                gen_tech_legend = Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0)
+                handles.append(gen_tech_legend)
+            
             if (Unserved_Energy == 0).all() == False:
-                handles.append(custom_legend_elements)
+                handles.append(lp2[0])
                 labels += ['Unserved Energy']
+                
 
             axs[grid_size-1].legend(reversed(handles),reversed(labels),
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),

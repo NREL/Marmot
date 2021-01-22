@@ -17,9 +17,9 @@ import logging
 
 #===============================================================================
 
-custom_legend_elements = [Patch(facecolor='#DD0200',
+custom_legend_elements = Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')]
+                         label='Unserved Energy')
 
 class mplot(object):
 
