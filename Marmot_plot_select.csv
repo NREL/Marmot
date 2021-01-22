@@ -18,7 +18,6 @@ Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,,gener
 Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff_Range,Date Range,,,EST,7/1/2024,7/7/2024,generation_stack,gen_diff
 Generation Stack,FALSE,Stacked_Gen,,,,EST,,,generation_stack,gen_stack
 Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Peak Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,generation_stack,gen_stack
 Generation Stack,FALSE,Stacked_Gen_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
@@ -64,7 +63,7 @@ Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Peak_D
 Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reserve_gen_timeseries
 Thermal Capacity reserves,FALSE,Thermal_Capacity_Reserves,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves
 Total Generation,FALSE,Total_Generation,,,,,,,total_generation,total_gen
-Total Generation Difference,FALSE,Total_Generation_Diff,,,,,,,total_generation,total_gen_diff
+Total Generation Difference,False,Total_Generation_Diff,,,,,,,total_generation,total_gen_diff
 Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,,total_generation,total_gen_facet
 Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,,,,total_installed_capacity,total_cap
 Total Installed Capacity and Generation Facet,FALSE,Total_Installed_Capacity_and_Generation_Facet,,,,,,,total_installed_capacity,total_cap_and_gen_facet

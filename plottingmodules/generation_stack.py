@@ -6,7 +6,6 @@ This code creates generation stack plots and is called from Marmot_plot_main.py
 """
 
 import pandas as pd
-
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -81,13 +80,13 @@ class mplot(object):
 
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
-            Stacked_Gen = Stacked_Gen #/ 1000 #MW -> GW
+            Stacked_Gen = Stacked_Gen 
 
             Load = load_collection.get(scenario)
             Load = Load.xs(zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
-            Load = Load #/ 1000 #MW -> GW
+            Load = Load 
             
             try:
                 pump_load_collection[scenario]
@@ -98,7 +97,7 @@ class mplot(object):
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
-            Pump_Load = Pump_Load #/ 1000 #MW -> GW
+            Pump_Load = Pump_Load 
             if (Pump_Load == 0).all() == False:
                 Total_Demand = Load - Pump_Load
             else:
@@ -200,15 +199,6 @@ class mplot(object):
                 xdimension = 1
                 ydimension = 1
 
-            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
-            if xdimension > 1:
-                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-
-
             grid_size = xdimension*ydimension
 
             # Used to calculate any excess axis to delete
@@ -236,7 +226,6 @@ class mplot(object):
 
                 Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
                 data = setup_data(zone_input, scenario, Stacked_Gen)
-
                 data = data_prop(data)
                 
                 # if no Generation return empty dataframe
@@ -427,6 +416,22 @@ class mplot(object):
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
+        
+        xdimension=len(self.xlabels)
+        if xdimension == 0:
+                xdimension = 1
+        
+        # If the plot is not a facet plot, grid size should be 1x1
+        if not self.facet:
+            xdimension = 1
+        
+        # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+        if xdimension > 1:
+            font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+            plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
+            plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
+            plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
+            plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
     
         for zone_input in self.Zones:
             self.logger.info("Zone = "+ zone_input)
@@ -516,7 +521,7 @@ class mplot(object):
             ax.spines['top'].set_visible(False)
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             ax.margins(x=0.01)
 
             locator = mdates.AutoDateLocator(minticks=6, maxticks=12)

@@ -167,12 +167,12 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
             
+            # unit conversion return divisor and energy units
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum()))
             
             Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor'] 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
-
             Total_Load_Out = Total_Load_Out.T/unitconversion['divisor'] 
             Pump_Load_Out = Pump_Load_Out.T/unitconversion['divisor']
             Total_Demand_Out = Total_Demand_Out.T/unitconversion['divisor'] 
@@ -309,14 +309,6 @@ class mplot(object):
             
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
-            
-
-            net_diff = Total_Generation_Stack_Out
-            try:
-                net_diff.drop(columns = 'Curtailment',inplace=True)
-            except KeyError:
-                pass
-            net_diff = net_diff.sum(axis = 1)
 
             if Total_Generation_Stack_Out.empty == True:
                 out = mfunc.MissingZoneData()
@@ -324,9 +316,17 @@ class mplot(object):
                 continue
             
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum()))
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
+            
+            net_diff = Total_Generation_Stack_Out
+            try:
+                net_diff.drop(columns = 'Curtailment',inplace=True)
+            except KeyError:
+                pass
+            net_diff = net_diff.sum(axis = 1)
+            
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
             Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,

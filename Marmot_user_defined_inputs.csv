@@ -1,16 +1,16 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\Ryan_h5
-Marmot_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\h5_files\Ryan_h5
+PLEXOS_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS CEII\Projects\Xcel_H2@Scale\Results_Analysis\PLEXOS_Scenarios\RO2
+Marmot_Solutions_folder,folder,required,\\nrelqnap02\PLEXOS CEII\Projects\Xcel_H2@Scale\Results_Analysis\PLEXOS_Scenarios\RO2
 Scenario_process_list,List,required,RTS_2016
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,optional,emit_names.csv
-Main_scenario_plot,string,required,RTS_2016
-Multi_scenario_plot,List,required,RTS_2016
-Scenario_Diff_plot,List [Max 2],optional,
+Main_scenario_plot,string,required,2026_BAU
+Multi_scenario_plot,List,required,"2026_BAU,2026_FlexOps,2030_BAU,2030_FlexOps,2034_BAU,2034_FlexOps"
+Scenario_Diff_plot,List [Max 2],optional,"2034_BAU,2026_BAU"
 AGG_BY,string,required,zone
-zone_region_sublist,List,optional,
-Facet_ylabels,List,optional,BAU
-Facet_xlabels,List,optional,2026
+zone_region_sublist,List,optional,"Xcel_Energy_EI, MISO_EI"
+Facet_ylabels,List,optional,"BAU,FlexOps"
+Facet_xlabels,List,optional,"2026,2030,2034"
 Tick_labels,List,optional,

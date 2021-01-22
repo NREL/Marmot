@@ -566,6 +566,20 @@ def get_interval_count(df):
 
 
 def capacity_energy_unitconversion(max_value):
+    """
+    auto unitconversion for capacity and energy figures.
+
+    Parameters
+    ----------
+    max_value : float
+        value used to determine divisor and units.
+
+    Returns
+    -------
+    dict
+        dictionary containing divisor and units.
+
+    """
     
     if max_value < 1000:
         divisor = 1
