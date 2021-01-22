@@ -425,7 +425,7 @@ class mplot(object):
 
                 for column in reserve_timeseries:
                     mfunc.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
-                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
                 axs[n].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
 

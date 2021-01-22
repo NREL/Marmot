@@ -307,7 +307,7 @@ def create_stacked_bar_plot(df, colour):
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
     #adds comma to y axis data
-    fig.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    fig.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
     fig.tick_params(axis='y', which='major', length=5, width=1)
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
@@ -581,9 +581,12 @@ def capacity_energy_unitconversion(max_value):
 
     """
     
-    if max_value < 1000:
+    if max_value < 1000 and max_value > 1:
         divisor = 1
         units = 'MW'
+    elif max_value < 1:
+        divisor = 0.001
+        units = 'kW'
     elif max_value > 999999.9:
         divisor = 1000000
         units = 'TW'
