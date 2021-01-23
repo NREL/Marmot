@@ -19,9 +19,8 @@ import config.mconfig as mconfig
 
 #===============================================================================
 
-custom_legend_elements = [Patch(facecolor='#DD0200',
-                            alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')]
+custom_legend_elements = Patch(facecolor='#DD0200',
+                            alpha=0.5, edgecolor='#DD0200')
 
 class mplot(object):
     def __init__(self, argument_dict):
@@ -59,6 +58,7 @@ class mplot(object):
                 self.logger.info("Scenario = " + scenario)
 
                 Total_Installed_Capacity = installed_capacity_collection.get(scenario)
+                
                 zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 if scenario == 'ADS':
                     zone_input_adj = zone_input.split('_WI')[0]
@@ -306,47 +306,34 @@ class mplot(object):
             l2 = Total_Generation_Stack_Out.columns.tolist()
             l1.extend(l2)
 
-            handles = np.unique(np.array(l1)).tolist()
-            handles.sort(key = lambda i:self.ordered_gen.index(i))
-            handles = reversed(handles)
+            labels = np.unique(np.array(l1)).tolist()
+            labels.sort(key = lambda i:self.ordered_gen.index(i))
 
             # create custom gen_tech legend
-            gen_tech_legend = []
-            for tech in handles:
-                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0,
-                         label=tech)]
-                gen_tech_legend.extend(legend_handles)
+            handles = []
+            for tech in labels:
+                gen_tech_legend = Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0)
+                handles.append(gen_tech_legend)
 
-            #Legend 1
-            leg1 = axs[1].legend(handles = gen_tech_legend, loc='lower left', bbox_to_anchor=(1,-0.1),
-                          facecolor='inherit', frameon=True, prop={"size":10})
 
-            #Legend 2
             if Pump_Load_Out.values.sum() > 0:
-              leg2 = axs[1].legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
-                        facecolor='inherit', frameon=True, prop={"size":10})
-            else:
-              leg2 = axs[1].legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
-                        facecolor='inherit', frameon=True, prop={"size":10})
+                handles.append(lp2[0])
+                handles.append(lp1[0])
+                labels += ['Demand','Demand + \n Storage Charging']
+             
+            else:  
+                handles.append(lp1[0])
+                labels += ['Demand']
 
-            #Legend 3
             if Unserved_Energy_Out.values.sum() > 0:
-                leg3 = axs[1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
-                          facecolor='inherit', frameon=True, prop={"size":10})
-
-            #Legend 4
-            if Pump_Load_Out.values.sum() > 0:
-                leg4 = axs[1].legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.18),
-                          facecolor='inherit', frameon=True, prop={"size":10})
-
-            # Manually add the first legend back
-            fig.add_artist(leg1)
-            fig.add_artist(leg2)
-            if Unserved_Energy_Out.values.sum() > 0:
-                fig.add_artist(leg3)
-            if Pump_Load_Out.values.sum() > 0:
-                fig.add_artist(leg4)
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
+            
+            axs[1].legend(reversed(handles),reversed(labels),
+                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                    facecolor='inherit', frameon=True)
+            
 
             # add labels to panels
             axs[0].set_title("A.", fontdict={"weight":"bold"}, loc='left')

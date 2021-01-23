@@ -34,32 +34,57 @@ Multi_Scenario = as.character(inputs[Input == 'Multi_Scenario']$User_defined_val
 agg_level = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
 plot_dev = as.character(inputs[Input == 'Figure_Format']$User_defined_value)
 
-sections = c('_total_generation','_total_generation')
-names(sections) = c('Total Generation','Total Generation Difference')
+agg_levels = c('Summary','Usual')
+
+sections = c('_total_generation',
+             #'_total_generation',
+             '_generation_stack',
+             '_curtailment',
+             '_production_cost',
+             '_transmission'
+             #'_total_installed_capacity'
+             )
+names(sections) = c('Total Generation',
+                    #'Total Generation Difference'
+                    'Generation Stack',
+                    'Total Curtailment',
+                    'Total Production Cost',
+                    'Transmission'
+                    #'Installed Capacity'
+                    )
 
 # set up default options for chunks, turn off error or warning messages
-knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='svg', cache = F, fig.width = 20,results = 'asis',out.width = "50%", fig.asp = 0.675)
+knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='svg', cache = F, fig.width = 20,results = 'asis',out.width = "100%", fig.asp = 0.675)
 
 ```
+
 
 ```{r}
 for (section_name in names(sections)){
   pandoc.header(section_name)
-  all.plots = list.files(file.path(parent_dir,scenario_dir,'Figures_Output',paste0(agg_level,sections[section_name])),
-                   pattern = plot_dev,full.name = T,recursive = T,all.files = T)
+  all.plots = c()
+  for (agg_level in agg_levels){
+  all.plots = c(all.plots,list.files(file.path(parent_dir,scenario_dir,'Figures_Output',paste0(agg_level,sections[section_name])),
+                   pattern = plot_dev,full.name = T,recursive = T,all.files = T))
+  }
   diff.plots = all.plots[grepl('Diff',all.plots)]
+  if(!is_empty(diff.plots)){
   abs.plots = all.plots[-which(all.plots == diff.plots)]
-  
+  } else {
+    abs.plots = all.plots
+  }
   for (plot in abs.plots){
     end_of_string = tail(unlist(strsplit(plot,'/')),n = 1)
     region_name = unlist(strsplit(end_of_string,'_'))[1]
   
-    #Print dlot
+    #Print plot
     print(ggdraw() + draw_image(plot) + draw_label(region_name, y = 0.975, fontfamily = "serif", size = 48))
   
     #Print data
     data = str_replace(plot,plot_dev,'csv')
-    pandoc.table(fread(data),style = 'grid',split.table = Inf,keep.line.breaks = T)
+    if (section_name != 'Generation Stack' & section_name != 'Transmission'){
+      pandoc.table(fread(data),style = 'grid',split.table = Inf,keep.line.breaks = T)
+    }
     #datatable(fread(data), rownames = FALSE, filter="top", options = list(pageLength = length(Multi_Scenario), scrollX=T))
 
   }

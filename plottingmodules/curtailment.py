@@ -543,5 +543,3 @@ class mplot(object):
 
         outputs = mfunc.DataSavedInModule()
         return outputs
-
-

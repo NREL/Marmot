@@ -69,7 +69,7 @@ CSP-noTES_WI,CSP
 CSP_MX,CSP
 RTPV,PV
 2024_UPV,PV
-2024_DUPV,PV
+2024_DUPV,dPV
 pv,PV
 SynchCond,Storage
 battery,Storage
@@ -81,7 +81,7 @@ caes_gas,Storage
 ReEDS_gas-ct-nsp,Gas-CT
 ReEDS_battery,Storage
 ReEDS_gas-cc-nsp,Gas-CC
-ReEDS_dupv,PV
+ReEDS_dupv,dPV
 ReEDS_upv,PV
 ReEDS_gas-cc,Gas-CC
 ReEDS_coal-new,Coal
@@ -92,7 +92,7 @@ ReEDS_hydud,Hydro
 ReEDS_caes,Storage
 ReEDS_hydund,Hydro
 ReEDS_gas-ct,Gas-CT
-ReEDS_distpv,PV
+ReEDS_distpv,dPV
 ReEDS_hydnpnd,Hydro
 ReEDS_pumped-hydro,Storage
 ReEDS_lfill-gas,Biopower
@@ -113,7 +113,7 @@ hydend,Hydro
 pumped-hydro,Storage
 CAN,Net Imports
 Gas CC,Gas-CC
-distPV,PV
+distPV,dPV
 Gas CT,Gas-CT
 Nuclear ST,Nuclear
 Gas ST,Oil-Gas-Steam
@@ -124,7 +124,7 @@ Solid Biofuel ST,Biopower
 ERCOT_penalty,Other
 Biomass,Biopower
 RPM Storage c1,Storage
-RPM VG PV Rooftop,PV
+RPM VG PV Rooftop,dPV
 RPM VG PV Fixed,PV
 Gas Steam,Oil-Gas-Steam
 RPM VG Wind,Wind
@@ -140,7 +140,7 @@ PHES,Storage
 RPM Storage c0,Storage
 RPM PV Batt c1 PV,PV-Battery
 Gas CC_ERCOT,Gas-CC
-2024_dpv,PV
+2024_dpv,dPV
 Hydro,Hydro
 SynchCond,Other
 Wind,Wind
@@ -152,7 +152,7 @@ ReEDS_gas-cc-ccs,Gas-CC CCS
 ReEDS_hydsnd,Hydro
 Hydro_MonthlyEnergy,Hydro
 Hydro_FixedDispatch,Hydro
-dpv,PV
+dpv,dPV
 Dual_Fuel_NY,Dual Fuel
 DIESEL_NP,Other
 HYDRO-ROR,Hydro
@@ -178,7 +178,7 @@ NUCLEAR_BD,Nuclear
 HYDRO-ROR_KARNALI_NP,Hydro
 DIESEL_BD,Other
 BATTERY_4,Storage
-DUPV,PV
+DUPV,dPV
 HYDRO-PUMPED,Storage
 HYDRO-STORAGE_BD,Storage
 COGENERATION-BAGASSE,Dual Fuel
@@ -213,7 +213,7 @@ CT_NG_Ind,Gas-CC
 CT_Oil,Oil-Gas-Steam
 DC-Intertie,Other
 Dfuel_gen,Other
-DG-BTM_2028,PV
+DG-BTM_2028,dPV
 DR,Other
 Geo_BinaryCycle,Geothermal
 Geo_DoubleFlash,Geothermal

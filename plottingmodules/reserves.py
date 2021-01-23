@@ -102,7 +102,8 @@ class mplot(object):
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
 
                 if self.prop == "Peak Demand":
-                    axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve),
+                    axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve/unitconversion['divisor']), '.2f')) + ' {}'.format(unitconversion['units']), 
+                                    xy=(peak_reserve_t, Peak_Reserve),
                             xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
@@ -218,7 +219,7 @@ class mplot(object):
             fig1 = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict)
 
             # additional figure formatting
-            fig1.set_ylabel('Total Reserve Provision (GWh)',  color='black', rotation='vertical')
+            fig1.set_ylabel('Total Reserve Provision ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:

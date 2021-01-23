@@ -18,9 +18,9 @@ import config.mconfig as mconfig
 
 #===============================================================================
 
-custom_legend_elements = [Patch(facecolor='#DD0200',
+custom_legend_elements = Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')]
+                         label='Unserved Energy')
 
 class mplot(object):
 
@@ -100,7 +100,6 @@ class mplot(object):
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
-                #print(Total_Generation_Stack_Out)
 
                 Total_Load = load_collection.get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
@@ -211,32 +210,24 @@ class mplot(object):
 
             handles, labels = fig1.get_legend_handles_labels()
 
-            #Legend 1
-            leg1 = fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            #Combine all legends into one.
             #Legend 2
             if Pump_Load_Out.values.sum() > 0:
-                leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
-                          facecolor='inherit', frameon=True)
+                handles.append(lp2[0])
+                handles.append(lp1[0])
+                labels += ['Demand','Demand + \n Storage Charging']
+   
             else:
-                leg2 = fig1.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
-                          facecolor='inherit', frameon=True)
+                handles.append(lp1[0])
+                labels += ['Demand']
 
             #Legend 3
             if Unserved_Energy_Out.values.sum() > 0:
-                leg3 = fig1.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
-                          facecolor='inherit', frameon=True)
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
 
-            #Legend 4
-            if Pump_Load_Out.values.sum() > 0:
-                fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1),
-                          facecolor='inherit', frameon=True)
+            fig1.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
-            # Manually add the first legend back
-            fig1.add_artist(leg1)
-            fig1.add_artist(leg2)
-            if Unserved_Energy_Out.values.sum() > 0:
-                fig1.add_artist(leg3)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
@@ -349,7 +340,7 @@ class mplot(object):
                 n += 1
 
             locs,labels=plt.xticks()
-            ax.set_ylabel('Generation Change ({}h) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0],  color='black', rotation='vertical')
+            ax.set_ylabel('Generation Change ({}h) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0].replace('_',' '),  color='black', rotation='vertical')
             self.xlabels = pd.Series(self.Multi_Scenario).str.replace('_',' ').str.wrap(10, break_long_words=False)
             plt.xticks(ticks=locs,labels=self.xlabels[1:])
             ax.margins(x=0.01)
@@ -357,14 +348,12 @@ class mplot(object):
             plt.axhline(linewidth=0.5,linestyle='--',color='grey')
 
             handles, labels = ax.get_legend_handles_labels()
-
+            
+            handles.append(net_line[0])
+            labels += ['Net Gen Change']
+            
             #Main legend
-            leg_main = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
-
-            #Net line legend
-            leg_net = ax.legend(net_line,['Net Gen Change'],loc='center left',bbox_to_anchor=(1, -0.05),facecolor='inherit', frameon=True)
-            ax.add_artist(leg_main)
-            ax.add_artist(leg_net)
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
