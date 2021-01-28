@@ -76,11 +76,13 @@ class mplot(object):
                 storage_volume.columns = [scenario]
 
                 max_volume = storage_volume.max().squeeze()
-                if scenario == '2010':
+                try:
                     max_volume = max_volume_collection.get(scenario)
                     max_volume = max_volume.xs(zone_input, level = self.AGG_BY)
                     max_volume = max_volume.groupby('timestamp').sum()
                     max_volume = max_volume.squeeze()[0]
+                except KeyError:
+                    self.logger.warning('No storage resources in %s',zone_input)
 
                 #Pull unserved energy.
                 use_read = unserved_e_collection.get(scenario)
@@ -88,7 +90,24 @@ class mplot(object):
                 use = use.groupby("timestamp").sum() / 1000
                 use.columns = [scenario]
 
-                if self.prop == 'Date Range':
+                if self.prop == "Peak Demand":
+
+                    peak_demand_t = Total_Demand.idxmax()
+                    end_date = peak_demand_t + dt.timedelta(days=self.end)
+                    start_date = peak_demand_t - dt.timedelta(days=self.start)
+                    Peak_Demand = Total_Demand[peak_demand_t]
+                    storage_volume = storage_volume[start_date : end_date]
+                    use = use[start_date : end_date]
+
+                elif self.prop == "Min Net Load":
+                    min_net_load_t = Net_Load.idxmin()
+                    end_date = min_net_load_t + dt.timedelta(days=self.end)
+                    start_date = min_net_load_t - dt.timedelta(days=self.start)
+                    Min_Net_Load = Net_Load[min_net_load_t]
+                    storage_volume = storage_volume[start_date : end_date]
+                    use = use[start_date : end_date]
+
+                elif self.prop == 'Date Range':
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(self.start_date),str(self.end_date)))
 

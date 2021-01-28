@@ -71,7 +71,7 @@ class mplot(object):
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.info.info("No reserves deployed in : " + scenario)
+                    self.logger.info("No reserves deployed in : " + scenario)
                     continue
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
                 data_tables[scenario] = reserve_provision_timeseries

@@ -134,12 +134,22 @@ class MetaData:
             except KeyError:
                 pass
             try:
+                generator_headstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/exportinggenerators_headstorage']))
+                head_tail[0] = 1
+            except KeyError:
+                pass
+            try:
                 generator_tailstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generators_tailstorage']))
                 head_tail[1] = 1
             except KeyError:
                 pass
             try:
                 generator_tailstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generator_tailstorage']))
+                head_tail[1] = 1
+            except KeyError:
+                pass
+            try:
+                generator_tailstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/importinggenerators_tailstorage']))
                 head_tail[1] = 1
             except KeyError:
                 pass
@@ -261,7 +271,11 @@ class MetaData:
            try:
                region_intraregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
            except KeyError:
-               region_intraregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionalline']))
+               try:
+                   region_intraregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionalline']))
+               except KeyError:
+                   region_intraregionallines=pd.concat([pd.DataFrame(np.asarray(self.data['metadata/relations/region_importinglines'])),
+                                                        pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))]).drop_duplicates()
            region_intraregionallines = region_intraregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
            region_intraregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
            region_intraregionallines=pd.merge(region_intraregionallines,self.Region_Mapping,how='left',on="region")
