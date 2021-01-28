@@ -7,15 +7,16 @@ Functions required to create Marmot plots
 @author: Daniel Levie
 """
 
-import pandas as pd
 import os
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import math
 import logging
 import datetime as dt
+import pandas as pd
 import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import config.mconfig as mconfig
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
@@ -209,9 +210,9 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     Parameters
     ----------
     xdimension : int, optional
-        plot x dimension. The default is 1.
+        facet plot x dimension. The default is 1.
     ydimension : int, optional
-        plot y dimension. The default is 1.
+        facet plot y dimension. The default is 1.
     sharey : bool, optional
         Share y axes labels. The default is True.
 
@@ -222,7 +223,10 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     axs : matplotlib.axes
         matplotlib axes.
     """
-    fig, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=sharey, squeeze=False)
+    x = mconfig.parser("figure_size","xdimension")
+    y = mconfig.parser("figure_size","ydimension")
+    
+    fig, axs = plt.subplots(ydimension,xdimension, figsize=((x*xdimension),(y*ydimension)), sharey=sharey, squeeze=False)
     axs = axs.ravel()
     return fig,axs
 
@@ -272,7 +276,8 @@ def create_grouped_bar_plot(df, colour):
     fig : matplotlib fig
         matplotlib fig.
     """
-    fig = df.plot.bar(figsize=(6,4), rot=0, edgecolor='white', linewidth='1.5',
+    
+    fig = df.plot.bar(figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='white', linewidth='1.5',
                                       color=[colour.get(x, '#333333') for x in df.columns])
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
@@ -297,12 +302,12 @@ def create_stacked_bar_plot(df, colour):
         matplotlib fig.
     """
 
-    fig = df.plot.bar(stacked=True, figsize=(6,4), rot=0, edgecolor='black', linewidth='0.1',
+    fig = df.plot.bar(stacked=True, figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='black', linewidth='0.1',
                                                 color=[colour.get(x, '#333333') for x in df.columns])
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
     #adds comma to y axis data
-    fig.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    fig.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
     fig.tick_params(axis='y', which='major', length=5, width=1)
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
@@ -394,7 +399,7 @@ def create_stackplot(axs,data,color_dict,label=None,n=0):
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
     axs[n].tick_params(axis='x', which='major', length=5, width=1)
-    axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
     axs[n].margins(x=0.01)
 
 
@@ -558,3 +563,34 @@ def get_interval_count(df):
     # Finds intervals in 60 minute period
     interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
     return(interval_count)
+
+
+def capacity_energy_unitconversion(max_value):
+    """
+    auto unitconversion for capacity and energy figures.
+
+    Parameters
+    ----------
+    max_value : float
+        value used to determine divisor and units.
+
+    Returns
+    -------
+    dict
+        dictionary containing divisor and units.
+
+    """
+    
+    if max_value < 1000 and max_value > 1:
+        divisor = 1
+        units = 'MW'
+    elif max_value < 1:
+        divisor = 0.001
+        units = 'kW'
+    elif max_value > 999999.9:
+        divisor = 1000000
+        units = 'TW'
+    else:
+        divisor = 1000
+        units = 'GW'
+    return {'units':units, 'divisor':divisor}

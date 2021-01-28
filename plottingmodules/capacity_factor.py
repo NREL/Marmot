@@ -8,12 +8,14 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 @author: dlevie
 """
 
+import os
 import pandas as pd
 import matplotlib.ticker as mtick
 import numpy as np
-import os
-import marmot_plot_functions as mfunc
 import logging
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
+
 
 #===============================================================================
 
@@ -25,6 +27,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
     def cf(self):
         outputs = {}
@@ -192,7 +197,7 @@ class mplot(object):
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-            fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(6,4), rot=0,
+            fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
 
             fig2.spines['right'].set_visible(False)

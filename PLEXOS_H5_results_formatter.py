@@ -13,16 +13,17 @@ it can be read into the Marmot_plot_main.py file
 # Import Python Libraries
 #===============================================================================
 
-import pandas as pd
 import os
-import h5py
 import sys
+import pandas as pd
+import h5py
 import pathlib
 import time
 import logging
 import logging.config
 import yaml
 from meta_data import MetaData
+import config.mconfig as mconfig
 
 sys.path.append('../h5plexos')
 from h5plexos.query import PLEXOSSolution
@@ -63,7 +64,7 @@ pd.set_option("display.max_colwidth", 1000)
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute())
 
-Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'],
+Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
 
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo

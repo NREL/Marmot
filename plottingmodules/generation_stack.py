@@ -6,7 +6,6 @@ This code creates generation stack plots and is called from Marmot_plot_main.py
 """
 
 import pandas as pd
-
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -14,7 +13,8 @@ import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
 import numpy as np
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 import logging
 
 #===============================================================================
@@ -30,6 +30,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
 ###############################################################################
 
@@ -76,13 +79,13 @@ class mplot(object):
 
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
-            Stacked_Gen = Stacked_Gen #/ 1000 #MW -> GW
+            Stacked_Gen = Stacked_Gen 
 
             Load = load_collection.get(scenario)
             Load = Load.xs(zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
-            Load = Load #/ 1000 #MW -> GW
+            Load = Load 
             
             try:
                 pump_load_collection[scenario]
@@ -93,7 +96,7 @@ class mplot(object):
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
-            Pump_Load = Pump_Load #/ 1000 #MW -> GW
+            Pump_Load = Pump_Load 
             if (Pump_Load == 0).all() == False:
                 Total_Demand = Load - Pump_Load
             else:
@@ -126,9 +129,9 @@ class mplot(object):
             Unserved_Energy = data["Unserved_Energy"]
             unserved_eng_data_table = data["ue_data_table"]
             peak_demand_t = None
-            Peak_Demand = None
+            Peak_Demand = 0
             min_net_load_t = None
-            Min_Net_Load = None
+            Min_Net_Load = 0
 
             if self.prop == "Peak Demand":
 
@@ -195,22 +198,13 @@ class mplot(object):
                 xdimension = 1
                 ydimension = 1
 
-            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
-            if xdimension > 1:
-                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-
-
             grid_size = xdimension*ydimension
 
             # Used to calculate any excess axis to delete
             plot_number = len(all_scenarios)
             excess_axs = grid_size - plot_number
-
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
+            
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.25)
             axs = axs.ravel()
             i=0
@@ -231,15 +225,14 @@ class mplot(object):
 
                 Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
                 data = setup_data(zone_input, scenario, Stacked_Gen)
-
+                data = data_prop(data)
+                
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
                     self.logger.warning('No generation during time period in %s',zone_input)
                     out = mfunc.MissingZoneData()
                     return out
-
-                data = data_prop(data)
-
+                
                 Stacked_Gen = data["Stacked_Gen"]
                 Load = data["Load"] 
                 Pump_Load = data["Pump_Load"]
@@ -250,20 +243,27 @@ class mplot(object):
                 peak_demand_t = data["peak_demand_t"]
                 min_net_load_t = data["min_net_load_t"]
                 Min_Net_Load = data["Min_Net_Load"]
-
-                #Convert MW -> GW
-                Stacked_Gen = Stacked_Gen / 1000
-                Load = Load / 1000
-                Total_Demand = Total_Demand / 1000
-                Unserved_Energy = Unserved_Energy / 1000
-                unserved_eng_data_table = unserved_eng_data_table / 1000
+                
+                # unitconversion based off peak generation hour, only checked once 
+                if i == 0:
+                    unitconversion = mfunc.capacity_energy_unitconversion(max(Stacked_Gen.sum(axis=1)))
+                
+                #Convert units
+                Stacked_Gen = Stacked_Gen / unitconversion['divisor']
+                Load = Load / unitconversion['divisor']
+                Pump_Load = Pump_Load / unitconversion['divisor']
+                Total_Demand = Total_Demand / unitconversion['divisor']
+                Unserved_Energy = Unserved_Energy / unitconversion['divisor']
+                unserved_eng_data_table = unserved_eng_data_table / unitconversion['divisor']
+                Peak_Demand = Peak_Demand / unitconversion['divisor']
+                Min_Net_Load = Min_Net_Load / unitconversion['divisor']
 
                 Load = Load.rename('Total Load \n (Demand + Storage Charging)')
                 Total_Demand = Total_Demand.rename('Total Demand')
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
                 # Data table of values to return to main program
                 Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
-                data_tables[scenario] = Data_Table_Out
+                data_tables[scenario] = Data_Table_Out * unitconversion['divisor']
 
                 # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
@@ -287,16 +287,20 @@ class mplot(object):
                 axs[i].spines['top'].set_visible(False)
                 axs[i].tick_params(axis='y', which='major', length=5, width=1)
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
                 axs[i].margins(x=0.01)
 
                 if self.prop == "Min Net Load":
-                    axs[i].annotate('Min Net Load: \n' + str(format(int(Min_Net_Load), ',')) + ' MW', xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), (Min_Net_Load + max(Load)/4)),
+                    axs[i].annotate('Min Net Load: \n' + str(format(Min_Net_Load, '.2f')) + ' {}'.format(unitconversion['units']), 
+                                    xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), 
+                                                                               (max(Load))),
                         fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
                 # Peak Demand label overlaps other labels on a facet plot
                 elif self.prop == "Peak Demand":
-                    axs[i].annotate('Peak Demand: \n' + str(format(int(Total_Demand[peak_demand_t]), ',')) + ' MW', xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
+                    axs[i].annotate('Peak Demand: \n' + str(format(Total_Demand[peak_demand_t], '.2f')) + ' {}'.format(unitconversion['units']), 
+                                    xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), 
+                                                                             (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
                                 fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
 
@@ -368,7 +372,7 @@ class mplot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Generation (GW)',  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel('Generation ({})'.format(unitconversion['units']), color='black', rotation='vertical', labelpad=60)
 
             #Remove extra axis
             if excess_axs != 0:
@@ -401,6 +405,22 @@ class mplot(object):
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
+        
+        xdimension=len(self.xlabels)
+        if xdimension == 0:
+                xdimension = 1
+        
+        # If the plot is not a facet plot, grid size should be 1x1
+        if not self.facet:
+            xdimension = 1
+        
+        # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+        if xdimension > 1:
+            font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+            plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
+            plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
+            plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
+            plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
     
         for zone_input in self.Zones:
             self.logger.info("Zone = "+ zone_input)
@@ -470,6 +490,9 @@ class mplot(object):
             Data_Table_Out = Gen_Stack_Out
             # Reverses order of columns
             Gen_Stack_Out = Gen_Stack_Out.iloc[:, ::-1]
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Gen_Stack_Out.sum(axis=1)))
+            Gen_Stack_Out = Gen_Stack_Out/unitconversion['divisor']
 
             fig3, ax = plt.subplots(figsize=(9,6))
 
@@ -481,13 +504,13 @@ class mplot(object):
 
 
             ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
-            ax.set_ylabel('Generation Difference (MW)',  color='black', rotation='vertical')
+            ax.set_ylabel('Generation Difference ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
             ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             ax.margins(x=0.01)
 
             locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
@@ -741,25 +764,31 @@ class mplot(object):
                 units_gen = units_generating_collection.get(scenario)
                 avail_cap = gen_available_capacity_collection.get(scenario)
                 
-                #Calculate  committed cap (for thermal only).
-                thermal_commit_cap = units_gen * avail_cap
-                thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
-                thermal_commit_cap = mfunc.df_process_gen_inputs(thermal_commit_cap,self.ordered_gen)
-                thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
-                thermal_commit_cap = thermal_commit_cap / 1000 #MW -> GW
-
                 #Process generation.
                 gen = generation_collection.get(scenario)
                 gen = gen.xs(zone_input,level = self.AGG_BY)
                 gen = mfunc.df_process_gen_inputs(gen,self.ordered_gen)
                 gen = gen.loc[:, (gen != 0).any(axis=0)]
-                gen = gen / 1000
+                
+                # unitconversion based off peak generation hour, only checked once 
+                if i == 0:
+                    unitconversion = mfunc.capacity_energy_unitconversion(max(gen.sum(axis=1)))
+                gen = gen / unitconversion['divisor']
+                
+                
+                #Calculate  committed cap (for thermal only).
+                thermal_commit_cap = units_gen * avail_cap
+                thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
+                thermal_commit_cap = mfunc.df_process_gen_inputs(thermal_commit_cap,self.ordered_gen)
+                thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
+                thermal_commit_cap = thermal_commit_cap / unitconversion['divisor']
+
 
                 #Process available capacity (for VG only).
                 avail_cap = avail_cap.xs(zone_input, level = self.AGG_BY)
                 avail_cap = mfunc.df_process_gen_inputs(avail_cap,self.ordered_gen)
                 avail_cap = avail_cap.loc[:, (avail_cap !=0).any(axis=0)]
-                avail_cap = avail_cap / 1000
+                avail_cap = avail_cap / unitconversion['divisor']
 
                 j = 0
                 gen_lines = []
@@ -800,7 +829,7 @@ class mplot(object):
             #fig4.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
             fig4.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Generation or Committed Capacity (GW)',  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel('Generation or Committed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=60)
 
             data_table = pd.DataFrame()
             outputs[zone_input] = {'fig':fig4, 'data_table':data_table}

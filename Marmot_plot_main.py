@@ -6,19 +6,19 @@ Created on Thu Dec  5 14:16:30 2019
 """
 #%%
 
-import pandas as pd
 import os
-import pathlib
-import matplotlib as mpl
 import sys
-sys.path.append(os.path.dirname(os.path.realpath(__file__)) + "/plottingmodules")
+import pathlib
+import pandas as pd
+import time
+import matplotlib as mpl
 import importlib
-from meta_data import MetaData
 import logging 
 import logging.config
 import yaml
-import time
-import marmot_plot_functions as mfunc
+from meta_data import MetaData
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 
 #changes working directory to location of this python file
 os.chdir(pathlib.Path(__file__).parent.absolute()) #If running in sections you have to manually change the current directory to where Marmot is
@@ -43,12 +43,13 @@ class plottypes:
     def runmplot(self):
         mpl.rc('xtick', labelsize=self.font_defaults['xtick_size'])
         mpl.rc('ytick', labelsize=self.font_defaults['ytick_size'])
-        mpl.rc('axes', labelsize=self.font_defaults['axes_size'])
+        mpl.rc('axes', labelsize=self.font_defaults['axes_label_size'])
         mpl.rc('legend', fontsize=self.font_defaults['legend_size'])
         mpl.rc('font', family=self.font_defaults['font_family'])
         mpl.rc('figure', max_open_warning = 0)
-
-        plot = importlib.import_module(self.figure_type)
+        
+        # Import plot module from plottingmodules package
+        plot = importlib.import_module('plottingmodules.' + self.figure_type)
         fig = plot.mplot(self.argument_dict)
 
         process_attr = getattr(fig, self.figure_output_name)
@@ -67,11 +68,8 @@ except IndexError:
 # Set Graphing Font Defaults
 #===============================================================================
 
-font_defaults = {'xtick_size':11,
-                 'ytick_size':12,
-                 'axes_size':16,
-                 'legend_size':11,
-                 'font_family':'serif'}
+font_defaults = mconfig.parser("font_settings")
+
 
 #===============================================================================
 # Load Input Properties
@@ -81,8 +79,9 @@ font_defaults = {'xtick_size':11,
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
 
-Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'],
+Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
+
 
 Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
 
@@ -127,11 +126,12 @@ if xlabels == ['nan']: xlabels = [""]
 ticklabels = pd.Series(str(Marmot_user_defined_inputs.loc['Tick_labels'].squeeze()).split(",")).str.strip().tolist()
 if ticklabels == ['nan']: ticklabels = [""]
 
-figure_format = str(Marmot_user_defined_inputs.loc['Figure_Format'].squeeze()).strip()
+figure_format = mconfig.parser("figure_file_format")
 if figure_format == 'nan':
     figure_format = 'png'
 
-shift_leap_day = str(Marmot_user_defined_inputs.loc['shift_leap_day'].squeeze())
+shift_leap_day = str(mconfig.parser("shift_leap_day")).upper()
+
 #===============================================================================
 # Input and Output Directories
 #===============================================================================

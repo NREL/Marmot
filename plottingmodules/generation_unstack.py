@@ -10,7 +10,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 import numpy as np
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 import logging
 
 #===============================================================================
@@ -23,6 +24,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
 
     def gen_unstack(self):
@@ -91,8 +95,9 @@ class mplot(object):
             self.logger.info("Zone = "+ zone_input)
         
             excess_axs = grid_size - plot_number
-
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=True, squeeze=False)
+        
+            
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.25)
             axs = axs.ravel()
             i=0
@@ -197,7 +202,14 @@ class mplot(object):
                     self.logger.info("Plotting graph for entire timeperiod")
                 
                 data_table[scenario] = Stacked_Gen
-
+                
+                
+                # unitconversion based off peak generation hour, only checked once 
+                if i == 0:
+                    unitconversion = mfunc.capacity_energy_unitconversion(max(Stacked_Gen.max()))
+                Stacked_Gen = Stacked_Gen/unitconversion['divisor']
+                Unserved_Energy = Unserved_Energy/unitconversion['divisor']
+                
                 for column in Stacked_Gen.columns:
                     axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2,
                        color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
@@ -210,7 +222,7 @@ class mplot(object):
                 axs[i].spines['top'].set_visible(False)
                 axs[i].tick_params(axis='y', which='major', length=5, width=1)
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
                 axs[i].margins(x=0.01)
 
                 locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
@@ -272,7 +284,7 @@ class mplot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Genertaion (MW)',  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel('Genertaion ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=60)
             
              #Remove extra axis
             if excess_axs != 0:

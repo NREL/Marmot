@@ -9,13 +9,13 @@ This code creates transmission line and interface plots and is called from Marmo
 
 import os
 import pandas as pd
+import numpy as np
+import math
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-import numpy as np
-import math
 import logging
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 

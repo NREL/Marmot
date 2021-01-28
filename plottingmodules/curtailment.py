@@ -8,13 +8,14 @@ This module creates plots that show curtailment
 
 """
 
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
 import logging
-import marmot_plot_functions as mfunc
-import os
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 
 #===============================================================================
 
@@ -25,6 +26,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
         
     def curt_pen(self):
         outputs = {}
@@ -182,8 +186,8 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
-            fig1, ax = plt.subplots(figsize=(6,4))
+            
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
             for index, row in Penetration_Curtailment_out.iterrows():
                 if self.prop == "PV":
                     ax.scatter(row["% PV Penetration"], row["% PV Curtailment"],
@@ -271,7 +275,7 @@ class mplot(object):
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
 
 
-            fig2, ax = plt.subplots(figsize=(6,4))
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
             if self.prop == "PV":
                 Data_Table_Out = PV_Curtailment_DC
@@ -342,7 +346,9 @@ class mplot(object):
 
             Total_Curtailment_out = pd.DataFrame()
             Total_Available_gen = pd.DataFrame()
-
+            
+            vre_curt_chunks = []
+            avail_gen_chunks = []
             for scenario in self.Multi_Scenario:
                 self.logger.info("Scenario = " + scenario)
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
@@ -357,7 +363,7 @@ class mplot(object):
                 except KeyError:
                     self.logger.info('No curtailment in ' + zone_input)
                     continue
-                vre_curt = (vre_curt.loc[(slice(None), self.vre_gen_cat),:])
+                vre_curt = vre_curt[vre_curt.index.isin(self.vre_gen_cat,level='tech')]
 
                 avail_gen = avail_gen_collection.get(scenario)
                 try: #Check for regions missing all generation.
@@ -365,7 +371,7 @@ class mplot(object):
                 except KeyError:
                         self.logger.info('No available generation in ' + zone_input)
                         continue
-                avail_gen = (avail_gen.loc[(slice(None), self.vre_gen_cat),:])
+                avail_gen = avail_gen[avail_gen.index.isin(self.vre_gen_cat,level='tech')]
 
                 for vre_type in self.vre_gen_cat:
                     try:
@@ -381,30 +387,35 @@ class mplot(object):
                 vre_table = pd.DataFrame(vre_collection,index=[scenario])
                 avail_gen_table = pd.DataFrame(avail_vre_collection,index=[scenario])
 
-
-                Total_Curtailment_out = pd.concat([Total_Curtailment_out, vre_table], axis=0, sort=False)
-                Total_Available_gen = pd.concat([Total_Available_gen, avail_gen_table], axis=0, sort=False)
-
+                vre_curt_chunks.append(vre_table)
+                avail_gen_chunks.append(avail_gen_table)
+            
+            Total_Curtailment_out = pd.concat(vre_curt_chunks, axis=0, sort=False)
+            Total_Available_gen = pd.concat(avail_gen_chunks, axis=0, sort=False)
+            
             vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
-
-            Total_Curtailment_out = Total_Curtailment_out/1000000 #Convert to TWh
-
-            # Data table of values to return to main program
-            Data_Table_Out = Total_Curtailment_out
-
+            
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
+            
+            # Data table of values to return to main program
+            Data_Table_Out = Total_Curtailment_out
 
             if Total_Curtailment_out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            
+            # unit conversion return divisor and energy units
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
+            Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
+            
+            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1')
             fig3.spines['right'].set_visible(False)
             fig3.spines['top'].set_visible(False)
-            fig3.set_ylabel('Total Curtailment (TWh)',  color='black', rotation='vertical')
-            fig3.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.2f}'))
+            fig3.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            fig3.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig3.tick_params(axis='y', which='major', length=5, width=1)
             fig3.tick_params(axis='x', which='major', length=5, width=1)
             fig3.margins(x=0.01)
@@ -422,7 +433,7 @@ class mplot(object):
                 x, y = i.get_xy()
                 fig3.text(x+width/2,
                     y+height + 0.05*max(fig3.get_ylim()),
-                    '{:.2%}\n|{:,.0f}|'.format(vre_pct_curt[k],curt_totals[k]),
+                    '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11, color='red')
                 k=k+1
@@ -532,5 +543,3 @@ class mplot(object):
 
         outputs = mfunc.DataSavedInModule()
         return outputs
-
-
