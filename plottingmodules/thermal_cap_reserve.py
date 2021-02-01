@@ -38,8 +38,8 @@ class mplot(object):
         gen_available_capacity_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -60,11 +60,11 @@ class mplot(object):
 
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
-            # if len(self.Multi_Scenario) > 1:
+            # if len(self.Scenarios) > 1:
             axs = axs.ravel()
             i=0
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
 
@@ -106,7 +106,7 @@ class mplot(object):
                 formatter.offset_formats[3] = '%b %Y'
                 formatter.show_offset = False
 
-                if len(self.Multi_Scenario) > 1:
+                if len(self.Scenarios) > 1:
                     sp = axs[i].stackplot(thermal_reserve.index.values, thermal_reserve.values.T, labels = thermal_reserve.columns, linewidth=0,
                                  colors = [self.PLEXOS_color_dict.get(x, '#333333') for x in thermal_reserve.T.index])
 

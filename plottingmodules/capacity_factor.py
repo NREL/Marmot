@@ -33,8 +33,8 @@ class mplot(object):
         cap_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -45,7 +45,7 @@ class mplot(object):
             CF_all_scenarios = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
                 self.logger.info("Scenario = " + str(scenario))
                 Gen = gen_collection.get(scenario)
                 try: #Check for regions missing all generation.
@@ -127,8 +127,8 @@ class mplot(object):
         cap_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -139,7 +139,7 @@ class mplot(object):
             CF_all_scenarios = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
                 Gen = gen_collection.get(scenario)
@@ -158,7 +158,7 @@ class mplot(object):
                 #interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
                 duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
 
-                if self.start_date != 'Date Range':
+                if math.isnan(self.start_date) == False:
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(self.start_date),str(self.end_date)))
                     Gen = Gen[self.start_date : self.end_date]
@@ -216,9 +216,9 @@ class mplot(object):
         gen_hours_at_min_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_hours_at_min_collection,"generator_Hours_at_Minimum", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_hours_at_min_collection,"generator_Hours_at_Minimum", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -230,16 +230,14 @@ class mplot(object):
 
             time_at_min = pd.DataFrame()
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
                 self.logger.info("Scenario = " + str(scenario))
 
                 Min = gen_hours_at_min_collection.get(scenario)
                 Min = Min.xs(zone_input,level = self.AGG_BY)
                 Min = Min.reset_index()
-                Min.index = Min.gen_name
-                Min = Min.drop(columns = ['gen_name','timestamp','region','zone','Usual','Country','CountryInterconnect'])
+                Min = Min.set_index('gen_name')
                 Min = Min.rename(columns = {0:"Hours at Minimum"})
-
 
                 Gen = gen_collection.get(scenario)
                 try: #Check for regions missing all generation.
@@ -250,9 +248,10 @@ class mplot(object):
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
-                Gen = Gen.drop(columns = ['region'])
+
+
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
-                Gen = Gen[~Gen['tech'].isin(['PV','Wind','Hydro','CSP','Storage','Other'])]
+                Gen = Gen[~Gen['tech'].isin(self.vre_gen_cat)]
                 Gen.index = Gen.timestamp
 
                 Cap = cap_collection.get(scenario)

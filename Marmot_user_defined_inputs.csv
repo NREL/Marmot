@@ -9,8 +9,8 @@ gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,required(default),emit_names.csv
 Scenarios,string or List,required,"2036_pre_enforced_tx, 2036_enforced_tx"
 Scenario_Diff_plot,List [Max 2],optional,"2036_pre_enforced_tx, 2036_enforced_tx"
-AGG_BY,string,required,Summary
-zone_region_sublist,List,optional,
+AGG_BY,string,required,region
+zone_region_sublist,List,optional,BPAT_WI
 Facet_ylabels,List,optional,"2036_pre_enforced_tx, 2036_enforced_tx"
 Facet_xlabels,List,optional,
 Figure_Format,string,optional,svg

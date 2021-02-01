@@ -290,7 +290,6 @@ else:
 
 
 #Zones = Region_Mapping[AGG_BY].unique()   #If formated H5 is from an older version of Marmot may need this line instead.
-Zones = ['Eastern Oregon','Western Oregon','Washington','Idaho']
 # Filter for chosen figures to plot
 if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
     logger.info("Will plot row " +(sys.argv[1])+" of Marmot plot select regardless of T/F.")
@@ -302,7 +301,7 @@ else:
 #%%
 start_timer = time.time()
 # Main loop to process each figure and pass data to functions
-for index, row in Marmot_plot_select.iterrows():
+for index, row in Marmot_plot_select.iterrows(): 
 
     print("\n\n\n")
     logger.info("Plot =  %s",row["Figure Output Name"])

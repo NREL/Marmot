@@ -39,7 +39,7 @@ class mplot(object):
             check_input_data = []
             check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, scenario_list)])
             check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, scenario_list)])
-            mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)
+            mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Scenarios)
             
             if self.AGG_BY == "zone":
                 check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, scenario_list)])
@@ -51,11 +51,11 @@ class mplot(object):
             return check_input_data
         
         if self.facet:
-            check_input_data = getdata(self.Multi_Scenario)
-            all_scenarios = self.Multi_Scenario
+            check_input_data = getdata(self.Scenarios)
+            all_scenarios = self.Scenarios
         else:
-            check_input_data = getdata([self.Multi_Scenario[0]])  
-            all_scenarios = [self.Multi_Scenario[0]]
+            check_input_data = getdata([self.Scenarios[0]])  
+            all_scenarios = [self.Scenarios[0]]
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -295,7 +295,7 @@ class mplot(object):
                     excess_axs-=1
 
             if not self.facet:
-                data_table = data_table[self.Multi_Scenario[0]]
+                data_table = data_table[self.Scenarios[0]]
                 
             outputs[zone_input] = {'fig':fig1, 'data_table':data_table}
         return outputs

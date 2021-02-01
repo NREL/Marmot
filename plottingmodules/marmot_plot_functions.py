@@ -87,7 +87,7 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
             return return_value
     return return_value
 
-def df_process_gen_inputs(df,ordered_gen,zone_input):
+def df_process_gen_inputs(df,ordered_gen):
     """
     Processes generation data into a pivot
     Technology names as columns,
@@ -105,26 +105,13 @@ def df_process_gen_inputs(df,ordered_gen,zone_input):
     df : DataFrame
         Proceessed DataFrame
     """
-    # df = df.reset_index(['timestamp','tech'])
-    # df = df.groupby(["timestamp", "tech"], as_index=False).sum()
-    # df.tech = df.tech.astype("category")
-    # df.tech.cat.set_categories(ordered_gen, inplace=True)
-    # df = df.sort_values(["tech"])
-    # df = df.pivot(index='timestamp', columns='tech', values=0)
-    # return df
-
-    gen2state = pd.read_csv('/Users/mschwarz/Marmot local/Marmot/mapping_folder/PNW gens all years.csv',index_col = 'Generator')
-    df = df.reset_index()
-    df = df.merge(gen2state,right_index = True, left_on = 'gen_name')
-    df = df[['SummaryRegion','timestamp','tech',0]]
-    df = df[df['SummaryRegion'] == zone_input]
+    df = df.reset_index(['timestamp','tech'])
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
     df.tech = df.tech.astype("category")
     df.tech.cat.set_categories(ordered_gen, inplace=True)
     df = df.sort_values(["tech"])
     df = df.pivot(index='timestamp', columns='tech', values=0)
     return df
-
 
 def df_process_categorical_index(df, ordered_gen):
     """

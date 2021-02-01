@@ -102,7 +102,7 @@ class mplot(object):
         diff_csv_perc = pd.DataFrame(index = bc_tech.index.get_level_values('timestamp').unique())
 
         #Add net interchange difference to icing plot.
-        bc_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, self.Scenario_Diff[0],"Processed_HDF5_folder", self.Scenario_Diff[0] + "_formatted.h5"),"region_Net_Interchange")
+        bc_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, "Processed_HDF5_folder", self.Scenario_Diff[0] + "_formatted.h5"),"region_Net_Interchange")
         bc_int = mfunc.shift_leap_day(int_collection.get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder,self.shift_leap_day)
         scen_int = mfunc.shift_leap_day(int_collection.get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder,self.shift_leap_day)
 
@@ -185,7 +185,7 @@ class mplot(object):
                     mfunc.create_line_plot(axs,Data_Table_Out,col,color_dict = custom_color_dict, label = col, linestyle = ls_dict[col], n=0)
                     
                 #Make two hatches: blue for when scenario > basecase, and red for when scenario < basecase.
-                if self.Scenario_name != 'Icing' and self.Scenario_name != 'DryHydro':
+                if self.Scenario_Diff[1]!= 'Icing' and self.Scenario_Diff[1]!= 'DryHydro':
                     axs[0].fill_between(diffs.index,diffs[self.prop + ' ' + str(self.Scenario_Diff[0])],diffs[str(self.Scenario_Diff[1])],
                         where = diffs[str(self.Scenario_Diff[1])] > diffs[self.prop + ' ' + str(self.Scenario_Diff[0])],
                         label = 'Increased ' + self.prop.lower() + ' generation', facecolor = 'blue', hatch = '///',alpha = 0.5)

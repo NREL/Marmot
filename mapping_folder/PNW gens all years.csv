@@ -1,4 +1,9 @@
 ﻿Generator,Latitude,Longitude,PLEXOS Node,reV_Node,PCA,State,Region,PLEXOS Technology,ReEDS Technology,Capacity (MW),SummaryRegion,infrastructure
+1_Astoria,,,,,,,,Offshore Wind,,371,Western Oregon,2024
+2_PacificCity,,,,,,,,Offshore Wind,,553,Western Oregon,2025
+3_Florence,,,,,,,,Offshore Wind,,15,Western Oregon,2026
+4_CoosBay,,,,,,,,Offshore Wind,,614,Western Oregon,2027
+5_PortOrford,,,,,,,,Offshore Wind,,941,Western Oregon,2028
 upv_TechBreak2050_40579_JENKINS_WI,47.2,-120.31,40579_JENKINS_WI,40579_JENKINS,p1,WA,BPAT_WI,PV,pv,292.9,Washington,2050
 wind_TechBreak2050_40579_JENKINS_WI,47.2,-120.31,40579_JENKINS_WI,40579_JENKINS,p1,WA,BPAT_WI,Wind,wind-ons,234.7,Washington,2050
 wind_TechBreak2050_40590_LAUDERDL_WI,46.99892,-120.563777,40590_LAUDERDL_WI,40590_SMITHSON,p1,WA,BPAT_WI,Wind,wind-ons,96.4,Washington,2050

@@ -46,8 +46,8 @@ class mplot(object):
         gen_available_capacity_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -58,12 +58,12 @@ class mplot(object):
             CF_all_scenarios = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
 
-            fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
+            fig3, ax3 = plt.subplots(len(self.Scenarios),figsize=(4,4*len(self.Scenarios)),sharey=True) # Set up subplots for all scenarios
 
             n=0 #Counter for scenario subplots
 
             cf_chunk = []
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
                 Gen = generation_collection.get(scenario)
@@ -92,7 +92,7 @@ class mplot(object):
                 for i in sorted(Gen.reset_index()['tech'].unique()):
                     duration_curve = Gen.xs(i,level="tech").sort_values(by='Type CF',ascending=False).reset_index()
 
-                    if len(self.Multi_Scenario)>1:
+                    if len(self.Scenarios)>1:
                         ax3[n].plot(duration_curve['Type CF'],color=self.PLEXOS_color_dict.get(i, '#333333'),label=i)
                         ax3[n].legend()
                         ax3[n].set_ylabel('CF \n'+scenario,  color='black', rotation='vertical')
@@ -144,8 +144,8 @@ class mplot(object):
         gen_available_capacity_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -155,12 +155,12 @@ class mplot(object):
         for zone_input in self.Zones:
             self.logger.info(self.AGG_BY + " = " + zone_input)
 
-            fig2, ax2 = plt.subplots(len(self.Multi_Scenario),len(self.thermal_gen_cat),figsize=(len(self.thermal_gen_cat)*4,len(self.Multi_Scenario)*4),sharey=True)# Set up subplots for all scenarios & techs
+            fig2, ax2 = plt.subplots(len(self.Scenarios),len(self.thermal_gen_cat),figsize=(len(self.thermal_gen_cat)*4,len(self.Scenarios)*4),sharey=True)# Set up subplots for all scenarios & techs
             CF_all_scenarios=pd.DataFrame()
             n=0 #Counter for scenario subplots
             
             th_gen_chunk = []
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
                 Gen = generation_collection.get(scenario)
@@ -187,9 +187,9 @@ class mplot(object):
                 for i in sorted(thermal_generator_cf.reset_index()['tech'].unique()):
                     cfs = thermal_generator_cf['Interval CF'].xs(i,level="tech")
 
-                    if len(self.Multi_Scenario)>1:
+                    if len(self.Scenarios)>1:
                         ax2[n][m].hist(cfs.replace([np.inf,np.nan]),bins=20,range=(0,1),color=self.PLEXOS_color_dict.get(i, '#333333'),label=scenario+"_"+i)
-                        ax2[len(self.Multi_Scenario)-1][m].set_xlabel('Annual CF',  color='black', rotation='horizontal')
+                        ax2[len(self.Scenarios)-1][m].set_xlabel('Annual CF',  color='black', rotation='horizontal')
                         ax2[n][m].set_ylabel(('n='+str(len(cfs))),  color='black', rotation='vertical')
                         ax2[n][m].legend()
                  #Plot histograms of individual generator annual CF's on a subplot containing all combinations
@@ -239,8 +239,8 @@ class mplot(object):
         gen_available_capacity_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -254,7 +254,7 @@ class mplot(object):
             fig3, ax3 = plt.subplots(len(self.thermal_gen_cat),figsize=(4,4*len(self.thermal_gen_cat)),sharey=True) # Set up subplots for all scenarios
 
             cf_chunk = []
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
                 Gen = generation_collection.get(scenario)
@@ -331,7 +331,7 @@ class mplot(object):
         generation_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -342,12 +342,12 @@ class mplot(object):
             GW_all_scenarios = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
 
-            fig3, ax3 = plt.subplots(len(self.Multi_Scenario),figsize=(4,4*len(self.Multi_Scenario)),sharey=True) # Set up subplots for all scenarios
+            fig3, ax3 = plt.subplots(len(self.Scenarios),figsize=(4,4*len(self.Scenarios)),sharey=True) # Set up subplots for all scenarios
 
             n=0 #Counter for scenario subplots
             
             total_gen_chunks = []
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
                 Gen = generation_collection.get(scenario)
@@ -366,7 +366,7 @@ class mplot(object):
                 for i in sorted(Gen.reset_index()['tech'].unique()):
                     duration_curve = Gen.xs(i,level="tech").sort_values(ascending=False).reset_index()
 
-                    if len(self.Multi_Scenario)>1:
+                    if len(self.Scenarios)>1:
                         ax3[n].plot(duration_curve[0]/1000,color=self.PLEXOS_color_dict.get(i, '#333333'),label=i)
                         ax3[n].legend()
                         ax3[n].set_ylabel('GW \n'+scenario,  color='black', rotation='vertical')

@@ -14,6 +14,7 @@ import numpy as np
 from matplotlib.patches import Patch
 import marmot_plot_functions as mfunc
 import logging
+import os
 
 #===============================================================================
 
@@ -68,7 +69,6 @@ class mplot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
-
                 Total_Gen_Stack = gen_collection.get(scenario)
 
                 #Check if zone has generation, if not skips
@@ -77,6 +77,7 @@ class mplot(object):
                 except KeyError:
                     self.logger.warning("No installed capacity in : "+zone_input)
                     continue
+
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
@@ -96,7 +97,6 @@ class mplot(object):
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
-                #print(Total_Generation_Stack_Out)
 
                 Total_Load = load_collection.get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
@@ -104,7 +104,7 @@ class mplot(object):
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
-
+                
                 try:
                     unserved_energy_collection[scenario]
                 except KeyError:
@@ -141,26 +141,25 @@ class mplot(object):
                 Pump_Load_Out = pd.concat([Pump_Load_Out, Pump_Load], axis=0, sort=False)
                 Total_Demand_Out = pd.concat([Total_Demand_Out, Total_Demand], axis=0, sort=False)
 
-
             Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load (Demand + \n Storage Charging)'})
-            Total_Demand_Out = Total_Demand_Out.rename(columns={0: 'Total Demand'})
+            Total_Demand_Out = Total_Demand_Out.rename(columns={0:'Total Demand'})
             Unserved_Energy_Out = Unserved_Energy_Out.rename(columns={0: 'Unserved Energy'})
             unserved_eng_data_table_out = unserved_eng_data_table_out.rename(columns={0: 'Unserved Energy'})
 
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to TWh
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to TWh
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             # Data table of values to return to main program
-            Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Demand_Out/1000, unserved_eng_data_table_out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
+            Data_Table_Out = pd.concat([Total_Load_Out/1000000, Total_Demand_Out/1000000, unserved_eng_data_table_out/1000000, Total_Generation_Stack_Out],  axis=1, sort=False)
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
 
-            Total_Load_Out = Total_Load_Out.T/1000 #Convert to TWh
-            Pump_Load_Out = Pump_Load_Out.T/1000 #Convert to TWh
-            Total_Demand_Out = Total_Demand_Out.T/1000 #Convert to TWh
-            Unserved_Energy_Out = Unserved_Energy_Out.T/1000
+            Total_Load_Out = Total_Load_Out/1000000 #Convert to TWh
+            Pump_Load_Out = Pump_Load_Out.T/1000000 #Convert to TWh
+            Total_Demand_Out = Total_Demand_Out.T/1000000 #Convert to TWh
+            Unserved_Energy_Out = Unserved_Energy_Out.T/1000000
 
             if Total_Generation_Stack_Out.empty:
                 out = mfunc.MissingZoneData()
@@ -173,7 +172,7 @@ class mplot(object):
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Total Genertaion (TWh)',  color='black', rotation='vertical')
+            fig1.set_ylabel('Total Generation (TWh)',  color='black', rotation='vertical')
             #adds comma to y axis data
             fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
@@ -183,48 +182,40 @@ class mplot(object):
             for scenario in self.Scenarios:
 
                 x = [fig1.patches[n].get_x(), fig1.patches[n].get_x() + fig1.patches[n].get_width()]
-                height1 = [int(Total_Load_Out[scenario])]*2
-                lp1 = plt.plot(x,height1, c='black', linewidth=1.5)
-                if Pump_Load_Out[scenario].values.sum() > 0:
-                    height2 = [int(Total_Demand_Out[scenario])]*2
-                    lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)
+                height1 = [int(Total_Load_Out.loc[scenario].sum())]*2
+                lp1 = plt.plot(x,height1, c='black', linewidth=3)
+                #if Pump_Load_Out[scenario].values.sum() > 0:
+                    # height2 = [int(Total_Demand_Out[scenario])]*2
+                    # lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)
 
-                if Unserved_Energy_Out[scenario].values.sum() > 0:
-                    height3 = [int(Unserved_Energy_Out[scenario])]*2
-                    plt.plot(x,height3, c='#DD0200', linewidth=1.5)
-                    fig1.fill_between(x, height3, height1,
-                                facecolor = '#DD0200',
-                                alpha=0.5)
+                # if Unserved_Energy_Out[scenario].values.sum() > 0:
+                #     height3 = [int(Unserved_Energy_Out[scenario])]*2
+                #     plt.plot(x,height3, c='#DD0200', linewidth=1.5)
+                #     fig1.fill_between(x, height3, height1,
+                #                 facecolor = '#DD0200',
+                #                 alpha=0.5)
                 n=n+1
 
             handles, labels = fig1.get_legend_handles_labels()
 
-            #Legend 1
-            leg1 = fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            #Combine all legends into one.
             #Legend 2
-            if Pump_Load_Out.values.sum() > 0:
-                leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
-                          facecolor='inherit', frameon=True)
-            else:
-                leg2 = fig1.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
-                          facecolor='inherit', frameon=True)
+            # if Pump_Load_Out.values.sum() > 0:
+            #     handles.append(lp2[0])
+            #     handles.append(lp1[0])
+            #     labels += ['Demand','Demand + \n Storage Charging']
+   
+            # else:
+            #     handles.append(lp1[0])
+            #     labels += ['Demand']
 
             #Legend 3
             if Unserved_Energy_Out.values.sum() > 0:
-                leg3 = fig1.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
-                          facecolor='inherit', frameon=True)
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
 
-            #Legend 4
-            if Pump_Load_Out.values.sum() > 0:
-                fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1),
-                          facecolor='inherit', frameon=True)
+            fig1.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
-            # Manually add the first legend back
-            fig1.add_artist(leg1)
-            fig1.add_artist(leg2)
-            if Unserved_Energy_Out.values.sum() > 0:
-                fig1.add_artist(leg3)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
@@ -255,22 +246,22 @@ class mplot(object):
 
                 Total_Gen_Stack = gen_collection.get(scenario)
 
-                #Check if zone has generation, if not skips and breaks out of Scenarios loop
-                # try:
-                #     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
-                # except KeyError:
-                #     self.logger.warning("No installed capacity in : "+zone_input)
-                #     break
+                #Check if zone has generation, if not skips and breaks out of Multi_Scenario loop
+                try:
+                    Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    self.logger.warning("No installed capacity in : "+zone_input)
+                    break
 
-                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen,zone_input)
+                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
                 interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
                 try:
                     Stacked_Curt = curtailment_collection.get(scenario)
-                    #Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen,zone_input)
+                    Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
                     Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
                     Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -297,7 +288,7 @@ class mplot(object):
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
 
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out / 1 #GWh -> TWh
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out / 1000 #GWh -> TWh
             net_diff = Total_Generation_Stack_Out.drop(columns = 'Curtailment')
             net_diff = net_diff.sum(axis = 1)
 
@@ -323,7 +314,6 @@ class mplot(object):
 
             #Add net gen difference line.
             n=0
-            print(net_diff)
             for scenario in self.Scenarios[1:]:
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 y_net = [net_diff.loc[scenario]] * 2
@@ -331,7 +321,7 @@ class mplot(object):
                 n += 1
 
             locs,labels=plt.xticks()
-            ax.set_ylabel('Generation Change (GWh) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
+            ax.set_ylabel('Generation Change (TWh) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
             self.xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
             plt.xticks(ticks=locs,labels=self.xlabels[1:])
             ax.margins(x=0.01)

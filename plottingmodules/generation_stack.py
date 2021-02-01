@@ -34,6 +34,139 @@ class mplot(object):
 
 ###############################################################################
 
+    def committed_stack(self):
+        outputs = {}
+        generation_collection = {}
+        installed_cap_collection = {}
+        units_generating_collection = {}
+        gen_available_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(installed_cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, [self.Scenarios[0]])])
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(units_generating_collection,"generator_Units_Generating", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        for zone_input in self.Zones:
+            self.logger.info('Zone = ' + str(zone_input))
+
+            #Get technology list.
+            gens = installed_cap_collection.get(self.Scenarios[0])
+            try:
+                gens = gens.xs(zone_input,level=self.AGG_BY)
+            except KeyError:
+                self.logger.warning("No Generation in %s: ",zone_input)
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
+            tech_list = list(gens.reset_index().tech.unique())
+            tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
+            
+            if not tech_list_sort:
+                self.logger.info('No Thermal Generation in %s',zone_input)
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+                            
+            xdimension = len(self.Scenarios)
+            ydimension = len(tech_list_sort)
+
+            fig4, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharex = True, sharey='row',squeeze=False)
+            plt.subplots_adjust(wspace=0.1, hspace=0.2)
+
+            i=0
+            
+            for scenario in self.Scenarios:
+                self.logger.info("Scenario = " + scenario)
+
+                locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
+                formatter = mdates.ConciseDateFormatter(locator)
+                formatter.formats[2] = '%d\n %b'
+                formatter.zero_formats[1] = '%b\n %Y'
+                formatter.zero_formats[2] = '%d\n %b'
+                formatter.zero_formats[3] = '%H:%M\n %d-%b'
+                formatter.offset_formats[3] = '%b %Y'
+                formatter.show_offset = False
+                
+
+                units_gen = units_generating_collection.get(scenario)
+                avail_cap = gen_available_capacity_collection.get(scenario)
+                
+                #Calculate  committed cap (for thermal only).
+                thermal_commit_cap = units_gen * avail_cap
+                thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
+                thermal_commit_cap = mfunc.df_process_gen_inputs(thermal_commit_cap,self.ordered_gen)
+                thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
+                thermal_commit_cap = thermal_commit_cap / 1000 #MW -> GW
+
+                #Process generation.
+                gen = generation_collection.get(scenario)
+                gen = gen.xs(zone_input,level = self.AGG_BY)
+                gen = mfunc.df_process_gen_inputs(gen,self.ordered_gen)
+                gen = gen.loc[:, (gen != 0).any(axis=0)]
+                gen = gen / 1000
+
+                #Process available capacity (for VG only).
+                avail_cap = avail_cap.xs(zone_input, level = self.AGG_BY)
+                avail_cap = mfunc.df_process_gen_inputs(avail_cap,self.ordered_gen)
+                avail_cap = avail_cap.loc[:, (avail_cap !=0).any(axis=0)]
+                avail_cap = avail_cap / 1000
+
+                j = 0
+                gen_lines = []
+                for tech in tech_list_sort:
+                    if tech not in gen.columns:
+                        gen_one_tech = pd.Series(0,index = gen.index)
+                        commit_cap = pd.Series(0,index = gen.index) #Add dummy columns to deal with coal retirements (coal showing up in 2024, but not future years).
+                    elif tech in self.thermal_gen_cat:
+                        gen_one_tech = gen[tech]
+                        commit_cap = thermal_commit_cap[tech]
+                    else:
+                        gen_one_tech = gen[tech]
+                        commit_cap = avail_cap[tech]
+                    
+                    gen_line = axs[j,i].plot(gen_one_tech,alpha = 0, color = self.PLEXOS_color_dict[tech])[0]
+                    gen_lines.append(gen_line)
+                    gen_fill = axs[j,i].fill_between(gen_one_tech.index,gen_one_tech,0, color = self.PLEXOS_color_dict[tech], alpha = 0.5)
+                    if tech != 'Hydro':
+                        cc = axs[j,i].plot(commit_cap, color = self.PLEXOS_color_dict[tech])
+
+                    axs[j,i].spines['right'].set_visible(False)
+                    axs[j,i].spines['top'].set_visible(False)
+                    axs[j,i].tick_params(axis='y', which='major', length=5, width=1)
+                    axs[j,i].tick_params(axis='x', which='major', length=5, width=1)
+                    axs[j,i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+                    axs[j,i].margins(x=0.01)
+                    axs[j,i].xaxis.set_major_locator(locator)
+                    axs[j,i].xaxis.set_major_formatter(formatter)
+                    if j == 0:
+                        axs[j,i].set_xlabel(xlabel = scenario, color = 'black')
+                        axs[j,i].xaxis.set_label_position('top')
+                    if i == 0:
+                        axs[j,i].set_ylabel(ylabel = tech, rotation = 'vertical', color = 'black')
+
+                    j = j + 1
+                i = i + 1
+
+            #fig4.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
+            fig4.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.ylabel('Generation or Committed Capacity (GW)',  color='black', rotation='vertical', labelpad=60)
+
+            data_table = pd.DataFrame()
+            outputs[zone_input] = {'fig':fig4, 'data_table':data_table}
+        return outputs
+
+            # fig4.savefig('/home/mschwarz/PLEXOS results analysis/test/WI_commited_cap_2011heatwave_test.png', dpi=100, bbox_inches='tight') #Test
+            # mpl.pyplot.close('all')
+
+
     def gen_stack(self):
         # Create a dictionary to hold Dataframes
         gen_collection = {}
@@ -46,7 +179,7 @@ class mplot(object):
         def set_dicts(scenario_list):
             check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, scenario_list)])
             check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, scenario_list)])
-            mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)
+            mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Scenarios)
             
             if self.AGG_BY == "zone":
                 check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, scenario_list)])
@@ -132,7 +265,6 @@ class mplot(object):
             Min_Net_Load = None
 
             if self.prop == "Peak Demand":
-
                 peak_demand_t = Total_Demand.idxmax()
                 end_date = peak_demand_t + dt.timedelta(days=self.end)
                 start_date = peak_demand_t - dt.timedelta(days=self.start)
@@ -181,6 +313,7 @@ class mplot(object):
             data["Peak_Demand"] = Peak_Demand
             data["min_net_load_t"] = min_net_load_t
             data["Min_Net_Load"] = Min_Net_Load
+
             return data
 
         def mkplot(outputs, zone_input, all_scenarios):
@@ -394,7 +527,7 @@ class mplot(object):
                     excess_axs-=1
 
             if not self.facet:
-                data_tables = data_tables[self.Multi_Scenario[0]]
+                data_tables = data_tables[self.Scenarios[0]]
             out = {'fig':fig1, 'data_table':data_tables}
 
             plt.close(fig1)
@@ -404,9 +537,9 @@ class mplot(object):
         # Main loop for gen_stack
         outputs = {}        
         if self.facet:
-            check_input_data = set_dicts(self.Multi_Scenario)
+            check_input_data = set_dicts(self.Scenarios)
         else:
-            check_input_data = set_dicts([self.Multi_Scenario[0]])  
+            check_input_data = set_dicts([self.Scenarios[0]])  
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -417,9 +550,9 @@ class mplot(object):
             self.logger.info("Zone = "+ zone_input)
 
             if self.facet:
-                outputs[zone_input] = mkplot(outputs, zone_input, self.Multi_Scenario)
+                outputs[zone_input] = mkplot(outputs, zone_input, self.Scenarios)
             else:
-                outputs[zone_input] = mkplot(outputs, zone_input, [self.Multi_Scenario[0]])
+                outputs[zone_input] = mkplot(outputs, zone_input, [self.Scenarios[0]])
         return outputs
 
 ###############################################################################
@@ -430,7 +563,7 @@ class mplot(object):
         gen_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
         
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -515,319 +648,190 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
-    def gen_stack_all_periods(self):
-        #Location to save to
-        gen_stack_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Gen_Stack')
+###DEPRECIATED FOR NOW
+
+    # def gen_stack_all_periods(self):
+    #     #Location to save to
+    #     gen_stack_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Gen_Stack')
         
-        Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", 'generator_Generation')
-        try:
-            Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Pump_Load" )
-        except:
-            Pump_Load_read = Stacked_Gen_read.copy()
-            Pump_Load_read.iloc[:,0] = 0
-        Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "generator_Curtailment" )
+    #     Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", 'generator_Generation')
+    #     try:
+    #         Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "generator_Pump_Load" )
+    #     except:
+    #         Pump_Load_read = Stacked_Gen_read.copy()
+    #         Pump_Load_read.iloc[:,0] = 0
+    #     Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "generator_Curtailment" )
 
-        # If data is to be aggregated by zone, then zone properties are loaded, else region properties are loaded
-        if self.AGG_BY == "zone":
-            Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Load")
-            try:
-                Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "zone_Unserved_Energy" )
-            except:
-                Unserved_Energy_read = Load_read.copy()
-                Unserved_Energy_read.iloc[:,0] = 0
-        else:
-            Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Load")
-            try:
-                Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Multi_Scenario[0]+"_formatted.h5", "region_Unserved_Energy" )
-            except:
-                Unserved_Energy_read = Load_read.copy()
-                Unserved_Energy_read.iloc[:,0] = 0
+    #     # If data is to be aggregated by zone, then zone properties are loaded, else region properties are loaded
+    #     if self.AGG_BY == "zone":
+    #         Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "zone_Load")
+    #         try:
+    #             Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "zone_Unserved_Energy" )
+    #         except:
+    #             Unserved_Energy_read = Load_read.copy()
+    #             Unserved_Energy_read.iloc[:,0] = 0
+    #     else:
+    #         Load_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "region_Load")
+    #         try:
+    #             Unserved_Energy_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "region_Unserved_Energy" )
+    #         except:
+    #             Unserved_Energy_read = Load_read.copy()
+    #             Unserved_Energy_read.iloc[:,0] = 0
 
-        outputs = {}
-        for zone_input in self.Zones:
+    #     outputs = {}
+    #     for zone_input in self.Zones:
 
-            self.logger.info("Zone = "+ zone_input)
-
-
-           # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
-            Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
-            del Stacked_Gen_read
-            Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
-
-            try:
-                Stacked_Curt = Stacked_Curt_read.xs(zone_input,level=self.AGG_BY)
-                del Stacked_Curt_read
-                Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
-                Stacked_Curt = Stacked_Curt.sum(axis=1)
-                Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
-                Stacked_Gen.insert(len(Stacked_Gen.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
-            except Exception:
-                pass
-
-            # Calculates Net Load by removing variable gen + curtailment
-            self.vre_gen_cat = self.vre_gen_cat + ['Curtailment']
-            # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-            self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
-            Net_Load = Stacked_Gen.drop(labels = self.vre_gen_cat, axis=1)
-            Net_Load = Net_Load.sum(axis=1)
-
-            # Removes columns that only contain 0
-            Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
-
-            Load = Load_read.xs(zone_input,level=self.AGG_BY)
-            del Load_read
-            Load = Load.groupby(["timestamp"]).sum()
-            Load = Load.squeeze() #Convert to Series
-
-            Pump_Load = Pump_Load_read.xs(zone_input,level=self.AGG_BY)
-            del Pump_Load_read
-            Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
-            Pump_Load = Pump_Load.squeeze() #Convert to Series
-            if (Pump_Load == 0).all() == False:
-                Total_Demand = Load - Pump_Load
-            else:
-                Total_Demand = Load
-
-            Unserved_Energy = Unserved_Energy_read.xs(zone_input,level=self.AGG_BY)
-            del Unserved_Energy_read
-            Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
-            Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
-            unserved_eng_data_table = Unserved_Energy # Used for output to data table csv
-            if (Unserved_Energy == 0).all() == False:
-                Unserved_Energy = Load - Unserved_Energy
-
-            Load = Load.rename('Total Load (Demand + Storage Charging)')
-            Total_Demand = Total_Demand.rename('Total Demand')
-            unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
+    #         self.logger.info("Zone = "+ zone_input)
 
 
-            first_date=Stacked_Gen.index[0]
-            for wk in range(1,53): #assumes weekly, could be something else if user changes self.end Marmot_plot_select
+    #        # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
+    #         Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
+    #         del Stacked_Gen_read
+    #         Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
 
-                period_start=first_date+dt.timedelta(days=(wk-1)*7)
-                period_end=period_start+dt.timedelta(days=self.end)
-                self.logger.info(str(period_start)+" and next "+str(self.end)+" days.")
-                Stacked_Gen_Period = Stacked_Gen[period_start:period_end]
-                Load_Period = Load[period_start:period_end]
-                Unserved_Energy_Period = Unserved_Energy[period_start:period_end]
-                Total_Demand_Period = Total_Demand[period_start:period_end]
-                unserved_eng_data_table_period = unserved_eng_data_table[period_start:period_end]
+    #         try:
+    #             Stacked_Curt = Stacked_Curt_read.xs(zone_input,level=self.AGG_BY)
+    #             del Stacked_Curt_read
+    #             Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+    #             Stacked_Curt = Stacked_Curt.sum(axis=1)
+    #             Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
+    #             Stacked_Gen.insert(len(Stacked_Gen.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
+    #         except Exception:
+    #             pass
 
+    #         # Calculates Net Load by removing variable gen + curtailment
+    #         self.vre_gen_cat = self.vre_gen_cat + ['Curtailment']
+    #         # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+    #         self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
+    #         Net_Load = Stacked_Gen.drop(labels = self.vre_gen_cat, axis=1)
+    #         Net_Load = Net_Load.sum(axis=1)
 
-                # Data table of values to return to main program
-                Data_Table_Out = pd.concat([Load_Period, Total_Demand_Period, unserved_eng_data_table_period, Stacked_Gen_Period], axis=1, sort=False)
+    #         # Removes columns that only contain 0
+    #         Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
-                fig1, ax = plt.subplots(figsize=(9,6))
-                ax.stackplot(Stacked_Gen_Period.index.values, Stacked_Gen_Period.values.T, labels=Stacked_Gen_Period.columns, linewidth=5,colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen_Period.T.index])
+    #         Load = Load_read.xs(zone_input,level=self.AGG_BY)
+    #         del Load_read
+    #         Load = Load.groupby(["timestamp"]).sum()
+    #         Load = Load.squeeze() #Convert to Series
 
-                if (Unserved_Energy_Period == 0).all() == False:
-                    plt.plot(Unserved_Energy_Period,
-                                   #color='#EE1289'  OLD MARMOT COLOR
-                                   color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
-                                   )
+    #         Pump_Load = Pump_Load_read.xs(zone_input,level=self.AGG_BY)
+    #         del Pump_Load_read
+    #         Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
+    #         Pump_Load = Pump_Load.squeeze() #Convert to Series
+    #         if (Pump_Load == 0).all() == False:
+    #             Total_Demand = Load - Pump_Load
+    #         else:
+    #             Total_Demand = Load
 
-                lp1 = plt.plot(Load_Period, color='black')
+    #         Unserved_Energy = Unserved_Energy_read.xs(zone_input,level=self.AGG_BY)
+    #         del Unserved_Energy_read
+    #         Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
+    #         Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
+    #         unserved_eng_data_table = Unserved_Energy # Used for output to data table csv
+    #         if (Unserved_Energy == 0).all() == False:
+    #             Unserved_Energy = Load - Unserved_Energy
 
-                if (Pump_Load == 0).all() == False:
-                    lp3 = plt.plot(Total_Demand_Period, color='black', linestyle="--")
-
-
-                ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-                ax.set_xlabel('Date ' + '(' + str(self.timezone) + ')',  color='black', rotation='horizontal')
-                ax.spines['right'].set_visible(False)
-                ax.spines['top'].set_visible(False)
-                ax.tick_params(axis='y', which='major', length=5, width=1)
-                ax.tick_params(axis='x', which='major', length=5, width=1)
-                ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                ax.margins(x=0.01)
-
-                locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-                formatter = mdates.ConciseDateFormatter(locator)
-                formatter.formats[2] = '%d\n %b'
-                formatter.zero_formats[1] = '%b\n %Y'
-                formatter.zero_formats[2] = '%d\n %b'
-                formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                formatter.offset_formats[3] = '%b %Y'
-                formatter.show_offset = False
-                ax.xaxis.set_major_locator(locator)
-                ax.xaxis.set_major_formatter(formatter)
-
-
-                if (Unserved_Energy_Period == 0).all() == False:
-                    ax.fill_between(Load_Period.index, Load_Period,Unserved_Energy_Period,
-                                    #facecolor='#EE1289'
-                                    facecolor = '#DD0200',
-                                    alpha=0.5)
-
-                handles, labels = ax.get_legend_handles_labels()
+    #         Load = Load.rename('Total Load (Demand + Storage Charging)')
+    #         Total_Demand = Total_Demand.rename('Total Demand')
+    #         unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
 
 
-                #Legend 1
-                leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                #Legend 2
-                if (Pump_Load == 0).all() == False:
-                    leg2 = ax.legend(lp1, ['Demand + Storage Charging'], loc='center left',bbox_to_anchor=(1, 0.9),
-                              facecolor='inherit', frameon=True)
-                else:
-                    leg2 = ax.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9),
-                              facecolor='inherit', frameon=True)
+    #         first_date=Stacked_Gen.index[0]
+    #         for wk in range(1,53): #assumes weekly, could be something else if user changes self.end Marmot_plot_select
 
-                #Legend 3
-                if (Unserved_Energy_Period == 0).all() == False:
-                    leg3 = ax.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 0.82),
-                              facecolor='inherit', frameon=True)
-
-                #Legend 4
-                if (Pump_Load == 0).all() == False:
-                    ax.legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.885),
-                              facecolor='inherit', frameon=True)
-
-                # Manually add the first legend back
-                ax.add_artist(leg1)
-                ax.add_artist(leg2)
-                if (Unserved_Energy_Period == 0).all() == False:
-                    ax.add_artist(leg3)
+    #             period_start=first_date+dt.timedelta(days=(wk-1)*7)
+    #             period_end=period_start+dt.timedelta(days=self.end)
+    #             self.logger.info(str(period_start)+" and next "+str(self.end)+" days.")
+    #             Stacked_Gen_Period = Stacked_Gen[period_start:period_end]
+    #             Load_Period = Load[period_start:period_end]
+    #             Unserved_Energy_Period = Unserved_Energy[period_start:period_end]
+    #             Total_Demand_Period = Total_Demand[period_start:period_end]
+    #             unserved_eng_data_table_period = unserved_eng_data_table[period_start:period_end]
 
 
-                fig1.savefig(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Multi_Scenario[0]+"_period_"+str(wk)), dpi=600, bbox_inches='tight')
-                Data_Table_Out.to_csv(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Multi_Scenario[0]+"_period_"+str(wk)+ ".csv"))
-                del fig1
-                del Data_Table_Out
-                mpl.pyplot.close('all')
+    #             # Data table of values to return to main program
+    #             Data_Table_Out = pd.concat([Load_Period, Total_Demand_Period, unserved_eng_data_table_period, Stacked_Gen_Period], axis=1, sort=False)
 
-        outputs = mfunc.DataSavedInModule()
-        #end weekly loop
-        return outputs
+    #             fig1, ax = plt.subplots(figsize=(9,6))
+    #             ax.stackplot(Stacked_Gen_Period.index.values, Stacked_Gen_Period.values.T, labels=Stacked_Gen_Period.columns, linewidth=5,colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen_Period.T.index])
 
-    def committed_stack(self):
-        outputs = {}
-        generation_collection = {}
-        installed_cap_collection = {}
-        units_generating_collection = {}
-        gen_available_capacity_collection = {}
-        check_input_data = []
-        
-        check_input_data.extend([mfunc.get_data(installed_cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(units_generating_collection,"generator_Units_Generating", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        
-        # Checks if all data required by plot is available, if 1 in list required data is missing
-        if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-        
-        for zone_input in self.Zones:
-            self.logger.info('Zone = ' + str(zone_input))
+    #             if (Unserved_Energy_Period == 0).all() == False:
+    #                 plt.plot(Unserved_Energy_Period,
+    #                                #color='#EE1289'  OLD MARMOT COLOR
+    #                                color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+    #                                )
 
-            #Get technology list.
-            gens = installed_cap_collection.get(self.Multi_Scenario[0])
-            try:
-                gens = gens.xs(zone_input,level=self.AGG_BY)
-            except KeyError:
-                self.logger.warning("No Generation in %s: ",zone_input)
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
-                continue
-            
-            tech_list = list(gens.reset_index().tech.unique())
-            tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
-            
-            if not tech_list_sort:
-                self.logger.info('No Thermal Generation in %s',zone_input)
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
-                continue
-                            
-            xdimension = len(self.Multi_Scenario)
-            ydimension = len(tech_list_sort)
+    #             lp1 = plt.plot(Load_Period, color='black')
 
-            fig4, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharex = True, sharey='row',squeeze=False)
-            plt.subplots_adjust(wspace=0.1, hspace=0.2)
+    #             if (Pump_Load == 0).all() == False:
+    #                 lp3 = plt.plot(Total_Demand_Period, color='black', linestyle="--")
 
-            i=0
-            
-            for scenario in self.Multi_Scenario:
-                self.logger.info("Scenario = " + scenario)
 
-                locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
-                formatter = mdates.ConciseDateFormatter(locator)
-                formatter.formats[2] = '%d\n %b'
-                formatter.zero_formats[1] = '%b\n %Y'
-                formatter.zero_formats[2] = '%d\n %b'
-                formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                formatter.offset_formats[3] = '%b %Y'
-                formatter.show_offset = False
-                
+    #             ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
+    #             ax.set_xlabel('Date ' + '(' + str(self.timezone) + ')',  color='black', rotation='horizontal')
+    #             ax.spines['right'].set_visible(False)
+    #             ax.spines['top'].set_visible(False)
+    #             ax.tick_params(axis='y', which='major', length=5, width=1)
+    #             ax.tick_params(axis='x', which='major', length=5, width=1)
+    #             ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    #             ax.margins(x=0.01)
 
-                units_gen = units_generating_collection.get(scenario)
-                avail_cap = gen_available_capacity_collection.get(scenario)
-                
-                #Calculate  committed cap (for thermal only).
-                thermal_commit_cap = units_gen * avail_cap
-                thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
-                thermal_commit_cap = mfunc.df_process_gen_inputs(thermal_commit_cap,self.ordered_gen)
-                thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
-                thermal_commit_cap = thermal_commit_cap / 1000 #MW -> GW
+    #             locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
+    #             formatter = mdates.ConciseDateFormatter(locator)
+    #             formatter.formats[2] = '%d\n %b'
+    #             formatter.zero_formats[1] = '%b\n %Y'
+    #             formatter.zero_formats[2] = '%d\n %b'
+    #             formatter.zero_formats[3] = '%H:%M\n %d-%b'
+    #             formatter.offset_formats[3] = '%b %Y'
+    #             formatter.show_offset = False
+    #             ax.xaxis.set_major_locator(locator)
+    #             ax.xaxis.set_major_formatter(formatter)
 
-                #Process generation.
-                gen = generation_collection.get(scenario)
-                gen = gen.xs(zone_input,level = self.AGG_BY)
-                gen = mfunc.df_process_gen_inputs(gen,self.ordered_gen)
-                gen = gen.loc[:, (gen != 0).any(axis=0)]
-                gen = gen / 1000
 
-                #Process available capacity (for VG only).
-                avail_cap = avail_cap.xs(zone_input, level = self.AGG_BY)
-                avail_cap = mfunc.df_process_gen_inputs(avail_cap,self.ordered_gen)
-                avail_cap = avail_cap.loc[:, (avail_cap !=0).any(axis=0)]
-                avail_cap = avail_cap / 1000
+    #             if (Unserved_Energy_Period == 0).all() == False:
+    #                 ax.fill_between(Load_Period.index, Load_Period,Unserved_Energy_Period,
+    #                                 #facecolor='#EE1289'
+    #                                 facecolor = '#DD0200',
+    #                                 alpha=0.5)
 
-                j = 0
-                gen_lines = []
-                for tech in tech_list_sort:
-                    if tech not in gen.columns:
-                        gen_one_tech = pd.Series(0,index = gen.index)
-                        commit_cap = pd.Series(0,index = gen.index) #Add dummy columns to deal with coal retirements (coal showing up in 2024, but not future years).
-                    elif tech in self.thermal_gen_cat:
-                        gen_one_tech = gen[tech]
-                        commit_cap = thermal_commit_cap[tech]
-                    else:
-                        gen_one_tech = gen[tech]
-                        commit_cap = avail_cap[tech]
-                    
-                    gen_line = axs[j,i].plot(gen_one_tech,alpha = 0, color = self.PLEXOS_color_dict[tech])[0]
-                    gen_lines.append(gen_line)
-                    gen_fill = axs[j,i].fill_between(gen_one_tech.index,gen_one_tech,0, color = self.PLEXOS_color_dict[tech], alpha = 0.5)
-                    if tech != 'Hydro':
-                        cc = axs[j,i].plot(commit_cap, color = self.PLEXOS_color_dict[tech])
+    #             handles, labels = ax.get_legend_handles_labels()
 
-                    axs[j,i].spines['right'].set_visible(False)
-                    axs[j,i].spines['top'].set_visible(False)
-                    axs[j,i].tick_params(axis='y', which='major', length=5, width=1)
-                    axs[j,i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[j,i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
-                    axs[j,i].margins(x=0.01)
-                    axs[j,i].xaxis.set_major_locator(locator)
-                    axs[j,i].xaxis.set_major_formatter(formatter)
-                    if j == 0:
-                        axs[j,i].set_xlabel(xlabel = scenario, color = 'black')
-                        axs[j,i].xaxis.set_label_position('top')
-                    if i == 0:
-                        axs[j,i].set_ylabel(ylabel = tech, rotation = 'vertical', color = 'black')
 
-                    j = j + 1
-                i = i + 1
+    #             #Legend 1
+    #             leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+    #                           facecolor='inherit', frameon=True)
+    #             #Legend 2
+    #             if (Pump_Load == 0).all() == False:
+    #                 leg2 = ax.legend(lp1, ['Demand + Storage Charging'], loc='center left',bbox_to_anchor=(1, 0.9),
+    #                           facecolor='inherit', frameon=True)
+    #             else:
+    #                 leg2 = ax.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 0.9),
+    #                           facecolor='inherit', frameon=True)
 
-            #fig4.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
-            fig4.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Generation or Committed Capacity (GW)',  color='black', rotation='vertical', labelpad=60)
+    #             #Legend 3
+    #             if (Unserved_Energy_Period == 0).all() == False:
+    #                 leg3 = ax.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 0.82),
+    #                           facecolor='inherit', frameon=True)
 
-            data_table = pd.DataFrame()
-            outputs[zone_input] = {'fig':fig4, 'data_table':data_table}
-        return outputs
+    #             #Legend 4
+    #             if (Pump_Load == 0).all() == False:
+    #                 ax.legend(lp3, ['Demand'], loc='upper left',bbox_to_anchor=(1, 0.885),
+    #                           facecolor='inherit', frameon=True)
 
-            # fig4.savefig('/home/mschwarz/PLEXOS results analysis/test/WI_commited_cap_2011heatwave_test.png', dpi=100, bbox_inches='tight') #Test
-            # mpl.pyplot.close('all')
+    #             # Manually add the first legend back
+    #             ax.add_artist(leg1)
+    #             ax.add_artist(leg2)
+    #             if (Unserved_Energy_Period == 0).all() == False:
+    #                 ax.add_artist(leg3)
+
+
+    #             fig1.savefig(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Scenarios[0]+"_period_"+str(wk)), dpi=600, bbox_inches='tight')
+    #             Data_Table_Out.to_csv(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Scenarios[0]+"_period_"+str(wk)+ ".csv"))
+    #             del fig1
+    #             del Data_Table_Out
+    #             mpl.pyplot.close('all')
+
+    #     outputs = mfunc.DataSavedInModule()
+    #     #end weekly loop
+    #     return outputs
+
