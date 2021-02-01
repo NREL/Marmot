@@ -8,10 +8,10 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 @author: dlevie
 """
 
-import pandas as pd
 import os
+import pandas as pd
 import logging
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 class mplot(object):

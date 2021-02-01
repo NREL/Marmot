@@ -14,7 +14,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import os
 from matplotlib.patches import Patch
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 import logging
 
 #===============================================================================

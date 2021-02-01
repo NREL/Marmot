@@ -10,12 +10,12 @@ and is called from Marmot_plot_main.py
 @author: adyreson
 """
 
-import pandas as pd
-import matplotlib.pyplot as plt
-import numpy as np
 import os
-import marmot_plot_functions as mfunc
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
 import logging
+import plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 

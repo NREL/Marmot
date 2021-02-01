@@ -5,22 +5,22 @@ Created on Tue Dec 10 08:51:15 2019
 @author: dlevie
 """
 
+import os
 import pandas as pd
+import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import os
-import total_generation as gen
-import pdb
 from matplotlib.patches import Patch
-import numpy as np
-import marmot_plot_functions as mfunc
+import pdb
 import logging
+import plottingmodules.total_generation as gen
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 
 #===============================================================================
 
-custom_legend_elements = [Patch(facecolor='#DD0200',
-                            alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')]
+custom_legend_elements = Patch(facecolor='#DD0200',
+                            alpha=0.5, edgecolor='#DD0200')
 
 class mplot(object):
     def __init__(self, argument_dict):
@@ -32,6 +32,9 @@ class mplot(object):
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
     def total_cap(self):
         outputs = {}
@@ -55,6 +58,7 @@ class mplot(object):
                 self.logger.info("Scenario = " + scenario)
 
                 Total_Installed_Capacity = installed_capacity_collection.get(scenario)
+                
                 zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 if scenario == 'ADS':
                     zone_input_adj = zone_input.split('_WI')[0]
@@ -72,8 +76,6 @@ class mplot(object):
                 Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
 
-
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000 #Convert to GW
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
@@ -85,18 +87,21 @@ class mplot(object):
 
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Data_Table_Out, Total_Installed_Capacity_Out],  axis=1, sort=False)
-
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor'] 
+            
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Total Installed Capacity (GW)',  color='black', rotation='vertical')
+            fig1.set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
@@ -152,9 +157,7 @@ class mplot(object):
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
-
-
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/1000 #Convert to GW
+                
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             try:
@@ -174,19 +177,23 @@ class mplot(object):
 
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Data_Table_Out, Total_Installed_Capacity_Out],  axis=1, sort=False)
-
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor'] 
+            
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
 
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Capacity Change (GW) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
+            fig1.set_ylabel('Capacity Change ({}) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0],  color='black', rotation='vertical')
+
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
@@ -225,6 +232,9 @@ class mplot(object):
             
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor'] 
 
             Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=axs[0],
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
@@ -232,9 +242,9 @@ class mplot(object):
 
             axs[0].spines['right'].set_visible(False)
             axs[0].spines['top'].set_visible(False)
-            axs[0].set_ylabel('Total Installed Capacity (GW)',  color='black', rotation='vertical')
+            axs[0].set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             axs[0].tick_params(axis='y', which='major', length=5, width=1)
             axs[0].tick_params(axis='x', which='major', length=5, width=1)
             axs[0].get_legend().remove()
@@ -246,6 +256,10 @@ class mplot(object):
 
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
+
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Gen_Results.sum()))
+            Total_Gen_Results = Total_Gen_Results/unitconversion['divisor'] 
+
             Total_Load_Out = Total_Gen_Results.loc[:, "Total Load (Demand + \n Storage Charging)"]
             Total_Demand_Out = Total_Gen_Results.loc[:, "Total Demand"]
             Unserved_Energy_Out = Total_Gen_Results.loc[:, "Unserved Energy"]
@@ -254,15 +268,15 @@ class mplot(object):
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
-
+            
             Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=axs[1],
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
 
             axs[1].spines['right'].set_visible(False)
             axs[1].spines['top'].set_visible(False)
-            axs[1].set_ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical')
+            axs[1].set_ylabel('Total Generation ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             axs[1].tick_params(axis='y', which='major', length=5, width=1)
             axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
@@ -293,47 +307,34 @@ class mplot(object):
             l2 = Total_Generation_Stack_Out.columns.tolist()
             l1.extend(l2)
 
-            handles = np.unique(np.array(l1)).tolist()
-            handles.sort(key = lambda i:self.ordered_gen.index(i))
-            handles = reversed(handles)
+            labels = np.unique(np.array(l1)).tolist()
+            labels.sort(key = lambda i:self.ordered_gen.index(i))
 
             # create custom gen_tech legend
-            gen_tech_legend = []
-            for tech in handles:
-                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0,
-                         label=tech)]
-                gen_tech_legend.extend(legend_handles)
+            handles = []
+            for tech in labels:
+                gen_tech_legend = Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0)
+                handles.append(gen_tech_legend)
 
-            #Legend 1
-            leg1 = axs[1].legend(handles = gen_tech_legend, loc='lower left', bbox_to_anchor=(1,-0.1),
-                          facecolor='inherit', frameon=True, prop={"size":10})
 
-            #Legend 2
             if Pump_Load_Out.values.sum() > 0:
-              leg2 = axs[1].legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
-                        facecolor='inherit', frameon=True, prop={"size":10})
-            else:
-              leg2 = axs[1].legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
-                        facecolor='inherit', frameon=True, prop={"size":10})
+                handles.append(lp2[0])
+                handles.append(lp1[0])
+                labels += ['Demand','Demand + \n Storage Charging']
+             
+            else:  
+                handles.append(lp1[0])
+                labels += ['Demand']
 
-            #Legend 3
             if Unserved_Energy_Out.values.sum() > 0:
-                leg3 = axs[1].legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
-                          facecolor='inherit', frameon=True, prop={"size":10})
-
-            #Legend 4
-            if Pump_Load_Out.values.sum() > 0:
-                leg4 = axs[1].legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.18),
-                          facecolor='inherit', frameon=True, prop={"size":10})
-
-            # Manually add the first legend back
-            fig.add_artist(leg1)
-            fig.add_artist(leg2)
-            if Unserved_Energy_Out.values.sum() > 0:
-                fig.add_artist(leg3)
-            if Pump_Load_Out.values.sum() > 0:
-                fig.add_artist(leg4)
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
+            
+            axs[1].legend(reversed(handles),reversed(labels),
+                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                    facecolor='inherit', frameon=True)
+            
 
             # add labels to panels
             axs[0].set_title("A.", fontdict={"weight":"bold"}, loc='left')

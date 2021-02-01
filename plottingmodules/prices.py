@@ -12,7 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import math
 import logging
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 

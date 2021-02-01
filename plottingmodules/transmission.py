@@ -9,13 +9,13 @@ This code creates transmission line and interface plots and is called from Marmo
 
 import os
 import pandas as pd
+import numpy as np
+import math
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-import numpy as np
-import math
 import logging
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 
@@ -422,7 +422,8 @@ class mplot(object):
 
             mfunc.remove_excess_axs(axs,excess_axs,grid_size)
             axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit',color = 'red')
-            axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit',color = 'green')
+            axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit', color = 'green')
+
             axs[n].set_title(line)
             handles, labels = axs[n].get_legend_handles_labels()
             if not self.duration_curve:
@@ -466,9 +467,11 @@ class mplot(object):
         The plot includes every interchange that originates or ends in the aggregation zone. 
         Figures and data tables are returned to plot_main
         """
+
         if pd.isna(self.start_date):
             self.logger.warning('You are attempting to plot a time series facetted by two seasons, \n but you are missing a value in the "Start Date" column of "Marmot_plot_select.csv" Please enter dates in "Start Date" and "End Date". These will define the bounds of one of your two seasons. The other season will be comprised of the rest of the year.')
             return mfunc.MissingInputData()
+
 
         check_input_data = []
         Flow_Collection = {}
@@ -482,10 +485,12 @@ class mplot(object):
         if 1 in check_input_data:
             return mfunc.MissingInputData()
 
+
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = self.prop.split(",")
         if select_lines == None:
             return mfunc.InputSheetError()
+
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
@@ -510,6 +515,7 @@ class mplot(object):
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
         fig2, axs = plt.subplots(ydim,xdim, figsize=((6*xdim),(4*ydim)), sharey=False, squeeze=False) #Not using mfunc.setup_plot here, I used two dimensional axis array so don't want to axs.ravel().
+
         #plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
         i = -1
@@ -522,8 +528,9 @@ class mplot(object):
             if line[0] == ' ':
                 line = line[1:]
             if line in reported_lines:
-                
+ 
                 chunks_line = []
+
                 single_exp_lim = export_limits.loc[line]
                 single_exp_lim.index = ti
                 single_imp_lim = import_limits.loc[line]
@@ -533,6 +540,7 @@ class mplot(object):
                 limits_chunks.append(limits)
 
                 for scenario in self.Scenarios:
+
                     flow = Flow_Collection[scenario]
                     single_line = flow.xs(line,level = 'line_name')
                     single_line_out = single_line.copy()
@@ -544,6 +552,7 @@ class mplot(object):
                     summer = single_line[self.start_date : self.end_date]
                     winter = single_line.drop(summer.index)
 
+
                     if self.duration_curve:
                         def sort_duration(df):
                             df.sort_values(by = 'flow',ascending = False,inplace = True)
@@ -552,7 +561,6 @@ class mplot(object):
                             return(df)
                         summer = sort_duration(summer) 
                         winter = sort_duration(winter)
-
 
                     linestyle_dict = {'flow': '-','export_limit': '--', 'import_limit': '--'}
                     color_dict = {'flow': 'blue','export_limit': 'red', 'import_limit': 'green'}
@@ -570,6 +578,7 @@ class mplot(object):
                         axs[i,j].set_title(line)
                         axs[i,j].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
+
                     #For output time series .csv
                     scenario_names = pd.Series([scenario] * len(single_line_out),name = 'Scenario')
                     single_line_out.columns = [line]
@@ -580,6 +589,7 @@ class mplot(object):
                 chunks.append(Data_out_line)
             else:
                 self.logger.warning(line + ' not found in' + self.Scenarios[0] + '. Have you tagged it with the "Must Report" property in PLEXOS?')
+
                 excess_axs += 1
                 missing_lines += 1
                 continue
@@ -601,13 +611,12 @@ class mplot(object):
 
         fn_suffix = '_duration_curve' if self.duration_curve else ''
 
+
         fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
         #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
-
         outputs = mfunc.DataSavedInModule()
         return outputs
-
 
     def extract_tx_cap(self):
 

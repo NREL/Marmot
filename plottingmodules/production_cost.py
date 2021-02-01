@@ -9,8 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
 import logging
+import config.mconfig as mconfig
 
 #===============================================================================
 
@@ -21,6 +22,10 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
+        
     def prod_cost(self):
         
         outputs = {}
@@ -107,7 +112,7 @@ class mplot(object):
             # names = list(Net_Revenue.index)
             # values = list(Net_Revenue.values)
 
-            fig1, ax = plt.subplots(figsize=(6,4))
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
             net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', linestyle='None', marker='o')
             sb = Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
@@ -209,7 +214,7 @@ class mplot(object):
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
 
-            fig2, ax = plt.subplots(figsize=(6,4))
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
             sb = Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
@@ -308,7 +313,7 @@ class mplot(object):
                 Start_Shutdown_Cost = Start_Shutdown_Cost.xs(zone_input,level=self.AGG_BY)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
-                
+
                 try:
                     emissions_cost_collection[scenario]
                 except KeyError:
@@ -329,7 +334,7 @@ class mplot(object):
                 Detailed_Gen_Cost_Out = pd.concat([Detailed_Gen_Cost_Out, Detailed_Gen_Cost], axis=1, sort=False)
 
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
-
+            
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(5, break_long_words=False)
             # Deletes columns that are all 0
@@ -344,7 +349,7 @@ class mplot(object):
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out
 
-            fig3, ax = plt.subplots(figsize=(6,4))
+            fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
             sb = Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
@@ -445,9 +450,9 @@ class mplot(object):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
 
-            fig1, ax = plt.subplots(figsize=(6,4))
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            bp = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            bp = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
 
@@ -556,7 +561,7 @@ class mplot(object):
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
 
-            fig2, ax = plt.subplots(figsize=(6,4))
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
             sb = Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
@@ -637,7 +642,7 @@ class mplot(object):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
 
-            fig1, ax = plt.subplots(figsize=(6,4))
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
             bp = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
@@ -769,7 +774,7 @@ class mplot(object):
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out
 
-            fig3, ax = plt.subplots(figsize=(6,4))
+            fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
             sb = Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)

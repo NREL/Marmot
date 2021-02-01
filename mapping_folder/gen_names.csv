@@ -81,7 +81,7 @@ caes_gas,Storage
 ReEDS_gas-ct-nsp,Gas-CT
 ReEDS_battery,Storage
 ReEDS_gas-cc-nsp,Gas-CC
-ReEDS_dupv,PV
+ReEDS_dupv,dPV
 ReEDS_upv,PV
 ReEDS_gas-cc,Gas-CC
 ReEDS_coal-new,Coal
@@ -92,7 +92,7 @@ ReEDS_hydud,Hydro
 ReEDS_caes,Storage
 ReEDS_hydund,Hydro
 ReEDS_gas-ct,Gas-CT
-ReEDS_distpv,PV
+ReEDS_distpv,dPV
 ReEDS_hydnpnd,Hydro
 ReEDS_pumped-hydro,Storage
 ReEDS_lfill-gas,Biopower
@@ -124,7 +124,7 @@ Solid Biofuel ST,Biopower
 ERCOT_penalty,Other
 Biomass,Biopower
 RPM Storage c1,Storage
-RPM VG PV Rooftop,PV
+RPM VG PV Rooftop,dPV
 RPM VG PV Fixed,PV
 Gas Steam,Oil-Gas-Steam
 RPM VG Wind,Wind
@@ -213,7 +213,7 @@ CT_NG_Ind,Gas-CC
 CT_Oil,Oil-Gas-Steam
 DC-Intertie,Other
 Dfuel_gen,Other
-DG-BTM_2028,PV
+DG-BTM_2028,dPV
 DR,Other
 Geo_BinaryCycle,Geothermal
 Geo_DoubleFlash,Geothermal

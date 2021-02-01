@@ -1,11 +1,12 @@
+# -*- coding: utf-8 -*-
+
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.dates as mdates
-import marmot_plot_functions as mfunc
-import os
 from matplotlib.patches import Patch
 import logging
+import plottingmodules.marmot_plot_functions as mfunc
 
 
 #===============================================================================

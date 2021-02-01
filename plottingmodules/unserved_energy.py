@@ -7,14 +7,14 @@ This code creates unserved energy timeseries line plots and total bat plots and 
 @author: dlevie
 """
 
-
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-import os
 import logging
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 
 #===============================================================================
 
@@ -26,6 +26,9 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
     def unserved_energy_timeseries(self):
 
@@ -173,7 +176,7 @@ class mplot(object):
                 # create color dictionary
                 color_dict = dict(zip(Total_Unserved_Energy_Out.columns,self.color_list))
 
-                fig2, ax = plt.subplots(figsize=(6,4))
+                fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
                 mfunc.create_bar_plot(Total_Unserved_Energy_Out,ax,color_dict)
 

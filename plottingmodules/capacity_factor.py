@@ -8,13 +8,16 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 @author: dlevie
 """
 
+import os
 import pandas as pd
 import matplotlib.ticker as mtick
 import numpy as np
-import os
-import marmot_plot_functions as mfunc
 import logging
 import math
+
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
+
 
 #===============================================================================
 
@@ -26,6 +29,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
     def avg_output_when_committed(self):
         outputs = {}
@@ -67,7 +73,8 @@ class mplot(object):
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
                 
-                if math.isnan(self.start_date) == False:
+                print(self.start_date)
+                if pd.isna(self.start_date) == False:
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(self.start_date),str(self.end_date)))
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
@@ -107,7 +114,7 @@ class mplot(object):
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-            fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(6,4), rot=0,
+            fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
 
             fig2.spines['right'].set_visible(False)
@@ -158,7 +165,7 @@ class mplot(object):
                 #interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
                 duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
 
-                if math.isnan(self.start_date) == False:
+                if pd.isna(self.start_date) == False:
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(self.start_date),str(self.end_date)))
                     Gen = Gen[self.start_date : self.end_date]
