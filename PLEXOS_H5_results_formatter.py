@@ -300,10 +300,19 @@ class Process:
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df = df.reset_index() # unzip the levels in index
         df = df.merge(self.metadata.generator_category(), how='left', on='gen_name')
+         
+        # merging in generator region/zones first prevents double counting in cases where multiple model regions are within a reserve region
+        if self.metadata.region_generators().empty == False:
+            df = df.merge(self.metadata.region_generators(), how='left', on='gen_name')
+        if self.metadata.zone_generators().empty == False:
+            df = df.merge(self.metadata.zone_generators(), how='left', on='gen_name')
+        
+        # now merge in reserve regions/zones
         if self.metadata.reserves_regions().empty == False:
-            df = df.merge(self.metadata.reserves_regions(), how='left', on='parent') # Merges in regions where reserves are located
+            df = df.merge(self.metadata.reserves_regions(), how='left', on=['parent', 'region']) # Merges in regions where reserves are located
         if self.metadata.reserves_zones().empty == False:
-            df = df.merge(self.metadata.reserves_zones(), how='left', on='parent') # Merges in zones where reserves are located
+            df = df.merge(self.metadata.reserves_zones(), how='left', on=['parent', 'zone']) # Merges in zones where reserves are located
+        
         df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
