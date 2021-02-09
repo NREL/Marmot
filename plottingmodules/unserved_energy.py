@@ -37,9 +37,9 @@ class mplot(object):
         check_input_data = []
 
         if self.AGG_BY == "zone":
-            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)])
         else:
-            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)])
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -51,7 +51,7 @@ class mplot(object):
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
             #Total_Unserved_Energy_Out = pd.DataFrame()
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info('Scenario = %s',scenario)
 
@@ -126,9 +126,9 @@ class mplot(object):
         check_input_data = []
 
         if self.AGG_BY == "zone":
-            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)])
         else:
-            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)])
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -140,7 +140,7 @@ class mplot(object):
             Total_Unserved_Energy_Out = pd.DataFrame()
 
             self.logger.info(self.AGG_BY + ' = ' + zone_input)
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info('Scenario = %s',scenario)
 

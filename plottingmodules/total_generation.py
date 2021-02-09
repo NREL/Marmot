@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
 import logging
+import os
 import plottingmodules.marmot_plot_functions as mfunc
 import config.mconfig as mconfig
 
@@ -44,16 +45,16 @@ class mplot(object):
         curtailment_collection = {}
         check_input_data = []
 
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
+        mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Scenarios)
 
         if self.AGG_BY == "zone":
-            check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-            mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+            check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, self.Scenarios)])
+            mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)
         else:
-            check_input_data.extend([mfunc.get_data(load_collection,"region_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-            mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+            check_input_data.extend([mfunc.get_data(load_collection,"region_Load", self.Marmot_Solutions_folder, self.Scenarios)])
+            mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -69,10 +70,9 @@ class mplot(object):
             self.logger.info("Zone = " + zone_input)
 
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
-
                 Total_Gen_Stack = gen_collection.get(scenario)
 
                 #Check if zone has generation, if not skips
@@ -81,6 +81,7 @@ class mplot(object):
                 except KeyError:
                     self.logger.warning("No installed capacity in : "+zone_input)
                     continue
+
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
@@ -107,7 +108,7 @@ class mplot(object):
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
-
+                
                 try:
                     unserved_energy_collection[scenario]
                 except KeyError:
@@ -144,9 +145,8 @@ class mplot(object):
                 Pump_Load_Out = pd.concat([Pump_Load_Out, Pump_Load], axis=0, sort=False)
                 Total_Demand_Out = pd.concat([Total_Demand_Out, Total_Demand], axis=0, sort=False)
 
-
             Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load (Demand + \n Storage Charging)'})
-            Total_Demand_Out = Total_Demand_Out.rename(columns={0: 'Total Demand'})
+            Total_Demand_Out = Total_Demand_Out.rename(columns={0:'Total Demand'})
             Unserved_Energy_Out = Unserved_Energy_Out.rename(columns={0: 'Unserved Energy'})
             unserved_eng_data_table_out = unserved_eng_data_table_out.rename(columns={0: 'Unserved Energy'})
 
@@ -184,18 +184,20 @@ class mplot(object):
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
+
             fig1.set_ylabel('Total Genertaion ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+
             #adds comma to y axis data
             fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
             n=0
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 x = [fig1.patches[n].get_x(), fig1.patches[n].get_x() + fig1.patches[n].get_width()]
-                height1 = [int(Total_Load_Out[scenario])]*2
-                lp1 = plt.plot(x,height1, c='black', linewidth=1.5)
+                height1 = [int(Total_Load_Out[scenario].sum())]*2
+                lp1 = plt.plot(x,height1, c='black', linewidth=3)
                 if Pump_Load_Out[scenario].values.sum() > 0:
                     height2 = [int(Total_Demand_Out[scenario])]*2
                     lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)
@@ -212,6 +214,7 @@ class mplot(object):
 
             #Combine all legends into one.
             #Legend 2
+
             if Pump_Load_Out.values.sum() > 0:
                 handles.append(lp2[0])
                 handles.append(lp1[0])
@@ -240,8 +243,8 @@ class mplot(object):
         curtailment_collection = {}
         check_input_data = []
 
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -252,7 +255,7 @@ class mplot(object):
 
             self.logger.info("Zone = " + zone_input)
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
 
@@ -291,13 +294,14 @@ class mplot(object):
 
             #Ensures region has generation, else skips
             try:
-                Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+                Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            Total_Generation_Stack_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
-            
+
+            Total_Generation_Stack_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
+
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
 
@@ -333,15 +337,17 @@ class mplot(object):
 
             #Add net gen difference line.
             n=0
-            for scenario in self.Multi_Scenario[1:]:
+            for scenario in self.Scenarios[1:]:
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 y_net = [net_diff.loc[scenario]] * 2
                 net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
                 n += 1
 
             locs,labels=plt.xticks()
-            ax.set_ylabel('Generation Change ({}h) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0].replace('_',' '),  color='black', rotation='vertical')
-            self.xlabels = pd.Series(self.Multi_Scenario).str.replace('_',' ').str.wrap(10, break_long_words=False)
+
+            ax.set_ylabel('Generation Change ({}h) \n relative to '.format(unitconversion['units']) + self.Scenarios[0].replace('_',' '),  color='black', rotation='vertical')
+            self.xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
+
             plt.xticks(ticks=locs,labels=self.xlabels[1:])
             ax.margins(x=0.01)
 
@@ -371,7 +377,7 @@ class mplot(object):
     #     Load_Collection = {}
     #     curtailment_collection = {}
 
-    #     for scenario in self.Multi_Scenario:
+    #     for scenario in self.Scenarios:
     #         try:
     #             Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
     #             curtailment_collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "generator_Curtailment")
@@ -390,7 +396,7 @@ class mplot(object):
     #     self.logger.info("Zone = " + self.zone_input)
 
 
-    #     for scenario in self.Multi_Scenario:
+    #     for scenario in self.Scenarios:
     #         self.logger.info("Scenario = " + scenario)
     #         try:
     #             Total_Gen_Stack = Gen_Collection.get(scenario)

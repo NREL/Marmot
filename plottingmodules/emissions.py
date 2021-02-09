@@ -36,7 +36,7 @@ class mplot(object):
         outputs = {}
         emit_gen_collection = {}
         check_input_data = []
-        check_input_data.extend([mfunc.get_data(emit_gen_collection,"emissions_generators_Production", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(emit_gen_collection,"emissions_generators_Production", self.Marmot_Solutions_folder, self.Scenarios)])
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -48,7 +48,7 @@ class mplot(object):
             self.logger.info("Zone = " + zone_input)
 
             # collect data for all scenarios and pollutants
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
 

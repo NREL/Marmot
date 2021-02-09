@@ -1,96 +1,94 @@
-Figure Type,Plot Graph,Figure Output Name,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada], Emissions to plot [CO2, SO2, NOx]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
-Average Output When Committed,FALSE,Avg_Out_Committed,,,,EST,,,capacity_factor,avg_output_when_committed
-Average Output When Committed,FALSE,Avg_Out_Committed_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,capacity_factor,avg_output_when_committed
-Capacity Factor,FALSE,Capacity_Factor,,,,EST,,,capacity_factor,cf
-Capacity Factor,FALSE,Capacity_Factor_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,capacity_factor,cf
-Time at Minimum Generation,FALSE,Time_at_Min_Gen,,,,,,,capacity_factor,time_at_min_gen
-Capacity Out Stack,FALSE,Capacity_Out_Stacked,,,,EST,,,capacity_out,capacity_out_stack
-Curtailment Duration Curve,FALSE,PV_Curtailment_Duration_Curve,PV,,,,,,curtailment,curt_duration_curve
-Curtailment Duration Curve,FALSE,RE_Curtailment_Duration_Curve,PV+Wind,,,,,,curtailment,curt_duration_curve
-Curtailment vs Penetration,FALSE,PV_Curtailment_vs_Penetration,PV,,,,,,curtailment,curt_pen
-Curtailment vs Penetration,FALSE,RE_Curtailment_vs_Penetration,PV+Wind,,,,,,curtailment,curt_pen
-Total Curtailment,FALSE,Total_Curtailment,,,,,,,curtailment,curt_total
-Total Curtailment Individual Sites,FALSE,Total_Curtailment_Individual,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
-Total CO2 Emissions by Generator Fuel Type,FALSE,Total_Emissions_By_Gen_Type_CO2,CO2,,,,,,emissions,total_emissions_by_type
-Total SO2 Emissions by Generator Fuel Type,FALSE,Total_Emissions_By_Gen_Type_SO2,SO2,,,,,,emissions,total_emissions_by_type
-Committed Capacity Stack,FALSE,Committed_Capacity_Stack,,,,,,,generation_stack,committed_stack
-Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff,,,,EST,,,generation_stack,gen_diff
-Generation Timeseries Difference,FALSE,Generation_Timeseries_Diff_Range,Date Range,,,EST,7/1/2024,7/7/2024,generation_stack,gen_diff
-Generation Stack,FALSE,Stacked_Gen,,,,EST,,,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,generation_stack,gen_stack
-Generation Stack,FALSE,Stacked_Gen_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Min_Net_Load,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid_Range,Date Range,,,EST,7/1/2024,7/7/2024,generation_stack,gen_stack
-Generation Stack Facet Grid,FALSE,Stacked_Gen_Facet_Grid,,,,,,,generation_stack,gen_stack
-Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,,EST,,,generation_stack,gen_stack_all_periods
-Generation Stack All Periods,FALSE,Stacked_Gen_All_Periods,,,,,,,generation_stack,gen_stack_all_periods
-Generation Unstacked,FALSE,Unstacked_Gen_Min_Net_Load,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked,FALSE,Unstacked_Gen_Peak_Demand,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked,FALSE,Unstacked_Gen,,,,EST,,,generation_unstack,gen_unstack
-Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Peak_Demand,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid_Min_Net_load,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
-Generation Unstacked Facet Grid,FALSE,Unstacked_Gen_Facet_Grid,,,,EST,,,generation_unstack,gen_unstack
-Canada Hydro Analysis,FALSE,Hydro_Versus_Continent_Net_Load,,,,,7/1/2024,7/7/2024,hydro,hydro_continent_net_load
-Hydro Analysis,FALSE,Hydro_Versus_Net_Load,,,7,EST,,,hydro,hydro_net_load
-All Regions PDC,FALSE,All_Regions_Price_Duration_Curve,150,,,,,,prices,pdc_all_regions
-Region Price,FALSE,Region_Price_Duration,,,,,,,prices,region_pdc
-Region Price,FALSE,Region_Price_Duration_Threshold,150,,,,,,prices,region_pdc
-Region Price Timeseries,FALSE,Region_Price_Timeseries,,,,,,,prices,region_timeseries_price
-Region Price Timeseries,FALSE,Region_Price_Timeseries_Threshold,150,,,,,,prices,region_timeseries_price
-All Regions Timeseries Price,FALSE,All_Regions_Price_Timeseries,,,,,,,prices,timeseries_price_all_regions
-Detailed Total Generation Cost,FALSE,Detailed_Total_Generation_Cost,,,,,,,production_cost,detailed_gen_cost
-Detailed Total Generation Cost Difference,FALSE,Detailed_Total_Generation_Cost_Diff,,,,,,,production_cost,detailed_gen_cost_diff
-Production Cost,FALSE,Production_Cost,,,,,,,production_cost,prod_cost
-Total System Cost,FALSE,Total_System_Cost,,,,,,,production_cost,sys_cost
-Total System Cost Difference,FALSE,Total_System_Cost_Diff,,,,,,,production_cost,sys_cost_diff
-Total System Cost Type,FALSE,Total_System_Cost_Type,,,,,,,production_cost,sys_cost_type
-Total System Cost Type Difference,FALSE,Total_System_Cost_Type_Diff,,,,,,,production_cost,sys_cost_type_diff
-Capacity Started,FALSE,Capacity_Started,,,,EST,,,ramping,capacity_started
-Capacity Started,FALSE,Capacity_Started_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,ramping,capacity_started
-Reserve Provision Region,FALSE,Reserve_Provision_Region,,,,,,,reserves,reg_reserve_provision
-Reserve Shortage Region,FALSE,Reserve_Shortage_Region,,,,,,,reserves,reg_reserve_shortage
-Reserve Shortage Hours,FALSE,Reserve_Shortage_Hours,,,,,,,reserves,reg_reserve_shortage_hrs
-Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries,,,,EST,,,reserves,reg_reserve_shortage_timeseries
-Reserve Shortage Timeseries Facet Grid,FALSE,Reserve_Shortage_Timeseries_Facet_Grid,,,,EST,,,reserves,reg_reserve_shortage_timeseries
-Reserve Shortage Timeseries,FALSE,Reserve_Shortage_Timeseries_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reg_reserve_shortage_timeseries
-Reserve Shortage Timeseries Facet Grid,FALSE,Reserve_Shortage_Timeseries_Facet_Grid_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reg_reserve_shortage_timeseries
-Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries,,,,EST,,,reserves,reserve_gen_timeseries
-Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Peak_Demand,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
-Reserve Gen Timeseries,FALSE,Reserve_Gen_Timeseries_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reserve_gen_timeseries
-Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
-Reserve Gen Timeseries Facet Grid,FALSE,Reserve_Gen_Timeseries_Facet_Grid_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,reserves,reserve_gen_timeseries
-Thermal Capacity reserves,FALSE,Thermal_Capacity_Reserves,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves
-Total Generation,FALSE,Total_Generation,,,,,,,total_generation,total_gen
-Total Generation Difference,TRUE,Total_Generation_Diff,,,,,,,total_generation,total_gen_diff
-Total Generation Facet Grid,FALSE,Total_Generation_Facet_Grid,,,,,,,total_generation,total_gen_facet
-Total Installed Capacity,FALSE,Total_Installed_Capacity,,,,,,,total_installed_capacity,total_cap
-Total Installed Capacity and Generation Facet,FALSE,Total_Installed_Capacity_and_Generation_Facet,,,,,,,total_installed_capacity,total_cap_and_gen_facet
-Line Utilization Histogram,FALSE,Line_Utilization_Histogram,,,,,,,transmission,line_hist
-Line Utilization Histogram,FALSE,Line_Utilization_Histogram_Category,ReEDS_Expansion,,,,,,transmission,line_hist
-Line Utilization Duration Curve,FALSE,Line_Utilization_Duration,,,,,,,transmission,line_util
-Line Utilization Duration Curve,FALSE,Line_Utilization_Duration_Category,ReEDS_Expansion,,,,,,transmission,line_util
-Line Violations Timeseries,FALSE,Line_Violations_Time_Series,,,,EST,,,transmission,line_violations_timeseries
-Line Violations Totals,FALSE,Line_Violations_Totals,,,,,,,transmission,line_violations_totals
-Net Export,FALSE,Net_Export_Date_Range,Date Range,,,EST,7/1/2024,7/7/2024,transmission,net_export
-Net Export,FALSE,Net_Export,,,,EST,,,transmission,net_export
-Region-Region Net Interchange Checkerboard,FALSE,Region-Region_Net_Interchange_Checkerboard,,,,,,,transmission,region_region_checkerboard
-Region-Region Net Interchange,FALSE,Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_scenarios
-All Region-Region Net Interchange,FALSE,All_Region-Region_Net_Interchange,,,,EST,,,transmission,region_region_interchange_all_regions
-Individual Line Flow,FALSE,Individual_Line_Flow,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI",,,EST,,,transmission,line_flow_ind
-Individual Interface Flow,FALSE,Individual_Interface_Flow,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
-Individual Line Flow Duration Curve,FALSE,Individual_Line_Flow_duration_curve,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI",,,EST,,,transmission,line_flow_ind
-Individual Line Flow Duration Curve Seasonal,FALSE,Individual_Line_Flow_duration_curve_seasonal,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI, p2_p5_1, p2_p5_2",,,EST,6/1/24,9/30/24,transmission,line_flow_ind_seasonal
-Individual Line Flow Duration Curve Seasonal,FALSE,Individual_Line_Flow_duration_curve_seasonal,"48197_LOLO To 60278_IMNAHA_1_WI, 40621_LAGRANDE To 60312_N POWDER_1_WI, 60150_HELLSCYN To 45103_HURICANE_1_WI, 60155_HEMINWAY To 43049_GRASSLND_1_WI, 60155_HEMINWAY To 45029_BURNS_1_WI, 60155_HEMINWAY To 45029_BURNS_1_WI,61826_HINES To 40507_HARNEY_1_WI",,,EST,6/1/24,9/30/24,transmission,line_flow_ind_seasonal
-Individual Line Flow Duration Curve Seasonal,FALSE,Individual_Line_Flow_duration_curve_seasonal,"40061_ASHE To 40062_ASHE R1_2_WI, 40111_BIG EDDY To 40809_OSTRNDER_1_WI, 40141_NBONVL E To 47851_LITLBUCK_1_WI, 40155_BUCKLEY To 40699_MARION_1_WI, 40585_JOHN DAY To 40699_MARION_1_WI, 40721_MCNARY To 40901_ROSS_1_WI, 40809_OSTRNDER To 41450_KNIGHT_1_WI, 41341_BIGEDDY1 To 40813_PARKDALE_1_WI, 41342_BIGEDDY2 To 40213_CHEMAWA_1_WI, 41343_BIGEDDY3 To 43313_MCLOUGLN_1_WI, 41450_KNIGHT To 41138_WAUTOMA_1_WI, 47814_JONESCYN To 41079_TMBLCR T_1_WI, 43039_BETHEL To 43483_ROUNDB N_1_WI",,,EST,6/1/24,9/30/24,transmission,line_flow_ind_seasonal
-Individual Interface Flow Duration Curve,FALSE,Individual_Interface_Flow_duration_curve,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
-Total Unserved Energy,FALSE,Total_Unserved_Energy,,,,,,,unserved_energy,tot_unserved_energy
-Unserved Energy Timeseries,FALSE,Unserved_Energy_Timeseries,,,,EST,,,unserved_energy,unserved_energy_timeseries
-Utilization GW Fleet,FALSE,Utilization_GW_Fleet,,,,,,,utilization_factor,GW_fleet
-Utilization Factor Fleet,FALSE,Utilization_Factor_Fleet,,,,EST,,,utilization_factor,uf_fleet
-Utilization Factor Fleet by Type,FALSE,Utilization_Factor_Fleet_Type,,,,,,,utilization_factor,uf_fleet_by_type
-Utilization Factor Generators,FALSE,Utilization_Factor_Generators,,,,EST,,,utilization_factor,uf_gen
-Sensitivities Difference,FALSE,Sensitivities_Difference_Hydro,Hydro,,,EST,,,sensitivities,sensitivities_gas
-Sensitivities Difference,FALSE,Sensitivities_Difference_Wind,Wind,,,EST,,,sensitivities,sensitivities_gas
-Total Reserve Provision by Generator,FALSE,Total_Reserve_Provision_by_Generator,,,,,,,reserves,total_reserves_by_gen
+Figure Output Name,Plot Graph,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada], Emissions to plot [CO2, SO2, NOx]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
+Avg_Out_Committed,TRUE,,,,EST,5/20/24,5/23/24,capacity_factor,avg_output_when_committed
+Capacity_Factor,TRUE,,,,EST,5/20/24,5/23/24,capacity_factor,cf
+Time_at_Min_Gen,TRUE,,,,,,,capacity_factor,time_at_min_gen
+Capacity_Out_Stacked,TRUE,,,,EST,,,capacity_out,capacity_out_stack
+PV_Curtailment_Duration_Curve,TRUE,PV,,,,,,curtailment,curt_duration_curve
+RE_Curtailment_Duration_Curve,TRUE,PV+Wind,,,,,,curtailment,curt_duration_curve
+PV_Curtailment_vs_Penetration,TRUE,PV,,,,,,curtailment,curt_pen
+RE_Curtailment_vs_Penetration,TRUE,PV+Wind,,,,,,curtailment,curt_pen
+Total_Curtailment,TRUE,,,,,,,curtailment,curt_total
+Total_Curtailment_Individual,TRUE,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
+Total_Emissions_By_Gen_Type_CO2,TRUE,CO2,,,,,,emissions,total_emissions_by_type
+Total_Emissions_By_Gen_Type_SO2,TRUE,SO2,,,,,,emissions,total_emissions_by_type
+Committed_Capacity_Stack,TRUE,,,,,,,generation_stack,committed_stack
+Generation_Timeseries_Diff,TRUE,,,,EST,,,generation_stack,gen_diff
+Generation_Timeseries_Diff_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,generation_stack,gen_diff
+Stacked_Gen,TRUE,,,,EST,,,generation_stack,gen_stack
+Stacked_Gen_Min_Net_Load,TRUE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,generation_stack,gen_stack
+Stacked_Gen_Peak_Demand,TRUE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Facet_Grid_Peak_Demand,TRUE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Facet_Grid_Min_Net_Load,TRUE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Facet_Grid_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,generation_stack,gen_stack
+Stacked_Gen_Facet_Grid,TRUE,,,,,,,generation_stack,gen_stack
+Stacked_Gen_All_Periods,TRUE,,,,EST,,,generation_stack,gen_stack_all_periods
+Stacked_Gen_All_Periods,TRUE,,,,,,,generation_stack,gen_stack_all_periods
+Unstacked_Gen_Min_Net_Load,TRUE,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
+Unstacked_Gen_Peak_Demand,TRUE,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
+Unstacked_Gen,TRUE,,,,EST,,,generation_unstack,gen_unstack
+Unstacked_Gen_Facet_Grid_Peak_Demand,TRUE,Peak Demand,3,3,EST,,,generation_unstack,gen_unstack
+Unstacked_Gen_Facet_Grid_Min_Net_load,TRUE,Min Net Load,3,3,EST,,,generation_unstack,gen_unstack
+Unstacked_Gen_Facet_Grid,TRUE,,,,EST,,,generation_unstack,gen_unstack
+Hydro_Versus_Continent_Net_Load,TRUE,,,,,5/20/24,5/23/24,hydro,hydro_continent_net_load
+Hydro_Versus_Net_Load,TRUE,,,7,EST,,,hydro,hydro_net_load
+All_Regions_Price_Duration_Curve,TRUE,150,,,,,,prices,pdc_all_regions
+Region_Price_Duration,TRUE,,,,,,,prices,region_pdc
+Region_Price_Duration_Threshold,TRUE,150,,,,,,prices,region_pdc
+Region_Price_Timeseries,TRUE,,,,,,,prices,region_timeseries_price
+Region_Price_Timeseries_Threshold,TRUE,150,,,,,,prices,region_timeseries_price
+All_Regions_Price_Timeseries,TRUE,,,,,,,prices,timeseries_price_all_regions
+Detailed_Total_Generation_Cost,TRUE,,,,,,,production_cost,detailed_gen_cost
+Detailed_Total_Generation_Cost_Diff,TRUE,,,,,,,production_cost,detailed_gen_cost_diff
+Production_Cost,TRUE,,,,,,,production_cost,prod_cost
+Total_System_Cost,TRUE,,,,,,,production_cost,sys_cost
+Total_System_Cost_Diff,TRUE,,,,,,,production_cost,sys_cost_diff
+Total_System_Cost_Type,TRUE,,,,,,,production_cost,sys_cost_type
+Total_System_Cost_Type_Diff,TRUE,,,,,,,production_cost,sys_cost_type_diff
+Capacity_Started,TRUE,,,,EST,,,ramping,capacity_started
+Capacity_Started_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,ramping,capacity_started
+Reserve_Provision_Region,TRUE,,,,,,,reserves,reg_reserve_provision
+Reserve_Shortage_Region,TRUE,,,,,,,reserves,reg_reserve_shortage
+Reserve_Shortage_Hours,TRUE,,,,,,,reserves,reg_reserve_shortage_hrs
+Reserve_Shortage_Timeseries,TRUE,,,,EST,,,reserves,reg_reserve_shortage_timeseries
+Reserve_Shortage_Timeseries_Facet_Grid,TRUE,,,,EST,,,reserves,reg_reserve_shortage_timeseries
+Reserve_Shortage_Timeseries_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,reserves,reg_reserve_shortage_timeseries
+Reserve_Shortage_Timeseries_Facet_Grid_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,reserves,reg_reserve_shortage_timeseries
+Reserve_Gen_Timeseries,TRUE,,,,EST,,,reserves,reserve_gen_timeseries
+Reserve_Gen_Timeseries_Peak_Demand,TRUE,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
+Reserve_Gen_Timeseries_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,reserves,reserve_gen_timeseries
+Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,TRUE,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
+Reserve_Gen_Timeseries_Facet_Grid_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,reserves,reserve_gen_timeseries
+Thermal_Capacity_Reserves,TRUE,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves
+Total_Generation,TRUE,,,,,,,total_generation,total_gen
+Total_Generation_Diff,TRUE,,,,,,,total_generation,total_gen_diff
+Total_Generation_Facet_Grid,TRUE,,,,,,,total_generation,total_gen_facet
+Total_Installed_Capacity,TRUE,,,,,,,total_installed_capacity,total_cap
+Total_Installed_Capacity_and_Generation_Facet,TRUE,,,,,,,total_installed_capacity,total_cap_and_gen_facet
+Line_Utilization_Histogram,TRUE,,,,,,,transmission,line_hist
+Line_Utilization_Histogram_Category,TRUE,ReEDS_Expansion,,,,,,transmission,line_hist
+Line_Utilization_Duration,TRUE,,,,,,,transmission,line_util
+Line_Utilization_Duration_Category,TRUE,ReEDS_Expansion,,,,,,transmission,line_util
+Line_Violations_Time_Series,TRUE,,,,EST,,,transmission,line_violations_timeseries
+Line_Violations_Totals,TRUE,,,,,,,transmission,line_violations_totals
+Net_Export_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,transmission,net_export
+Net_Export,TRUE,,,,EST,,,transmission,net_export
+Region-Region_Net_Interchange_Checkerboard,TRUE,,,,,,,transmission,region_region_checkerboard
+Region-Region_Net_Interchange,TRUE,,,,EST,,,transmission,region_region_interchange_all_scenarios
+All_Region-Region_Net_Interchange,TRUE,,,,EST,,,transmission,region_region_interchange_all_regions
+Individual_Line_Flow,TRUE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI",,,EST,,,transmission,line_flow_ind
+Individual_Interface_Flow,TRUE,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
+Individual_Line_Flow_duration_curve,TRUE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI",,,EST,,,transmission,line_flow_ind
+Individual_Line_Flow_duration_curve_seasonal,TRUE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI, p2_p5_1, p2_p5_2",,,EST,6/1/24,9/30/24,transmission,line_flow_ind_seasonal
+Individual_Line_Flow_duration_curve_seasonal,TRUE,"48197_LOLO To 60278_IMNAHA_1_WI, 40621_LAGRANDE To 60312_N POWDER_1_WI, 60150_HELLSCYN To 45103_HURICANE_1_WI, 60155_HEMINWAY To 43049_GRASSLND_1_WI, 60155_HEMINWAY To 45029_BURNS_1_WI, 60155_HEMINWAY To 45029_BURNS_1_WI,61826_HINES To 40507_HARNEY_1_WI",,,EST,6/1/24,9/30/24,transmission,line_flow_ind_seasonal
+Individual_Line_Flow_duration_curve_seasonal,TRUE,"40061_ASHE To 40062_ASHE R1_2_WI, 40111_BIG EDDY To 40809_OSTRNDER_1_WI, 40141_NBONVL E To 47851_LITLBUCK_1_WI, 40155_BUCKLEY To 40699_MARION_1_WI, 40585_JOHN DAY To 40699_MARION_1_WI, 40721_MCNARY To 40901_ROSS_1_WI, 40809_OSTRNDER To 41450_KNIGHT_1_WI, 41341_BIGEDDY1 To 40813_PARKDALE_1_WI, 41342_BIGEDDY2 To 40213_CHEMAWA_1_WI, 41343_BIGEDDY3 To 43313_MCLOUGLN_1_WI, 41450_KNIGHT To 41138_WAUTOMA_1_WI, 47814_JONESCYN To 41079_TMBLCR T_1_WI, 43039_BETHEL To 43483_ROUNDB N_1_WI",,,EST,6/1/24,9/30/24,transmission,line_flow_ind_seasonal
+Individual_Interface_Flow_duration_curve,TRUE,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
+Total_Unserved_Energy,TRUE,,,,,,,unserved_energy,tot_unserved_energy
+Unserved_Energy_Timeseries,TRUE,,,,EST,,,unserved_energy,unserved_energy_timeseries
+Utilization_GW_Fleet,TRUE,,,,,,,utilization_factor,GW_fleet
+Utilization_Factor_Fleet,TRUE,,,,EST,,,utilization_factor,uf_fleet
+Utilization_Factor_Fleet_Type,TRUE,,,,,,,utilization_factor,uf_fleet_by_type
+Utilization_Factor_Generators,TRUE,,,,EST,,,utilization_factor,uf_gen
+Sensitivities_Difference_Hydro,TRUE,Hydro,,,EST,,,sensitivities,sensitivities_gas
+Sensitivities_Difference_Wind,TRUE,Wind,,,EST,,,sensitivities,sensitivities_gas
+Total_Reserve_Provision_by_Generator,TRUE,,,,,,,reserves,total_reserves_by_gen

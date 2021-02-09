@@ -41,7 +41,7 @@ class mplot(object):
         installed_capacity_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -53,7 +53,7 @@ class mplot(object):
             Data_Table_Out = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
 
@@ -118,7 +118,7 @@ class mplot(object):
         installed_capacity_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -130,7 +130,7 @@ class mplot(object):
             Data_Table_Out = pd.DataFrame()
             self.logger.info(self.AGG_BY + " = " + zone_input)
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
 
@@ -161,12 +161,12 @@ class mplot(object):
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             try:
-                Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+                Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            Total_Installed_Capacity_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
+            Total_Installed_Capacity_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
             if Total_Installed_Capacity_Out.empty:
@@ -191,6 +191,7 @@ class mplot(object):
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
             fig1.set_ylabel('Capacity Change ({}) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0],  color='black', rotation='vertical')
+
             #adds comma to y axis data
             fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
@@ -280,7 +281,11 @@ class mplot(object):
             axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
             n=0
-            for scenario in self.Multi_Scenario:
+            
+            data_tables = {}
+            if not self.facet:
+                self.Scenarios = [self.Scenarios[0]]
+            for scenario in self.Scenarios:
 
                 x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + axs[1].patches[n].get_width()]
                 height1 = [int(Total_Load_Out[scenario])]*2
@@ -293,6 +298,8 @@ class mplot(object):
                     axs[1].fill_between(x, height3, height1,
                                 facecolor = '#DD0200',
                                 alpha=0.5)
+                    
+                data_tables[scenario] = pd.DataFrame() 
                 n=n+1
 
             # replace x-axis with custom labels
@@ -340,8 +347,7 @@ class mplot(object):
             axs[1].set_title("B.", fontdict={"weight":"bold"}, loc='left')
 
             # output figure
-            df = pd.DataFrame()
-            outputs[zone_input] = {'fig': fig, 'data_table': df}
+            outputs[zone_input] = {'fig': fig, 'data_table': data_tables}
 
 
         return outputs

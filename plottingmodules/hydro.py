@@ -33,12 +33,93 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
+ 
+    def hydro_continent_net_load(self):
+        outputs = {}
+        gen_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Scenarios[0]])])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        for zone_input in self.Zones:
+            #Location to save to
+            hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
+
+            Stacked_Gen_read = gen_collection.get(self.Scenarios[0])
+
+            self.logger.info("Zone = "+ zone_input)
+            self.logger.info("Winter is defined as date range: \
+            {} to {}".format(str(self.start_date),str(self.end_date)))
+            Net_Load = mfunc.df_process_gen_inputs(Stacked_Gen_read, self.ordered_gen)
+
+            # Calculates Net Load by removing variable gen
+            # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+            self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Net_Load.columns]
+            Net_Load = Net_Load.drop(labels = self.vre_gen_cat, axis=1)
+            Net_Load = Net_Load.sum(axis=1) # Continent net load
+            
+            try:
+                Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
+            except KeyError:
+                self.logger.warning("No Generation in %s",zone_input)
+                continue
+            del Stacked_Gen_read
+            Stacked_Gen= mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
+            Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)] #Removes columns only containing 0
+
+        #end weekly loop
+
+            try:
+                Hydro_Gen = Stacked_Gen['Hydro']
+            except KeyError:
+                self.logger.warning("No Hydro Generation in %s", zone_input)
+                Hydro_Gen=mfunc.MissingZoneData()
+                continue
+
+            del Stacked_Gen
+
+            #Scatter plot by season
+            fig2, ax2 = plt.subplots(figsize=(9,6))
+
+            ax2.scatter(Net_Load[self.end_date:self.start_date],
+                        Hydro_Gen[self.end_date:self.start_date],color='black',s=5,label='Non-winter')
+            ax2.scatter(Net_Load[self.start_date:],Hydro_Gen[self.start_date:],color='blue',s=5,label='Winter',alpha=0.5)
+            ax2.scatter(Net_Load[:self.end_date],Hydro_Gen[:self.end_date],color='blue',s=5,alpha=0.5)
+
+
+            ax2.set_ylabel('In Region Hydro Generation (MW)',  color='black', rotation='vertical')
+            ax2.set_xlabel('Continent Net Load (MW)',  color='black', rotation='horizontal')
+            ax2.spines['right'].set_visible(False)
+            ax2.spines['top'].set_visible(False)
+            ax2.tick_params(axis='y', which='major', length=5, width=1)
+            ax2.tick_params(axis='x', which='major', length=5, width=1)
+            ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax2.margins(x=0.01)
+
+            handles, labels = ax2.get_legend_handles_labels()
+
+            leg1 = ax2.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+                              facecolor='inherit', frameon=True)
+
+            ax2.add_artist(leg1)
+
+            fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Continent_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
+        
+        outputs = mfunc.DataSavedInModule()
+        return outputs
+
     def hydro_net_load(self):
         outputs = {}
         gen_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Scenarios[0]])])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -51,7 +132,7 @@ class mplot(object):
             #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = gen_collection.get(self.Multi_Scenario[0])
+            Stacked_Gen_read = gen_collection.get(self.Scenarios[0])
             
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
             try:
@@ -138,8 +219,8 @@ class mplot(object):
                 ax.add_artist(leg1)
 
 
-                fig1.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_And_Net_Load" + "_" + self.Multi_Scenario[0]+"_period_"+str(wk)), dpi=600, bbox_inches='tight')
-                Data_Table_Out.to_csv(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Multi_Scenario[0]+"_period_"+str(wk)+ ".csv"))
+                fig1.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_And_Net_Load" + "_" + self.Scenarios[0]+"_period_"+str(wk)), dpi=600, bbox_inches='tight')
+                Data_Table_Out.to_csv(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Scenarios[0]+"_period_"+str(wk)+ ".csv"))
                 del fig1
                 del Data_Table_Out
                 mpl.pyplot.close('all')
@@ -169,87 +250,8 @@ class mplot(object):
 
             ax2.add_artist(leg1)
 
-            fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Multi_Scenario[0]), dpi=600, bbox_inches='tight')
+            fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
         
         outputs = mfunc.DataSavedInModule()
         return outputs
 
-    def hydro_continent_net_load(self):
-        outputs = {}
-        gen_collection = {}
-        check_input_data = []
-        
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
-        
-        # Checks if all data required by plot is available, if 1 in list required data is missing
-        if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-        
-        for zone_input in self.Zones:
-            #Location to save to
-            hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
-
-            Stacked_Gen_read = gen_collection.get(self.Multi_Scenario[0])
-
-            self.logger.info("Zone = "+ zone_input)
-            self.logger.info("Winter is defined as date range: \
-            {} to {}".format(str(self.start_date),str(self.end_date)))
-            Net_Load = mfunc.df_process_gen_inputs(Stacked_Gen_read, self.ordered_gen)
-
-            # Calculates Net Load by removing variable gen
-            # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-            self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Net_Load.columns]
-            Net_Load = Net_Load.drop(labels = self.vre_gen_cat, axis=1)
-            Net_Load = Net_Load.sum(axis=1) # Continent net load
-            
-            try:
-                Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
-            except KeyError:
-                self.logger.warning("No Generation in %s",zone_input)
-                continue
-            del Stacked_Gen_read
-            Stacked_Gen= mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
-            Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)] #Removes columns only containing 0
-
-        #end weekly loop
-
-            try:
-                Hydro_Gen = Stacked_Gen['Hydro']
-            except KeyError:
-                self.logger.warning("No Hydro Generation in %s", zone_input)
-                Hydro_Gen=mfunc.MissingZoneData()
-                continue
-
-            del Stacked_Gen
-
-            #Scatter plot by season
-            fig2, ax2 = plt.subplots(figsize=(9,6))
-
-            ax2.scatter(Net_Load[self.end_date:self.start_date],
-                        Hydro_Gen[self.end_date:self.start_date],color='black',s=5,label='Non-winter')
-            ax2.scatter(Net_Load[self.start_date:],Hydro_Gen[self.start_date:],color='blue',s=5,label='Winter',alpha=0.5)
-            ax2.scatter(Net_Load[:self.end_date],Hydro_Gen[:self.end_date],color='blue',s=5,alpha=0.5)
-
-
-            ax2.set_ylabel('In Region Hydro Generation (MW)',  color='black', rotation='vertical')
-            ax2.set_xlabel('Continent Net Load (MW)',  color='black', rotation='horizontal')
-            ax2.spines['right'].set_visible(False)
-            ax2.spines['top'].set_visible(False)
-            ax2.tick_params(axis='y', which='major', length=5, width=1)
-            ax2.tick_params(axis='x', which='major', length=5, width=1)
-            ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-            ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-            ax2.margins(x=0.01)
-
-            handles, labels = ax2.get_legend_handles_labels()
-
-            leg1 = ax2.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-
-            ax2.add_artist(leg1)
-
-            fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Continent_Net_Load" + "_" + self.Multi_Scenario[0]), dpi=600, bbox_inches='tight')
-        
-        outputs = mfunc.DataSavedInModule()
-        return outputs

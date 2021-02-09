@@ -80,7 +80,7 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
 
     for scenario in scenario_list:
         try:
-            data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),data)
+            data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder,"Processed_HDF5_folder", scenario + "_formatted.h5"),data)
             return_value = 0
         except KeyError:
             logger.warning("'%s' is MISSING from the Marmot formatted h5 files",data)
