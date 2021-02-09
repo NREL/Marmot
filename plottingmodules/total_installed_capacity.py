@@ -281,6 +281,10 @@ class mplot(object):
             axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
             n=0
+            
+            data_tables = {}
+            if not self.facet:
+                self.Scenarios = [self.Scenarios[0]]
             for scenario in self.Scenarios:
 
                 x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + axs[1].patches[n].get_width()]
@@ -294,6 +298,8 @@ class mplot(object):
                     axs[1].fill_between(x, height3, height1,
                                 facecolor = '#DD0200',
                                 alpha=0.5)
+                    
+                data_tables[scenario] = pd.DataFrame() 
                 n=n+1
 
             # replace x-axis with custom labels
@@ -341,8 +347,7 @@ class mplot(object):
             axs[1].set_title("B.", fontdict={"weight":"bold"}, loc='left')
 
             # output figure
-            df = pd.DataFrame()
-            outputs[zone_input] = {'fig': fig, 'data_table': df}
+            outputs[zone_input] = {'fig': fig, 'data_table': data_tables}
 
 
         return outputs

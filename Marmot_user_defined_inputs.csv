@@ -4,7 +4,6 @@ Marmot_Solutions_folder,folder,required,/path/to/Marmotplots
 Scenario_process_list,List,required,Scenario1
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
-reserve_region_type.csv_name,string,optional,reserve_region_type.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,required(default),emit_names.csv
 Scenarios,string or List,required,"Scenario1, Scenario2, Scenario3"
@@ -15,4 +14,3 @@ Facet_ylabels,List,optional,"Scenario1, Scenario2, Scenario3"
 Facet_xlabels,List,optional,
 Figure_Format,string,optional,svg
 Tick_labels,List,optional,
-shift_leap_day,string,optional,TRUE

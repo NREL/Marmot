@@ -393,9 +393,12 @@ class mplot(object):
             fig3, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-            reserve_timeseries_chunk = []
+            data_tables = {}
             unique_reserve_types = []
             n=0 #Counter for scenario subplots
+            
+            if not self.facet:
+                self.Scenarios = [self.Scenarios[0]]
             for scenario in self.Scenarios:
 
                 self.logger.info('Scenario = ' + scenario)
@@ -424,24 +427,26 @@ class mplot(object):
                 # create color dictionary
                 color_dict = dict(zip(reserve_timeseries.columns,self.color_list))
 
+                data_tables[scenario] = reserve_timeseries 
+
                 for column in reserve_timeseries:
                     mfunc.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
                 axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
                 axs[n].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
 
-                scenario_names = pd.Series([scenario]*len(reserve_timeseries),name='Scenario')
-                reserve_timeseries = reserve_timeseries.set_index([scenario_names],append=True)
-                reserve_timeseries_chunk.append(reserve_timeseries)
+                # scenario_names = pd.Series([scenario]*len(reserve_timeseries),name='Scenario')
+                # reserve_timeseries = reserve_timeseries.set_index([scenario_names],append=True)
+                # reserve_timeseries_chunk.append(reserve_timeseries)
 
                 # create list of gen technologies
                 l1 = reserve_timeseries.columns.tolist()
                 unique_reserve_types.extend(l1)
 
                 if self.facet:
-                    n=n+1
+                    n+=1
             
-            if not reserve_timeseries_chunk:
+            if not data_tables:
                 out = mfunc.MissingZoneData()
                 outputs[region] = out
                 continue
@@ -472,7 +477,11 @@ class mplot(object):
             # plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
             plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 30)
 
-            Data_Out=pd.concat(reserve_timeseries_chunk,axis=0)
+            #Data_Out = pd.concat(reserve_timeseries_chunk,axis=0)
+            if not self.facet:
+                data_tables = data_tables[self.Scenarios[0]]
 
-            outputs[region] =  {'fig': fig3, 'data_table': Data_Out}
+            outputs[region] =  {'fig': fig3, 'data_table': data_tables}
+
         return outputs
+            

@@ -326,7 +326,7 @@ for index, row in Marmot_plot_select.iterrows():
                 "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
                 "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leap_day","duration_curve"]
 
-    argument_list = [row.iloc[3], row.iloc[4], row.iloc[5], row.iloc[6],row.iloc[7], row.iloc[8],
+    argument_list = [row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5],row.iloc[6], row.iloc[7],
                      hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict,
                      Scenarios, Scenario_Diff, Marmot_Solutions_folder,
                      ylabels, xlabels, ticklabels,
@@ -375,13 +375,14 @@ for index, row in Marmot_plot_select.iterrows():
             except AttributeError:
                 Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
 
-            try:
-                if not Figure_Out[zone_input]['data_table']:
-                    logger.info('%s does not return a data table',row["Figure Output Name"])
-            except ValueError:
+            #Save .csv's.
+            if not facet:
                 if Figure_Out[zone_input]['data_table'].empty:
                     logger.info('%s does not return a data table',row["Figure Output Name"])
-            else:
+                else:
+                    Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+
+            else: #Facetted plot, save multiple tables
                 tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
                 try:
                      os.makedirs(tables_folder)
