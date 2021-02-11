@@ -446,10 +446,10 @@ class mplot(object):
         plt.tight_layout()
 
         fn_suffix = '_duration_curve' if self.duration_curve else ''
-
-        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '.csv'))
-        Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
+    
+        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + fn_suffix + '.csv'))
+        Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + 'limits.csv'))
 
         outputs = mfunc.DataSavedInModule()
         return outputs
