@@ -185,6 +185,21 @@ class MetaData:
             node_zone = pd.DataFrame()
             return node_zone
     
+    def generator_node(self):
+        try:
+            try:
+                generator_node = pd.DataFrame(np.asarray(self.data['metadata/relations/generators_nodes']))
+            except KeyError:
+                generator_node = pd.DataFrame(np.asarray(self.data['metadata/relations/generator_nodes']))
+            generator_node.rename(columns={'child':'node','parent':'gen_name'}, inplace=True)
+            generator_node = generator_node.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            # generators_nodes = generators_nodes.sort_values(by=['generator'])
+            return generator_node
+        except:
+            generator_node = pd.DataFrame()
+            return generator_node
+        
+        
 ##############################################################################
     
 # These methods were not originally part of the MetaData class and were used to 
