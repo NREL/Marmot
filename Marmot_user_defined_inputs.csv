@@ -3,7 +3,7 @@ PLEXOS_Solutions_folder,folder,required,/path/to/PLEXOSsolutionh5s
 Marmot_Solutions_folder,folder,required,/path/to/Marmotplots
 Scenario_process_list,List,required,Scenario1
 VoLL,int,required,10000
-Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
+Region_Mapping.csv_name,string,required(default),Region_mapping_ReEDS.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,required(default),emit_names.csv
 Scenarios,string or List,required,"Scenario1, Scenario2, Scenario3"

@@ -140,13 +140,13 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             if hist == True:
                 if (self.prop != self.prop)==True:
-                    self.prop='All Lines'
+                    label_prop='All Lines'
                 plt.ylabel('Number of lines',  color='black', rotation='vertical', labelpad=30)
-                plt.xlabel('Line Utilization: {}'.format(self.prop),  color='black', rotation='horizontal', labelpad=20)
+                plt.xlabel('Line Utilization: {}'.format(label_prop),  color='black', rotation='horizontal', labelpad=20)
             else:
                 if (self.prop != self.prop)==True:
-                    self.prop='Top 10 Lines'
-                plt.ylabel('Line Utilization: {}'.format(self.prop),  color='black', rotation='vertical', labelpad=30)
+                    label_prop='Top 10 Lines'
+                plt.ylabel('Line Utilization: {}'.format(label_prop),  color='black', rotation='vertical', labelpad=30)
                 plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             del annual_util, limits
             outputs[zone_input] = {'fig': fig2,'data_table':Data_Out}
