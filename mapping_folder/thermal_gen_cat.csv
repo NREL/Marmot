@@ -1,10 +1,9 @@
 Thermal_Gen_Categories
-nuclear
-coal
-gas-cc
-gas-cc-ccs
-gas-ct
-o-g-s
-biopower
-battery_8
-battery_10
+Coal
+Gas-CC
+Gas-CT
+Nuclear
+DualFuel
+Oil-Gas-Steam
+Biopower
+Gas-CC CCS

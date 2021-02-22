@@ -1,14 +1,12 @@
 RE_Gen_Categories
-nuclear
-hydro
-geothermal
-biopower
-re-ct
-onswind
-ofswind
+Hydro
+Ocean
+Geothermal
+Biomass
+Biopwoer
 Wind
-csp
-upv
-dupv
-distpv
 Solar
+CSP
+PV
+dPV
+Offshore Wind
