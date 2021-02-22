@@ -10,16 +10,18 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import numpy as np
 from matplotlib.patches import Patch
-import marmot_plot_functions as mfunc
 import logging
+import os
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
+
 
 #===============================================================================
 
-custom_legend_elements = [Patch(facecolor='#DD0200',
+custom_legend_elements = Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')]
+                         label='Unserved Energy')
 
 class mplot(object):
 
@@ -29,6 +31,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
     def total_gen(self):
         # Create Dictionary to hold Datframes for each scenario
@@ -40,16 +45,16 @@ class mplot(object):
         curtailment_collection = {}
         check_input_data = []
 
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
+        mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Scenarios)
 
         if self.AGG_BY == "zone":
-            check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-            mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+            check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, self.Scenarios)])
+            mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)
         else:
-            check_input_data.extend([mfunc.get_data(load_collection,"region_Load", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-            mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Multi_Scenario)
+            check_input_data.extend([mfunc.get_data(load_collection,"region_Load", self.Marmot_Solutions_folder, self.Scenarios)])
+            mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -65,10 +70,9 @@ class mplot(object):
             self.logger.info("Zone = " + zone_input)
 
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
-
                 Total_Gen_Stack = gen_collection.get(scenario)
 
                 #Check if zone has generation, if not skips
@@ -77,13 +81,11 @@ class mplot(object):
                 except KeyError:
                     self.logger.warning("No installed capacity in : "+zone_input)
                     continue
+
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
-                time_delta = Total_Gen_Stack.index[1]- Total_Gen_Stack.index[0]
-                # Finds intervals in 60 minute period
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
-
+                interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
                 try:
                     Stacked_Curt = curtailment_collection.get(scenario)
@@ -99,7 +101,6 @@ class mplot(object):
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
-                #print(Total_Generation_Stack_Out)
 
                 Total_Load = load_collection.get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
@@ -107,7 +108,7 @@ class mplot(object):
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
-
+                
                 try:
                     unserved_energy_collection[scenario]
                 except KeyError:
@@ -144,50 +145,59 @@ class mplot(object):
                 Pump_Load_Out = pd.concat([Pump_Load_Out, Pump_Load], axis=0, sort=False)
                 Total_Demand_Out = pd.concat([Total_Demand_Out, Total_Demand], axis=0, sort=False)
 
-
             Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load (Demand + \n Storage Charging)'})
-            Total_Demand_Out = Total_Demand_Out.rename(columns={0: 'Total Demand'})
+            Total_Demand_Out = Total_Demand_Out.rename(columns={0:'Total Demand'})
             Unserved_Energy_Out = Unserved_Energy_Out.rename(columns={0: 'Unserved Energy'})
             unserved_eng_data_table_out = unserved_eng_data_table_out.rename(columns={0: 'Unserved Energy'})
 
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to TWh
+            
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out.T
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             # Data table of values to return to main program
-            Data_Table_Out = pd.concat([Total_Load_Out/1000000, Total_Demand_Out/1000000, unserved_eng_data_table_out/1000000, Total_Generation_Stack_Out],  axis=1, sort=False)
-
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
-
-            Total_Load_Out = Total_Load_Out.T/1000000 #Convert to TWh
-            Pump_Load_Out = Pump_Load_Out.T/1000000 #Convert to TWh
-            Total_Demand_Out = Total_Demand_Out.T/1000000 #Convert to TWh
-            Unserved_Energy_Out = Unserved_Energy_Out.T/1000000
+            Data_Table_Out = pd.concat([Total_Load_Out, 
+                                        Total_Demand_Out, 
+                                        unserved_eng_data_table_out, 
+                                        Total_Generation_Stack_Out],  axis=1, sort=False)
 
             if Total_Generation_Stack_Out.empty:
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
-            fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            
+            # unit conversion return divisor and energy units
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum()))
+            
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor'] 
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
+            Total_Load_Out = Total_Load_Out.T/unitconversion['divisor'] 
+            Pump_Load_Out = Pump_Load_Out.T/unitconversion['divisor']
+            Total_Demand_Out = Total_Demand_Out.T/unitconversion['divisor'] 
+            Unserved_Energy_Out = Unserved_Energy_Out.T/unitconversion['divisor']
+            
+            
+            fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
 
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Total Genertaion (TWh)',  color='black', rotation='vertical')
+
+            fig1.set_ylabel('Total Genertaion ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
             n=0
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 x = [fig1.patches[n].get_x(), fig1.patches[n].get_x() + fig1.patches[n].get_width()]
-                height1 = [int(Total_Load_Out[scenario])]*2
-                lp1 = plt.plot(x,height1, c='black', linewidth=1.5)
+                height1 = [int(Total_Load_Out[scenario].sum())]*2
+                lp1 = plt.plot(x,height1, c='black', linewidth=3)
                 if Pump_Load_Out[scenario].values.sum() > 0:
                     height2 = [int(Total_Demand_Out[scenario])]*2
                     lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)
@@ -202,32 +212,25 @@ class mplot(object):
 
             handles, labels = fig1.get_legend_handles_labels()
 
-            #Legend 1
-            leg1 = fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            #Combine all legends into one.
             #Legend 2
+
             if Pump_Load_Out.values.sum() > 0:
-                leg2 = fig1.legend(lp1, ['Demand + Pumped Load'], loc='center left',bbox_to_anchor=(1, 1.2),
-                          facecolor='inherit', frameon=True)
+                handles.append(lp2[0])
+                handles.append(lp1[0])
+                labels += ['Demand','Demand + \n Storage Charging']
+   
             else:
-                leg2 = fig1.legend(lp1, ['Demand'], loc='center left',bbox_to_anchor=(1, 1.2),
-                          facecolor='inherit', frameon=True)
+                handles.append(lp1[0])
+                labels += ['Demand']
 
             #Legend 3
             if Unserved_Energy_Out.values.sum() > 0:
-                leg3 = fig1.legend(handles=custom_legend_elements, loc='upper left',bbox_to_anchor=(1, 1.15),
-                          facecolor='inherit', frameon=True)
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
 
-            #Legend 4
-            if Pump_Load_Out.values.sum() > 0:
-                fig1.legend(lp2, ['Demand'], loc='upper left',bbox_to_anchor=(1, 1.1),
-                          facecolor='inherit', frameon=True)
+            fig1.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
-            # Manually add the first legend back
-            fig1.add_artist(leg1)
-            fig1.add_artist(leg2)
-            if Unserved_Energy_Out.values.sum() > 0:
-                fig1.add_artist(leg3)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
@@ -240,8 +243,8 @@ class mplot(object):
         curtailment_collection = {}
         check_input_data = []
 
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -252,7 +255,7 @@ class mplot(object):
 
             self.logger.info("Zone = " + zone_input)
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
 
@@ -268,9 +271,7 @@ class mplot(object):
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
-                time_delta = Total_Gen_Stack.index[1]- Total_Gen_Stack.index[0]
-                # Finds intervals in 60 minute period
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
                 try:
                     Stacked_Curt = curtailment_collection.get(scenario)
@@ -288,69 +289,77 @@ class mplot(object):
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
 
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000 #Convert to GWh
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out.T
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             #Ensures region has generation, else skips
             try:
-                Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Multi_Scenario[0]) #Change to a diff on first scenario
+                Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            Total_Generation_Stack_Out.drop(self.Multi_Scenario[0],inplace=True) #Drop base entry
+
+            Total_Generation_Stack_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
+
             # Data table of values to return to main program
             Data_Table_Out = pd.concat([Total_Generation_Stack_Out],  axis=1, sort=False)
-
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out / 1000 #GWh -> TWh
-            net_diff = Total_Generation_Stack_Out.drop(columns = 'Curtailment')
-            net_diff = net_diff.sum(axis = 1)
-
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
 
             if Total_Generation_Stack_Out.empty == True:
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
-            fig1, ax = plt.subplots(figsize=(6,4))
-            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum()))
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
+            
+            net_diff = Total_Generation_Stack_Out
+            try:
+                net_diff.drop(columns = 'Curtailment',inplace=True)
+            except KeyError:
+                pass
+            net_diff = net_diff.sum(axis = 1)
+            
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
+            
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             #adds comma to y axis data
-            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
 
             #Add net gen difference line.
             n=0
-            for scenario in self.Multi_Scenario[1:]:
+            for scenario in self.Scenarios[1:]:
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 y_net = [net_diff.loc[scenario]] * 2
                 net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
                 n += 1
 
             locs,labels=plt.xticks()
-            ax.set_ylabel('Generation Change (TWh) \n relative to '+ self.Multi_Scenario[0],  color='black', rotation='vertical')
-            self.xlabels = pd.Series(self.Multi_Scenario).str.replace('_',' ').str.wrap(10, break_long_words=False)
+
+            ax.set_ylabel('Generation Change ({}h) \n relative to '.format(unitconversion['units']) + self.Scenarios[0].replace('_',' '),  color='black', rotation='vertical')
+            self.xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
+
             plt.xticks(ticks=locs,labels=self.xlabels[1:])
             ax.margins(x=0.01)
 
             plt.axhline(linewidth=0.5,linestyle='--',color='grey')
 
             handles, labels = ax.get_legend_handles_labels()
-
+            
+            handles.append(net_line[0])
+            labels += ['Net Gen Change']
+            
             #Main legend
-            leg_main = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
-
-            #Net line legend
-            leg_net = ax.legend(net_line,['Net Gen Change'],loc='center left',bbox_to_anchor=(1, -0.05),facecolor='inherit', frameon=True)
-            ax.add_artist(leg_main)
-            ax.add_artist(leg_net)
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -368,7 +377,7 @@ class mplot(object):
     #     Load_Collection = {}
     #     curtailment_collection = {}
 
-    #     for scenario in self.Multi_Scenario:
+    #     for scenario in self.Scenarios:
     #         try:
     #             Gen_Collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
     #             curtailment_collection[scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "generator_Curtailment")
@@ -387,7 +396,7 @@ class mplot(object):
     #     self.logger.info("Zone = " + self.zone_input)
 
 
-    #     for scenario in self.Multi_Scenario:
+    #     for scenario in self.Scenarios:
     #         self.logger.info("Scenario = " + scenario)
     #         try:
     #             Total_Gen_Stack = Gen_Collection.get(scenario)

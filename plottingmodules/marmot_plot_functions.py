@@ -7,14 +7,16 @@ Functions required to create Marmot plots
 @author: Daniel Levie
 """
 
-import pandas as pd
 import os
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
 import math
 import logging
 import datetime as dt
+import pandas as pd
+import numpy as np
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
+import config.mconfig as mconfig
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
@@ -24,7 +26,7 @@ class MissingInputData:
     Exception Class for handling return of missing data
     """
     def __init__(self):
-       return 
+       return
 
 class MissingZoneData:
     """
@@ -46,14 +48,14 @@ class UnderDevelopment:
     """
     def __init__(self):
         return
-    
+
 class InputSheetError:
     """
-    Exception Class for handling user input sheet errors 
+    Exception Class for handling user input sheet errors
     """
     def __init__(self):
         return
-      
+
 def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     """
     Used to get data from formatted h5 file
@@ -78,7 +80,7 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
 
     for scenario in scenario_list:
         try:
-            data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),data)
+            data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder,"Processed_HDF5_folder", scenario + "_formatted.h5"),data)
             return_value = 0
         except KeyError:
             logger.warning("'%s' is MISSING from the Marmot formatted h5 files",data)
@@ -208,9 +210,9 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     Parameters
     ----------
     xdimension : int, optional
-        plot x dimension. The default is 1.
+        facet plot x dimension. The default is 1.
     ydimension : int, optional
-        plot y dimension. The default is 1.
+        facet plot y dimension. The default is 1.
     sharey : bool, optional
         Share y axes labels. The default is True.
 
@@ -221,7 +223,10 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     axs : matplotlib.axes
         matplotlib axes.
     """
-    fig, axs = plt.subplots(ydimension,xdimension, figsize=((6*xdimension),(4*ydimension)), sharey=sharey, squeeze=False)
+    x = mconfig.parser("figure_size","xdimension")
+    y = mconfig.parser("figure_size","ydimension")
+    
+    fig, axs = plt.subplots(ydimension,xdimension, figsize=((x*xdimension),(y*ydimension)), sharey=sharey, squeeze=False)
     axs = axs.ravel()
     return fig,axs
 
@@ -253,7 +258,7 @@ def create_bar_plot(df, axs, colour, stacked=False):
     fig.tick_params(axis='y', which='major', length=5, width=1)
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
-    
+
 
 def create_grouped_bar_plot(df, colour):
     """
@@ -271,7 +276,8 @@ def create_grouped_bar_plot(df, colour):
     fig : matplotlib fig
         matplotlib fig.
     """
-    fig = df.plot.bar(figsize=(6,4), rot=0, edgecolor='white', linewidth='1.5',
+    
+    fig = df.plot.bar(figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='white', linewidth='1.5',
                                       color=[colour.get(x, '#333333') for x in df.columns])
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
@@ -296,12 +302,12 @@ def create_stacked_bar_plot(df, colour):
         matplotlib fig.
     """
 
-    fig = df.plot.bar(stacked=True, figsize=(6,4), rot=0, edgecolor='black', linewidth='0.1',
+    fig = df.plot.bar(stacked=True, figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='black', linewidth='0.1',
                                                 color=[colour.get(x, '#333333') for x in df.columns])
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
     #adds comma to y axis data
-    fig.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    fig.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
     fig.tick_params(axis='y', which='major', length=5, width=1)
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
@@ -393,7 +399,7 @@ def create_stackplot(axs,data,color_dict,label=None,n=0):
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
     axs[n].tick_params(axis='x', which='major', length=5, width=1)
-    axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+    axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
     axs[n].margins(x=0.01)
 
 
@@ -508,7 +514,7 @@ def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
     """
     if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0) and shift_leap_day:
         df.index.set_levels(
-            df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'), 
+            df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'),
             level = 'timestamp',
             inplace = True)
     return(df)
@@ -524,7 +530,7 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
     df : Pandas multiindex dataframe
         reported parameter (i.e. generator_Generation)
     Region_Mapping : Pandas dataframe
-        Dataframe that maps regions to user-specified aggregation levels. 
+        Dataframe that maps regions to user-specified aggregation levels.
     AGG_BY : string
         Name of new aggregation. Needs to match the appropriate column in the user defined Region Mapping file.
 
@@ -540,3 +546,51 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
     df = df.merge(agg_new,left_on = 'region', right_index = True)
     return(df)
 
+def get_interval_count(df):
+    """
+    Detects the interval spacing; used to adjust sums of certain for variables for sub-hourly runs
+
+    Parameters
+    ----------
+    df : Pandas multiindex dataframe for some reported parameter (e.g. generator_Generation)
+
+    Returns
+    -------
+    interval_count : number of intervals per 60 minutes
+
+    """
+    time_delta = df.index[1]- df.index[0]
+    # Finds intervals in 60 minute period
+    interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+    return(interval_count)
+
+
+def capacity_energy_unitconversion(max_value):
+    """
+    auto unitconversion for capacity and energy figures.
+
+    Parameters
+    ----------
+    max_value : float
+        value used to determine divisor and units.
+
+    Returns
+    -------
+    dict
+        dictionary containing divisor and units.
+
+    """
+    
+    if max_value < 1000 and max_value > 1:
+        divisor = 1
+        units = 'MW'
+    elif max_value < 1:
+        divisor = 0.001
+        units = 'kW'
+    elif max_value > 999999.9:
+        divisor = 1000000
+        units = 'TW'
+    else:
+        divisor = 1000
+        units = 'GW'
+    return {'units':units, 'divisor':divisor}

@@ -1,33 +1,30 @@
 Ordered_Gen
-nuclear
-coal
-gas-cc
-gas-cc-ccs
-gas-ct
-o-g-s
-hydro
-geothermal
-biopower
-lfill-gas
-re-ct
-onswind
-ofswind
+Nuclear
+Coal
+Gas-CC
+Gas-CC CCS
+Gas-CT
+Gas
+Gas-Steam
+Dual Fuel
+DualFuel
+Oil-Gas-Steam
+Oil
+Hydro
+Ocean
+Geothermal
+Biomass
+Biopower
+Other
 Wind
-csp
-upv
-dupv
-distpv
+Offshore Wind
 Solar
-phs
-battery
-battery_2
-battery_4
-battery_6
-battery_8
-battery_10
-caes
-storage-h2
-Canada
-spill
-curtailment
-Unserved Energy
+PV
+dPV
+CSP
+PV-Battery
+Battery
+PHS
+Storage
+Net Imports
+Curtailment

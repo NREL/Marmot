@@ -8,10 +8,10 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 @author: dlevie
 """
 
-import pandas as pd
 import os
+import pandas as pd
 import logging
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 class mplot(object):
@@ -30,8 +30,8 @@ class mplot(object):
         cap_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -42,7 +42,7 @@ class mplot(object):
             self.logger.info(self.AGG_BY + " =  " + zone_input)
             cap_started_all_scenarios = pd.DataFrame()
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
 
@@ -152,8 +152,8 @@ class mplot(object):
         cap_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -164,7 +164,7 @@ class mplot(object):
             self.logger.info("Zone =  " + zone_input)
             cap_started_chunk = []
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
                 Gen = gen_collection.get(scenario)

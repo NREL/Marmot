@@ -16,7 +16,7 @@ import matplotlib as mpl
 import numpy as np
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
 import logging
 
 #===============================================================================
@@ -39,11 +39,11 @@ class mplot(object):
         """
         # If not facet plot, only plot first sceanrio
         if not self.facet:
-            self.Multi_Scenario = [self.Multi_Scenario[0]]
+            self.Scenarios = [self.Scenarios[0]]
         outputs = {}
         check_input_data = []
         reserve_provision_collection = {}
-        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Scenarios)])
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -52,9 +52,9 @@ class mplot(object):
         for region in self.Zones:
             self.logger.info("Zone = "+ region)
 
-            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario=self.Multi_Scenario)
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario=self.Scenarios)
             grid_size = xdimension*ydimension
-            excess_axs = grid_size - len(self.Multi_Scenario)
+            excess_axs = grid_size - len(self.Scenarios)
 
             fig1, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -62,7 +62,7 @@ class mplot(object):
             data_tables = {}
             unique_tech_names = []
             n=0 #Counter for scenario subplots
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
                 self.logger.info("Scenario = " + scenario)
 
                 reserve_provision_timeseries = reserve_provision_collection.get(scenario)
@@ -92,12 +92,18 @@ class mplot(object):
                     reserve_provision_timeseries = reserve_provision_timeseries[self.start_date : self.end_date]
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
-
+                
+                # unitconversion based off peak generation hour, only checked once 
+                if n == 0:
+                    unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
+                reserve_provision_timeseries = reserve_provision_timeseries/unitconversion['divisor']
+                
                 mfunc.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, label=reserve_provision_timeseries.columns,n=n)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
 
                 if self.prop == "Peak Demand":
-                    axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), ',')) + ' MW', xy=(peak_reserve_t, Peak_Reserve),
+                    axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve/unitconversion['divisor']), '.2f')) + ' {}'.format(unitconversion['units']), 
+                                    xy=(peak_reserve_t, Peak_Reserve),
                             xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
@@ -139,10 +145,10 @@ class mplot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Reserve Provision (MW)',  color='black', rotation='vertical', labelpad=30)
+            plt.ylabel('Reserve Provision ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=30)
 
             if not self.facet:
-                data_tables = data_tables[self.Multi_Scenario[0]]
+                data_tables = data_tables[self.Scenarios[0]]
 
             outputs[region] = {'fig': fig1, 'data_table': data_tables}
         return outputs
@@ -157,7 +163,7 @@ class mplot(object):
         outputs = {}
         check_input_data = []
         reserve_provision_collection = {}
-        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Scenarios)])
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -168,7 +174,7 @@ class mplot(object):
 
             Total_Reserves_Out = pd.DataFrame()
             unique_tech_names = []
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
                 self.logger.info("Scenario = " + scenario)
 
                 reserve_provision_timeseries = reserve_provision_collection.get(scenario)
@@ -193,22 +199,27 @@ class mplot(object):
 
 
             Total_Reserves_Out = mfunc.df_process_categorical_index(Total_Reserves_Out, self.ordered_gen)
-            Total_Reserves_Out = Total_Reserves_Out.T/1000 #Convert to GWh
+            Total_Reserves_Out = Total_Reserves_Out.T
             Total_Reserves_Out = Total_Reserves_Out.loc[:, (Total_Reserves_Out != 0).any(axis=0)]
-
-            Total_Reserves_Out.index = Total_Reserves_Out.index.str.replace('_',' ')
-            Total_Reserves_Out.index = Total_Reserves_Out.index.str.wrap(5, break_long_words=False)
             
             if Total_Reserves_Out.empty:
                 out = mfunc.MissingZoneData()
                 outputs[region] = out
                 continue
             
+            Total_Reserves_Out.index = Total_Reserves_Out.index.str.replace('_',' ')
+            Total_Reserves_Out.index = Total_Reserves_Out.index.str.wrap(5, break_long_words=False)
+            data_table_out = Total_Reserves_Out
+            
+            # Convert units
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Reserves_Out.sum()))
+            Total_Reserves_Out = Total_Reserves_Out/unitconversion['divisor'] 
+            
             # create figure
             fig1 = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict)
 
             # additional figure formatting
-            fig1.set_ylabel('Total Reserve Provision (GWh)',  color='black', rotation='vertical')
+            fig1.set_ylabel('Total Reserve Provision ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
@@ -234,8 +245,6 @@ class mplot(object):
             # Add legend
             fig1.legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
                      facecolor='inherit', frameon=True)
-
-            data_table_out = Total_Reserves_Out
 
             outputs[region] = {'fig': fig1, 'data_table': data_table_out}
         return outputs
@@ -270,7 +279,7 @@ class mplot(object):
     def _reserve_bar_plots(self, data_set, count_hours=False):
         reserve_collection = {}
         check_input_data = []
-        check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_{}".format(data_set),self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_{}".format(data_set),self.Marmot_Solutions_folder, self.Scenarios)])
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -282,7 +291,7 @@ class mplot(object):
 
             Data_Table_Out=pd.DataFrame()
             reserve_total_chunk = []
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info('Scenario = ' + scenario)
 
@@ -320,23 +329,28 @@ class mplot(object):
             reserve_out = pd.concat(reserve_total_chunk,axis=1, sort='False')
             # remove any rows that all eqaul 0
             reserve_out = reserve_out.loc[(reserve_out != 0).any(axis=1),:]
-
+            reserve_out.columns = reserve_out.columns.str.replace('_',' ')
+        
             # If no reserves return nothing
             if reserve_out.empty:
                 out = mfunc.MissingZoneData()
                 outputs[region] = out
                 continue
-
-            reserve_out.columns = reserve_out.columns.str.replace('_',' ')
-
+            
             Data_Table_Out=pd.concat([Data_Table_Out,reserve_out],axis=1)
+
+            if count_hours == False:
+                # Convert units
+                unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_out.sum()))
+                reserve_out = reserve_out/unitconversion['divisor'] 
+
             # create color dictionary
             color_dict = dict(zip(reserve_out.columns,self.color_list))
 
             fig2 = mfunc.create_grouped_bar_plot(reserve_out,color_dict)
             if count_hours == False:
-                fig2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-                fig2.set_ylabel('Reserve {} [MWh]'.format(data_set),  color='black', rotation='vertical')
+                fig2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+                fig2.set_ylabel('Reserve {} [{}h]'.format(data_set,unitconversion['units'] ),  color='black', rotation='vertical')
             elif count_hours == True:
                 fig2.set_ylabel('Reserve {} Hours'.format(data_set),  color='black', rotation='vertical')
             handles, labels = fig2.get_legend_handles_labels()
@@ -360,9 +374,9 @@ class mplot(object):
 
         # If not facet plot, only plot first sceanrio
         if not self.facet:
-            self.Multi_Scenario = [self.Multi_Scenario[0]]
+            self.Scenarios = [self.Scenarios[0]]
 
-        check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_Shortage", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_Shortage", self.Marmot_Solutions_folder, self.Scenarios)])
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -371,18 +385,21 @@ class mplot(object):
         for region in self.Zones:
             self.logger.info("Zone = "+ region)
 
-            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario = self.Multi_Scenario)
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario = self.Scenarios)
 
             grid_size = xdimension*ydimension
-            excess_axs = grid_size - len(self.Multi_Scenario)
+            excess_axs = grid_size - len(self.Scenarios)
 
             fig3, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-            reserve_timeseries_chunk = []
+            data_tables = {}
             unique_reserve_types = []
             n=0 #Counter for scenario subplots
-            for scenario in self.Multi_Scenario:
+            
+            if not self.facet:
+                self.Scenarios = [self.Scenarios[0]]
+            for scenario in self.Scenarios:
 
                 self.logger.info('Scenario = ' + scenario)
 
@@ -410,24 +427,26 @@ class mplot(object):
                 # create color dictionary
                 color_dict = dict(zip(reserve_timeseries.columns,self.color_list))
 
+                data_tables[scenario] = reserve_timeseries 
+
                 for column in reserve_timeseries:
                     mfunc.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
-                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
                 axs[n].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
 
-                scenario_names = pd.Series([scenario]*len(reserve_timeseries),name='Scenario')
-                reserve_timeseries = reserve_timeseries.set_index([scenario_names],append=True)
-                reserve_timeseries_chunk.append(reserve_timeseries)
+                # scenario_names = pd.Series([scenario]*len(reserve_timeseries),name='Scenario')
+                # reserve_timeseries = reserve_timeseries.set_index([scenario_names],append=True)
+                # reserve_timeseries_chunk.append(reserve_timeseries)
 
                 # create list of gen technologies
                 l1 = reserve_timeseries.columns.tolist()
                 unique_reserve_types.extend(l1)
 
                 if self.facet:
-                    n=n+1
+                    n+=1
             
-            if not reserve_timeseries_chunk:
+            if not data_tables:
                 out = mfunc.MissingZoneData()
                 outputs[region] = out
                 continue
@@ -458,7 +477,11 @@ class mplot(object):
             # plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
             plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 30)
 
-            Data_Out=pd.concat(reserve_timeseries_chunk,axis=0)
+            #Data_Out = pd.concat(reserve_timeseries_chunk,axis=0)
+            if not self.facet:
+                data_tables = data_tables[self.Scenarios[0]]
 
-            outputs[region] =  {'fig': fig3, 'data_table': Data_Out}
+            outputs[region] =  {'fig': fig3, 'data_table': data_tables}
+
         return outputs
+            

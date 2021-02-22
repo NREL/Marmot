@@ -8,13 +8,14 @@ This module creates plots that show curtailment
 
 """
 
+import os
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
 import logging
-import marmot_plot_functions as mfunc
-import os
+import plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 
 #===============================================================================
 
@@ -25,7 +26,114 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
+
+    def curt_duration_curve(self):
+        outputs = {}
+        curtailment_collection = {}
+        check_input_data = []
         
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        RE_Curtailment_DC = pd.DataFrame()
+        PV_Curtailment_DC = pd.DataFrame()
+
+        for zone_input in self.Zones:
+            self.logger.info(self.AGG_BY +  " = " + zone_input)
+
+            for scenario in self.Scenarios:
+                self.logger.info("Scenario = " + scenario)
+
+                re_curt = curtailment_collection.get(scenario)
+
+                # Timeseries [MW] RE curtailment [MWh]
+                try: #Check for regions missing all generation.
+                    re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                        self.logger.info('No curtailment in ' + zone_input)
+                        continue
+
+                # Timeseries [MW] PV curtailment [MWh]
+                pv_curt = (re_curt.loc[(slice(None), self.pv_gen_cat),:])
+
+                re_curt = re_curt.groupby(["timestamp"]).sum()
+                pv_curt = pv_curt.groupby(["timestamp"]).sum()
+
+                re_curt = re_curt.squeeze() #Convert to Series
+                pv_curt = pv_curt.squeeze() #Convert to Series
+
+                # Sort from larget to smallest
+                re_cdc = re_curt.sort_values(ascending=False).reset_index(drop=True)
+                pv_cdc = pv_curt.sort_values(ascending=False).reset_index(drop=True)
+
+                re_cdc.rename(scenario, inplace=True)
+                pv_cdc.rename(scenario, inplace=True)
+
+                RE_Curtailment_DC = pd.concat([RE_Curtailment_DC, re_cdc], axis=1, sort=False)
+                PV_Curtailment_DC = pd.concat([PV_Curtailment_DC, pv_cdc], axis=1, sort=False)
+
+            # Remove columns that have values less than 1
+            RE_Curtailment_DC = RE_Curtailment_DC.loc[:, (RE_Curtailment_DC >= 1).any(axis=0)]
+            PV_Curtailment_DC = PV_Curtailment_DC.loc[:, (PV_Curtailment_DC >= 1).any(axis=0)]
+            # Replace _ with white space
+            RE_Curtailment_DC.columns = RE_Curtailment_DC.columns.str.replace('_',' ')
+            PV_Curtailment_DC.columns = PV_Curtailment_DC.columns.str.replace('_',' ')
+
+            # Create Dictionary from scenario names and color list
+            colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
+
+
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
+
+            if self.prop == "PV":
+                Data_Table_Out = PV_Curtailment_DC
+                
+                if PV_Curtailment_DC.empty:
+                    out = mfunc.MissingZoneData()
+                    outputs[zone_input] = out
+                    continue
+                
+                for column in PV_Curtailment_DC:
+                    ax.plot(PV_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
+                            label=column)
+                    ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                              facecolor='inherit', frameon=True)
+                    ax.set_ylabel('PV Curtailment (MW)',  color='black', rotation='vertical')
+
+            if self.prop == "PV+Wind":
+                Data_Table_Out = RE_Curtailment_DC
+                
+                if RE_Curtailment_DC.empty:
+                    out = mfunc.MissingZoneData()
+                    outputs[zone_input] = out
+                    continue
+
+                for column in RE_Curtailment_DC:
+                    ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
+                            label=column)
+                    ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                              facecolor='inherit', frameon=True)
+                    ax.set_ylabel('PV + Wind Curtailment (MW)',  color='black', rotation='vertical')
+
+            ax.set_xlabel('Hours',  color='black', rotation='horizontal')
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.margins(x=0.01)
+            ax.set_xlim(0, 9490)
+            ax.set_ylim(bottom=0)
+
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+        return outputs
+
     def curt_pen(self):
         outputs = {}
         generation_collection = {}
@@ -34,10 +142,10 @@ class mplot(object):
         total_gen_cost_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(avail_gen_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(avail_gen_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -50,7 +158,7 @@ class mplot(object):
 
             self.logger.info(self.AGG_BY +  " = " + zone_input)
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
                 self.logger.info("Scenario = " + scenario)
 
                 gen = generation_collection.get(scenario)
@@ -182,8 +290,8 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
-            fig1, ax = plt.subplots(figsize=(6,4))
+            
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
             for index, row in Penetration_Curtailment_out.iterrows():
                 if self.prop == "PV":
                     ax.scatter(row["% PV Penetration"], row["% PV Curtailment"],
@@ -211,12 +319,13 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
+
     def curt_duration_curve(self):
         outputs = {}
         curtailment_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -229,7 +338,7 @@ class mplot(object):
         for zone_input in self.Zones:
             self.logger.info(self.AGG_BY +  " = " + zone_input)
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
                 self.logger.info("Scenario = " + scenario)
 
                 re_curt = curtailment_collection.get(scenario)
@@ -271,7 +380,7 @@ class mplot(object):
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
 
 
-            fig2, ax = plt.subplots(figsize=(6,4))
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
             if self.prop == "PV":
                 Data_Table_Out = PV_Curtailment_DC
@@ -316,7 +425,6 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
-
     def curt_total(self):
 
         """
@@ -329,8 +437,8 @@ class mplot(object):
         avail_gen_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(avail_gen_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(avail_gen_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -342,8 +450,11 @@ class mplot(object):
 
             Total_Curtailment_out = pd.DataFrame()
             Total_Available_gen = pd.DataFrame()
+            vre_curt_chunks = []
+            avail_gen_chunks = []
 
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
+
                 self.logger.info("Scenario = " + scenario)
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
                 #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
@@ -357,7 +468,7 @@ class mplot(object):
                 except KeyError:
                     self.logger.info('No curtailment in ' + zone_input)
                     continue
-                vre_curt = (vre_curt.loc[(slice(None), self.vre_gen_cat),:])
+                vre_curt = vre_curt[vre_curt.index.isin(self.vre_gen_cat,level='tech')]
 
                 avail_gen = avail_gen_collection.get(scenario)
                 try: #Check for regions missing all generation.
@@ -365,7 +476,7 @@ class mplot(object):
                 except KeyError:
                         self.logger.info('No available generation in ' + zone_input)
                         continue
-                avail_gen = (avail_gen.loc[(slice(None), self.vre_gen_cat),:])
+                avail_gen = avail_gen[avail_gen.index.isin(self.vre_gen_cat,level='tech')]
 
                 for vre_type in self.vre_gen_cat:
                     try:
@@ -381,30 +492,35 @@ class mplot(object):
                 vre_table = pd.DataFrame(vre_collection,index=[scenario])
                 avail_gen_table = pd.DataFrame(avail_vre_collection,index=[scenario])
 
-
-                Total_Curtailment_out = pd.concat([Total_Curtailment_out, vre_table], axis=0, sort=False)
-                Total_Available_gen = pd.concat([Total_Available_gen, avail_gen_table], axis=0, sort=False)
-
+                vre_curt_chunks.append(vre_table)
+                avail_gen_chunks.append(avail_gen_table)
+            
+            Total_Curtailment_out = pd.concat(vre_curt_chunks, axis=0, sort=False)
+            Total_Available_gen = pd.concat(avail_gen_chunks, axis=0, sort=False)
+            
             vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
-
-            Total_Curtailment_out = Total_Curtailment_out/1000 #Convert to GWh
-
-            # Data table of values to return to main program
-            Data_Table_Out = Total_Curtailment_out
-
+            
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
+            
+            # Data table of values to return to main program
+            Data_Table_Out = Total_Curtailment_out
 
             if Total_Curtailment_out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(6,4), rot=0,
+            
+            # unit conversion return divisor and energy units
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
+            Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
+            
+            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1')
             fig3.spines['right'].set_visible(False)
             fig3.spines['top'].set_visible(False)
-            fig3.set_ylabel('Total Curtailment (GWh)',  color='black', rotation='vertical')
-            fig3.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            fig3.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            fig3.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
             fig3.tick_params(axis='y', which='major', length=5, width=1)
             fig3.tick_params(axis='x', which='major', length=5, width=1)
             fig3.margins(x=0.01)
@@ -422,7 +538,7 @@ class mplot(object):
                 x, y = i.get_xy()
                 fig3.text(x+width/2,
                     y+height + 0.05*max(fig3.get_ylim()),
-                    '{:.2%}\n|{:,.0f}|'.format(vre_pct_curt[k],curt_totals[k]),
+                    '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11, color='red')
                 k=k+1
@@ -451,9 +567,9 @@ class mplot(object):
         gen_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -467,7 +583,7 @@ class mplot(object):
 
         chunks = []
 
-        for scenario in self.Multi_Scenario:
+        for scenario in self.Scenarios:
             scen_idx += 1
             self.logger.info("Scenario = " + scenario)
 
@@ -523,14 +639,12 @@ class mplot(object):
             Total_Gen = pd.concat([Total_Gen,sites_gen],axis = 1)
 
         Gen_8760 = pd.concat(chunks,axis = 0, copy = False)
-        Gen_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen_8760.csv'))
+        Gen_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen_8760.csv'))
 
         Total_Gen = Total_Gen / 1000000
-        Total_Curtailment_Out.T.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
-        Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen.csv'))
+        Total_Curtailment_Out.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
+        Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen.csv'))
 
 
         outputs = mfunc.DataSavedInModule()
         return outputs
-
-

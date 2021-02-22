@@ -7,12 +7,12 @@ Created on Mon Jun 22 16:14:56 2020
 
 # This is the new MetaData class
 
-import h5py
 import os
+import sys
+import h5py
 import pandas as pd
 import numpy as np
 import logging
-import sys
 
 class MetaData:
     
@@ -40,7 +40,7 @@ class MetaData:
                 if names.endswith(".h5"):
                     files_list.append(names) # Creates a list of only the hdf5 files
             if len(files_list) == 0:
-                self.logger.info("\n In order to initialize your database's metadata, Marmot is looking for an h5plexos solution file.  \n It is looking in " + self.HDF5_folder_in + ", but it cannot find any *.h5 files there. \n Please check the 'PLEXOS_Solutions_folder' input in row 2 of your 'Marmot_user_defined_inputs.csv'. \n Ensure that it matches the filepath containing the *.h5 files created by h5plexos. \n \n Marmot will now quit.")
+                self.logger.info("\n In order to initialize your database's metadata, Marmot is looking for a h5plexos solution file.  \n It is looking in " + self.HDF5_folder_in + ", but it cannot find any *.h5 files there. \n Please check the 'PLEXOS_Solutions_folder' input in row 2 of your 'Marmot_user_defined_inputs.csv'. \n Ensure that it matches the filepath containing the *.h5 files created by h5plexos. \n \n Marmot will now quit.")
                 sys.exit()
             else:
                 model=files_list[0]
@@ -195,6 +195,21 @@ class MetaData:
             node_zone = pd.DataFrame()
             return node_zone
     
+    def generator_node(self):
+        try:
+            try:
+                generator_node = pd.DataFrame(np.asarray(self.data['metadata/relations/generators_nodes']))
+            except KeyError:
+                generator_node = pd.DataFrame(np.asarray(self.data['metadata/relations/generator_nodes']))
+            generator_node.rename(columns={'child':'node','parent':'gen_name'}, inplace=True)
+            generator_node = generator_node.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            # generators_nodes = generators_nodes.sort_values(by=['generator'])
+            return generator_node
+        except:
+            generator_node = pd.DataFrame()
+            return generator_node
+        
+        
 ##############################################################################
     
 # These methods were not originally part of the MetaData class and were used to 

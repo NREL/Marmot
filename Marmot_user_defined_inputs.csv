@@ -1,18 +1,16 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,/Users/mschwarz/Marmot local/Bradys_solutions
-Marmot_Solutions_folder,folder,required,/Users/mschwarz/Marmot local/Bradys_solutions
-Scenario_process_list,List,required,
+PLEXOS_Solutions_folder,folder,required,/path/to/PLEXOSsolutionh5s
+Marmot_Solutions_folder,folder,required,/path/to/Marmotplots
+Scenario_process_list,List,required,Scenario1
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Region_mapping_ReEDS.csv
 gen_names.csv_name,string,required(default),gen_names.csv
-emit_names.csv_name,string,optional,emit_names.csv
-Main_scenario_plot,string,required,2010
-Multi_scenario_plot,List,required,"2010, 2010_old"
-Scenario_Diff_plot,List [Max 2],optional,
-AGG_BY,string,required,State
+emit_names.csv_name,string,required(default),emit_names.csv
+Scenarios,string or List,required,"Scenario1, Scenario2, Scenario3"
+Scenario_Diff_plot,List [Max 2],optional,"Scenario1, Scenario2"
+AGG_BY,string,required,region
 zone_region_sublist,List,optional,
-Facet_ylabels,List,optional,
+Facet_ylabels,List,optional,"Scenario1, Scenario2, Scenario3"
 Facet_xlabels,List,optional,
 Figure_Format,string,optional,svg
 Tick_labels,List,optional,
-shift_leap_day,Boolean,required,TRUE

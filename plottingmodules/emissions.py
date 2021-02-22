@@ -13,8 +13,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
-import marmot_plot_functions as mfunc
+import plottingmodules.marmot_plot_functions as mfunc
 import logging
+import config.mconfig as mconfig
 
 #===============================================================================
 
@@ -25,6 +26,9 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
     # function to collect total emissions by fuel type
     def total_emissions_by_type(self):
@@ -32,7 +36,7 @@ class mplot(object):
         outputs = {}
         emit_gen_collection = {}
         check_input_data = []
-        check_input_data.extend([mfunc.get_data(emit_gen_collection,"emissions_generators_Production", self.Marmot_Solutions_folder, self.Multi_Scenario)])
+        check_input_data.extend([mfunc.get_data(emit_gen_collection,"emissions_generators_Production", self.Marmot_Solutions_folder, self.Scenarios)])
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -44,7 +48,7 @@ class mplot(object):
             self.logger.info("Zone = " + zone_input)
 
             # collect data for all scenarios and pollutants
-            for scenario in self.Multi_Scenario:
+            for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
 
@@ -88,7 +92,7 @@ class mplot(object):
                 emitPlot.index = emitPlot.index.str.wrap(10, break_long_words=False)
 
                 # single pollutant plot
-                fig1 = emitPlot.plot.bar(stacked=True, figsize=(6,4), rot=0,
+                fig1 = emitPlot.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in emitPlot.columns.values], edgecolor='black', linewidth='0.1')
 
                 # plot formatting

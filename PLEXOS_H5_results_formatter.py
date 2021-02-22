@@ -13,16 +13,17 @@ it can be read into the Marmot_plot_main.py file
 # Import Python Libraries
 #===============================================================================
 
-import pandas as pd
 import os
-import h5py
 import sys
+import pandas as pd
+import h5py
 import pathlib
 import time
 import logging
 import logging.config
 import yaml
 from meta_data import MetaData
+import config.mconfig as mconfig
 
 sys.path.append('../h5plexos')
 from h5plexos.query import PLEXOSSolution
@@ -61,9 +62,9 @@ except IndexError:
 pd.set_option("display.max_colwidth", 1000)
 
 #changes working directory to location of this python file
-os.chdir(pathlib.Path(__file__).parent.absolute())
+#os.chdir(pathlib.Path(__file__).parent.absolute())
 
-Marmot_user_defined_inputs = pd.read_csv('Marmot_user_defined_inputs.csv', usecols=['Input','User_defined_value'],
+Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
 
 # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
@@ -299,10 +300,19 @@ class Process:
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df = df.reset_index() # unzip the levels in index
         df = df.merge(self.metadata.generator_category(), how='left', on='gen_name')
+         
+        # merging in generator region/zones first prevents double counting in cases where multiple model regions are within a reserve region
+        if self.metadata.region_generators().empty == False:
+            df = df.merge(self.metadata.region_generators(), how='left', on='gen_name')
+        if self.metadata.zone_generators().empty == False:
+            df = df.merge(self.metadata.zone_generators(), how='left', on='gen_name')
+        
+        # now merge in reserve regions/zones
         if self.metadata.reserves_regions().empty == False:
-            df = df.merge(self.metadata.reserves_regions(), how='left', on='parent') # Merges in regions where reserves are located
+            df = df.merge(self.metadata.reserves_regions(), how='left', on=['parent', 'region']) # Merges in regions where reserves are located
         if self.metadata.reserves_zones().empty == False:
-            df = df.merge(self.metadata.reserves_zones(), how='left', on='parent') # Merges in zones where reserves are located
+            df = df.merge(self.metadata.reserves_zones(), how='left', on=['parent', 'zone']) # Merges in zones where reserves are located
+        
         df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
@@ -466,32 +476,28 @@ for Scenario_name in Scenario_List:
     #===============================================================================
 
     HDF5_output = Scenario_name + "_formatted.h5"
-
-    Marmot_Scenario = os.path.join(Marmot_Solutions_folder, Scenario_name)
-    try:
-        os.makedirs(Marmot_Scenario )
-    except FileExistsError:
-        # directory already exists
-        pass
-    hdf_out_folder = os.path.join(Marmot_Scenario , 'Processed_HDF5_folder')
-    try:
-        os.makedirs(hdf_out_folder)
-    except FileExistsError:
-        # directory already exists
-        pass
+    
     HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
     try:
         os.makedirs(HDF5_folder_in)
     except FileExistsError:
         # directory already exists
         pass
-    figure_folder = os.path.join(Marmot_Scenario , 'Figures_Output')
+    
+    hdf_out_folder = os.path.join(Marmot_Solutions_folder,'Processed_HDF5_folder')
+    try:
+        os.makedirs(hdf_out_folder)
+    except FileExistsError:
+        # directory already exists
+        pass    
+    
+    figure_folder = os.path.join(Marmot_Solutions_folder, 'Figures_Output')
     try:
         os.makedirs(figure_folder)
     except FileExistsError:
         # directory already exists
         pass
-
+    
     startdir=os.getcwd()
     os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
     files = sorted(os.listdir()) # List of all files in hdf5 folder in alpha numeric order
