@@ -70,11 +70,25 @@ class mplot(object):
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
+        
+        xdimension=len(self.xlabels)
+        if xdimension == 0:
+            xdimension = 1
+        ydimension=len(self.ylabels)
+        if ydimension == 0:
+            ydimension = 1
 
+
+        grid_size = xdimension*ydimension
+
+        # Used to calculate any excess axis to delete
+        plot_number = len(all_scenarios)
+        excess_axs = grid_size - plot_number
+            
         for zone_input in self.Zones:
             self.logger.info("For all lines touching Zone = "+zone_input)
             
-            fig2, axs = mfunc.setup_plot(ydimension=len(self.Scenarios),sharey = False)
+            fig2, axs = mfunc.setup_plot(xdimension = xdimension, ydimension=len(self.Scenarios),sharey = False,squeeze = False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
 
@@ -140,13 +154,13 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             if hist == True:
                 if (self.prop != self.prop)==True:
-                    label_prop='All Lines'
+                    self.prop='All Lines'
                 plt.ylabel('Number of lines',  color='black', rotation='vertical', labelpad=30)
-                plt.xlabel('Line Utilization: {}'.format(label_prop),  color='black', rotation='horizontal', labelpad=20)
+                plt.xlabel('Line Utilization: {}'.format(self.prop),  color='black', rotation='horizontal', labelpad=20)
             else:
                 if (self.prop != self.prop)==True:
-                    label_prop='Top 10 Lines'
-                plt.ylabel('Line Utilization: {}'.format(label_prop),  color='black', rotation='vertical', labelpad=30)
+                    self.prop='Top 10 Lines'
+                plt.ylabel('Line Utilization: {}'.format(self.prop),  color='black', rotation='vertical', labelpad=30)
                 plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             del annual_util, limits
             outputs[zone_input] = {'fig': fig2,'data_table':Data_Out}
@@ -350,6 +364,26 @@ class mplot(object):
         import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
 
+
+        flows = Flow_Collection[scenario]
+                          
+        # limited_lines = []
+        # i = 0
+        # all_lines = flows.index.get_level_values('line_name').unique()
+
+        # for line in all_lines:
+        #     i += 1
+        #     print(line)
+        #     print(i / len(all_lines))
+        #     exp = export_limits.loc[line].squeeze()[0]
+        #     imp = import_limits.loc[line].squeeze()[0]
+        #     flow = flows.xs(line,level = 'line_name')[0].tolist()
+        #     if exp in flow or imp in flow:
+        #         limited_lines.append(line)
+                
+        # print(limited_lines)
+        # pd.DataFrame(limited_lines).to_csv('/Users/mschwarz/OR OSW local/Solutions/Figures_Output/limited_lines.csv')
+
         xdim,ydim = mfunc.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
@@ -371,6 +405,8 @@ class mplot(object):
 
                 single_exp_lim = export_limits.loc[line]
                 single_imp_lim = import_limits.loc[line]
+                limits = pd.concat([single_exp_lim,single_imp_lim])
+                limits_chunks.append(limits)
                 single_exp_lim = single_exp_lim.squeeze()
                 single_imp_lim = single_imp_lim.squeeze()
 
@@ -386,11 +422,13 @@ class mplot(object):
                     flow = Flow_Collection[scenario]
                     single_line = flow.xs(line,level = 'line_name')
                     single_line.columns = [line]
+                    single_line_out = single_line.copy()
                     if self.duration_curve:
                         single_line.sort_values(by = line,ascending = False,inplace = True)
                         single_line.reset_index(inplace = True)
                         single_line.drop(columns = ['timestamp'],inplace = True)
-                    mfunc.create_line_plot(axs,single_line,line, label = scenario + ' line flow', n = n)
+                    
+                    mfunc.create_line_plot(axs,single_line,line, label = scenario + '\n line flow', n = n)
 
                     #Add %congested number to plot.
                     if scenario == self.Scenarios[0]:
@@ -408,8 +446,8 @@ class mplot(object):
                         axs[n].annotate('Congestion = ' + str(cong_perc) + '% of hours', xy = (0.1,0.1),xycoords='axes fraction')
 
                     #For output time series .csv
-                    scenario_names = pd.Series([scenario] * len(single_line),name = 'Scenario')
-                    single_line_out = single_line.set_index([scenario_names],append = True)
+                    scenario_names = pd.Series([scenario] * len(single_line_out),name = 'Scenario')
+                    single_line_out = single_line_out.set_index([scenario_names],append = True)
                     chunks_line.append(single_line_out)
 
                 Data_out_line = pd.concat(chunks_line,axis = 0)
@@ -423,7 +461,7 @@ class mplot(object):
             mfunc.remove_excess_axs(axs,excess_axs,grid_size)
             axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit',color = 'red')
             axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit', color = 'green')
-
+            
             axs[n].set_title(line)
             handles, labels = axs[n].get_legend_handles_labels()
             if not self.duration_curve:
@@ -436,8 +474,8 @@ class mplot(object):
             return outputs
 
         Data_Table_Out = pd.concat(chunks,axis = 1)
-        Limits_Out = pd.concat(limits_chunks,axis = 1)
-        Limits_Out.index = ['Export Limit','Import Limit']
+        #Limits_Out = pd.concat(limits_chunks,axis = 1)
+        #Limits_Out.index = ['Export Limit','Import Limit']
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -446,10 +484,11 @@ class mplot(object):
         plt.tight_layout()
 
         fn_suffix = '_duration_curve' if self.duration_curve else ''
-    
+
         fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + fn_suffix + '.csv'))
-        Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + 'limits.csv'))
+       # Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + 'limits.csv'))
+
 
         outputs = mfunc.DataSavedInModule()
         return outputs
@@ -565,6 +604,7 @@ class mplot(object):
                     linestyle_dict = {'flow': '-','export_limit': '--', 'import_limit': '--'}
                     color_dict = {'flow': 'blue','export_limit': 'red', 'import_limit': 'green'}
 
+
                     for col in summer.columns:
                         axs[i,0].plot(summer[col],linewidth = 1,linestyle = linestyle_dict[col],color = color_dict[col],label = col)
                         axs[i,1].plot(winter[col],linewidth = 1,linestyle = linestyle_dict[col],color = color_dict[col],label = col)
@@ -578,7 +618,6 @@ class mplot(object):
                         axs[i,j].set_title(line)
                         axs[i,j].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
-
                     #For output time series .csv
                     scenario_names = pd.Series([scenario] * len(single_line_out),name = 'Scenario')
                     single_line_out.columns = [line]
@@ -588,6 +627,7 @@ class mplot(object):
                 Data_out_line = pd.concat(chunks_line,axis = 0)
                 chunks.append(Data_out_line)
             else:
+
                 self.logger.warning(line + ' not found in' + self.Scenarios[0] + '. Have you tagged it with the "Must Report" property in PLEXOS?')
 
                 excess_axs += 1
@@ -1126,7 +1166,151 @@ class mplot(object):
                           facecolor='inherit', frameon=True)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
+    
+    def zonal_interchange(self):
+    
+        """
+        This method plots the net interchange between each zone, with a facet for each zone.
+        Figures and data tables are returned to plot_main.
+        The method will only work if agg_by = "zone".
+        """
+        line_flow_collection = {}
+        check_input_data = []
+        check_input_data.extend([mfunc.get_data(line_flow_collection,"line_Flow",self.Marmot_Solutions_folder, self.Scenarios)])
 
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+
+        exp_lines = self.meta.zone_exporting_lines()
+        imp_lines = self.meta.zone_importing_lines()
+        
+        exp_lines.columns = ['region','line_name']
+        imp_lines.columns = ['region','line_name']
+        
+        outputs = {}
+        xdimension=len(self.xlabels)
+        if xdimension == 0:
+            xdimension = 1
+        ydimension=len(self.ylabels)
+        if ydimension == 0:
+            ydimension = 1
+
+        grid_size = xdimension*ydimension
+
+        # Used to calculate any excess axis to delete
+        plot_number = len(self.Scenarios)
+        excess_axs = grid_size - plot_number
+        
+        for zone_input in self.Zones:
+        
+            self.logger.info(self.AGG_BY + " = " + zone_input)
+
+            #Find list of lines that connect each region.
+            exp_oz = exp_lines[exp_lines['region'] == zone_input]
+            imp_oz = imp_lines[imp_lines['region'] == zone_input]
+
+            other_zones = self.meta.zones().name.tolist()
+            other_zones.remove(zone_input)
+
+            #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
+            fig7, axs = mfunc.setup_plot(xdimension,ydimension,sharey = False)
+            plt.subplots_adjust(wspace=0.6, hspace=0.3)
+            n = -1
+            
+            net_exports_all = []
+            
+            for scenario in self.Scenarios:
+                n += 1
+                net_exports = []
+                self.logger.info("Scenario = " + str(scenario))
+                flow = line_flow_collection[scenario]
+                flow = flow.reset_index()
+                
+                for other_zone in other_zones:
+                    exp_other_oz = exp_lines[exp_lines['region'] == other_zone]
+                    imp_other_oz = imp_lines[imp_lines['region'] == other_zone]
+           
+                    exp_pair = pd.merge(exp_oz,imp_other_oz,left_on = 'line_name',right_on = 'line_name')            
+                    imp_pair = pd.merge(imp_oz,exp_other_oz,left_on = 'line_name',right_on = 'line_name')
+                    
+                    #Swap columns for importing lines
+                    imp_pair = imp_pair.reindex(columns = ['region_from','line_name','region_to'])
+    
+                    export = flow[flow['line_name'].isin(exp_pair['line_name'])]
+                    imports = flow[flow['line_name'].isin(imp_pair['line_name'])]
+
+                    export = export.groupby(['timestamp']).sum()
+                    imports = imports.groupby(['timestamp']).sum()
+                    
+                    #Check for situations where there are only exporting or importing lines for this zonal pair.
+                    if imports.empty:
+                        net_export = export
+                    elif export.empty:
+                        net_export = -imports
+                    else:
+                        net_export = export - imports
+                    net_export.columns = [other_zone]
+                    net_exports.append(net_export)
+                
+                net_exports = pd.concat(net_exports,axis = 1)
+                net_exports = net_exports.dropna(axis = 'columns')
+                net_exports.index = pd.to_datetime(net_exports.index)
+                net_exports['Net export'] = net_exports.sum(axis = 1)
+                
+                
+    
+                for column in net_exports:
+                    linestyle = '--' if column == 'Net export' else 'solid'
+                    mfunc.create_line_plot(axs,net_exports,column = column, label = column, n = n,linestyle = linestyle)
+    
+                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[n].margins(x=0.01)
+                mfunc.set_plot_timeseries_format(axs,n)
+                axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
+                if n == len(self.Scenarios) - 1:
+                    axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+    
+                locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
+                formatter = mdates.ConciseDateFormatter(locator)
+                formatter.formats[2] = '%d\n %b'
+                formatter.zero_formats[1] = '%b\n %Y'
+                formatter.zero_formats[2] = '%d\n %b'
+                formatter.zero_formats[3] = '%H:%M\n %d-%b'
+                formatter.offset_formats[3] = '%b %Y'
+                formatter.show_offset = False
+                axs[n].xaxis.set_major_locator(locator)
+                axs[n].xaxis.set_major_formatter(formatter)
+    
+                #Add scenario column to output table.
+                scenario_names = pd.Series([scenario] * len(net_exports),name = 'Scenario')
+                net_exports = net_exports.set_index([scenario_names],append = True)
+                net_exports_all.append(net_exports)
+                
+            all_axes = fig7.get_axes()
+            self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
+            j=0
+            k=0
+            for ax in all_axes:
+                if ax.is_last_row():
+                    ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
+                    j=j+1
+                if ax.is_first_col():
+                    ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
+                    k=k+1
+
+                
+            fig7.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.ylabel('Net export (MW)',  color='black', rotation='vertical', labelpad=60)
+            
+            net_exports_all = pd.concat(net_exports_all)
+
+            # if plotting all scenarios return figures to plot_main
+            outputs[zone_input] = {'fig': fig7,'data_table' : net_exports_all}
+            
+        return outputs
+                
     ### Archived Code ####
 
     # def line_util_agged(self):
