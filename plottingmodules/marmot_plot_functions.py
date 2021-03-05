@@ -56,6 +56,13 @@ class InputSheetError:
     def __init__(self):
         return
 
+class FacetLabelError:
+    """
+    Exception Class for incorrect facet labeling.
+    """
+    def __init__(self):
+        return
+
 def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     """
     Used to get data from formatted h5 file
@@ -312,6 +319,67 @@ def create_stacked_bar_plot(df, colour):
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
 
+def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **kwargs):
+    """Given a lbar plot with both stacked and unstacked bars.
+    
+    Parameters
+    ----------
+    df_list: List of Pandas DataFrames.
+        The columns within each dataframe will be stacked with different colors. 
+        The corresponding columns between each dataframe will be set next to each other and given different hatches.
+    labels: A list of strings, for use in the secondary legend which labels the hatching.
+    title: Optional plot title.
+    H: Sets the hatch pattern to differentiate dataframe bars. Each consecutive bar will have a higher density of the same hatch pattern.
+        
+    
+    Returns
+    ---------
+    fig: matplotlib fig
+    """
+
+    n_df = len(df_list)
+    n_col = len(df_list[0].columns) 
+    n_ind = len(df_list[0].index)
+    fig = plt.subplot(111)
+
+    for df in df_list : # for each data frame
+        fig = df.plot(kind="bar",
+                      linewidth=0,
+                      stacked=True,
+                      ax=axe,
+                      legend=False,
+                      grid=False,
+                      **kwargs)  # make bar plots
+
+    h,l = fig.get_legend_handles_labels() # get the handles we want to modify
+    for i in range(0, n_df * n_col, n_col): # len(h) = n_col * n_df
+        for j, pa in enumerate(h[i:i+n_col]):
+            for rect in pa.patches: # for each index
+                rect.set_x(rect.get_x() + 1 / float(n_df + 1) * i / float(n_col))
+                rect.set_hatch(H * int(i / n_col)) #edited part     
+                rect.set_width(1 / float(n_df + 1))
+
+    fig.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
+    fig.set_xticklabels(df.index, rotation = 0)
+    fig.set_title(title)
+
+    # Add invisible data to add another legend
+    n=[]        
+    for i in range(n_df):
+        n.append(fig.bar(0, 0, color="gray", hatch=H * i))
+
+    l1 = axe.legend(h[:n_col], l[:n_col], loc=[1.01, 0.5])
+    if labels is not None:
+        l2 = plt.legend(n, labels, loc=[1.01, 0.1]) 
+    fig.add_artist(l1)
+    
+    fig.spines['right'].set_visible(False)
+    fig.spines['top'].set_visible(False)
+    fig.tick_params(axis='y', which='major', length=5, width=1)
+    fig.tick_params(axis='x', which='major', length=5, width=1)
+    
+    return fig
+
 def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'solid',n=0,alpha = 1):
     """
     Creates a line plot
@@ -564,6 +632,32 @@ def get_interval_count(df):
     interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
     return(interval_count)
 
+def sort_duration(df,col):
+    
+    """
+    Converts a dataframe time series into a duration curve.
+    
+    Parameters
+    ----------
+    df : Pandas multiindex dataframe for some reported parameter (e.g. line_Flow)
+    col : Column name by which to sort.
+
+    Returns
+    -------
+    df : Sorted time series. 
+
+    """
+    
+    df.sort_values(by = col,ascending = False,inplace = True)
+    df.reset_index(inplace = True)
+    df.drop(columns = ['timestamp'],inplace = True)
+    return(df)
+
+
+# test = pd.DataFrame({'A':[1,3,2],
+#                     'B' :[9,3,10],
+#                     'C' : [100,4,2]})
+# test.index = pd.Series(['9 am','10 am','11 am'],name = 'timestamp')
 
 def capacity_energy_unitconversion(max_value):
     """

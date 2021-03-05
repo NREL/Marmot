@@ -50,8 +50,8 @@ except IndexError:
 #This is only required if your output has not been processed already on Eagle
 
 #from h5plexos.process import process_solution
-#PLEXOS_Solution = '/Volumes/PLEXOS CEII/Projects/Extreme Events/Model c_Feb01-04_2011_2024 Solution/Model c_Feb01-04_2011_2024 Solution.zip' #PLEXOS solution .zip file.
-#process_solution(PLEXOS_Solution,'/Volumes/PLEXOS CEII/Projects/Extreme Events/Model c_Feb01-04_2011_2024 Solution/Model c_Feb01-04_2011_2024 Solution.h5') # Saves out to PLEXOS_Solution.h5
+#PLEXOS_Solution = '/path/to/PLEXOS/zipfile.zip'
+#process_solution('/write/path/to/h5plexos/solution.h5') # Saves out to PLEXOS_Solution.h5
 
 #===============================================================================
 # Load Input Properties

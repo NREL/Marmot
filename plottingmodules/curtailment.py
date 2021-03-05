@@ -16,6 +16,7 @@ import matplotlib as mpl
 import logging
 import plottingmodules.marmot_plot_functions as mfunc
 import config.mconfig as mconfig
+import matplotlib.ticker as mtick
 
 #===============================================================================
 
@@ -576,7 +577,8 @@ class mplot(object):
             outputs = None
             return outputs
 
-        Total_Curtailment_Out = pd.DataFrame()
+        Total_Curtailment_Out_perc = pd.DataFrame()
+        Total_Curt = pd.DataFrame()
         Total_Gen = pd.DataFrame()
         Gen_8760 = pd.DataFrame()
         scen_idx = -1
@@ -601,18 +603,20 @@ class mplot(object):
             site_idx = -1
             sites = pd.Series()
             sites_gen = pd.Series()
+            curt_tots = pd.Series()
             chunks_scen = []
+            #vre_curt = vre_curt.reset_index()
+
             for site in select_sites:
                 if site in gen.index.get_level_values('gen_name').unique():
                     site_idx += 1
-                    curt2 = vre_curt.xs(site,level = 'gen_name')
                     gen_site = gen.xs(site,level = 'gen_name')
                     cap_site = cap.xs(site,level = 'gen_name') 
                     curt = cap_site - gen_site
                     curt = vre_curt.xs(site,level = 'gen_name')
                     curt_tot = curt.sum()
                     gen_tot = gen_site.sum()
-                    curt_perc = pd.Series(100 * curt_tot / gen_tot)
+                    curt_perc = pd.Series(curt_tot / gen_tot)
 
                     levels2drop = [level for level in gen_site.index.names if level != 'timestamp']
                     gen_site = gen_site.droplevel(levels2drop)
@@ -624,6 +628,7 @@ class mplot(object):
                     gen_site = pd.Series([0] * len(ti),name = site,index = ti)
                 sites_gen = sites_gen.append(gen_tot)
                 sites = sites.append(curt_perc)
+                curt_tots = curt_tots.append(curt_tot)
                 chunks_scen.append(gen_site)
 
             gen_8760_scen = pd.concat(chunks_scen,axis = 1)
@@ -633,18 +638,47 @@ class mplot(object):
 
             sites.name = scenario
             sites.index = select_sites
+            curt_tots.name = scenario
+            curt_tots.index = select_sites
             sites_gen.name = scenario
             sites_gen.index = select_sites
-            Total_Curtailment_Out = pd.concat([Total_Curtailment_Out,sites],axis = 1)
+            Total_Curtailment_Out_perc = pd.concat([Total_Curtailment_Out_perc,sites],axis = 1)
             Total_Gen = pd.concat([Total_Gen,sites_gen],axis = 1)
+            Total_Curt = pd.concat([Total_Curt,curt_tots],axis = 1)
 
         Gen_8760 = pd.concat(chunks,axis = 0, copy = False)
         Gen_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen_8760.csv'))
 
         Total_Gen = Total_Gen / 1000000
-        Total_Curtailment_Out.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
+        Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
         Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen.csv'))
-
+                    
+        fig1 = Total_Curtailment_Out_perc.plot.bar(stacked = False, figsize=(9,6), rot=0,edgecolor='black', linewidth='0.1')
+        fig1.spines['right'].set_visible(False)
+        fig1.spines['top'].set_visible(False)
+        fig1.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
+        fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
+        fig1.tick_params(axis='y', which='major', length=5, width=1)
+        fig1.tick_params(axis='x', which='major', length=5, width=1)
+        
+        Total_Curt = round(Total_Curt / 1000,0)
+        Total_Curt = Total_Curt.melt()
+        #inserts total bar value above each bar
+        k=0
+        for patch in fig1.patches:
+                        
+            height = patch.get_height()
+            width = patch.get_width()
+            x, y = patch.get_xy()
+            fig1.text(x+width/2,y + height + 0.05*max(fig1.get_ylim()),
+                str(Total_Curt.iloc[k][1]) + ' GWh',
+                horizontalalignment='center',
+                verticalalignment='center', fontsize=11)
+            k += 1
+            # if k>=len(self.vre_pct_curt):
+            #     break
+        
+        fig1.figure.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.svg'),dpi=600, bbox_inches='tight')
 
         outputs = mfunc.DataSavedInModule()
         return outputs
