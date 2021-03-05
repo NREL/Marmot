@@ -51,7 +51,7 @@ except IndexError:
 
 #from h5plexos.process import process_solution
 #PLEXOS_Solution = '/path/to/PLEXOS/zipfile.zip'
-#process_solution('/write/path/to/h5plexos/solution.h5') # Saves out to PLEXOS_Solution.h5
+#process_solution(PLEXOS_Solution,'/write/path/to/h5plexos/solution.h5') # Saves out to PLEXOS_Solution.h5
 
 #===============================================================================
 # Load Input Properties
