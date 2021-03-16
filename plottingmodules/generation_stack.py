@@ -191,7 +191,11 @@ class mplot(object):
         def setup_data(zone_input, scenario, Stacked_Gen):
             try:
                 Stacked_Curt = curtailment_collection.get(scenario)
+                if self.shift_leapday:
+                    Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
+
                 Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+
                 Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                 Stacked_Curt = Stacked_Curt.sum(axis=1)
                 Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
@@ -208,20 +212,22 @@ class mplot(object):
 
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
-            Stacked_Gen = Stacked_Gen 
 
             Load = load_collection.get(scenario)
+            if self.shift_leapday:
+                Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
             Load = Load.xs(zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
-            Load = Load 
-            
+                        
             try:
                 pump_load_collection[scenario]
             except KeyError:
                 pump_load_collection[scenario] = gen_collection[scenario].copy()
                 pump_load_collection[scenario].iloc[:,0] = 0
             Pump_Load = pump_load_collection.get(scenario)
+            if self.shift_leapday:
+                Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
@@ -237,6 +243,9 @@ class mplot(object):
                 unserved_energy_collection[scenario] = load_collection[scenario].copy()
                 unserved_energy_collection[scenario].iloc[:,0] = 0
             Unserved_Energy = unserved_energy_collection.get(scenario)
+            if self.shift_leapday:
+                Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)
+
             Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
             Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
             Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
@@ -306,6 +315,7 @@ class mplot(object):
 
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
+                
             data = {"Stacked_Gen":Stacked_Gen, "Load":Load, "Pump_Load":Pump_Load, "Total_Demand":Total_Demand, "Unserved_Energy":Unserved_Energy,"ue_data_table":unserved_eng_data_table}
             data["peak_demand_t"] = peak_demand_t
             data["Peak_Demand"] = Peak_Demand
@@ -345,6 +355,8 @@ class mplot(object):
 
                 try:
                     Stacked_Gen = gen_collection.get(scenario)
+                    if self.shift_leapday:
+                        Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     i=i+1
@@ -433,7 +445,7 @@ class mplot(object):
                                 fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
 
-                locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
+                locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
                 formatter = mdates.ConciseDateFormatter(locator)
                 formatter.formats[2] = '%d\n %b'
                 formatter.zero_formats[1] = '%b\n %Y'

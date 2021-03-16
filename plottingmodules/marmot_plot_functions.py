@@ -559,7 +559,7 @@ def add_facet_labels(fig, xlabels, ylabels):
             ax.set_ylabel(ylabel=(ylabels[k]),  color='black', rotation='vertical', fontsize=16)
             k=k+1
 
-def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
+def shift_leapday(df,Marmot_Solutions_folder):
     """
     Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
     Modeled year must be included in the scenario parent directory name.
@@ -580,7 +580,7 @@ def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
         same dataframe, with time index shifted
 
     """
-    if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0) and shift_leap_day:
+    if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0):
         df.index.set_levels(
             df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'),
             level = 'timestamp',

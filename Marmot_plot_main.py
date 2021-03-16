@@ -127,7 +127,9 @@ figure_format = mconfig.parser("figure_file_format")
 if figure_format == 'nan':
     figure_format = 'png'
 
-shift_leap_day = str(mconfig.parser("shift_leap_day")).upper()
+shift_leapday = mconfig.parser("shift_leapday")
+minticks = mconfig.parser("figure_size","minticks")
+maxticks = mconfig.parser("figure_size","maxticks")
 
 #===============================================================================
 # Input and Output Directories
@@ -322,16 +324,16 @@ for index, row in Marmot_plot_select.iterrows():
     key_list = ["prop", "start", "end", "timezone", "start_date", "end_date",
                 "hdf_out_folder", "Zones", "AGG_BY", "ordered_gen", "PLEXOS_color_dict",
                 "Scenarios", "Scenario_Diff", "Marmot_Solutions_folder",
-                "ylabels", "xlabels", "ticklabels",
+                "ylabels", "xlabels", "ticklabels","minticks","maxticks",
                 "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
-                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leap_day","duration_curve"]
+                "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leapday","duration_curve"]
 
     argument_list = [row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5],row.iloc[6], row.iloc[7],
                      hdf_out_folder, Zones, AGG_BY, ordered_gen, PLEXOS_color_dict,
                      Scenarios, Scenario_Diff, Marmot_Solutions_folder,
-                     ylabels, xlabels, ticklabels,
+                     ylabels, xlabels, ticklabels,minticks,maxticks,
                      color_list, marker_style, gen_names_dict, pv_gen_cat,
-                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta,facet,shift_leap_day,duration_curve]
+                     re_gen_cat, vre_gen_cat, thermal_gen_cat,Region_Mapping,figure_folder, meta,facet,shift_leapday,duration_curve]
 
     argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
 
