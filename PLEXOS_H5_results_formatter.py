@@ -25,7 +25,7 @@ import yaml
 from meta_data import MetaData
 import config.mconfig as mconfig
 
-sys.path.append('../h5plexos')
+# sys.path.append('../h5plexos')
 from h5plexos.query import PLEXOSSolution
 
 with open('marmot_logging_config.yml', 'rt') as f:
@@ -54,119 +54,30 @@ except IndexError:
 #process_solution(PLEXOS_Solution,'/write/path/to/h5plexos/solution.h5') # Saves out to PLEXOS_Solution.h5
 
 #===============================================================================
-# Load Input Properties
-#===============================================================================
 
 #A bug in pandas requires this to be included, otherwise df.to_string truncates long strings
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
 
-#changes working directory to location of this python file
-#os.chdir(pathlib.Path(__file__).parent.absolute())
 
-Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
-                                         index_col='Input', skipinitialspace=True)
-
-# File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
-Plexos_Properties = pd.read_csv('plexos_properties.csv')
-
-# Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
-Scenario_List = pd.Series(Marmot_user_defined_inputs.loc['Scenario_process_list'].squeeze().split(",")).str.strip().tolist()
-# The folder that contains all PLEXOS h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
-PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
-
-# Folder to save your processed solutions
-Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
-
-# This folder contains all the csv required for mapping and selecting outputs to process
-# Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
-Mapping_folder = 'mapping_folder'
-
-Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
-gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
-
-# Value of Lost Load for calculatinhg cost of unserved energy
-VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))
-
-#===============================================================================
-# Standard Naming of Generation Data
-#===============================================================================
-
-gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
-vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
-
-#===============================================================================
-# Region mapping
-#===============================================================================
-Region_Mapping = Region_Mapping.astype(str)
-try:
-    Region_Mapping = Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
-except Exception:
-    pass
-
-
-#===============================================================================
-# Standard Naming of Emissions types (optional)
-#===============================================================================
-
-emit_names_csv = Marmot_user_defined_inputs.loc['emit_names.csv_name'].to_string(index=False).strip()
-emit_names_dict = {}
-
-if emit_names_csv == 'NaN' or emit_names_csv == '':
-    logger.info('No emissions mapping specified\n')
-else:
-    try:
-        emit_names = pd.read_csv(os.path.join(Mapping_folder, emit_names_csv))
-        emit_names_dict=emit_names[['Original','New']].set_index("Original").to_dict()["New"]
-    except Exception:
-        logger.warning('Could not find specified emissions mapping file; check file name\n')
-
-#=============================================================================
-# FUNCTIONS FOR PLEXOS DATA EXTRACTION
-#=============================================================================
-
-# This function handles the pulling of the data from the H5plexos hdf5 file and then passes the data to one of the formating functions
-# metadata is now a parameter of get data
-def get_data(loc, prop,t, db, metadata):
-
-    try:
-        if "_" in loc:
-            df = db.query_relation_property(loc,prop,timescale=t)
-        else:
-            df = db.query_object_property(loc,prop,timescale=t)
-
-    except KeyError:
-        df = report_prop_error(prop,loc)
-        return df
-
-    # Instantiate instance of Process Class
-    # metadata is used as a paramter to initialize process_cl
-    process_cl = Process(df, metadata)
-    # Instantiate Method of Process Class
-    process_att = getattr(process_cl,'df_process_' + loc)
-    # Process attribute and return to df
-    df = process_att()
-
-    if loc == 'region' and prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
-        logger.warning("Scenario contains Unserved Energy: %s MW\n", int(df.sum(axis=0)))
-    return df
-
-# This fucntion prints a warning message when the get_data function cannot find the specified property in the H5plexos hdf5 file
-def report_prop_error(prop,loc):
-    logger.warning('CAN NOT FIND "%s %s". "%s" DOES NOT EXIST',loc,prop,prop)
-    logger.info('SKIPPING PROPERTY\n')
-    df = pd.DataFrame()
-    return df
-
-# Process Class contains methods for processing data
 class Process:
+    '''
+    Process Class contains methods for processing data
+    '''
 
-    def __init__(self, df, metadata):
+    def __init__(self, df, metadata, Region_Mapping, gen_names, gen_names_dict, emit_names):
 
         # certain methods require information from metadata.  metadata is now
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
         self.metadata = metadata
+        self.Region_Mapping = Region_Mapping
+        self.gen_names = gen_names
+        self.gen_names_dict = gen_names_dict
+        self.emit_names = emit_names
+        
+        if not self.emit_names.empty:
+            self.emit_names_dict=self.emit_names[['Original','New']].set_index("Original").to_dict()["New"]
 
 
 # Function for formatting data which comes form the PLEXOS Generator Category
@@ -194,8 +105,8 @@ class Process:
         else:
             idx_zone = idx_region
 
-        if len(Region_Mapping.columns)>1 == True:
-            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.metadata.region_generator_category().merge(Region_Mapping,
+        if not self.Region_Mapping.empty:
+            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.metadata.region_generator_category().merge(self.Region_Mapping,
                                 how="left", on='region').sort_values(by=['tech','gen_name']).drop(['region','tech','gen_name'], axis=1))
             region_gen_mapping_idx = region_gen_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
@@ -206,7 +117,7 @@ class Process:
             idx_map = idx_zone
 
         idx_map = idx_map.droplevel(level=["tech"])
-        df_tech = pd.CategoricalIndex(df.index.get_level_values('tech').map(lambda x: gen_names_dict.get(x,x)))
+        df_tech = pd.CategoricalIndex(df.index.get_level_values('tech').map(lambda x: self.gen_names_dict.get(x,x)))
 
         idx =  pd.MultiIndex(levels= [df_tech.categories] + idx_map.levels
                                 ,codes= [df_tech.codes] + idx_map.codes,
@@ -228,8 +139,8 @@ class Process:
     def df_process_region(self):
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
-        if len(Region_Mapping.columns)>1 == True: #checks if Region_Mapping contains data to merge, skips if empty
-            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions().merge(Region_Mapping,
+        if not self.Region_Mapping.empty: #checks if Region_Mapping contains data to merge, skips if empty
+            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions().merge(self.Region_Mapping,
                                 how="left", on='region').drop(['region','category'], axis=1))
             mapping_idx = mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
@@ -313,7 +224,7 @@ class Process:
         if self.metadata.reserves_zones().empty == False:
             df = df.merge(self.metadata.reserves_zones(), how='left', on=['parent', 'zone']) # Merges in zones where reserves are located
         
-        df['tech'] = df['tech'].map(lambda x: gen_names_dict.get(x,x))
+        df['tech'] = df['tech'].map(lambda x: self.gen_names_dict.get(x,x))
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp"))) #move timestamp to start of df
@@ -370,22 +281,23 @@ class Process:
         if self.metadata.zone_generator_category().empty == False:
             df = df.merge(self.metadata.zone_generator_category().reset_index(), how='left', on=['gen_name', 'tech']) # Merges in zones where reserves are located
 
-        if len(Region_Mapping.columns)>1 == True:
-            df = df.merge(Region_Mapping, how="left", on="region")
+        if not self.Region_Mapping.empty:
+            df = df.merge(self.Region_Mapping, how="left", on="region")
 
         # reclassify gen tech categories
-        df['tech'] = pd.Categorical(df['tech'].map(lambda x: gen_names_dict.get(x,x)))
+        df['tech'] = pd.Categorical(df['tech'].map(lambda x: self.gen_names_dict.get(x,x)))
 
         # reclassify emissions as specified by user in mapping
-        df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: emit_names_dict.get(x,x)))
+        df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: self.emit_names_dict.get(x,x)))
 
         # remove categoricals (otherwise h5 save will fail)
         df = df.astype({'tech':'object', 'pollutant':'object'})
 
         # Checks if all emissions categorieses have been identified and matched. If not, lists categories that need a match
-        if emit_names_dict != {} and (set(df['pollutant'].unique()).issubset(emit_names["New"].unique())) == False:
-            missing_emit_cat = list((set(df['pollutant'].unique())) - (set(emit_names["New"].unique())))
-            logger.warning("The following emission objects do not have a correct category mapping: %s\n",missing_emit_cat)
+        if not self.emit_names.empty:
+            if self.emit_names_dict != {} and (set(df['pollutant'].unique()).issubset(self.emit_names["New"].unique())) == False:
+                missing_emit_cat = list((set(df['pollutant'].unique())) - (set(self.emit_names["New"].unique())))
+                logger.warning("The following emission objects do not have a correct category mapping: %s\n",missing_emit_cat)
         
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0)
@@ -406,8 +318,8 @@ class Process:
             df = df.merge(self.metadata.region_generators(), how='left', on='gen_name') # Merges in regions where generators are located
         if self.metadata.zone_generators().empty == False:
             df = df.merge(self.metadata.zone_generators(), how='left', on='gen_name') # Merges in zones where generators are located
-        if len(Region_Mapping.columns)>1 == True: #checks if Region_Maping contains data to merge, skips if empty (Default)
-            df = df.merge(Region_Mapping, how='left', on='region') # Merges in all Region Mappings
+        if not self.Region_Mapping.empty: #checks if Region_Maping contains data to merge, skips if empty (Default)
+            df = df.merge(self.Region_Mapping, how='left', on='region') # Merges in all Region Mappings
         df.rename(columns={'name':'storage_resource'}, inplace=True)
         df_col = list(df.columns) # Gets names of all columns in df and places in list
         df_col.remove(0) # Removes 0, the data column from the list
@@ -446,8 +358,8 @@ class Process:
                                 names= idx_region.names + node_zone_idx.names)
         else:
             idx_zone = idx_region
-        if len(Region_Mapping.columns)>1 == True:
-            region_mapping_idx = pd.MultiIndex.from_frame(self.metadata.node_region().merge(Region_Mapping,
+        if not self.Region_Mapping.empty:
+            region_mapping_idx = pd.MultiIndex.from_frame(self.metadata.node_region().merge(self.Region_Mapping,
                                 how="left", on='region').drop(['region','node'], axis=1))
             region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
@@ -467,214 +379,468 @@ class Process:
 #===================================================================================
 # Main
 #===================================================================================
-for Scenario_name in Scenario_List:
 
-    logger.info("#### Processing %s PLEXOS Results ####", Scenario_name)
-
-    #===============================================================================
-    # Input and Output Directories
-    #===============================================================================
-
-    HDF5_output = Scenario_name + "_formatted.h5"
+class MarmotFormat:
     
-    HDF5_folder_in = os.path.join(PLEXOS_Solutions_folder, Scenario_name)
-    try:
-        os.makedirs(HDF5_folder_in)
-    except FileExistsError:
-        # directory already exists
-        pass
-    
-    hdf_out_folder = os.path.join(Marmot_Solutions_folder,'Processed_HDF5_folder')
-    try:
-        os.makedirs(hdf_out_folder)
-    except FileExistsError:
-        # directory already exists
-        pass    
-    
-    figure_folder = os.path.join(Marmot_Solutions_folder, 'Figures_Output')
-    try:
-        os.makedirs(figure_folder)
-    except FileExistsError:
-        # directory already exists
-        pass
-    
-    startdir=os.getcwd()
-    os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
-    files = sorted(os.listdir()) # List of all files in hdf5 folder in alpha numeric order
-    os.chdir(startdir)
+    def __init__(self,Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
+                 Marmot_Solutions_folder=None, vre_gen_cat=None, Region_Mapping=pd.DataFrame(),
+                  emit_names=pd.DataFrame(), VoLL=10000):
+        '''
+        
 
-##############################################################################
-    files_list = []
-    for names in files:
-        if names.endswith(".h5"):
-            files_list.append(names) # Creates a list of only the hdf5 files
+        Parameters
+        ----------
+        Scenario_name : string
+            DESCRIPTION.
+        PLEXOS_Solutions_folder : string directory
+            DESCRIPTION.
+        gen_names : string/pd.DataFrame
+            DESCRIPTION.
+        Plexos_Properties : string/pd.DataFrame
+            DESCRIPTION. 
+        Marmot_Solutions_folder : string directory, optional
+            DESCRIPTION. The default is None.
+        vre_gen_cat : string/list, optional
+            DESCRIPTION. The default is None.
+        Region_Mapping : string/pd.DataFrame, optional
+            DESCRIPTION. The default is pd.DataFrame().
+        emit_names : string/pd.DataFrame, optional
+            DESCRIPTION. The default is pd.DataFrame().
+        VoLL : int, optional
+            DESCRIPTION. The default is 10000.
 
+        Returns
+        -------
+        None.
 
-###############################################################################
+        '''
+        
+        self.Scenario_name = Scenario_name
+        self.PLEXOS_Solutions_folder = PLEXOS_Solutions_folder
+        self.Marmot_Solutions_folder = Marmot_Solutions_folder
+        self.Plexos_Properties = Plexos_Properties
+        self.VoLL = VoLL
 
-    # Read in all HDF5 files into dictionary
-    logger.info("Loading all HDF5 files to prepare for processing")
-    hdf5_collection = {}
-    for file in files_list:
-        hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
-
-######### Process the Outputs##################################################
-
-    # Creates Initial HDF5 file for ouputing formated data
-    Processed_Data_Out=pd.DataFrame()
-    if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
-        logger.info("'%s\%s' already exists: New variables will be added\n",hdf_out_folder,HDF5_output)
-    else:
-        Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
-
-    # Filters for chosen Plexos properties to process
-    if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
-        logger.info("Will process row " +(sys.argv[1])+" of plexos properties regardless of T/F.")
-        Plexos_Properties = Plexos_Properties.iloc[int(sys.argv[1])-1].to_frame().T
-    else:
-        Plexos_Properties = Plexos_Properties.loc[Plexos_Properties["collect_data"] == True]
-
-    start = time.time()
-
-    #if any(meta.regions()['region'] not in Region_Mapping['region']):
-    if set(MetaData(HDF5_folder_in, Region_Mapping).regions()['region']).issubset(Region_Mapping['region']) == False:
-        missing_regions = list(set(MetaData(HDF5_folder_in, Region_Mapping).regions()['region']) - set(Region_Mapping['region']))
-        logger.warning('The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: %s\n',missing_regions)
-
-    # Main loop to process each ouput and pass data to functions
-    for index, row in Plexos_Properties.iterrows():
-        Processed_Data_Out = pd.DataFrame()
-        data_chunks = []
-
-        logger.info("Processing %s %s",row["group"],row["data_set"])
-
-        for model in files_list:
-            logger.info("      %s",model)
-
-            # Create an instance of metadata, and pass that as a variable to get data.
-            meta = MetaData(HDF5_folder_in, Region_Mapping,model)
-
-            db = hdf5_collection.get(model)
-
-            processed_data = get_data(row["group"], row["data_set"],row["data_type"], db, meta)
-
-            if processed_data.empty == True:
-                break
-            
-            # special units processing for emissions
-            if row["group"]=="emissions_generators":
-                if (row["Units"] == "lb") | (row["Units"] == "lbs"):
-                    # convert lbs to kg
-                    kg_per_lb = 0.453592
-                    processed_data = processed_data*kg_per_lb
-                # convert kg to metric tons
-                kg_per_metric_ton = 1E3
-                data_chunks.append(processed_data/kg_per_metric_ton)
-            
-            # other unit multipliers
-            if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
-                data_chunks.append(processed_data*row["unit_multiplier"])
-                logger.info("%s Year property reported from only the first partition",row["data_set"])
-                break
-            else:
-                data_chunks.append(processed_data*row["unit_multiplier"])
-
-        if data_chunks:
-            Processed_Data_Out = pd.concat(data_chunks, copy=False)
-
-        if Processed_Data_Out.empty == False:
-            if (row["data_type"]== "year"):
-                logger.info("Please Note: Year properties can not be checked for duplicates.\n\
-                Overlaping data can not be removed from 'Year' grouped data.\n\
-                This will effect Year data that differs between partitions such as cost results.\n\
-                It will not effect Year data that is equal in all partitions such as Installed Capacity or Line Limit results")
-
-            else:
-                oldsize=Processed_Data_Out.size
-                Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
-                if  (oldsize-Processed_Data_Out.size) >0:
-                    logger.info('Drop duplicates removed %s rows',oldsize-Processed_Data_Out.size)
-
-            row["data_set"] = row["data_set"].replace(' ', '_')
+        
+        if self.Marmot_Solutions_folder == None:
+            self.Marmot_Solutions_folder = self.PLEXOS_Solutions_folder
+        
+        if isinstance(gen_names, str):
             try:
-                Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
-                logger.info("Data saved to h5 file successfully\n")
-            except:
-                logger.warning("h5 File is probably in use, waiting to attempt save for a second time")
-                time.sleep(120)
-                try:
-                      Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
-                      logger.info("h5 File save succeded on second attempt")
-                except:
-                    logger.warning("h5 File is probably in use, waiting to attempt save for a third time")
-                    time.sleep(240)
-                    try:
-                        Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a",  complevel=9, complib = 'blosc:zlib')
-                        logger.info("h5 File save succeded on third attempt")
-                    except:
-                        logger.warning("h5 Save failed on third try; will not attempt again\n")
-            # del Processed_Data_Out
+                self.gen_names = pd.read_csv(gen_names)   
+            except FileNotFoundError:
+                logger.warning('Could not find specified gen_names file; check file name. This is required to run Marmot, system will now exit')
+                sys.exit()
+        elif isinstance(gen_names, pd.DataFrame):
+            self.gen_names = gen_names.rename(columns={gen_names.columns[0]:'Original',gen_names.columns[1]:'New'})
+            self.gen_names_dict=self.gen_names[['Original','New']].set_index("Original").to_dict()["New"]
+        
+        if isinstance(Plexos_Properties, str):
+            try:
+                self.Plexos_Properties = pd.read_csv(Plexos_Properties)   
+            except FileNotFoundError:
+                logger.warning('Could not find specified Plexos_Properties file; check file name. This is required to run Marmot, system will now exit')
+                sys.exit()
+        elif isinstance(Plexos_Properties, pd.DataFrame):
+            self.Plexos_Properties = Plexos_Properties
+        
+        if vre_gen_cat:
+            if isinstance(vre_gen_cat, str):
+                self.vre_gen_cat = pd.read_csv(vre_gen_cat,squeeze=True).str.strip().tolist()
+            else:
+                 self.vre_gen_cat = vre_gen_cat
+        
+        if isinstance(Region_Mapping, str):
+            try:
+                self.Region_Mapping = pd.read_csv(Region_Mapping)
+                if not self.Region_Mapping.empty:  
+                    self.Region_Mapping = self.Region_Mapping.astype(str)
+            except FileNotFoundError:
+                logger.warning('Could not find specified Region Mapping file; check file name\n')
+                self.Region_Mapping = pd.DataFrame()
+        elif isinstance(Region_Mapping, pd.DataFrame):
+            self.Region_Mapping = Region_Mapping
+            if not self.Region_Mapping.empty:           
+                self.Region_Mapping = self.Region_Mapping.astype(str)
+        
+        try:
+            self.Region_Mapping = self.Region_Mapping.drop(["category"],axis=1) # delete category columns if exists
+        except KeyError:
+            pass
+        
+        if isinstance(emit_names, str):
+            try:
+                self.emit_names = pd.read_csv(emit_names)
+                if not self.emit_names.empty:
+                    self.emit_names.rename(columns={self.emit_names.columns[0]:'Original',self.emit_names.columns[1]:'New'},inplace=True)
+            except FileNotFoundError:
+                logger.warning('Could not find specified emissions mapping file; check file name\n')
+                self.emit_names = pd.DataFrame()
+        elif isinstance(self.emit_names, pd.DataFrame):
+            self.emit_names = emit_names
+            if not self.emit_names.empty:
+                self.emit_names.rename(columns={self.emit_names.columns[0]:'Original',self.emit_names.columns[1]:'New'},inplace=True)
+        
+    
+    
+    def _get_data(self, loc, prop,t, db, metadata):
+        """
+        This function handles the pulling of the data from the H5plexos hdf5 
+        file and then passes the data to one of the formating functions
+        metadata is now a parameter of get data
+
+        Parameters
+        ----------
+        loc : TYPE
+            DESCRIPTION.
+        prop : TYPE
+            DESCRIPTION.
+        t : TYPE
+            DESCRIPTION.
+        db : TYPE
+            DESCRIPTION.
+        metadata : TYPE
+            DESCRIPTION.
+        Region_Mapping : TYPE
+            DESCRIPTION.
+        gen_names : TYPE
+            DESCRIPTION.
+        gen_names_dict : TYPE
+            DESCRIPTION.
+        emit_names : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        df : TYPE
+            DESCRIPTION.
+
+        """
+    
+        try:
+            if "_" in loc:
+                df = db.query_relation_property(loc,prop,timescale=t)
+            else:
+                df = db.query_object_property(loc,prop,timescale=t)
+    
+        except KeyError:
+            df = self._report_prop_error(prop,loc)
+            return df
+    
+        # Instantiate instance of Process Class
+        # metadata is used as a paramter to initialize process_cl
+        process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.gen_names_dict, self.emit_names)
+        # Instantiate Method of Process Class
+        process_att = getattr(process_cl,'df_process_' + loc)
+        # Process attribute and return to df
+        df = process_att()
+    
+        if loc == 'region' and prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
+            logger.warning("Scenario contains Unserved Energy: %s MW\n", int(df.sum(axis=0)))
+        return df
+    
+   
+    def _report_prop_error(self,prop,loc):
+        '''
+        This fucntion prints a warning message when the _get_data function 
+        cannot find the specified property in the H5plexos hdf5 file
+
+        Parameters
+        ----------
+        prop : TYPE
+            DESCRIPTION.
+        loc : TYPE
+            DESCRIPTION.
+
+        Returns
+        -------
+        df : TYPE
+            DESCRIPTION.
+
+        '''
+        logger.warning('CAN NOT FIND "%s %s". "%s" DOES NOT EXIST',loc,prop,prop)
+        logger.info('SKIPPING PROPERTY\n')
+        df = pd.DataFrame()
+        return df
+        
+    
+    def run_formatter(self):
+            
+    
+        logger.info("#### Processing %s PLEXOS Results ####", self.Scenario_name)
+        
+        #===============================================================================
+        # Input and Output Directories
+        #===============================================================================
+    
+        HDF5_output = self.Scenario_name + "_formatted.h5"
+        
+        HDF5_folder_in = os.path.join(self.PLEXOS_Solutions_folder, self.Scenario_name)
+        try:
+            os.makedirs(HDF5_folder_in)
+        except FileExistsError:
+            # directory already exists
+            pass
+        
+        hdf_out_folder = os.path.join(self.Marmot_Solutions_folder,'Processed_HDF5_folder')
+        try:
+            os.makedirs(hdf_out_folder)
+        except FileExistsError:
+            # directory already exists
+            pass    
+        
+        figure_folder = os.path.join(self.Marmot_Solutions_folder, 'Figures_Output')
+        try:
+            os.makedirs(figure_folder)
+        except FileExistsError:
+            # directory already exists
+            pass
+        
+        startdir=os.getcwd()
+        os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
+        files = sorted(os.listdir()) # List of all files in hdf5 folder in alpha numeric order
+        os.chdir(startdir)
+    
+    ##############################################################################
+        files_list = []
+        for names in files:
+            if names.endswith(".h5"):
+                files_list.append(names) # Creates a list of only the hdf5 files
+    
+    
+    ###############################################################################
+    
+        # Read in all HDF5 files into dictionary
+        logger.info("Loading all HDF5 files to prepare for processing")
+        hdf5_collection = {}
+        for file in files_list:
+            hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
+    
+    #===================================================================================
+    # Process the Outputs
+    #===================================================================================
+    
+        # Creates Initial HDF5 file for ouputing formated data
+        Processed_Data_Out=pd.DataFrame()
+        if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
+            logger.info("'%s\%s' already exists: New variables will be added\n",hdf_out_folder,HDF5_output)
         else:
-            continue
-
-######### Calculate Extra Ouputs################################################
-    if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
-        try:
-            logger.info("Processing generator Curtailment")
+            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
+    
+        # Filters for chosen Plexos properties to process
+        if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
+            logger.info("Will process row " +(sys.argv[1])+" of plexos properties regardless of T/F.")
+            process_properties = self.Plexos_Properties.iloc[int(sys.argv[1])-1].to_frame().T
+        else:
+            process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
+    
+        start = time.time()
+        
+        if not self.Region_Mapping.empty:
+            #if any(meta.regions()['region'] not in Region_Mapping['region']):
+            if set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) == False:
+                missing_regions = list(set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
+                logger.warning('The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: %s\n',missing_regions)
+    
+        # Main loop to process each ouput and pass data to functions
+        for index, row in process_properties.iterrows():
+            Processed_Data_Out = pd.DataFrame()
+            data_chunks = []
+    
+            logger.info("Processing %s %s",row["group"],row["data_set"])
+    
+            for model in files_list:
+                logger.info("      %s",model)
+    
+                # Create an instance of metadata, and pass that as a variable to get data.
+                meta = MetaData(HDF5_folder_in, self.Region_Mapping,model)
+    
+                db = hdf5_collection.get(model)
+    
+                processed_data = self._get_data(row["group"], row["data_set"],row["data_type"], db, meta)
+    
+                if processed_data.empty == True:
+                    break
+                
+                # special units processing for emissions
+                if row["group"]=="emissions_generators":
+                    if (row["Units"] == "lb") | (row["Units"] == "lbs"):
+                        # convert lbs to kg
+                        kg_per_lb = 0.453592
+                        processed_data = processed_data*kg_per_lb
+                    # convert kg to metric tons
+                    kg_per_metric_ton = 1E3
+                    data_chunks.append(processed_data/kg_per_metric_ton)
+                
+                # other unit multipliers
+                if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
+                    data_chunks.append(processed_data*row["unit_multiplier"])
+                    logger.info("%s Year property reported from only the first partition",row["data_set"])
+                    break
+                else:
+                    data_chunks.append(processed_data*row["unit_multiplier"])
+    
+            if data_chunks:
+                Processed_Data_Out = pd.concat(data_chunks, copy=False)
+    
+            if Processed_Data_Out.empty == False:
+                if (row["data_type"]== "year"):
+                    logger.info("Please Note: Year properties can not be checked for duplicates.\n\
+                    Overlaping data can not be removed from 'Year' grouped data.\n\
+                    This will effect Year data that differs between partitions such as cost results.\n\
+                    It will not effect Year data that is equal in all partitions such as Installed Capacity or Line Limit results")
+    
+                else:
+                    oldsize=Processed_Data_Out.size
+                    Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
+                    if  (oldsize-Processed_Data_Out.size) >0:
+                        logger.info('Drop duplicates removed %s rows',oldsize-Processed_Data_Out.size)
+    
+                row["data_set"] = row["data_set"].replace(' ', '_')
+                try:
+                    Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
+                    logger.info("Data saved to h5 file successfully\n")
+                except:
+                    logger.warning("h5 File is probably in use, waiting to attempt save for a second time")
+                    time.sleep(120)
+                    try:
+                          Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
+                          logger.info("h5 File save succeded on second attempt")
+                    except:
+                        logger.warning("h5 File is probably in use, waiting to attempt save for a third time")
+                        time.sleep(240)
+                        try:
+                            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a",  complevel=9, complib = 'blosc:zlib')
+                            logger.info("h5 File save succeded on third attempt")
+                        except:
+                            logger.warning("h5 Save failed on third try; will not attempt again\n")
+                # del Processed_Data_Out
+            else:
+                continue
+    #===================================================================================
+    # Calculate Extra Ouputs
+    #===================================================================================
+        if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
             try:
-                Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
-                Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
-                if Total_Gen_Out.empty==True:
+                logger.info("Processing generator Curtailment")
+                try:
+                    Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
+                    Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+                    if Total_Gen_Out.empty==True:
+                        logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+                except KeyError:
                     logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+                adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+                
+                if not adjusted_vre_gen_list:
+                    logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
+                    logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
+                    For more information see Marmot Readme under 'Mapping Files'")
+    
+                # Output Curtailment#
+                Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]) -
+                                    (Total_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]))
+    
+                Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
+    
+                #Clear Some Memory
+                del Total_Gen_Out
+                del Avail_Gen_Out
+                del Curtailment_Out
+            except Exception:
+                logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
+                pass
+    
+        if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
+            try:
+                logger.info("Calculating Cost Unserved Energy: Regions")
+                Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
+                Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
+                Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
             except KeyError:
-                logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
-            # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-            vre_gen_cat = [name for name in vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+                logger.warning("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
+                pass
+    
+        if "zone_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
+            try:
+                logger.info("Calculating Cost Unserved Energy: Zones")
+                Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
+                Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
+                Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
+            except KeyError:
+                logger.warning("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
+                pass
+    
+        end = time.time()
+        elapsed = end - start
+        logger.info('Main loop took %s minutes',round(elapsed/60,2))
+        logger.info('Formatting COMPLETED for %s',Scenario_name)
 
-            if not vre_gen_cat:
-                logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
-                logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
-                For more information see Marmot Readme under 'Mapping Files'")
 
-            # Output Curtailment#
-            Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), vre_gen_cat),:]) -
-                                (Total_Gen_Out.loc[(slice(None), vre_gen_cat),:]))
 
-            Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
+if __name__ == '__main__':
+    
+    
+    #===============================================================================
+    # Load Input Properties
+    #===============================================================================
+    
+    #changes working directory to location of this python file
+    os.chdir(pathlib.Path(__file__).parent.absolute())
+    
+    Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
+                                         index_col='Input', skipinitialspace=True)
 
-            #Clear Some Memory
-            del Total_Gen_Out
-            del Avail_Gen_Out
-            del Curtailment_Out
-        except Exception:
-            logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
-            pass
+    # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
+    Plexos_Properties = pd.read_csv('plexos_properties.csv')
+    
+    # Plexos_Properties = 'plexos_properties.csv'
+        
+    # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
+    Scenario_List = pd.Series(Marmot_user_defined_inputs.loc['Scenario_process_list'].squeeze().split(",")).str.strip().tolist()
+    # The folder that contains all PLEXOS h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
+    PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
+    
+    # Folder to save your processed solutions
+    Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
+    
+    # This folder contains all the csv required for mapping and selecting outputs to process
+    # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
+    Mapping_folder = 'mapping_folder'
+    
+    Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
+    
+    gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
+    
+    # Value of Lost Load for calculatinhg cost of unserved energy
+    VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))
+    
+    #===============================================================================
+    # Standard Naming of Generation Data
+    #===============================================================================
+    
+    # gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
+    vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
+    
+    
+    #===============================================================================
+    # Standard Naming of Emissions types (optional)
+    #===============================================================================
+    
+    emit_names = Marmot_user_defined_inputs.loc['emit_names.csv_name'].to_string(index=False).strip()
 
-    if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
-        try:
-            logger.info("Calculating Cost Unserved Energy: Regions")
-            Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
-            Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
-            Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="region_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
-        except KeyError:
-            logger.warning("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
-            pass
-
-    if "zone_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
-        try:
-            logger.info("Calculating Cost Unserved Energy: Zones")
-            Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
-            Cost_Unserved_Energy = Cost_Unserved_Energy * VoLL
-            Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="zone_Cost_Unserved_Energy", mode="a", complevel=9, complib = 'blosc:zlib')
-        except KeyError:
-            logger.warning("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
-            pass
-
-    end = time.time()
-    elapsed = end - start
-    logger.info('Main loop took %s minutes',round(elapsed/60,2))
-    logger.info('Formatting COMPLETED for %s',Scenario_name)
-
+    
+    for Scenario_name in Scenario_List:
+        # run_formatter(Scenario_name,PLEXOS_Solutions_folder,gen_names,Marmot_Solutions_folder,
+        #               Plexos_Properties,vre_gen_cat,Region_Mapping,emit_names,VoLL)
+        
+        Region_Mapping = pd.DataFrame()
+        initiate = MarmotFormat(Scenario_name,PLEXOS_Solutions_folder,gen_names,Plexos_Properties,Marmot_Solutions_folder,
+                      vre_gen_cat,Region_Mapping,emit_names,VoLL)
+    
+        initiate.run_formatter()
+    
 ###############################################################################
 
 # Code that can be used to test PLEXOS_H5_results_formatter
