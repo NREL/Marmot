@@ -1,0 +1,7 @@
+# Ignore everything in this directory
+*
+# Except these file
+!.gitignore
+!__init__.py
+!mconfig.py
+!marmot_logging_config.yml
