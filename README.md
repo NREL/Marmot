@@ -12,7 +12,7 @@ A high-level explanation of what these files do and suggested settings to change
 ## Initial Setup
 * First `git clone git@github.nrel.gov:PCM/Marmot.git` to any location you like.
 * To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.nrel.gov/PCM/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
-* Follow the PLEXOS_H5_results_formatter and Marmot_plot_main steps below to run Marmot.
+* Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot.
 
 ## marmot_h5_formatter
 The **marmot_h5_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed, they are saved to an intermediary hdf5 file which can then be read into the Marmot plotting code. From the h5plexos ReadMe: "This package provides a Python interface for reading HDF5 files with H5PLEXOS v0.5 and v0.6 formatting. To create v0.5 files, use a version of this package in the 0.5 series. To create v0.6 files, use H5PLEXOS.jl."
