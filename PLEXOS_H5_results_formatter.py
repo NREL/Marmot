@@ -60,13 +60,36 @@ except IndexError:
 pd.set_option("display.max_colwidth", 1000)
 
 
-class Process:
+class Process():
     '''
-    Process Class contains methods for processing data
+    Process Class contains methods for processing h5plexos query data
     '''
 
     def __init__(self, df, metadata, Region_Mapping, gen_names, gen_names_dict, emit_names):
+        '''
+        
+        Parameters
+        ----------
+        df : pd.DataFrame
+            Unprocessed h5plexos dataframe containing 
+            class and property specifc data.
+        metadata : meta_data.MetaData (class instantiation)
+            Instantiation of MetaData for specific h5plexos file.
+        Region_Mapping : pd.DataFrame
+            DataFrame to map custom regions/zones to create custom aggregations.
+        gen_names : pd.DataFrame
+            DataFrame with 2 columns to rename generator technologies.
+        gen_names_dict : dictionary
+            Dictionary version of gen_names.
+        emit_names : pd.DataFrame
+            DataFrame with 2 columns to rename emmission names. 
 
+        Returns
+        -------
+        None.
+
+        '''
+        
         # certain methods require information from metadata.  metadata is now
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
@@ -80,8 +103,17 @@ class Process:
             self.emit_names_dict=self.emit_names[['Original','New']].set_index("Original").to_dict()["New"]
 
 
-# Function for formatting data which comes form the PLEXOS Generator Category
+# 
     def df_process_generator(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Generator Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['tech','gen_name'], level=['category','name'], inplace=True)
 
@@ -135,8 +167,17 @@ class Process:
             logger.warning("The Following Generators do not have a correct category mapping: %s\n",missing_gen_cat)
         return df
 
-    # Function for formating data which comes from the PLEXOS Region Category
+   
     def df_process_region(self):
+        '''
+        Function for formating data which comes from the PLEXOS Region Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
         if not self.Region_Mapping.empty: #checks if Region_Mapping contains data to merge, skips if empty
@@ -156,8 +197,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formating data which comes from the PLEXOS Zone Category
+     
     def df_process_zone(self):
+        '''
+        Method for formating data which comes from the PLEXOS Zone Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('zone', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -167,8 +217,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes form the PLEXOS Line Category
+    
     def df_process_line(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Line Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('line_name', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -178,8 +237,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes form the PLEXOS Line Category
+    
     def df_process_interface(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Interface Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['interface_name', 'interface_category'], level=['name','category'], inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -189,8 +257,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes form the PLEXOS Reserve Category (To Fix: still uses old merging method)
+    
     def df_process_reserve(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Reserve Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['parent','Type'], level=['name','category'], inplace=True)
         df = df.reset_index() # unzip the levels in index
@@ -205,8 +282,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes form the PLEXOS Reserve_generators Category
+    
     def df_process_reserves_generators(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Reserve_Generators Relational Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df = df.reset_index() # unzip the levels in index
@@ -232,8 +318,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes form the PLEXOS Fuel Category
+    
     def df_process_fuel(self):
+        '''
+        Methodfor formatting data which comes form the PLEXOS Fuel Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('fuel_type', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -243,8 +338,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes form the PLEXOS Constraint Category
+    
     def df_process_constraint(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Constraint Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['constraint_category', 'constraint'], level=['category', 'name'], inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -254,8 +358,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes form the PLEXOS emission Category
+    
     def df_process_emission(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Emission Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename('emission_type', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -265,8 +378,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes from the PLEXOS emissions_generators category
+    
     def df_process_emissions_generators(self):
+        '''
+        Method for formatting data which comes from the PLEXOS Emissions_Generators Relational Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df.index.rename(['pollutant'], level=['parent'], inplace=True)
@@ -309,8 +431,17 @@ class Process:
         df.columns = pd.RangeIndex(0, 1, step=1)
         return df
 
-    # Function for formatting data which comes form the PLEXOS storage Category (To Fix: still uses old merging method)
+    
     def df_process_storage(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Storage Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property", "category"])
         df = df.reset_index() # unzip the levels in index
         df = df.merge(self.metadata.generator_storage(), how='left', on='name')
@@ -328,8 +459,17 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    # Function for formatting data which comes form the PLEXOS region_regions Category
+    
     def df_process_region_regions(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Region_Regions Relational Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band", "property"])
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names) # Gets names of all columns in df and places in list
@@ -339,6 +479,15 @@ class Process:
         return df
 
     def df_process_node(self):
+        '''
+        Method for formatting data which comes form the PLEXOS Node Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        '''
         df = self.df.droplevel(level=["band","property","category"])
         df.index.rename('node', level='name', inplace=True)
         df.sort_index(level=['node'], inplace=True)
@@ -376,38 +525,48 @@ class Process:
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-#===================================================================================
-# Main
-#===================================================================================
 
-class MarmotFormat:
+class MarmotFormat():
+    
+    ''' 
+    This is the main MarmotFormat class which needs to be instantiated to run the formatter.
+    The fromatter reads in PLEXOS hdf5 files created with the h5plexos library 
+    and processes the output results to ready them for plotting. 
+    Once the outputs have been processed, they are saved to an intermediary hdf5 file 
+    which can then be read into the Marmot plotting code 
+    '''
     
     def __init__(self,Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
                  Marmot_Solutions_folder=None, vre_gen_cat=None, Region_Mapping=pd.DataFrame(),
                   emit_names=pd.DataFrame(), VoLL=10000):
         '''
         
-
         Parameters
         ----------
         Scenario_name : string
-            DESCRIPTION.
+            Name of sceanrio to process.
         PLEXOS_Solutions_folder : string directory
-            DESCRIPTION.
-        gen_names : string/pd.DataFrame
-            DESCRIPTION.
-        Plexos_Properties : string/pd.DataFrame
-            DESCRIPTION. 
+            Folder containing h5plexos results files.
+        gen_names : string directory/pd.DataFrame
+            Mapping file to rename generator technologies.
+        Plexos_Properties : string directory/pd.DataFrame
+            PLEXOS properties to process, must follow format seen in Marmot directory. 
         Marmot_Solutions_folder : string directory, optional
-            DESCRIPTION. The default is None.
+            Folder to save Marmot solution files. The default is None.
         vre_gen_cat : string/list, optional
-            DESCRIPTION. The default is None.
-        Region_Mapping : string/pd.DataFrame, optional
-            DESCRIPTION. The default is pd.DataFrame().
-        emit_names : string/pd.DataFrame, optional
-            DESCRIPTION. The default is pd.DataFrame().
+            List of VRE generation technologies, used to calculate curtailment.
+            Generator names should be present in the gen_names file.
+            The default is None.
+        Region_Mapping : string directory/pd.DataFrame, optional
+            Mapping file to map custom regions/zones to create custom aggregations. 
+            Aggregations are created by grouping PLEXOS regions.
+            The default is pd.DataFrame().
+        emit_names : string directory/pd.DataFrame, optional
+            Mapping file to reanme emissions types.
+            The default is pd.DataFrame().
         VoLL : int, optional
-            DESCRIPTION. The default is 10000.
+            Value of lost load, used to calculate cost of unserved energy.
+            The default is 10000.
 
         Returns
         -------
@@ -418,7 +577,6 @@ class MarmotFormat:
         self.Scenario_name = Scenario_name
         self.PLEXOS_Solutions_folder = PLEXOS_Solutions_folder
         self.Marmot_Solutions_folder = Marmot_Solutions_folder
-        self.Plexos_Properties = Plexos_Properties
         self.VoLL = VoLL
 
         
@@ -476,97 +634,97 @@ class MarmotFormat:
             except FileNotFoundError:
                 logger.warning('Could not find specified emissions mapping file; check file name\n')
                 self.emit_names = pd.DataFrame()
-        elif isinstance(self.emit_names, pd.DataFrame):
+        elif isinstance(emit_names, pd.DataFrame):
             self.emit_names = emit_names
             if not self.emit_names.empty:
                 self.emit_names.rename(columns={self.emit_names.columns[0]:'Original',self.emit_names.columns[1]:'New'},inplace=True)
         
     
     
-    def _get_data(self, loc, prop,t, db, metadata):
+    def _get_data(self, plexos_class, plexos_prop, timescale, db, metadata):
         """
-        This function handles the pulling of the data from the H5plexos hdf5 
+        This method handles the pulling of the data from the H5plexos hdf5 
         file and then passes the data to one of the formating functions
-        metadata is now a parameter of get data
 
         Parameters
         ----------
-        loc : TYPE
-            DESCRIPTION.
-        prop : TYPE
-            DESCRIPTION.
-        t : TYPE
-            DESCRIPTION.
-        db : TYPE
-            DESCRIPTION.
-        metadata : TYPE
-            DESCRIPTION.
-        Region_Mapping : TYPE
-            DESCRIPTION.
-        gen_names : TYPE
-            DESCRIPTION.
-        gen_names_dict : TYPE
-            DESCRIPTION.
-        emit_names : TYPE
-            DESCRIPTION.
+        plexos_class : string
+            PLEXOS calss e.g Region, Generator, Zone etc.
+        plexos_prop : string
+            PLEXOS property e.g Max Capacity, Generation etc.
+        timescale : string
+            Data timescale, e.g Hourly, Monthly, 5 minute etc.
+        db : h5plexos.query.solution.PLEXOSSolution (class instantiation)
+            Instantiation of h5plexos PLEXOSSolution for specific h5plexos file.
+        metadata : meta_data.MetaData (class instantiation)
+            Instantiation of MetaData for specific h5plexos file.
 
         Returns
         -------
-        df : TYPE
-            DESCRIPTION.
+        df : pd.DataFrame()
+            Formatted results dataframe.
 
         """
-    
+        
         try:
-            if "_" in loc:
-                df = db.query_relation_property(loc,prop,timescale=t)
+            if "_" in plexos_class:
+                df = db.query_relation_property(plexos_class,plexos_prop,timescale=timescale)
             else:
-                df = db.query_object_property(loc,prop,timescale=t)
+                df = db.query_object_property(plexos_class,plexos_prop,timescale=timescale)
     
         except KeyError:
-            df = self._report_prop_error(prop,loc)
+            df = self._report_prop_error(plexos_prop,plexos_class)
             return df
     
         # Instantiate instance of Process Class
         # metadata is used as a paramter to initialize process_cl
         process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.gen_names_dict, self.emit_names)
         # Instantiate Method of Process Class
-        process_att = getattr(process_cl,'df_process_' + loc)
+        process_att = getattr(process_cl,'df_process_' + plexos_class)
         # Process attribute and return to df
         df = process_att()
     
-        if loc == 'region' and prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
+        if plexos_class == 'region' and plexos_prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
             logger.warning("Scenario contains Unserved Energy: %s MW\n", int(df.sum(axis=0)))
         return df
     
    
-    def _report_prop_error(self,prop,loc):
+    def _report_prop_error(self, plexos_prop, plexos_class):
         '''
-        This fucntion prints a warning message when the _get_data function 
-        cannot find the specified property in the H5plexos hdf5 file
+        This method prints a warning message when the _get_data method 
+        cannot find the specified PLEXOS property in the h5plexos hdf5 file
 
         Parameters
         ----------
-        prop : TYPE
-            DESCRIPTION.
-        loc : TYPE
-            DESCRIPTION.
+        plexos_class : string
+            PLEXOS calss e.g Region, Generator, Zone etc.
+        plexos_prop : string
+            PLEXOS property e.g Max Capacity, Generation etc.
 
         Returns
         -------
-        df : TYPE
-            DESCRIPTION.
+        df : pd.DataFrame
+            Empty DataFrame.
 
         '''
-        logger.warning('CAN NOT FIND "%s %s". "%s" DOES NOT EXIST',loc,prop,prop)
+        logger.warning('CAN NOT FIND "%s %s". "%s" DOES NOT EXIST',plexos_class,plexos_prop,plexos_prop)
         logger.info('SKIPPING PROPERTY\n')
         df = pd.DataFrame()
         return df
         
     
     def run_formatter(self):
+        '''
+        
+        Main method to call to begin processing h5plexos files, this method takes 
+        no input variables, all required varibales are passed in via the __init__ method.
+
+        Returns
+        -------
+        None.
+
+        '''
             
-    
         logger.info("#### Processing %s PLEXOS Results ####", self.Scenario_name)
         
         #===============================================================================
@@ -601,24 +759,21 @@ class MarmotFormat:
         files = sorted(os.listdir()) # List of all files in hdf5 folder in alpha numeric order
         os.chdir(startdir)
     
-    ##############################################################################
         files_list = []
         for names in files:
             if names.endswith(".h5"):
                 files_list.append(names) # Creates a list of only the hdf5 files
     
-    
-    ###############################################################################
-    
+        
         # Read in all HDF5 files into dictionary
         logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
         for file in files_list:
             hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
     
-    #===================================================================================
-    # Process the Outputs
-    #===================================================================================
+        #===================================================================================
+        # Process the Outputs
+        #===================================================================================
     
         # Creates Initial HDF5 file for ouputing formated data
         Processed_Data_Out=pd.DataFrame()
@@ -717,9 +872,10 @@ class MarmotFormat:
                 # del Processed_Data_Out
             else:
                 continue
-    #===================================================================================
-    # Calculate Extra Ouputs
-    #===================================================================================
+            
+        #===================================================================================
+        # Calculate Extra Ouputs
+        #===================================================================================
         if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
             try:
                 logger.info("Processing generator Curtailment")
@@ -781,9 +937,13 @@ class MarmotFormat:
 
 if __name__ == '__main__':
     
+    '''
+    The following code is run if the formatter is run directly,
+    it does not run if the formatter is imported as a module. 
+    '''
     
     #===============================================================================
-    # Load Input Properties
+    # Input Properties
     #===============================================================================
     
     #changes working directory to location of this python file
@@ -820,20 +980,19 @@ if __name__ == '__main__':
     # Standard Naming of Generation Data
     #===============================================================================
     
-    # gen_names_dict=gen_names[['Original','New']].set_index("Original").to_dict()["New"]
     vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
-    
     
     #===============================================================================
     # Standard Naming of Emissions types (optional)
     #===============================================================================
     
-    emit_names = Marmot_user_defined_inputs.loc['emit_names.csv_name'].to_string(index=False).strip()
+    emit_names = os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['emit_names.csv_name'].to_string(index=False).strip())
 
+    #===============================================================================
+    # Loop through scenarios in list
+    #===============================================================================
     
     for Scenario_name in Scenario_List:
-        # run_formatter(Scenario_name,PLEXOS_Solutions_folder,gen_names,Marmot_Solutions_folder,
-        #               Plexos_Properties,vre_gen_cat,Region_Mapping,emit_names,VoLL)
         
         Region_Mapping = pd.DataFrame()
         initiate = MarmotFormat(Scenario_name,PLEXOS_Solutions_folder,gen_names,Plexos_Properties,Marmot_Solutions_folder,
@@ -841,9 +1000,10 @@ if __name__ == '__main__':
     
         initiate.run_formatter()
     
-###############################################################################
-
+    
+#===============================================================================
 # Code that can be used to test PLEXOS_H5_results_formatter
+#===============================================================================
 
     # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'node_Price')
     # test = test.xs("Xcel_Energy_EI",level='zone')
