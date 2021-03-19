@@ -1,13 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Wed May 22 14:29:48 2019
-
-@author: Daniel Levie
+First Created on Wed May 22 14:29:48 2019
 
 This code was written to process PLEXOS HDF5 outputs to get them ready for plotting.
 Once the data is processed it is outputed as an intermediary HDF5 file format so that
 it can be read into the marmot_plot_main.py file
 
+@author: Daniel Levie
 """
 #===============================================================================
 # Import Python Libraries
@@ -28,6 +27,9 @@ import marmot.config.mconfig as mconfig
 
 # sys.path.append('../h5plexos')
 
+#===============================================================================
+# Setup Logger
+#===============================================================================
 
 current_dir = os.getcwd()
 os.chdir(pathlib.Path(__file__).parent.absolute())
@@ -40,13 +42,6 @@ logger = logging.getLogger('marmot_format')
 # Creates a new log file for next run
 logger.handlers[1].doRollover()
 logger.handlers[2].doRollover()
-
-try:
-    logger.info("Will process row:" +(sys.argv[1]))
-    logger.info(str(len(sys.argv)-1)+" arguments were passed from commmand line.")
-except IndexError:
-    #No arguments passed
-    pass
 
 os.chdir(current_dir)
 #===============================================================================
@@ -108,7 +103,6 @@ class Process():
             self.emit_names_dict=self.emit_names[['Original','New']].set_index("Original").to_dict()["New"]
 
 
-# 
     def df_process_generator(self):
         '''
         Method for formatting data which comes form the PLEXOS Generator Class
@@ -752,13 +746,6 @@ class MarmotFormat():
             # directory already exists
             pass    
         
-        figure_folder = os.path.join(self.Marmot_Solutions_folder, 'Figures_Output')
-        try:
-            os.makedirs(figure_folder)
-        except FileExistsError:
-            # directory already exists
-            pass
-        
         startdir=os.getcwd()
         os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
         files = sorted(os.listdir()) # List of all files in hdf5 folder in alpha numeric order
@@ -787,12 +774,7 @@ class MarmotFormat():
         else:
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
     
-        # Filters for chosen Plexos properties to process
-        if (len(sys.argv)-1) == 1: # If passed one argument (not including file name which is automatic)
-            logger.info("Will process row " +(sys.argv[1])+" of plexos properties regardless of T/F.")
-            process_properties = self.Plexos_Properties.iloc[int(sys.argv[1])-1].to_frame().T
-        else:
-            process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
+        process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
     
         start = time.time()
         
