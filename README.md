@@ -4,22 +4,22 @@ Marmot is a set of python scripts to process h5plexos PLEXOS results plot the ou
 
 ## Main Python Scripts
 Marmot consists of two main .py files:
-* [**PLEXOS_H5_results_formatter.py**](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
-* [**Marmot_plot_main.py**](https://github.nrel.gov/PCM/Marmot#marmot_plot_main)
+* [**marmot_h5_formatter.py**](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/marmot/marmot_h5_formatter.py)
+* [**marmot_plot_main.py**](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/marmot/marmot_plot_main.py)
 
 A high-level explanation of what these files do and suggested settings to change are described in this readme. Code specifics are decribed in more detail in the code comments. 
 
 ## Initial Setup
 * First `git clone git@github.nrel.gov:PCM/Marmot.git` to any location you like.
 * To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.nrel.gov/PCM/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
-* Follow the PLEXOS_H5_results_formatter and Marmot_plot_main steps below to run Marmot.
+* Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot.
 
-## PLEXOS_H5_results_formatter
-The **PLEXOS_H5_results_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed, they are saved to an intermediary hdf5 file which can then be read into the Marmot plotting code. From the h5plexos ReadMe: "This package provides a Python interface for reading HDF5 files with H5PLEXOS v0.5 and v0.6 formatting. To create v0.5 files, use a version of this package in the 0.5 series. To create v0.6 files, use H5PLEXOS.jl."
+## marmot_h5_formatter
+The **marmot_h5_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed, they are saved to an intermediary hdf5 file which can then be read into the Marmot plotting code. From the h5plexos ReadMe: "This package provides a Python interface for reading HDF5 files with H5PLEXOS v0.5 and v0.6 formatting. To create v0.5 files, use a version of this package in the 0.5 series. To create v0.6 files, use H5PLEXOS.jl."
 
-The Marmot formatter imports h5plexos. To avoid errors, use h5plexos v0.5 or later. You may run into issues if you created the intermediate hdf5 file with h5plexos in Julia, but the h5plexos installation called by **PLEXOS_H5_results_formatter** is v0.4 or earlier.
+The Marmot formatter imports h5plexos. To avoid errors, use h5plexos v0.5 or later. You may run into issues if you created the intermediate hdf5 file with h5plexos in Julia, but the h5plexos installation called by **marmot_h5_formatter** is v0.4 or earlier.
 
-Before you use the **PLEXOS_H5_results_formatter** you will need to adjust and set the input settings in the **Marmot_user_defined_inputs.csv** and set which PLEXOS properties to process in the **plexos_properties.csv**. You may also want to edit the Mapping Files described [here](https://github.nrel.gov/PCM/Marmot#mapping-files). These files are located in the repo and are available to be edited once you clone the repo. 
+Before you use the **marmot_h5_formatter** you will need to adjust and set the input settings in the **Marmot_user_defined_inputs.csv** and set which PLEXOS properties to process in the **plexos_properties.csv**. You may also want to edit the Mapping Files described [here](https://github.nrel.gov/PCM/Marmot#mapping-files). These files are located in the repo and are available to be edited once you clone the repo. 
 
 Settings to adjust in the **Marmot_user_defined_inputs.csv** required to run the formatter include:
 
@@ -59,9 +59,9 @@ temp=pd.HDFStore(hdf_out_folder+"/"+Multi_Scenario[0]+"_formatted.h5")
 temp.keys()
 temp.close()
 
-## Marmot_plot_main
+## marmot_plot_main
 
-**Marmot_plot_main.py** is the main plotting script within Marmot which calls on supporting files to read in data, create the plot, and then return the plot and data to **Marmot_plot_main.py**. The supporting modules can be viewed within the repo [plottingmodules](https://github.nrel.gov/PCM/Marmot/tree/master/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc. 
+**marmot_plot_main.py** is the main plotting script within Marmot which calls on supporting files to read in data, create the plot, and then return the plot and data to **marmot_plot_main.py**. The supporting modules can be viewed within the repo [plottingmodules](https://github.nrel.gov/PCM/Marmot/tree/master/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc. 
 
 As with the processing script users will need to adjust the input settings in the **Marmot_user_defined_inputs.csv** and set which plots to create in **Marmot_plot_select.csv**. 
 **Marmot_plot_select.csv** is a csv file which determines which figures to plot. This file is in the repo. Under the *"Plot Graph"* column adjust the property to be TRUE or FALSE to decide whether to plot the figure. Column *D* allows the user to adjust certain properties within the plot (examples given). Columns *E* and *F* adjust the range of days to plot either side of the specified property in *D*. Column *G* adjusts the time zone to plot on the figure. The list of figures to plot is currently limited by what code has been written for.  
