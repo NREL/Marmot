@@ -112,7 +112,7 @@ class mplot(object):
                 zone_lines = zone_lines.xs(zone_input)
                 zone_lines=zone_lines['line_name'].unique()
 
-                flow = Flow_Collection.get(scenario)
+                flow = Flow_Collection.get(scenario).copy()
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] #Limit to only lines touching to this zone
 
                 limits = Limit_Collection.get(scenario).droplevel('timestamp')
@@ -506,7 +506,7 @@ class mplot(object):
                 axs[n,1].set_title(interf)
                 handles, labels = axs[n,0].get_legend_handles_labels()
                 if not self.duration_curve:
-                    locator = mdates.AutoDateLocator(minticks=minticks, maxticks=maxticks)
+                    locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
                     formatter = mdates.ConciseDateFormatter(locator)
                     formatter.formats[2] = '%d\n %b'
                     formatter.zero_formats[1] = '%b\n %Y'
@@ -1438,7 +1438,9 @@ class mplot(object):
                 n += 1
                 net_exports = []
                 self.logger.info("Scenario = " + str(scenario))
-                flow = line_flow_collection[scenario]
+                flow = line_flow_collection[scenario].copy()
+                if self.shift_leapday:
+                    flow = mfunc.shift_leapday(flow,self.Marmot_Solutions_folder)
                 flow = flow.reset_index()
                                 
                 for other_zone in other_zones:
@@ -1504,7 +1506,7 @@ class mplot(object):
     
                 if not self.duration_curve:
                     mfunc.set_plot_timeseries_format(axs,n)
-                    locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
+                    locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
                     formatter = mdates.ConciseDateFormatter(locator)
                     formatter.formats[2] = '%d\n %b'
                     formatter.zero_formats[1] = '%b\n %Y'

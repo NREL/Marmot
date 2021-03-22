@@ -10,6 +10,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
+from matplotlib.ticker import FormatStrFormatter
 import os
 from matplotlib.patches import Patch
 import numpy as np
@@ -190,10 +191,9 @@ class mplot(object):
 
         def setup_data(zone_input, scenario, Stacked_Gen):
             try:
-                Stacked_Curt = curtailment_collection.get(scenario)
+                Stacked_Curt = curtailment_collection.get(scenario).copy()
                 if self.shift_leapday:
                     Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
-
                 Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
 
                 Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
@@ -213,36 +213,50 @@ class mplot(object):
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
-            Load = load_collection.get(scenario)
-            if self.shift_leapday:
-                Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
-            Load = Load.xs(zone_input,level=self.AGG_BY)
-            Load = Load.groupby(["timestamp"]).sum()
-            Load = Load.squeeze() #Convert to Series
+            # Load = load_collection.get(scenario).copy()
+            # if self.shift_leapday:
+            #     Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
+            # Load = Load.xs(zone_input,level=self.AGG_BY)
+            # Load = Load.groupby(["timestamp"]).sum()
+            # Load = Load.squeeze() #Convert to Series
+
+            #######################
+            ###DO NOT COMMIT
+            #Use input load instead of Xcel zonal load.
+            Total_Demand = pd.read_csv('/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Load/load_2028_2013_EST.csv',index_col = 'DATETIME')
+            Total_Demand = Total_Demand['PSCO_WI']
+            Total_Demand.index = pd.to_datetime(Total_Demand.index)
+            Total_Demand.index = Total_Demand.index.shift(1,freq = 'D')
+            Total_Demand.index = Total_Demand.index.shift(-2,freq = 'H')
+            Total_Demand = Total_Demand.loc[Stacked_Gen.index]
+            Total_Demand = Total_Demand.squeeze()
+            ###DO NOT COMMIT
+            #######################
+
                         
             try:
                 pump_load_collection[scenario]
             except KeyError:
                 pump_load_collection[scenario] = gen_collection[scenario].copy()
                 pump_load_collection[scenario].iloc[:,0] = 0
-            Pump_Load = pump_load_collection.get(scenario)
+            Pump_Load = pump_load_collection.get(scenario).copy()
             if self.shift_leapday:
                 Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
-            Pump_Load = Pump_Load 
             if (Pump_Load == 0).all() == False:
-                Total_Demand = Load - Pump_Load
+                #Total_Demand = Load - Pump_Load
+                Load = Total_Demand + Pump_Load
             else:
-                Total_Demand = Load
-            
+                #Total_Demand = Load
+                Load = Total_Demand
             try:
                 unserved_energy_collection[scenario]
             except KeyError:
                 unserved_energy_collection[scenario] = load_collection[scenario].copy()
                 unserved_energy_collection[scenario].iloc[:,0] = 0
-            Unserved_Energy = unserved_energy_collection.get(scenario)
+            Unserved_Energy = unserved_energy_collection.get(scenario).copy()
             if self.shift_leapday:
                 Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)
 
@@ -354,7 +368,7 @@ class mplot(object):
                 self.logger.info("Scenario = " + scenario)
 
                 try:
-                    Stacked_Gen = gen_collection.get(scenario)
+                    Stacked_Gen = gen_collection.get(scenario).copy()
                     if self.shift_leapday:
                         Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
@@ -455,6 +469,7 @@ class mplot(object):
                 formatter.show_offset = False
                 axs[i].xaxis.set_major_locator(locator)
                 axs[i].xaxis.set_major_formatter(formatter)
+                axs[i].yaxis.set_major_formatter(FormatStrFormatter('%.0f')) #Remove unnecessary decimals.
 
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].fill_between(Load.index, Load,Unserved_Energy,
@@ -513,7 +528,10 @@ class mplot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Generation ({})'.format(unitconversion['units']), color='black', rotation='vertical', labelpad=60)
+
+            #Ylabel should change if there are facet labels.
+            labelpad = 60 if self.facet else 20
+            plt.ylabel('Generation ({})'.format(unitconversion['units']), color='black', rotation='vertical', labelpad = labelpad)
 
             #Remove extra axis
             if excess_axs != 0:

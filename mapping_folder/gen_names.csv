@@ -238,3 +238,7 @@ Wind_2028,Wind
 Renewable_Thermal,Geothermal
 Thermal,Oil-Gas-Steam
 OSW,Offshore Wind
+XcelWind,Wind
+XcelPV,PV
+XcelNG,Gas-CC
+XcelBattery,Storage

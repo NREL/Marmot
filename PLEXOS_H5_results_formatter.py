@@ -50,8 +50,9 @@ except IndexError:
 #This is only required if your output has not been processed already on Eagle
 
 #from h5plexos.process import process_solution
-#PLEXOS_Solution = '/path/to/PLEXOS/zipfile.zip'
-#process_solution(PLEXOS_Solution,'/write/path/to/h5plexos/solution.h5') # Saves out to PLEXOS_Solution.h5
+#PLEXOS_Solution = '/Volumes/PLEXOS CEII/Projects/Xcel_Weather/Model Aug-2011_PeakNetLoad_ImportsMS Solution/Model Aug-2011_PeakNetLoad_ImportsMS Solution.zip'
+#process_solution(PLEXOS_Solution,'/Volumes/PLEXOS CEII/Projects/Xcel_Weather/Solutions/Aug-2011_PeakNetLoad_Imports/Aug-2011_PeakNetLoad_Imports/Model Aug-2011_PeakNetLoad_Imports Solution.h5') # Saves out to PLEXOS_Solution.h5
+#logger.info('Finished converting the h5 solution file.')
 
 #===============================================================================
 # Load Input Properties
@@ -484,14 +485,14 @@ for Scenario_name in Scenario_List:
         # directory already exists
         pass
     
-    hdf_out_folder = os.path.join(Marmot_Solutions_folder,'Processed_HDF5_folder')
+    hdf_out_folder = os.path.join(Marmot_Solutions_folder, Scenario_name,'Processed_HDF5_folder')
     try:
         os.makedirs(hdf_out_folder)
     except FileExistsError:
         # directory already exists
         pass    
     
-    figure_folder = os.path.join(Marmot_Solutions_folder, 'Figures_Output')
+    figure_folder = os.path.join(Marmot_Solutions_folder, Scenario_name,'Figures_Output')
     try:
         os.makedirs(figure_folder)
     except FileExistsError:

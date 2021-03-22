@@ -29,8 +29,8 @@ with open('marmot_logging_config.yml', 'rt') as f:
     
 logger = logging.getLogger('marmot_plot')
 # Creates a new log file for next run 
-logger.handlers[1].doRollover()
-logger.handlers[2].doRollover()
+#logger.handlers[1].doRollover()
+#logger.handlers[2].doRollover()
 
 class plottypes:
 
@@ -373,16 +373,16 @@ for index, row in Marmot_plot_select.iterrows():
         else:
             # Save figures
             try:
-                Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
+                Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '_' + row.iloc[5] + '.' + figure_format), dpi=600, bbox_inches='tight')
             except AttributeError:
-                Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
+                Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '_' + row.iloc[5] + '.' + figure_format), dpi=600, bbox_inches='tight')
 
             #Save .csv's.
             if not facet:
                 if Figure_Out[zone_input]['data_table'].empty:
                     logger.info('%s does not return a data table',row["Figure Output Name"])
                 else:
-                    Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+                    Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '_' + row.iloc[5] + ".csv"))
 
             else: #Facetted plot, save multiple tables
                 tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")

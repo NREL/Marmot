@@ -585,6 +585,15 @@ def shift_leapday(df,Marmot_Solutions_folder):
             df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'),
             level = 'timestamp',
             inplace = True)
+
+        ###########################
+        ###DO NOT COMMIT
+        df.index.set_levels(
+            df.index.levels[df.index.names.index('timestamp')].shift(-2,freq = 'H'),
+            level = 'timestamp',
+            inplace = True)
+        ###DO NOT COMMIT
+        ###########################
     return(df)
 
 
