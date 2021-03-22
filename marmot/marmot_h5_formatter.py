@@ -14,6 +14,7 @@ it can be read into the marmot_plot_main.py file
 
 import os
 import sys
+import re
 import pandas as pd
 import h5py
 import pathlib
@@ -65,7 +66,7 @@ class Process():
     Process Class contains methods for processing h5plexos query data
     '''
 
-    def __init__(self, df, metadata, Region_Mapping, gen_names, gen_names_dict, emit_names):
+    def __init__(self, df, metadata, Region_Mapping, gen_names, emit_names):
         '''
         
         Parameters
@@ -79,8 +80,6 @@ class Process():
             DataFrame to map custom regions/zones to create custom aggregations.
         gen_names : pd.DataFrame
             DataFrame with 2 columns to rename generator technologies.
-        gen_names_dict : dictionary
-            Dictionary version of gen_names.
         emit_names : pd.DataFrame
             DataFrame with 2 columns to rename emmission names. 
 
@@ -96,11 +95,13 @@ class Process():
         self.metadata = metadata
         self.Region_Mapping = Region_Mapping
         self.gen_names = gen_names
-        self.gen_names_dict = gen_names_dict
         self.emit_names = emit_names
         
         if not self.emit_names.empty:
             self.emit_names_dict=self.emit_names[['Original','New']].set_index("Original").to_dict()["New"]
+            
+        self.gen_names_dict=self.gen_names[['Original','New']].set_index("Original").to_dict()["New"]
+
 
 
     def df_process_generator(self):
@@ -407,9 +408,10 @@ class Process():
 
         # reclassify gen tech categories
         df['tech'] = pd.Categorical(df['tech'].map(lambda x: self.gen_names_dict.get(x,x)))
-
-        # reclassify emissions as specified by user in mapping
-        df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: self.emit_names_dict.get(x,x)))
+        
+        if not self.emit_names.empty:
+            # reclassify emissions as specified by user in mapping
+            df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: self.emit_names_dict.get(x,x)))
 
         # remove categoricals (otherwise h5 save will fail)
         df = df.astype({'tech':'object', 'pollutant':'object'})
@@ -536,7 +538,7 @@ class MarmotFormat():
     '''
     
     def __init__(self,Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
-                 Marmot_Solutions_folder=None, vre_gen_cat=None, Region_Mapping=pd.DataFrame(),
+                 Marmot_Solutions_folder=None, vre_gen_cat=[], Region_Mapping=pd.DataFrame(),
                   emit_names=pd.DataFrame(), VoLL=10000):
         '''
         
@@ -584,13 +586,13 @@ class MarmotFormat():
         
         if isinstance(gen_names, str):
             try:
-                self.gen_names = pd.read_csv(gen_names)   
+                gen_names = pd.read_csv(gen_names)   
+                self.gen_names = gen_names.rename(columns={gen_names.columns[0]:'Original',gen_names.columns[1]:'New'})
             except FileNotFoundError:
                 logger.warning('Could not find specified gen_names file; check file name. This is required to run Marmot, system will now exit')
                 sys.exit()
         elif isinstance(gen_names, pd.DataFrame):
             self.gen_names = gen_names.rename(columns={gen_names.columns[0]:'Original',gen_names.columns[1]:'New'})
-            self.gen_names_dict=self.gen_names[['Original','New']].set_index("Original").to_dict()["New"]
         
         if isinstance(Plexos_Properties, str):
             try:
@@ -664,7 +666,6 @@ class MarmotFormat():
             Formatted results dataframe.
 
         """
-        
         try:
             if "_" in plexos_class:
                 df = db.query_relation_property(plexos_class,plexos_prop,timescale=timescale)
@@ -674,15 +675,14 @@ class MarmotFormat():
         except KeyError:
             df = self._report_prop_error(plexos_prop,plexos_class)
             return df
-    
+        
         # Instantiate instance of Process Class
         # metadata is used as a paramter to initialize process_cl
-        process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.gen_names_dict, self.emit_names)
+        process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.emit_names)
         # Instantiate Method of Process Class
         process_att = getattr(process_cl,'df_process_' + plexos_class)
         # Process attribute and return to df
         df = process_att()
-    
         if plexos_class == 'region' and plexos_prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
             logger.warning("Scenario contains Unserved Energy: %s MW\n", int(df.sum(axis=0)))
         return df
@@ -748,7 +748,9 @@ class MarmotFormat():
         
         startdir=os.getcwd()
         os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
-        files = sorted(os.listdir()) # List of all files in hdf5 folder in alpha numeric order
+        # List of all files in hdf5 folder in alpha numeric order
+        files = sorted(os.listdir(), key=lambda x:int(re.sub('[a-zA-Z,_]', '', os.path.splitext(x)[0]))) 
+        
         os.chdir(startdir)
     
         files_list = []
@@ -756,7 +758,6 @@ class MarmotFormat():
             if names.endswith(".h5"):
                 files_list.append(names) # Creates a list of only the hdf5 files
     
-        
         # Read in all HDF5 files into dictionary
         logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
@@ -793,12 +794,10 @@ class MarmotFormat():
     
             for model in files_list:
                 logger.info("      %s",model)
-    
+                
                 # Create an instance of metadata, and pass that as a variable to get data.
                 meta = MetaData(HDF5_folder_in, self.Region_Mapping,model)
-    
                 db = hdf5_collection.get(model)
-    
                 processed_data = self._get_data(row["group"], row["data_set"],row["data_type"], db, meta)
     
                 if processed_data.empty == True:
@@ -864,36 +863,35 @@ class MarmotFormat():
         # Calculate Extra Ouputs
         #===================================================================================
         if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
+            
+            logger.info("Processing generator Curtailment")
             try:
-                logger.info("Processing generator Curtailment")
-                try:
-                    Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
-                    Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
-                    if Total_Gen_Out.empty==True:
-                        logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
-                except KeyError:
+                Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
+                Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+                if Total_Gen_Out.empty==True:
                     logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
-                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
-                
-                if not adjusted_vre_gen_list:
-                    logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
-                    logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
-                    For more information see Marmot Readme under 'Mapping Files'")
-    
-                # Output Curtailment#
-                Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]) -
-                                    (Total_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]))
-    
-                Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
-    
-                #Clear Some Memory
-                del Total_Gen_Out
-                del Avail_Gen_Out
-                del Curtailment_Out
-            except Exception:
-                logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
-                pass
+            except KeyError:
+                logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+            # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+            adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+            
+            if not adjusted_vre_gen_list:
+                logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
+                logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
+                For more information see Marmot Readme under 'Mapping Files'")
+        
+            # Output Curtailment#
+            Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]) -
+                                (Total_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]))
+        
+            Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
+        
+            #Clear Some Memory
+            del Total_Gen_Out
+            del Avail_Gen_Out
+            del Curtailment_Out
+            # logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
+
     
         if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
             try:
@@ -991,9 +989,9 @@ if __name__ == '__main__':
 # Code that can be used to test PLEXOS_H5_results_formatter
 #===============================================================================
 
-    # test = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'node_Price')
-    # test = test.xs("Xcel_Energy_EI",level='zone')
-    # test = test.xs("Nuclear",level='tech')
+    # test = pd.read_hdf(file, 'generator_Generation')
+    # test = test.xs("p60",level='region')
+    # test = test.xs("gas-ct",level='tech')
     # test = test.reset_index(['timestamp','node'])
     # test = test.groupby(["timestamp", "node"], as_index=False).sum()
     # test = test.pivot(index='timestamp', columns='node', values=0)

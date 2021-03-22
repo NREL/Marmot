@@ -9,7 +9,6 @@ have descriptive names such as total_generation.py, generation_stack.py, curtaim
 
 @author: Daniel Levie
 """
-
 #===============================================================================
 # Import Python Libraries
 #===============================================================================
@@ -162,7 +161,6 @@ class MarmotPlot():
                 sys.exit()
         elif isinstance(gen_names, pd.DataFrame):
             self.gen_names = gen_names.rename(columns={gen_names.columns[0]:'Original',gen_names.columns[1]:'New'})
-            self.gen_names_dict=self.gen_names[['Original','New']].set_index("Original").to_dict()["New"]
         
         if isinstance(Marmot_plot_select, str):
             try:
@@ -310,6 +308,7 @@ class MarmotPlot():
         
         try:
             PLEXOS_color_dict = pd.read_csv(os.path.join(self.marmot_mapping_folder, 'colour_dictionary.csv'))
+            PLEXOS_color_dict = PLEXOS_color_dict.rename(columns={PLEXOS_color_dict.columns[0]:'Generator',PLEXOS_color_dict.columns[1]:'Colour'})
             PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
             PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
             PLEXOS_color_dict = PLEXOS_color_dict[['Generator','Colour']].set_index("Generator").to_dict()["Colour"]
