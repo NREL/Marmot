@@ -22,9 +22,9 @@ import time
 import logging
 import logging.config
 import yaml
-from h5plexos.query import PLEXOSSolution
-from marmot.meta_data import MetaData
-import marmot.config.mconfig as mconfig
+from h5plexos.h5plexos.query import PLEXOSSolution
+from Marmot.marmot.meta_data import MetaData
+import Marmot.marmot.config.mconfig as mconfig
 
 # sys.path.append('../h5plexos')
 
@@ -729,9 +729,9 @@ class MarmotFormat():
         # Input and Output Directories
         #===============================================================================
     
-        HDF5_output = self.Scenario_name + "_formatted.h5"
-        
-        HDF5_folder_in = os.path.join(self.PLEXOS_Solutions_folder, self.Scenario_name)
+        HDF5_output = str(self.Scenario_name) + "_formatted.h5"
+
+        HDF5_folder_in = os.path.join(self.PLEXOS_Solutions_folder, str(self.Scenario_name))
         try:
             os.makedirs(HDF5_folder_in)
         except FileExistsError:
@@ -751,7 +751,7 @@ class MarmotFormat():
         files = sorted(os.listdir(), key=lambda x:int(re.sub('\D', '', os.path.splitext(x)[0]))) 
         
         os.chdir(startdir)
-    
+
         files_list = []
         for names in files:
             if names.endswith(".h5"):
@@ -761,14 +761,16 @@ class MarmotFormat():
         logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
         for file in files_list:
+            print(os.path.join(HDF5_folder_in,file))
             hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
-    
+        #logger.info(files_list)
+        #logger.info(hdf5_collection)
         #===================================================================================
         # Process the Outputs
         #===================================================================================
     
         # Creates Initial HDF5 file for ouputing formated data
-        Processed_Data_Out=pd.DataFrame()
+        Processed_Data_Out = pd.DataFrame()
         if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
             logger.info("'%s\%s' already exists: New variables will be added\n",hdf_out_folder,HDF5_output)
         else:
@@ -783,7 +785,7 @@ class MarmotFormat():
             if set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) == False:
                 missing_regions = list(set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
                 logger.warning('The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: %s\n',missing_regions)
-    
+        
         # Main loop to process each ouput and pass data to functions
         for index, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
