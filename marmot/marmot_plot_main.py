@@ -103,7 +103,7 @@ class MarmotPlot():
     
     def __init__(self,Scenarios, AGG_BY, PLEXOS_Solutions_folder, gen_names, Marmot_plot_select, 
                  Marmot_Solutions_folder=None,
-                 marmot_mapping_folder='mapping_folder',Scenario_Diff=[],
+                 mapping_folder='mapping_folder',Scenario_Diff=[],
                  zone_region_sublist=[],xlabels=[], ylabels=[],ticklabels=[],
                  Region_Mapping=pd.DataFrame()):
         '''
@@ -122,7 +122,7 @@ class MarmotPlot():
             selection of plots to plot.
         Marmot_Solutions_folder : string directory, optional
             Folder to save Marmot solution files. The default is None.
-        marmot_mapping_folder : string directory, optional
+        mapping_folder : string directory, optional
             The location of the Marmot mapping folder. The default is 'mapping_folder'.
         Scenario_Diff : string/list, optional
             2 value string or list, used to compare 2 sceanrios. The default is [].
@@ -176,7 +176,7 @@ class MarmotPlot():
         if self.Marmot_Solutions_folder == None:
             self.Marmot_Solutions_folder = self.PLEXOS_Solutions_folder
             
-        self.marmot_mapping_folder = marmot_mapping_folder
+        self.mapping_folder = mapping_folder
         
         if isinstance(Scenario_Diff, str):
             self.Scenario_Diff = pd.Series(Scenario_Diff.split(",")).str.strip().tolist() 
@@ -273,33 +273,33 @@ class MarmotPlot():
         #===============================================================================
         
         try:
-            ordered_gen = pd.read_csv(os.path.join(self.marmot_mapping_folder, 'ordered_gen.csv'),squeeze=True).str.strip().tolist()
+            ordered_gen = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('ordered_gen_file')),squeeze=True).str.strip().tolist()
         except FileNotFoundError:
-            logger.warning(f'Could not find "{os.path.join(self.marmot_mapping_folder, "ordered_gen.csv")}"; Check file name. This is required to run Marmot, system will now exit')
+            logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "ordered_gen.csv")}"; Check file name in config file. This is required to run Marmot, system will now exit')
             sys.exit()
         
         try:
-            pv_gen_cat = pd.read_csv(os.path.join(self.marmot_mapping_folder, 'pv_gen_cat.csv'),squeeze=True).str.strip().tolist()
+            pv_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','pv_gen_cat')),squeeze=True).str.strip().tolist()
         except FileNotFoundError:
-            logger.warning(f'Could not find "{os.path.join(self.marmot_mapping_folder, "pv_gen_cat.csv")}"; Check file name. This is required for certain plots to display correctly')
+            logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "pv_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
             pv_gen_cat = []
         
         try:
-            re_gen_cat = pd.read_csv(os.path.join(self.marmot_mapping_folder, 're_gen_cat.csv'),squeeze=True).str.strip().tolist()
+            re_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','re_gen_cat')),squeeze=True).str.strip().tolist()
         except FileNotFoundError:
-            logger.warning(f'Could not find "{os.path.join(self.marmot_mapping_folder, "re_gen_cat.csv")}"; Check file name. This is required for certain plots to display correctly')
+            logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "re_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
             re_gen_cat = []
         
         try:
-            vre_gen_cat = pd.read_csv(os.path.join(self.marmot_mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
+            vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','vre_gen_cat')),squeeze=True).str.strip().tolist()
         except FileNotFoundError:
-            logger.warning(f'Could not find "{os.path.join(self.marmot_mapping_folder, "vre_gen_cat.csv")}"; Check file name. This is required for certain plots to display correctly')
+            logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
             vre_gen_cat = []
         
         try:
-            thermal_gen_cat = pd.read_csv(os.path.join(self.marmot_mapping_folder, 'thermal_gen_cat.csv'), squeeze = True).str.strip().tolist()
+            thermal_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','thermal_gen_cat')), squeeze = True).str.strip().tolist()
         except FileNotFoundError:
-            logger.warning(f'Could not find "{os.path.join(self.marmot_mapping_folder, "thermal_gen_cat.csv")}"; Check file name. This is required for certain plots to display correctly')
+            logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "thermal_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
             thermal_gen_cat = []
         
         
@@ -307,13 +307,13 @@ class MarmotPlot():
                             logger.warning(f"The new categories from the gen_names csv do not exist in ordered_gen!:{set(self.gen_names.New.unique()) - (set(ordered_gen))}")
         
         try:
-            PLEXOS_color_dict = pd.read_csv(os.path.join(self.marmot_mapping_folder, 'colour_dictionary.csv'))
+            PLEXOS_color_dict = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('color_dictionary_file')))
             PLEXOS_color_dict = PLEXOS_color_dict.rename(columns={PLEXOS_color_dict.columns[0]:'Generator',PLEXOS_color_dict.columns[1]:'Colour'})
             PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
             PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
             PLEXOS_color_dict = PLEXOS_color_dict[['Generator','Colour']].set_index("Generator").to_dict()["Colour"]
         except FileNotFoundError:
-            logger.warning(f'Could not find "{os.path.join(self.marmot_mapping_folder, "colour_dictionary.csv")}"; Check file name. Random colors will now be used')
+            logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "colour_dictionary.csv")}"; Check file name in config file. Random colors will now be used')
             cmap = plt.cm.get_cmap(lut=len(ordered_gen))
             colors = []
             for i in range(cmap.N):

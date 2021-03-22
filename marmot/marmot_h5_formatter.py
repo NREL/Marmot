@@ -538,7 +538,7 @@ class MarmotFormat():
     '''
     
     def __init__(self,Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
-                 Marmot_Solutions_folder=None, vre_gen_cat=[], Region_Mapping=pd.DataFrame(),
+                 Marmot_Solutions_folder=None, mapping_folder='mapping_folder', Region_Mapping=pd.DataFrame(),
                   emit_names=pd.DataFrame(), VoLL=10000):
         '''
         
@@ -554,10 +554,8 @@ class MarmotFormat():
             PLEXOS properties to process, must follow format seen in Marmot directory. 
         Marmot_Solutions_folder : string directory, optional
             Folder to save Marmot solution files. The default is None.
-        vre_gen_cat : string/list, optional
-            List of VRE generation technologies, used to calculate curtailment.
-            Generator names should be present in the gen_names file.
-            The default is None.
+        mapping_folder : string directory, optional
+            The location of the Marmot mapping folder. The default is 'mapping_folder'.
         Region_Mapping : string directory/pd.DataFrame, optional
             Mapping file to map custom regions/zones to create custom aggregations. 
             Aggregations are created by grouping PLEXOS regions.
@@ -578,6 +576,7 @@ class MarmotFormat():
         self.Scenario_name = Scenario_name
         self.PLEXOS_Solutions_folder = PLEXOS_Solutions_folder
         self.Marmot_Solutions_folder = Marmot_Solutions_folder
+        self.mapping_folder = mapping_folder
         self.VoLL = VoLL
 
         
@@ -603,11 +602,11 @@ class MarmotFormat():
         elif isinstance(Plexos_Properties, pd.DataFrame):
             self.Plexos_Properties = Plexos_Properties
         
-        if vre_gen_cat:
-            if isinstance(vre_gen_cat, str):
-                self.vre_gen_cat = pd.read_csv(vre_gen_cat,squeeze=True).str.strip().tolist()
-            else:
-                 self.vre_gen_cat = vre_gen_cat
+        try:
+            self.vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','vre_gen_cat')),squeeze=True).str.strip().tolist()
+        except FileNotFoundError:
+            logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required to calculate Curtailment')
+            self.vre_gen_cat = []
         
         if isinstance(Region_Mapping, str):
             try:
@@ -749,7 +748,7 @@ class MarmotFormat():
         startdir=os.getcwd()
         os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
         # List of all files in hdf5 folder in alpha numeric order
-        files = sorted(os.listdir(), key=lambda x:int(re.sub('[a-zA-Z,_]', '', os.path.splitext(x)[0]))) 
+        files = sorted(os.listdir(), key=lambda x:int(re.sub('\D', '', os.path.splitext(x)[0]))) 
         
         os.chdir(startdir)
     
@@ -965,7 +964,6 @@ if __name__ == '__main__':
     # Standard Naming of Generation Data
     #===============================================================================
     
-    vre_gen_cat = pd.read_csv(os.path.join(Mapping_folder, 'vre_gen_cat.csv'),squeeze=True).str.strip().tolist()
     
     #===============================================================================
     # Standard Naming of Emissions types (optional)
@@ -979,8 +977,12 @@ if __name__ == '__main__':
     
     for Scenario_name in Scenario_List:
         
-        initiate = MarmotFormat(Scenario_name,PLEXOS_Solutions_folder,gen_names,Plexos_Properties,Marmot_Solutions_folder,
-                      vre_gen_cat,Region_Mapping,emit_names,VoLL)
+        initiate = MarmotFormat(Scenario_name,PLEXOS_Solutions_folder,gen_names,Plexos_Properties,
+                                Marmot_Solutions_folder = Marmot_Solutions_folder,
+                                mapping_folder = 'mapping_folder',
+                                Region_Mapping = Region_Mapping,
+                                emit_names = emit_names,
+                                VoLL = VoLL)
     
         initiate.run_formatter()
     
