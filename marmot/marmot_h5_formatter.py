@@ -22,11 +22,9 @@ import time
 import logging
 import logging.config
 import yaml
-from h5plexos.query import PLEXOSSolution
 from marmot.meta_data import MetaData
 import marmot.config.mconfig as mconfig
-
-# sys.path.append('../h5plexos')
+from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 
 #===============================================================================
 # Setup Logger
