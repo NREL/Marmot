@@ -58,7 +58,7 @@ class mplot(object):
                 try:
                     emit = emit.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No emissions found for : "+zone_input)
+                    self.logger.warning(f"No emissions in Scenario : {scenario}")
                     continue
 
                 # summarize annual emissions by pollutant and tech
@@ -69,7 +69,14 @@ class mplot(object):
                 emitList.append(emit)
 
             # concatenate chunks
-            emitOut = pd.concat(emitList, axis=1)
+            try:
+                emitOut = pd.concat(emitList, axis=1)
+            except ValueError:
+                self.logger.warning(f"No emissions found for : {zone_input}")
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
 
             # format results
             emitOut = emitOut.T/1E6 # Convert from metric tons to million metric tons

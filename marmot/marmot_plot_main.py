@@ -155,7 +155,8 @@ class MarmotPlot():
         
         if isinstance(gen_names, str):
             try:
-                self.gen_names = pd.read_csv(gen_names)   
+                gen_names = pd.read_csv(gen_names) 
+                self.gen_names = gen_names.rename(columns={gen_names.columns[0]:'Original',gen_names.columns[1]:'New'})
             except FileNotFoundError:
                 logger.warning('Could not find specified gen_names file; check file name. This is required to run Marmot, system will now exit')
                 sys.exit()
@@ -341,7 +342,7 @@ class MarmotPlot():
                 sys.exit()
             Zones = zones['name'].unique()
         
-            if self.zone_region_sublist != ['nan']:
+            if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
                 zsub = []
                 for zone in self.zone_region_sublist:
                     if zone in Zones:
@@ -360,7 +361,7 @@ class MarmotPlot():
                 logger.warning("Input Sheet Data Incorrect! Your model does not contain Regions, enter a different aggregation")
                 sys.exit()
             Zones = regions['region'].unique()
-            if self.zone_region_sublist != ['nan']:
+            if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
                 zsub = []
                 for region in self.zone_region_sublist:
                     if region in Zones:
@@ -387,7 +388,7 @@ class MarmotPlot():
             # remove any nan that might end  up in list
             Zones = [x for x in Zones if str(x) != 'nan']
             
-            if self.zone_region_sublist != ['nan']:
+            if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
                 zsub = []
                 for region in self.zone_region_sublist:
                     if region in Zones:
@@ -468,6 +469,10 @@ class MarmotPlot():
             
             if isinstance(Figure_Out, mfunc.InputSheetError):
                 logger.info("Input Sheet Data Incorrect!\n")
+                continue
+            
+            if isinstance(Figure_Out, mfunc.MissingMetaData):
+                logger.info("Required Meta Data Not Available For This Plot!\n")
                 continue
             
             for zone_input in Zones:

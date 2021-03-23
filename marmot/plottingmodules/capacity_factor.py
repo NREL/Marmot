@@ -157,24 +157,23 @@ class mplot(object):
                         continue
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
                 
-                # Calculates interval step to correct for MWh of generation
-                time_delta = Gen.index[1] - Gen.index[0]
-                duration = Gen.index[len(Gen)-1] - Gen.index[0]
-                duration = duration + time_delta #Account for last timestep.
-                # Finds intervals in 60 minute period
-                #interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
-                duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
-
                 if pd.isna(self.start_date) == False:
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(self.start_date),str(self.end_date)))
                     Gen = Gen[self.start_date : self.end_date]
                 
+                # Calculates interval step to correct for MWh of generation
+                time_delta = Gen.index[1] - Gen.index[0]
+                duration = Gen.index[len(Gen)-1] - Gen.index[0]
+                duration = duration + time_delta #Account for last timestep.
+                # Finds intervals in 60 minute period
+                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
 
-                #Gen = Gen/interval_count
+                Gen = Gen/interval_count
                 Total_Gen = Gen.sum(axis=0)
                 Total_Gen.rename(scenario, inplace = True)
-
+                
                 Cap = cap_collection.get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = mfunc.df_process_gen_inputs(Cap, self.ordered_gen)
@@ -204,11 +203,11 @@ class mplot(object):
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
-            # handles, labels = fig1.get_legend_handles_labels()
+            handles, labels = fig1.get_legend_handles_labels()
 
-            # #Legend 1
-            # leg1 = fig1.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
-            #               facecolor='inherit', frameon=True)
+            #Legend 1
+            fig1.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': CF_all_scenarios}
 

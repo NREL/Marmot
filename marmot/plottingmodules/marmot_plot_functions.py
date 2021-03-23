@@ -62,6 +62,13 @@ class FacetLabelError:
     """
     def __init__(self):
         return
+    
+class MissingMetaData:
+    """
+    Exception Class for missing meta data.
+    """
+    def __init__(self):
+        return
 
 def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
     """

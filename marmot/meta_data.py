@@ -371,6 +371,7 @@ class MetaData:
             return zone_exportinglines 
         except KeyError:
             self.logger.warning("zone exporting lines data not included in h5plexos results") 
+            return pd.DataFrame()
     
     def zone_importing_lines(self):
         try:
@@ -383,6 +384,7 @@ class MetaData:
             return zone_importinglines 
         except KeyError:
             self.logger.warning("zone importing lines data not included in h5plexos results") 
+            return pd.DataFrame()
 
     def interface_lines(self):
             try:

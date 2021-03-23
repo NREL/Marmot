@@ -756,7 +756,7 @@ class MarmotFormat():
         for names in files:
             if names.endswith(".h5"):
                 files_list.append(names) # Creates a list of only the hdf5 files
-    
+        
         # Read in all HDF5 files into dictionary
         logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
