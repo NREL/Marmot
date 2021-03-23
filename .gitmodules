@@ -1,0 +1,3 @@
+[submodule "marmot/h5plexos"]
+	path = marmot/h5plexos
+	url = https://github.com/NREL/h5plexos.git
