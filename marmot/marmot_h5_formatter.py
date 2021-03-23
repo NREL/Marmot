@@ -22,9 +22,9 @@ import time
 import logging
 import logging.config
 import yaml
-from h5plexos.h5plexos.query import PLEXOSSolution
-from Marmot.marmot.meta_data import MetaData
-import Marmot.marmot.config.mconfig as mconfig
+from h5plexos.query import PLEXOSSolution
+from marmot.meta_data import MetaData
+import marmot.config.mconfig as mconfig
 
 # sys.path.append('../h5plexos')
 
@@ -761,10 +761,8 @@ class MarmotFormat():
         logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
         for file in files_list:
-            print(os.path.join(HDF5_folder_in,file))
             hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
-        #logger.info(files_list)
-        #logger.info(hdf5_collection)
+
         #===================================================================================
         # Process the Outputs
         #===================================================================================
