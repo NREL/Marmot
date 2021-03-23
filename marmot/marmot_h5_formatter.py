@@ -6,6 +6,7 @@ This code was written to process PLEXOS HDF5 outputs to get them ready for plott
 Once the data is processed it is outputed as an intermediary HDF5 file format so that
 it can be read into the marmot_plot_main.py file
 
+
 @author: Daniel Levie
 """
 #===============================================================================
@@ -24,7 +25,12 @@ import logging.config
 import yaml
 from marmot.meta_data import MetaData
 import marmot.config.mconfig as mconfig
-from marmot.h5plexos.h5plexos.query import PLEXOSSolution
+# Import as Submodule
+try:
+    from marmot.h5plexos.h5plexos.query import PLEXOSSolution
+except ModuleNotFoundError:
+    from h5plexos.query import PLEXOSSolution
+
 
 #===============================================================================
 # Setup Logger
