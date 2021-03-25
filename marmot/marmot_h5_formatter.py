@@ -866,34 +866,36 @@ class MarmotFormat():
         # Calculate Extra Ouputs
         #===================================================================================
         if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
-            
-            logger.info("Processing generator Curtailment")
             try:
-                Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
-                Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
-                if Total_Gen_Out.empty==True:
+                logger.info("Processing generator Curtailment")
+                try:
+                    Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
+                    Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+                    if Total_Gen_Out.empty==True:
+                        logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+                except KeyError:
                     logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
-            except KeyError:
-                logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
-            # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-            adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+                    
+                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+                adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+                
+                if not adjusted_vre_gen_list:
+                    logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
+                    logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
+                    For more information see Marmot Readme under 'Mapping Files'")
             
-            if not adjusted_vre_gen_list:
-                logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
-                logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
-                For more information see Marmot Readme under 'Mapping Files'")
-        
-            # Output Curtailment#
-            Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]) -
-                                (Total_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]))
-        
-            Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
-        
-            #Clear Some Memory
-            del Total_Gen_Out
-            del Avail_Gen_Out
-            del Curtailment_Out
-            # logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
+                # Output Curtailment#
+                Curtailment_Out =  ((Avail_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]) -
+                                    (Total_Gen_Out.loc[(slice(None), adjusted_vre_gen_list),:]))
+            
+                Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key="generator_Curtailment", mode="a", complevel=9, complib = 'blosc:zlib')
+                logger.info("Data saved to h5 file successfully\n")
+                #Clear Some Memory
+                del Total_Gen_Out
+                del Avail_Gen_Out
+                del Curtailment_Out
+            except Exception:
+                logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
 
     
         if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output),'r'):
