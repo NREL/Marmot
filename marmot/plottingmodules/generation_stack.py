@@ -223,7 +223,7 @@ class mplot(object):
             #######################
             ###DO NOT COMMIT
             #Use input load instead of Xcel zonal load.
-            Total_Demand = pd.read_csv('/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Load/load_2028_2013_EST.csv',index_col = 'DATETIME')
+            Total_Demand = pd.read_csv('/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Load/load_2028_2011_EST.csv',index_col = 'DATETIME')
             Total_Demand = Total_Demand['PSCO_WI']
             Total_Demand.index = pd.to_datetime(Total_Demand.index)
             Total_Demand.index = Total_Demand.index.shift(1,freq = 'D')

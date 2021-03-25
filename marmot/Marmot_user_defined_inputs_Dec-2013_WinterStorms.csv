@@ -1,15 +1,15 @@
 Input,Input_type,Importance,User_defined_value
 PLEXOS_Solutions_folder,folder,required,/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Solutions
-Marmot_Solutions_folder,folder,required,/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Solutions
-Scenario_process_list,List,required,"Dec-2013_WinterStorms,Apr-2013_SpringNetLoad"
+Marmot_Solutions_folder,folder,required,/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Solutions/Dec-2013_WinterStorms
+Scenario_process_list,List,required,Dec-2013_WinterStorms
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,required(default),emit_names.csv
-Scenarios,string or List,required,
+Scenarios,string or List,required,Dec-2013_WinterStorms
 Scenario_Diff_plot,List [Max 2],optional,
 AGG_BY,string,required,Summary
-zone_region_sublist,List,optional,Xcel
+zone_region_sublist,List,optional,
 Facet_ylabels,List,optional,
 Facet_xlabels,List,optional,
 Figure_Format,string,optional,svg

@@ -1,12 +1,12 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,/Volumes/PLEXOS CEII/Projects/Xcel_Weather/Solutions/Aug-2011_PeakNetLoad_Imports
-Marmot_Solutions_folder,folder,required,/Volumes/PLEXOS CEII/Projects/Xcel_Weather/Solutions/Aug-2011_PeakNetLoad_Imports
-Scenario_process_list,List,required,Aug-2011_PeakNetLoad_Imports
+PLEXOS_Solutions_folder,folder,required,/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Solutions
+Marmot_Solutions_folder,folder,required,/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Solutions/Aug-2011_PeakNetLoad
+Scenario_process_list,List,required,Aug-2011_PeakNetLoad
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,required(default),emit_names.csv
-Scenarios,string or List,required,Aug-2011_PeakNetLoad_Imports
+Scenarios,string or List,required,Aug-2011_PeakNetLoad
 Scenario_Diff_plot,List [Max 2],optional,
 AGG_BY,string,required,zone
 zone_region_sublist,List,optional,Xcel
