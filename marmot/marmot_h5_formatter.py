@@ -23,13 +23,18 @@ import time
 import logging
 import logging.config
 import yaml
-from marmot.meta_data import MetaData
-import marmot.config.mconfig as mconfig
+try:
+    from meta_data import MetaData
+    import config.mconfig as mconfig
+except ModuleNotFoundError:
+    from marmot.meta_data import MetaData
+    import marmot.config.mconfig as mconfig
+
 # Import as Submodule
 try:
-    from marmot.h5plexos.h5plexos.query import PLEXOSSolution
+    from h5plexos.h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
-    from h5plexos.query import PLEXOSSolution
+    from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 
 
 #===============================================================================
