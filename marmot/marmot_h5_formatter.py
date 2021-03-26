@@ -15,6 +15,8 @@ it can be read into the marmot_plot_main.py file
 
 import os
 import sys
+if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import re
 import pandas as pd
 import h5py
