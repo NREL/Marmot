@@ -1,22 +1,22 @@
 <<<<<<< HEAD
 Figure Output Name,Plot Graph,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada], Emissions to plot [CO2, SO2, NOx]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
-Avg_Out_Committed,FALSE,,,,EST,5/20/24,5/23/24,capacity_factor,avg_output_when_committed
-Capacity_Factor,FALSE,,,,EST,5/20/24,5/23/24,capacity_factor,cf
+Avg_Out_Committed,FALSE,,,,PST,5/20/24,5/23/24,capacity_factor,avg_output_when_committed
+Capacity_Factor,FALSE,,,,PST,5/20/24,5/23/24,capacity_factor,cf
 Time_at_Min_Gen,FALSE,,,,,,,capacity_factor,time_at_min_gen
-Capacity_Out_Stacked_PASA,FALSE,,,,EST,,,capacity_out,capacity_out_stack_PASA
-Capacity_Out_Stacked,FALSE,,,,MST,,,capacity_out,capacity_out_stack
+Capacity_Out_Stacked_PASA,FALSE,,,,PST,,,capacity_out,capacity_out_stack_PASA
+Capacity_Out_Stacked,FALSE,,,,PST,,,capacity_out,capacity_out_stack
 PV_Curtailment_Duration_Curve,FALSE,PV,,,,,,curtailment,curt_duration_curve
 RE_Curtailment_Duration_Curve,FALSE,PV+Wind,,,,,,curtailment,curt_duration_curve
 PV_Curtailment_vs_Penetration,FALSE,PV,,,,,,curtailment,curt_pen
 RE_Curtailment_vs_Penetration,FALSE,PV+Wind,,,,,,curtailment,curt_pen
-Total_Curtailment,FALSE,,,,,,,curtailment,curt_total
-Total_Curtailment_Individual,FALSE,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
+Total_Curtailment,TRUE,,,,,,,curtailment,curt_total
+Total_Curtailment_Individual,TRUE,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
 Total_Emissions_By_Gen_Type_CO2,FALSE,CO2,,,,,,emissions,total_emissions_by_type
 Total_Emissions_By_Gen_Type_SO2,FALSE,SO2,,,,,,emissions,total_emissions_by_type
 Committed_Capacity_Stack,FALSE,,,,,,,generation_stack,committed_stack
 Generation_Timeseries_Diff,FALSE,,,,EST,,,generation_stack,gen_diff
 Generation_Timeseries_Diff_Range,FALSE,Date Range,,,EST,5/20/24,5/23/24,generation_stack,gen_diff
-Stacked_Gen,TRUE,,,,MST,,,generation_stack,gen_stack
+Stacked_Gen,FALSE,,,,PST,,,generation_stack,gen_stack
 Stacked_Gen_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Date_Range,FALSE,Date Range,,,EST,5/20/24,5/23/24,generation_stack,gen_stack
 Stacked_Gen_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
@@ -61,7 +61,7 @@ Reserve_Gen_Timeseries_Peak_Demand,FALSE,Peak Demand,2,2,EST,,,reserves,reserve_
 Reserve_Gen_Timeseries_Date_Range,FALSE,Date Range,,,EST,5/20/24,5/23/24,reserves,reserve_gen_timeseries
 Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,FALSE,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
 Reserve_Gen_Timeseries_Facet_Grid_Date_Range,FALSE,Date Range,,,EST,5/20/24,5/23/24,reserves,reserve_gen_timeseries
-Thermal_Capacity_Reserves,TRUE,,,,MST,,,thermal_cap_reserve,thermal_cap_reserves
+Thermal_Capacity_Reserves,FALSE,,,,MST,,,thermal_cap_reserve,thermal_cap_reserves
 Total_Generation,FALSE,,,,,,,total_generation,total_gen
 Total_Generation_Diff,FALSE,,,,,,,total_generation,total_gen_diff
 Total_Generation_Facet_Grid,FALSE,,,,,,,total_generation,total_gen_facet
