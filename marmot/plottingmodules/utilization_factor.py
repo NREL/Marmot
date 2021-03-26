@@ -15,7 +15,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import logging
-import plottingmodules.marmot_plot_functions as mfunc
+import marmot.plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 

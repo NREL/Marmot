@@ -16,7 +16,7 @@ import matplotlib as mpl
 import numpy as np
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
-import plottingmodules.marmot_plot_functions as mfunc
+import marmot.plottingmodules.marmot_plot_functions as mfunc
 import logging
 
 #===============================================================================
@@ -66,7 +66,7 @@ class mplot(object):
                 self.logger.info("Scenario = " + scenario)
 
                 reserve_provision_timeseries = reserve_provision_collection.get(scenario)
-
+                
                 #Check if zone has reserves, if not skips
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
@@ -74,12 +74,16 @@ class mplot(object):
                     self.logger.info("No reserves deployed in : " + scenario)
                     continue
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
+                # unitconversion based off peak generation hour, only checked once 
+                if n == 0:
+                    unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
+                    
                 data_tables[scenario] = reserve_provision_timeseries
 
                 if self.prop == "Peak Demand":
                     self.logger.info("Plotting Peak Demand period")
 
-                    total_reserve = reserve_provision_timeseries.sum(axis=1)
+                    total_reserve = reserve_provision_timeseries.sum(axis=1)/unitconversion['divisor']
                     peak_reserve_t =  total_reserve.idxmax()
                     start_date = peak_reserve_t - dt.timedelta(days=self.start)
                     end_date = peak_reserve_t + dt.timedelta(days=self.end)
@@ -93,16 +97,14 @@ class mplot(object):
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
                 
-                # unitconversion based off peak generation hour, only checked once 
-                if n == 0:
-                    unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
+                
                 reserve_provision_timeseries = reserve_provision_timeseries/unitconversion['divisor']
                 
                 mfunc.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, label=reserve_provision_timeseries.columns,n=n)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
 
                 if self.prop == "Peak Demand":
-                    axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve/unitconversion['divisor']), '.2f')) + ' {}'.format(unitconversion['units']), 
+                    axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), '.2f')) + ' {}'.format(unitconversion['units']), 
                                     xy=(peak_reserve_t, Peak_Reserve),
                             xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
@@ -117,7 +119,8 @@ class mplot(object):
             if not data_tables:
                 self.logger.warning('No reserves in ' + region)
                 out = mfunc.MissingZoneData()
-                return out
+                outputs[region] = out
+                continue
                 
             # create handles list of unique tech names then order
             handles = np.unique(np.array(unique_tech_names)).tolist()
@@ -325,12 +328,14 @@ class mplot(object):
                 reserve_total.rename(columns={0:scenario},inplace=True)
 
                 reserve_total_chunk.append(reserve_total)
-
-            reserve_out = pd.concat(reserve_total_chunk,axis=1, sort='False')
-            # remove any rows that all eqaul 0
-            reserve_out = reserve_out.loc[(reserve_out != 0).any(axis=1),:]
-            reserve_out.columns = reserve_out.columns.str.replace('_',' ')
-        
+            
+            if reserve_total_chunk:
+                reserve_out = pd.concat(reserve_total_chunk,axis=1, sort='False')
+                # remove any rows that all eqaul 0
+                reserve_out = reserve_out.loc[(reserve_out != 0).any(axis=1),:]
+                reserve_out.columns = reserve_out.columns.str.replace('_',' ')
+            else:
+                reserve_out=pd.DataFrame()
             # If no reserves return nothing
             if reserve_out.empty:
                 out = mfunc.MissingZoneData()

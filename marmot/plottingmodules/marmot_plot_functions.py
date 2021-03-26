@@ -16,7 +16,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-import config.mconfig as mconfig
+import marmot.config.mconfig as mconfig
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
@@ -59,6 +59,13 @@ class InputSheetError:
 class FacetLabelError:
     """
     Exception Class for incorrect facet labeling.
+    """
+    def __init__(self):
+        return
+    
+class MissingMetaData:
+    """
+    Exception Class for missing meta data.
     """
     def __init__(self):
         return

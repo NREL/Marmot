@@ -13,9 +13,9 @@ import matplotlib as mpl
 from matplotlib.patches import Patch
 import pdb
 import logging
-import plottingmodules.total_generation as gen
-import plottingmodules.marmot_plot_functions as mfunc
-import config.mconfig as mconfig
+import marmot.plottingmodules.total_generation as gen
+import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 
 #===============================================================================
 

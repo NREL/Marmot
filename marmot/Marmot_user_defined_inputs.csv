@@ -1,7 +1,7 @@
 Input,Input_type,Importance,User_defined_value
-PLEXOS_Solutions_folder,folder,required,/Users/mschwarz/Marmot local/Benchmark
-Marmot_Solutions_folder,folder,required,/Users/mschwarz/Marmot local/Benchmark
-Scenario_process_list,List,required,"5GW_2036, 5GW_2036_bess"
+PLEXOS_Solutions_folder,folder,required,/path/to/PLEXOSsolutionh5s
+Marmot_Solutions_folder,folder,required,/path/to/Marmotplots
+Scenario_process_list,List,required,Scenario1
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,required(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv

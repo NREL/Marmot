@@ -1,5 +1,5 @@
 # Ignore byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
-Marmot_user_defined_inputs.csv
+
 

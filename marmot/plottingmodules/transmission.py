@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import logging
-import plottingmodules.marmot_plot_functions as mfunc
+import marmot.plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 
@@ -1399,6 +1399,10 @@ class mplot(object):
         exp_lines = self.meta.zone_exporting_lines()
         imp_lines = self.meta.zone_importing_lines()
         
+        if exp_lines.empty or imp_lines.empty:
+            outputs = mfunc.MissingMetaData()
+            return outputs
+            
         exp_lines.columns = ['region','line_name']
         imp_lines.columns = ['region','line_name']
         

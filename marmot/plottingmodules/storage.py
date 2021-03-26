@@ -15,7 +15,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import math
 import logging
-import marmot_plot_functions as mfunc
+import marmot.marmot_plot_functions as mfunc
 
 #===============================================================================
 

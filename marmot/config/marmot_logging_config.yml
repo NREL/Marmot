@@ -1,0 +1,65 @@
+version: 1
+formatters:
+  info_format:
+    format: '%(asctime)s:%(levelname)-8s- %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+  warning_format:
+    format: '%(asctime)s:%(levelname)s:%(module)s.%(funcName)s - %(message)s'
+    datefmt: '%Y-%m-%d %H:%M:%S'
+
+handlers:
+  console:
+    class: logging.StreamHandler
+    level: INFO
+    stream  : ext://sys.stdout
+
+  warning_formatter:
+    class: logging.handlers.RotatingFileHandler
+    level: WARNING
+    formatter: warning_format
+    filename: logs/WARNINGS_formatter.log
+    backupCount: 3
+    encoding: utf8
+    mode: a
+
+  info_formatter:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: info_format
+    filename: logs/Log_formatter.log
+    backupCount: 3
+    encoding: utf8
+    mode: a
+
+  warning_plotter:
+    class: logging.handlers.RotatingFileHandler
+    level: WARNING
+    formatter: warning_format
+    filename: logs/WARNINGS_plotter.log
+    backupCount: 3
+    encoding: utf8
+    mode: a
+
+  info_plotter:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: info_format
+    filename: logs/Log_plotter.log
+    backupCount: 3
+    encoding: utf8
+    mode: a
+
+loggers:
+  marmot_format:
+    level: INFO
+    handlers: [console,warning_formatter,info_formatter]
+    propagate: no
+
+  marmot_plot:
+    level: INFO
+    handlers: [console,warning_plotter,info_plotter]
+    propagate: no
+
+  root:
+    level: DEBUG
+    handlers: [console]

@@ -9,9 +9,9 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import os
-import plottingmodules.marmot_plot_functions as mfunc
+import marmot.plottingmodules.marmot_plot_functions as mfunc
 import logging
-import config.mconfig as mconfig
+import marmot.config.mconfig as mconfig
 
 #===============================================================================
 

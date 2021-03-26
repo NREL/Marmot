@@ -13,8 +13,8 @@ import matplotlib as mpl
 from matplotlib.patches import Patch
 import logging
 import os
-import plottingmodules.marmot_plot_functions as mfunc
-import config.mconfig as mconfig
+import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 
 
 #===============================================================================
@@ -46,7 +46,7 @@ class mplot(object):
         check_input_data = []
 
         check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
+        mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)
         mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Scenarios)
 
         if self.AGG_BY == "zone":
@@ -87,15 +87,17 @@ class mplot(object):
                 # Calculates interval step to correct for MWh of generation
                 interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
-                try:
+                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+            
+                # Insert Curtailmnet into gen stack if it exhists in database
+                if curtailment_collection:
                     Stacked_Curt = curtailment_collection.get(scenario)
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                     Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
-                    Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
+                    Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                     Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
-                except Exception:
-                    pass
+                
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -244,7 +246,7 @@ class mplot(object):
         check_input_data = []
 
         check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
+        mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -273,15 +275,16 @@ class mplot(object):
                 # Calculates interval step to correct for MWh of generation
                 interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
-                try:
+                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+            
+                # Insert Curtailmnet into gen stack if it exhists in database
+                if curtailment_collection:
                     Stacked_Curt = curtailment_collection.get(scenario)
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                     Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
-                    Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
+                    Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                     Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
-                except Exception:
-                    pass
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -315,7 +318,7 @@ class mplot(object):
             
             net_diff = Total_Generation_Stack_Out
             try:
-                net_diff.drop(columns = 'Curtailment',inplace=True)
+                net_diff.drop(columns = curtailment_name,inplace=True)
             except KeyError:
                 pass
             net_diff = net_diff.sum(axis = 1)

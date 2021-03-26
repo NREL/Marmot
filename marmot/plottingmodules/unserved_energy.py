@@ -13,8 +13,8 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import logging
-import plottingmodules.marmot_plot_functions as mfunc
-import config.mconfig as mconfig
+import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 
 #===============================================================================
 

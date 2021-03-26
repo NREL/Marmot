@@ -10,8 +10,8 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 import numpy as np
-import plottingmodules.marmot_plot_functions as mfunc
-import config.mconfig as mconfig
+import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 import logging
 
 #===============================================================================
@@ -42,7 +42,7 @@ class mplot(object):
             
             check_input_data = []
             check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, scenario_list)])
-            check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, scenario_list)])
+            mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, scenario_list)
             mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Scenarios)
             
             if self.AGG_BY == "zone":
@@ -124,7 +124,10 @@ class mplot(object):
 
                 Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
 
-                try:
+                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+            
+                # Insert Curtailmnet into gen stack if it exhists in database
+                if curtailment_collection:
                     Stacked_Curt = curtailment_collection.get(scenario).copy()
                     if self.shift_leapday:
                         Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
@@ -132,12 +135,11 @@ class mplot(object):
                     Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
                     Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
-                    Stacked_Gen.insert(len(Stacked_Gen.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
-                except Exception:
-                    pass
+                    Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
 
-                # Calculates Net Load by removing variable gen + curtailment
-                self.re_gen_cat = self.re_gen_cat + ['Curtailment']
+                    # Calculates Net Load by removing variable gen + curtailment
+                    self.re_gen_cat = self.re_gen_cat + [curtailment_name]
+                    
                 # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
                 self.re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
                 Net_Load = Stacked_Gen.drop(labels = self.re_gen_cat, axis=1)

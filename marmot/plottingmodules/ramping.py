@@ -11,7 +11,7 @@ This code creates total generation stacked bar plots and is called from Marmot_p
 import os
 import pandas as pd
 import logging
-import plottingmodules.marmot_plot_functions as mfunc
+import marmot.plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 class mplot(object):
