@@ -15,6 +15,8 @@ have descriptive names such as total_generation.py, generation_stack.py, curtaim
 
 import os
 import sys
+if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
+    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import pathlib
 import pandas as pd
 import time
