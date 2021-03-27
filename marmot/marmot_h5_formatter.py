@@ -753,16 +753,17 @@ class MarmotFormat():
         
         startdir=os.getcwd()
         os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
-        # List of all files in hdf5 folder in alpha numeric order
-        files = sorted(os.listdir(), key=lambda x:int(re.sub('\D', '', os.path.splitext(x)[0]))) 
+        
+        files = []
+        for names in os.listdir():
+            if names.endswith(".h5"):
+                files.append(names) # Creates a list of only the hdf5 files
+        
+        # List of all hf files in hdf5 folder in alpha numeric order
+        files_list = sorted(files, key=lambda x:int(re.sub('\D', '', os.path.splitext(x)[0]))) 
         
         os.chdir(startdir)
 
-        files_list = []
-        for names in files:
-            if names.endswith(".h5"):
-                files_list.append(names) # Creates a list of only the hdf5 files
-        
         # Read in all HDF5 files into dictionary
         logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
