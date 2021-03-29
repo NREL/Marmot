@@ -15,24 +15,32 @@ it can be read into the marmot_plot_main.py file
 
 import os
 import sys
-if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
-    sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
+    if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
+        sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+import pathlib
+import time
 import re
 import pandas as pd
 import h5py
-import pathlib
-import time
 import logging
 import logging.config
 import yaml
-from marmot.meta_data import MetaData
+try:
+    from marmot.meta_data import MetaData
+except ModuleNotFoundError:
+    print("Attempted import of Marmot as a module from a Git directory. ", end='')
+    print("Import of Marmot will not function in this way. ", end='') 
+    print("To import Marmot as a module use the preferred method of pip installing Marmot, ", end='')
+    print("or add the Marmot directory to the system path, see ReadME for details.\n")
+    print("System will now exit")
+    sys.exit()
 import marmot.config.mconfig as mconfig
 # Import as Submodule
 try:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
     from h5plexos.query import PLEXOSSolution
-
 
 #===============================================================================
 # Setup Logger
