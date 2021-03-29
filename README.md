@@ -2,6 +2,14 @@
 Marmot is a set of python scripts to process h5plexos PLEXOS results plot the outputs 
 ![Yellow-bellied marmot](https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg)
 
+Click the following to quickly navigate to the main sections of the ReadME:
+- [Main Python Scripts](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#main-python-scripts)
+- [Initial Setup](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#initial-setup)
+- [marmot_h5_formatter](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#marmot_h5_formatter)
+- [Mapping Files](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#mapping-files)
+- [marmot_plot_main](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#marmot_plot_main)
+
+
 ## Main Python Scripts
 Marmot consists of two main .py files:
 * [**marmot_h5_formatter.py**](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/marmot/marmot_h5_formatter.py)
