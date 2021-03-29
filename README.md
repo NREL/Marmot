@@ -58,6 +58,7 @@ from marmot.marmot_plot_main import MarmotPlot
 ```
 - When importing Marmot directly, the **Marmot_user_defined_inputs.csv** described below is not used. However several other input files are still required. For more details see internal code docstrings within the '__init__' methods.
 
+
 ## marmot_h5_formatter
 The **marmot_h5_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed, they are saved to an intermediary hdf5 file which can then be read into the Marmot plotting code. From the h5plexos ReadMe: "This package provides a Python interface for reading HDF5 files with H5PLEXOS v0.5 and v0.6 formatting. To create v0.5 files, use a version of this package in the 0.5 series. To create v0.6 files, use H5PLEXOS.jl."
 

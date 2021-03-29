@@ -36,11 +36,12 @@ except ModuleNotFoundError:
     print("System will now exit")
     sys.exit()
 import marmot.config.mconfig as mconfig
+
 # Import as Submodule
 try:
-    from marmot.h5plexos.h5plexos.query import PLEXOSSolution
+    from h5plexos.h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
-    from h5plexos.query import PLEXOSSolution
+    from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 
 #===============================================================================
 # Setup Logger
