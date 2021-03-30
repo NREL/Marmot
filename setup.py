@@ -16,6 +16,7 @@ setup(name='marmot',
       packages=['marmot',
                 'marmot.config',
                 'marmot.plottingmodules'],
+
       install_requires=['numpy',
                         'pandas',
                         'PyYAML',
