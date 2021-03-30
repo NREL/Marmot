@@ -15,16 +15,27 @@ have descriptive names such as total_generation.py, generation_stack.py, curtaim
 
 import os
 import sys
+if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
+    if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
+        sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 import pathlib
-import pandas as pd
+import importlib
 import time
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import importlib
 import logging 
 import logging.config
 import yaml
-from marmot.meta_data import MetaData
+try:
+    from marmot.meta_data import MetaData
+except ModuleNotFoundError:
+    print("Attempted import of Marmot as a module from a Git directory. ", end='')
+    print("Import of Marmot will not function in this way. ", end='') 
+    print("To import Marmot as a module use the preferred method of pip installing Marmot, ", end='')
+    print("or add the Marmot directory to you sys path. See ReadME for details.\n")
+    print("System will now exit")
+    sys.exit()
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 
@@ -45,6 +56,7 @@ logger.handlers[1].doRollover()
 logger.handlers[2].doRollover()
 
 os.chdir(current_dir)
+#===============================================================================
 
 #A bug in pandas requires this to be included, otherwise df.to_string truncates long strings
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
@@ -523,7 +535,7 @@ if __name__ == '__main__':
     The following code is run if the formatter is run directly,
     it does not run if the formatter is imported as a module. 
     '''
-    
+    print('__main__ first')
     #===============================================================================
     # Load Input Properties
     #===============================================================================

@@ -15,27 +15,33 @@ it can be read into the marmot_plot_main.py file
 
 import os
 import sys
+if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
+    if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
+        sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+import pathlib
+import time
 import re
 import pandas as pd
 import h5py
-import pathlib
-import time
 import logging
 import logging.config
 import yaml
 try:
-    from meta_data import MetaData
-    import config.mconfig as mconfig
-except ModuleNotFoundError:
     from marmot.meta_data import MetaData
-    import marmot.config.mconfig as mconfig
+except ModuleNotFoundError:
+    print("Attempted import of Marmot as a module from a Git directory. ", end='')
+    print("Import of Marmot will not function in this way. ", end='') 
+    print("To import Marmot as a module use the preferred method of pip installing Marmot, ", end='')
+    print("or add the Marmot directory to the system path, see ReadME for details.\n")
+    print("System will now exit")
+    sys.exit()
+import marmot.config.mconfig as mconfig
 
 # Import as Submodule
 try:
     from h5plexos.h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
-
 
 #===============================================================================
 # Setup Logger
@@ -756,16 +762,17 @@ class MarmotFormat():
         
         startdir=os.getcwd()
         os.chdir(HDF5_folder_in)     #Due to a bug on eagle need to chdir before listdir
-        # List of all files in hdf5 folder in alpha numeric order
-        files = sorted(os.listdir(), key=lambda x:int(re.sub('\D', '', os.path.splitext(x)[0]))) 
+        
+        files = []
+        for names in os.listdir():
+            if names.endswith(".h5"):
+                files.append(names) # Creates a list of only the hdf5 files
+        
+        # List of all hf files in hdf5 folder in alpha numeric order
+        files_list = sorted(files, key=lambda x:int(re.sub('\D', '', os.path.splitext(x)[0]))) 
         
         os.chdir(startdir)
 
-        files_list = []
-        for names in files:
-            if names.endswith(".h5"):
-                files_list.append(names) # Creates a list of only the hdf5 files
-        
         # Read in all HDF5 files into dictionary
         logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
