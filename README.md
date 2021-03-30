@@ -34,17 +34,7 @@ A high-level explanation of what these files do and suggested settings to change
 - These prerequisites can be installed manually with conda or pip, but it is recommended to install all requirements with the provided conda environment or requirements.txt file.
 Each are explained below. 
 
-#### Conda Environment
-- Setting up a new conda environment is the recommended route on Eagle or personal computer. Users will not be able to setup conda environments on most NREL windows servers due to admin rights restrictions.
-To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.nrel.gov/PCM/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
-Once the environment has been created it can be activated by typing `conda activate marmot-env `
-
-#### requirements txt file
-- A [requirements.txt](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`
-
-After all required prerequisites are installed, you are ready to install and run Marmot. There are two ways to run Marmot, directly or as a module. Most users probably want to run Marmot directly however some advanced users may want to import Marmot directly to use its functionality  in their own code. Both are explained below.
-
-### Running Marmot Directly 
+### Downloading, installing, and running Marmot Directly 
 
 - First `git clone --recurse-submodules https://github.nrel.gov/PCM/Marmot.git` to any location you like, make sure to include `--recurse-submodules` else h5plexos will not be included correctly.
 
@@ -52,7 +42,7 @@ After all required prerequisites are installed, you are ready to install and run
 
 - Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot.
 
-### Importing and Running Marmot as a Module (Advanced User)
+### Importing and running Marmot as a Module (Advanced User)
 
 - To use Marmot as a Python Module that can be imported, it first needs to be made visible to the Python package directory. This can be done two ways, pip installing Marmot (preferred method) or adding the Marmot directory folder to the system path. 
 - To pip install Marmot, first open a cmd window that is setup with Python and type the following `pip install --user -e git+https://github.nrel.gov/PCM/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit if desired. You may need to navigate do non system drive to run pip install (e.g D:\)
@@ -65,6 +55,18 @@ After all required prerequisites are installed, you are ready to install and run
 from marmot.marmot_plot_main import MarmotPlot 
 ```
 - When importing Marmot directly, the **Marmot_user_defined_inputs.csv** described below is not used. However several other input files are still required. For more details see internal code docstrings within the '__init__' methods.
+
+#### Conda Environment
+- Setting up a new conda environment is the recommended route on Eagle or personal computer. Users will not be able to setup conda environments on most NREL windows servers due to admin rights restrictions.
+To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.nrel.gov/PCM/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
+Once the environment has been created it can be activated by typing `conda activate marmot-env `
+
+#### requirements txt file
+- A [requirements.txt](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`
+
+After all required prerequisites are installed, you are ready to install and run Marmot. There are two ways to run Marmot, directly or as a module. Most users probably want to run Marmot directly however some advanced users may want to import Marmot directly to use its functionality  in their own code. Both are explained below.
+
+
 
 
 ## marmot_h5_formatter
