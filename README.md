@@ -42,12 +42,13 @@ After all required prerequisites are installed, you are ready to install and run
 
 - The Marmot formatter imports h5plexos. To avoid import and version errors, h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot `--recurse-submodules`, you can combine the git submodule init and git submodule update steps by running `git submodule update --init`.
 
-- Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot.
+- Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot. When running these scripts, make sure to chdir into the highest level of the repo and use `python marmot/marmot_h5_formatter.py` and `python marmot/marmot_plot_main.py`
 
 ### Importing and running Marmot as a Module (Advanced User)
 
 - To use Marmot as a Python Module that can be imported, it first needs to be made visible to the Python package directory. This can be done two ways, pip installing Marmot (preferred method) or adding the Marmot directory folder to the system path. 
 - To pip install Marmot, first open a cmd window that is setup with Python and type the following `pip install --user -e git+https://github.nrel.gov/PCM/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit if desired. You may need to navigate do non system drive to run pip install (e.g D:\)
+-If you have both python2 and python3 installed, your system will have different package libraries. In order to use python3, you need to explicity tell pip to install Marmot into your python3 library: `pip3 install --user -e git+https://github.nrel.gov/PCM/Marmot.git#egg=marmot`
 - If no error messages appeared Marmot has been installed correctly. To import the formatter or plotter, use the following import commands:
   
  ```python 
