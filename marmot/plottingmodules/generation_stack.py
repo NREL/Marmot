@@ -14,12 +14,8 @@ from matplotlib.ticker import FormatStrFormatter
 import os
 from matplotlib.patches import Patch
 import numpy as np
-try:
-    import plottingmodules.marmot_plot_functions as mfunc
-    import config.mconfig as mconfig
-except ModuleNotFoundError:
-    import marmot.plottingmodules.marmot_plot_functions as mfunc
-    import marmot.config.mconfig as mconfig
+import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 import logging
 
 #===============================================================================

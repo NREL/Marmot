@@ -63,8 +63,8 @@ interval,zone,Price,TRUE,1,$/MWh,Depends on the load settlement model used. What
 interval,zone,Unserved Energy,TRUE,1,MW,Unserved energy in an RTO
 interval,zone,Dump Energy,TRUE,1,,
 year,generator,Installed Capacity,TRUE,1,MW,Nameplate power capacity (Max Capacity x Units)
-year,line,Export Limit,TRUE,1,MW,Transmission capacity
-year,line,Import Limit,TRUE,1,MW,Transmission capacity
+year,line,Export Limit,FALSE,1,MW,Transmission capacity
+year,line,Import Limit,FALSE,1,MW,Transmission capacity
 interval,region,Net Interchange,TRUE,1,MW,
 interval,zone,Net Interchange,TRUE,1,MW,
 interval,interface,Flow,TRUE,1,MW,
@@ -72,8 +72,8 @@ interval,interface,Shadow Price,TRUE,1,$/MW,
 interval,interface,Violation,TRUE,1,MW,
 interval,interface,Hours Congested,TRUE,1,hours,
 interval,region_regions,Net Interchange,TRUE,1,MW,
-year,interface,Import Limit,TRUE,1,MW,
-year,interface,Export Limit,TRUE,1,MW,
+year,interface,Import Limit,FALSE,1,MW,
+year,interface,Export Limit,FALSE,1,MW,
 year,generator,Hours at Minimum,TRUE,1,hours,
 year,generator,Emissions Cost,TRUE,1000,$0 ,
 year,generator,Fuel Cost,TRUE,1000,$0 ,
@@ -103,5 +103,5 @@ interval,node,Price,TRUE,1,,
 interval,node,Load,TRUE,1,,
 interval,node,Generation,TRUE,1,,
 interval,node,Dump Energy,TRUE,1,,
-interval,line,Export Limit,FALSE,1,MW,Transmission capacity
-interval,line,Import Limit,FALSE,1,MW,Transmission capacity
+interval,line,Export Limit,TRUE,1,MW,Transmission capacity
+interval,line,Import Limit,TRUE,1,MW,Transmission capacity

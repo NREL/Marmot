@@ -14,12 +14,8 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
 import logging
-try:
-    import plottingmodules.marmot_plot_functions as mfunc
-    import config.mconfig as mconfig
-except ModuleNotFoundError:
-    import marmot.plottingmodules.marmot_plot_functions as mfunc
-    import marmot.config.mconfig as mconfig
+import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 import matplotlib.ticker as mtick
 
 #===============================================================================

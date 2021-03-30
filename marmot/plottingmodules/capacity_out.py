@@ -6,10 +6,7 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import numpy as np
 import logging
-try:
-    import plottingmodules.marmot_plot_functions as mfunc
-except ModuleNotFoundError:
-    import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.plottingmodules.marmot_plot_functions as mfunc
 import config.mconfig as mconfig
 
 

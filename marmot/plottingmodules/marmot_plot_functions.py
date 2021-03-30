@@ -16,10 +16,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-try:
-    import config.mconfig as mconfig
-except ModuleNotFoundError:
-    import marmot.config.mconfig as mconfig
+import marmot.config.mconfig as mconfig
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
