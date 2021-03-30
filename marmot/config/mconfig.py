@@ -41,12 +41,14 @@ if not os.path.isfile(configfile_path):
         
         figure_size = dict(
             xdimension = 6,
-            ydimension = 4
+            ydimension = 4,
+            minticks = 4,
+            maxticks = 8
             ),
         
         figure_file_format = 'svg',
         
-        shift_leap_day = False,
+        shift_leapday = False,
         
         category_file_names = dict(
             pv_gen_cat = 'pv_gen_cat.csv',

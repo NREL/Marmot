@@ -14,8 +14,12 @@ import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
 import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
+try:
+    import plottingmodules.marmot_plot_functions as mfunc
+    import config.mconfig as mconfig
+except ModuleNotFoundError:
+    import marmot.plottingmodules.marmot_plot_functions as mfunc
+    import marmot.config.mconfig as mconfig
 import matplotlib.ticker as mtick
 
 #===============================================================================
@@ -624,6 +628,7 @@ class mplot(object):
 
                 else:
                     curt_perc = pd.Series([0])
+                    curt_tot = pd.Series([0])
                     gen_tot = pd.Series([0])
                     gen_site = pd.Series([0] * len(ti),name = site,index = ti)
                 sites_gen = sites_gen.append(gen_tot)

@@ -14,8 +14,12 @@ from matplotlib.ticker import FormatStrFormatter
 import os
 from matplotlib.patches import Patch
 import numpy as np
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
+try:
+    import plottingmodules.marmot_plot_functions as mfunc
+    import config.mconfig as mconfig
+except ModuleNotFoundError:
+    import marmot.plottingmodules.marmot_plot_functions as mfunc
+    import marmot.config.mconfig as mconfig
 import logging
 
 #===============================================================================
@@ -88,7 +92,7 @@ class mplot(object):
             for scenario in self.Scenarios:
                 self.logger.info("Scenario = " + scenario)
 
-                locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
+                locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
                 formatter = mdates.ConciseDateFormatter(locator)
                 formatter.formats[2] = '%d\n %b'
                 formatter.zero_formats[1] = '%b\n %Y'
@@ -215,23 +219,23 @@ class mplot(object):
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
-            # Load = load_collection.get(scenario).copy()
-            # if self.shift_leapday:
-            #     Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
-            # Load = Load.xs(zone_input,level=self.AGG_BY)
-            # Load = Load.groupby(["timestamp"]).sum()
-            # Load = Load.squeeze() #Convert to Series
+            Load = load_collection.get(scenario).copy()
+            if self.shift_leapday:
+                Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
+            Load = Load.xs(zone_input,level=self.AGG_BY)
+            Load = Load.groupby(["timestamp"]).sum()
+            Load = Load.squeeze() #Convert to Series
 
             #######################
             ###DO NOT COMMIT
             #Use input load instead of Xcel zonal load.
-            Total_Demand = pd.read_csv('/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Load/load_2028_2011_EST.csv',index_col = 'DATETIME')
-            Total_Demand = Total_Demand['PSCO_WI']
-            Total_Demand.index = pd.to_datetime(Total_Demand.index)
-            Total_Demand.index = Total_Demand.index.shift(1,freq = 'D')
-            Total_Demand.index = Total_Demand.index.shift(-2,freq = 'H')
-            Total_Demand = Total_Demand.loc[Stacked_Gen.index]
-            Total_Demand = Total_Demand.squeeze()
+            # Total_Demand = pd.read_csv('/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Load/load_2028_2011_EST.csv',index_col = 'DATETIME')
+            # Total_Demand = Total_Demand['PSCO_WI']
+            # Total_Demand.index = pd.to_datetime(Total_Demand.index)
+            # Total_Demand.index = Total_Demand.index.shift(1,freq = 'D')
+            # Total_Demand.index = Total_Demand.index.shift(-2,freq = 'H')
+            # Total_Demand = Total_Demand.loc[Stacked_Gen.index]
+            # Total_Demand = Total_Demand.squeeze()
             ###DO NOT COMMIT
             #######################
 
@@ -248,11 +252,11 @@ class mplot(object):
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
             if (Pump_Load == 0).all() == False:
-                #Total_Demand = Load - Pump_Load
-                Load = Total_Demand + Pump_Load
+                Total_Demand = Load - Pump_Load
+                #Load = Total_Demand + Pump_Load
             else:
-                #Total_Demand = Load
-                Load = Total_Demand
+                Total_Demand = Load
+                #Load = Total_Demand
             try:
                 unserved_energy_collection[scenario]
             except KeyError:

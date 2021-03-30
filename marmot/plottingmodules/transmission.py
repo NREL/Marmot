@@ -15,7 +15,10 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+try:
+    import plottingmodules.marmot_plot_functions as mfunc
+except ModuleNotFoundError:
+    import marmot.plottingmodules.marmot_plot_functions as mfunc
 
 #===============================================================================
 
@@ -280,6 +283,7 @@ class mplot(object):
 
                     limits = pd.concat([single_exp_lim,single_imp_lim],axis = 1)
                     limits.columns = ['export limit','import limit']
+
                     limits.index = ti
 
                     for scenario in self.Scenarios:
@@ -429,8 +433,20 @@ class mplot(object):
             else:
                 interf_list = reported_ints.copy()
                 
-
             self.logger.info('Carving out season from ' + self.start_date + ' to ' + self.end_date)
+
+            #Remove missing interfaces from the list.
+            for interf in interf_list:
+                #Remove leading spaces
+                if interf[0] == ' ':
+                    interf = interf[1:]
+                if interf not in reported_ints:
+                    self.logger.warning(interf + ' not found in results.')
+                    interf_list.remove(interf)
+            if not interf_list:
+                outputs = mfunc.MissingInputData()
+                return outputs
+
             xdim = 2
             ydim = len(interf_list)
             fig2, axs = plt.subplots(ydim,xdim, figsize=((6*xdim),(4*ydim)), sharey=False, squeeze=False)
@@ -448,58 +464,52 @@ class mplot(object):
                 #Remove leading spaces
                 if interf[0] == ' ':
                     interf = interf[1:]
-                if interf in reported_ints:
-                    chunks_interf = []
-                    single_exp_lim = export_limits.loc[interf] / 1000
-                    single_imp_lim = import_limits.loc[interf] / 1000
 
-                    #Check if all hours have the same limit.
-                    check = single_exp_lim.to_numpy()
-                    identical = check[0] == check.all()
+                chunks_interf = []
+                single_exp_lim = export_limits.loc[interf] / 1000
+                single_imp_lim = import_limits.loc[interf] / 1000
 
-                    limits = pd.concat([single_exp_lim,single_imp_lim],axis = 1)
-                    limits.columns = ['export limit','import limit']
-                    limits.index = ti
+                #Check if all hours have the same limit.
+                check = single_exp_lim.to_numpy()
+                identical = check[0] == check.all()
 
-                    for scenario in self.Scenarios:
-                        flow = Flow_Collection.get(scenario)
-                        single_int = flow.xs(interf,level = 'interface_name') / 1000
-                        single_int.index = single_int.index.droplevel('interface_category')
-                        single_int.columns = [interf]
-                        
-                        summer = single_int[self.start_date:self.end_date]
-                        winter = single_int.drop(summer.index)
-                        summer_lim = limits[self.start_date:self.end_date]
-                        winter_lim = limits.drop(summer.index)
-                        
-                        if self.duration_curve:
-                            summer = mfunc.sort_duration(summer,interf)
-                            winter = mfunc.sort_duration(winter,interf)
-                            summer_lim = mfunc.sort_duration(summer_lim,'export limit')
-                            winter_lim = mfunc.sort_duration(winter_lim,'export limit')
-                        
-                        axs[n,0].plot(summer[interf],linewidth = 1,label = scenario + '\n interface flow')
-                        axs[n,1].plot(winter[interf],linewidth = 1,label = scenario + '\n interface flow')
-                        if scenario == self.Scenarios[-1]:
-                            for col in summer_lim:
-                                limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
-                                axs[n,0].plot(summer_lim[col],linewidth = 1,linestyle = '--',color = limits_color_dict[col],label = col)
-                                axs[n,1].plot(winter_lim[col],linewidth = 1,linestyle = '--',color = limits_color_dict[col],label = col)
+                limits = pd.concat([single_exp_lim,single_imp_lim],axis = 1)
+                limits.columns = ['export limit','import limit']
+                limits.index = ti
 
-                        #For output time series .csv
-                        scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
-                        single_int_out = single_int.set_index([scenario_names],append = True)
-                        chunks_interf.append(single_int_out)
+                for scenario in self.Scenarios:
+                    flow = Flow_Collection.get(scenario)
+                    single_int = flow.xs(interf,level = 'interface_name') / 1000
+                    single_int.index = single_int.index.droplevel('interface_category')
+                    single_int.columns = [interf]
+                    
+                    summer = single_int[self.start_date:self.end_date]
+                    winter = single_int.drop(summer.index)
+                    summer_lim = limits[self.start_date:self.end_date]
+                    winter_lim = limits.drop(summer.index)
+                    
+                    if self.duration_curve:
+                        summer = mfunc.sort_duration(summer,interf)
+                        winter = mfunc.sort_duration(winter,interf)
+                        summer_lim = mfunc.sort_duration(summer_lim,'export limit')
+                        winter_lim = mfunc.sort_duration(winter_lim,'export limit')
+                    
+                    axs[n,0].plot(summer[interf],linewidth = 1,label = scenario + '\n interface flow')
+                    axs[n,1].plot(winter[interf],linewidth = 1,label = scenario + '\n interface flow')
+                    if scenario == self.Scenarios[-1]:
+                        for col in summer_lim:
+                            limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
+                            axs[n,0].plot(summer_lim[col],linewidth = 1,linestyle = '--',color = limits_color_dict[col],label = col)
+                            axs[n,1].plot(winter_lim[col],linewidth = 1,linestyle = '--',color = limits_color_dict[col],label = col)
 
-                    Data_out_line = pd.concat(chunks_interf,axis = 0)
-                    Data_out_line.columns = [interf]
-                    chunks.append(Data_out_line)
+                    #For output time series .csv
+                    scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
+                    single_int_out = single_int.set_index([scenario_names],append = True)
+                    chunks_interf.append(single_int_out)
 
-                else:
-                    self.logger.warning(interf + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
-                    excess_axs += 1
-                    missing_ints += 1
-                    continue
+                Data_out_line = pd.concat(chunks_interf,axis = 0)
+                Data_out_line.columns = [interf]
+                chunks.append(Data_out_line)
 
 
                 axs[n,0].set_title(interf)
@@ -522,9 +532,6 @@ class mplot(object):
                 if n == len(interf_list) - 1:
                     axs[n,1].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
 
-                if missing_ints == len(interf_list):
-                    outputs = mfunc.MissingInputData()
-                    return outputs
 
             Data_Table_Out = pd.concat(chunks,axis = 1)
             #Limits_Out = pd.concat(limits_chunks,axis = 1)
@@ -768,6 +775,20 @@ class mplot(object):
         ti = Flow_Collection[self.Scenarios[0]].index.get_level_values('timestamp').unique()
         reported_lines = Flow_Collection[self.Scenarios[0]].index.get_level_values('line_name').unique()
 
+        self.logger.info('Carving out season from ' + self.start_date + ' to ' + self.end_date)
+
+        #Remove missing interfaces from the list.
+        for line in select_lines:
+            #Remove leading spaces
+            if line[0] == ' ':
+                line = line[1:]
+            if line not in reported_lines:
+                self.logger.warning(line + ' not found in results.')
+                select_lines.remove(line)
+        if not select_lines:
+            outputs = mfunc.MissingInputData()
+            return outputs
+
         xdim = 2
         ydim = len(select_lines)
         grid_size = xdim * ydim
@@ -785,68 +806,63 @@ class mplot(object):
             #Remove leading spaces
             if line[0] == ' ':
                 line = line[1:]
-            if line in reported_lines:
  
-                chunks_line = []
+            chunks_line = []
 
-                single_exp_lim = export_limits.loc[line]
-                single_exp_lim.index = ti
-                single_imp_lim = import_limits.loc[line]
-                single_imp_lim.index = ti
+            single_exp_lim = export_limits.loc[line]
+            single_exp_lim.index = ti
+            single_imp_lim = import_limits.loc[line]
+            single_imp_lim.index = ti
 
-                limits = pd.concat([single_exp_lim,single_imp_lim])
-                limits_chunks.append(limits)
+            limits = pd.concat([single_exp_lim,single_imp_lim],axis = 1)
+            limits.columns = ['export limit','import limit']
+            limits.index = ti
+            limits_chunks.append(limits)
 
-                for scenario in self.Scenarios:
+            for scenario in self.Scenarios:
 
-                    flow = Flow_Collection[scenario]
-                    single_line = flow.xs(line,level = 'line_name')
-                    single_line_out = single_line.copy()
-                    single_line = single_line.merge(single_exp_lim,left_index = True,right_index = True)
-                    single_line = single_line.merge(single_imp_lim,left_index = True,right_index = True)
-                    single_line.columns = ['flow','export_limit','import_limit']
+                flow = Flow_Collection[scenario]
+                single_line = flow.xs(line,level = 'line_name')
+                single_line_out = single_line.copy()
+                single_line.columns = [line]
 
-                    #Split into seasons.
-                    summer = single_line[self.start_date : self.end_date]
-                    winter = single_line.drop(summer.index)
+                #Split into seasons.
+                summer = single_line[self.start_date : self.end_date]
+                winter = single_line.drop(summer.index)
+                summer_lim = limits[self.start_date:self.end_date]
+                winter_lim = limits.drop(summer.index)
 
+                if self.duration_curve:
+                    summer = mfunc.sort_duration(summer,line) 
+                    winter = mfunc.sort_duration(winter,line)
+                    summer_lim = mfunc.sort_duration(summer_lim,'export limit')
+                    winter_lim = mfunc.sort_duration(winter_lim,'export limit')
 
-                    if self.duration_curve:
-                        summer = mfunc.sort_duration(summer,'flow') 
-                        winter = mfunc.sort_duration(winter,'flow')
+                axs[i,0].plot(summer[line],linewidth = 1,label = scenario + '\n line flow')
+                axs[i,1].plot(winter[line],linewidth = 1,label = scenario + '\n line flow')
+                if scenario == self.Scenarios[-1]:
+                    for col in summer_lim:
+                        limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
+                        axs[i,0].plot(summer_lim[col],linewidth = 1,linestyle = '--',color = limits_color_dict[col],label = col)
+                        axs[i,1].plot(winter_lim[col],linewidth = 1,linestyle = '--',color = limits_color_dict[col],label = col)
+                                        
+                for j in [0,1]:
+                    axs[i,j].spines['right'].set_visible(False)
+                    axs[i,j].spines['top'].set_visible(False)
+                    axs[i,j].tick_params(axis='y', which='major', length=5, width=1)
+                    axs[i,j].tick_params(axis='x', which='major', length=5, width=1)
+                    axs[i,j].set_title(line)
+                    axs[i,j].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
-                    linestyle_dict = {'flow': '-','export_limit': '--', 'import_limit': '--'}
-                    color_dict = {'flow': 'blue','export_limit': 'red', 'import_limit': 'green'}
+                #For output time series .csv
+                scenario_names = pd.Series([scenario] * len(single_line_out),name = 'Scenario')
+                single_line_out.columns = [line]
+                single_line_out = single_line_out.set_index([scenario_names],append = True)
+                chunks_line.append(single_line_out)
 
+            Data_out_line = pd.concat(chunks_line,axis = 0)
+            chunks.append(Data_out_line)
 
-                    for col in summer.columns:
-                        axs[i,0].plot(summer[col],linewidth = 1,linestyle = linestyle_dict[col],color = color_dict[col],label = col)
-                        axs[i,1].plot(winter[col],linewidth = 1,linestyle = linestyle_dict[col],color = color_dict[col],label = col)
-                    
-
-                    for j in [0,1]:
-                        axs[i,j].spines['right'].set_visible(False)
-                        axs[i,j].spines['top'].set_visible(False)
-                        axs[i,j].tick_params(axis='y', which='major', length=5, width=1)
-                        axs[i,j].tick_params(axis='x', which='major', length=5, width=1)
-                        axs[i,j].set_title(line)
-                        axs[i,j].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
-
-                    #For output time series .csv
-                    scenario_names = pd.Series([scenario] * len(single_line_out),name = 'Scenario')
-                    single_line_out.columns = [line]
-                    single_line_out = single_line_out.set_index([scenario_names],append = True)
-                    chunks_line.append(single_line_out)
-
-                Data_out_line = pd.concat(chunks_line,axis = 0)
-                chunks.append(Data_out_line)
-            else:
-
-                self.logger.warning(line + ' not found in' + self.Scenarios[0] + '. Have you tagged it with the "Must Report" property in PLEXOS?')
-
-                excess_axs += 1
-                missing_lines += 1
-                continue
 
         if missing_lines == len(select_lines):
             outputs = mfunc.MissingInputData()
@@ -1473,8 +1489,9 @@ class mplot(object):
                     net_export.columns = [other_zone]
                     
                     if not pd.isnull(self.start_date):
-                        self.logger.info("Plotting specific date range: \
-                        {} to {}".format(str(self.start_date),str(self.end_date)))
+                        if other_zone == [other_zones[0]]:
+                            self.logger.info("Plotting specific date range: \
+                            {} to {}".format(str(self.start_date),str(self.end_date)))
 
                         net_export = net_export[self.start_date : self.end_date]
                 
@@ -1638,8 +1655,9 @@ class mplot(object):
                     net_export.columns = [other_zone]
                     
                     if not pd.isnull(self.start_date):
-                        self.logger.info("Plotting specific date range: \
-                        {} to {}".format(str(self.start_date),str(self.end_date)))
+                        if other_zone == other_zones[0]:
+                            self.logger.info("Plotting specific date range: \
+                            {} to {}".format(str(self.start_date),str(self.end_date)))
 
                         net_export = net_export[self.start_date : self.end_date]
                 
@@ -1666,7 +1684,7 @@ class mplot(object):
                 Data_Table_Out = pd.concat(net_exports_all)
 
                             
-            fig10 = mfunc.plot_clustered_stacked(net_exports_all,self.Scenarios)
+            fig10 = mfunc.create_clustered_stacked_bar_plot(net_exports_all,self.Scenarios)
             fig10.hlines(y = 0, xmin = fig10.get_xlim()[0], xmax = fig10.get_xlim()[1], linestyle = ':')
             fig10.set_ylabel('Interchange ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
 
