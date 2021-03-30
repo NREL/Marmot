@@ -3,17 +3,17 @@ Marmot is a set of python scripts to process h5plexos PLEXOS results plot the ou
 ![Yellow-bellied marmot](https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg)
 
 Click the following to quickly navigate to the main sections of the ReadME:
-- [Main Python Scripts](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#main-python-scripts)
-- [Initial Setup](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#initial-setup)
-- [marmot_h5_formatter](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#marmot_h5_formatter)
-- [Mapping Files](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#mapping-files)
-- [marmot_plot_main](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#marmot_plot_main)
+- [Main Python Scripts](https://github.nrel.gov/PCM/Marmot#main-python-scripts)
+- [Initial Setup](https://github.nrel.gov/PCM/Marmot#initial-setup)
+- [marmot_h5_formatter](https://github.nrel.gov/PCM/Marmot#marmot_h5_formatter)
+- [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files)
+- [marmot_plot_main](https://github.nrel.gov/PCM/Marmot#marmot_plot_main)
 
 
 ## Main Python Scripts
 Marmot consists of two main .py files:
-* [**marmot_h5_formatter.py**](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/marmot/marmot_h5_formatter.py)
-* [**marmot_plot_main.py**](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/marmot/marmot_plot_main.py)
+* [**marmot_h5_formatter.py**](https://github.nrel.gov/PCM/Marmot/blob/master/marmot/marmot_h5_formatter.py)
+* [**marmot_plot_main.py**](https://github.nrel.gov/PCM/Marmot/blob/master/marmot/marmot_plot_main.py)
 
 A high-level explanation of what these files do and suggested settings to change are described in this readme. Code specifics are described in more detail in the code docstrings. 
 
@@ -26,13 +26,15 @@ A high-level explanation of what these files do and suggested settings to change
   - PyYAML
   - h5py>=2.10.0
   - matplotlib>=3.1.0
-  - [h5plexos](https://github.com/NREL/h5plexos)>=0.6 *(See more details [below](https://github.nrel.gov/PCM/Marmot/tree/ReEDS2_integration#marmot_h5_formatter))*
+  - [h5plexos](https://github.com/NREL/h5plexos)>=0.6 *(See more details [below](https://github.nrel.gov/PCM/Marmot#marmot_h5_formatter))*
   - tables
 
 - Most NREL severs should already meet these prerequisites so installation of prerequisites may not be required.
 
 - These prerequisites can be installed manually with conda or pip, but it is recommended to install all requirements with the provided conda environment or requirements.txt file.
-Each are explained below. 
+Each are explained [below](https://github.nrel.gov/PCM/Marmot#conda-environment). 
+
+After all required prerequisites are installed, you are ready to install and run Marmot. There are two ways to run Marmot, directly or as a module. Most users probably want to run Marmot directly however some advanced users may want to import Marmot directly to use its functionality  in their own code. Both are explained below.
 
 ### Downloading, installing, and running Marmot Directly 
 
@@ -62,10 +64,7 @@ To ensure you are using all the required python modules, create a new conda envi
 Once the environment has been created it can be activated by typing `conda activate marmot-env `
 
 #### requirements txt file
-- A [requirements.txt](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`
-
-After all required prerequisites are installed, you are ready to install and run Marmot. There are two ways to run Marmot, directly or as a module. Most users probably want to run Marmot directly however some advanced users may want to import Marmot directly to use its functionality  in their own code. Both are explained below.
-
+- A [requirements.txt](https://github.nrel.gov/PCM/Marmot/blob/master/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`. If installing on a server adding `--user` to the command may be required. 
 
 
 
