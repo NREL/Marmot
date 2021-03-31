@@ -353,7 +353,7 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
         fig = df.plot(kind="bar",
                       linewidth=0,
                       stacked=True,
-                      ax=axe,
+                      ax=fig,
                       legend=False,
                       grid=False,
                       **kwargs)  # make bar plots
@@ -375,7 +375,7 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
     for i in range(n_df):
         n.append(fig.bar(0, 0, color="gray", hatch=H * i))
 
-    l1 = axe.legend(h[:n_col], l[:n_col], loc=[1.01, 0.5])
+    l1 = fig.legend(h[:n_col], l[:n_col], loc=[1.01, 0.5])
     if labels is not None:
         l2 = plt.legend(n, labels, loc=[1.01, 0.1]) 
     fig.add_artist(l1)
@@ -566,7 +566,7 @@ def add_facet_labels(fig, xlabels, ylabels):
             ax.set_ylabel(ylabel=(ylabels[k]),  color='black', rotation='vertical', fontsize=16)
             k=k+1
 
-def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
+def shift_leapday(df,Marmot_Solutions_folder):
     """
     Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
     Modeled year must be included in the scenario parent directory name.
@@ -587,11 +587,18 @@ def shift_leap_day(df,Marmot_Solutions_folder,shift_leap_day):
         same dataframe, with time index shifted
 
     """
-    if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0) and shift_leap_day:
+    if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0):
         df.index.set_levels(
             df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'),
             level = 'timestamp',
             inplace = True)
+
+        #Special case where timezone shifting may also be necessary.
+        # df.index.set_levels(
+        #     df.index.levels[df.index.names.index('timestamp')].shift(-2,freq = 'H'),
+        #     level = 'timestamp',
+        #     inplace = True)
+
     return(df)
 
 

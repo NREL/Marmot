@@ -18,6 +18,7 @@ interval,generator,SRMC,TRUE,1,$/MWh,The marginal cost for a generator to provid
 interval,generator,Start & Shutdown Cost,TRUE,1,$,The amount spent starting and stopping generators by timestep.
 year,generator,Total Generation Cost,TRUE,1000,"$1,000 ",The total cost for operating a generator during each timestep.
 interval,generator,Units Generating,TRUE,1,Unitless,The fraction at which a generator is operating.
+interval,generator,Units Out,TRUE,1,Unitless,Number of units on outage.
 interval,generator,VO&M Cost,TRUE,1,$,The total amount in VO&M paid to generate (VO&M charge x Generation)
 interval,generator,Pool Revenue,TRUE,1,,
 interval,generator,Net Revenue,TRUE,1,,
@@ -71,8 +72,8 @@ interval,interface,Shadow Price,TRUE,1,$/MW,
 interval,interface,Violation,TRUE,1,MW,
 interval,interface,Hours Congested,TRUE,1,hours,
 interval,region_regions,Net Interchange,TRUE,1,MW,
-year,interface,Import Limit,TRUE,1,MW,
-year,interface,Export Limit,TRUE,1,MW,
+year,interface,Import Limit,FALSE,1,MW,
+year,interface,Export Limit,FALSE,1,MW,
 year,generator,Hours at Minimum,TRUE,1,hours,
 year,generator,Emissions Cost,TRUE,1000,$0 ,
 year,generator,Fuel Cost,TRUE,1000,$0 ,

@@ -7,6 +7,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import config.mconfig as mconfig
 
 
 #===============================================================================
@@ -18,10 +19,99 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
 
     def capacity_out_stack(self):
+        
+        outputs = {}
+        installed_cap_collection = {}
+        gen_available_capacity_collection = {}
+        check_input_data = []
+        
+        check_input_data.extend([mfunc.get_data(installed_cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, [self.Scenarios[0]])])
+        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        
+        xdimension=len(self.xlabels)
+        if xdimension == 0:
+            xdimension = 1
+        ydimension=len(self.ylabels)
+        if ydimension == 0:
+            ydimension = 1
+
+        # If the plot is not a facet plot, grid size should be 1x1
+        if not self.facet:
+            xdimension = 1
+            ydimension = 1
+
+        grid_size = xdimension*ydimension
+
+        # Used to calculate any excess axis to delete
+        plot_number = len(self.Scenarios)
+        excess_axs = grid_size - plot_number
+
+        for zone_input in self.Zones:
+            self.logger.info('Zone = ' + str(zone_input))
+
+            fig2, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharex = True, sharey='row',squeeze=False)
+            plt.subplots_adjust(wspace=0.1, hspace=0.2)
+            axs = axs.ravel()
+
+            i = -1
+            chunks = []
+            
+            for scenario in self.Scenarios:
+                self.logger.info("Scenario = " + scenario)
+                i += 1
+                
+                install_cap = installed_cap_collection.get(scenario).copy()
+                avail_cap = gen_available_capacity_collection.get(scenario).copy()
+                if self.shift_leapday:
+                    avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)
+                avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
+                avail_cap.columns = ['avail']
+                install_cap.columns = ['cap']
+                avail_cap.reset_index(inplace = True)
+                
+                cap_out = avail_cap.merge(install_cap,left_on = ['gen_name'],right_on = ['gen_name'])
+                cap_out['Capacity out'] = cap_out['cap'] - cap_out['avail']
+                
+                cap_out = cap_out.groupby(["timestamp", "tech"], as_index=False).sum()
+                cap_out.tech = cap_out.tech.astype("category")
+                cap_out.tech.cat.set_categories(self.ordered_gen, inplace=True)
+                cap_out = cap_out.sort_values(["tech"])
+                cap_out = cap_out.pivot(index = 'timestamp', columns = 'tech', values = 'Capacity out')
+                #Subset only thermal gen categories
+                thermal_gens = [therm for therm in self.thermal_gen_cat if therm in cap_out.columns]
+                cap_out = cap_out[thermal_gens]
+
+                # unitconversion based off peak outage hour, only checked once 
+                if i == 0:
+                    unitconversion = mfunc.capacity_energy_unitconversion(max(cap_out.sum(axis=1)))
+               
+                cap_out = cap_out / unitconversion['divisor']
+
+                scenario_names = pd.Series([scenario] * len(cap_out),name = 'Scenario')
+                single_scen_out = cap_out.set_index([scenario_names],append = True)
+                chunks.append(single_scen_out)
+                        
+                mfunc.create_stackplot(axs = axs, data = cap_out,color_dict = self.PLEXOS_color_dict, label = cap_out.columns, n = i)
+                mfunc.set_plot_timeseries_format(axs, n = i, minticks = self.minticks, maxticks = self.maxticks)
+                axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
+
+            Data_Table_Out = pd.concat(chunks,axis = 1)
+
+            fig2.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.ylabel('Capacity out ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=30)
+            plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+        return outputs
+
+
+    def capacity_out_stack_PASA(self):
         outputs = mfunc.UnderDevelopment()
-        self.logger.warning('capacity_out_stack requires PASA files, and is under development. Skipping plot.')
+        self.logger.warning('capacity_out_stack_PASA requires PASA files, and is under development. Skipping plot.')
         return outputs 
     
         outputs = {}

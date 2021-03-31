@@ -1,22 +1,23 @@
 Figure Output Name,Plot Graph,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada], Emissions to plot [CO2, SO2, NOx]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
-Avg_Out_Committed,FALSE,,,,EST,5/20/2024,5/23/2024,capacity_factor,avg_output_when_committed
-Capacity_Factor,TRUE,,,,EST,5/20/2024,5/23/2024,capacity_factor,cf
+Avg_Out_Committed,FALSE,,,,PST,5/20/2024,5/23/2024,capacity_factor,avg_output_when_committed
+Capacity_Factor,FALSE,,,,PST,5/20/2024,5/23/2024,capacity_factor,cf
 Time_at_Min_Gen,FALSE,,,,,,,capacity_factor,time_at_min_gen
-Capacity_Out_Stacked,FALSE,,,,EST,,,capacity_out,capacity_out_stack
+Capacity_Out_Stacked_PASA,FALSE,,,,PST,,,capacity_out,capacity_out_stack_PASA
+Capacity_Out_Stacked,FALSE,,,,PST,,,capacity_out,capacity_out_stack
 PV_Curtailment_Duration_Curve,FALSE,PV,,,,,,curtailment,curt_duration_curve
 RE_Curtailment_Duration_Curve,FALSE,PV+Wind,,,,,,curtailment,curt_duration_curve
 PV_Curtailment_vs_Penetration,FALSE,PV,,,,,,curtailment,curt_pen
 RE_Curtailment_vs_Penetration,FALSE,PV+Wind,,,,,,curtailment,curt_pen
 Total_Curtailment,TRUE,,,,,,,curtailment,curt_total
 Total_Curtailment_Individual,FALSE,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
-Total_Emissions_By_Gen_Type_CO2,TRUE,CO2,,,,,,emissions,total_emissions_by_type
+Total_Emissions_By_Gen_Type_CO2,FALSE,CO2,,,,,,emissions,total_emissions_by_type
 Total_Emissions_By_Gen_Type_SO2,FALSE,SO2,,,,,,emissions,total_emissions_by_type
 Committed_Capacity_Stack,FALSE,,,,,,,generation_stack,committed_stack
 Generation_Timeseries_Diff,FALSE,,,,EST,,,generation_stack,gen_diff
 Generation_Timeseries_Diff_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_diff
-Stacked_Gen,TRUE,,,,EST,,,generation_stack,gen_stack
+Stacked_Gen,FALSE,,,,PST,,,generation_stack,gen_stack
 Stacked_Gen_Min_Net_Load,TRUE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Stacked_Gen_Date_Range,TRUE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_stack
+Stacked_Gen_Date_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_stack
 Stacked_Gen_Peak_Demand,TRUE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
@@ -33,12 +34,12 @@ Unstacked_Gen_Facet_Grid,FALSE,,,,EST,,,generation_unstack,gen_unstack
 Hydro_Versus_Continent_Net_Load,FALSE,,,,,5/20/2024,5/23/2024,hydro,hydro_continent_net_load
 Hydro_Versus_Net_Load,FALSE,,,7,EST,,,hydro,hydro_net_load
 All_Regions_Price_Duration_Curve,FALSE,150,,,,,,prices,pdc_all_regions
-Region_Price_Duration,TRUE,,,,,,,prices,region_pdc
-Region_Price_Duration_Threshold,FALSE,150,,,,,,prices,region_pdc
+Region_Price_Duration,FALSE,,,,,,,prices,region_pdc
+Region_Price_Duration_Threshold,TRUE,150,,,,,,prices,region_pdc
 Region_Price_Timeseries,FALSE,,,,,,,prices,region_timeseries_price
 Region_Price_Timeseries_Threshold,FALSE,150,,,,,,prices,region_timeseries_price
 All_Regions_Price_Timeseries,FALSE,,,,,,,prices,timeseries_price_all_regions
-Detailed_Total_Generation_Cost,FALSE,,,,,,,production_cost,detailed_gen_cost
+Detailed_Total_Generation_Cost,TRUE,,,,,,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,,production_cost,detailed_gen_cost_diff
 Production_Cost,FALSE,,,,,,,production_cost,prod_cost
 Total_System_Cost,FALSE,,,,,,,production_cost,sys_cost
@@ -59,11 +60,11 @@ Reserve_Gen_Timeseries_Peak_Demand,FALSE,Peak Demand,2,2,EST,,,reserves,reserve_
 Reserve_Gen_Timeseries_Date_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,reserves,reserve_gen_timeseries
 Reserve_Gen_Timeseries_Facet_Grid_Peak_Demand,FALSE,Peak Demand,2,2,EST,,,reserves,reserve_gen_timeseries
 Reserve_Gen_Timeseries_Facet_Grid_Date_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,reserves,reserve_gen_timeseries
-Thermal_Capacity_Reserves,FALSE,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves
-Total_Generation,TRUE,,,,,,,total_generation,total_gen
-Total_Generation_Diff,TRUE,,,,,,,total_generation,total_gen_diff
+Thermal_Capacity_Reserves,FALSE,,,,MST,,,thermal_cap_reserve,thermal_cap_reserves
+Total_Generation,FALSE,,,,,,,total_generation,total_gen
+Total_Generation_Diff,FALSE,,,,,,,total_generation,total_gen_diff
 Total_Generation_Facet_Grid,FALSE,,,,,,,total_generation,total_gen_facet
-Total_Installed_Capacity,TRUE,,,,,,,total_installed_capacity,total_cap
+Total_Installed_Capacity,FALSE,,,,,,,total_installed_capacity,total_cap
 Total_Installed_Capacity_and_Generation_Facet,TRUE,,,,,,,total_installed_capacity,total_cap_and_gen_facet
 Line_Utilization_Histogram,FALSE,,,,,,,transmission,line_hist
 Line_Utilization_Histogram_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_hist
@@ -72,7 +73,7 @@ Line_Utilization_Duration_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_
 Line_Violations_Time_Series,FALSE,,,,EST,,,transmission,line_violations_timeseries
 Line_Violations_Totals,FALSE,,,,,,,transmission,line_violations_totals
 Net_Export_Date_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,transmission,net_export
-Net_Export,FALSE,,,,EST,,,transmission,net_export
+Net_Export,TRUE,,,,EST,,,transmission,net_export
 Region-Region_Net_Interchange_Checkerboard,FALSE,,,,,,,transmission,region_region_checkerboard
 Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_scenarios
 All_Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_regions
@@ -93,3 +94,7 @@ Utilization_Factor_Generators,FALSE,,,,EST,,,utilization_factor,uf_gen
 Sensitivities_Difference_Hydro,FALSE,Hydro,,,EST,,,sensitivities,sensitivities_gas
 Sensitivities_Difference_Wind,FALSE,Wind,,,EST,,,sensitivities,sensitivities_gas
 Total_Reserve_Provision_by_Generator,FALSE,,,,,,,reserves,total_reserves_by_gen
+Avg_Out_Committed,FALSE,,,,EST,5/20/2024,5/23/2024,capacity_factor,avg_output_when_committed
+Capacity_Factor,FALSE,,,,EST,5/20/2024,5/23/2024,capacity_factor,cf
+Capacity_Out_Stacked,FALSE,,,,EST,,,capacity_out,capacity_out_stack
+Thermal_Capacity_Reserves,FALSE,,,,EST,,,thermal_cap_reserve,thermal_cap_reserves

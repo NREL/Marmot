@@ -32,7 +32,7 @@ class MetaData:
         self.Region_Mapping = Region_Mapping
         if model == None: 
             startdir=os.getcwd()
-            os.chdir(self.HDF5_folder_in)     
+            os.chdir(self.HDF5_folder_in)  
             files = sorted(os.listdir()) 
             os.chdir(startdir)
             files_list = []

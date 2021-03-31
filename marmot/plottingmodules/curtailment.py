@@ -624,6 +624,7 @@ class mplot(object):
 
                 else:
                     curt_perc = pd.Series([0])
+                    curt_tot = pd.Series([0])
                     gen_tot = pd.Series([0])
                     gen_site = pd.Series([0] * len(ti),name = site,index = ti)
                 sites_gen = sites_gen.append(gen_tot)

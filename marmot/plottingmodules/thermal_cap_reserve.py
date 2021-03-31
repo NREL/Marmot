@@ -67,8 +67,12 @@ class mplot(object):
 
                 self.logger.info("Scenario = " + scenario)
 
-                Gen = generation_collection.get(scenario)
-                avail_cap = gen_available_capacity_collection.get(scenario)
+                Gen = generation_collection.get(scenario).copy()
+                if self.shift_leapday:
+                    Gen = mfunc.shift_leapday(Gen,self.Marmot_Solutions_folder)
+                avail_cap = gen_available_capacity_collection.get(scenario).copy()
+                if self.shift_leapday:
+                    avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)               
                
                 # Check if zone is in avail_cap
                 try:
@@ -83,20 +87,22 @@ class mplot(object):
 
                 thermal_reserve = avail_cap - Gen
 
+                #Convert units
+                if i == 0:
+                    unitconversion = mfunc.capacity_energy_unitconversion(max(thermal_reserve.sum(axis=1)))
+                thermal_reserve = thermal_reserve / unitconversion['divisor']
+
                 # Check if thermal_reserve contains data, if not skips
                 if thermal_reserve.empty == True:
                     out = mfunc.MissingZoneData()
                     outputs[zone_input] = out
                     continue
 
-                # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and thermal_reserve.index[0] > dt.datetime(2024,2,28,0,0):
-                #     thermal_reserve.index = thermal_reserve.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
-
                 Data_Table_Out = thermal_reserve
 
 
 
-                locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
+                locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
                 formatter = mdates.ConciseDateFormatter(locator)
                 formatter.formats[2] = '%d\n %b'
                 formatter.zero_formats[1] = '%b\n %Y'
@@ -113,7 +119,7 @@ class mplot(object):
                     axs[i].spines['top'].set_visible(False)
                     axs[i].tick_params(axis='y', which='major', length=5, width=1)
                     axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                    axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.2f}'))
                     axs[i].margins(x=0.01)
                     axs[i].xaxis.set_major_locator(locator)
                     axs[i].xaxis.set_major_formatter(formatter)
@@ -159,7 +165,7 @@ class mplot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Thermal capacity reserve (MW)',  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel('Thermal capacity reserve ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=60)
 
             #fig1.savefig('/home/mschwarz/PLEXOS results analysis/test/SPP_thermal_cap_reserves_test', dpi=600, bbox_inches='tight') #Test
 

@@ -42,7 +42,7 @@ After all required prerequisites are installed, you are ready to install and run
 
 - The Marmot formatter imports h5plexos. To avoid import and version errors, h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot `--recurse-submodules`, you can combine the git submodule init and git submodule update steps by running `git submodule update --init`.
 
-- Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot. When running these scripts, make sure to chdir into the highest level of the repo and use `python marmot/marmot_h5_formatter.py` and `python marmot/marmot_plot_main.py`
+- Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot.
 
 ### Importing and running Marmot as a Module (Advanced User)
 
