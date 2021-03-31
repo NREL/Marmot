@@ -197,7 +197,7 @@ The **config.yml** settings and their defaults are as follows:
 
 - **skip_existing_properties:** true
 
-  *Toggles whether existing properties are skipped or overwritten if they already contained in the processed_h5 file, the default is to skip
+  *Toggles whether existing properties are skipped or overwritten if they already contained in the processed_h5 file, the default is to skip*
 
 - **user_defined_inputs_file:** Marmot_user_defined_inputs.csv
 
