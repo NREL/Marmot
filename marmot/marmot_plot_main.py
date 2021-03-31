@@ -15,18 +15,13 @@ have descriptive names such as total_generation.py, generation_stack.py, curtaim
 
 import os
 import sys
+import pathlib
+file_dir = pathlib.Path(__file__).parent.absolute()
 if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
-
     #If running from top level of repo.
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-
-    # #If running from Marmot/marmot directory.
-    # if os.path.dirname(os.path.dirname(os.path.dirname(__file__))) not in sys.path:
-    #     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-
-
-import pathlib
+        os.chdir(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import importlib
 import time
 import pandas as pd
@@ -35,7 +30,6 @@ import matplotlib.pyplot as plt
 import logging 
 import logging.config
 import yaml
-
 try:
     from marmot.meta_data import MetaData
 except ModuleNotFoundError:
@@ -53,7 +47,7 @@ import marmot.config.mconfig as mconfig
 #===============================================================================
 
 current_dir = os.getcwd()
-os.chdir(pathlib.Path(__file__).parent.absolute())
+os.chdir(file_dir)
 
 with open('config/marmot_logging_config.yml', 'rt') as f:
     conf = yaml.safe_load(f.read())
@@ -271,8 +265,8 @@ class MarmotPlot():
         
         shift_leapday = str(mconfig.parser("shift_leapday")).upper()
         font_defaults = mconfig.parser("font_settings")
-        minticks = mconfig.parser("figure_size","minticks")
-        maxticks = mconfig.parser("figure_size","maxticks")
+        minticks = mconfig.parser("axes_options","x_axes_minticks")
+        maxticks = mconfig.parser("axes_options","x_axes_maxticks")
 
         #===============================================================================
         # Input and Output Directories
@@ -457,15 +451,19 @@ class MarmotPlot():
                         "Scenarios", "Scenario_Diff", "Marmot_Solutions_folder",
                         "ylabels", "xlabels", "ticklabels","minticks","maxticks",
                         "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
-                        "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leapday","duration_curve"]
+                        "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leapday","duration_curve",
+                        "minticks","maxticks"]
         
             argument_list = [row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5],row.iloc[6], row.iloc[7],
                              hdf_out_folder, Zones, self.AGG_BY, ordered_gen, PLEXOS_color_dict,
                              self.Scenarios, self.Scenario_Diff, self.Marmot_Solutions_folder,
                              self.ylabels, self.xlabels, self.ticklabels,minticks,maxticks,
                              color_list, marker_style, gen_names_dict, pv_gen_cat,
-                             re_gen_cat, vre_gen_cat, thermal_gen_cat,self.Region_Mapping,figure_folder, meta,facet,shift_leapday,duration_curve]
-        
+                             re_gen_cat, vre_gen_cat, thermal_gen_cat,self.Region_Mapping,figure_folder, meta,facet,shift_leapday,duration_curve,
+                             minticks,
+                             maxticks]
+            
+            
             argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
         
             # Use run_plot_types to run any plotting module
@@ -552,7 +550,7 @@ if __name__ == '__main__':
     #===============================================================================
     
     #changes working directory to location of this python file
-    os.chdir(pathlib.Path(__file__).parent.absolute())
+    os.chdir(file_dir)
     
     Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)

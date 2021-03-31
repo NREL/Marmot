@@ -119,7 +119,7 @@ class mplot(object):
                     axs[i].spines['top'].set_visible(False)
                     axs[i].tick_params(axis='y', which='major', length=5, width=1)
                     axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                    axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.2f}'))
                     axs[i].margins(x=0.01)
                     axs[i].xaxis.set_major_locator(locator)
                     axs[i].xaxis.set_major_formatter(formatter)

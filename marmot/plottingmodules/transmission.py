@@ -82,13 +82,13 @@ class mplot(object):
         grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
-        plot_number = len(all_scenarios)
+        plot_number = len(self.Scenarios)
         excess_axs = grid_size - plot_number
             
         for zone_input in self.Zones:
             self.logger.info("For all lines touching Zone = "+zone_input)
             
-            fig2, axs = mfunc.setup_plot(xdimension = xdimension, ydimension=len(self.Scenarios),sharey = False,squeeze = False)
+            fig2, axs = mfunc.setup_plot(xdimension = xdimension, ydimension=len(self.Scenarios),sharey = False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
 
@@ -1515,7 +1515,7 @@ class mplot(object):
                     linestyle = '--' if column == 'Net export' else 'solid'
                     mfunc.create_line_plot(axs,net_exports,column = column, label = column, n = n,linestyle = linestyle)
     
-                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
                 axs[n].margins(x=0.01)
 
                 axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.

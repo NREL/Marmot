@@ -471,7 +471,6 @@ class mplot(object):
                 formatter.show_offset = False
                 axs[i].xaxis.set_major_locator(locator)
                 axs[i].xaxis.set_major_formatter(formatter)
-                axs[i].yaxis.set_major_formatter(FormatStrFormatter('%.0f')) #Remove unnecessary decimals.
 
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].fill_between(Load.index, Load,Unserved_Energy,
