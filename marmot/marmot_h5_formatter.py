@@ -15,10 +15,12 @@ it can be read into the marmot_plot_main.py file
 
 import os
 import sys
+import pathlib
+file_dir = pathlib.Path(__file__).parent.absolute()
 if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-import pathlib
+        os.chdir(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import time
 import re
 import pandas as pd
@@ -48,7 +50,7 @@ except ModuleNotFoundError:
 #===============================================================================
 
 current_dir = os.getcwd()
-os.chdir(pathlib.Path(__file__).parent.absolute())
+os.chdir(file_dir)
 
 with open('config/marmot_logging_config.yml', 'rt') as f:
     conf = yaml.safe_load(f.read())
@@ -949,7 +951,7 @@ if __name__ == '__main__':
     #===============================================================================
     
     #changes working directory to location of this python file
-    os.chdir(pathlib.Path(__file__).parent.absolute())
+    os.chdir(file_dir)
     
     Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)

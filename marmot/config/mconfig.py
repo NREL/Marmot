@@ -41,10 +41,11 @@ if not os.path.isfile(configfile_path):
         
         figure_size = dict(
             xdimension = 6,
-            ydimension = 4,
-            minticks = 4,
-            maxticks = 8
-            ),
+            ydimension = 4),
+        
+        axes_options = dict(
+            x_axes_minticks = 4,
+            x_axes_maxticks = 8),
         
         figure_file_format = 'svg',
         
