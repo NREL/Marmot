@@ -50,6 +50,7 @@ if not os.path.isfile(configfile_path):
         figure_file_format = 'svg',
         
         shift_leapday = False,
+        skip_existing_properties = True,
         
         category_file_names = dict(
             pv_gen_cat = 'pv_gen_cat.csv',

@@ -789,6 +789,12 @@ class MarmotFormat():
         Processed_Data_Out = pd.DataFrame()
         if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
             logger.info("'%s\%s' already exists: New variables will be added\n",hdf_out_folder,HDF5_output)
+            #Skip properties that already exist in *formatted.h5 file.
+            with h5py.File(os.path.join(hdf_out_folder,HDF5_output),'r') as f:
+                existing_keys = [key for key in f.keys()]
+
+            if not mconfig.parser('skip_existing_properties'):
+                existing_keys = []
         else:
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
     
@@ -808,74 +814,81 @@ class MarmotFormat():
             data_chunks = []
     
             logger.info("Processing %s %s",row["group"],row["data_set"])
+            row["data_set"] = row["data_set"].replace(' ', '_')
+            key_path = row["group"] + "_" + row["data_set"]
+            if key_path not in existing_keys:
     
-            for model in files_list:
-                logger.info("      %s",model)
-                
-                # Create an instance of metadata, and pass that as a variable to get data.
-                meta = MetaData(HDF5_folder_in, self.Region_Mapping,model)
-                db = hdf5_collection.get(model)
-                processed_data = self._get_data(row["group"], row["data_set"],row["data_type"], db, meta)
-    
-                if processed_data.empty == True:
-                    break
-                
-                # special units processing for emissions
-                if row["group"]=="emissions_generators":
-                    if (row["Units"] == "lb") | (row["Units"] == "lbs"):
-                        # convert lbs to kg
-                        kg_per_lb = 0.453592
-                        processed_data = processed_data*kg_per_lb
-                    # convert kg to metric tons
-                    kg_per_metric_ton = 1E3
-                    data_chunks.append(processed_data/kg_per_metric_ton)
-                
-                # other unit multipliers
-                if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
-                    data_chunks.append(processed_data*row["unit_multiplier"])
-                    logger.info("%s Year property reported from only the first partition",row["data_set"])
-                    break
-                else:
-                    data_chunks.append(processed_data*row["unit_multiplier"])
-    
-            if data_chunks:
-                Processed_Data_Out = pd.concat(data_chunks, copy=False)
-    
-            if Processed_Data_Out.empty == False:
-                if (row["data_type"]== "year"):
-                    logger.info("Please Note: Year properties can not be checked for duplicates.\n\
-                    Overlaping data can not be removed from 'Year' grouped data.\n\
-                    This will effect Year data that differs between partitions such as cost results.\n\
-                    It will not effect Year data that is equal in all partitions such as Installed Capacity or Line Limit results")
-    
-                else:
-                    oldsize=Processed_Data_Out.size
-                    Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
-                    if  (oldsize-Processed_Data_Out.size) >0:
-                        logger.info('Drop duplicates removed %s rows',oldsize-Processed_Data_Out.size)
-    
-                row["data_set"] = row["data_set"].replace(' ', '_')
-                try:
-                    logger.info("Saving data to h5 file...")
-                    Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
-                    logger.info("Data saved to h5 file successfully\n")
-                except:
-                    logger.warning("h5 File is probably in use, waiting to attempt save for a second time")
-                    time.sleep(120)
+                for model in files_list:
+                    logger.info("      %s",model)
+                    
+                    # Create an instance of metadata, and pass that as a variable to get data.
+                    meta = MetaData(HDF5_folder_in, self.Region_Mapping,model)
+                    db = hdf5_collection.get(model)
+                    processed_data = self._get_data(row["group"], row["data_set"],row["data_type"], db, meta)
+        
+                    if processed_data.empty == True:
+                        break
+                    
+                    # special units processing for emissions
+                    if row["group"]=="emissions_generators":
+                        if (row["Units"] == "lb") | (row["Units"] == "lbs"):
+                            # convert lbs to kg
+                            kg_per_lb = 0.453592
+                            processed_data = processed_data*kg_per_lb
+                        # convert kg to metric tons
+                        kg_per_metric_ton = 1E3
+                        data_chunks.append(processed_data/kg_per_metric_ton)
+                    
+                    # other unit multipliers
+                    if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
+                        data_chunks.append(processed_data*row["unit_multiplier"])
+                        logger.info("%s Year property reported from only the first partition",row["data_set"])
+                        break
+                    else:
+                        data_chunks.append(processed_data*row["unit_multiplier"])
+        
+                if data_chunks:
+                    Processed_Data_Out = pd.concat(data_chunks, copy=False)
+        
+                if Processed_Data_Out.empty == False:
+                    if (row["data_type"]== "year"):
+                        logger.info("Please Note: Year properties can not be checked for duplicates.\n\
+                        Overlaping data can not be removed from 'Year' grouped data.\n\
+                        This will effect Year data that differs between partitions such as cost results.\n\
+                        It will not effect Year data that is equal in all partitions such as Installed Capacity or Line Limit results")
+        
+                    else:
+                        oldsize=Processed_Data_Out.size
+                        Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
+                        if  (oldsize-Processed_Data_Out.size) >0:
+                            logger.info('Drop duplicates removed %s rows',oldsize-Processed_Data_Out.size)
+        
+                    row["data_set"] = row["data_set"].replace(' ', '_')
                     try:
-                          Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
-                          logger.info("h5 File save succeded on second attempt")
+                        logger.info("Saving data to h5 file...")
+                        Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
+                        logger.info("Data saved to h5 file successfully\n")
                     except:
-                        logger.warning("h5 File is probably in use, waiting to attempt save for a third time")
-                        time.sleep(240)
+                        logger.warning("h5 File is probably in use, waiting to attempt save for a second time")
+                        time.sleep(120)
                         try:
-                            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a",  complevel=9, complib = 'blosc:zlib')
-                            logger.info("h5 File save succeded on third attempt")
+                              Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
+                              logger.info("h5 File save succeded on second attempt")
                         except:
-                            logger.warning("h5 Save failed on third try; will not attempt again\n")
-                # del Processed_Data_Out
+                            logger.warning("h5 File is probably in use, waiting to attempt save for a third time")
+                            time.sleep(240)
+                            try:
+                                Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a",  complevel=9, complib = 'blosc:zlib')
+                                logger.info("h5 File save succeded on third attempt")
+                            except:
+                                logger.warning("h5 Save failed on third try; will not attempt again\n")
+                    # del Processed_Data_Out
+                else:
+                    continue
             else:
+                logger.info(f"{key_path} already exists in output .h5 file. Skipping property.\n")
                 continue
+
             
         #===================================================================================
         # Calculate Extra Ouputs
