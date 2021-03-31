@@ -600,6 +600,8 @@ class MarmotFormat():
         if self.Marmot_Solutions_folder == None:
             self.Marmot_Solutions_folder = self.PLEXOS_Solutions_folder
         
+        skip_props = mconfig.parser('skip_existing_properties')
+
         if isinstance(gen_names, str):
             try:
                 gen_names = pd.read_csv(gen_names)   
@@ -792,6 +794,8 @@ class MarmotFormat():
             #Skip properties that already exist in *formatted.h5 file.
             with h5py.File(os.path.join(hdf_out_folder,HDF5_output),'r') as f:
                 existing_keys = [key for key in f.keys()]
+            if not skip_props:
+                existing_keys = []
         else:
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
     
