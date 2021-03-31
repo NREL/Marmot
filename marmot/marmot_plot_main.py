@@ -16,8 +16,16 @@ have descriptive names such as total_generation.py, generation_stack.py, curtaim
 import os
 import sys
 if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
+
+    #If running from top level of repo.
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
+
+    # #If running from Marmot/marmot directory.
+    # if os.path.dirname(os.path.dirname(os.path.dirname(__file__))) not in sys.path:
+    #     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+
+
 import pathlib
 import importlib
 import time
@@ -27,6 +35,7 @@ import matplotlib.pyplot as plt
 import logging 
 import logging.config
 import yaml
+
 try:
     from marmot.meta_data import MetaData
 except ModuleNotFoundError:
@@ -260,7 +269,7 @@ class MarmotPlot():
         if figure_format == 'nan':
             figure_format = 'png'
         
-        shift_leap_day = str(mconfig.parser("shift_leap_day")).upper()
+        shift_leapday = str(mconfig.parser("shift_leapday")).upper()
         font_defaults = mconfig.parser("font_settings")
 
         #===============================================================================
@@ -446,14 +455,14 @@ class MarmotPlot():
                         "Scenarios", "Scenario_Diff", "Marmot_Solutions_folder",
                         "ylabels", "xlabels", "ticklabels",
                         "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
-                        "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leap_day","duration_curve"]
+                        "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leapday","duration_curve"]
         
             argument_list = [row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5],row.iloc[6], row.iloc[7],
                              hdf_out_folder, Zones, self.AGG_BY, ordered_gen, PLEXOS_color_dict,
                              self.Scenarios, self.Scenario_Diff, self.Marmot_Solutions_folder,
                              self.ylabels, self.xlabels, self.ticklabels,
                              color_list, marker_style, gen_names_dict, pv_gen_cat,
-                             re_gen_cat, vre_gen_cat, thermal_gen_cat,self.Region_Mapping,figure_folder, meta,facet,shift_leap_day,duration_curve]
+                             re_gen_cat, vre_gen_cat, thermal_gen_cat,self.Region_Mapping,figure_folder, meta,facet,shift_leapday,duration_curve]
         
             argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
         
