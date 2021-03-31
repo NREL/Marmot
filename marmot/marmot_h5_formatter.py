@@ -854,6 +854,7 @@ class MarmotFormat():
     
                 row["data_set"] = row["data_set"].replace(' ', '_')
                 try:
+                    logger.info("Saving data to h5 file...")
                     Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= row["group"] + "_" + row["data_set"], mode="a", complevel=9, complib = 'blosc:zlib')
                     logger.info("Data saved to h5 file successfully\n")
                 except:
