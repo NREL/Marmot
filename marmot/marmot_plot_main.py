@@ -271,6 +271,8 @@ class MarmotPlot():
         
         shift_leapday = str(mconfig.parser("shift_leapday")).upper()
         font_defaults = mconfig.parser("font_settings")
+        minticks = mconfig.parser("figure_size","minticks")
+        maxticks = mconfig.parser("figure_size","maxticks")
 
         #===============================================================================
         # Input and Output Directories
@@ -453,14 +455,14 @@ class MarmotPlot():
             key_list = ["prop", "start", "end", "timezone", "start_date", "end_date",
                         "hdf_out_folder", "Zones", "AGG_BY", "ordered_gen", "PLEXOS_color_dict",
                         "Scenarios", "Scenario_Diff", "Marmot_Solutions_folder",
-                        "ylabels", "xlabels", "ticklabels",
+                        "ylabels", "xlabels", "ticklabels","minticks","maxticks",
                         "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
                         "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leapday","duration_curve"]
         
             argument_list = [row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5],row.iloc[6], row.iloc[7],
                              hdf_out_folder, Zones, self.AGG_BY, ordered_gen, PLEXOS_color_dict,
                              self.Scenarios, self.Scenario_Diff, self.Marmot_Solutions_folder,
-                             self.ylabels, self.xlabels, self.ticklabels,
+                             self.ylabels, self.xlabels, self.ticklabels,minticks,maxticks,
                              color_list, marker_style, gen_names_dict, pv_gen_cat,
                              re_gen_cat, vre_gen_cat, thermal_gen_cat,self.Region_Mapping,figure_folder, meta,facet,shift_leapday,duration_curve]
         
