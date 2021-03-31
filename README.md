@@ -8,6 +8,7 @@ Click the following to quickly navigate to the main sections of the ReadME:
 - [marmot_h5_formatter](https://github.nrel.gov/PCM/Marmot#marmot_h5_formatter)
 - [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files)
 - [marmot_plot_main](https://github.nrel.gov/PCM/Marmot#marmot_plot_main)
+- [Additional Configuration Settings ](https://github.nrel.gov/PCM/Marmot#Additional-Configuration-Settings)
 
 
 ## Main Python Scripts
@@ -122,20 +123,82 @@ temp.close()
 As with the processing script users will need to adjust the input settings in the **Marmot_user_defined_inputs.csv** and set which plots to create in **Marmot_plot_select.csv**. 
 **Marmot_plot_select.csv** is a csv file which determines which figures to plot. This file is in the repo. Under the *"Plot Graph"* column adjust the property to be TRUE or FALSE to decide whether to plot the figure. Column *D* allows the user to adjust certain properties within the plot (examples given). Columns *E* and *F* adjust the range of days to plot either side of the specified property in *D*. Column *G* adjusts the time zone to plot on the figure. The list of figures to plot is currently limited by what code has been written for.  
 
-Settings to adjust in the **Marmot_user_defined_inputs.csv** required to run the plotting code include:
+Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the plotting code include:
 
-- `PLEXOS_Solutions_folder` Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
+- `PLEXOS_Solutions_folder` **Required** Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
 
-- `Marmot_Solutions_folder` Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
+- `Marmot_Solutions_folder` **Required** Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
 
-- `Scenarios` This is the name of the scenario(s) to plot. The order of the scenarios will determine the order of the scenarios in the plot. Resulting outputs will be saved in the "*Figures_Output*" folder contained with the `Marmot_Solutions_folder`. "*Figures_Output*" is created automatically when **marmot_plot_main.py** is run
+- `Scenarios` **Required** This is the name of the scenario(s) to plot. The order of the scenarios will determine the order of the scenarios in the plot. Resulting outputs will be saved in the "*Figures_Output*" folder contained with the `Marmot_Solutions_folder`. "*Figures_Output*" is created automatically when **marmot_plot_main.py** is run
 
-- `Scenario_Diff_plot` This is a list which can contain max two entries. This list is used to create plots using the difference of the values between two scenarios. The second scenario in the list is subtracted from the first. If you are not creating difference plots this list can remain empty.
+- `Scenario_Diff_plot` **Optional** This is a list which can contain max two entries. This list is used to create plots using the difference of the values between two scenarios. The second scenario in the list is subtracted from the first. If you are not creating difference plots this list can remain empty.
 
-- `AGG_BY` A string which tells Marmot which region type to aggregate by when creating plots. The default options are *”regions”* and *“zones”*. Other options can be added based on how the user sets up **Region_mapping.csv** described [above](https://github.nrel.gov/PCM/Marmot#mapping-files)
+- `AGG_BY` **Required** A string which tells Marmot which region type to aggregate by when creating plots. The default options are *”regions”* and *“zones”*. Other options can be added based on how the user sets up **Region_mapping.csv** described [above](https://github.nrel.gov/PCM/Marmot#mapping-files)
 
-- `zone_region_sublist` List of *"regions/zones”* to plot if results are not required for all regions. The list of *"regions/zones”* should be contained within the `AGG_BY` aggregation. This is an optional field and can be left empty if not needed.
+- `zone_region_sublist` **Optional** List of *"regions/zones”* to plot if results are not required for all regions. The list of *"regions/zones”* should be contained within the `AGG_BY` aggregation. This is an optional field and can be left empty if not needed.
 
-- `Facet_ylabels` & `Facet_xlabels` If you wish to create a Facet plot, these labels will be applied to the axis. The amount of entries given to each label will determine the dimensions of the Facet plot. This should be equal to the number of scenarios you are plotting. For example, if you have 6 scenarios your Facet Grid dimensions may be [2,3], [3,2] or [1,6] etc. This is an optional field and can be left empty if not needed.
+- `Facet_ylabels` & `Facet_xlabels` **Optional** If you wish to create a Facet plot, these labels will be applied to the axis. The amount of entries given to each label will determine the dimensions of the Facet plot. This should be equal to the number of scenarios you are plotting. For example, if you have 6 scenarios your Facet Grid dimensions may be [2,3], [3,2] or [1,6] etc. This is an optional field and can be left empty if not needed.
 
-- `Figure_Format` The format to save images in. If left blank Marmot will output all figures as .png. We recommend that the user uses a .svg figure format which is a vector-based image format and compatible with all Microsoft Office products. Vector images uses mathematical paths to determine how images are drawn compared to raster images (jpg,png etc.) which use pixels. The main advantages of vector images are reduced size and that they do not decrease in quality when image display size is adjusted. For more information see the following article https://www.geeksforgeeks.org/vector-vs-raster-graphics/
+- `Tick_labels` **Optional** List of custom tick labels, allows adjustment of scenario names on certain plots. Not setup for every plot. 
+
+## Additional Configuration Settings 
+
+**The adjustment of the following settings are all optional** and are setup with default values. Users who would like to further customize how Marmot works will be able to easily change these values. 
+
+These additional configuration settings live within the [Marmot/marmot/config](https://github.nrel.gov/PCM/Marmot/tree/master/marmot/config) folder of the repo. A **config.yml** file will be created the first time the **marmot_h5_formatter** or **marmot_plot_main** are run. After the yml file has been created users will be able to change any settings they like within the file, this file is never overwritten by Marmot once created. To revert to default settings, delete the config.yml file and Marmot will create it again once run. 
+The config.yml file is not to be confused with the marmot_logging_config.yml file which is used to set the logging defaults used by Marmot and also exhists in the same folder.
+
+The **config.yml** settings and their defaults are as follows:
+
+- **axes_options:** 
+  - x_axes_maxticks: 8
+  - x_axes_minticks: 4
+  
+  *Allows adjustment of the minimum and maximum tick marks on datetime x axes* 
+
+- **category_file_names:**
+  - pv_gen_cat: pv_gen_cat.csv
+  - re_gen_cat: re_gen_cat.csv
+  - thermal_gen_cat: thermal_gen_cat.csv
+  - vre_gen_cat: vre_gen_cat.csv
+  
+  *Change the default category files that live within the Mapping Folder, files must be created first*  
+  
+ - **color_dictionary_file:** colour_dictionary.csv
+ 
+  *Change the default color dictionary file that lives within the Mapping Folder, file must be created first*  
+
+- **figure_file_format:** svg
+
+  *Adjust the format figures are saved in, the default is **svg** a vector-based image. This field accepts any format that is compatible with matplotlib*  
+
+- **figure_size:**
+  - xdimension: 6
+  - ydimension: 4
+  
+  *Adjust the the x and y axes dimensions of the output figure*  
+
+- **font_settings:**
+  - axes_label_size: 16
+  - font_family: serif
+  - legend_size: 11
+  - xtick_size: 11
+  - ytick_size: 12
+  
+  *Settings to adjust font sizes, family, and tick size within figures*
+
+- **ordered_gen_file:** ordered_gen.csv
+
+  *Change the default ordered_gen file that lives within the Mapping Folder, file must be created first*  
+
+- **shift_leapday:** false
+
+  *Handles auto shifting of leap day if model contains it, default is false*  
+
+- **skip_existing_properties:** true
+
+  *Toggles whether existing properties are skipped or overwritten if they already contained in the processed_h5 file, the default is to skip
+
+- **user_defined_inputs_file:** Marmot_user_defined_inputs.csv
+
+  *Change the default Marmot_user_defined_inputs file, file must be created first*  
