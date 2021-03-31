@@ -2,22 +2,75 @@
 Marmot is a set of python scripts to process h5plexos PLEXOS results plot the outputs 
 ![Yellow-bellied marmot](https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg)
 
+Click the following to quickly navigate to the main sections of the ReadME:
+- [Main Python Scripts](https://github.nrel.gov/PCM/Marmot#main-python-scripts)
+- [Initial Setup](https://github.nrel.gov/PCM/Marmot#initial-setup)
+- [marmot_h5_formatter](https://github.nrel.gov/PCM/Marmot#marmot_h5_formatter)
+- [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files)
+- [marmot_plot_main](https://github.nrel.gov/PCM/Marmot#marmot_plot_main)
+
+
 ## Main Python Scripts
 Marmot consists of two main .py files:
-* [**marmot_h5_formatter.py**](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/marmot/marmot_h5_formatter.py)
-* [**marmot_plot_main.py**](https://github.nrel.gov/PCM/Marmot/blob/ReEDS2_integration/marmot/marmot_plot_main.py)
+* [**marmot_h5_formatter.py**](https://github.nrel.gov/PCM/Marmot/blob/master/marmot/marmot_h5_formatter.py)
+* [**marmot_plot_main.py**](https://github.nrel.gov/PCM/Marmot/blob/master/marmot/marmot_plot_main.py)
 
-A high-level explanation of what these files do and suggested settings to change are described in this readme. Code specifics are decribed in more detail in the code comments. 
+A high-level explanation of what these files do and suggested settings to change are described in this readme. Code specifics are described in more detail in the code docstrings. 
 
 ## Initial Setup
-* First `git clone --recurse-submodules https://github.nrel.gov/PCM/Marmot.git` to any location you like, make sure to include `--recurse-submodules` else h5plexos will not be included correctly.
-* To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.nrel.gov/PCM/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
-* Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot.
+
+- Marmot requires Python 3 and the following prerequisites to run.
+  - hdf5>=1.10.4 *(Install with Conda or Download from HDF website)*
+  - numpy
+  - pandas
+  - PyYAML
+  - h5py>=2.10.0
+  - matplotlib>=3.1.0
+  - [h5plexos](https://github.com/NREL/h5plexos)>=0.6 *(See more details [below](https://github.nrel.gov/PCM/Marmot#marmot_h5_formatter))*
+  - tables
+
+- Most NREL severs should already meet these prerequisites so installation of prerequisites may not be required.
+
+- These prerequisites can be installed manually with conda or pip, but it is recommended to install all requirements with the provided conda environment or requirements.txt file.
+Each are explained [below](https://github.nrel.gov/PCM/Marmot#conda-environment). 
+
+After all required prerequisites are installed, you are ready to install and run Marmot. There are two ways to run Marmot, directly or as a module. Most users probably want to run Marmot directly however some advanced users may want to import Marmot directly to use its functionality  in their own code. Both are explained below.
+
+### Downloading, installing, and running Marmot Directly 
+
+- First `git clone --recurse-submodules https://github.nrel.gov/PCM/Marmot.git` to any location you like, make sure to include `--recurse-submodules` else h5plexos will not be included correctly.
+
+- The Marmot formatter imports h5plexos. To avoid import and version errors, h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot `--recurse-submodules`, you can combine the git submodule init and git submodule update steps by running `git submodule update --init`.
+
+- Follow the **marmot_h5_formatter** and **marmot_plot_main** steps below to run Marmot. When running these scripts, make sure to chdir into the highest level of the repo and use `python marmot/marmot_h5_formatter.py` and `python marmot/marmot_plot_main.py`
+
+### Importing and running Marmot as a Module (Advanced User)
+
+- To use Marmot as a Python Module that can be imported, it first needs to be made visible to the Python package directory. This can be done two ways, pip installing Marmot (preferred method) or adding the Marmot directory folder to the system path. 
+- To pip install Marmot, first open a cmd window that is setup with Python and type the following `pip install --user -e git+https://github.nrel.gov/PCM/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit if desired. You may need to navigate do non system drive to run pip install (e.g D:\)
+-If you have both python2 and python3 installed, your system will have different package libraries. In order to use python3, you need to explicity tell pip to install Marmot into your python3 library: `pip3 install --user -e git+https://github.nrel.gov/PCM/Marmot.git#egg=marmot`
+- If no error messages appeared Marmot has been installed correctly. To import the formatter or plotter, use the following import commands:
+  
+ ```python 
+ from marmot.marmot_h5_formatter import MarmotFormat 
+ ```
+ ```python 
+from marmot.marmot_plot_main import MarmotPlot 
+```
+- When importing Marmot directly, the **Marmot_user_defined_inputs.csv** described below is not used. However several other input files are still required. For more details see internal code docstrings within the '__init__' methods.
+
+#### Conda Environment
+- Setting up a new conda environment is the recommended route on Eagle or personal computer. Users will not be able to setup conda environments on most NREL windows servers due to admin rights restrictions.
+To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.nrel.gov/PCM/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
+Once the environment has been created it can be activated by typing `conda activate marmot-env `
+
+#### requirements txt file
+- A [requirements.txt](https://github.nrel.gov/PCM/Marmot/blob/master/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`. If installing on a server adding `--user` to the command may be required. 
+
+
 
 ## marmot_h5_formatter
 The **marmot_h5_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed, they are saved to an intermediary hdf5 file which can then be read into the Marmot plotting code. From the h5plexos ReadMe: "This package provides a Python interface for reading HDF5 files with H5PLEXOS v0.5 and v0.6 formatting. To create v0.5 files, use a version of this package in the 0.5 series. To create v0.6 files, use H5PLEXOS.jl."
-
-The Marmot formatter imports h5plexos. To avoid import and version erros, h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot `--recurse-submodules`, you can combine the git submodule init and git submodule update steps by running `git submodule update --init`.
 
 Before you use the **marmot_h5_formatter** you will need to adjust and set the input settings in the **Marmot_user_defined_inputs.csv** and set which PLEXOS properties to process in the **plexos_properties.csv**. You may also want to edit the Mapping Files described [here](https://github.nrel.gov/PCM/Marmot#mapping-files). These files are located in the repo and are available to be edited once you clone the repo. 
 
@@ -54,10 +107,13 @@ Examples of these files can be found within in the repo in the [mapping_folder](
  - **pv_gen_cat.csv** , **re_gen_cat.csv** , **vre_gen_cat.csv** & **thermal_gen_cat.csv** - Generators which belong to specified category, used for certain figures and determining which generators to include for curtailment calculations.
 
 ### View formatted contents
-In order to check the contents of an existing processed HDF5 folder, use the following (adjusting scenario as desired):
-temp=pd.HDFStore(hdf_out_folder+"/"+Multi_Scenario[0]+"_formatted.h5")
-temp.keys()
+In order to check the contents of an existing processed HDF5 folder, use the following:
+
+```python 
+temp=pd.HDFStore("path to formatted hdf5 file")
+print(temp.keys())
 temp.close()
+```
 
 ## marmot_plot_main
 

@@ -16,7 +16,6 @@ have descriptive names such as total_generation.py, generation_stack.py, curtaim
 import os
 import sys
 if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
-
     #If running from top level of repo.
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -24,7 +23,6 @@ if __name__ == '__main__': # Add Marmot directory to sys path if running from __
     # #If running from Marmot/marmot directory.
     # if os.path.dirname(os.path.dirname(os.path.dirname(__file__))) not in sys.path:
     #     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
-
 
 import pathlib
 import importlib
@@ -35,7 +33,6 @@ import matplotlib.pyplot as plt
 import logging 
 import logging.config
 import yaml
-
 try:
     from marmot.meta_data import MetaData
 except ModuleNotFoundError:
