@@ -797,7 +797,7 @@ class MarmotFormat():
                 existing_keys = []
         else:
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
-    
+            existing_keys = []
         process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
     
         start = time.time()
