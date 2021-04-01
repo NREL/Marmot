@@ -581,6 +581,8 @@ class mplot(object):
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
 
+        scenario = self.Scenarios[0] #Select single scenario for purpose of extracting limits.
+
         export_limits = Export_Limit_Collection.get(scenario).droplevel('timestamp')
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
@@ -1442,7 +1444,10 @@ class mplot(object):
             imp_oz = imp_lines[imp_lines['region'] == zone_input]
 
             other_zones = self.meta.zones().name.tolist()
-            other_zones.remove(zone_input)
+            try:
+                other_zones.remove(zone_input)
+            except: 
+                self.logger.warning("Are you sure you set agg_by = zone?")
 
             #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
             fig7, axs = mfunc.setup_plot(xdimension,ydimension,sharey = True)
