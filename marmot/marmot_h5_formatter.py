@@ -67,9 +67,9 @@ os.chdir(current_dir)
 #===============================================================================
 #This is only required if your output has not been processed already on Eagle
 
-#from h5plexos.process import process_solution
-#PLEXOS_Solution = '/path/to/PLEXOS/zipfile.zip'
-#process_solution(PLEXOS_Solution,'/write/path/to/h5plexos/solution.h5') # Saves out to PLEXOS_Solution.h5
+# from h5plexos.process import process_solution
+# PLEXOS_Solution = '/Users/mschwarz/OR OSW local/Solutions/coastaltx_tests/5GW_2036_midjune/Model 5GW_2036_0604_to_0620 Solution.zip'
+# process_solution(PLEXOS_Solution,'/Users/mschwarz/OR OSW local/Solutions/coastaltx_tests/5GW_2036_midjune/Model 5GW_2036_0604_to_0620 Solution.h5') # Saves out to PLEXOS_Solution.h5
 
 #===============================================================================
 
@@ -681,7 +681,7 @@ class MarmotFormat():
         df : pd.DataFrame()
             Formatted results dataframe.
 
-        """
+        """        
         try:
             if "_" in plexos_class:
                 df = db.query_relation_property(plexos_class,plexos_prop,timescale=timescale)
@@ -796,6 +796,7 @@ class MarmotFormat():
             if not mconfig.parser('skip_existing_properties'):
                 existing_keys = []
         else:
+            existing_keys = []
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
             existing_keys = []
         process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
@@ -814,8 +815,8 @@ class MarmotFormat():
             data_chunks = []
     
             logger.info("Processing %s %s",row["group"],row["data_set"])
-            row["data_set"] = row["data_set"].replace(' ', '_')
-            key_path = row["group"] + "_" + row["data_set"]
+            prop_underscore = row["data_set"].replace(' ', '_')
+            key_path = row["group"] + "_" + prop_underscore
             if key_path not in existing_keys:
     
                 for model in files_list:
