@@ -18,10 +18,8 @@ path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
 configfile_path = os.path.join(dir_path,configfile_name)
 
-# Check if there is already a configurtion file
-if not os.path.isfile(configfile_path):
-    # Create the configuration file as it doesn't exist yet
-    
+
+def createConfig(configfile_path):
     """
     The following are Marmot default config settings that are used to create the config.yml file when Marmot is first run.
     Users Should NOT edit these values, instead edit the values directly in the config.yml file once created. 
@@ -64,10 +62,17 @@ if not os.path.isfile(configfile_path):
 
     with open(configfile_path, "w") as cfgfile:
         yaml.dump(data, cfgfile,default_flow_style=False)
-    
 
+
+# Check if there is already a configurtion file
+if not os.path.isfile(configfile_path):
+    # Create the configuration file as it doesn't exist yet
+    createConfig(configfile_path)
+    
+    
 def parser(top_level, second_level=None): 
     """
+    Pull requested value from config.yml file
     
     Parameters
     ----------
@@ -91,3 +96,45 @@ def parser(top_level, second_level=None):
         value = cfg[top_level][second_level]
     return value 
     
+
+def edit_value(new_value, top_level, second_level=None): 
+    """
+    Edit the config.yml file through code
+
+    Parameters
+    ----------
+    new_value : string/int/bool
+        New value to apply to config file.
+    top_level : string
+        top level of config dictionary, will return specified level and any sublevel.
+    second_level : string, optional
+        second level of config dictionary under top_level, will return a single value
+
+    Returns
+    -------
+    None.
+
+    """
+
+    with open(configfile_path, "r") as f:
+        cfg = yaml.safe_load(f)
+    
+    if not second_level:
+        cfg[top_level] = new_value
+    else:
+        cfg[top_level][second_level] = new_value  
+            
+    with open(configfile_path,'w') as f:
+            yaml.dump(cfg,f,default_flow_style=False)
+            
+
+def reset_defaults():   
+    '''
+    When called, resets config.yml to default values
+
+    Returns
+    -------
+    None.
+
+    '''
+    createConfig(configfile_path)
