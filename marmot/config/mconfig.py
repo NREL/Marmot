@@ -50,6 +50,7 @@ def createConfig(configfile_path):
         
         shift_leapday = False,
         skip_existing_properties = True,
+        auto_convert_units = True,
         
         category_file_names = dict(
             pv_gen_cat = 'pv_gen_cat.csv',

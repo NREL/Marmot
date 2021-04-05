@@ -705,4 +705,10 @@ def capacity_energy_unitconversion(max_value):
     else:
         divisor = 1000
         units = 'GW'
+    
+    # Disables auto unit conversion, all values in MW
+    if mconfig.parser("auto_convert_units") == False:
+        divisor = 1
+        units = 'MW'
+        
     return {'units':units, 'divisor':divisor}
