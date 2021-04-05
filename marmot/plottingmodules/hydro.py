@@ -32,6 +32,8 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
  
     def hydro_continent_net_load(self):
@@ -98,7 +100,7 @@ class mplot(object):
             ax2.spines['top'].set_visible(False)
             ax2.tick_params(axis='y', which='major', length=5, width=1)
             ax2.tick_params(axis='x', which='major', length=5, width=1)
-            ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax2.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
             ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             ax2.margins(x=0.01)
 
@@ -190,7 +192,7 @@ class mplot(object):
                 ax.spines['top'].set_visible(False)
                 ax.tick_params(axis='y', which='major', length=5, width=1)
                 ax.tick_params(axis='x', which='major', length=5, width=1)
-                ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
                 ax.margins(x=0.01)
 
                 locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
@@ -238,7 +240,7 @@ class mplot(object):
             ax2.spines['top'].set_visible(False)
             ax2.tick_params(axis='y', which='major', length=5, width=1)
             ax2.tick_params(axis='x', which='major', length=5, width=1)
-            ax2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax2.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
             ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             ax2.margins(x=0.01)
 

@@ -8,6 +8,7 @@ This code creates transmission line and interface plots and is called from Marmo
 """
 
 import os
+import datetime as dt
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -16,6 +17,8 @@ import numpy as np
 import math
 import logging
 import marmot.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
+
 
 #===============================================================================
 
@@ -27,6 +30,7 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
     def storage_volume(self):
 
@@ -139,7 +143,7 @@ class mplot(object):
             for column in storage_volume_all_scenarios:
                 mfunc.create_line_plot(axs,storage_volume_all_scenarios,column,color_dict,label = column,n = 0)      
                 axs[0].set_ylabel('Head Storage Volume (GWh)',  color='black', rotation='vertical')
-                axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[0].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
                 axs[0].margins(x=0.01)
 
                 axs[0].set_ylim(ymin = 0)
@@ -149,7 +153,7 @@ class mplot(object):
                 mfunc.create_line_plot(axs,use_all_scenarios,column,color_dict,label = column + ' Unserved Energy', n = 1)
                 axs[1].set_ylabel('Unserved Energy (GWh)',  color='black', rotation='vertical')
                 axs[1].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[1].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
                 axs[1].margins(x=0.01)
 
                 [mfunc.set_plot_timeseries_format(axs,n) for n in range(0,2)]

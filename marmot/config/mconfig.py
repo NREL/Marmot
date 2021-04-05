@@ -43,7 +43,8 @@ def createConfig(configfile_path):
         
         axes_options = dict(
             x_axes_minticks = 4,
-            x_axes_maxticks = 8),
+            x_axes_maxticks = 8,
+            y_axes_decimalpt = 1),
         
         figure_file_format = 'svg',
         

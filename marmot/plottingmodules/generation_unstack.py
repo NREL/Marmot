@@ -27,6 +27,7 @@ class mplot(object):
         
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
 
     def gen_unstack(self):
@@ -237,7 +238,7 @@ class mplot(object):
                 axs[i].spines['top'].set_visible(False)
                 axs[i].tick_params(axis='y', which='major', length=5, width=1)
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+                axs[i].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
                 axs[i].margins(x=0.01)
 
                 locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)

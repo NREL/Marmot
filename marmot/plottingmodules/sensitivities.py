@@ -7,6 +7,7 @@ import matplotlib as mpl
 from matplotlib.patches import Patch
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 
 
 #===============================================================================
@@ -23,6 +24,7 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
     def _process_ts(self,df,zone_input):
         oz = df.xs(zone_input, level = self.AGG_BY)
@@ -200,7 +202,7 @@ class mplot(object):
                 axs[0].tick_params(axis='x', which='major', length=5, width=1)
                 axs[0].set_ylabel('Generation (MW)',  color='black', rotation='vertical')
                 axs[0].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[0].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
                 axs[0].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs)
                 handles, labels = axs[0].get_legend_handles_labels()

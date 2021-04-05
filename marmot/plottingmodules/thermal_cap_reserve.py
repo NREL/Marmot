@@ -15,6 +15,7 @@ import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 
 #===============================================================================
 
@@ -30,6 +31,7 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
     def thermal_cap_reserves(self):
         outputs = {}
@@ -119,7 +121,7 @@ class mplot(object):
                     axs[i].spines['top'].set_visible(False)
                     axs[i].tick_params(axis='y', which='major', length=5, width=1)
                     axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.2f}'))
+                    axs[i].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
                     axs[i].margins(x=0.01)
                     axs[i].xaxis.set_major_locator(locator)
                     axs[i].xaxis.set_major_formatter(formatter)
@@ -137,7 +139,7 @@ class mplot(object):
                     axs[i].spines['top'].set_visible(False)
                     axs[i].tick_params(axis='y', which='major', length=5, width=1)
                     axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                    axs[i].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
                     axs[i].margins(x=0.01)
                     axs[i].xaxis.set_major_locator(locator)
                     axs[i].xaxis.set_major_formatter(formatter)

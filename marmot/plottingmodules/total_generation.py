@@ -34,6 +34,7 @@ class mplot(object):
         
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
     def total_gen(self):
         # Create Dictionary to hold Datframes for each scenario
@@ -190,7 +191,7 @@ class mplot(object):
             fig1.set_ylabel('Total Genertaion ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
 
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+            fig1.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
@@ -334,7 +335,7 @@ class mplot(object):
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             #adds comma to y axis data
-            ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+            ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
 
