@@ -357,7 +357,7 @@ class mplot(object):
 
             fig2 = mfunc.create_grouped_bar_plot(reserve_out,color_dict)
             if count_hours == False:
-                fig2.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                fig2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 fig2.set_ylabel('Reserve {} [{}h]'.format(data_set,unitconversion['units'] ),  color='black', rotation='vertical')
             elif count_hours == True:
                 fig2.set_ylabel('Reserve {} Hours'.format(data_set),  color='black', rotation='vertical')
@@ -439,7 +439,7 @@ class mplot(object):
 
                 for column in reserve_timeseries:
                     mfunc.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
 

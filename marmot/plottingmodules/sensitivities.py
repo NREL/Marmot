@@ -202,7 +202,7 @@ class mplot(object):
                 axs[0].tick_params(axis='x', which='major', length=5, width=1)
                 axs[0].set_ylabel('Generation (MW)',  color='black', rotation='vertical')
                 axs[0].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                axs[0].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs)
                 handles, labels = axs[0].get_legend_handles_labels()

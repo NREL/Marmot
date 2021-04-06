@@ -143,7 +143,7 @@ class mplot(object):
             for column in storage_volume_all_scenarios:
                 mfunc.create_line_plot(axs,storage_volume_all_scenarios,column,color_dict,label = column,n = 0)      
                 axs[0].set_ylabel('Head Storage Volume (GWh)',  color='black', rotation='vertical')
-                axs[0].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].margins(x=0.01)
 
                 axs[0].set_ylim(ymin = 0)
@@ -153,7 +153,7 @@ class mplot(object):
                 mfunc.create_line_plot(axs,use_all_scenarios,column,color_dict,label = column + ' Unserved Energy', n = 1)
                 axs[1].set_ylabel('Unserved Energy (GWh)',  color='black', rotation='vertical')
                 axs[1].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                axs[1].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[1].margins(x=0.01)
 
                 [mfunc.set_plot_timeseries_format(axs,n) for n in range(0,2)]

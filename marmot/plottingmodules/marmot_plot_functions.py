@@ -323,7 +323,7 @@ def create_stacked_bar_plot(df, colour):
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
     #adds comma to y axis data
-    fig.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{y_axes_decimalpt}f'))
+    fig.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
     fig.tick_params(axis='y', which='major', length=5, width=1)
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
@@ -478,7 +478,7 @@ def create_stackplot(axs,data,color_dict,label=None,n=0):
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
     axs[n].tick_params(axis='x', which='major', length=5, width=1)
-    axs[n].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{y_axes_decimalpt}f'))
+    axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
     axs[n].margins(x=0.01)
 
 

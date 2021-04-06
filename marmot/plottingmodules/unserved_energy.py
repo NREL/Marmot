@@ -98,7 +98,7 @@ class mplot(object):
                 ax.spines['top'].set_visible(False)
                 ax.tick_params(axis='y', which='major', length=5, width=1)
                 ax.tick_params(axis='x', which='major', length=5, width=1)
-                ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
 
             #    ax.axvline(dt.datetime(2024, 1, 2, 2, 0), color='black', linestyle='--')
@@ -182,7 +182,7 @@ class mplot(object):
                 mfunc.create_bar_plot(Total_Unserved_Energy_Out,ax,color_dict)
 
                 ax.set_ylabel('Total Unserved Energy (MWh)',  color='black', rotation='vertical')
-                ax.yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
 
                 for i in ax.patches:

@@ -1079,7 +1079,7 @@ class mplot(object):
 
                         mfunc.create_line_plot(axs,single_parent,column,label=column,n=n)
                         axs[n].set_title(parent)
-                        axs[n].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                        axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                         axs[n].margins(x=0.01)
                         mfunc.set_plot_timeseries_format(axs,n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
@@ -1310,7 +1310,7 @@ class mplot(object):
             else:
                 for column in all_scenarios:
                     mfunc.create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
                 axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
@@ -1388,7 +1388,7 @@ class mplot(object):
                 mfunc.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
                 axs[n].set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
                 axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
                 axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':')
                 mfunc.set_plot_timeseries_format(axs,n)
@@ -1528,7 +1528,7 @@ class mplot(object):
                     linestyle = '--' if column == 'Net export' else 'solid'
                     mfunc.create_line_plot(axs,net_exports,column = column, label = column, n = n,linestyle = linestyle)
     
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FormatStrFormatter(f'%.{self.y_axes_decimalpt}f'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
 
                 axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
