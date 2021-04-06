@@ -35,6 +35,7 @@ class mplot(object):
         
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
     def total_cap(self):
         outputs = {}
@@ -101,7 +102,7 @@ class mplot(object):
             fig1.spines['top'].set_visible(False)
             fig1.set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
@@ -193,7 +194,7 @@ class mplot(object):
             fig1.set_ylabel('Capacity Change ({}) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0],  color='black', rotation='vertical')
 
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
 
@@ -244,7 +245,7 @@ class mplot(object):
             axs[0].spines['top'].set_visible(False)
             axs[0].set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            axs[0].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+            axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             axs[0].tick_params(axis='y', which='major', length=5, width=1)
             axs[0].tick_params(axis='x', which='major', length=5, width=1)
             axs[0].get_legend().remove()
@@ -276,7 +277,7 @@ class mplot(object):
             axs[1].spines['top'].set_visible(False)
             axs[1].set_ylabel('Total Generation ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
             #adds comma to y axis data
-            axs[1].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+            axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             axs[1].tick_params(axis='y', which='major', length=5, width=1)
             axs[1].tick_params(axis='x', which='major', length=5, width=1)
 

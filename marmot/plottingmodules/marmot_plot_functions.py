@@ -315,13 +315,15 @@ def create_stacked_bar_plot(df, colour):
     fig : matplotlib fig
         matplotlib fig.
     """
+    
+    y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
     fig = df.plot.bar(stacked=True, figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='black', linewidth='0.1',
                                                 color=[colour.get(x, '#333333') for x in df.columns])
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
     #adds comma to y axis data
-    fig.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+    fig.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
     fig.tick_params(axis='y', which='major', length=5, width=1)
     fig.tick_params(axis='x', which='major', length=5, width=1)
     return fig
@@ -468,13 +470,15 @@ def create_stackplot(axs,data,color_dict,label=None,n=0):
     -------
     None.
     """
+    y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+    
     axs[n].stackplot(data.index.values, data.values.T, labels=label, linewidth=0,
                              colors=[color_dict.get(x, '#333333') for x in data.T.index])
     axs[n].spines['right'].set_visible(False)
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
     axs[n].tick_params(axis='x', which='major', length=5, width=1)
-    axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+    axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
     axs[n].margins(x=0.01)
 
 
@@ -701,4 +705,10 @@ def capacity_energy_unitconversion(max_value):
     else:
         divisor = 1000
         units = 'GW'
+    
+    # Disables auto unit conversion, all values in MW
+    if mconfig.parser("auto_convert_units") == False:
+        divisor = 1
+        units = 'MW'
+        
     return {'units':units, 'divisor':divisor}
