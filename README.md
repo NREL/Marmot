@@ -112,7 +112,7 @@ In order to check the contents of an existing processed HDF5 folder, use the fol
 
 ```python 
 temp=pd.HDFStore("path to formatted hdf5 file")
-print(temp.keys())
+temp.keys()
 temp.close()
 ```
 
@@ -150,6 +150,21 @@ The config.yml file is not to be confused with the marmot_logging_config.yml fil
 
 The **config.yml** settings and their defaults are as follows:
 
+- **font_settings:**
+  - axes_label_size: 16
+  - font_family: serif
+  - legend_size: 11
+  - xtick_size: 11
+  - ytick_size: 12
+  
+  *Settings to adjust font sizes, family, and tick size within figures*
+  
+- **figure_size:**
+  - xdimension: 6
+  - ydimension: 4
+  
+  *Adjust the the x and y axes dimensions of the output figure*  
+  
 - **axes_options:** 
   - x_axes_maxticks: 8
   - x_axes_minticks: 4
@@ -163,34 +178,23 @@ The **config.yml** settings and their defaults are as follows:
   - vre_gen_cat: vre_gen_cat.csv
   
   *Change the default category files that live within the Mapping Folder, files must be created first*  
+ 
+- **user_defined_inputs_file:** Marmot_user_defined_inputs.csv
+
+  *Change the default Marmot_user_defined_inputs file, file must be created first*  
   
- - **color_dictionary_file:** colour_dictionary.csv
+- **color_dictionary_file:** colour_dictionary.csv
  
   *Change the default color dictionary file that lives within the Mapping Folder, file must be created first*  
-
-- **figure_file_format:** svg
-
-  *Adjust the format figures are saved in, the default is **svg** a vector-based image. This field accepts any format that is compatible with matplotlib*  
-
-- **figure_size:**
-  - xdimension: 6
-  - ydimension: 4
-  
-  *Adjust the the x and y axes dimensions of the output figure*  
-
-- **font_settings:**
-  - axes_label_size: 16
-  - font_family: serif
-  - legend_size: 11
-  - xtick_size: 11
-  - ytick_size: 12
-  
-  *Settings to adjust font sizes, family, and tick size within figures*
 
 - **ordered_gen_file:** ordered_gen.csv
 
   *Change the default ordered_gen file that lives within the Mapping Folder, file must be created first*  
 
+- **figure_file_format:** svg
+
+  *Adjust the format figures are saved in, the default is **svg** a vector-based image. This field accepts any format that is compatible with matplotlib*  
+  
 - **shift_leapday:** false
 
   *Handles auto shifting of leap day if model contains it, default is false*  
@@ -199,6 +203,6 @@ The **config.yml** settings and their defaults are as follows:
 
   *Toggles whether existing properties are skipped or overwritten if they already contained in the processed_h5 file, the default is to skip*
 
-- **user_defined_inputs_file:** Marmot_user_defined_inputs.csv
+- **auto_convert_units:** true
 
-  *Change the default Marmot_user_defined_inputs file, file must be created first*  
+  *If True automatically converts Energy and Capacity units so that no number exceeds 1000, all base units are in MW, units can be converted to GW, TW and kW*
