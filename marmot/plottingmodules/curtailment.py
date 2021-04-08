@@ -626,16 +626,16 @@ class mplot(object):
                     curt_perc = pd.Series([0])
                     curt_tot = pd.Series([0])
                     gen_tot = pd.Series([0])
-                    gen_site = pd.Series([0] * len(ti),name = site,index = ti)
+                    curt = pd.Series([0] * len(ti),name = site,index = ti)
                 sites_gen = sites_gen.append(gen_tot)
                 sites = sites.append(curt_perc)
                 curt_tots = curt_tots.append(curt_tot)
-                chunks_scen.append(gen_site)
+                chunks_scen.append(curt)
 
-            gen_8760_scen = pd.concat(chunks_scen,axis = 1)
+            curt_8760_scen = pd.concat(chunks_scen,axis = 1)
             scen_name = pd.Series([scenario] * len(ti),name = 'Scenario')
-            gen_8760_scen = gen_8760_scen.set_index(scen_name,append = True)
-            chunks.append(gen_8760_scen)
+            curt_8760_scen = curt_8760_scen.set_index(scen_name,append = True)
+            chunks.append(curt_8760_scen)
 
             sites.name = scenario
             sites.index = select_sites
@@ -647,8 +647,8 @@ class mplot(object):
             Total_Gen = pd.concat([Total_Gen,sites_gen],axis = 1)
             Total_Curt = pd.concat([Total_Curt,curt_tots],axis = 1)
 
-        Gen_8760 = pd.concat(chunks,axis = 0, copy = False)
-        Gen_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen_8760.csv'))
+        Curt_8760 = pd.concat(chunks,axis = 0, copy = False)
+        Curt_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curt_8760.csv'))
 
         Total_Gen = Total_Gen / 1000000
         Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
