@@ -27,7 +27,6 @@ def createConfig(configfile_path):
     """
         
     data = dict(
-        user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
         
         font_settings = dict(
             xtick_size = 11,
@@ -43,12 +42,16 @@ def createConfig(configfile_path):
         
         axes_options = dict(
             x_axes_minticks = 4,
-            x_axes_maxticks = 8),
+            x_axes_maxticks = 8,
+            y_axes_decimalpt = 1),
         
         figure_file_format = 'svg',
         
         shift_leapday = False,
         skip_existing_properties = True,
+        auto_convert_units = True,
+        
+        user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
         
         category_file_names = dict(
             pv_gen_cat = 'pv_gen_cat.csv',
@@ -61,7 +64,7 @@ def createConfig(configfile_path):
         )
 
     with open(configfile_path, "w") as cfgfile:
-        yaml.dump(data, cfgfile,default_flow_style=False)
+        yaml.safe_dump(data, cfgfile,default_flow_style=False, sort_keys=False)
 
 
 # Check if there is already a configurtion file
@@ -125,7 +128,7 @@ def edit_value(new_value, top_level, second_level=None):
         cfg[top_level][second_level] = new_value  
             
     with open(configfile_path,'w') as f:
-            yaml.dump(cfg,f,default_flow_style=False)
+            yaml.safe_dump(cfg,f,default_flow_style=False, sort_keys=False)
             
 
 def reset_defaults():   

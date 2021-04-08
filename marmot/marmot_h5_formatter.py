@@ -41,7 +41,7 @@ import marmot.config.mconfig as mconfig
 
 # Import as Submodule
 try:
-    from h5plexos.h5plexos.query import PLEXOSSolution
+    from h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 

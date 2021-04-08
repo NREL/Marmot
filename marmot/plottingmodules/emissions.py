@@ -29,6 +29,7 @@ class mplot(object):
         
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
     # function to collect total emissions by fuel type
     def total_emissions_by_type(self):
@@ -107,7 +108,7 @@ class mplot(object):
                 fig1.spines['top'].set_visible(False)
                 fig1.set_ylabel('Annual ' + self.prop + ' Emissions\n(million metric tons)',  color='black', rotation='vertical')
                 #adds comma to y axis data
-                fig1.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 fig1.tick_params(axis='y', which='major', length=5, width=1)
                 fig1.tick_params(axis='x', which='major', length=5, width=1)
 

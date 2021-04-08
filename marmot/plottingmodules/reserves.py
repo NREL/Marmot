@@ -17,6 +17,7 @@ import numpy as np
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 import logging
 
 #===============================================================================
@@ -29,6 +30,8 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
     def reserve_gen_timeseries(self):
         """
@@ -354,7 +357,7 @@ class mplot(object):
 
             fig2 = mfunc.create_grouped_bar_plot(reserve_out,color_dict)
             if count_hours == False:
-                fig2.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+                fig2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 fig2.set_ylabel('Reserve {} [{}h]'.format(data_set,unitconversion['units'] ),  color='black', rotation='vertical')
             elif count_hours == True:
                 fig2.set_ylabel('Reserve {} Hours'.format(data_set),  color='black', rotation='vertical')
@@ -436,7 +439,7 @@ class mplot(object):
 
                 for column in reserve_timeseries:
                     mfunc.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
-                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
 

@@ -14,8 +14,10 @@ import math
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
+import matplotlib.lines as mlines
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 
 #===============================================================================
 
@@ -27,6 +29,7 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
 
 
@@ -1078,7 +1081,7 @@ class mplot(object):
 
                         mfunc.create_line_plot(axs,single_parent,column,label=column,n=n)
                         axs[n].set_title(parent)
-                        axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                        axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                         axs[n].margins(x=0.01)
                         mfunc.set_plot_timeseries_format(axs,n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
@@ -1309,7 +1312,7 @@ class mplot(object):
             else:
                 for column in all_scenarios:
                     mfunc.create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
-                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
                 axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
@@ -1362,7 +1365,10 @@ class mplot(object):
 
                 net_export_all_scenarios = pd.concat([net_export_all_scenarios,net_export], axis = 1)
                 net_export_all_scenarios.columns = net_export_all_scenarios.columns.str.replace('_',' ')
-
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(net_export_all_scenarios.max().max())
+            
+            net_export_all_scenarios = net_export_all_scenarios/unitconversion["divisor"]
             # Data table of values to return to main program
             Data_Table_Out = net_export_all_scenarios.copy()
             #Make scenario/color dictionary.
@@ -1382,14 +1388,21 @@ class mplot(object):
             n=0
             for column in net_export_all_scenarios:
                 mfunc.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
-                axs[n].set_ylabel('Net exports (MW)',  color='black', rotation='vertical')
+                axs[n].set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
                 axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
                 axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':')
                 mfunc.set_plot_timeseries_format(axs,n)
+            
+            labels = net_export_all_scenarios.columns.tolist()
+            
+            handles = []
+            # create custom handles
+            for scen in labels:
+                scen_legend_patches = mlines.Line2D([],[],color=color_dict[scen])
+                handles.append(scen_legend_patches)
 
-            handles, labels = axs[n].get_legend_handles_labels()
 
             axs[n].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
@@ -1520,7 +1533,7 @@ class mplot(object):
                     linestyle = '--' if column == 'Net export' else 'solid'
                     mfunc.create_line_plot(axs,net_exports,column = column, label = column, n = n,linestyle = linestyle)
     
-                axs[n].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.1f}'))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
 
                 axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
