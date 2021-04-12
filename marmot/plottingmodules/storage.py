@@ -2,9 +2,9 @@
 """
 Created April 2020, updated August 2020
 
-This code creates transmission line and interface plots and is called from Marmot_plot_main.py
+This code creates energy storage plots and is called from Marmot_plot_main.py
 
-@author: dlevie
+@author: 
 """
 
 import os
@@ -16,7 +16,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import math
 import logging
-import marmot.marmot_plot_functions as mfunc
+import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 
 
@@ -44,9 +44,9 @@ class mplot(object):
         unserved_e_collection = {}
         max_volume_collection = {}
         check_input_data = []
-        check_input_data.extend([mfunc.get_data(initial_volume_collection,"storage_Initial_Volume",self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(unserved_e_collection,"region_Unserved_Energy",self.Marmot_Solutions_folder, self.Multi_Scenario)])
-        check_input_data.extend([mfunc.get_data(max_volume_collection,"storage_Max_Volume",self.Marmot_Solutions_folder, [self.Multi_Scenario[0]])])
+        check_input_data.extend([mfunc.get_data(initial_volume_collection,"storage_Initial_Volume",self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(unserved_e_collection,"region_Unserved_Energy",self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([mfunc.get_data(max_volume_collection,"storage_Max_Volume",self.Marmot_Solutions_folder, [self.Scenarios[0]])])
 
 
         if 1 in check_input_data:
@@ -62,13 +62,13 @@ class mplot(object):
 
             for scenario in self.Multi_Scenario:
 
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
 
                 storage_volume_read = initial_volume_collection.get(scenario)
                 try:
                     storage_volume = storage_volume_read.xs(zone_input, level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning('No storage resources in %s',zone_input)
+                    self.logger.warning(f'No storage resources in {zone_input}')
                     outputs[zone_input] = mfunc.MissingZoneData()
                     continue
 
@@ -86,7 +86,7 @@ class mplot(object):
                     max_volume = max_volume.groupby('timestamp').sum()
                     max_volume = max_volume.squeeze()[0]
                 except KeyError:
-                    self.logger.warning('No storage resources in %s',zone_input)
+                    self.logger.warning(f'No storage resources in {zone_input}')
 
                 #Pull unserved energy.
                 use_read = unserved_e_collection.get(scenario)
@@ -112,8 +112,8 @@ class mplot(object):
                     use = use[start_date : end_date]
 
                 elif self.prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(self.start_date)} to {str(self.end_date)}")
 
                     storage_volume = storage_volume[self.start_date : self.end_date]
                     use = use[self.start_date : self.end_date]

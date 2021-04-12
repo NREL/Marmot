@@ -1,4 +1,3 @@
-
 """
 Created on Mon Dec  9 10:34:48 2019
 This code creates generation stack plots and is called from Marmot_plot_main.py
@@ -10,13 +9,12 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-from matplotlib.ticker import FormatStrFormatter
-import os
 from matplotlib.patches import Patch
 import numpy as np
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import logging
+import textwrap
 
 #===============================================================================
 
@@ -57,14 +55,14 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info('Zone = ' + str(zone_input))
+            self.logger.info(f'Zone = {str(zone_input)}')
 
             #Get technology list.
             gens = installed_cap_collection.get(self.Scenarios[0])
             try:
                 gens = gens.xs(zone_input,level=self.AGG_BY)
             except KeyError:
-                self.logger.warning("No Generation in %s: ",zone_input)
+                self.logger.warning(f"No Generation in: {zone_input}")
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
@@ -73,7 +71,7 @@ class mplot(object):
             tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
             
             if not tech_list_sort:
-                self.logger.info('No Thermal Generation in %s',zone_input)
+                self.logger.info(f'No Thermal Generation in: {zone_input}')
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
@@ -83,11 +81,9 @@ class mplot(object):
 
             fig4, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharex = True, sharey='row',squeeze=False)
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
-
-            i=0
             
-            for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + scenario)
+            for i, scenario in enumerate(self.Scenarios):
+                self.logger.info(f"Scenario = {scenario}")
 
                 locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
                 formatter = mdates.ConciseDateFormatter(locator)
@@ -97,8 +93,7 @@ class mplot(object):
                 formatter.zero_formats[3] = '%H:%M\n %d-%b'
                 formatter.offset_formats[3] = '%b %Y'
                 formatter.show_offset = False
-                
-
+            
                 units_gen = units_generating_collection.get(scenario)
                 avail_cap = gen_available_capacity_collection.get(scenario)
                 
@@ -107,24 +102,27 @@ class mplot(object):
                 thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
                 thermal_commit_cap = mfunc.df_process_gen_inputs(thermal_commit_cap,self.ordered_gen)
                 thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
-                thermal_commit_cap = thermal_commit_cap / 1000 #MW -> GW
-
+                
+                # unitconversion based off peak generation hour, only checked once 
+                if i == 0:
+                    unitconversion = mfunc.capacity_energy_unitconversion(thermal_commit_cap.values.max())
+                thermal_commit_cap = thermal_commit_cap/unitconversion['divisor']
+                
                 #Process generation.
                 gen = generation_collection.get(scenario)
                 gen = gen.xs(zone_input,level = self.AGG_BY)
                 gen = mfunc.df_process_gen_inputs(gen,self.ordered_gen)
                 gen = gen.loc[:, (gen != 0).any(axis=0)]
-                gen = gen / 1000
+                gen = gen/unitconversion['divisor']
 
                 #Process available capacity (for VG only).
                 avail_cap = avail_cap.xs(zone_input, level = self.AGG_BY)
                 avail_cap = mfunc.df_process_gen_inputs(avail_cap,self.ordered_gen)
                 avail_cap = avail_cap.loc[:, (avail_cap !=0).any(axis=0)]
-                avail_cap = avail_cap / 1000
+                avail_cap = avail_cap/unitconversion['divisor']
 
-                j = 0
                 gen_lines = []
-                for tech in tech_list_sort:
+                for j,tech in enumerate(tech_list_sort):
                     if tech not in gen.columns:
                         gen_one_tech = pd.Series(0,index = gen.index)
                         commit_cap = pd.Series(0,index = gen.index) #Add dummy columns to deal with coal retirements (coal showing up in 2024, but not future years).
@@ -155,17 +153,15 @@ class mplot(object):
                     if i == 0:
                         axs[j,i].set_ylabel(ylabel = tech, rotation = 'vertical', color = 'black')
 
-                    j = j + 1
-                i = i + 1
-
             #fig4.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
             fig4.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Generation or Committed Capacity (GW)',  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=60)
 
             data_table = pd.DataFrame()
             outputs[zone_input] = {'fig':fig4, 'data_table':data_table}
         return outputs
+
 
     def gen_stack(self):
         # Create a dictionary to hold Dataframes
@@ -313,8 +309,8 @@ class mplot(object):
                 unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
 
             elif self.prop == 'Date Range':
-                self.logger.info("Plotting specific date range: \
-                {} to {}".format(str(self.start_date),str(self.end_date)))
+                self.logger.info(f"Plotting specific date range: \
+                {str(self.start_date)} to {str(self.end_date)}")
 
                 Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
                 Load = Load[self.start_date : self.end_date]
@@ -342,12 +338,9 @@ class mplot(object):
             return data
 
         def mkplot(outputs, zone_input, all_scenarios):
-            xdimension=len(self.xlabels)
-            if xdimension == 0:
-                xdimension = 1
-            ydimension=len(self.ylabels)
-            if ydimension == 0:
-                ydimension = 1
+            
+            # sets up x, y dimensions of plot
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=all_scenarios)
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not self.facet:
@@ -363,12 +356,11 @@ class mplot(object):
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.25)
             axs = axs.ravel()
-            i=0
             data_tables = {}
             unique_tech_names = []
 
-            for scenario in all_scenarios:
-                self.logger.info("Scenario = " + scenario)
+            for i, scenario in enumerate(all_scenarios):
+                self.logger.info(f"Scenario = {scenario}")
 
                 try:
                     Stacked_Gen = gen_collection.get(scenario).copy()
@@ -376,8 +368,7 @@ class mplot(object):
                         Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    i=i+1
-                    self.logger.warning('No generation in %s',zone_input)
+                    self.logger.warning(f'No generation in {zone_input}')
                     out = mfunc.MissingZoneData()
                     return out
 
@@ -387,7 +378,7 @@ class mplot(object):
                 
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
-                    self.logger.warning('No generation during time period in %s',zone_input)
+                    self.logger.warning(f'No generation during time period in {zone_input}')
                     out = mfunc.MissingZoneData()
                     return out
                 
@@ -421,7 +412,7 @@ class mplot(object):
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
                 # Data table of values to return to main program
                 Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
-                data_tables[scenario] = Data_Table_Out * unitconversion['divisor']
+                data_tables[scenario] = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
                 # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
@@ -439,15 +430,14 @@ class mplot(object):
                 if (Pump_Load == 0).all() == False:
                     lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
 
-                # ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-                # ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
                 axs[i].spines['right'].set_visible(False)
                 axs[i].spines['top'].set_visible(False)
                 axs[i].tick_params(axis='y', which='major', length=5, width=1)
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
                 axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[i].margins(x=0.01)
-
+                mfunc.set_plot_timeseries_format(axs,i)
+                 
                 if self.prop == "Min Net Load":
                     axs[i].annotate('Min Net Load: \n' + str(format(Min_Net_Load, '.2f')) + ' {}'.format(unitconversion['units']), 
                                     xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), 
@@ -461,18 +451,6 @@ class mplot(object):
                                                                              (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
                                 fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
-
-                locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
-                formatter = mdates.ConciseDateFormatter(locator)
-                formatter.formats[2] = '%d\n %b'
-                formatter.zero_formats[1] = '%b\n %Y'
-                formatter.zero_formats[2] = '%d\n %b'
-                formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                formatter.offset_formats[3] = '%b %Y'
-                formatter.show_offset = False
-                axs[i].xaxis.set_major_locator(locator)
-                axs[i].xaxis.set_major_formatter(formatter)
-
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].fill_between(Load.index, Load,Unserved_Energy,
                                         # facecolor='#EE1289' OLD MARMOT COLOR
@@ -482,8 +460,6 @@ class mplot(object):
                 # create list of gen technologies
                 l1 = Stacked_Gen.columns.tolist()
                 unique_tech_names.extend(l1)
-
-                i=i+1
 
             # create labels list of unique tech names then order
             labels = np.unique(np.array(unique_tech_names)).tolist()
@@ -495,9 +471,6 @@ class mplot(object):
                 gen_legend_patches = Patch(facecolor=self.PLEXOS_color_dict[tech],
                             alpha=1.0)
                 handles.append(gen_legend_patches)
-
-            #Combine all legends into one.
-            #handles, labels = axs[grid_size-1].get_legend_handles_labels()
 
             if (Pump_Load == 0).all() == False:
                 handles.append(lp3[0])
@@ -515,37 +488,23 @@ class mplot(object):
             axs[grid_size-1].legend(reversed(handles),reversed(labels),
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
+            
+            self.xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            self.ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
 
-            all_axes = fig1.get_axes()
-            self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
-            j=0
-            k=0
-            for ax in all_axes:
-                if ax.is_last_row():
-                    ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
-                    j=j+1
-                if ax.is_first_col():
-                    ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
-                    k=k+1
-
+            # add facet labels
+            mfunc.add_facet_labels(fig1, self.xlabels, self.ylabels)
+            
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
 
             #Ylabel should change if there are facet labels.
             labelpad = 60 if self.facet else 20
-            plt.ylabel('Generation ({})'.format(unitconversion['units']), color='black', rotation='vertical', labelpad = labelpad)
-
-            #Remove extra axis
+            plt.ylabel(f"Generation ({unitconversion['units']})", color='black', rotation='vertical', labelpad = labelpad)
+            
+            #Remove extra axes
             if excess_axs != 0:
-                while excess_axs > 0:
-                    axs[(grid_size)-excess_axs].spines['right'].set_visible(False)
-                    axs[(grid_size)-excess_axs].spines['left'].set_visible(False)
-                    axs[(grid_size)-excess_axs].spines['bottom'].set_visible(False)
-                    axs[(grid_size)-excess_axs].spines['top'].set_visible(False)
-                    axs[(grid_size)-excess_axs].tick_params(axis='both',
-                                                            which='both',
-                                                            colors='white')
-                    excess_axs-=1
+                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
             if not self.facet:
                 data_tables = data_tables[self.Scenarios[0]]
@@ -584,7 +543,7 @@ class mplot(object):
             plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
     
         for zone_input in self.Zones:
-            self.logger.info("Zone = "+ zone_input)
+            self.logger.info(f"Zone = {zone_input}")
 
             if self.facet:
                 outputs[zone_input] = mkplot(outputs, zone_input, self.Scenarios)
@@ -592,9 +551,7 @@ class mplot(object):
                 outputs[zone_input] = mkplot(outputs, zone_input, [self.Scenarios[0]])
         return outputs
 
-###############################################################################
 
-###############################################################################
     def gen_diff(self):
         outputs = {}
         gen_collection = {}
@@ -607,12 +564,12 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info("Zone = "+ zone_input)
+            self.logger.info(f"Zone = {zone_input}")
             # Create Dictionary to hold Datframes for each scenario
             
             Total_Gen_Stack_1 = gen_collection.get(self.Scenario_Diff[0])
             if Total_Gen_Stack_1 is None:
-                self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
+                self.logger.warning(f'Scenario_Diff "{self.Scenario_Diff[0]}" is not in data. Ensure User Input Sheet is set up correctly!')
                 outputs = mfunc.InputSheetError()
                 return outputs 
             
@@ -623,7 +580,7 @@ class mplot(object):
 
             Total_Gen_Stack_2 = gen_collection.get(self.Scenario_Diff[1])
             if Total_Gen_Stack_2 is None:
-                self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[1])
+                self.logger.warning(f'Scenario_Diff "{self.Scenario_Diff[1]}" is not in data. Ensure User Input Sheet is set up correctly!')
                 outputs = mfunc.InputSheetError()
                 return outputs 
             
@@ -632,13 +589,13 @@ class mplot(object):
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns = self.ordered_gen).fillna(0)
 
-            self.logger.info('Scenario 1 = ' + self.Scenario_Diff[0])
-            self.logger.info('Scenario 2 =  ' + self.Scenario_Diff[1])
+            self.logger.info(f'Scenario 1 = {self.Scenario_Diff[0]}')
+            self.logger.info(f'Scenario 2 = {self.Scenario_Diff[1]}')
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
 
             if self.prop == 'Date Range':
-                self.logger.info("Plotting specific date range: \
-                {} to {}".format(str(self.start_date),str(self.end_date)))
+                self.logger.info(f"Plotting specific date range: \
+                {str(self.start_date)} to {str(self.end_date)}")
                 Gen_Stack_Out = Gen_Stack_Out[self.start_date : self.end_date]
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
@@ -647,50 +604,53 @@ class mplot(object):
             Gen_Stack_Out.dropna(inplace=True)
             Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]
             
-            # Data table of values to return to main program
-            Data_Table_Out = Gen_Stack_Out
+            if Gen_Stack_Out.empty == True:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
             # Reverses order of columns
             Gen_Stack_Out = Gen_Stack_Out.iloc[:, ::-1]
             
             unitconversion = mfunc.capacity_energy_unitconversion(max(Gen_Stack_Out.sum(axis=1)))
             Gen_Stack_Out = Gen_Stack_Out/unitconversion['divisor']
-
-            fig3, ax = plt.subplots(figsize=(9,6))
-
+            
+            # Data table of values to return to main program
+            Data_Table_Out = Gen_Stack_Out.add_suffix(f" ({unitconversion['units']})")
+            
+            fig3, axs = mfunc.setup_plot()
+            # Flatten object
+            ax = axs[0]
+            
             for column in Gen_Stack_Out:
                 ax.plot(Gen_Stack_Out[column], linewidth=3, color=self.PLEXOS_color_dict[column],
                         label=column)
                 ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
 
-
             ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
-            ax.set_ylabel('Generation Difference ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
-            ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
+            ax.set_ylabel(f"Generation Difference ({unitconversion['units']})",  color='black', rotation='vertical')
+            ax.set_xlabel(f'Date ({self.timezone})',  color='black', rotation='horizontal')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-
-            locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-            formatter = mdates.ConciseDateFormatter(locator)
-            formatter.formats[2] = '%d\n %b'
-            formatter.zero_formats[1] = '%b\n %Y'
-            formatter.zero_formats[2] = '%d\n %b'
-            formatter.zero_formats[3] = '%H:%M\n %d-%b'
-            formatter.offset_formats[3] = '%b %Y'
-            formatter.show_offset = False
-            ax.xaxis.set_major_locator(locator)
-            ax.xaxis.set_major_formatter(formatter)
-
+            mfunc.set_plot_timeseries_format(axs)
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
-     ###DEPRCIATED FOR NOW
      
     def gen_stack_all_periods(self):
+        '''
+        DEPRCIATED FOR NOW
+
+        Returns
+        -------
+        outputs : mfunc.UnderDevelopment()
+
+        '''
         
         outputs = mfunc.UnderDevelopment()
         self.logger.warning('total_gen_facet is under development')

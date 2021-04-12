@@ -2,24 +2,19 @@
 """
 Created on Mon Dec  9 13:20:56 2019
 
-This code creates total generation stacked bar plots and is called from Marmot_plot_main.py
+This mdouel creates capacity factor and average output plots 
 
 
-@author: dlevie
+@author: Daniel Levie 
 """
 
-import os
 import pandas as pd
 import matplotlib.ticker as mtick
 import numpy as np
 import logging
-import math
-
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 
-
-#===============================================================================
 
 class mplot(object):
 
@@ -49,21 +44,21 @@ class mplot(object):
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
                 Gen = gen_collection.get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.warning('No data in ' + zone_input)
+                        self.logger.warning(f'No data in {zone_input}')
                         continue
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
-                techs = list(Gen['tech'].unique())
+                # techs = list(Gen['tech'].unique())
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]
                 Cap = cap_collection.get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
@@ -75,8 +70,8 @@ class mplot(object):
                 
                 print(self.start_date)
                 if pd.isna(self.start_date) == False:
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(self.start_date)} to {str(self.end_date)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
                     Gen = Gen.sort_index()[self.start_date : self.end_date]
 
@@ -110,10 +105,16 @@ class mplot(object):
                         CF[tech_name] = cf
 
                 CF_all_scenarios = CF_all_scenarios.append(CF)
-
+            
+            CF_all_scenarios.index = CF_all_scenarios.index.str.replace('_',' ')
+            CF_all_scenarios.columns = CF_all_scenarios.columns.str.wrap(10, break_long_words = False)
+            
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
+            
+            Data_Table_Out = CF_all_scenarios.T
+
             fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
 
@@ -124,9 +125,12 @@ class mplot(object):
             fig2.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig2.tick_params(axis='y', which='major', length=5, width=1)
             fig2.tick_params(axis='x', which='major', length=5, width=1)
+            fig2.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
 
-            outputs[zone_input] = {'fig': fig2, 'data_table': CF_all_scenarios.T}
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
+
 
     def cf(self):
         outputs = {}
@@ -144,22 +148,22 @@ class mplot(object):
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
                 Gen = gen_collection.get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.warning('No data in ' + zone_input)
+                        self.logger.warning(f'No data in {zone_input}')
                         continue
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
                 
                 if pd.isna(self.start_date) == False:
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(self.start_date)} to {str(self.end_date)}")
                     Gen = Gen[self.start_date : self.end_date]
                 
                 # Calculates interval step to correct for MWh of generation
@@ -192,7 +196,10 @@ class mplot(object):
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-            fig1 = CF_all_scenarios.plot.bar(stacked = False, figsize=(9,6), rot=0,
+            
+            Data_Table_Out = CF_all_scenarios.T
+
+            fig1 = CF_all_scenarios.plot.bar(stacked = False, figsize=(self.x*1.5,self.y*1.5), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
 
             fig1.spines['right'].set_visible(False)
@@ -202,6 +209,8 @@ class mplot(object):
             fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
+            fig1.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
 
             handles, labels = fig1.get_legend_handles_labels()
 
@@ -209,10 +218,9 @@ class mplot(object):
             fig1.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': CF_all_scenarios}
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
         return outputs
-
 
 
     def time_at_min_gen(self):
@@ -232,12 +240,12 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             time_at_min = pd.DataFrame()
 
             for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
 
                 Min = gen_hours_at_min_collection.get(scenario)
                 Min = Min.xs(zone_input,level = self.AGG_BY)
@@ -249,7 +257,7 @@ class mplot(object):
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.warning('No data in ' + zone_input)
+                        self.logger.warning(f'No data in {zone_input}')
                         continue
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
@@ -287,7 +295,10 @@ class mplot(object):
             if time_at_min.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-            fig3 = time_at_min.T.plot.bar(stacked = False, figsize=(9,6), rot=0,
+            
+            Data_Table_Out = time_at_min.T
+            
+            fig3 = time_at_min.T.plot.bar(stacked = False, figsize=(self.x*1.5,self.y*1.5), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
 
             fig3.spines['right'].set_visible(False)
@@ -297,6 +308,8 @@ class mplot(object):
             fig3.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig3.tick_params(axis='y', which='major', length=5, width=1)
             fig3.tick_params(axis='x', which='major', length=5, width=1)
+            fig3.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
 
-            outputs[zone_input] = {'fig': fig3, 'data_table': time_at_min.T}
+            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs

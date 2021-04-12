@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-price analysis plots, price duration cureves = timeseries plots
+price analysis plots, price duration curves = timeseries plots
 
 @author: adyreson and Daniel Levie
 """
@@ -9,8 +9,6 @@ price analysis plots, price duration cureves = timeseries plots
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import math
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 
@@ -23,8 +21,7 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
-  
+
 
     def pdc_all_regions(self):
 
@@ -46,7 +43,6 @@ class mplot(object):
         #Location to save to
         save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
 
-        n=0
         region_number = len(self.Zones)
         # determine x,y length for plot
         xdimension, ydimension =  mfunc.set_x_y_dimension(region_number)
@@ -56,7 +52,7 @@ class mplot(object):
         plt.subplots_adjust(wspace=0.1, hspace=0.2)
         
         data_table = []
-        for zone_input in self.Zones:
+        for n, zone_input in enumerate(self.Zones):
 
             all_prices=[]
             for scenario in self.Scenarios:
@@ -85,7 +81,6 @@ class mplot(object):
                 #Legend
                 axs[region_number-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-            n+=1
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -93,6 +88,7 @@ class mplot(object):
         plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
+        Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
         fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
         outputs = mfunc.DataSavedInModule()
@@ -116,7 +112,7 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
@@ -129,7 +125,7 @@ class mplot(object):
             duration_curve = pd.concat(all_prices, axis=1)
             duration_curve.columns = duration_curve.columns.str.replace('_',' ')
 
-            Data_Out = duration_curve.copy()
+            Data_Out = duration_curve.add_suffix(" ($/MWh)")
 
             xdimension=len(self.xlabels)
             if xdimension == 0:
@@ -162,7 +158,7 @@ class mplot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=20)
+            plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
             plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
 
             outputs[zone_input] = {'fig': fig1, 'data_table':Data_Out}
@@ -187,7 +183,7 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
@@ -198,7 +194,7 @@ class mplot(object):
             timeseries = pd.concat(all_prices, axis=1)
             timeseries.columns = timeseries.columns.str.replace('_',' ')
 
-            Data_Out = timeseries.copy()
+            Data_Out = timeseries.add_suffix(" ($/MWh)")
 
             xdimension=len(self.xlabels)
             if xdimension == 0:
@@ -232,7 +228,7 @@ class mplot(object):
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=20)
+            plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
             plt.xlabel(self.timezone,  color='black', rotation='horizontal', labelpad=20)
 
             outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
@@ -259,7 +255,6 @@ class mplot(object):
         save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
 
         outputs = {}
-        n=0
 
         region_number = len(self.Zones)
         xdimension, ydimension =  mfunc.set_x_y_dimension(region_number)
@@ -269,8 +264,8 @@ class mplot(object):
         plt.subplots_adjust(wspace=0.1, hspace=0.2)
 
         data_table = []
-        for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+        for n, zone_input in enumerate(self.Zones):
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
@@ -298,14 +293,14 @@ class mplot(object):
                 #Legend
                 axs[region_number-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-            n+=1
 
         fig4.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=30)
+        plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=30)
         plt.xlabel(self.timezone,  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
+        Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
         fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
         outputs = mfunc.DataSavedInModule()

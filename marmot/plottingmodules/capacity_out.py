@@ -30,7 +30,7 @@ class mplot(object):
         gen_available_capacity_collection = {}
         check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(installed_cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, [self.Scenarios[0]])])
+        check_input_data.extend([mfunc.get_data(installed_cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
         
         xdimension=len(self.xlabels)
@@ -52,18 +52,17 @@ class mplot(object):
         excess_axs = grid_size - plot_number
 
         for zone_input in self.Zones:
-            self.logger.info('Zone = ' + str(zone_input))
+            self.logger.info(f'Zone = {str(zone_input)}')
 
             fig2, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharex = True, sharey='row',squeeze=False)
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
             axs = axs.ravel()
 
-            i = -1
             chunks = []
-            
-            for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + scenario)
-                i += 1
+            i=-1
+            for scenario in (self.Scenarios):
+                self.logger.info(f"Scenario = {scenario}")
+                i+=1
                 
                 install_cap = installed_cap_collection.get(scenario).copy()
                 avail_cap = gen_available_capacity_collection.get(scenario).copy()
@@ -101,10 +100,11 @@ class mplot(object):
                 axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
             Data_Table_Out = pd.concat(chunks,axis = 1)
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Capacity out ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=30)
+            plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
