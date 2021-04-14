@@ -66,54 +66,6 @@ os.chdir(current_dir)
 pd.set_option("display.max_colwidth", 1000)
 
 
-class PlotTypes:
-    '''
-    Class to handle the selection of plottingmodule and correct method for specifed figure
-    '''
-
-    def __init__(self, figure_type, figure_method, argument_dict, font_defaults):
-        '''
-        
-        Parameters
-        ----------
-        figure_type : string
-            figure module name.
-        figure_method : string
-            figure method name.
-        argument_dict : dictionary
-            dictioanry of input variables for plottingmodules.
-        font_defaults : dictionary
-            default font settings passed from config file.
-
-        Returns
-        -------
-        None.
-
-        '''
-        self.figure_type = figure_type
-        self.figure_method = figure_method
-        self.argument_dict = argument_dict
-        self.font_defaults = font_defaults
-
-
-    def runmplot(self):
-        mpl.rc('xtick', labelsize=self.font_defaults['xtick_size'])
-        mpl.rc('ytick', labelsize=self.font_defaults['ytick_size'])
-        mpl.rc('axes', labelsize=self.font_defaults['axes_label_size'])
-        mpl.rc('legend', fontsize=self.font_defaults['legend_size'])
-        mpl.rc('font', family=self.font_defaults['font_family'])
-        mpl.rc('figure', max_open_warning = 0)
-        
-        # Import plot module from plottingmodules package
-        plot = importlib.import_module('marmot.plottingmodules.' + self.figure_type)
-        fig = plot.mplot(self.argument_dict)
-
-        process_attr = getattr(fig, self.figure_method)
-
-        Figure_Out = process_attr()
-        return Figure_Out
-
-
 class MarmotPlot():
     
     def __init__(self,Scenarios, AGG_BY, PLEXOS_Solutions_folder, gen_names, Marmot_plot_select, 
@@ -426,109 +378,145 @@ class MarmotPlot():
         
         # Filter for chosen figures to plot
         plot_selection = self.Marmot_plot_select.loc[self.Marmot_plot_select["Plot Graph"] == True]
+        plot_selection = plot_selection.sort_values(by=['Marmot Module','Method'])
+        
+        list_modules = plot_selection['Marmot Module'].unique()
         
         start_timer = time.time()
-        # Main loop to process each figure and pass data to functions
-        for index, row in plot_selection.iterrows(): 
         
-            print("\n\n\n")
-            logger.info(f"Plot =  {row['Figure Output Name']}")
-        
-            module = row['Marmot Module']
-            method = row['Method']
-        
-            facet = False
-            if 'Facet' in row["Figure Output Name"]:
-                facet = True
-        
-            duration_curve = False
-            if 'duration_curve' in row["Figure Output Name"]:
-            	duration_curve = True
-            # dictionary of arguments passed to plotting modules; key_list names match the property names in each module
-            # while arguments contains the property value
-            key_list = ["prop", "start", "end", "timezone", "start_date", "end_date",
-                        "hdf_out_folder", "Zones", "AGG_BY", "ordered_gen", "PLEXOS_color_dict",
-                        "Scenarios", "Scenario_Diff", "Marmot_Solutions_folder",
-                        "ylabels", "xlabels", "ticklabels","minticks","maxticks",
-                        "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
-                        "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leapday","duration_curve",
-                        "minticks","maxticks"]
-        
-            argument_list = [row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5],row.iloc[6], row.iloc[7],
-                             hdf_out_folder, Zones, self.AGG_BY, ordered_gen, PLEXOS_color_dict,
-                             self.Scenarios, self.Scenario_Diff, self.Marmot_Solutions_folder,
-                             self.ylabels, self.xlabels, self.ticklabels,minticks,maxticks,
-                             color_list, marker_style, gen_names_dict, pv_gen_cat,
-                             re_gen_cat, vre_gen_cat, thermal_gen_cat,self.Region_Mapping,figure_folder, meta,facet,shift_leapday,duration_curve,
-                             minticks,
-                             maxticks]
+        for module in list_modules:
+            module_plots = plot_selection.loc[plot_selection['Marmot Module'] == module]
             
+            # Can be removed later 
+            duration_curve=None
             
-            argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
-        
-            # Use run_plot_types to run any plotting module
+            # dictionary of arguments passed to plotting modules; 
+            # key names match the instance variables in each module            
+            argument_dict = {
+                "hdf_out_folder": hdf_out_folder,
+                "Zones": Zones,
+                "AGG_BY": self.AGG_BY,
+                "ordered_gen": ordered_gen,
+                "PLEXOS_color_dict": PLEXOS_color_dict,
+                "Scenarios": self.Scenarios,
+                "Scenario_Diff": self.Scenario_Diff,
+                "Marmot_Solutions_folder": self.Marmot_Solutions_folder,
+                "ylabels": self.ylabels,
+                "xlabels": self.xlabels,
+                "ticklabels": self.ticklabels,
+                "minticks": minticks,
+                "maxticks": maxticks,
+                "color_list": color_list,
+                "marker_style": marker_style,
+                "gen_names_dict": gen_names_dict,
+                "pv_gen_cat": pv_gen_cat,
+                "re_gen_cat": re_gen_cat,
+                "vre_gen_cat": vre_gen_cat,
+                "thermal_gen_cat": thermal_gen_cat,
+                "Region_Mapping": self.Region_Mapping,
+                "figure_folder": figure_folder,
+                "meta": meta,
+                "shift_leapday": shift_leapday,
+                "duration_curve": duration_curve
+                }
+            
+            # Create ouput folder for each plotting module
             figures = os.path.join(figure_folder, self.AGG_BY + '_' + module)
             try:
                 os.makedirs(figures)
             except FileExistsError:
                 pass
-            fig = PlotTypes(module, method, argument_dict, font_defaults)
-            Figure_Out = fig.runmplot()
             
-            if isinstance(Figure_Out, mfunc.MissingInputData):
-                logger.info("Add Inputs With Formatter Before Attempting to Plot!\n")
-                continue
+            # Import plot module from plottingmodules package
+            plot_module = importlib.import_module('marmot.plottingmodules.' + module)
+            # Instantiate the module class
+            instantiate_mplot = plot_module.mplot(argument_dict)
             
-            if isinstance(Figure_Out, mfunc.DataSavedInModule):
-                logger.info(f'Plotting Completed for {row["Figure Output Name"]}\n')
-                logger.info("Plots & Data Saved Within Module!\n")
-                continue
+            # Main loop to process each figure and pass plot specific variables to methods
+            for index, row in module_plots.iterrows(): 
+                
+                # Set Plot defauts
+                mpl.rc('xtick', labelsize=font_defaults['xtick_size'])
+                mpl.rc('ytick', labelsize=font_defaults['ytick_size'])
+                mpl.rc('axes', labelsize=font_defaults['axes_label_size'])
+                mpl.rc('legend', fontsize=font_defaults['legend_size'])
+                mpl.rc('font', family=font_defaults['font_family'])
+                mpl.rc('figure', max_open_warning = 0)
+                
+                print("\n\n\n")
+                logger.info(f"Plot =  {row['Figure Output Name']}")
+                        
+                facet = False
+                if 'Facet' in row["Figure Output Name"]:
+                    facet = True
+                      
+                # method variables
+                fig_name = row.iloc[0]
+                prop = row.iloc[2] 
+                start = row.iloc[3] 
+                end = row.iloc[4] 
+                timezone = row.iloc[5]
+                start_date_range = row.iloc[6] 
+                end_date_range = row.iloc[7]
+                
+                # Get figure method and run plot
+                figure_method = getattr(instantiate_mplot, row['Method'])
+                Figure_Out = figure_method(fig_name,prop,start,end,timezone,start_date_range,end_date_range)
+                
+                if isinstance(Figure_Out, mfunc.MissingInputData):
+                    logger.info("Add Inputs With Formatter Before Attempting to Plot!\n")
+                    continue
+                
+                if isinstance(Figure_Out, mfunc.DataSavedInModule):
+                    logger.info(f'Plotting Completed for {row["Figure Output Name"]}\n')
+                    logger.info("Plots & Data Saved Within Module!\n")
+                    continue
+                
+                if isinstance(Figure_Out, mfunc.UnderDevelopment):
+                    logger.info("Plot is Under Development, Plotting Skipped!\n")
+                    continue
+                
+                if isinstance(Figure_Out, mfunc.InputSheetError):
+                    logger.info("Input Sheet Data Incorrect!\n")
+                    continue
+                
+                if isinstance(Figure_Out, mfunc.MissingMetaData):
+                    logger.info("Required Meta Data Not Available For This Plot!\n")
+                    continue
+                
+                for zone_input in Zones:
+                    if isinstance(Figure_Out[zone_input], mfunc.MissingZoneData):
+                        logger.info(f"No Data to Plot in {zone_input}")
             
-            if isinstance(Figure_Out, mfunc.UnderDevelopment):
-                logger.info("Plot is Under Development, Plotting Skipped!\n")
-                continue
-            
-            if isinstance(Figure_Out, mfunc.InputSheetError):
-                logger.info("Input Sheet Data Incorrect!\n")
-                continue
-            
-            if isinstance(Figure_Out, mfunc.MissingMetaData):
-                logger.info("Required Meta Data Not Available For This Plot!\n")
-                continue
-            
-            for zone_input in Zones:
-                if isinstance(Figure_Out[zone_input], mfunc.MissingZoneData):
-                    logger.info(f"No Data to Plot in {zone_input}")
-        
-                else:
-                    # Save figures
-                    try:
-                        Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
-                    except AttributeError:
-                        Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
-        
-                    #Save .csv's.
-                    if not facet:
-                        if Figure_Out[zone_input]['data_table'].empty:
-                            logger.info(f'{row["Figure Output Name"]} does not return a data table')
-                        else:
-                            Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
-        
-                    else: #Facetted plot, save multiple tables
-                        tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
+                    else:
+                        # Save figures
                         try:
-                             os.makedirs(tables_folder)
-                        except FileExistsError:
-                             # directory already exists
-                            pass
-                        for scenario in self.Scenarios:
-                            #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
-                            s = zone_input.replace('.','') + "_" + scenario + ".csv"
-                            Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
+                            Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
+                        except AttributeError:
+                            Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
+            
+                        #Save .csv's.
+                        if not facet:
+                            if Figure_Out[zone_input]['data_table'].empty:
+                                logger.info(f'{row["Figure Output Name"]} does not return a data table')
+                            else:
+                                Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+            
+                        else: #Facetted plot, save multiple tables
+                            tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
+                            try:
+                                 os.makedirs(tables_folder)
+                            except FileExistsError:
+                                 # directory already exists
+                                pass
+                            for scenario in self.Scenarios:
+                                #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
+                                s = zone_input.replace('.','') + "_" + scenario + ".csv"
+                                Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
+            
+                logger.info(f'Plotting Completed for {row["Figure Output Name"]}\n')
         
-            logger.info(f'Plotting Completed for {row["Figure Output Name"]}\n')
-        
-            mpl.pyplot.close('all')
+                mpl.pyplot.close('all')
         
         end_timer = time.time()
         time_elapsed = end_timer - start_timer
@@ -595,4 +583,3 @@ if __name__ == '__main__':
                           xlabels,ylabels,ticklabels,Region_Mapping)
     
     initiate.run_plotter()
-        
