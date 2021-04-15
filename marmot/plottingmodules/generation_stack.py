@@ -37,9 +37,8 @@ class mplot(object):
         self.mplot_data_dict = {}
 
 
-###############################################################################
-
-    def committed_stack(self, figure_name=None, prop=None, start=None, end=None, timezone=None, start_date_range=None, end_date_range=None):
+    def committed_stack(self, figure_name=None, prop=None, start=None, end=None, 
+                        timezone=None, start_date_range=None, end_date_range=None):
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -166,7 +165,8 @@ class mplot(object):
         return outputs
 
 
-    def gen_stack(self, figure_name=None, prop=None, start=None, end=None, timezone=None, start_date_range=None, end_date_range=None):
+    def gen_stack(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         
         facet=False
         if 'Facet' in figure_name:
@@ -203,7 +203,9 @@ class mplot(object):
 
                 # Calculates Net Load by removing variable gen + curtailment
                 vre_gen_cat = self.vre_gen_cat + [curtailment_name]
-           
+            
+            else:
+                vre_gen_cat = self.re_gen_cat
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
             vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
             Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
@@ -551,7 +553,8 @@ class mplot(object):
         return outputs
 
 
-    def gen_diff(self, figure_name=None, prop=None, start=None, end=None, timezone=None, start_date_range=None, end_date_range=None):
+    def gen_diff(self, figure_name=None, prop=None, start=None, end=None, 
+                 timezone=None, start_date_range=None, end_date_range=None):
         outputs = {}
         
          # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -644,7 +647,8 @@ class mplot(object):
         return outputs
 
      
-    def gen_stack_all_periods(self, figure_name=None, prop=None, start=None, end=None, timezone=None, start_date_range=None, end_date_range=None):
+    def gen_stack_all_periods(self, figure_name=None, prop=None, start=None, end=None, 
+                              timezone=None, start_date_range=None, end_date_range=None):
         '''
         DEPRCIATED FOR NOW
 

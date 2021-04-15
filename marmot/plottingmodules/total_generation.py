@@ -12,7 +12,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
 import logging
-import os
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import textwrap
@@ -39,7 +38,8 @@ class mplot(object):
 
         self.mplot_data_dict = {}
 
-    def total_gen(self, figure_name=None, prop=None, start=None, end=None, timezone=None, start_date_range=None, end_date_range=None):
+    def total_gen(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
         
@@ -216,7 +216,8 @@ class mplot(object):
 
         return outputs
 
-    def total_gen_diff(self, figure_name=None, prop=None, start=None, end=None, timezone=None, start_date_range=None, end_date_range=None):
+    def total_gen_diff(self, figure_name=None, prop=None, start=None, end=None, 
+                       timezone=None, start_date_range=None, end_date_range=None):
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
         
@@ -326,7 +327,6 @@ class mplot(object):
             ax.set_ylabel(f"Generation Change ({format(unitconversion['units'])}h) \n relative to {self.Scenarios[0].replace('_',' ')}",  color='black', rotation='vertical')
             
             xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
 
             plt.xticks(ticks=locs,labels=xlabels[1:])
             ax.margins(x=0.01)
@@ -348,7 +348,8 @@ class mplot(object):
     ## Total Gen Facet Plots removed for now, code not stable and needs testing
     #===============================================================================
 
-    def total_gen_facet(self, figure_name=None, prop=None, start=None, end=None, timezone=None, start_date_range=None, end_date_range=None):
+    def total_gen_facet(self, figure_name=None, prop=None, start=None, end=None, 
+                        timezone=None, start_date_range=None, end_date_range=None):
         outputs = mfunc.UnderDevelopment()
         self.logger.warning('total_gen_facet is under development')
         return outputs

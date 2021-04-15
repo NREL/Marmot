@@ -7,6 +7,7 @@ Created on Tue Dec 10 08:51:15 2019
 
 import os
 import re
+import textwrap
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -37,12 +38,18 @@ class mplot(object):
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
-    def total_cap(self):
+        self.mplot_data_dict = {}
+
+    def total_cap(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         outputs = {}
-        installed_capacity_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Installed_Capacity",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -57,7 +64,7 @@ class mplot(object):
 
                 self.logger.info(f"Scenario = {zone_input}")
 
-                Total_Installed_Capacity = installed_capacity_collection.get(scenario)
+                Total_Installed_Capacity = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 
                 zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 if scenario == 'ADS':
@@ -113,12 +120,16 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-    def total_cap_diff(self):
+    def total_cap_diff(self, figure_name=None, prop=None, start=None, end=None, 
+                       timezone=None, start_date_range=None, end_date_range=None):
         outputs = {}
-        installed_capacity_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Installed_Capacity",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -133,7 +144,7 @@ class mplot(object):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Installed_Capacity = installed_capacity_collection.get(scenario)
+                Total_Installed_Capacity = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 if scenario == 'ADS':
                     zone_input_adj = zone_input.split('_WI')[0]
@@ -149,7 +160,7 @@ class mplot(object):
                     continue
 
                 #print(Total_Installed_Capacity.index.get_level_values('tech').unique())
-                fn = os.path.join(self.Marmot_Solutions_folder, self.Scenario_name, 'Figures_Output',self.AGG_BY + '_total_installed_capacity','Individual_Gen_Cap_' + scenario + '.csv')  
+                fn = os.path.join(self.Marmot_Solutions_folder,  'Figures_Output',self.AGG_BY + '_total_installed_capacity','Individual_Gen_Cap_' + scenario + '.csv')  
                 Total_Installed_Capacity.reset_index().to_csv(fn)
 
                 Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
@@ -189,7 +200,7 @@ class mplot(object):
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel(f"Capacity Change ({unitconversion['units']}) \n relative to {self.Multi_Scenario[0]}",  color='black', rotation='vertical')
+            fig1.set_ylabel(f"Capacity Change ({unitconversion['units']}) \n relative to {self.Scenarios[0]}",  color='black', rotation='vertical')
 
             #adds comma to y axis data
             fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
@@ -205,7 +216,9 @@ class mplot(object):
         return outputs
 
 
-    def total_cap_and_gen_facet(self):
+    def total_cap_and_gen_facet(self, figure_name=None, prop=None, start=None, end=None, 
+                                timezone=None, start_date_range=None, end_date_range=None):
+        
         # generation figure
         self.logger.info("Generation data")
         gen_obj = gen.mplot(self.argument_dict)
@@ -254,8 +267,8 @@ class mplot(object):
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
-                self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
-                axs[0].set_xticklabels(self.ticklabels)
+                ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
+                axs[0].set_xticklabels(ticklabels)
 
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
@@ -299,8 +312,6 @@ class mplot(object):
             axs[1].tick_params(axis='x', which='major', length=5, width=1)
             
             data_tables = {}
-            if not self.facet:
-                self.Scenarios = [self.Scenarios[0]]
             for n, scenario in enumerate(self.Scenarios):
 
                 x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + axs[1].patches[n].get_width()]
@@ -319,8 +330,8 @@ class mplot(object):
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
-                self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
-                axs[1].set_xticklabels(self.ticklabels)
+                ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
+                axs[1].set_xticklabels(ticklabels)
 
             # get names of generator to create custom legend
             l1 = Total_Installed_Capacity_Out.columns.tolist()

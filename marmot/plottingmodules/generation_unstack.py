@@ -27,33 +27,31 @@ class mplot(object):
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
+        self.mplot_data_dict = {}
 
-    def gen_unstack(self):
 
-        outputs = {}   
-        gen_collection = {}
-        load_collection = {}
-        pump_load_collection = {}
-        unserved_energy_collection = {}
-        curtailment_collection = {}
+    def gen_unstack(self, figure_name=None, prop=None, start=None, end=None, 
+                        timezone=None, start_date_range=None, end_date_range=None):
+        outputs = {}  
         
+        facet=False
+        if 'Facet' in figure_name:
+            facet = True
+            
         def getdata(scenario_list):
             
-            check_input_data = []
-            check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, scenario_list)])
-            mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, scenario_list)
-            mfunc.get_data(pump_load_collection,"generator_Pump_Load", self.Marmot_Solutions_folder, self.Scenarios)
+            # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+            # required True/False, property name and scenarios required, scenarios must be a list.
+            properties = [(True,"generator_Generation",scenario_list),
+                          (False,"generator_Curtailment",scenario_list),
+                          (False,"generator_Pump_Load",scenario_list),
+                          (True,f"{self.AGG_BY}_Load",scenario_list),
+                          (False,f"{self.AGG_BY}_Unserved_Energy",scenario_list)]
             
-            if self.AGG_BY == "zone":
-                check_input_data.extend([mfunc.get_data(load_collection,"zone_Load", self.Marmot_Solutions_folder, scenario_list)])
-                mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, scenario_list)
-            else:
-                check_input_data.extend([mfunc.get_data(load_collection,"region_Load", self.Marmot_Solutions_folder, scenario_list)])
-                mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, scenario_list)
-            
-            return check_input_data
+            # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+            return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
-        if self.facet:
+        if facet:
             check_input_data = getdata(self.Scenarios)
             all_scenarios = self.Scenarios
         else:
@@ -69,7 +67,7 @@ class mplot(object):
         xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=all_scenarios)
 
         # If the plot is not a facet plot, grid size should be 1x1
-        if not self.facet:
+        if not facet:
             xdimension = 1
             ydimension = 1
 
@@ -99,10 +97,10 @@ class mplot(object):
 
             for i, scenario in enumerate(all_scenarios):
                 self.logger.info(f"Scenario = {scenario}")
-                Pump_Load = pd.Series() # Initiate pump load
+                # Pump_Load = pd.Series() # Initiate pump load
 
                 try:
-                    Stacked_Gen = gen_collection.get(scenario).copy()
+                    Stacked_Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
                     if self.shift_leapday:
                         Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
@@ -118,8 +116,8 @@ class mplot(object):
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
             
                 # Insert Curtailmnet into gen stack if it exhists in database
-                if curtailment_collection:
-                    Stacked_Curt = curtailment_collection.get(scenario).copy()
+                if self.mplot_data_dict["generator_Curtailment"]:
+                    Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario).copy()
                     if self.shift_leapday:
                         Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
@@ -129,29 +127,29 @@ class mplot(object):
                     Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
 
                     # Calculates Net Load by removing variable gen + curtailment
-                    self.re_gen_cat = self.re_gen_cat + [curtailment_name]
+                    vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+                else:
+                    vre_gen_cat = self.vre_gen_cat
                     
                 # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-                self.re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
-                Net_Load = Stacked_Gen.drop(labels = self.re_gen_cat, axis=1)
+                vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
+                Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
                 Net_Load = Net_Load.sum(axis=1)
 
                 Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
-                Load = load_collection.get(scenario).copy()
+                Load = self.mplot_data_dict[f"{self.AGG_BY}_Load"].get(scenario).copy()
                 if self.shift_leapday:
                     Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)     
                 Load = Load.xs(zone_input,level=self.AGG_BY)
                 Load = Load.groupby(["timestamp"]).sum()
                 Load = Load.squeeze() #Convert to Series
            
-                try:
-                    pump_load_collection[scenario]
-                except KeyError:
-                    pump_load_collection[scenario] = gen_collection[scenario].copy()
-                    pump_load_collection[scenario].iloc[:,0] = 0
-
-                Pump_Load = pump_load_collection.get(scenario).copy()
+                if self.mplot_data_dict["generator_Pump_Load"] == {}:
+                    Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
+                    Pump_Load.iloc[:,0] = 0
+                else:
+                    Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
                 if self.shift_leapday:
                     Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)                                
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
@@ -161,45 +159,46 @@ class mplot(object):
                     Pump_Load = Load - Pump_Load
                 else:
                     Pump_Load = Load
-                try:
-                    unserved_energy_collection[scenario]
-                except KeyError:
-                    unserved_energy_collection[scenario] = load_collection[scenario].copy()
-                    unserved_energy_collection[scenario].iloc[:,0] = 0
-                Unserved_Energy = unserved_energy_collection.get(scenario).copy()
+                
+                
+                if self.mplot_data_dict[f"{self.AGG_BY}_Unserved_Energy"] == {}:
+                    Unserved_Energy = self.mplot_data_dict[f"{self.AGG_BY}_Load"][scenario].copy()
+                    Unserved_Energy.iloc[:,0] = 0
+                else:
+                    Unserved_Energy = self.mplot_data_dict[f"{self.AGG_BY}_Unserved_Energy"][scenario].copy()                
                 if self.shift_leapday:
                     Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)                    
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
 
-                if self.prop == "Peak Demand":
+                if prop == "Peak Demand":
                     peak_pump_load_t = Pump_Load.idxmax()
-                    end_date = peak_pump_load_t + dt.timedelta(days=self.end)
-                    start_date = peak_pump_load_t - dt.timedelta(days=self.start)
+                    end_date = peak_pump_load_t + dt.timedelta(days=end)
+                    start_date = peak_pump_load_t - dt.timedelta(days=start)
                     # Peak_Pump_Load = Pump_Load[peak_pump_load_t]
                     Stacked_Gen = Stacked_Gen[start_date : end_date]
                     Load = Load[start_date : end_date]
                     Unserved_Energy = Unserved_Energy[start_date : end_date]
                     Pump_Load = Pump_Load[start_date : end_date]
 
-                elif self.prop == "Min Net Load":
+                elif prop == "Min Net Load":
                     min_net_load_t = Net_Load.idxmin()
-                    end_date = min_net_load_t + dt.timedelta(days=self.end)
-                    start_date = min_net_load_t - dt.timedelta(days=self.start)
+                    end_date = min_net_load_t + dt.timedelta(days=end)
+                    start_date = min_net_load_t - dt.timedelta(days=start)
                     # Min_Net_Load = Net_Load[min_net_load_t]
                     Stacked_Gen = Stacked_Gen[start_date : end_date]
                     Load = Load[start_date : end_date]
                     Unserved_Energy = Unserved_Energy[start_date : end_date]
                     Pump_Load = Pump_Load[start_date : end_date]
 
-                elif self.prop == 'Date Range':
+                elif prop == 'Date Range':
                 	self.logger.info(f"Plotting specific date range: \
-                	{str(self.start_date)} to {str(self.end_date)}")
+                	{str(start_date_range)} to {str(end_date_range)}")
 
-	                Stacked_Gen = Stacked_Gen[self.start_date : self.end_date]
-	                Load = Load[self.start_date : self.end_date]
-	                Unserved_Energy = Unserved_Energy[self.start_date : self.end_date]
+	                Stacked_Gen = Stacked_Gen[start_date_range : end_date_range]
+	                Load = Load[start_date_range : end_date_range]
+	                Unserved_Energy = Unserved_Energy[start_date_range : end_date_range]
 
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
@@ -258,22 +257,22 @@ class mplot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
             
-            self.xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            self.ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
+            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
             
             # add facet labels
-            mfunc.add_facet_labels(fig1, self.xlabels, self.ylabels)
+            mfunc.add_facet_labels(fig1, xlabels, ylabels)
                         
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            labelpad = 60 if self.facet else 25
+            labelpad = 50 if facet else 30
             plt.ylabel(f"Genertaion ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
             
              #Remove extra axis
             if excess_axs != 0:
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
-            if not self.facet:
+            if not facet:
                 data_table = data_table[self.Scenarios[0]]
                 
             outputs[zone_input] = {'fig':fig1, 'data_table':data_table}
