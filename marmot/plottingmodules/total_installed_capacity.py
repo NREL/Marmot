@@ -36,6 +36,7 @@ class mplot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.set_title = mconfig.parser("plot_title_as_region")
 
     def total_cap(self):
         outputs = {}
@@ -101,6 +102,9 @@ class mplot(object):
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
             fig1.set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
+            if self.set_title:
+                fig1.set_title(zone_input)
+
             #adds comma to y axis data
             fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             fig1.tick_params(axis='y', which='major', length=5, width=1)

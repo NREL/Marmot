@@ -100,8 +100,11 @@ class mplot(object):
                     outputs[zone_input] = out
                     continue
 
-                Data_Table_Out = thermal_reserve
+                if self.prop == 'Date Range':
+                    self.logger.info("Plotting specific date range: {} to {}".format(str(self.start_date),str(self.end_date)))
+                    thermal_reserve = thermal_reserve[self.start_date : self.end_date]
 
+                Data_Table_Out = thermal_reserve
 
 
                 locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)

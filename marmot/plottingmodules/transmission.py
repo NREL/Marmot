@@ -30,8 +30,7 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-
-
+        self.set_title = mconfig.parser("plot_title_as_region")
 
     #Duration curve of individual line utilization for all hours
     def line_util(self):
@@ -1574,6 +1573,8 @@ class mplot(object):
             fig7.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Net export ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=60)
+            if self.set_title:
+                plt.title(zone_input)
             if self.duration_curve:
                 plt.xlabel('Sorted hour of the year',color = 'black', labelpad = 30)
             
@@ -1702,11 +1703,140 @@ class mplot(object):
             fig10 = mfunc.create_clustered_stacked_bar_plot(net_exports_all,self.Scenarios)
             fig10.hlines(y = 0, xmin = fig10.get_xlim()[0], xmax = fig10.get_xlim()[1], linestyle = ':')
             fig10.set_ylabel('Interchange ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            if self.set_title:
+                fig10.set_title(zone_input)
+
+            outputs[zone_input] = {'fig': fig10,'data_table': Data_Table_Out}
+        
+        return outputs
+
+    def total_int_flow_ind(self):
+        
+        """
+        This method plots the total flow for a specific interface, separated by positive and negative flows.
+        Specify the interface of interest in column C of Marmot_plot_select.csv. 
+        Figures and data tables are returned to plot_main.
+        The method will only work if agg_by = "zone".
+        """
+        line_flow_collection = {}
+        check_input_data = []
+        check_input_data.extend([mfunc.get_data(line_flow_collection,"line_Flow",self.Marmot_Solutions_folder, self.Scenarios)])
+
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+
+        exp_lines = self.meta.zone_exporting_lines()
+        imp_lines = self.meta.zone_importing_lines()
+        
+        exp_lines.columns = ['region','line_name']
+        imp_lines.columns = ['region','line_name']
+        
+        outputs = {}
+        xdimension=len(self.xlabels)
+        if xdimension == 0:
+            xdimension = 1
+        ydimension=len(self.ylabels)
+        if ydimension == 0:
+            ydimension = 1
+
+        grid_size = xdimension*ydimension
+
+        # Used to calculate any excess axis to delete
+        plot_number = len(self.Scenarios)
+        excess_axs = grid_size - plot_number
+        
+        for zone_input in self.Zones:
+        
+            self.logger.info(self.AGG_BY + " = " + zone_input)
+
+            #Find list of lines that connect each region.
+            exp_oz = exp_lines[exp_lines['region'] == zone_input]
+            imp_oz = imp_lines[imp_lines['region'] == zone_input]
+
+            other_zones = self.meta.zones().name.tolist()
+            other_zones.remove(zone_input)
+
+            #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
+            fig7, axs = mfunc.setup_plot(xdimension,ydimension,sharey = True)
+            plt.subplots_adjust(wspace=0.6, hspace=0.3)
+            n = -1
+            
+            net_exports_all = []
+            
+            for scenario in self.Scenarios:
+                n += 1
+                net_exports = []
+                self.logger.info("Scenario = " + str(scenario))
+                flow = line_flow_collection[scenario]
+                flow = flow.reset_index()
+                                
+                for other_zone in other_zones:
+                    exp_other_oz = exp_lines[exp_lines['region'] == other_zone]
+                    imp_other_oz = imp_lines[imp_lines['region'] == other_zone]
+           
+                    exp_pair = pd.merge(exp_oz,imp_other_oz,left_on = 'line_name',right_on = 'line_name')            
+                    imp_pair = pd.merge(imp_oz,exp_other_oz,left_on = 'line_name',right_on = 'line_name')
+                    
+                    #Swap columns for importing lines
+                    imp_pair = imp_pair.reindex(columns = ['region_from','line_name','region_to'])
+    
+                    export = flow[flow['line_name'].isin(exp_pair['line_name'])]
+                    imports = flow[flow['line_name'].isin(imp_pair['line_name'])]
+
+                    export = export.groupby(['timestamp']).sum()
+                    imports = imports.groupby(['timestamp']).sum()
+                    
+                    #Check for situations where there are only exporting or importing lines for this zonal pair.
+                    if imports.empty:
+                        net_export = export
+                    elif export.empty:
+                        net_export = -imports
+                    else:
+                        net_export = export - imports
+                    net_export.columns = [other_zone]
+                    
+                    if not pd.isnull(self.start_date):
+                        if other_zone == other_zones[0]:
+                            self.logger.info("Plotting specific date range: \
+                            {} to {}".format(str(self.start_date),str(self.end_date)))
+
+                        net_export = net_export[self.start_date : self.end_date]
+                
+                    net_exports.append(net_export)
+                
+                net_exports = pd.concat(net_exports,axis = 1)
+                net_exports = net_exports.dropna(axis = 'columns')
+                net_exports.index = pd.to_datetime(net_exports.index)
+                net_exports['Net export'] = net_exports.sum(axis = 1)
+                                        
+                positive = net_exports.agg(lambda x: x[x>0].sum())
+                negative = net_exports.agg(lambda x: x[x<0].sum())
+                
+                # unitconversion based off peak export hour, only checked once
+                if scenario == self.Scenarios[0]:
+                    max_val = max(positive['Net export'].max(),abs(negative['Net export']).max())
+                    unitconversion = mfunc.capacity_energy_unitconversion(max_val)
+                    print(unitconversion)
+
+                both = pd.concat([positive,negative],axis = 1)
+                both.columns = ['Total export','Total import']                    
+                both = both / unitconversion['divisor']
+                net_exports_all.append(both)
+                Data_Table_Out = pd.concat(net_exports_all)
+
+                            
+            fig10 = mfunc.create_clustered_stacked_bar_plot(net_exports_all,self.Scenarios)
+            fig10.hlines(y = 0, xmin = fig10.get_xlim()[0], xmax = fig10.get_xlim()[1], linestyle = ':')
+            fig10.set_ylabel('Interchange ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            if self.set_title:
+                fig10.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig10,'data_table': Data_Table_Out}
         
         return outputs
         
+
     ### Archived Code ####
 
     # def line_util_agged(self):

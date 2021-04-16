@@ -50,6 +50,7 @@ def createConfig(configfile_path):
         shift_leapday = False,
         skip_existing_properties = True,
         auto_convert_units = True,
+        plot_title_as_region = True,
         
         user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
         
