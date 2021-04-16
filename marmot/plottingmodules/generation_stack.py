@@ -171,16 +171,22 @@ class mplot(object):
         facet=False
         if 'Facet' in figure_name:
             facet = True
-
+        
+        if self.AGG_BY == 'zone':
+                agg = 'zone'
+        else:
+            agg = 'region'
+                
         def set_dicts(scenario_list):
+            
             
             # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
             # required True/False, property name and scenarios required, scenarios must be a list.
             properties = [(True,"generator_Generation",scenario_list),
                           (False,"generator_Curtailment",scenario_list),
                           (False,"generator_Pump_Load",scenario_list),
-                          (True,f"{self.AGG_BY}_Load",scenario_list),
-                          (False,f"{self.AGG_BY}_Unserved_Energy",scenario_list)]
+                          (True,f"{agg}_Load",scenario_list),
+                          (False,f"{agg}_Unserved_Energy",scenario_list)]
             
             # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
             return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -214,7 +220,7 @@ class mplot(object):
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
-            Load = self.mplot_data_dict[f'{self.AGG_BY}_Load'].get(scenario).copy()
+            Load = self.mplot_data_dict[f'{agg}_Load'].get(scenario).copy()
             if self.shift_leapday:
                 Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
             Load = Load.xs(zone_input,level=self.AGG_BY)
@@ -253,9 +259,9 @@ class mplot(object):
                 #Load = Total_Demand
             
             try:
-                Unserved_Energy = self.mplot_data_dict[f'{self.AGG_BY}_Unserved_Energy'][scenario].copy()
+                Unserved_Energy = self.mplot_data_dict[f'{agg}_Unserved_Energy'][scenario].copy()
             except KeyError:
-                Unserved_Energy = self.mplot_data_dict[f'{self.AGG_BY}_Load'][scenario].copy()
+                Unserved_Energy = self.mplot_data_dict[f'{agg}_Load'][scenario].copy()
                 Unserved_Energy.iloc[:,0] = 0
             if self.shift_leapday:
                 Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)
@@ -520,8 +526,8 @@ class mplot(object):
         if facet:
             check_input_data = set_dicts(self.Scenarios)
         else:
-            check_input_data = set_dicts([self.Scenarios[0]])  
-        
+            check_input_data = set_dicts([self.Scenarios[0]])
+
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -557,7 +563,7 @@ class mplot(object):
                  timezone=None, start_date_range=None, end_date_range=None):
         outputs = {}
         
-         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios)]
             

@@ -43,13 +43,17 @@ class mplot(object):
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
         
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
+        else:
+            agg = 'region'
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios),
                       (False,"generator_Curtailment",self.Scenarios),
                       (False,"generator_Pump_Load",self.Scenarios),
-                      (True,f"{self.AGG_BY}_Load",self.Scenarios),
-                      (False,f"{self.AGG_BY}_Unserved_Energy",self.Scenarios)]
+                      (True,f"{agg}_Load",self.Scenarios),
+                      (False,f"{agg}_Unserved_Energy",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -99,7 +103,7 @@ class mplot(object):
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
 
-                Total_Load = self.mplot_data_dict[f"{self.AGG_BY}_Load"].get(scenario)
+                Total_Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
@@ -107,11 +111,11 @@ class mplot(object):
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
                 
                 
-                if self.mplot_data_dict[f"{self.AGG_BY}_Unserved_Energy"] == {}:
-                    Unserved_Energy = self.mplot_data_dict[f"{self.AGG_BY}_Load"][scenario].copy()
+                if self.mplot_data_dict[f"{agg}_Unserved_Energy"] == {}:
+                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Load"][scenario].copy()
                     Unserved_Energy.iloc[:,0] = 0
                 else:
-                    Unserved_Energy = self.mplot_data_dict[f"{self.AGG_BY}_Unserved_Energy"][scenario]
+                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
