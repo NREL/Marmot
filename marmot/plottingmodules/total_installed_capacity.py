@@ -42,6 +42,7 @@ class mplot(object):
 
     def total_cap(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone=None, start_date_range=None, end_date_range=None):
+        
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -100,20 +101,22 @@ class mplot(object):
             
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
-
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+            
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0, ax=ax,
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
 
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel(f"Total Installed Capacity ({unitconversion['units']})",  color='black', rotation='vertical')
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel(f"Total Installed Capacity ({unitconversion['units']})",  color='black', rotation='vertical')
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
-            handles, labels = fig1.get_legend_handles_labels()
-            fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+            handles, labels = ax.get_legend_handles_labels()
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
 
@@ -194,25 +197,26 @@ class mplot(object):
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=ax,
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
 
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel(f"Capacity Change ({unitconversion['units']}) \n relative to {self.Scenarios[0]}",  color='black', rotation='vertical')
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel(f"Capacity Change ({unitconversion['units']}) \n relative to {self.Scenarios[0]}",  color='black', rotation='vertical')
 
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
-            handles, labels = fig1.get_legend_handles_labels()
-            fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+            handles, labels = ax.get_legend_handles_labels()
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
 

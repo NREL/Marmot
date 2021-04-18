@@ -174,18 +174,20 @@ class mplot(object):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
             
-            fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=ax,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical')
-            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
             for n, scenario in enumerate(self.Scenarios):
 
-                x = [fig1.patches[n].get_x(), fig1.patches[n].get_x() + fig1.patches[n].get_width()]
+                x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 height1 = [int(Total_Load_Out[scenario].sum())]*2
                 lp1 = plt.plot(x,height1, c='black', linewidth=3)
                 if Pump_Load_Out[scenario].values.sum() > 0:
@@ -195,11 +197,11 @@ class mplot(object):
                 if Unserved_Energy_Out[scenario].values.sum() > 0:
                     height3 = [int(Unserved_Energy_Out[scenario])]*2
                     plt.plot(x,height3, c='#DD0200', linewidth=1.5)
-                    fig1.fill_between(x, height3, height1,
+                    ax.fill_between(x, height3, height1,
                                 facecolor = '#DD0200',
                                 alpha=0.5)
 
-            handles, labels = fig1.get_legend_handles_labels()
+            handles, labels = ax.get_legend_handles_labels()
 
             #Combine all legends into one.
             if Pump_Load_Out.values.sum() > 0:
@@ -214,7 +216,7 @@ class mplot(object):
                 handles.append(custom_legend_elements)
                 labels += ['Unserved Energy']
 
-            fig1.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
+            ax.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
@@ -312,7 +314,7 @@ class mplot(object):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
