@@ -369,7 +369,8 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
                 rect.set_width(1 / float(n_df + 1))
 
     fig.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
-    fig.set_xticklabels(df.index, rotation = 0)
+    labels = df.index.get_level_values(None)
+    fig.set_xticklabels(labels, rotation = 90)
     fig.set_title(title)
 
     # Add invisible data to add another legend
@@ -598,10 +599,10 @@ def shift_leapday(df,Marmot_Solutions_folder):
             inplace = True)
 
         #Special case where timezone shifting may also be necessary.
-        # df.index.set_levels(
-        #     df.index.levels[df.index.names.index('timestamp')].shift(-2,freq = 'H'),
-        #     level = 'timestamp',
-        #     inplace = True)
+        df.index.set_levels(
+            df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
+            level = 'timestamp',
+            inplace = True)
 
     return(df)
 

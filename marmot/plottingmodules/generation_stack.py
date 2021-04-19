@@ -364,7 +364,7 @@ class mplot(object):
             plt.subplots_adjust(wspace=0.05, hspace=0.25)
             axs = axs.ravel()
             i=0
-            data_tables = {}
+            data_tables = []
             unique_tech_names = []
 
             for scenario in all_scenarios:
@@ -419,9 +419,12 @@ class mplot(object):
                 Load = Load.rename('Total Load \n (Demand + Storage Charging)')
                 Total_Demand = Total_Demand.rename('Total Demand')
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
+
                 # Data table of values to return to main program
-                Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
-                data_tables[scenario] = Data_Table_Out * unitconversion['divisor']
+                single_scen_out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
+                scenario_names = pd.Series([scenario] * len(single_scen_out),name = 'Scenario')
+                single_scen_out = single_scen_out.set_index([scenario_names],append = True)
+                data_tables.append(single_scen_out * unitconversion['divisor'])
 
                 # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
@@ -547,9 +550,8 @@ class mplot(object):
                                                             colors='white')
                     excess_axs-=1
 
-            if not self.facet:
-                data_tables = data_tables[self.Scenarios[0]]
-            out = {'fig':fig1, 'data_table':data_tables}
+            Data_Table_Out = pd.concat(data_tables)
+            out = {'fig':fig1, 'data_table':Data_Table_Out}
 
             plt.close(fig1)
 
