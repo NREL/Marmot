@@ -27,20 +27,24 @@ class mplot(object):
         
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
-
-    def avg_output_when_committed(self):
+        
+        self.mplot_data_dict = {}
+        
+    def avg_output_when_committed(self, figure_name=None, prop=None, start=None, 
+                                  end=None, timezone=None, start_date_range=None, 
+                                  end_date_range=None):
         outputs = {}
-        gen_collection = {}
-        cap_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -48,7 +52,7 @@ class mplot(object):
 
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = gen_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -60,7 +64,7 @@ class mplot(object):
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 # techs = list(Gen['tech'].unique())
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]
-                Cap = cap_collection.get(scenario)
+                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.drop(columns = ['timestamp','tech'])
@@ -68,12 +72,11 @@ class mplot(object):
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
                 
-                print(self.start_date)
-                if pd.isna(self.start_date) == False:
+                if pd.isna(start_date_range) == False:
                     self.logger.info(f"Plotting specific date range: \
-                    {str(self.start_date)} to {str(self.end_date)}")
+                    {str(start_date_range)} to {str(end_date_range)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
-                    Gen = Gen.sort_index()[self.start_date : self.end_date]
+                    Gen = Gen.sort_index()[start_date_range : end_date_range]
 
                 #Calculate CF individually for each plant, since we need to take out all zero rows.
                 tech_names = Gen['tech'].unique()
@@ -132,19 +135,22 @@ class mplot(object):
         return outputs
 
 
-    def cf(self):
+    def cf(self, figure_name=None, prop=None, start=None, 
+           end=None, timezone=None, start_date_range=None, 
+           end_date_range=None):
+        
         outputs = {}
-        gen_collection = {}
-        cap_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -153,7 +159,7 @@ class mplot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = gen_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -161,10 +167,10 @@ class mplot(object):
                         continue
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
                 
-                if pd.isna(self.start_date) == False:
+                if pd.isna(start_date_range) == False:
                     self.logger.info(f"Plotting specific date range: \
-                    {str(self.start_date)} to {str(self.end_date)}")
-                    Gen = Gen[self.start_date : self.end_date]
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    Gen = Gen[start_date_range : end_date_range]
                 
                 # Calculates interval step to correct for MWh of generation
                 time_delta = Gen.index[1] - Gen.index[0]
@@ -178,7 +184,7 @@ class mplot(object):
                 Total_Gen = Gen.sum(axis=0)
                 Total_Gen.rename(scenario, inplace = True)
                 
-                Cap = cap_collection.get(scenario)
+                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = mfunc.df_process_gen_inputs(Cap, self.ordered_gen)
                 Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
@@ -223,21 +229,23 @@ class mplot(object):
         return outputs
 
 
-    def time_at_min_gen(self):
+    def time_at_min_gen(self, figure_name=None, prop=None, start=None, 
+           end=None, timezone=None, start_date_range=None, 
+           end_date_range=None):
+        
         outputs = {}
-        gen_collection = {}
-        cap_collection = {}
-        gen_hours_at_min_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_hours_at_min_collection,"generator_Hours_at_Minimum", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Installed_Capacity",self.Scenarios),
+                      (True,"generator_Hours_at_Minimum",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -247,13 +255,13 @@ class mplot(object):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {str(scenario)}")
 
-                Min = gen_hours_at_min_collection.get(scenario)
+                Min = self.mplot_data_dict["generator_Hours_at_Minimum"].get(scenario)
                 Min = Min.xs(zone_input,level = self.AGG_BY)
                 Min = Min.reset_index()
                 Min = Min.set_index('gen_name')
                 Min = Min.rename(columns = {0:"Hours at Minimum"})
 
-                Gen = gen_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -268,7 +276,7 @@ class mplot(object):
                 Gen = Gen[~Gen['tech'].isin(self.vre_gen_cat)]
                 Gen.index = Gen.timestamp
 
-                Cap = cap_collection.get(scenario)
+                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Caps = Cap.groupby('gen_name').mean()
                 Caps.reset_index()

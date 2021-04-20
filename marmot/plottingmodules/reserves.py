@@ -11,6 +11,7 @@ This module creates plots of reserve provision and shortage at the generation an
 
 import pandas as pd
 import datetime as dt
+import textwrap
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import numpy as np
@@ -34,8 +35,11 @@ class mplot(object):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
-    def reserve_gen_timeseries(self):
+        self.mplot_data_dict = {}
+
+    def reserve_gen_timeseries(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
         """
         This method creates a generation stackplot of reserve provision for each region.
         A Facet Plot is created if multiple scenarios are compared.
@@ -43,33 +47,44 @@ class mplot(object):
         Figures and data tables are returned to plot_main
         """
         # If not facet plot, only plot first sceanrio
-        if not self.facet:
-            self.Scenarios = [self.Scenarios[0]]
+        facet=False
+        if 'Facet' in figure_name:
+            facet = True
+            
+        if not facet:
+            Scenarios = [self.Scenarios[0]]
+        else:
+            Scenarios = self.Scenarios
+            
         outputs = {}
-        check_input_data = []
-        reserve_provision_collection = {}
-        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Scenarios)])
-
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"reserves_generators_Provision",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
 
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
 
-            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario=self.Scenarios)
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,facet,multi_scenario=Scenarios)
             grid_size = xdimension*ydimension
-            excess_axs = grid_size - len(self.Scenarios)
+            excess_axs = grid_size - len(Scenarios)
 
             fig1, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             data_tables = {}
             unique_tech_names = []
-            for n, scenario in enumerate(self.Scenarios):
+            for n, scenario in enumerate(Scenarios):
                 self.logger.info(f"Scenario = {scenario}")
 
-                reserve_provision_timeseries = reserve_provision_collection.get(scenario)
+                reserve_provision_timeseries = self.mplot_data_dict["reserves_generators_Provision"].get(scenario)
                 
                 #Check if zone has reserves, if not skips
                 try:
@@ -82,20 +97,20 @@ class mplot(object):
                 if n == 0:
                     unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
 
-                if self.prop == "Peak Demand":
+                if prop == "Peak Demand":
                     self.logger.info("Plotting Peak Demand period")
 
                     total_reserve = reserve_provision_timeseries.sum(axis=1)/unitconversion['divisor']
                     peak_reserve_t =  total_reserve.idxmax()
-                    start_date = peak_reserve_t - dt.timedelta(days=self.start)
-                    end_date = peak_reserve_t + dt.timedelta(days=self.end)
+                    start_date = peak_reserve_t - dt.timedelta(days=start)
+                    end_date = peak_reserve_t + dt.timedelta(days=end)
                     reserve_provision_timeseries = reserve_provision_timeseries[start_date : end_date]
                     Peak_Reserve = total_reserve[peak_reserve_t]
 
-                elif self.prop == 'Date Range':
+                elif prop == 'Date Range':
                     self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    reserve_provision_timeseries = reserve_provision_timeseries[self.start_date : self.end_date]
+                    {str(start_date_range} to {str(end_date_range)}")
+                    reserve_provision_timeseries = reserve_provision_timeseries[start_date_range : end_date_range]
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
                 
@@ -105,7 +120,7 @@ class mplot(object):
                 mfunc.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, label=reserve_provision_timeseries.columns,n=n)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
 
-                if self.prop == "Peak Demand":
+                if prop == "Peak Demand":
                     axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), '.2f')) + ' {}'.format(unitconversion['units']), 
                                     xy=(peak_reserve_t, Peak_Reserve),
                             xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
@@ -116,7 +131,7 @@ class mplot(object):
                 unique_tech_names.extend(l1)
             
             if not data_tables:
-                self.logger.warning('No reserves in ' + region)
+                self.logger.warning(f'No reserves in {region}')
                 out = mfunc.MissingZoneData()
                 outputs[region] = out
                 continue
@@ -143,20 +158,22 @@ class mplot(object):
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            self.xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            mfunc.add_facet_labels(fig1, self.xlabels, self.ylabels)
+            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            mfunc.add_facet_labels(fig1, xlabels, self.ylabels)
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel(f"Reserve Provision ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=30)
 
-            if not self.facet:
+            if not facet:
                 data_tables = data_tables[self.Scenarios[0]]
 
             outputs[region] = {'fig': fig1, 'data_table': data_tables}
         return outputs
 
-    def total_reserves_by_gen(self):
+    def total_reserves_by_gen(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
         """
         This method creates a generation barplot of total reserve provision by generator for each region.
         Multiple scenarios are assigned to the x-axis
@@ -164,13 +181,17 @@ class mplot(object):
         """
 
         outputs = {}
-        check_input_data = []
-        reserve_provision_collection = {}
-        check_input_data.extend([mfunc.get_data(reserve_provision_collection,"reserves_generators_Provision",self.Marmot_Solutions_folder, self.Scenarios)])
-
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"reserves_generators_Provision",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
 
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
@@ -180,7 +201,7 @@ class mplot(object):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                reserve_provision_timeseries = reserve_provision_collection.get(scenario)
+                reserve_provision_timeseries = self.mplot_data_dict["reserves_generators_Provision"].get(scenario)
                 #Check if zone has reserves, if not skips
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
@@ -227,8 +248,8 @@ class mplot(object):
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
-                self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
-                fig1.set_xticklabels(self.ticklabels)
+                ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
+                fig1.set_xticklabels(ticklabels)
 
             # create list of gen technologies
             l1 = Total_Reserves_Out.columns.tolist()
@@ -253,25 +274,25 @@ class mplot(object):
             outputs[region] = {'fig': fig1, 'data_table': data_table_out}
         return outputs
 
-    def reg_reserve_shortage(self):
+    def reg_reserve_shortage(self, **kwargs):
         """
         This method creates a bar plot of reserve shortage for each region in MWh.
         Bars are grouped by reserve type
         Figures and data tables are returned to plot_main
         """
-        outputs = self._reserve_bar_plots("Shortage")
+        outputs = self._reserve_bar_plots("Shortage", **kwargs)
         return outputs
 
-    def reg_reserve_provision(self):
+    def reg_reserve_provision(self, **kwargs):
         """
         This method creates a bar plot of reserve provision for each region in MWh.
         Bars are grouped by reserve type
         Figures and data tables are returned to plot_main
         """
-        outputs = self._reserve_bar_plots("Provision")
+        outputs = self._reserve_bar_plots("Provision", **kwargs)
         return outputs
 
-    def reg_reserve_shortage_hrs(self):
+    def reg_reserve_shortage_hrs(self, **kwargs):
         """
         This method creates a bar plot of reserve shortage for each region in hrs.
         Bars are grouped by reserve type
@@ -280,16 +301,23 @@ class mplot(object):
         outputs = self._reserve_bar_plots("Shortage",count_hours=True)
         return outputs
 
-    def _reserve_bar_plots(self, data_set, count_hours=False):
-        reserve_collection = {}
-        check_input_data = []
-        check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_{}".format(data_set),self.Marmot_Solutions_folder, self.Scenarios)])
-
-        if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-
+    def _reserve_bar_plots(self, data_set, count_hours=False, figure_name=None, 
+                           prop=None, start=None, end=None, timezone=None, 
+                           start_date_range=None, end_date_range=None):
+        
         outputs = {}
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, f"reserve_{data_set}", self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            return mfunc.MissingInputData()
+
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
 
@@ -299,7 +327,7 @@ class mplot(object):
 
                 self.logger.info(f'Scenario = {scenario}')
 
-                reserve_timeseries = reserve_collection.get(scenario)
+                reserve_timeseries = self.mplot_data_dict[f"reserve_{data_set}"].get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
@@ -349,7 +377,7 @@ class mplot(object):
                 reserve_out = reserve_out/unitconversion['divisor'] 
                 Data_Table_Out = reserve_out.add_suffix(f" ({unitconversion['units']}h)")
             else:
-                Data_Table_Out = reserve_out.add_suffix(f" (hrs)")
+                Data_Table_Out = reserve_out.add_suffix(" (hrs)")
             
             # create color dictionary
             color_dict = dict(zip(reserve_out.columns,self.color_list))
@@ -368,34 +396,45 @@ class mplot(object):
         return outputs
 
 
-    def reg_reserve_shortage_timeseries(self):
+    def reg_reserve_shortage_timeseries(self,figure_name=None, 
+                           prop=None, start=None, end=None, timezone=None, 
+                           start_date_range=None, end_date_range=None):
         """
         This method creates a timeseries line plot of reserve shortage for each region.
         A Facet Plot is created if multiple scenarios are compared.
         A line is plotted for each reserve type shortage.
         Figures and data tables are returned to plot_main
         """
-        outputs = {}
-        reserve_collection = {}
-        check_input_data = []
-
+        facet=False
+        if 'Facet' in figure_name:
+            facet = True
+        
         # If not facet plot, only plot first sceanrio
-        if not self.facet:
-            self.Scenarios = [self.Scenarios[0]]
+        if not facet:
+            Scenarios = [self.Scenarios[0]]
+        else:
+            Scenarios = self.Scenarios
 
-        check_input_data.extend([mfunc.get_data(reserve_collection,"reserve_Shortage", self.Marmot_Solutions_folder, self.Scenarios)])
-
+        outputs = {}
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, "reserve_Shortage", Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        
+        # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-
+            return mfunc.MissingInputData()
+        
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
 
-            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,self.facet,multi_scenario = self.Scenarios)
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,facet,multi_scenario = Scenarios)
 
             grid_size = xdimension*ydimension
-            excess_axs = grid_size - len(self.Scenarios)
+            excess_axs = grid_size - len(Scenarios)
 
             fig3, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -403,13 +442,12 @@ class mplot(object):
             data_tables = {}
             unique_reserve_types = []
             
-            if not self.facet:
-                self.Scenarios = [self.Scenarios[0]]
-            for n, scenario in enumerate(self.Scenarios):
+
+            for n, scenario in enumerate(Scenarios):
 
                 self.logger.info(f'Scenario = {scenario}')
 
-                reserve_timeseries = reserve_collection.get(scenario)
+                reserve_timeseries = self.mplot_data_dict["reserve_Shortage"].get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
@@ -423,10 +461,10 @@ class mplot(object):
                 reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', reserve_timeseries['parent'])
                 reserve_timeseries = reserve_timeseries.pivot(index='timestamp', columns='Type', values=0)
 
-                if self.prop == 'Date Range':
+                if prop == 'Date Range':
                     self.logger.info(f"Plotting specific date range: \
-                    {str(self.start_date)} to {str(self.end_date)}")
-                    reserve_timeseries = reserve_timeseries[self.start_date : self.end_date]
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    reserve_timeseries = reserve_timeseries[start_date_range : end_date_range]
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
 
@@ -473,8 +511,8 @@ class mplot(object):
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            self.xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            mfunc.add_facet_labels(fig3, self.xlabels, self.ylabels)
+            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            mfunc.add_facet_labels(fig3, xlabels, self.ylabels)
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -482,7 +520,7 @@ class mplot(object):
             plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 30)
 
             #Data_Out = pd.concat(reserve_timeseries_chunk,axis=0)
-            if not self.facet:
+            if not facet:
                 data_tables = data_tables[self.Scenarios[0]]
 
             outputs[region] =  {'fig': fig3, 'data_table': data_tables}

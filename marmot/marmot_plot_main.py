@@ -452,12 +452,12 @@ class MarmotPlot():
                 
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
-                Figure_Out = figure_method(figure_name=row.iloc[0], 
-                                           prop=row.iloc[2],
-                                           start=row.iloc[3], end=row.iloc[4],
-                                           timezone=row.iloc[5],
-                                           start_date_range=row.iloc[6],
-                                           end_date_range=row.iloc[7])
+                Figure_Out = figure_method(figure_name = row.iloc[0], 
+                                           prop = row.iloc[2],
+                                           start = row.iloc[3], end=row.iloc[4],
+                                           timezone = row.iloc[5],
+                                           start_date_range = row.iloc[6],
+                                           end_date_range = row.iloc[7])
                 
                 if isinstance(Figure_Out, mfunc.MissingInputData):
                     logger.info("Add Inputs With Formatter Before Attempting to Plot!\n")

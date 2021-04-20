@@ -594,7 +594,7 @@ def add_facet_labels(fig, xlabels, ylabels):
             k=k+1
 
 
-def shift_leapday(df,Marmot_Solutions_folder):
+def shift_leapday(df, Marmot_Solutions_folder):
     """
     Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
     Modeled year must be included in the scenario parent directory name.

@@ -8,6 +8,7 @@ Created on Mon Dec  9 10:34:48 2019
 
 import pandas as pd
 import numpy as np
+import textwrap
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
@@ -28,29 +29,29 @@ class mplot(object):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
-    def thermal_cap_reserves(self):
+        self.mplot_data_dict = {}
+
+    def thermal_cap_reserves(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
         outputs = {}
-        generation_collection = {}
-        gen_available_capacity_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
-
-            xdimension=len(self.xlabels)
-            if xdimension == 0:
-                xdimension = 1
-            ydimension=len(self.ylabels)
-            if ydimension == 0:
-                ydimension = 1
+                
+            # sets up x, y dimensions of plot
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
             
             grid_size = xdimension*ydimension
 
@@ -69,10 +70,10 @@ class mplot(object):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                Gen = generation_collection.get(scenario).copy()
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
                 if self.shift_leapday:
                     Gen = mfunc.shift_leapday(Gen,self.Marmot_Solutions_folder)
-                avail_cap = gen_available_capacity_collection.get(scenario).copy()
+                avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
                 if self.shift_leapday:
                     avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)               
                
@@ -137,9 +138,10 @@ class mplot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
 
-            self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
+            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+
             # add facet labels
-            mfunc.add_facet_labels(fig1, self.xlabels, self.ylabels)           
+            mfunc.add_facet_labels(fig1, xlabels, self.ylabels)           
             
             #Remove extra axes
             if excess_axs != 0:
@@ -147,7 +149,7 @@ class mplot(object):
             
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=50)
 
             # Concat all data tables together
             Data_Table_Out = pd.concat(data_table_chunks, copy=False, axis=0)
