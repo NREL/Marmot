@@ -65,7 +65,6 @@ os.chdir(current_dir)
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
 
-
 class MarmotPlot():
     
     def __init__(self,Scenarios, AGG_BY, PLEXOS_Solutions_folder, gen_names, Marmot_plot_select, 
@@ -387,9 +386,6 @@ class MarmotPlot():
         for module in list_modules:
             module_plots = plot_selection.loc[plot_selection['Marmot Module'] == module]
             
-            # Can be removed later 
-            duration_curve=None
-            
             # dictionary of arguments passed to plotting modules; 
             # key names match the instance variables in each module            
             argument_dict = {
@@ -415,13 +411,11 @@ class MarmotPlot():
                 "thermal_gen_cat": thermal_gen_cat,
                 "Region_Mapping": self.Region_Mapping,
                 "figure_folder": figure_folder,
-                "meta": meta,
-                "shift_leapday": shift_leapday,
-                "duration_curve": duration_curve
+                "meta": meta
                 }
             
             # Create ouput folder for each plotting module
-            figures = os.path.join(figure_folder, self.AGG_BY + '_' + module)
+            figures = os.path.join(figure_folder, f"{self.AGG_BY}_{module}")
             try:
                 os.makedirs(figures)
             except FileExistsError:
