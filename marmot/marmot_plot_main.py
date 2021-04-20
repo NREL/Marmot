@@ -411,7 +411,8 @@ class MarmotPlot():
                 "thermal_gen_cat": thermal_gen_cat,
                 "Region_Mapping": self.Region_Mapping,
                 "figure_folder": figure_folder,
-                "meta": meta
+                "meta": meta,
+                "shift_leapday": shift_leapday
                 }
             
             # Create ouput folder for each plotting module
