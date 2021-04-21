@@ -69,8 +69,8 @@ class MarmotPlot():
     
     def __init__(self,Scenarios, AGG_BY, PLEXOS_Solutions_folder, gen_names, Marmot_plot_select, 
                  Marmot_Solutions_folder=None,
-                 mapping_folder='mapping_folder',Scenario_Diff=[],
-                 zone_region_sublist=[],xlabels=[], ylabels=[],ticklabels=[],
+                 mapping_folder='mapping_folder', Scenario_Diff=None,
+                 zone_region_sublist=None, xlabels=None, ylabels=None, ticklabels=None,
                  Region_Mapping=pd.DataFrame()):
         '''
 
@@ -91,15 +91,15 @@ class MarmotPlot():
         mapping_folder : string directory, optional
             The location of the Marmot mapping folder. The default is 'mapping_folder'.
         Scenario_Diff : string/list, optional
-            2 value string or list, used to compare 2 sceanrios. The default is [].
+            2 value string or list, used to compare 2 sceanrios. The default is None.
         zone_region_sublist : string/list, optional
-            subset of regions to plot from AGG_BY. The default is [].
+            subset of regions to plot from AGG_BY. The default is None.
         xlabels : string/list, optional
-            x axis labels for facet plots. The default is [].
+            x axis labels for facet plots. The default is None.
         ylabels : string/list, optional
-            y axis labels for facet plots. The default is [].
+            y axis labels for facet plots. The default is None.
         ticklabels : string/list, optional
-            custom ticklabels for plots, not available for every plot type. The default is [].
+            custom ticklabels for plots, not available for every plot type. The default is None.
         Region_Mapping : string directory/pd.DataFrame, optional
             Mapping file to map custom regions/zones to create custom aggregations. 
             Aggregations are created by grouping PLEXOS regions.
@@ -140,7 +140,7 @@ class MarmotPlot():
         
         self.Marmot_Solutions_folder = Marmot_Solutions_folder
         
-        if self.Marmot_Solutions_folder == None:
+        if self.Marmot_Solutions_folder is None:
             self.Marmot_Solutions_folder = self.PLEXOS_Solutions_folder
             
         self.mapping_folder = mapping_folder
@@ -149,30 +149,32 @@ class MarmotPlot():
             self.Scenario_Diff = pd.Series(Scenario_Diff.split(",")).str.strip().tolist() 
         elif isinstance(Scenario_Diff, list):
             self.Scenario_Diff = Scenario_Diff
-        if self.Scenario_Diff == ['nan'] or self.Scenario_Diff == [] : self.Scenario_Diff = [""]
+        if self.Scenario_Diff == ['nan'] or self.Scenario_Diff is None : self.Scenario_Diff = [""]
         
         if isinstance(zone_region_sublist, str):
             self.zone_region_sublist = pd.Series(zone_region_sublist.split(",")).str.strip().tolist()
         elif isinstance(zone_region_sublist, list):
             self.zone_region_sublist = zone_region_sublist
+        else:
+            self.zone_region_sublist = []
         
         if isinstance(xlabels, str):
             self.xlabels = pd.Series(xlabels.split(",")).str.strip().tolist()
         elif isinstance(xlabels, list):
             self.xlabels = xlabels
-        if self.xlabels == ['nan'] or self.xlabels == [] : self.xlabels = [""]
+        if self.xlabels == ['nan'] or self.xlabels is None : self.xlabels = [""]
         
         if isinstance(ylabels, str):
             self.ylabels = pd.Series(ylabels.split(",")).str.strip().tolist()
         elif isinstance(ylabels, list):
             self.ylabels = ylabels
-        if self.ylabels == ['nan'] or self.ylabels == [] : self.ylabels = [""]
+        if self.ylabels == ['nan'] or self.ylabels is None : self.ylabels = [""]
         
         if isinstance(ticklabels, str):
             self.ticklabels = pd.Series(ticklabels.split(",")).str.strip().tolist()
         elif isinstance(ticklabels, list):
             self.ticklabels = ticklabels
-        if self.ticklabels == ['nan'] or self.ticklabels == [] : self.ticklabels = [""]
+        if self.ticklabels == ['nan'] or self.ticklabels is None : self.ticklabels = [""]
         
         if isinstance(Region_Mapping, str):
             try:
