@@ -16,10 +16,10 @@ import marmot.config.mconfig as mconfig
 import logging
 import textwrap
 
-#===============================================================================
+# ===============================================================================
 
 custom_legend_elements = Patch(facecolor='#DD0200',
-                            alpha=0.5, edgecolor='#DD0200')
+                               alpha=0.5, edgecolor='#DD0200')
 
 class mplot(object):
 
@@ -29,33 +29,33 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
+
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
+
         self.mplot_data_dict = {}
 
 
-    def committed_stack(self, figure_name=None, prop=None, start=None, end=None, 
+    def committed_stack(self, figure_name=None, prop=None, start=None, end=None,
                         timezone=None, start_date_range=None, end_date_range=None):
         outputs = {}
-        
+
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Installed_Capacity",[self.Scenarios[0]]),
                       (True,"generator_Generation",self.Scenarios),
                       (True,"generator_Units_Generating",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
-        
+
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-    
+
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
-        
+
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {str(zone_input)}')
 
@@ -68,22 +68,22 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            
+
             tech_list = list(gens.reset_index().tech.unique())
             tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
-            
+
             if not tech_list_sort:
                 self.logger.info(f'No Thermal Generation in: {zone_input}')
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-                            
+
             xdimension = len(self.Scenarios)
             ydimension = len(tech_list_sort)
 
             fig4, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharex = True, sharey='row',squeeze=False)
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
-            
+
             for i, scenario in enumerate(self.Scenarios):
                 self.logger.info(f"Scenario = {scenario}")
 
@@ -95,21 +95,21 @@ class mplot(object):
                 formatter.zero_formats[3] = '%H:%M\n %d-%b'
                 formatter.offset_formats[3] = '%b %Y'
                 formatter.show_offset = False
-            
+
                 units_gen = self.mplot_data_dict['generator_Units_Generating'].get(scenario)
                 avail_cap = self.mplot_data_dict['generator_Available_Capacity'].get(scenario)
-                
+
                 #Calculate  committed cap (for thermal only).
                 thermal_commit_cap = units_gen * avail_cap
                 thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
                 thermal_commit_cap = mfunc.df_process_gen_inputs(thermal_commit_cap,self.ordered_gen)
                 thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
-                
-                # unitconversion based off peak generation hour, only checked once 
+
+                # unitconversion based off peak generation hour, only checked once
                 if i == 0:
                     unitconversion = mfunc.capacity_energy_unitconversion(thermal_commit_cap.values.max())
                 thermal_commit_cap = thermal_commit_cap/unitconversion['divisor']
-                
+
                 #Process generation.
                 gen = self.mplot_data_dict['generator_Generation'].get(scenario)
                 gen = gen.xs(zone_input,level = self.AGG_BY)
@@ -134,7 +134,7 @@ class mplot(object):
                     else:
                         gen_one_tech = gen[tech]
                         commit_cap = avail_cap[tech]
-                    
+
                     gen_line = axs[j,i].plot(gen_one_tech,alpha = 0, color = self.PLEXOS_color_dict[tech])[0]
                     gen_lines.append(gen_line)
                     gen_fill = axs[j,i].fill_between(gen_one_tech.index,gen_one_tech,0, color = self.PLEXOS_color_dict[tech], alpha = 0.5)
@@ -165,21 +165,21 @@ class mplot(object):
         return outputs
 
 
-    def gen_stack(self, figure_name=None, prop=None, start=None, end=None, 
+    def gen_stack(self, figure_name=None, prop=None, start=None, end=None,
                   timezone=None, start_date_range=None, end_date_range=None):
-        
+
         facet=False
         if 'Facet' in figure_name:
             facet = True
-        
+
         if self.AGG_BY == 'zone':
                 agg = 'zone'
         else:
             agg = 'region'
-                
+
         def set_dicts(scenario_list):
-            
-            
+
+
             # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
             # required True/False, property name and scenarios required, scenarios must be a list.
             properties = [(True,"generator_Generation",scenario_list),
@@ -187,11 +187,11 @@ class mplot(object):
                           (False,"generator_Pump_Load",scenario_list),
                           (True,f"{agg}_Load",scenario_list),
                           (False,f"{agg}_Unserved_Energy",scenario_list)]
-            
+
             # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
             return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-            
-        
+
+
         def setup_data(zone_input, scenario, Stacked_Gen):
 
             curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
@@ -209,7 +209,7 @@ class mplot(object):
 
                 # Calculates Net Load by removing variable gen + curtailment
                 vre_gen_cat = self.vre_gen_cat + [curtailment_name]
-            
+
             else:
                 vre_gen_cat = self.re_gen_cat
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
@@ -240,7 +240,7 @@ class mplot(object):
             ###DO NOT COMMIT
             #######################
 
-                        
+
             try:
                 Pump_Load = self.mplot_data_dict['generator_Pump_Load'][scenario].copy()
             except KeyError:
@@ -257,7 +257,7 @@ class mplot(object):
             else:
                 Total_Demand = Load
                 #Load = Total_Demand
-            
+
             try:
                 Unserved_Energy = self.mplot_data_dict[f'{agg}_Unserved_Energy'][scenario].copy()
             except KeyError:
@@ -336,7 +336,7 @@ class mplot(object):
 
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
-                
+
             data = {"Stacked_Gen":Stacked_Gen, "Load":Load, "Pump_Load":Pump_Load, "Total_Demand":Total_Demand, "Unserved_Energy":Unserved_Energy,"ue_data_table":unserved_eng_data_table}
             data["peak_demand_t"] = peak_demand_t
             data["Peak_Demand"] = Peak_Demand
@@ -345,7 +345,7 @@ class mplot(object):
             return data
 
         def mkplot(outputs, zone_input, all_scenarios):
-            
+
             # sets up x, y dimensions of plot
             xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=all_scenarios)
 
@@ -359,7 +359,7 @@ class mplot(object):
             # Used to calculate any excess axis to delete
             plot_number = len(all_scenarios)
             excess_axs = grid_size - plot_number
-            
+
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.25)
             axs = axs.ravel()
@@ -382,28 +382,28 @@ class mplot(object):
                 Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
                 data = setup_data(zone_input, scenario, Stacked_Gen)
                 data = data_prop(data)
-                
+
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
                     self.logger.warning(f'No generation during time period in {zone_input}')
                     out = mfunc.MissingZoneData()
                     return out
-                
+
                 Stacked_Gen = data["Stacked_Gen"]
-                Load = data["Load"] 
+                Load = data["Load"]
                 Pump_Load = data["Pump_Load"]
-                Total_Demand = data["Total_Demand"] 
-                Unserved_Energy = data["Unserved_Energy"] 
+                Total_Demand = data["Total_Demand"]
+                Unserved_Energy = data["Unserved_Energy"]
                 unserved_eng_data_table = data["ue_data_table"]
-                Peak_Demand = data["Peak_Demand"] 
+                Peak_Demand = data["Peak_Demand"]
                 peak_demand_t = data["peak_demand_t"]
                 min_net_load_t = data["min_net_load_t"]
                 Min_Net_Load = data["Min_Net_Load"]
-                
-                # unitconversion based off peak generation hour, only checked once 
+
+                # unitconversion based off peak generation hour, only checked once
                 if i == 0:
                     unitconversion = mfunc.capacity_energy_unitconversion(max(Stacked_Gen.sum(axis=1)))
-                
+
                 #Convert units
                 Stacked_Gen = Stacked_Gen / unitconversion['divisor']
                 Load = Load / unitconversion['divisor']
@@ -444,17 +444,17 @@ class mplot(object):
                 axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[i].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,i)
-                 
+
                 if prop == "Min Net Load":
-                    axs[i].annotate(f"Min Net Load: \n{str(format(Min_Net_Load, '.2f'))} {unitconversion['units']}", 
-                                    xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)), 
+                    axs[i].annotate(f"Min Net Load: \n{str(format(Min_Net_Load, '.2f'))} {unitconversion['units']}",
+                                    xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)),
                                                                                (max(Load))),
                         fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
                 # Peak Demand label overlaps other labels on a facet plot
                 elif prop == "Peak Demand":
-                    axs[i].annotate(f"Peak Demand: \n{str(format(Total_Demand[peak_demand_t], '.2f'))} {unitconversion['units']}", 
-                                    xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)), 
+                    axs[i].annotate(f"Peak Demand: \n{str(format(Total_Demand[peak_demand_t], '.2f'))} {unitconversion['units']}",
+                                    xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)),
                                                                              (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
                                 fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
@@ -471,7 +471,7 @@ class mplot(object):
             # create labels list of unique tech names then order
             labels = np.unique(np.array(unique_tech_names)).tolist()
             labels.sort(key = lambda i:self.ordered_gen.index(i))
-            
+
             handles = []
             # create custom gen_tech legend
             for tech in labels:
@@ -491,24 +491,24 @@ class mplot(object):
             if (Unserved_Energy == 0).all() == False:
                 handles.append(custom_legend_elements)
                 labels += ['Unserved Energy']
-            
+
             axs[grid_size-1].legend(reversed(handles),reversed(labels),
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
-            
+
             xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
             ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
 
             # add facet labels
             mfunc.add_facet_labels(fig1, xlabels, ylabels)
-            
+
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
 
             #Ylabel should change if there are facet labels.
             labelpad = 50 if facet else 30
             plt.ylabel(f"Generation ({unitconversion['units']})", color='black', rotation='vertical', labelpad = labelpad)
-            
+
             #Remove extra axes
             if excess_axs != 0:
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
@@ -522,7 +522,7 @@ class mplot(object):
             return out
 
         # Main loop for gen_stack
-        outputs = {}        
+        outputs = {}
         if facet:
             check_input_data = set_dicts(self.Scenarios)
         else:
@@ -532,15 +532,15 @@ class mplot(object):
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
-        
+
         xdimension=len(self.xlabels)
         if xdimension == 0:
                 xdimension = 1
-        
+
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
             xdimension = 1
-        
+
         # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
         if xdimension > 1:
             font_scaling_ratio = 1 + ((xdimension-1)*0.09)
@@ -548,7 +548,7 @@ class mplot(object):
             plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
             plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
             plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-    
+
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
 
@@ -559,31 +559,31 @@ class mplot(object):
         return outputs
 
 
-    def gen_diff(self, figure_name=None, prop=None, start=None, end=None, 
+    def gen_diff(self, figure_name=None, prop=None, start=None, end=None,
                  timezone=None, start_date_range=None, end_date_range=None):
         outputs = {}
-        
+
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios)]
-            
+
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-                
+
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
-        
+
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
             # Create Dictionary to hold Datframes for each scenario
-            
+
             Total_Gen_Stack_1 = self.mplot_data_dict['generator_Generation'].get(self.Scenario_Diff[0])
             if Total_Gen_Stack_1 is None:
                 self.logger.warning(f'Scenario_Diff "{self.Scenario_Diff[0]}" is not in data. Ensure User Input Sheet is set up correctly!')
                 outputs = mfunc.InputSheetError()
-                return outputs 
-            
+                return outputs
+
             Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_1 = mfunc.df_process_gen_inputs(Total_Gen_Stack_1, self.ordered_gen)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
@@ -593,8 +593,8 @@ class mplot(object):
             if Total_Gen_Stack_2 is None:
                 self.logger.warning(f'Scenario_Diff "{self.Scenario_Diff[1]}" is not in data. Ensure User Input Sheet is set up correctly!')
                 outputs = mfunc.InputSheetError()
-                return outputs 
-            
+                return outputs
+
             Total_Gen_Stack_2 = Total_Gen_Stack_2.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_2 = mfunc.df_process_gen_inputs(Total_Gen_Stack_2, self.ordered_gen)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
@@ -610,29 +610,29 @@ class mplot(object):
                 Gen_Stack_Out = Gen_Stack_Out[start_date_range : end_date_range]
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
-            
+
             # Removes columns that only equal 0
             Gen_Stack_Out.dropna(inplace=True)
             Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]
-            
+
             if Gen_Stack_Out.empty == True:
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            
+
             # Reverses order of columns
             Gen_Stack_Out = Gen_Stack_Out.iloc[:, ::-1]
-            
+
             unitconversion = mfunc.capacity_energy_unitconversion(max(Gen_Stack_Out.sum(axis=1)))
             Gen_Stack_Out = Gen_Stack_Out/unitconversion['divisor']
-            
+
             # Data table of values to return to main program
             Data_Table_Out = Gen_Stack_Out.add_suffix(f" ({unitconversion['units']})")
-            
+
             fig3, axs = mfunc.setup_plot()
             # Flatten object
             ax = axs[0]
-            
+
             for column in Gen_Stack_Out:
                 ax.plot(Gen_Stack_Out[column], linewidth=3, color=self.PLEXOS_color_dict[column],
                         label=column)
@@ -652,8 +652,8 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
-     
-    def gen_stack_all_periods(self, figure_name=None, prop=None, start=None, end=None, 
+
+    def gen_stack_all_periods(self, figure_name=None, prop=None, start=None, end=None,
                               timezone=None, start_date_range=None, end_date_range=None):
         '''
         DEPRCIATED FOR NOW
@@ -663,14 +663,14 @@ class mplot(object):
         outputs : mfunc.UnderDevelopment()
 
         '''
-        
+
         outputs = mfunc.UnderDevelopment()
         self.logger.warning('total_gen_facet is under development')
         return outputs
 
     #     #Location to save to
     #     gen_stack_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Gen_Stack')
-        
+
     #     Stacked_Gen_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", 'generator_Generation')
     #     try:
     #         Pump_Load_read =pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "generator_Pump_Load" )
@@ -810,9 +810,9 @@ class mplot(object):
     #                                 #facecolor='#EE1289'
     #                                 facecolor = '#DD0200',
     #                                 alpha=0.5)
-                
+
     #             handles, labels = ax.get_legend_handles_labels()
-                
+
     #             if (Pump_Load == 0).all() == False:
     #                 handles.append(lp3[0])
     #                 handles.append(lp1[0])

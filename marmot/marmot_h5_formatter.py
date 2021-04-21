@@ -684,23 +684,23 @@ class MarmotFormat():
         """        
         try:
             if "_" in plexos_class:
-                df = db.query_relation_property(plexos_class,plexos_prop,timescale=timescale)
+                df = db.query_relation_property(plexos_class, plexos_prop, timescale=timescale)
             else:
-                df = db.query_object_property(plexos_class,plexos_prop,timescale=timescale)
+                df = db.query_object_property(plexos_class, plexos_prop, timescale=timescale)
     
         except KeyError:
-            df = self._report_prop_error(plexos_prop,plexos_class)
+            df = self._report_prop_error(plexos_prop, plexos_class)
             return df
         
         # Instantiate instance of Process Class
         # metadata is used as a paramter to initialize process_cl
         process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.emit_names)
         # Instantiate Method of Process Class
-        process_att = getattr(process_cl,'df_process_' + plexos_class)
+        process_att = getattr(process_cl, f'df_process_{plexos_class}')
         # Process attribute and return to df
         df = process_att()
         if plexos_class == 'region' and plexos_prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
-            logger.warning("Scenario contains Unserved Energy: %s MW\n", int(df.sum(axis=0)))
+            logger.warning(f"Scenario contains Unserved Energy: {int(df.sum(axis=0))} MW\n")
         return df
     
    
@@ -722,7 +722,7 @@ class MarmotFormat():
             Empty DataFrame.
 
         '''
-        logger.warning('CAN NOT FIND "%s %s". "%s" DOES NOT EXIST',plexos_class,plexos_prop,plexos_prop)
+        logger.warning(f'CAN NOT FIND "{plexos_class} {plexos_prop}". "{plexos_prop}" DOES NOT EXIST')
         logger.info('SKIPPING PROPERTY\n')
         df = pd.DataFrame()
         return df
@@ -740,13 +740,13 @@ class MarmotFormat():
 
         '''
             
-        logger.info("#### Processing %s PLEXOS Results ####", self.Scenario_name)
+        logger.info(f"#### Processing {self.Scenario_name} PLEXOS Results ####")
         
         #===============================================================================
         # Input and Output Directories
         #===============================================================================
     
-        HDF5_output = str(self.Scenario_name) + "_formatted.h5"
+        HDF5_output = f"{self.Scenario_name}_formatted.h5"
 
         HDF5_folder_in = os.path.join(self.PLEXOS_Solutions_folder, str(self.Scenario_name))
         try:
@@ -755,7 +755,7 @@ class MarmotFormat():
             # directory already exists
             pass
         
-        hdf_out_folder = os.path.join(self.Marmot_Solutions_folder,'Processed_HDF5_folder')
+        hdf_out_folder = os.path.join(self.Marmot_Solutions_folder, 'Processed_HDF5_folder')
         try:
             os.makedirs(hdf_out_folder)
         except FileExistsError:
@@ -788,9 +788,9 @@ class MarmotFormat():
         # Creates Initial HDF5 file for ouputing formated data
         Processed_Data_Out = pd.DataFrame()
         if os.path.isfile(os.path.join(hdf_out_folder,HDF5_output))==True:
-            logger.info("'%s\%s' already exists: New variables will be added\n",hdf_out_folder,HDF5_output)
+            logger.info(f"'{hdf_out_folder}\{HDF5_output}' already exists: New variables will be added\n")
             #Skip properties that already exist in *formatted.h5 file.
-            with h5py.File(os.path.join(hdf_out_folder,HDF5_output),'r') as f:
+            with h5py.File(os.path.join(hdf_out_folder,HDF5_output), 'r') as f:
                 existing_keys = [key for key in f.keys()]
 
             if not mconfig.parser('skip_existing_properties'):
@@ -798,7 +798,6 @@ class MarmotFormat():
         else:
             existing_keys = []
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output), key= "generator_Generation" , mode="w", complevel=9, complib  ='blosc:zlib')
-            existing_keys = []
         process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
     
         start = time.time()
@@ -807,20 +806,20 @@ class MarmotFormat():
             #if any(meta.regions()['region'] not in Region_Mapping['region']):
             if set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) == False:
                 missing_regions = list(set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
-                logger.warning('The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: %s\n',missing_regions)
+                logger.warning(f'The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: {missing_regions}\n',)
         
         # Main loop to process each ouput and pass data to functions
         for index, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
             data_chunks = []
     
-            logger.info("Processing %s %s",row["group"],row["data_set"])
+            logger.info(f'Processing {row["group"]} {row["data_set"]}')
             prop_underscore = row["data_set"].replace(' ', '_')
             key_path = row["group"] + "_" + prop_underscore
             if key_path not in existing_keys:
     
                 for model in files_list:
-                    logger.info("      %s",model)
+                    logger.info(f"      {model}")
                     
                     # Create an instance of metadata, and pass that as a variable to get data.
                     meta = MetaData(HDF5_folder_in, self.Region_Mapping,model)
@@ -843,7 +842,7 @@ class MarmotFormat():
                     # other unit multipliers
                     if (row["data_type"] == "year")&((row["data_set"]=="Installed Capacity")|(row["data_set"]=="Export Limit")|(row["data_set"]=="Import Limit")):
                         data_chunks.append(processed_data*row["unit_multiplier"])
-                        logger.info("%s Year property reported from only the first partition",row["data_set"])
+                        logger.info(f"{row['data_set']} Year property reported from only the first partition")
                         break
                     else:
                         data_chunks.append(processed_data*row["unit_multiplier"])
@@ -862,7 +861,7 @@ class MarmotFormat():
                         oldsize=Processed_Data_Out.size
                         Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')] #Remove duplicates; keep first entry^M
                         if  (oldsize-Processed_Data_Out.size) >0:
-                            logger.info('Drop duplicates removed %s rows',oldsize-Processed_Data_Out.size)
+                            logger.info(f'Drop duplicates removed {oldsize-Processed_Data_Out.size} rows')
         
                     row["data_set"] = row["data_set"].replace(' ', '_')
                     try:
