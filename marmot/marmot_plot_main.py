@@ -544,7 +544,6 @@ if __name__ == '__main__':
     The following code is run if the formatter is run directly,
     it does not run if the formatter is imported as a module. 
     '''
-    print('__main__ first')
     #===============================================================================
     # Load Input Properties
     #===============================================================================

@@ -150,7 +150,7 @@ def df_process_categorical_index(df, ordered_gen):
     df = df.sort_index()
     return df
 
-def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
+def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
     """
     Sets facet plot x,y dimensions baded on provided labeles
 
@@ -182,9 +182,10 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
     if not facet:
         xdimension = 1
         ydimension = 1
-    # If no labels were provided use Marmot default dimension settings
-    if xlabels == [''] and ylabels == ['']:
-        logger.warning("Warning: Facet Labels not provided - Using Marmot default dimensions")
+        return xdimension, ydimension
+    # If no labels were provided or dimensions less than len scenarios use Marmot default dimension settings
+    if xlabels == [''] and ylabels == [''] or xdimension*ydimension<len(multi_scenario):
+        logger.warning("Warning: Facet Dimensions could not be Determined from Labels - Using Marmot default dimensions")
         xdimension, ydimension = set_x_y_dimension(len(multi_scenario))
     return xdimension, ydimension
 
@@ -559,16 +560,27 @@ def add_facet_labels(fig, xlabels, ylabels):
     None.
 
     """
+    font_defaults = mconfig.parser("font_settings")
+
     all_axes = fig.get_axes()
     j=0
     k=0
     for ax in all_axes:
         if ax.is_last_row():
-            ax.set_xlabel(xlabel=(xlabels[j]),  color='black', fontsize=16)
+            try:
+                ax.set_xlabel(xlabel=(xlabels[j]),  color='black', fontsize=font_defaults['axes_label_size']-2)
+            except IndexError:
+                logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                continue
             j=j+1
         if ax.is_first_col():
-            ax.set_ylabel(ylabel=(ylabels[k]),  color='black', rotation='vertical', fontsize=16)
+            try:
+                ax.set_ylabel(ylabel=(ylabels[k]),  color='black', rotation='vertical', fontsize=font_defaults['axes_label_size']-2)
+            except IndexError:
+                logger.warning(f"Warning: ylabel missing for subplot y{k}")
+                continue
             k=k+1
+
 
 def shift_leapday(df,Marmot_Solutions_folder):
     """

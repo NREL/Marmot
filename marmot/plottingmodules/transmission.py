@@ -10,12 +10,12 @@ This code creates transmission line and interface plots and is called from Marmo
 import os
 import pandas as pd
 import numpy as np
-import math
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import matplotlib.lines as mlines
 import logging
+import textwrap
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 
@@ -30,6 +30,8 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.font_defaults = mconfig.parser("font_settings")
+
 
 
 
@@ -74,14 +76,8 @@ class mplot(object):
             outputs = mfunc.MissingInputData()
             return outputs
         
-        xdimension=len(self.xlabels)
-        if xdimension == 0:
-            xdimension = 1
-        ydimension=len(self.ylabels)
-        if ydimension == 0:
-            ydimension = 1
-
-
+        # sets up x, y dimensions of plot
+        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,facet=True,multi_scenario=self.Scenarios)
         grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
@@ -89,17 +85,15 @@ class mplot(object):
         excess_axs = grid_size - plot_number
             
         for zone_input in self.Zones:
-            self.logger.info("For all lines touching Zone = "+zone_input)
+            self.logger.info(f"For all lines touching Zone = {zone_input}")
             
-            fig2, axs = mfunc.setup_plot(xdimension = xdimension, ydimension=len(self.Scenarios),sharey = False)
-            plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            fig2, axs = mfunc.setup_plot(xdimension = xdimension, ydimension=ydimension,sharey = True)
+            plt.subplots_adjust(wspace=0.05, hspace=0.25)
 
+            data_table=[]
 
-            n=0 #Counter for scenario subplots
-            Data_Out=pd.DataFrame()
-
-            for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + str(scenario))
+            for n, scenario in enumerate(self.Scenarios):
+                self.logger.info(f"Scenario = {str(scenario)}")
 
                 # gets correct metadata based on area aggregation
                 if self.AGG_BY=='zone':
@@ -119,53 +113,62 @@ class mplot(object):
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] #Limit to only lines touching to this zone
 
                 limits = Limit_Collection.get(scenario).droplevel('timestamp')
+                limits = limits.drop_duplicates()
                 limits.mask(limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
 
                 # This checks for a nan in string. If no scenario selected, do nothing.
                 if (self.prop != self.prop)==False:
-                    self.logger.info("Line category = "+str(self.prop))
+                    self.logger.info(f"Line category = {str(self.prop)}")
                     line_relations = self.meta.lines().rename(columns={"name":"line_name"}).set_index(["line_name"])
                     flow=pd.merge(flow,line_relations,left_index=True,right_index=True)
                     flow=flow[flow["category"] == self.prop]
                     flow=flow.drop('category',axis=1)
                 
-                flow = pd.merge(flow,limits[0].abs(),left_on = 'line_name', right_on = 'line_name',how='left')
-                flow['Util']=flow['0_x'].abs()/flow['0_y']
+                flow = pd.merge(flow,limits[0].abs(),on = 'line_name',how='left')
+                flow['Util']=(flow['0_x'].abs()/flow['0_y']).fillna(0)
                 #If greater than 1 because exceeds flow limit, report as 1
                 flow['Util'][flow['Util'] > 1] = 1
                 annual_util=flow['Util'].groupby(["line_name"]).mean().rename(scenario)
                 # top annual utilized lines
                 top_utilization = annual_util.nlargest(10, keep='first')
-
+                
                 color_dict = dict(zip(self.Scenarios,self.color_list))
                 if hist == True:
                     mfunc.create_hist_plot(axs,annual_util,color_dict,label=scenario,n=n)
-                    axs[n].set_ylabel(scenario.replace('_',' '),color='black', rotation='vertical')
                 else:
                     for line in top_utilization.index.get_level_values(level='line_name').unique():
                         duration_curve = flow.loc[line].sort_values(by = 'Util',ascending = False).reset_index(drop = True)
                         mfunc.create_line_plot(axs,duration_curve,'Util',label=line,n=n)
                         axs[n].set_ylim((0,1.1))
-                        axs[n].set_ylabel(scenario.replace('_',' '),color='black', rotation='vertical')
                         handles, labels = axs[n].get_legend_handles_labels()
-                        axs[n].legend(handles,labels, loc='lower left',bbox_to_anchor=(1,0),
+                        axs[n].legend(handles,labels, loc='best',
                               facecolor='inherit', frameon=True)
-                n+=1
-                Data_Out=pd.concat([Data_Out,annual_util],axis=1,sort=False)
-
+                data_table.append(annual_util)
+            
+            #Remove extra axes
+            if excess_axs != 0:
+                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+            
+            # add facet labels
+            self.xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            mfunc.add_facet_labels(fig2, self.xlabels, self.ylabels)
+            
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             if hist == True:
                 if (self.prop != self.prop)==True:
                     self.prop='All Lines'
                 plt.ylabel('Number of lines',  color='black', rotation='vertical', labelpad=30)
-                plt.xlabel('Line Utilization: {}'.format(self.prop),  color='black', rotation='horizontal', labelpad=20)
+                plt.xlabel(f'Line Utilization: {self.prop}',  color='black', rotation='horizontal', labelpad=20)
             else:
                 if (self.prop != self.prop)==True:
                     self.prop='Top 10 Lines'
-                plt.ylabel('Line Utilization: {}'.format(self.prop),  color='black', rotation='vertical', labelpad=30)
+                plt.ylabel(f'Line Utilization: {self.prop}',  color='black', rotation='vertical', labelpad=30)
                 plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             del annual_util, limits
+            
+            Data_Out = pd.concat(data_table)
+            
             outputs[zone_input] = {'fig': fig2,'data_table':Data_Out}
         return outputs
 
@@ -1008,18 +1011,17 @@ class mplot(object):
             return outputs
             
         for zone_input in self.Zones:
-            self.logger.info("Zone = %s",zone_input)
+            self.logger.info(f"Zone = {zone_input}")
+            
             xdimension=len(self.xlabels)
             ydimension=len(self.ylabels)
-            if xdimension == 0 or ydimension == 0:
+            if self.xlabels == [''] or self.ylabels == ['']:
                 xdimension, ydimension =  mfunc.set_x_y_dimension(len(scenario_type))
-
             fig3, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.6, hspace=0.3)
 
-            n=0 #Counter for subplots
-            Data_Out=pd.DataFrame()
-
+            data_table_chunks=[]
+            n=0
             for scenario in scenario_type:
 
                 rr_int = net_interchange_collection.get(scenario)
@@ -1073,10 +1075,14 @@ class mplot(object):
                         df_dontagg = single_parent[cols_dontagg]
                         df_toagg = single_parent.drop(columns = cols_dontagg)
                         agged = df_toagg.sum(axis = 1)
-                        agged_flows = agged.copy()
-                        df_dontagg['Other'] = agged_flows.copy()
+                        df_dontagg.insert(len(df_dontagg.columns),'Other',agged)
                         single_parent = df_dontagg.copy()
-
+                    
+                    #Convert units
+                    if n == 0:
+                        unitconversion = mfunc.capacity_energy_unitconversion(single_parent.abs().values.max())
+                    single_parent = single_parent / unitconversion['divisor']
+                    
                     for column in single_parent.columns:
 
                         mfunc.create_line_plot(axs,single_parent,column,label=column,n=n)
@@ -1086,31 +1092,30 @@ class mplot(object):
                         mfunc.set_plot_timeseries_format(axs,n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
                         axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+                    
                     n+=1
-
-            #Remove extra axes
-            if excess_axs != 0:
-                while excess_axs > 0:
-                    fig3.delaxes(axs[(grid_size)-excess_axs])
-                    excess_axs-=1
-
+                # Create data table for each scenario
+                scenario_names = pd.Series([scenario]*len(single_parent),name='Scenario')
+                data_table = single_parent.add_suffix(f" ({unitconversion['units']})")
+                data_table = data_table.set_index([scenario_names],append=True)
+                data_table_chunks.append(data_table)
+                
             # if plotting all scenarios add facet labels
             if plot_scenario == True:
-                all_axes = fig3.get_axes()
-                j=0
-                k=0
-                for ax in all_axes:
-                    if ax.is_last_row():
-                        ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black', fontsize=16)
-                        j=j+1
-                    if ax.is_first_col():
-                        ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical', fontsize=16)
-                        k=k+1
-
+                while len(self.xlabels) < xdimension:
+                    self.xlabels.extend(self.xlabels)
+                while len(self.ylabels) < ydimension:
+                    self.ylabels.extend(self.ylabels)
+                mfunc.add_facet_labels(fig3, self.xlabels, self.ylabels)
+            
+            #Remove extra axes
+            if excess_axs != 0:
+                mfunc.remove_excess_axs(axs, excess_axs, grid_size)
+            
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 60)
-            plt.ylabel('Net Interchange (MW)',  color='black', rotation='vertical', labelpad = 60)
+            plt.xlabel(f"Date {(self.timezone)}",  color='black', rotation='horizontal',labelpad = 60)
+            plt.ylabel(f"Net Interchange ({unitconversion['units']})",  color='black', rotation='vertical', labelpad = 60)
 
             # If plotting all regions save output and return none plot_main
             if plot_scenario == False:
@@ -1121,7 +1126,8 @@ class mplot(object):
                 Data_Table_Out.to_csv(os.path.join(save_figures, "Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
                 outputs = mfunc.DataSavedInModule()
                 return outputs
-
+            
+            Data_Out = pd.concat(data_table_chunks, copy=False, axis=0)
             # if plotting all scenarios return figures to plot_main
             outputs[zone_input] = {'fig': fig3,'data_table':Data_Out}
         return outputs
@@ -1257,11 +1263,11 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info('Zone = ' + zone_input)
+            self.logger.info(f'Zone = {zone_input}')
             all_scenarios = pd.DataFrame()
 
             for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
 
                 if self.AGG_BY == 'zone':
                     lines = self.meta.zone_lines()
@@ -1280,13 +1286,17 @@ class mplot(object):
 
                 one_zone = viol.xs(zone_input, level = self.AGG_BY)
                 one_zone = one_zone.rename(columns = {0 : scenario})
-                one_zone = one_zone.abs() #/ 1000 #We don't care the direction of the violation, convert MW -> GW.
+                one_zone = one_zone.abs() #We don't care the direction of the violation
                 all_scenarios = pd.concat([all_scenarios,one_zone], axis = 1)
 
             all_scenarios.columns = all_scenarios.columns.str.replace('_',' ')
             #remove columns that are all equal to 0
             all_scenarios = all_scenarios.loc[:, (all_scenarios != 0).any(axis=0)]
-            Data_Table_Out = all_scenarios
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(all_scenarios.values.max())
+            all_scenarios = all_scenarios/unitconversion['divisor']
+            
+            Data_Table_Out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
 
             if all_scenarios.empty==True:
                 out = mfunc.MissingZoneData()
@@ -1297,33 +1307,35 @@ class mplot(object):
             color_dict = dict(zip(all_scenarios.columns,self.color_list))
 
             fig5, axs = mfunc.setup_plot()
+            #flatten object
+            ax = axs[0]
 
-            n=0
             if total_violations==True:
                 all_scenarios_tot = all_scenarios.sum()
                 all_scenarios_tot.plot.bar(stacked=False, rot=0,
                                                         color=[color_dict.get(x, '#333333') for x in all_scenarios_tot.index],
-                                                       linewidth='0.1', width=0.35, ax=axs[n])
-                axs[n].spines['right'].set_visible(False)
-                axs[n].spines['top'].set_visible(False)
-                axs[n].tick_params(axis='y', which='major', length=5, width=1)
-                axs[n].tick_params(axis='x', which='major', length=5, width=1)
+                                                       linewidth='0.1', width=0.35, ax=ax)
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
+                ax.tick_params(axis='y', which='major', length=5, width=1)
+                ax.tick_params(axis='x', which='major', length=5, width=1)
 
             else:
                 for column in all_scenarios:
-                    mfunc.create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                axs[n].margins(x=0.01)
+                    mfunc.create_line_plot(ax,all_scenarios,column,color_dict=color_dict,label=column)
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                ax.margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
-                axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                handles, labels = axs[n].get_legend_handles_labels()
-                axs[n].legend(handles, labels, loc='best',facecolor='inherit', frameon=True)
+                ax.set_xlabel(f"Date {(self.timezone)}",  color='black', rotation='horizontal')
+                handles, labels = ax.get_legend_handles_labels()
+                ax.legend(handles, labels, loc='best',facecolor='inherit', frameon=True)
 
-            axs[n].set_ylabel('Line violations (MW)',  color='black', rotation='vertical')
+            ax.set_ylabel(f"Line violations ({unitconversion['units']})",  color='black', rotation='vertical')
 
             outputs[zone_input] = {'fig': fig5,'data_table':Data_Table_Out}
 
         return outputs
+    
     
     def net_export(self):
 
@@ -1345,32 +1357,32 @@ class mplot(object):
 
         outputs = {}
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             net_export_all_scenarios = pd.DataFrame()
 
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
                 net_export_read = net_interchange_collection.get(scenario)
                 net_export = net_export_read.xs(zone_input, level = self.AGG_BY)
                 net_export = net_export.groupby("timestamp").sum()
                 net_export.columns = [scenario]
 
                 if not pd.isnull(self.start_date):
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(self.start_date)} to {str(self.end_date)}")
 
                     net_export = net_export[self.start_date : self.end_date]
 
                 net_export_all_scenarios = pd.concat([net_export_all_scenarios,net_export], axis = 1)
                 net_export_all_scenarios.columns = net_export_all_scenarios.columns.str.replace('_',' ')
             
-            unitconversion = mfunc.capacity_energy_unitconversion(net_export_all_scenarios.max().max())
+            unitconversion = mfunc.capacity_energy_unitconversion(net_export_all_scenarios.abs().max().max())
             
             net_export_all_scenarios = net_export_all_scenarios/unitconversion["divisor"]
             # Data table of values to return to main program
-            Data_Table_Out = net_export_all_scenarios.copy()
+            Data_Table_Out = net_export_all_scenarios.add_suffix(f" ({unitconversion['units']})")
             #Make scenario/color dictionary.
             color_dict = dict(zip(net_export_all_scenarios.columns,self.color_list))
 
@@ -1379,32 +1391,31 @@ class mplot(object):
 
             fig1, axs = mfunc.setup_plot()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            # flatten object
+            ax = axs[0]
             
             if net_export_all_scenarios.empty:
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
-            n=0
             for column in net_export_all_scenarios:
                 mfunc.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
-                axs[n].set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
-                axs[n].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                axs[n].margins(x=0.01)
-                axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':')
-                mfunc.set_plot_timeseries_format(axs,n)
+                ax.set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
+                ax.set_xlabel(f'Date ({self.timezone})',  color='black', rotation='horizontal')
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                ax.margins(x=0.01)
+                ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
+                mfunc.set_plot_timeseries_format(axs)
             
             labels = net_export_all_scenarios.columns.tolist()
-            
             handles = []
             # create custom handles
             for scen in labels:
                 scen_legend_patches = mlines.Line2D([],[],color=color_dict[scen])
                 handles.append(scen_legend_patches)
-
-
-            axs[n].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+                
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -1434,14 +1445,10 @@ class mplot(object):
         exp_lines.columns = ['region','line_name']
         imp_lines.columns = ['region','line_name']
         
-        outputs = {}
-        xdimension=len(self.xlabels)
-        if xdimension == 0:
-            xdimension = 1
-        ydimension=len(self.ylabels)
-        if ydimension == 0:
-            ydimension = 1
-
+        outputs = {}        
+        
+        # sets up x, y dimensions of plot
+        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
         grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
@@ -1450,7 +1457,7 @@ class mplot(object):
         
         for zone_input in self.Zones:
         
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             #Find list of lines that connect each region.
             exp_oz = exp_lines[exp_lines['region'] == zone_input]
@@ -1465,14 +1472,12 @@ class mplot(object):
             #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
             fig7, axs = mfunc.setup_plot(xdimension,ydimension,sharey = True)
             plt.subplots_adjust(wspace=0.6, hspace=0.3)
-            n = -1
             
             net_exports_all = []
             
-            for scenario in self.Scenarios:
-                n += 1
+            for n, scenario in enumerate(self.Scenarios):
                 net_exports = []
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
                 flow = line_flow_collection[scenario].copy()
                 if self.shift_leapday:
                     flow = mfunc.shift_leapday(flow,self.Marmot_Solutions_folder)
@@ -1505,8 +1510,8 @@ class mplot(object):
                     
                     if not pd.isnull(self.start_date):
                         if other_zone == [other_zones[0]]:
-                            self.logger.info("Plotting specific date range: \
-                            {} to {}".format(str(self.start_date),str(self.end_date)))
+                            self.logger.info(f"Plotting specific date range: \
+                            {str(self.start_date)} to {str(self.end_date)}")
 
                         net_export = net_export[self.start_date : self.end_date]
                 
@@ -1542,45 +1547,29 @@ class mplot(object):
     
                 if not self.duration_curve:
                     mfunc.set_plot_timeseries_format(axs,n)
-                    locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
-                    formatter = mdates.ConciseDateFormatter(locator)
-                    formatter.formats[2] = '%d\n %b'
-                    formatter.zero_formats[1] = '%b\n %Y'
-                    formatter.zero_formats[2] = '%d\n %b'
-                    formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                    formatter.offset_formats[3] = '%b %Y'
-                    formatter.show_offset = False
-                    axs[n].xaxis.set_major_locator(locator)
-                    axs[n].xaxis.set_major_formatter(formatter)
     
                 #Add scenario column to output table.
                 scenario_names = pd.Series([scenario] * len(net_exports),name = 'Scenario')
                 net_exports = net_exports.set_index([scenario_names],append = True)
                 net_exports_all.append(net_exports)
                 
-            all_axes = fig7.get_axes()
-            self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
-            j=0
-            k=0
-            for ax in all_axes:
-                if ax.is_last_row():
-                    ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
-                    j=j+1
-                if ax.is_first_col():
-                    ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
-                    k=k+1
-
+            self.xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            mfunc.add_facet_labels(fig7, self.xlabels, self.ylabels)
+            
+            #Remove extra axes
+            if excess_axs != 0:
+                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
                 
             fig7.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Net export ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel(f"Net export ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=60)
             if self.duration_curve:
                 plt.xlabel('Sorted hour of the year',color = 'black', labelpad = 30)
             
-            net_exports_all = pd.concat(net_exports_all)
+            Data_Table_Out = pd.concat(net_exports_all).add_suffix(f" ({unitconversion['units']})")
 
             # if plotting all scenarios return figures to plot_main
-            outputs[zone_input] = {'fig': fig7,'data_table' : net_exports_all}
+            outputs[zone_input] = {'fig': fig7,'data_table' : Data_Table_Out}
             
         return outputs
     
@@ -1602,26 +1591,18 @@ class mplot(object):
         exp_lines = self.meta.zone_exporting_lines()
         imp_lines = self.meta.zone_importing_lines()
         
+        if exp_lines.empty or imp_lines.empty:
+            outputs = mfunc.MissingMetaData()
+            return outputs
+        
         exp_lines.columns = ['region','line_name']
         imp_lines.columns = ['region','line_name']
         
         outputs = {}
-        xdimension=len(self.xlabels)
-        if xdimension == 0:
-            xdimension = 1
-        ydimension=len(self.ylabels)
-        if ydimension == 0:
-            ydimension = 1
 
-        grid_size = xdimension*ydimension
-
-        # Used to calculate any excess axis to delete
-        plot_number = len(self.Scenarios)
-        excess_axs = grid_size - plot_number
-        
         for zone_input in self.Zones:
         
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             #Find list of lines that connect each region.
             exp_oz = exp_lines[exp_lines['region'] == zone_input]
@@ -1631,16 +1612,16 @@ class mplot(object):
             other_zones.remove(zone_input)
 
             #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
-            fig7, axs = mfunc.setup_plot(xdimension,ydimension,sharey = True)
+            fig7, axs = mfunc.setup_plot(1,1,sharey = True)
             plt.subplots_adjust(wspace=0.6, hspace=0.3)
-            n = -1
             
             net_exports_all = []
+            # Holds each scenario output table 
+            data_out_chunk = []
             
-            for scenario in self.Scenarios:
-                n += 1
+            for n, scenario in enumerate(self.Scenarios):
                 net_exports = []
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
                 flow = line_flow_collection[scenario]
                 flow = flow.reset_index()
                                 
@@ -1671,8 +1652,8 @@ class mplot(object):
                     
                     if not pd.isnull(self.start_date):
                         if other_zone == other_zones[0]:
-                            self.logger.info("Plotting specific date range: \
-                            {} to {}".format(str(self.start_date),str(self.end_date)))
+                            self.logger.info(f"Plotting specific date range: \
+                            {str(self.start_date)} to {str(self.end_date)}")
 
                         net_export = net_export[self.start_date : self.end_date]
                 
@@ -1690,18 +1671,22 @@ class mplot(object):
                 if scenario == self.Scenarios[0]:
                     max_val = max(positive['Net export'].max(),abs(negative['Net export']).max())
                     unitconversion = mfunc.capacity_energy_unitconversion(max_val)
-                    print(unitconversion)
 
                 both = pd.concat([positive,negative],axis = 1)
                 both.columns = ['Total export','Total import']                    
                 both = both / unitconversion['divisor']
                 net_exports_all.append(both)
-                Data_Table_Out = pd.concat(net_exports_all)
+                
+                #Add scenario column to output table.
+                scenario_names = pd.Series([scenario] * len(both),name = 'Scenario')
+                data_table = both.set_index([scenario_names],append = True)
+                data_out_chunk.append(data_table)
+            
+            Data_Table_Out = pd.concat(data_out_chunk).add_suffix(f" ({unitconversion['units']})")
 
-                            
             fig10 = mfunc.create_clustered_stacked_bar_plot(net_exports_all,self.Scenarios)
             fig10.hlines(y = 0, xmin = fig10.get_xlim()[0], xmax = fig10.get_xlim()[1], linestyle = ':')
-            fig10.set_ylabel('Interchange ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            fig10.set_ylabel(f"Interchange ({unitconversion['units']}h)",  color='black', rotation='vertical')
 
             outputs[zone_input] = {'fig': fig10,'data_table': Data_Table_Out}
         

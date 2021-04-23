@@ -2,16 +2,18 @@
 """
 Created on Mon Dec  9 13:20:56 2019
 
-This code creates total generation stacked bar plots and is called from Marmot_plot_main.py
+This module creates bar plot of the total volume of generator starts in MW,GW,etc.
 
 
 @author: dlevie
 """
 
-import os
 import pandas as pd
 import logging
+import matplotlib as mpl
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
+
 
 #===============================================================================
 class mplot(object):
@@ -23,6 +25,10 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+
     
     def capacity_started(self):
         outputs = {}
@@ -39,19 +45,19 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " =  " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
             cap_started_all_scenarios = pd.DataFrame()
 
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
 
                 Gen = gen_collection.get(scenario)
                 
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No installed capacity in : "+zone_input)
+                    self.logger.warning(f"No installed capacity in : {zone_input}")
                     break
                 
                 Gen = Gen.reset_index()
@@ -70,8 +76,8 @@ class mplot(object):
                 Gen.set_index('timestamp',inplace=True)
                 
                 if self.prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(self.start_date)} to {str(self.end_date)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
                     Gen = Gen.sort_index()[self.start_date : self.end_date]
 
@@ -130,17 +136,28 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
-            fig1 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0,
+            
+            unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            
+            cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
+            Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
+            
+            cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
+            cap_started_all_scenarios.columns = cap_started_all_scenarios.columns.str.wrap(10, break_long_words=False)
+            
+            fig1 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1')
 
             fig1.spines['right'].set_visible(False)
             fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
+            fig1.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
             fig1.tick_params(axis='y', which='major', length=5, width=1)
             fig1.tick_params(axis='x', which='major', length=5, width=1)
+            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            fig1.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': cap_started_all_scenarios.T}
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
 ##############################################################################
@@ -161,12 +178,12 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info("Zone =  " + zone_input)
+            self.logger.info(f"Zone =  {zone_input}")
             cap_started_chunk = []
 
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
                 Gen = gen_collection.get(scenario)
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
 
@@ -190,8 +207,8 @@ class mplot(object):
                 # Min = Min.xs(zone_input, level = AGG_BY)
 
                 if self.prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(self.start_date)} to {str(self.end_date)}")
                     Gen = Gen[self.start_date : self.end_date]
 
                 tech_names = Gen['tech'].unique()
@@ -219,16 +236,31 @@ class mplot(object):
 
                 cap_started_chunk.append(ramp_counts)
             
-            cap_started_all_scenarios = pd.concat([cap_started_chunk])
+            cap_started_all_scenarios = pd.concat(cap_started_chunk)
+            
+            if cap_started_all_scenarios.empty == True:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
+            cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
 
-            fig2 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0,
+            unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            
+            cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
+            Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
+            
+            fig2 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
                                   color = self.color_list,edgecolor='black', linewidth='0.1')
 
             fig2.spines['right'].set_visible(False)
             fig2.spines['top'].set_visible(False)
-            fig2.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
+            fig2.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
             fig2.tick_params(axis='y', which='major', length=5, width=1)
             fig2.tick_params(axis='x', which='major', length=5, width=1)
+            fig2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            fig2.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
 
-            outputs[zone_input] = {'fig': fig2, 'data_table': cap_started_all_scenarios.T}
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs

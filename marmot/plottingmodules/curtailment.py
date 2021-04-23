@@ -48,10 +48,10 @@ class mplot(object):
         PV_Curtailment_DC = pd.DataFrame()
 
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + scenario)
+                self.logger.info(f"Scenario = {scenario}")
 
                 re_curt = curtailment_collection.get(scenario)
 
@@ -59,7 +59,7 @@ class mplot(object):
                 try: #Check for regions missing all generation.
                     re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.info('No curtailment in ' + zone_input)
+                        self.logger.info(f'No curtailment in {zone_input}')
                         continue
 
                 # Timeseries [MW] PV curtailment [MWh]
@@ -91,11 +91,14 @@ class mplot(object):
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
 
-
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
             if self.prop == "PV":
+                # unit conversion return divisor and energy units
+                unitconversion = mfunc.capacity_energy_unitconversion(PV_Curtailment_DC.values.max())
+                PV_Curtailment_DC = PV_Curtailment_DC/unitconversion['divisor'] 
                 Data_Table_Out = PV_Curtailment_DC
+                Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
                 
                 if PV_Curtailment_DC.empty:
                     out = mfunc.MissingZoneData()
@@ -107,11 +110,15 @@ class mplot(object):
                             label=column)
                     ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-                    ax.set_ylabel('PV Curtailment (MW)',  color='black', rotation='vertical')
+                    ax.set_ylabel(f"PV Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
 
             if self.prop == "PV+Wind":
+                # unit conversion return divisor and energy units
+                unitconversion = mfunc.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
+                RE_Curtailment_DC = RE_Curtailment_DC/unitconversion['divisor'] 
                 Data_Table_Out = RE_Curtailment_DC
-                
+                Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
+
                 if RE_Curtailment_DC.empty:
                     out = mfunc.MissingZoneData()
                     outputs[zone_input] = out
@@ -122,7 +129,7 @@ class mplot(object):
                             label=column)
                     ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-                    ax.set_ylabel('PV + Wind Curtailment (MW)',  color='black', rotation='vertical')
+                    ax.set_ylabel(f"PV + Wind Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
 
             ax.set_xlabel('Hours',  color='black', rotation='horizontal')
             ax.spines['right'].set_visible(False)
@@ -156,19 +163,18 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-#        for zone_input in ['TWPR']:
             Penetration_Curtailment_out = pd.DataFrame()
 
-            self.logger.info(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY } = {zone_input}")
 
             for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + scenario)
+                self.logger.info(f"Scenario = {scenario}")
 
                 gen = generation_collection.get(scenario)
                 try: #Check for regions missing all generation.
                     gen = gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.info('No generation in %s',zone_input)
+                        self.logger.info(f'No generation in {zone_input}')
                         continue
 
                 avail_gen = avail_gen_collection.get(scenario)
@@ -178,7 +184,7 @@ class mplot(object):
                 try:
                     re_curt = re_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                        self.logger.info('No curtailment in %s',zone_input)
+                        self.logger.info(f'No curtailment in {zone_input}')
                         continue
 
                 # Finds the number of unique hours in the year
@@ -289,7 +295,7 @@ class mplot(object):
             Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
             
             if Penetration_Curtailment_out.empty:
-                self.logger.warning('No Generation in %s',zone_input)
+                self.logger.warning(f'No Generation in {zone_input}')
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
@@ -323,111 +329,6 @@ class mplot(object):
         return outputs
 
 
-    def curt_duration_curve(self):
-        outputs = {}
-        curtailment_collection = {}
-        check_input_data = []
-        
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
-        
-        # Checks if all data required by plot is available, if 1 in list required data is missing
-        if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-        
-        RE_Curtailment_DC = pd.DataFrame()
-        PV_Curtailment_DC = pd.DataFrame()
-
-        for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY +  " = " + zone_input)
-
-            for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + scenario)
-
-                re_curt = curtailment_collection.get(scenario)
-
-                # Timeseries [MW] RE curtailment [MWh]
-                try: #Check for regions missing all generation.
-                    re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
-                except KeyError:
-                        self.logger.info('No curtailment in ' + zone_input)
-                        continue
-
-                # Timeseries [MW] PV curtailment [MWh]
-                pv_curt = (re_curt.loc[(slice(None), self.pv_gen_cat),:])
-
-                re_curt = re_curt.groupby(["timestamp"]).sum()
-                pv_curt = pv_curt.groupby(["timestamp"]).sum()
-
-                re_curt = re_curt.squeeze() #Convert to Series
-                pv_curt = pv_curt.squeeze() #Convert to Series
-
-                # Sort from larget to smallest
-                re_cdc = re_curt.sort_values(ascending=False).reset_index(drop=True)
-                pv_cdc = pv_curt.sort_values(ascending=False).reset_index(drop=True)
-
-                re_cdc.rename(scenario, inplace=True)
-                pv_cdc.rename(scenario, inplace=True)
-
-                RE_Curtailment_DC = pd.concat([RE_Curtailment_DC, re_cdc], axis=1, sort=False)
-                PV_Curtailment_DC = pd.concat([PV_Curtailment_DC, pv_cdc], axis=1, sort=False)
-
-            # Remove columns that have values less than 1
-            RE_Curtailment_DC = RE_Curtailment_DC.loc[:, (RE_Curtailment_DC >= 1).any(axis=0)]
-            PV_Curtailment_DC = PV_Curtailment_DC.loc[:, (PV_Curtailment_DC >= 1).any(axis=0)]
-            # Replace _ with white space
-            RE_Curtailment_DC.columns = RE_Curtailment_DC.columns.str.replace('_',' ')
-            PV_Curtailment_DC.columns = PV_Curtailment_DC.columns.str.replace('_',' ')
-
-            # Create Dictionary from scenario names and color list
-            colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
-
-
-            fig2, ax = plt.subplots(figsize=(self.x,self.y))
-
-            if self.prop == "PV":
-                Data_Table_Out = PV_Curtailment_DC
-                
-                if PV_Curtailment_DC.empty:
-                    out = mfunc.MissingZoneData()
-                    outputs[zone_input] = out
-                    continue
-                
-                for column in PV_Curtailment_DC:
-                    ax.plot(PV_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
-                            label=column)
-                    ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                    ax.set_ylabel('PV Curtailment (MW)',  color='black', rotation='vertical')
-
-            if self.prop == "PV+Wind":
-                Data_Table_Out = RE_Curtailment_DC
-                
-                if RE_Curtailment_DC.empty:
-                    out = mfunc.MissingZoneData()
-                    outputs[zone_input] = out
-                    continue
-
-                for column in RE_Curtailment_DC:
-                    ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
-                            label=column)
-                    ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                    ax.set_ylabel('PV + Wind Curtailment (MW)',  color='black', rotation='vertical')
-
-            ax.set_xlabel('Hours',  color='black', rotation='horizontal')
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.margins(x=0.01)
-            ax.set_xlim(0, 9490)
-            ax.set_ylim(bottom=0)
-
-            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
-        return outputs
-
     def curt_total(self):
 
         """
@@ -449,7 +350,7 @@ class mplot(object):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY +  " = " + zone_input)
+            self.logger.info(f"self.AGG_BY = {zone_input}")
 
             Total_Curtailment_out = pd.DataFrame()
             Total_Available_gen = pd.DataFrame()
@@ -458,7 +359,7 @@ class mplot(object):
 
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + scenario)
+                self.logger.info(f"Scenario = {scenario}")
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
                 #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
 
@@ -469,7 +370,7 @@ class mplot(object):
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.info('No curtailment in ' + zone_input)
+                    self.logger.info(f'No curtailment in {zone_input}')
                     continue
                 vre_curt = vre_curt[vre_curt.index.isin(self.vre_gen_cat,level='tech')]
 
@@ -477,7 +378,7 @@ class mplot(object):
                 try: #Check for regions missing all generation.
                     avail_gen = avail_gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.info('No available generation in ' + zone_input)
+                        self.logger.info(f'No available generation in {zone_input}')
                         continue
                 avail_gen = avail_gen[avail_gen.index.isin(self.vre_gen_cat,level='tech')]
 
@@ -485,7 +386,7 @@ class mplot(object):
                     try:
                         vre_curt_type = vre_curt.xs(vre_type,level='tech')
                     except KeyError:
-                        self.logger.info('No ' + vre_type + ' in ' + zone_input)
+                        self.logger.info(f'No {vre_type} in {zone_input}')
                         continue
                     vre_collection[vre_type] = float(vre_curt_type.sum())
 
@@ -505,9 +406,6 @@ class mplot(object):
             
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
-            
-            # Data table of values to return to main program
-            Data_Table_Out = Total_Curtailment_out
 
             if Total_Curtailment_out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
@@ -517,12 +415,16 @@ class mplot(object):
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
             
+            # Data table of values to return to main program            
+            Data_Table_Out = Total_Curtailment_out
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
+            
             fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1')
             fig3.spines['right'].set_visible(False)
             fig3.spines['top'].set_visible(False)
-            fig3.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            fig3.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)",  color='black', rotation='vertical')
             fig3.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             fig3.tick_params(axis='y', which='major', length=5, width=1)
             fig3.tick_params(axis='x', which='major', length=5, width=1)
@@ -534,18 +436,17 @@ class mplot(object):
 
             curt_totals = Total_Curtailment_out.sum(axis=1)
             #inserts total bar value above each bar
-            k=0
-            for i in fig3.patches:
+            for k, patch in enumerate(fig3.patches):
                 height = curt_totals[k]
-                width = i.get_width()
-                x, y = i.get_xy()
+                width = patch.get_width()
+                x, y = patch.get_xy()
                 fig3.text(x+width/2,
                     y+height + 0.05*max(fig3.get_ylim()),
                     '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11, color='red')
-                k=k+1
-                if k>=len(vre_pct_curt):
+                
+                if k>=len(vre_pct_curt)-1:
                     break
 
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
@@ -589,7 +490,7 @@ class mplot(object):
 
         for scenario in self.Scenarios:
             scen_idx += 1
-            self.logger.info("Scenario = " + scenario)
+            self.logger.info(f"Scenario = {scenario}")
 
             vre_curt = curtailment_collection.get(scenario)
             gen = gen_collection.get(scenario)
@@ -660,26 +561,24 @@ class mplot(object):
         fig1.spines['right'].set_visible(False)
         fig1.spines['top'].set_visible(False)
         fig1.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
-        fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
+        fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 2))         #adds % to y axis data
         fig1.tick_params(axis='y', which='major', length=5, width=1)
         fig1.tick_params(axis='x', which='major', length=5, width=1)
         
-        Total_Curt = round(Total_Curt / 1000,0)
+        unitconversion = mfunc.capacity_energy_unitconversion(Total_Curt.values.max())
+        Total_Curt = Total_Curt/unitconversion['divisor'] 
+        
+        Total_Curt = round(Total_Curt,2)
         Total_Curt = Total_Curt.melt()
         #inserts total bar value above each bar
-        k=0
-        for patch in fig1.patches:
-                        
+        for k, patch in enumerate(fig1.patches):
             height = patch.get_height()
             width = patch.get_width()
             x, y = patch.get_xy()
             fig1.text(x+width/2,y + height + 0.05*max(fig1.get_ylim()),
-                str(Total_Curt.iloc[k][1]) + ' GWh',
+                str(Total_Curt.iloc[k][1]) + f" {unitconversion['units']}h",
                 horizontalalignment='center',
                 verticalalignment='center', fontsize=11)
-            k += 1
-            # if k>=len(self.vre_pct_curt):
-            #     break
         
         fig1.figure.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.svg'),dpi=600, bbox_inches='tight')
 
