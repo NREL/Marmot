@@ -768,7 +768,7 @@ class MarmotFormat():
                 files.append(names)  # Creates a list of only the hdf5 files
 
         # List of all hf files in hdf5 folder in alpha numeric order
-        files_list = sorted(files, key=lambda x: int(re.sub('\D', '', os.path.splitext(x)[0])))
+        files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
 
         os.chdir(startdir)
 
