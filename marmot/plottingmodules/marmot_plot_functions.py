@@ -69,7 +69,7 @@ class MissingMetaData:
     """
     def __init__(self):
         return
-
+    
 
 def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
     """

@@ -1216,7 +1216,7 @@ class mplot(object):
             rr_int_agg = rr_int_agg.unstack('child')
             rr_int_agg = rr_int_agg.droplevel(level = 0, axis = 1)
 
-            current_cmap = plt.cm.get_cmap().copy()
+            current_cmap = plt.cm.get_cmap()
             current_cmap.set_bad(color='grey')
 
             axs[n].imshow(rr_int_agg)

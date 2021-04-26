@@ -99,7 +99,7 @@ class mplot(object):
                 mfunc.set_plot_timeseries_format(axs, n = i, minticks = self.minticks, maxticks = self.maxticks)
                 axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
-            Data_Table_Out = pd.concat(chunks,axis = 1)
+            Data_Table_Out = pd.concat(chunks,axis = 0)
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
             fig2.add_subplot(111, frameon=False)

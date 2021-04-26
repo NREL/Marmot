@@ -201,17 +201,19 @@ class mplot(object):
                 Stacked_Curt = self.mplot_data_dict['generator_Curtailment'].get(scenario).copy()
                 if self.shift_leapday:
                     Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
-                Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
-                Stacked_Curt = Stacked_Curt.sum(axis=1)
-                Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
-                Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
-
-                # Calculates Net Load by removing variable gen + curtailment
-                vre_gen_cat = self.vre_gen_cat + [curtailment_name]
-
+                if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
+                    Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                    Stacked_Curt = Stacked_Curt.sum(axis=1)
+                    Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
+                    Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                    # Calculates Net Load by removing variable gen + curtailment
+                    vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+                else:
+                    vre_gen_cat = self.vre_gen_cat
+                    
             else:
-                vre_gen_cat = self.re_gen_cat
+                vre_gen_cat = self.vre_gen_cat
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
             vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
             Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)

@@ -99,16 +99,16 @@ class mplot(object):
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
             if prop == "PV":
-                # unit conversion return divisor and energy units
-                unitconversion = mfunc.capacity_energy_unitconversion(PV_Curtailment_DC.values.max())
-                PV_Curtailment_DC = PV_Curtailment_DC/unitconversion['divisor'] 
-                Data_Table_Out = PV_Curtailment_DC
-                Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
                 
                 if PV_Curtailment_DC.empty:
                     out = mfunc.MissingZoneData()
                     outputs[zone_input] = out
                     continue
+                # unit conversion return divisor and energy units
+                unitconversion = mfunc.capacity_energy_unitconversion(PV_Curtailment_DC.values.max())
+                PV_Curtailment_DC = PV_Curtailment_DC/unitconversion['divisor'] 
+                Data_Table_Out = PV_Curtailment_DC
+                Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
                 
                 for column in PV_Curtailment_DC:
                     ax.plot(PV_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
@@ -118,16 +118,16 @@ class mplot(object):
                     ax.set_ylabel(f"PV Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
 
             if prop == "PV+Wind":
+                
+                if RE_Curtailment_DC.empty:
+                    out = mfunc.MissingZoneData()
+                    outputs[zone_input] = out
+                    continue
                 # unit conversion return divisor and energy units
                 unitconversion = mfunc.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
                 RE_Curtailment_DC = RE_Curtailment_DC/unitconversion['divisor'] 
                 Data_Table_Out = RE_Curtailment_DC
                 Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
-
-                if RE_Curtailment_DC.empty:
-                    out = mfunc.MissingZoneData()
-                    outputs[zone_input] = out
-                    continue
 
                 for column in RE_Curtailment_DC:
                     ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
@@ -355,7 +355,7 @@ class mplot(object):
             return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"self.AGG_BY = {zone_input}")
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             Total_Curtailment_out = pd.DataFrame()
             Total_Available_gen = pd.DataFrame()
@@ -404,6 +404,10 @@ class mplot(object):
                 vre_curt_chunks.append(vre_table)
                 avail_gen_chunks.append(avail_gen_table)
             
+            if not vre_curt_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+                
             Total_Curtailment_out = pd.concat(vre_curt_chunks, axis=0, sort=False)
             Total_Available_gen = pd.concat(avail_gen_chunks, axis=0, sort=False)
             

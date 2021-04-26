@@ -77,6 +77,9 @@ class mplot(object):
                     {str(start_date_range)} to {str(end_date_range)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
                     Gen = Gen.sort_index()[start_date_range : end_date_range]
+                    if Gen.empty is True:
+                        self.logger.warning('No data in selected Date Range')
+                        continue
 
                 #Calculate CF individually for each plant, since we need to take out all zero rows.
                 tech_names = Gen['tech'].unique()
@@ -171,7 +174,10 @@ class mplot(object):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     Gen = Gen[start_date_range : end_date_range]
-                
+                    if Gen.empty is True:
+                        self.logger.warning('No data in selected Date Range')
+                        continue
+                        
                 # Calculates interval step to correct for MWh of generation
                 time_delta = Gen.index[1] - Gen.index[0]
                 duration = Gen.index[len(Gen)-1] - Gen.index[0]

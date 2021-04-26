@@ -92,11 +92,12 @@ class mplot(object):
                 # Insert Curtailmnet into gen stack if it exhists in database
                 if self.mplot_data_dict["generator_Curtailment"]:
                     Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
-                    Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
-                    Stacked_Curt = Stacked_Curt.sum(axis=1)
-                    Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
-                    Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
+                    if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
+                        Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = Stacked_Curt.sum(axis=1)
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                        Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
                 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -267,11 +268,12 @@ class mplot(object):
                 # Insert Curtailmnet into gen stack if it exhists in database
                 if self.mplot_data_dict["generator_Curtailment"]:
                     Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
-                    Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
-                    Stacked_Curt = Stacked_Curt.sum(axis=1)
-                    Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
-                    Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
+                    if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
+                        Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = Stacked_Curt.sum(axis=1)
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                        Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)

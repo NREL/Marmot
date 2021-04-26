@@ -66,7 +66,7 @@ class mplot(object):
 
             for scenario in self.Scenarios:
 
-                self.logger.info(f"Scenario = {zone_input}")
+                self.logger.info(f"Scenario = {scenario}")
 
                 Total_Installed_Capacity = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
 

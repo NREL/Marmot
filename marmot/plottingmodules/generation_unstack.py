@@ -38,6 +38,11 @@ class mplot(object):
         if 'Facet' in figure_name:
             facet = True
             
+        if self.AGG_BY == 'zone':
+                agg = 'zone'
+        else:
+            agg = 'region'
+            
         def getdata(scenario_list):
             
             # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -45,8 +50,8 @@ class mplot(object):
             properties = [(True,"generator_Generation",scenario_list),
                           (False,"generator_Curtailment",scenario_list),
                           (False,"generator_Pump_Load",scenario_list),
-                          (True,f"{self.AGG_BY}_Load",scenario_list),
-                          (False,f"{self.AGG_BY}_Unserved_Energy",scenario_list)]
+                          (True,f"{agg}_Load",scenario_list),
+                          (False,f"{agg}_Unserved_Energy",scenario_list)]
             
             # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
             return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -120,14 +125,17 @@ class mplot(object):
                     Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario).copy()
                     if self.shift_leapday:
                         Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
-                    Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                    Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
-                    Stacked_Curt = Stacked_Curt.sum(axis=1)
-                    Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
-                    Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
-
-                    # Calculates Net Load by removing variable gen + curtailment
-                    vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+                    if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
+                        Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = Stacked_Curt.sum(axis=1)
+                        Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
+                        Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+    
+                        # Calculates Net Load by removing variable gen + curtailment
+                        vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+                    else:
+                        vre_gen_cat = self.vre_gen_cat
                 else:
                     vre_gen_cat = self.vre_gen_cat
                     
@@ -138,7 +146,7 @@ class mplot(object):
 
                 Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
-                Load = self.mplot_data_dict[f"{self.AGG_BY}_Load"].get(scenario).copy()
+                Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario).copy()
                 if self.shift_leapday:
                     Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)     
                 Load = Load.xs(zone_input,level=self.AGG_BY)
@@ -161,11 +169,11 @@ class mplot(object):
                     Pump_Load = Load
                 
                 
-                if self.mplot_data_dict[f"{self.AGG_BY}_Unserved_Energy"] == {}:
-                    Unserved_Energy = self.mplot_data_dict[f"{self.AGG_BY}_Load"][scenario].copy()
+                if self.mplot_data_dict[f"{agg}_Unserved_Energy"] == {}:
+                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Load"][scenario].copy()
                     Unserved_Energy.iloc[:,0] = 0
                 else:
-                    Unserved_Energy = self.mplot_data_dict[f"{self.AGG_BY}_Unserved_Energy"][scenario].copy()                
+                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario].copy()                
                 if self.shift_leapday:
                     Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)                    
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
