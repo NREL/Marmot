@@ -1332,16 +1332,15 @@ class mplot(object):
             all_scenarios.columns = all_scenarios.columns.str.replace('_',' ')
             #remove columns that are all equal to 0
             all_scenarios = all_scenarios.loc[:, (all_scenarios != 0).any(axis=0)]
-
+            
+            if all_scenarios.empty:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             unitconversion = mfunc.capacity_energy_unitconversion(all_scenarios.values.max())
             all_scenarios = all_scenarios/unitconversion['divisor']
 
             Data_Table_Out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
-
-            if all_scenarios.empty==True:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
-                continue
 
             #Make scenario/color dictionary.
             color_dict = dict(zip(all_scenarios.columns,self.color_list))
@@ -1362,7 +1361,7 @@ class mplot(object):
 
             else:
                 for column in all_scenarios:
-                    mfunc.create_line_plot(ax,all_scenarios,column,color_dict=color_dict,label=column)
+                    mfunc.create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
                 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
