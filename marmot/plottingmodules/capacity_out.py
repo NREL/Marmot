@@ -68,7 +68,12 @@ class mplot(object):
                 avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
                 if self.shift_leapday:
                     avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)
-                avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
+                if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():
+                    avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
+                else:
+                    self.logger.warning(f"No Generation in: {zone_input}")
+                    outputs[zone_input] = mfunc.MissingZoneData()
+                    continue
                 avail_cap.columns = ['avail']
                 install_cap.columns = ['cap']
                 avail_cap.reset_index(inplace = True)
@@ -84,6 +89,10 @@ class mplot(object):
                 #Subset only thermal gen categories
                 thermal_gens = [therm for therm in self.thermal_gen_cat if therm in cap_out.columns]
                 cap_out = cap_out[thermal_gens]
+                
+                if cap_out.empty is True:
+                    self.logger.warning(f"No Thermal Generation in: {zone_input}")
+                    continue
 
                 # unitconversion based off peak outage hour, only checked once 
                 if i == 0:
@@ -94,11 +103,15 @@ class mplot(object):
                 scenario_names = pd.Series([scenario] * len(cap_out),name = 'Scenario')
                 single_scen_out = cap_out.set_index([scenario_names],append = True)
                 chunks.append(single_scen_out)
-                        
+                
                 mfunc.create_stackplot(axs = axs, data = cap_out,color_dict = self.PLEXOS_color_dict, label = cap_out.columns, n = i)
                 mfunc.set_plot_timeseries_format(axs, n = i, minticks = self.minticks, maxticks = self.maxticks)
                 axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
-
+            
+            if not chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+                
             Data_Table_Out = pd.concat(chunks,axis = 0)
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 

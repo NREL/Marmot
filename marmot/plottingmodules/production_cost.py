@@ -203,8 +203,12 @@ class mplot(object):
                 
                 total_cost_chunk.append(Total_Systems_Cost)
             
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not total_cost_chunk:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             Total_Systems_Cost_Out = pd.concat(total_cost_chunk, axis=0, sort=False)
-
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
 
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
@@ -212,8 +216,7 @@ class mplot(object):
 
              #Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Data table of values to return to main program
@@ -332,6 +335,11 @@ class mplot(object):
                 
                 gen_cost_out_chunks.append(Detailed_Gen_Cost)
             
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             Detailed_Gen_Cost_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False)
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
             
@@ -339,13 +347,12 @@ class mplot(object):
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(5, break_long_words=False)
             # Deletes columns that are all 0
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
-
+            
             # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
             if Detailed_Gen_Cost_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-
+            
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
 
@@ -433,6 +440,11 @@ class mplot(object):
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 gen_cost_out_chunks.append(Total_Gen_Stack)
             
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             Total_Generation_Stack_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False).fillna(0)
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
@@ -440,8 +452,7 @@ class mplot(object):
 
             # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
             if Total_Generation_Stack_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Data table of values to return to main program
@@ -528,24 +539,27 @@ class mplot(object):
                 Total_Systems_Cost.columns = Total_Systems_Cost.columns.str.replace('_',' ')
                 Total_Systems_Cost.rename({0:scenario}, axis='index', inplace=True)
                 total_cost_chunk.append(Total_Systems_Cost)
-                
-            Total_Systems_Cost_Out = pd.concat(total_cost_chunk, axis=0, sort=False)
             
+            # Checks if total_cost_chunk contains data, if not skips zone and does not return a plot
+            if not total_cost_chunk:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
+            Total_Systems_Cost_Out = pd.concat(total_cost_chunk, axis=0, sort=False)
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
             #Ensures region has generation, else skips
             try:
                 Total_Systems_Cost_Out = Total_Systems_Cost_Out-Total_Systems_Cost_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             Total_Systems_Cost_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             # Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
+            
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
             Data_Table_Out = Data_Table_Out.add_suffix(" (Million $)")
@@ -611,7 +625,12 @@ class mplot(object):
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 gen_cost_out_chunks.append(Total_Gen_Stack)
-
+            
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             Total_Generation_Stack_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False).fillna(0)
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
@@ -620,15 +639,13 @@ class mplot(object):
             try:
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             Total_Generation_Stack_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
             if Total_Generation_Stack_Out.empty == True:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Data table of values to return to main program
@@ -729,14 +746,18 @@ class mplot(object):
                 Detailed_Gen_Cost = Detailed_Gen_Cost.rename(scenario)
                 gen_cost_out_chunks.append(Detailed_Gen_Cost)
             
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             Detailed_Gen_Cost_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False)
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
             #Ensures region has generation, else skips
             try:
                 Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out-Detailed_Gen_Cost_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             Detailed_Gen_Cost_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
             net_cost = Detailed_Gen_Cost_Out.sum(axis = 1)
@@ -747,8 +768,7 @@ class mplot(object):
 
             # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
             if Detailed_Gen_Cost_Out.empty == True:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Data table of values to return to main program

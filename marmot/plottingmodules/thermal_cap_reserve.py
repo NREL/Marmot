@@ -71,10 +71,10 @@ class mplot(object):
                 self.logger.info(f"Scenario = {scenario}")
 
                 Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
-                if self.shift_leapday:
+                if self.shift_leapday is True:
                     Gen = mfunc.shift_leapday(Gen,self.Marmot_Solutions_folder)
                 avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
-                if self.shift_leapday:
+                if self.shift_leapday is True:
                     avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)               
                
                 # Check if zone is in avail_cap
@@ -143,22 +143,21 @@ class mplot(object):
             # add facet labels
             mfunc.add_facet_labels(fig1, xlabels, self.ylabels)           
             
-            #Remove extra axes
+            # Remove extra axes
             if excess_axs != 0:
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
             
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=50)
-
+            
+            # If data_table_chunks is empty, does not return data or figure
+            if not data_table_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
             # Concat all data tables together
             Data_Table_Out = pd.concat(data_table_chunks, copy=False, axis=0)
             
-            # If Data_Table_Out is empty, does not return data or figure
-            if Data_Table_Out.empty == True:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
-                continue
-
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs

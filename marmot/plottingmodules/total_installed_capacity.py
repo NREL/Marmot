@@ -350,7 +350,6 @@ class mplot(object):
 
             labels = np.unique(np.array(l1)).tolist()
             labels.sort(key=lambda i: self.ordered_gen.index(i))
-
             # create custom gen_tech legend
             handles = []
             for tech in labels:
