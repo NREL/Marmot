@@ -451,7 +451,8 @@ class MarmotPlot():
                 figure_method = getattr(instantiate_mplot, row['Method'])
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
                                            prop = row.iloc[2],
-                                           start = row.iloc[3], end=row.iloc[4],
+                                           start = row.iloc[3],
+                                           end=row.iloc[4],
                                            timezone = row.iloc[5],
                                            start_date_range = row.iloc[6],
                                            end_date_range = row.iloc[7])
@@ -552,8 +553,11 @@ if __name__ == '__main__':
     
     Mapping_folder = 'mapping_folder'
     
-    Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
-    Region_Mapping = Region_Mapping.astype(str)
+    if pd.isna(Marmot_user_defined_inputs.loc['Region_Mapping.csv_name', 'User_defined_value']) is True:
+        Region_Mapping = pd.DataFrame()
+    else:
+        Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
+        Region_Mapping = Region_Mapping.astype(str)
     
     gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
     

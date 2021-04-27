@@ -585,7 +585,11 @@ class mplot(object):
                 self.logger.warning(f'Scenario_Diff "{self.Scenario_Diff[0]}" is not in data. Ensure User Input Sheet is set up correctly!')
                 outputs = mfunc.InputSheetError()
                 return outputs
-
+            
+            if zone_input not in Total_Gen_Stack_1.index.get_level_values(self.AGG_BY).unique():
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+                
             Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_1 = mfunc.df_process_gen_inputs(Total_Gen_Stack_1, self.ordered_gen)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
@@ -618,8 +622,7 @@ class mplot(object):
             Gen_Stack_Out = Gen_Stack_Out.loc[:, (Gen_Stack_Out != 0).any(axis=0)]
 
             if Gen_Stack_Out.empty == True:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Reverses order of columns
