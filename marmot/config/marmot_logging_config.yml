@@ -13,38 +13,20 @@ handlers:
     level: INFO
     stream  : ext://sys.stdout
 
-  warning_formatter:
+  warning_handler:
     class: logging.handlers.RotatingFileHandler
     level: WARNING
     formatter: warning_format
-    filename: logs/WARNINGS_formatter.log
+    filename: logs/WARNINGS_{}{}.log
     backupCount: 3
     encoding: utf8
     mode: a
 
-  info_formatter:
+  info_handler:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: info_format
-    filename: logs/Log_formatter.log
-    backupCount: 3
-    encoding: utf8
-    mode: a
-
-  warning_plotter:
-    class: logging.handlers.RotatingFileHandler
-    level: WARNING
-    formatter: warning_format
-    filename: logs/WARNINGS_plotter.log
-    backupCount: 3
-    encoding: utf8
-    mode: a
-
-  info_plotter:
-    class: logging.handlers.RotatingFileHandler
-    level: INFO
-    formatter: info_format
-    filename: logs/Log_plotter.log
+    filename: logs/Log_{}{}.log
     backupCount: 3
     encoding: utf8
     mode: a
@@ -52,13 +34,13 @@ handlers:
 loggers:
   marmot_format:
     level: INFO
-    handlers: [console,warning_formatter,info_formatter]
-    propagate: no
+    handlers: [console,warning_handler,info_handler]
+    propagate: yes
 
   marmot_plot:
     level: INFO
-    handlers: [console,warning_plotter,info_plotter]
-    propagate: no
+    handlers: [console,warning_handler,info_handler]
+    propagate: yes
 
   root:
     level: DEBUG
