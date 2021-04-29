@@ -200,7 +200,7 @@ class mplot(object):
             # Insert Curtailmnet into gen stack if it exhists in database
             if curtailment_collection:
                 Stacked_Curt = curtailment_collection.get(scenario).copy()
-                if self.shift_leapday:
+                if self.shift_leapday == True:
                     Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
                 Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                 Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
@@ -220,7 +220,7 @@ class mplot(object):
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
             Load = load_collection.get(scenario).copy()
-            if self.shift_leapday:
+            if self.shift_leapday == True:
                 Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
             Load = Load.xs(zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
@@ -247,7 +247,7 @@ class mplot(object):
                 pump_load_collection[scenario] = gen_collection[scenario].copy()
                 pump_load_collection[scenario].iloc[:,0] = 0
             Pump_Load = pump_load_collection.get(scenario).copy()
-            if self.shift_leapday:
+            if self.shift_leapday == True:
                 Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
@@ -264,7 +264,7 @@ class mplot(object):
                 unserved_energy_collection[scenario] = load_collection[scenario].copy()
                 unserved_energy_collection[scenario].iloc[:,0] = 0
             Unserved_Energy = unserved_energy_collection.get(scenario).copy()
-            if self.shift_leapday:
+            if self.shift_leapday == True:
                 Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)
 
             Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
@@ -368,7 +368,7 @@ class mplot(object):
 
                 try:
                     Stacked_Gen = gen_collection.get(scenario).copy()
-                    if self.shift_leapday:
+                    if self.shift_leapday == True:
                         Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:

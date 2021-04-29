@@ -70,10 +70,10 @@ class mplot(object):
                 self.logger.info("Scenario = " + scenario)
 
                 Gen = generation_collection.get(scenario).copy()
-                if self.shift_leapday:
+                if self.shift_leapday == True:
                     Gen = mfunc.shift_leapday(Gen,self.Marmot_Solutions_folder)
                 avail_cap = gen_available_capacity_collection.get(scenario).copy()
-                if self.shift_leapday:
+                if self.shift_leapday == True:
                     avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)               
                
                 # Check if zone is in avail_cap

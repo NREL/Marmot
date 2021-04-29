@@ -116,6 +116,9 @@ class mplot(object):
                 flow = Flow_Collection.get(scenario).copy()
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] #Limit to only lines touching to this zone
 
+                if self.shift_leapday == True:
+                    flow = mfunc.shift_leapday(flow,self.Marmot_Solutions_folder)
+
                 limits = Limit_Collection.get(scenario).droplevel('timestamp')
                 limits.mask(limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
 
@@ -293,6 +296,9 @@ class mplot(object):
                         single_int.columns = [interf]
                         single_int = single_int.reset_index().set_index('timestamp')
                         limits = limits.reset_index().set_index('timestamp')
+
+                        if self.shift_leapday == True:
+                            single_int = mfunc.shift_leapday(single_int,self.Marmot_Solutions_folder)
                         if not pd.isnull(self.start_date):
         
                             single_int = single_int[self.start_date : self.end_date]
@@ -492,6 +498,9 @@ class mplot(object):
                     single_int.index = single_int.index.droplevel('interface_category')
                     single_int.columns = [interf]
                     
+                    if self.shift_leapday == True:
+                        single_int = mfunc.shift_leapday(single_int,self.Marmot_Solutions_folder)
+
                     summer = single_int[self.start_date:self.end_date]
                     winter = single_int.drop(summer.index)
                     summer_lim = limits[self.start_date:self.end_date]
@@ -687,6 +696,10 @@ class mplot(object):
                         single_int = flow.xs(interf,level = 'interface_name') / 1000
                         single_int.index = single_int.index.droplevel('interface_category')
                         single_int.columns = [interf]
+
+                        if self.shift_leapday == True:
+                            single_int = mfunc.shift_leapday(single_int,self.Marmot_Solutions_folder)
+
                         single_int = single_int.reset_index().set_index('timestamp')
                         limits = limits.reset_index().set_index('timestamp')
                         if not pd.isnull(self.start_date):
@@ -856,6 +869,10 @@ class mplot(object):
                     flow = Flow_Collection[scenario]
                     single_line = flow.xs(line,level = 'line_name')
                     single_line.columns = [line]
+
+                    if self.shift_leapday == True:
+                        single_line = mfunc.shift_leapday(single_line,self.Marmot_Solutions_folder)
+
                     single_line_out = single_line.copy()
                     if self.duration_curve:
                         single_line = mfunc.sort_duration(single_line,line)
@@ -973,6 +990,9 @@ class mplot(object):
 
                 single_line = flow_diff.xs(line,level = 'line_name')
                 single_line.columns = [line]
+                if self.shift_leapday == True:
+                    single_line = mfunc.shift_leapday(single_line,self.Marmot_Solutions_folder)
+
                 single_line_out = single_line.copy()
                 if self.duration_curve:
                     single_line = mfunc.sort_duration(single_line,line)
@@ -1124,6 +1144,8 @@ class mplot(object):
                 single_line = flow.xs(line,level = 'line_name')
                 single_line_out = single_line.copy()
                 single_line.columns = [line]
+                if self.shift_leapday == True:
+                    single_line = mfunc.shift_leapday(single_line,self.Marmot_Solutions_folder)
 
                 #Split into seasons.
                 summer = single_line[self.start_date : self.end_date]
@@ -1320,7 +1342,8 @@ class mplot(object):
             for scenario in scenario_type:
 
                 rr_int = net_interchange_collection.get(scenario)
-
+                if self.shift_leapday == True:
+                    rr_int = mfunc.shift_leapday(rr_int,self.Marmot_Solutions_folder)
                 # For plot_main handeling - need to find better solution
                 if plot_scenario == False:
                     outputs={}
@@ -1455,6 +1478,8 @@ class mplot(object):
         for scenario in self.Scenarios:
 
             rr_int = net_interchange_collection.get(scenario)
+            if self.shift_leapday == True:
+                rr_int = mfunc.shift_leapday(rr_int,self.Marmot_Solutions_folder)
 
             if self.AGG_BY != 'region' and self.AGG_BY != 'zone':
                     agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
@@ -1652,6 +1677,8 @@ class mplot(object):
 
                 self.logger.info("Scenario = " + str(scenario))
                 net_export_read = net_interchange_collection.get(scenario)
+                if self.shift_leapday == True:
+                    net_export_read = mfunc.shift_leapday(net_export_read,self.Marmot_Solutions_folder)                
                 net_export = net_export_read.xs(zone_input, level = self.AGG_BY)
                 net_export = net_export.groupby("timestamp").sum()
                 net_export.columns = [scenario]
@@ -1772,7 +1799,7 @@ class mplot(object):
                 net_exports = []
                 self.logger.info("Scenario = " + str(scenario))
                 flow = line_flow_collection[scenario].copy()
-                if self.shift_leapday:
+                if self.shift_leapday == True:
                     flow = mfunc.shift_leapday(flow,self.Marmot_Solutions_folder)
                 flow = flow.reset_index()
                                 

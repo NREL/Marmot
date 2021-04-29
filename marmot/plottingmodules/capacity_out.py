@@ -67,7 +67,7 @@ class mplot(object):
                 
                 install_cap = installed_cap_collection.get(scenario).copy()
                 avail_cap = gen_available_capacity_collection.get(scenario).copy()
-                if self.shift_leapday:
+                if self.shift_leapday == True:
                     avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)
                 avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
                 avail_cap.columns = ['avail']
