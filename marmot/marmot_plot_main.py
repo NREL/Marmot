@@ -54,20 +54,26 @@ class SetupLogger():
 
     Allows an optional suffix to be included which will be appended to the
     end of the log file name, this is useful when running multiple
-    processes in parallel to allow logging to seperate files
-
+    processes in parallel to allow logging to seperate files.
+    
+    Allows log_directory to be changed from default
+    
     SetupLogger is a subclass of all other module classes
     """
 
-    def __init__(self, log_suffix=None):
+    def __init__(self, log_directory='logs', log_suffix=None):
         """Setuplogger __init__ method.
         
         Formats log filename, 
         configures logger from marmot_logging_config.yml file,
-        handles rollover of log file on each instantiation
+        handles rollover of log file on each instantiation.
+        
+        Allows log_directory to be chnaged from default
         
         Parameters
         ----------
+        log_directory : string, optional
+            log directory to save logs, The default is 'logs'
         log_suffix : string, optional
             optional suffix to add to end of log file. The default is None.
 
@@ -77,9 +83,9 @@ class SetupLogger():
 
         """
         if log_suffix is None:
-            log_suffix = ''
+            self.log_suffix = ''
         else:
-             log_suffix = f'_{log_suffix}'
+             self.log_suffix = f'_{log_suffix}'
                  
         current_dir = os.getcwd()
         os.chdir(FILE_DIR)
@@ -87,9 +93,11 @@ class SetupLogger():
         with open('config/marmot_logging_config.yml', 'rt') as f:
             conf = yaml.safe_load(f.read())
             conf['handlers']['warning_handler']['filename'] = \
-                conf['handlers']['warning_handler']['filename'].format('plotter', log_suffix)
+                (conf['handlers']['warning_handler']['filename']
+                .format(log_directory, 'plotter', self.log_suffix))
             conf['handlers']['info_handler']['filename'] = \
-                conf['handlers']['info_handler']['filename'].format('plotter', log_suffix)
+                (conf['handlers']['info_handler']['filename']
+                .format(log_directory, 'plotter', self.log_suffix))
             logging.config.dictConfig(conf)
             
         self.logger = logging.getLogger('marmot_plot')

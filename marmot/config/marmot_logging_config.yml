@@ -17,7 +17,7 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: WARNING
     formatter: warning_format
-    filename: logs/WARNINGS_{}{}.log
+    filename: '{}/WARNINGS_{}{}.log'
     backupCount: 3
     encoding: utf8
     mode: a
@@ -26,7 +26,7 @@ handlers:
     class: logging.handlers.RotatingFileHandler
     level: INFO
     formatter: info_format
-    filename: logs/Log_{}{}.log
+    filename: '{}/Log_{}{}.log'
     backupCount: 3
     encoding: utf8
     mode: a
