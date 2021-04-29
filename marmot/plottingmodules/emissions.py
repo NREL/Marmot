@@ -117,7 +117,8 @@ class mplot(object):
                 leg1 = fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
                 fig1.add_artist(leg1)
-
+                if mconfig.parser("plot_title_as_region"):
+                    fig1.set_title(zone_input)
                 # replace x-axis with custom labels
                 if len(self.ticklabels) > 1:
                     self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)

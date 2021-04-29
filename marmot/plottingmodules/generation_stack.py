@@ -18,6 +18,7 @@ import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import logging
 
+mpl.rcParams['axes.titlesize'] = mconfig.parser("font_settings","title_size")
 #===============================================================================
 
 custom_legend_elements = Patch(facecolor='#DD0200',
@@ -162,6 +163,8 @@ class mplot(object):
             fig4.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Generation or Committed Capacity (GW)',  color='black', rotation='vertical', labelpad=60)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
 
             data_table = pd.DataFrame()
             outputs[zone_input] = {'fig':fig4, 'data_table':data_table}
@@ -233,6 +236,7 @@ class mplot(object):
             # Total_Demand.index = Total_Demand.index.shift(-2,freq = 'H')
             # Total_Demand = Total_Demand.loc[Stacked_Gen.index]
             # Total_Demand = Total_Demand.squeeze()
+
             ###DO NOT COMMIT
             #######################
 
@@ -322,14 +326,6 @@ class mplot(object):
                 Total_Demand = Total_Demand[self.start_date : self.end_date]
                 unserved_eng_data_table = unserved_eng_data_table[self.start_date : self.end_date]
 
-                #SHIFTING TIME ZONE, DON'T PUSH
-                # self.logger.info('Shifting EST -> PST')
-                # Stacked_Gen.index = Stacked_Gen.index.shift(-3,freq = 'H')
-                # Load.index = Load.index.shift(-3,freq = 'H')
-                # Total_Demand.index = Total_Demand.index.shift(-3,freq = 'H')
-                # Unserved_Energy.index = Unserved_Energy.index.shift(-3,freq = 'H')
-                # unserved_eng_data_table.index = unserved_eng_data_table.index.shift(-3,freq = 'H')
-
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
                 
@@ -385,6 +381,7 @@ class mplot(object):
                 data = setup_data(zone_input, scenario, Stacked_Gen)
                 data = data_prop(data)
                 
+
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
                     self.logger.warning('No generation during time period in %s',zone_input)
@@ -426,7 +423,19 @@ class mplot(object):
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
                 data_tables.append(single_scen_out * unitconversion['divisor'])
 
-                # only difference linewidth = 0,5
+                ##DO NOT COMMIT
+                #Pull P05 hourly flow
+                # interface_Flow_collection = {}
+                # mfunc.get_data(interface_Flow_collection,"interface_Flow", self.Marmot_Solutions_folder, self.Scenarios)
+                # int_flow = interface_Flow_collection[scenario]
+                # int_flow = int_flow.xs('P05 West of Cascades-South_WI',level = 'interface_name')
+                # int_flow = mfunc.shift_leapday(int_flow,self.Marmot_Solutions_folder)
+                # int_flow = int_flow.droplevel('interface_category')
+                # int_flow = int_flow[self.start_date : self.end_date]
+                # int_flow = int_flow /unitconversion['divisor']
+                # int_flow.columns = ['P05 flow']
+
+                # # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
                       colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
 
@@ -441,6 +450,8 @@ class mplot(object):
 
                 if (Pump_Load == 0).all() == False:
                     lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
+
+                #lp4 = axs[i].plot(int_flow,color = 'red', linestyle = ':')
 
                 # ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
                 # ax.set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
@@ -473,9 +484,12 @@ class mplot(object):
                 formatter.zero_formats[3] = '%H:%M\n %d-%b'
                 formatter.offset_formats[3] = '%b %Y'
                 formatter.show_offset = False
+
                 axs[i].xaxis.set_major_locator(locator)
                 axs[i].xaxis.set_major_formatter(formatter)
 
+                if i != len(self.Scenarios) - 1:
+                    axs[i].axes.get_xaxis().set_visible(False)
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].fill_between(Load.index, Load,Unserved_Energy,
                                         # facecolor='#EE1289' OLD MARMOT COLOR
@@ -486,7 +500,7 @@ class mplot(object):
                 l1 = Stacked_Gen.columns.tolist()
                 unique_tech_names.extend(l1)
 
-                i=i+1
+                i += 1
 
             # create labels list of unique tech names then order
             labels = np.unique(np.array(unique_tech_names)).tolist()
@@ -505,10 +519,14 @@ class mplot(object):
             if (Pump_Load == 0).all() == False:
                 handles.append(lp3[0])
                 handles.append(lp[0])
+                #handles.append(l4[0])
+                #labels += ['Demand','Demand + \n Storage Charging','P05 flow']
                 labels += ['Demand','Demand + \n Storage Charging']
 
             else:
                 handles.append(lp[0])
+                #handles.append(lp4[0])
+                #labels += ['Demand','P05 flow']
                 labels += ['Demand']
 
             if (Unserved_Energy == 0).all() == False:
@@ -533,6 +551,8 @@ class mplot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser('plot_title_as_region'):
+                plt.title(zone_input)
 
             #Ylabel should change if there are facet labels.
             labelpad = 60 if self.facet else 20
@@ -686,6 +706,8 @@ class mplot(object):
             formatter.show_offset = False
             ax.xaxis.set_major_locator(locator)
             ax.xaxis.set_major_formatter(formatter)
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs

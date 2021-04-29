@@ -131,14 +131,17 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
 
-            fig1 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1')
 
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
+			fig1, ax = plt.subplots(figsize=(self.x,self.y))
+			cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
+			                                 color = self.color_list,edgecolor='black', linewidth='0.1', ax=ax)
+			ax.spines['right'].set_visible(False)
+			ax.spines['top'].set_visible(False)
+            ax.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': cap_started_all_scenarios.T}
         return outputs
@@ -221,14 +224,16 @@ class mplot(object):
             
             cap_started_all_scenarios = pd.concat([cap_started_chunk])
 
-            fig2 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(9,6), rot=0,
-                                  color = self.color_list,edgecolor='black', linewidth='0.1')
-
-            fig2.spines['right'].set_visible(False)
-            fig2.spines['top'].set_visible(False)
-            fig2.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
-            fig2.tick_params(axis='y', which='major', length=5, width=1)
-            fig2.tick_params(axis='x', which='major', length=5, width=1)
+			fig2, ax = plt.subplots(figsize=(self.x,self.y))
+			cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
+			                                 color = self.color_list,edgecolor='black', linewidth='0.1', ax=ax)
+			ax.spines['right'].set_visible(False)
+			ax.spines['top'].set_visible(False)
+            ax.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': cap_started_all_scenarios.T}
         return outputs

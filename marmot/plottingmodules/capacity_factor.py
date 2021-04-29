@@ -29,7 +29,6 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
 
@@ -124,6 +123,8 @@ class mplot(object):
             fig2.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig2.tick_params(axis='y', which='major', length=5, width=1)
             fig2.tick_params(axis='x', which='major', length=5, width=1)
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': CF_all_scenarios.T}
         return outputs
@@ -208,7 +209,8 @@ class mplot(object):
             #Legend 1
             fig1.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': CF_all_scenarios}
 
         return outputs
@@ -297,6 +299,7 @@ class mplot(object):
             fig3.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig3.tick_params(axis='y', which='major', length=5, width=1)
             fig3.tick_params(axis='x', which='major', length=5, width=1)
-
+            if mconfig.parser("plot_title_as_region"):
+                fig3.set_title(zone_input)
             outputs[zone_input] = {'fig': fig3, 'data_table': time_at_min.T}
         return outputs

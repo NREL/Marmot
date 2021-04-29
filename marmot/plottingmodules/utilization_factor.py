@@ -110,7 +110,7 @@ class mplot(object):
 
                     del duration_curve
 
-                n=n+1
+                n+=1
 
                 #Calculate CF
                 CF = Total_Gen/Total_Ava
@@ -135,6 +135,8 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
 
+            if mconfig.parser("plot_title_as_region"):
+            	ax.set_title(zone_input)          
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
 
@@ -219,7 +221,8 @@ class mplot(object):
                 continue
             
             CF_all_scenarios=pd.concat(th_gen_chunk, axis=1, sort=False)
-            
+            if mconfig.parser("plot_title_as_region"):
+                ax2.set_title(zone_input)
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Generators',  color='black', rotation='vertical', labelpad=60)
@@ -312,6 +315,8 @@ class mplot(object):
                 self.logger.warning("No generation in %s",zone_input)
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
+            if mconfig.parser("plot_title_as_region"):
+                ax3.set_title(zone_input)
             
             CF_all_scenarios = pd.concat(cf_chunk, axis=1, sort=False)
             CF_all_scenarios = CF_all_scenarios.dropna(axis = 0)
@@ -393,7 +398,9 @@ class mplot(object):
                 self.logger.warning("No generation in %s",zone_input)
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-                
+            if mconfig.parser("plot_title_as_region"):
+                ax3.set_title(zone_input)
+
             GW_all_scenarios = pd.concat(total_gen_chunks, axis=1, sort=False)
             GW_all_scenarios = GW_all_scenarios.dropna(axis = 0)
             GW_all_scenarios.index = GW_all_scenarios.index.str.wrap(10, break_long_words = False)

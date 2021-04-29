@@ -171,7 +171,8 @@ class mplot(object):
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Thermal capacity reserve ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=60)
-
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
             #fig1.savefig('/home/mschwarz/PLEXOS results analysis/test/SPP_thermal_cap_reserves_test', dpi=600, bbox_inches='tight') #Test
 
             # If Data_Table_Out is empty, does not return data or figure

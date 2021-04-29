@@ -106,6 +106,9 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Capacity out ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
+
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
@@ -237,6 +240,8 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal', labelpad = 40)
             plt.ylabel('Capacity out (MW)',  color='black', rotation='vertical', labelpad = 60)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
 
            #fig1.savefig('/home/mschwarz/PLEXOS results analysis/test/PJM_outages_2024_2011_test', dpi=600, bbox_inches='tight') #Test
 

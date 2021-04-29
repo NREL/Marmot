@@ -100,10 +100,11 @@ class PlotTypes:
         mpl.rc('xtick', labelsize=self.font_defaults['xtick_size'])
         mpl.rc('ytick', labelsize=self.font_defaults['ytick_size'])
         mpl.rc('axes', labelsize=self.font_defaults['axes_label_size'])
+        #mpl.rc('titlesize',labelsize=self.font_defaults['title_size'])
         mpl.rc('legend', fontsize=self.font_defaults['legend_size'])
         mpl.rc('font', family=self.font_defaults['font_family'])
         mpl.rc('figure', max_open_warning = 0)
-        
+       
         # Import plot module from plottingmodules package
         plot = importlib.import_module('marmot.plottingmodules.' + self.figure_type)
         fig = plot.mplot(self.argument_dict)
@@ -426,7 +427,6 @@ class MarmotPlot():
         
         # Filter for chosen figures to plot
         plot_selection = self.Marmot_plot_select.loc[self.Marmot_plot_select["Plot Graph"] == True]
-        
         start_timer = time.time()
         # Main loop to process each figure and pass data to functions
         for index, row in plot_selection.iterrows(): 
@@ -452,7 +452,7 @@ class MarmotPlot():
                         "ylabels", "xlabels", "ticklabels","minticks","maxticks",
                         "color_list", "marker_style", "gen_names_dict", "pv_gen_cat",
                         "re_gen_cat", "vre_gen_cat", "thermal_gen_cat", "Region_Mapping", "figure_folder", "meta", "facet","shift_leapday","duration_curve",
-                        "minticks","maxticks"]
+                        "minticks","maxticks","figure_name"]
         
             argument_list = [row.iloc[2], row.iloc[3], row.iloc[4], row.iloc[5],row.iloc[6], row.iloc[7],
                              hdf_out_folder, Zones, self.AGG_BY, ordered_gen, PLEXOS_color_dict,
@@ -461,7 +461,7 @@ class MarmotPlot():
                              color_list, marker_style, gen_names_dict, pv_gen_cat,
                              re_gen_cat, vre_gen_cat, thermal_gen_cat,self.Region_Mapping,figure_folder, meta,facet,shift_leapday,duration_curve,
                              minticks,
-                             maxticks]
+                             maxticks, row["Figure Output Name"]]
             
             
             argument_dict = {key_list[i]: argument_list[i] for i in range(len(key_list))}
@@ -508,24 +508,11 @@ class MarmotPlot():
                         Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
         
                     #Save .csv's.
-                    if not facet:
-                        if Figure_Out[zone_input]['data_table'].empty:
-                            logger.info(f'{row["Figure Output Name"]} does not return a data table')
-                        else:
-                            Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
-        
-                    else: #Facetted plot, save multiple tables
-                        tables_folder = os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + "_data_tables")
-                        try:
-                             os.makedirs(tables_folder)
-                        except FileExistsError:
-                             # directory already exists
-                            pass
-                        for scenario in self.Scenarios:
-                            #CSV output file name cannot exceed 75 characters!!  Scenario names may need to be shortened
-                            s = zone_input.replace('.','') + "_" + scenario + ".csv"
-                            Figure_Out[zone_input]["data_table"][scenario].to_csv(os.path.join(tables_folder, s))
-        
+                    if Figure_Out[zone_input]['data_table'].empty:
+                        logger.info(f'{row["Figure Output Name"]} does not return a data table')
+                    else:
+                        Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+
             logger.info(f'Plotting Completed for {row["Figure Output Name"]}\n')
         
             mpl.pyplot.close('all')

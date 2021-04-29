@@ -152,6 +152,8 @@ class mplot(object):
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Reserve Provision ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=30)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
 
             if not self.facet:
                 data_tables = data_tables[self.Scenarios[0]]
@@ -251,6 +253,9 @@ class mplot(object):
             # Add legend
             fig1.legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
                      facecolor='inherit', frameon=True)
+
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
 
             outputs[region] = {'fig': fig1, 'data_table': data_table_out}
         return outputs
@@ -364,7 +369,8 @@ class mplot(object):
             handles, labels = fig2.get_legend_handles_labels()
             fig2.legend(handles,labels, loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(zone_input)
             outputs[region] = {'fig': fig2,'data_table': Data_Table_Out}
         return outputs
 
@@ -488,7 +494,8 @@ class mplot(object):
             #Data_Out = pd.concat(reserve_timeseries_chunk,axis=0)
             if not self.facet:
                 data_tables = data_tables[self.Scenarios[0]]
-
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
             outputs[region] =  {'fig': fig3, 'data_table': data_tables}
 
         return outputs

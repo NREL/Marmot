@@ -93,6 +93,9 @@ class mplot(object):
         plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
+
+        if mconfig.parser("plot_title_as_region"):
+            fig2.set_title(zone_input)
         fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
         outputs = mfunc.DataSavedInModule()
@@ -164,7 +167,8 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=20)
             plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
-
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table':Data_Out}
         return outputs
 
@@ -234,7 +238,8 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=20)
             plt.xlabel(self.timezone,  color='black', rotation='horizontal', labelpad=20)
-
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
             outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
         return outputs
 
@@ -306,6 +311,8 @@ class mplot(object):
         plt.xlabel(self.timezone,  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
+        if mconfig.parser("plot_title_as_region"):
+            fig4.set_title(zone_input)
         fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
         outputs = mfunc.DataSavedInModule()

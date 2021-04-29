@@ -110,7 +110,8 @@ class mplot(object):
                               facecolor='inherit', frameon=True)
 
             ax2.add_artist(leg1)
-
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(zone_input)
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Continent_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
         
         outputs = mfunc.DataSavedInModule()
@@ -251,7 +252,8 @@ class mplot(object):
 
 
             ax2.add_artist(leg1)
-
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(zone_input)
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
         
         outputs = mfunc.DataSavedInModule()

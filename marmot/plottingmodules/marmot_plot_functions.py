@@ -353,7 +353,7 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
 
     for df in df_list : # for each data frame
         fig = df.plot(kind="bar",
-                      linewidth=0,
+                      linewidth=0.5,
                       stacked=True,
                       ax=fig,
                       legend=False,
@@ -383,6 +383,8 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
         l2 = plt.legend(n, labels, loc=[1.01, 0.1]) 
     fig.add_artist(l1)
     
+    fig.legend(loc = [1.01,0.5])
+
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
     fig.tick_params(axis='y', which='major', length=5, width=1)
@@ -598,11 +600,11 @@ def shift_leapday(df,Marmot_Solutions_folder):
             level = 'timestamp',
             inplace = True)
 
-        #Special case where timezone shifting may also be necessary.
-        df.index.set_levels(
-            df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
-            level = 'timestamp',
-            inplace = True)
+    #Special case where timezone shifting may also be necessary.
+    # df.index.set_levels(
+    #     df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
+    #     level = 'timestamp',
+    #     inplace = True)
 
     return(df)
 

@@ -142,6 +142,8 @@ class mplot(object):
 
             # Manually add the first legend back
             ax.add_artist(leg1)
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -261,6 +263,8 @@ class mplot(object):
                 k=k+1
                 if k>=len(cost_totals):
                     break
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
@@ -397,7 +401,8 @@ class mplot(object):
                 k=k+1
                 if k>=len(cost_totals):
                     break
-
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
@@ -482,7 +487,8 @@ class mplot(object):
     #        fig1.add_artist(leg1)
 
 
-
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
@@ -583,6 +589,9 @@ class mplot(object):
             ax.legend(reversed(handles), reversed(labels), loc='upper center',bbox_to_anchor=(0.5,-0.15),
                          facecolor='inherit', frameon=True, ncol=2)
 
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
+
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
@@ -679,7 +688,8 @@ class mplot(object):
             # Manually add the first legend back
     #        fig1.add_artist(leg1)
 
-
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -691,12 +701,14 @@ class mplot(object):
         vom_cost_collection = {}
         start_shutdown_cost_collection = {}
         emissions_cost_collection = {}
+        gen_collection = {}
         check_input_data = []
         
         check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
         check_input_data.extend([mfunc.get_data(fuel_cost_collection,"generator_Fuel_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
         check_input_data.extend([mfunc.get_data(vom_cost_collection,"generator_VO&M_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
         check_input_data.extend([mfunc.get_data(start_shutdown_cost_collection,"generator_Start_&_Shutdown_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
+
         mfunc.get_data(emissions_cost_collection,"generator_Emissions_Cost", self.Marmot_Solutions_folder, self.Scenarios)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
@@ -708,6 +720,8 @@ class mplot(object):
             self.logger.info("Zone = "+ zone_input)
 
             Detailed_Gen_Cost_Out = pd.DataFrame()
+
+            OSW_injs = []
 
             for scenario in self.Scenarios:
                 self.logger.info("Scenario = " + scenario)
@@ -748,19 +762,31 @@ class mplot(object):
                 Detailed_Gen_Cost.columns = Detailed_Gen_Cost.columns.str.replace('_',' ')
                 Detailed_Gen_Cost = Detailed_Gen_Cost.sum(axis=0)
                 Detailed_Gen_Cost = Detailed_Gen_Cost.rename(scenario)
-
                 Detailed_Gen_Cost_Out = pd.concat([Detailed_Gen_Cost_Out, Detailed_Gen_Cost], axis=1, sort=False)
 
-            Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
+            Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T
+            #/1000000 #Convert cost to millions
             #Ensures region has generation, else skips
             try:
                 Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out-Detailed_Gen_Cost_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
+
             except KeyError:
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
+
             Detailed_Gen_Cost_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
+
+            #Normalize by pre-curtailment OSW
+            #OSW_injs = [10601535,19513218]
+            OSW_injs = [10601535,10601535, 19513218,19513218,19513218,19513218]
+            Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/OSW_injs
+            Detailed_Gen_Cost_Out = -1 * Detailed_Gen_Cost_Out.T
+
             net_cost = Detailed_Gen_Cost_Out.sum(axis = 1)
+
+            Detailed_Gen_Cost_Out['Value of avoided capacity'] = [19.2,19.2, 20,20,20,20]
+
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(10, break_long_words=False)
             # Deletes columns that are all 0
@@ -781,16 +807,18 @@ class mplot(object):
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y= 0 ,linewidth=0.5,linestyle='--',color='grey')
+            ax.axhline(y = 65.4, linewidth = 1, linestyle = ':',color = 'orange',label = 'Avg 2032 LCOE')
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
             locs,labels=plt.xticks()
-            ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
+            #ax.set_ylabel('Normalized Generation Cost Change \n relative to '+ self.Scenarios[0] + ' ($/MWh)',  color='black', rotation='vertical')
+            ax.set_ylabel('Operational + capacity value \nof OSW in 2036 ($/MWh)',color = 'black',rotation = 'vertical')
             self.xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
             plt.xticks(ticks=locs,labels=self.xlabels[1:])
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-    #        plt.ylim((0,600))
+            #plt.ylim((0,600))
 
             #Add net cost line.
             n=0
@@ -810,6 +838,9 @@ class mplot(object):
             leg_net = ax.legend(net_line,['Net Cost Change'],loc='center left',bbox_to_anchor=(1, -0.05),facecolor='inherit', frameon=True)
             ax.add_artist(leg_main)
             ax.add_artist(leg_net)
+
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs

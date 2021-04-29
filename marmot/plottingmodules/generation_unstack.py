@@ -301,7 +301,9 @@ class mplot(object):
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Genertaion ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=60)
-            
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
+
              #Remove extra axis
             if excess_axs != 0:
                 while excess_axs > 0:

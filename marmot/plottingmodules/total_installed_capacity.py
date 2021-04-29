@@ -76,6 +76,7 @@ class mplot(object):
                 Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0:scenario}, inplace=True)
+
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
 
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
@@ -96,22 +97,23 @@ class mplot(object):
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
-                                 color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
+			fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+                                 color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
-            if self.set_title:
-                fig1.set_title(zone_input)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel('Total Installed Capacity ({})'.format(unitconversion['units']),  color='black', rotation='vertical')
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
             handles, labels = fig1.get_legend_handles_labels()
-            fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
 
@@ -189,24 +191,24 @@ class mplot(object):
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_',' ')
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
 
-
-            fig1 = Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+			fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,ax = ax,
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns], edgecolor='black', linewidth='0.1')
 
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Capacity Change ({}) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0],  color='black', rotation='vertical')
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel('Capacity Change ({}) \n relative to '.format(unitconversion['units']) + self.Multi_Scenario[0],  color='black', rotation='vertical')
 
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
-            handles, labels = fig1.get_legend_handles_labels()
-            fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+            handles, labels = ax.get_legend_handles_labels()
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
-
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
@@ -240,6 +242,7 @@ class mplot(object):
             
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor'] 
+
 
             Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=axs[0],
                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
@@ -350,6 +353,9 @@ class mplot(object):
             # add labels to panels
             axs[0].set_title("A.", fontdict={"weight":"bold"}, loc='left')
             axs[1].set_title("B.", fontdict={"weight":"bold"}, loc='left')
+
+            if mconfig.parser("plot_title_as_region"):
+                fig.set_title(zone_input)
 
             # output figure
             outputs[zone_input] = {'fig': fig, 'data_table': data_tables}

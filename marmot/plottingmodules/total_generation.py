@@ -101,6 +101,11 @@ class mplot(object):
                 
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
+                if not pd.isnull(self.start_date):
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    Total_Gen_Stack = Total_Gen_Stack[self.start_date:self.end_date]
+
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
@@ -108,6 +113,12 @@ class mplot(object):
                 Total_Load = load_collection.get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
+
+                if not pd.isnull(self.start_date):
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    Total_Load = Total_Load[self.start_date:self.end_date]
+
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
@@ -119,6 +130,12 @@ class mplot(object):
                     unserved_energy_collection[scenario].iloc[:,0] = 0
                 Unserved_Energy = unserved_energy_collection.get(scenario)
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
+
+                if not pd.isnull(self.start_date):
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    Unserved_Energy = Unserved_Energy[self.start_date:self.end_date]
+
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
                 Unserved_Energy = Unserved_Energy/interval_count
@@ -139,6 +156,10 @@ class mplot(object):
                 Pump_Load = pump_load_collection.get(scenario)
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
+                if not pd.isnull(self.start_date):
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    Pump_Load = Pump_Load[self.start_date:self.end_date]
                 Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
                 Pump_Load = Pump_Load/interval_count
                 if (Pump_Load == 0).all() == False:
@@ -154,15 +175,8 @@ class mplot(object):
             unserved_eng_data_table_out = unserved_eng_data_table_out.rename(columns={0: 'Unserved Energy'})
 
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
-            
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
-
-            # Data table of values to return to main program
-            Data_Table_Out = pd.concat([Total_Load_Out, 
-                                        Total_Demand_Out, 
-                                        unserved_eng_data_table_out, 
-                                        Total_Generation_Stack_Out],  axis=1, sort=False)
 
             if Total_Generation_Stack_Out.empty:
                 out = mfunc.MissingZoneData()
@@ -173,27 +187,36 @@ class mplot(object):
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum()))
             
             Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor'] 
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
             Total_Load_Out = Total_Load_Out.T/unitconversion['divisor'] 
             Pump_Load_Out = Pump_Load_Out.T/unitconversion['divisor']
             Total_Demand_Out = Total_Demand_Out.T/unitconversion['divisor'] 
             Unserved_Energy_Out = Unserved_Energy_Out.T/unitconversion['divisor']
             
-            
-            fig1 = Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
+            # Data table of values to return to main program
+            Data_Table_Out = pd.concat([Total_Load_Out.T, 
+                                        Total_Demand_Out.T, 
+                                        Unserved_Energy_Out.T, 
+                                        Total_Generation_Stack_Out],  axis=1, sort=False)
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
+
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
+
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax = ax)
 
 
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
 
-            fig1.set_ylabel('Total Genertaion ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
-
+            ax.set_ylabel('Total Genertaion ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
             #adds comma to y axis data
-            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
             n=0
             for scenario in self.Scenarios:
@@ -213,7 +236,7 @@ class mplot(object):
                                 alpha=0.5)
                 n=n+1
 
-            handles, labels = fig1.get_legend_handles_labels()
+            handles, labels = ax.get_legend_handles_labels()
 
             #Combine all legends into one.
             #Legend 2
@@ -232,8 +255,7 @@ class mplot(object):
                 handles.append(custom_legend_elements)
                 labels += ['Unserved Energy']
 
-            fig1.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
-
+            ax.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
@@ -288,6 +310,10 @@ class mplot(object):
                     Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
+                if not pd.isnull(self.start_date):
+                    self.logger.info("Plotting specific date range: \
+                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                    Total_Gen_Stack = Total_Gen_Stack[self.start_date:self.end_date]
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
@@ -314,7 +340,7 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
             
-            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum()))
+            unitconversion = mfunc.capacity_energy_unitconversion(max(abs(Total_Generation_Stack_Out.sum())))
             Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
             
             net_diff = Total_Generation_Stack_Out
@@ -364,7 +390,8 @@ class mplot(object):
             
             #Main legend
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
-
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 

@@ -117,6 +117,8 @@ class mplot(object):
                 formatter.show_offset = False
                 ax.xaxis.set_major_locator(locator)
                 ax.xaxis.set_major_formatter(formatter)
+				if mconfig.parser("plot_title_as_region"):
+					ax.set_title(zone_input)
 
                 outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -195,6 +197,7 @@ class mplot(object):
                         '{:,.0f}'.format(height),
                         horizontalalignment='center',
                         verticalalignment='center', fontsize=13)
-
+				if mconfig.parser("plot_title_as_region"):
+					ax.set_title(zone_input)                  
                 outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
