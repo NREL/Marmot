@@ -2,16 +2,18 @@
 """
 Created on Mon Dec  9 13:20:56 2019
 
-This code creates total generation stacked bar plots and is called from Marmot_plot_main.py
+This module creates bar plot of the total volume of generator starts in MW,GW,etc.
 
 
 @author: dlevie
 """
 
-import os
 import pandas as pd
 import logging
+import matplotlib as mpl
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
+
 
 #===============================================================================
 class mplot(object):
@@ -23,35 +25,42 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        
+        self.mplot_data_dict = {}
     
-    def capacity_started(self):
+    def capacity_started(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+       
         outputs = {}
-        gen_collection = {}
-        cap_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " =  " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
             cap_started_all_scenarios = pd.DataFrame()
 
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                self.logger.info(f"Scenario = {str(scenario)}")
 
-                Gen = gen_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No installed capacity in : "+zone_input)
+                    self.logger.warning(f"No installed capacity in : {zone_input}")
                     break
                 
                 Gen = Gen.reset_index()
@@ -61,7 +70,7 @@ class mplot(object):
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.
 
-                Cap = cap_collection.get(scenario)
+                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.drop(columns = ['timestamp','tech'])
@@ -69,11 +78,11 @@ class mplot(object):
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
                 
-                if self.prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
+                if prop == 'Date Range':
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(start_date_range)} to {str(end_date_range)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
-                    Gen = Gen.sort_index()[self.start_date : self.end_date]
+                    Gen = Gen.sort_index()[start_date_range : end_date_range]
 
                 tech_names = Gen['tech'].unique()
                 Cap_started = pd.DataFrame(columns = tech_names,index = [scenario])
@@ -131,46 +140,54 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
 
+            unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            
+            cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
+            Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
+            
+            cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
+            cap_started_all_scenarios.columns = cap_started_all_scenarios.columns.str.wrap(10, break_long_words=False)
+            
+            fig1 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
+                                 color = self.color_list,edgecolor='black', linewidth='0.1')
 
-			fig1, ax = plt.subplots(figsize=(self.x,self.y))
-			cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
-			                                 color = self.color_list,edgecolor='black', linewidth='0.1', ax=ax)
-			ax.spines['right'].set_visible(False)
-			ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+            fig1.spines['right'].set_visible(False)
+            fig1.spines['top'].set_visible(False)
+            fig1.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
+            fig1.tick_params(axis='y', which='major', length=5, width=1)
+            fig1.tick_params(axis='x', which='major', length=5, width=1)
+            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            fig1.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': cap_started_all_scenarios.T}
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-##############################################################################
 
-
-    def count_ramps(self):
+    def count_ramps(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+        
         outputs = {}
-        gen_collection = {}
-        cap_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info("Zone =  " + zone_input)
+            self.logger.info(f"Zone =  {zone_input}")
             cap_started_chunk = []
 
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
-                Gen = gen_collection.get(scenario)
+                self.logger.info(f"Scenario = {str(scenario)}")
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
 
                 Gen = Gen.reset_index()
@@ -180,7 +197,7 @@ class mplot(object):
                 Gen = Gen[['timestamp','gen_name','tech','Output (MWh)']]
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.tops.
 
-                Cap = cap_collection.get(scenario)
+                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
@@ -192,10 +209,10 @@ class mplot(object):
                 # Min = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
                 # Min = Min.xs(zone_input, level = AGG_BY)
 
-                if self.prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Gen = Gen[self.start_date : self.end_date]
+                if prop == 'Date Range':
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    Gen = Gen[start_date_range : end_date_range]
 
                 tech_names = Gen['tech'].unique()
                 ramp_counts = pd.DataFrame(columns = tech_names,index = [scenario])
@@ -222,18 +239,32 @@ class mplot(object):
 
                 cap_started_chunk.append(ramp_counts)
             
-            cap_started_all_scenarios = pd.concat([cap_started_chunk])
+            cap_started_all_scenarios = pd.concat(cap_started_chunk)
+            
+            if cap_started_all_scenarios.empty == True:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
+            cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
 
-			fig2, ax = plt.subplots(figsize=(self.x,self.y))
-			cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
-			                                 color = self.color_list,edgecolor='black', linewidth='0.1', ax=ax)
-			ax.spines['right'].set_visible(False)
-			ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Capacity Started (MW-starts)',  color='black', rotation='vertical')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+            unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            
+            cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
+            Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
+            
+            #TODO: use mfunc functions
+            fig2 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
+                                  color = self.color_list,edgecolor='black', linewidth='0.1')
 
-            outputs[zone_input] = {'fig': fig2, 'data_table': cap_started_all_scenarios.T}
+            fig2.spines['right'].set_visible(False)
+            fig2.spines['top'].set_visible(False)
+            fig2.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
+            fig2.tick_params(axis='y', which='major', length=5, width=1)
+            fig2.tick_params(axis='x', which='major', length=5, width=1)
+            fig2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            fig2.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
+
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs

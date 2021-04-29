@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 
-price analysis plots, price duration cureves = timeseries plots
+price analysis plots, price duration curves = timeseries plots
 
 @author: adyreson and Daniel Levie
 """
@@ -9,8 +9,6 @@ price analysis plots, price duration cureves = timeseries plots
 import os
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-import math
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 
@@ -23,30 +21,38 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
-  
 
-    def pdc_all_regions(self):
+        self.mplot_data_dict = {}
 
+    def pdc_all_regions(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         """
         This method creates a price duration curve for all regions/zones and plots them on
         a single facet plot.
         The code automatically creates a facet plot based on the number of regions/zones in the input.
         All scenarios are plotted on a single facet for each region/zone
         """
+            
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
+        else:
+            agg = 'region'
+            
         outputs = {}
-        price_collection = {}
         
-        check_input_data = self._getdata(price_collection)
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, f"{agg}_Price", self.Scenarios)]
         
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
 
         #Location to save to
         save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
 
-        n=0
         region_number = len(self.Zones)
         # determine x,y length for plot
         xdimension, ydimension =  mfunc.set_x_y_dimension(region_number)
@@ -56,11 +62,11 @@ class mplot(object):
         plt.subplots_adjust(wspace=0.1, hspace=0.2)
         
         data_table = []
-        for zone_input in self.Zones:
+        for n, zone_input in enumerate(self.Zones):
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(price_collection,scenario,zone_input)
+                price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price.sort_values(by=scenario,ascending=False,inplace=True)
                 price.reset_index(drop=True,inplace=True)
                 all_prices.append(price)
@@ -76,8 +82,8 @@ class mplot(object):
 
             for column in duration_curve:
                 mfunc.create_line_plot(axs,duration_curve,column,color_dict,n=n,label=column)
-                if (self.prop!=self.prop)==False:
-                    axs[n].set_ylim(bottom=0,top=int(self.prop))
+                if (prop!=prop)==False:
+                    axs[n].set_ylim(bottom=0,top=int(prop))
                 axs[n].set_xlim(0,len(duration_curve))
                 axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
 
@@ -85,7 +91,6 @@ class mplot(object):
                 #Legend
                 axs[region_number-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-            n+=1
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -93,15 +98,18 @@ class mplot(object):
         plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
-
         if mconfig.parser("plot_title_as_region"):
             fig2.set_title(zone_input)
+
+        Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
+
         fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
         outputs = mfunc.DataSavedInModule()
         return outputs
     
-    def region_pdc(self):
+    def region_pdc(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
 
         """
         This method creates a price duration curve for each region.
@@ -110,21 +118,33 @@ class mplot(object):
         plotted on a single plot.
         """
         outputs = {}
-        price_collection = {}
         
-        check_input_data = self._getdata(price_collection)
+        facet=False
+        if 'Facet' in figure_name:
+            facet = True
+            
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
+        else:
+            agg = 'region'
+            
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, f"{agg}_Price", self.Scenarios)]
         
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
 
-                price = self._process_data(price_collection,scenario,zone_input)
+                price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price.sort_values(by=scenario,ascending=False,inplace=True)
                 price.reset_index(drop=True,inplace=True)
                 all_prices.append(price)
@@ -132,7 +152,7 @@ class mplot(object):
             duration_curve = pd.concat(all_prices, axis=1)
             duration_curve.columns = duration_curve.columns.str.replace('_',' ')
 
-            Data_Out = duration_curve.copy()
+            Data_Out = duration_curve.add_suffix(" ($/MWh)")
 
             xdimension=len(self.xlabels)
             if xdimension == 0:
@@ -142,7 +162,7 @@ class mplot(object):
                 ydimension = 1
 
             # If the plot is not a facet plot, grid size should be 1x1
-            if not self.facet:
+            if not facet:
                 xdimension = 1
                 ydimension = 1
 
@@ -155,17 +175,17 @@ class mplot(object):
             n=0
             for column in duration_curve:
                 mfunc.create_line_plot(axs,duration_curve,column,color_dict,n=n,label=column)
-                if (self.prop!=self.prop)==False:
-                    axs[n].set_ylim(bottom=0,top=int(self.prop))
+                if (prop!=prop)==False:
+                    axs[n].set_ylim(bottom=0,top=int(prop))
                 axs[n].set_xlim(0,len(duration_curve))
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-                if self.facet:
+                if facet:
                     n+=1
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=20)
+            plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
             plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
@@ -173,7 +193,8 @@ class mplot(object):
         return outputs
 
 
-    def region_timeseries_price(self):
+    def region_timeseries_price(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
 
         """
         This method creates price timeseries plot for each region.
@@ -182,27 +203,39 @@ class mplot(object):
         plotted on a single plot.
         """
         outputs = {}
-        price_collection = {}
         
-        check_input_data = self._getdata(price_collection)
+        facet=False
+        if 'Facet' in figure_name:
+            facet = True
+            
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
+        else:
+            agg = 'region'
+            
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, f"{agg}_Price", self.Scenarios)]
         
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(price_collection,scenario,zone_input)
+                price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 all_prices.append(price)
 
             timeseries = pd.concat(all_prices, axis=1)
             timeseries.columns = timeseries.columns.str.replace('_',' ')
 
-            Data_Out = timeseries.copy()
+            Data_Out = timeseries.add_suffix(" ($/MWh)")
 
             xdimension=len(self.xlabels)
             if xdimension == 0:
@@ -212,7 +245,7 @@ class mplot(object):
                 ydimension = 1
 
             # If the plot is not a facet plot, grid size should be 1x1
-            if not self.facet:
+            if not facet:
                 xdimension = 1
                 ydimension = 1
 
@@ -225,25 +258,27 @@ class mplot(object):
             n=0 #Counter for scenario subplots
             for column in timeseries:
                 mfunc.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
-                if (self.prop!=self.prop)==False:
-                    axs[n].set_ylim(bottom=0,top=int(self.prop))
+                if (prop!=prop)==False:
+                    axs[n].set_ylim(bottom=0,top=int(prop))
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
                 
                 mfunc.set_plot_timeseries_format(axs,n)
-                if self.facet:
+                if facet:
                     n+=1
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=20)
-            plt.xlabel(self.timezone,  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
+            plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
+            plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
+
             outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
         return outputs
 
-    def timeseries_price_all_regions(self):
+    def timeseries_price_all_regions(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
 
         """
         This method creates a price timeseries plot for all regions/zones and plots them on
@@ -252,19 +287,26 @@ class mplot(object):
         All scenarios are plotted on a single facet for each region/zone
         """
         outputs = {}
-        price_collection = {}
         
-        check_input_data = self._getdata(price_collection)
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
+        else:
+            agg = 'region'
+            
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, f"{agg}_Price", self.Scenarios)]
         
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
 
         #Location to save to
         save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
 
         outputs = {}
-        n=0
 
         region_number = len(self.Zones)
         xdimension, ydimension =  mfunc.set_x_y_dimension(region_number)
@@ -274,12 +316,12 @@ class mplot(object):
         plt.subplots_adjust(wspace=0.1, hspace=0.2)
 
         data_table = []
-        for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+        for n, zone_input in enumerate(self.Zones):
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(price_collection,scenario,zone_input)
+                price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 all_prices.append(price)
 
@@ -295,24 +337,25 @@ class mplot(object):
             for column in timeseries:
                 mfunc.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
                 axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
-                if (self.prop!=self.prop)==False:
-                    axs[n].set_ylim(bottom=0,top=int(self.prop))
+                if (prop!=prop)==False:
+                    axs[n].set_ylim(bottom=0,top=int(prop))
                 mfunc.set_plot_timeseries_format(axs,n)
 
                 handles, labels = axs[region_number-1].get_legend_handles_labels()
                 #Legend
                 axs[region_number-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-            n+=1
 
         fig4.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=30)
-        plt.xlabel(self.timezone,  color='black', rotation='horizontal', labelpad=20)
+        plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=30)
+        plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
         if mconfig.parser("plot_title_as_region"):
             fig4.set_title(zone_input)
+        Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
+
         fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
         outputs = mfunc.DataSavedInModule()

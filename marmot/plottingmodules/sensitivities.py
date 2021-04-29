@@ -25,6 +25,8 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.mplot_data_dict = {}
+
 
     def _process_ts(self,df,zone_input):
         oz = df.xs(zone_input, level = self.AGG_BY)
@@ -32,7 +34,9 @@ class mplot(object):
         oz = oz.groupby('timestamp').sum()
         return(oz)
 
-    def sensitivities_gas(self):
+    def sensitivities_gas(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
 
         """
         This method highlights the difference in generation between two scenarios of a single resource. 
@@ -45,11 +49,6 @@ class mplot(object):
         """
 
         outputs = {}
-
-        check_input_data = [] 
-        gen_collection = {}
-        curt_collection = {}
-        int_collection = {}
         
         if self.Scenario_Diff == ['']:
             self.logger.warning('Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!')
@@ -60,37 +59,41 @@ class mplot(object):
             outputs = mfunc.InputSheetError()
             return outputs 
         
-        check_input_data.extend([mfunc.get_data(gen_collection,'generator_Generation',self.Marmot_Solutions_folder,self.Scenario_Diff)])
-        check_input_data.extend([mfunc.get_data(curt_collection,'generator_Curtailment',self.Marmot_Solutions_folder,self.Scenario_Diff)])
-        check_input_data.extend([mfunc.get_data(int_collection,'region_Net_Interchange',self.Marmot_Solutions_folder,self.Scenario_Diff)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenario_Diff),
+                      (True,"generator_Curtailment",self.Scenario_Diff),
+                      (True,"region_Net_Interchange",self.Scenario_Diff)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-
+            return mfunc.MissingInputData()
+        
         try:
-            bc = mfunc.shift_leap_day(gen_collection.get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder,self.shift_leap_day)
+            bc = mfunc.shift_leapday(self.mplot_data_dict["generator_Generation"].get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder)
         except IndexError:
             self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
             outputs = mfunc.InputSheetError()
             return outputs 
         
-        bc_tech = bc.xs(self.prop,level = 'tech')
+        bc_tech = bc.xs(prop,level = 'tech')
         bc_CT = bc.xs('Gas-CT',level = 'tech')
         bc_CC = bc.xs('Gas-CC',level = 'tech')
         try:
-            scen = mfunc.shift_leap_day(gen_collection.get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder,self.shift_leap_day)
+            scen = mfunc.shift_leapday(self.mplot_data_dict["generator_Generation"].get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder)
         except IndexError:
             self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
             outputs = mfunc.InputSheetError()
             return outputs 
         
-        scen_tech = scen.xs(self.prop,level = 'tech')
+        scen_tech = scen.xs(prop,level = 'tech')
         scen_CT = scen.xs('Gas-CT',level = 'tech')
         scen_CC = scen.xs('Gas-CC',level = 'tech')
 
-        curt_bc = mfunc.shift_leap_day(curt_collection.get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder,self.shift_leap_day)
-        curt_scen = mfunc.shift_leap_day(curt_collection.get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder,self.shift_leap_day)
+        curt_bc = mfunc.shift_leapday(self.mplot_data_dict["generator_Curtailment"].get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder)
+        curt_scen = mfunc.shift_leapday(self.mplot_data_dict["generator_Curtailment"].get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder)
         curt_diff_all = curt_scen - curt_bc
 
         regions = list(bc.index.get_level_values(self.AGG_BY).unique())
@@ -106,8 +109,8 @@ class mplot(object):
 
         #Add net interchange difference to icing plot.
         bc_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, "Processed_HDF5_folder", self.Scenario_Diff[0] + "_formatted.h5"),"region_Net_Interchange")
-        bc_int = mfunc.shift_leap_day(int_collection.get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder,self.shift_leap_day)
-        scen_int = mfunc.shift_leap_day(int_collection.get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder,self.shift_leap_day)
+        bc_int = mfunc.shift_leapday(self.mplot_data_dict["region_Net_Interchange"].get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder)
+        scen_int = mfunc.shift_leapday(self.mplot_data_dict["region_Net_Interchange"].get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder)
 
         int_diff_all = scen_int - bc_int
 
@@ -125,7 +128,7 @@ class mplot(object):
                 icing_diff = oz_scen - oz_bc
                 icing_diff_perc = 100 * icing_diff / oz_bc
 
-                oz_bc.columns = [self.prop + ' ' + str(self.Scenario_Diff[0])] 
+                oz_bc.columns = [prop + ' ' + str(self.Scenario_Diff[0])] 
                 oz_scen.columns = [str(self.Scenario_Diff[1])]
 
                 Data_Out_List = []
@@ -171,14 +174,14 @@ class mplot(object):
                 Data_Table_Out = pd.concat(Data_Out_List,axis = 1,copy = False)
 
                 custom_color_dict = {'Curtailment difference' : self.PLEXOS_color_dict['Curtailment'],
-                                     self.prop + ' ' + self.Scenario_Diff[0] : self.PLEXOS_color_dict[self.prop],
-                                     self.Scenario_Diff[1] : self.PLEXOS_color_dict[self.prop],
+                                     prop + ' ' + self.Scenario_Diff[0] : self.PLEXOS_color_dict[prop],
+                                     self.Scenario_Diff[1] : self.PLEXOS_color_dict[prop],
                                      'Gas-CC difference' : self.PLEXOS_color_dict['Gas-CC'],
                                      'Gas-CT difference' : self.PLEXOS_color_dict['Gas-CT'],
                                      'Net export difference': 'black'}
 
                 ls_dict = {'Curtailment difference' : 'solid',
-                                     self.prop + ' ' + self.Scenario_Diff[0] : 'solid',
+                                     prop + ' ' + self.Scenario_Diff[0] : 'solid',
                                      self.Scenario_Diff[1] :':',
                                      'Gas-CC difference' : 'solid',
                                      'Gas-CT difference' : 'solid',
@@ -189,19 +192,19 @@ class mplot(object):
                     
                 #Make two hatches: blue for when scenario > basecase, and red for when scenario < basecase.
                 if self.Scenario_Diff[1]!= 'Icing' and self.Scenario_Diff[1]!= 'DryHydro':
-                    axs[0].fill_between(diffs.index,diffs[self.prop + ' ' + str(self.Scenario_Diff[0])],diffs[str(self.Scenario_Diff[1])],
-                        where = diffs[str(self.Scenario_Diff[1])] > diffs[self.prop + ' ' + str(self.Scenario_Diff[0])],
-                        label = 'Increased ' + self.prop.lower() + ' generation', facecolor = 'blue', hatch = '///',alpha = 0.5)
-                axs[0].fill_between(diffs.index,diffs[self.prop + ' ' + str(self.Scenario_Diff[0])],diffs[str(self.Scenario_Diff[1])],
-                    where = diffs[str(self.Scenario_Diff[1])] < diffs[self.prop + ' ' + str(self.Scenario_Diff[0])],
-                    label = 'Decreased ' + self.prop.lower() + ' generation', facecolor = 'red', hatch = '///',alpha = 0.5)
+                    axs[0].fill_between(diffs.index,diffs[prop + ' ' + str(self.Scenario_Diff[0])],diffs[str(self.Scenario_Diff[1])],
+                        where = diffs[str(self.Scenario_Diff[1])] > diffs[prop + ' ' + str(self.Scenario_Diff[0])],
+                        label = 'Increased ' + prop.lower() + ' generation', facecolor = 'blue', hatch = '///',alpha = 0.5)
+                axs[0].fill_between(diffs.index,diffs[prop + ' ' + str(self.Scenario_Diff[0])],diffs[str(self.Scenario_Diff[1])],
+                    where = diffs[str(self.Scenario_Diff[1])] < diffs[prop + ' ' + str(self.Scenario_Diff[0])],
+                    label = 'Decreased ' + prop.lower() + ' generation', facecolor = 'red', hatch = '///',alpha = 0.5)
                 axs[0].hlines(y = 0, xmin = axs[0].get_xlim()[0], xmax = axs[0].get_xlim()[1], linestyle = '--')
                 axs[0].spines['right'].set_visible(False)
                 axs[0].spines['top'].set_visible(False)
                 axs[0].tick_params(axis='y', which='major', length=5, width=1)
                 axs[0].tick_params(axis='x', which='major', length=5, width=1)
                 axs[0].set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-                axs[0].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
+                axs[0].set_xlabel('Date ' + '(' + timezone + ')',  color='black', rotation='horizontal')
                 axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs)

@@ -69,18 +69,19 @@ class MissingMetaData:
     """
     def __init__(self):
         return
+    
 
-def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
+def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
     """
     Used to get data from formatted h5 file
     Adds data to dictionary with scenario name as key
 
     Parameters
     ----------
-    data_collection : dictionary
+    mplot_data_dict : dictionary
         dictionary of data with scenarios as keys.
-    data : string
-        name of data to pull from h5 file.
+    properties : list
+        list of tuples containg required plexos property information
     Marmot_Solutions_folder : folder
         Main Mamrmot folder
     scenario_list : List
@@ -88,19 +89,30 @@ def get_data(data_collection,data,Marmot_Solutions_folder,scenario_list):
 
     Returns
     -------
-    return_value : int
-        1 or 0 for checking data
+    return_value : list
+        If 1 in list required data is missing 
     """
+    
+    check_input_data = []
+    
+    for prop in properties:
+        required, plx_prop_name, scenario_list = prop
+        if f"{plx_prop_name}" not in mplot_data_dict:
+            mplot_data_dict[f"{plx_prop_name}"] = {}
+        
+        for scenario in scenario_list:
+            if scenario not in mplot_data_dict[f"{plx_prop_name}"]:
+                try:
+                    mplot_data_dict[f"{plx_prop_name}"][scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder,"Processed_HDF5_folder", scenario + "_formatted.h5"),plx_prop_name)
+                except KeyError:
+                    break
+        
+        if mplot_data_dict[f"{plx_prop_name}"] == {}:
+            logger.warning(f"{plx_prop_name} is MISSING from the Marmot formatted h5 files")
+            if required == True:
+                check_input_data.append(1)
+    return check_input_data
 
-    for scenario in scenario_list:
-        try:
-            data_collection[scenario] = pd.read_hdf(os.path.join(Marmot_Solutions_folder,"Processed_HDF5_folder", scenario + "_formatted.h5"),data)
-            return_value = 0
-        except KeyError:
-            logger.warning("'%s' is MISSING from the Marmot formatted h5 files",data)
-            return_value = 1
-            return return_value
-    return return_value
 
 def df_process_gen_inputs(df,ordered_gen):
     """
@@ -150,7 +162,7 @@ def df_process_categorical_index(df, ordered_gen):
     df = df.sort_index()
     return df
 
-def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
+def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
     """
     Sets facet plot x,y dimensions baded on provided labeles
 
@@ -182,9 +194,10 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet,multi_scenario=None):
     if not facet:
         xdimension = 1
         ydimension = 1
-    # If no labels were provided use Marmot default dimension settings
-    if xlabels == [''] and ylabels == ['']:
-        logger.warning("Warning: Facet Labels not provided - Using Marmot default dimensions")
+        return xdimension, ydimension
+    # If no labels were provided or dimensions less than len scenarios use Marmot default dimension settings
+    if xlabels == [''] and ylabels == [''] or xdimension*ydimension<len(multi_scenario):
+        logger.info("Dimensions could not be determined from x & y labels - Using Marmot default dimensions")
         xdimension, ydimension = set_x_y_dimension(len(multi_scenario))
     return xdimension, ydimension
 
@@ -562,18 +575,29 @@ def add_facet_labels(fig, xlabels, ylabels):
     None.
 
     """
+    font_defaults = mconfig.parser("font_settings")
+
     all_axes = fig.get_axes()
     j=0
     k=0
     for ax in all_axes:
         if ax.is_last_row():
-            ax.set_xlabel(xlabel=(xlabels[j]),  color='black', fontsize=16)
+            try:
+                ax.set_xlabel(xlabel=(xlabels[j]),  color='black', fontsize=font_defaults['axes_label_size']-2)
+            except IndexError:
+                logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                continue
             j=j+1
         if ax.is_first_col():
-            ax.set_ylabel(ylabel=(ylabels[k]),  color='black', rotation='vertical', fontsize=16)
+            try:
+                ax.set_ylabel(ylabel=(ylabels[k]),  color='black', rotation='vertical', fontsize=font_defaults['axes_label_size']-2)
+            except IndexError:
+                logger.warning(f"Warning: ylabel missing for subplot y{k}")
+                continue
             k=k+1
 
-def shift_leapday(df,Marmot_Solutions_folder):
+
+def shift_leapday(df, Marmot_Solutions_folder):
     """
     Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
     Modeled year must be included in the scenario parent directory name.

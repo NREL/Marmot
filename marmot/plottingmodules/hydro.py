@@ -34,35 +34,39 @@ class mplot(object):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.mplot_data_dict = {}
 
- 
-    def hydro_continent_net_load(self):
+    def hydro_continent_net_load(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
+        
         outputs = {}
-        gen_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Scenarios[0]])])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, "generator_Generation", [self.Scenarios[0]])]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = gen_collection.get(self.Scenarios[0])
+            Stacked_Gen_read = self.mplot_data_dict["generator_Generation"].get(self.Scenarios[0])
 
             self.logger.info("Zone = "+ zone_input)
             self.logger.info("Winter is defined as date range: \
-            {} to {}".format(str(self.start_date),str(self.end_date)))
+            {} to {}".format(str(start_date_range),str(end_date_range)))
             Net_Load = mfunc.df_process_gen_inputs(Stacked_Gen_read, self.ordered_gen)
 
             # Calculates Net Load by removing variable gen
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-            self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Net_Load.columns]
-            Net_Load = Net_Load.drop(labels = self.vre_gen_cat, axis=1)
+            vre_gen_cat = [name for name in self.vre_gen_cat if name in Net_Load.columns]
+            Net_Load = Net_Load.drop(labels = vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1) # Continent net load
             
             try:
@@ -88,10 +92,10 @@ class mplot(object):
             #Scatter plot by season
             fig2, ax2 = plt.subplots(figsize=(9,6))
 
-            ax2.scatter(Net_Load[self.end_date:self.start_date],
-                        Hydro_Gen[self.end_date:self.start_date],color='black',s=5,label='Non-winter')
-            ax2.scatter(Net_Load[self.start_date:],Hydro_Gen[self.start_date:],color='blue',s=5,label='Winter',alpha=0.5)
-            ax2.scatter(Net_Load[:self.end_date],Hydro_Gen[:self.end_date],color='blue',s=5,alpha=0.5)
+            ax2.scatter(Net_Load[end_date_range:start_date_range],
+                        Hydro_Gen[end_date_range:start_date_range],color='black',s=5,label='Non-winter')
+            ax2.scatter(Net_Load[start_date_range:],Hydro_Gen[start_date_range:],color='blue',s=5,label='Winter',alpha=0.5)
+            ax2.scatter(Net_Load[:end_date_range],Hydro_Gen[:end_date_range],color='blue',s=5,alpha=0.5)
 
 
             ax2.set_ylabel('In Region Hydro Generation (MW)',  color='black', rotation='vertical')
@@ -117,17 +121,21 @@ class mplot(object):
         outputs = mfunc.DataSavedInModule()
         return outputs
 
-    def hydro_net_load(self):
+    def hydro_net_load(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
+        
         outputs = {}
-        gen_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, [self.Scenarios[0]])])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, "generator_Generation", [self.Scenarios[0]])]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info("Zone = "+ zone_input)
@@ -135,7 +143,7 @@ class mplot(object):
             #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = gen_collection.get(self.Scenarios[0])
+            Stacked_Gen_read = self.mplot_data_dict["generator_Generation"].get(self.Scenarios[0])
             
            # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
             try:
@@ -149,8 +157,8 @@ class mplot(object):
 
             # Calculates Net Load by removing variable gen
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
-            self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
-            Net_Load = Stacked_Gen.drop(labels = self.vre_gen_cat, axis=1)
+            vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
+            Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)
 
             # Removes columns that only contain 0
@@ -165,11 +173,11 @@ class mplot(object):
             del Stacked_Gen
 
             first_date=Net_Load.index[0]
-            for wk in range(1,53): #assumes weekly, could be something else if user changes self.end Marmot_plot_select
+            for wk in range(1,53): #assumes weekly, could be something else if user changes end Marmot_plot_select
 
                 period_start=first_date+dt.timedelta(days=(wk-1)*7)
-                period_end=period_start+dt.timedelta(days=self.end)
-                self.logger.info(str(period_start)+" and next "+str(self.end)+" days.")
+                period_end=period_start+dt.timedelta(days=end)
+                self.logger.info(str(period_start)+" and next "+str(end)+" days.")
                 Hydro_Period = Hydro_Gen[period_start:period_end]
                 Net_Load_Period = Net_Load[period_start:period_end]
                 #print(Net_Load_Period)
@@ -188,7 +196,7 @@ class mplot(object):
 
 
                 ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-                ax.set_xlabel('Date ' + '(' + str(self.timezone) + ')',  color='black', rotation='horizontal')
+                ax.set_xlabel('Date ' + '(' + str(timezone) + ')',  color='black', rotation='horizontal')
                 ax.spines['right'].set_visible(False)
                 ax.spines['top'].set_visible(False)
                 ax.tick_params(axis='y', which='major', length=5, width=1)

@@ -23,27 +23,27 @@ class mplot(object):
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
-    def capacity_out_stack(self):
+        self.mplot_data_dict = {}
+
+    def capacity_out_stack(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
         
         outputs = {}
-        installed_cap_collection = {}
-        gen_available_capacity_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(installed_cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, [self.Scenarios[0]])])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Installed_Capacity",self.Scenarios),
+                      (True,"generator_Available_Capacity",self.Scenarios)]
         
-        xdimension=len(self.xlabels)
-        if xdimension == 0:
-            xdimension = 1
-        ydimension=len(self.ylabels)
-        if ydimension == 0:
-            ydimension = 1
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
-        # If the plot is not a facet plot, grid size should be 1x1
-        if not self.facet:
-            xdimension = 1
-            ydimension = 1
+        if 1 in check_input_data:
+            return mfunc.MissingInputData()
+        
+        # sets up x, y dimensions of plot
+        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
 
         grid_size = xdimension*ydimension
 
@@ -52,24 +52,29 @@ class mplot(object):
         excess_axs = grid_size - plot_number
 
         for zone_input in self.Zones:
-            self.logger.info('Zone = ' + str(zone_input))
+            self.logger.info(f'Zone = {str(zone_input)}')
 
             fig2, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharex = True, sharey='row',squeeze=False)
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
             axs = axs.ravel()
 
-            i = -1
             chunks = []
-            
-            for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + scenario)
-                i += 1
+            i=-1
+            for scenario in (self.Scenarios):
+                self.logger.info(f"Scenario = {scenario}")
+                i+=1
                 
-                install_cap = installed_cap_collection.get(scenario).copy()
-                avail_cap = gen_available_capacity_collection.get(scenario).copy()
+
+                install_cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario).copy()
+                avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
                 if self.shift_leapday == True:
                     avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)
-                avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
+                if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():
+                    avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
+                else:
+                    self.logger.warning(f"No Generation in: {zone_input}")
+                    outputs[zone_input] = mfunc.MissingZoneData()
+                    continue
                 avail_cap.columns = ['avail']
                 install_cap.columns = ['cap']
                 avail_cap.reset_index(inplace = True)
@@ -85,6 +90,10 @@ class mplot(object):
                 #Subset only thermal gen categories
                 thermal_gens = [therm for therm in self.thermal_gen_cat if therm in cap_out.columns]
                 cap_out = cap_out[thermal_gens]
+                
+                if cap_out.empty is True:
+                    self.logger.warning(f"No Thermal Generation in: {zone_input}")
+                    continue
 
                 # unitconversion based off peak outage hour, only checked once 
                 if i == 0:
@@ -95,16 +104,21 @@ class mplot(object):
                 scenario_names = pd.Series([scenario] * len(cap_out),name = 'Scenario')
                 single_scen_out = cap_out.set_index([scenario_names],append = True)
                 chunks.append(single_scen_out)
-                        
+                
                 mfunc.create_stackplot(axs = axs, data = cap_out,color_dict = self.PLEXOS_color_dict, label = cap_out.columns, n = i)
                 mfunc.set_plot_timeseries_format(axs, n = i, minticks = self.minticks, maxticks = self.maxticks)
                 axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
-
-            Data_Table_Out = pd.concat(chunks,axis = 1)
+            
+            if not chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+                
+            Data_Table_Out = pd.concat(chunks,axis = 0)
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Capacity out ({})'.format(unitconversion['units']),  color='black', rotation='vertical', labelpad=30)
+            plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
@@ -113,7 +127,10 @@ class mplot(object):
         return outputs
 
 
-    def capacity_out_stack_PASA(self):
+    def capacity_out_stack_PASA(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
+        
         outputs = mfunc.UnderDevelopment()
         self.logger.warning('capacity_out_stack_PASA requires PASA files, and is under development. Skipping plot.')
         return outputs 
