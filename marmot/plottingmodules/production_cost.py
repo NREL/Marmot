@@ -26,51 +26,53 @@ class mplot(object):
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
-    def prod_cost(self):
+        self.mplot_data_dict = {}
+
+    def prod_cost(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         
         outputs = {}
-        total_gen_cost_collection = {}
-        pool_revenues_collection = {}
-        reserve_revenues_collection = {}
-        installed_capacity_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(pool_revenues_collection,"generator_Pool_Revenue", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(reserve_revenues_collection,"generator_Reserves_Revenue", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(installed_capacity_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Total_Generation_Cost",self.Scenarios),
+                      (True,"generator_Pool_Revenue",self.Scenarios),
+                      (True,"generator_Reserves_Revenue",self.Scenarios),
+                      (True,"generator_Installed_Capacity",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            Total_Systems_Cost_Out = pd.DataFrame()
-            self.logger.info(self.AGG_BY + " = "+ zone_input)
+            total_cost_chunk = []
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
             for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + scenario)
+                self.logger.info(f"Scenario = {scenario}")
                 Total_Systems_Cost = pd.DataFrame()
 
-                Total_Installed_Capacity = installed_capacity_collection.get(scenario)
+                Total_Installed_Capacity = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 #Check if zone has installed generation, if not skips
                 try:
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No installed capacity in : "+zone_input)
+                    self.logger.warning(f"No installed capacity in : {zone_input}")
                     continue
                 Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity = Total_Installed_Capacity.iloc[0]
 
-                Total_Gen_Cost = total_gen_cost_collection.get(scenario)
+                Total_Gen_Cost = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 Total_Gen_Cost = mfunc.df_process_gen_inputs(Total_Gen_Cost, self.ordered_gen)
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)*-1
                 Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/MW-year
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
 
-                Pool_Revenues = pool_revenues_collection.get(scenario)
+                Pool_Revenues = self.mplot_data_dict["generator_Pool_Revenue"].get(scenario)
                 Pool_Revenues = Pool_Revenues.xs(zone_input,level=self.AGG_BY)
                 Pool_Revenues = mfunc.df_process_gen_inputs(Pool_Revenues, self.ordered_gen)
                 Pool_Revenues = Pool_Revenues.sum(axis=0)
@@ -78,7 +80,7 @@ class mplot(object):
                 Pool_Revenues.rename("Energy_Revenues", inplace=True)
 
                 ### Might cvhnage to Net Reserve Revenue at later date
-                Reserve_Revenues = reserve_revenues_collection.get(scenario)
+                Reserve_Revenues = self.mplot_data_dict["generator_Reserves_Revenue"].get(scenario)
                 Reserve_Revenues = Reserve_Revenues.xs(zone_input,level=self.AGG_BY)
                 Reserve_Revenues = mfunc.df_process_gen_inputs(Reserve_Revenues, self.ordered_gen)
                 Reserve_Revenues = Reserve_Revenues.sum(axis=0)
@@ -90,8 +92,10 @@ class mplot(object):
                 Total_Systems_Cost.columns = Total_Systems_Cost.columns.str.replace('_',' ')
                 Total_Systems_Cost = Total_Systems_Cost.sum(axis=0)
                 Total_Systems_Cost = Total_Systems_Cost.rename(scenario)
+                
+                total_cost_chunk.append(Total_Systems_Cost)
 
-                Total_Systems_Cost_Out = pd.concat([Total_Systems_Cost_Out, Total_Systems_Cost], axis=1, sort=False)
+            Total_Systems_Cost_Out = pd.concat(total_cost_chunk, axis=1, sort=False)
 
             Total_Systems_Cost_Out = Total_Systems_Cost_Out.T
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
@@ -107,18 +111,17 @@ class mplot(object):
                 continue
 
             # Data table of values to return to main program
-            Data_Table_Out = Total_Systems_Cost_Out.add_suffix(f" ($/KW-yr)")
+            Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" ($/KW-yr)")
 
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
             net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', linestyle='None', marker='o')
             Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
 
-
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total System Net Rev, Rev, & Cost ($/KW-yr)',  color='black', rotation='vertical')
-        #    ax.set_xticklabels(rotation='vertical')
+            # ax.set_xticklabels(rotation='vertical')
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
@@ -142,49 +145,53 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-    def sys_cost(self):
-        outputs = {}
-        total_gen_cost_collection = {}
-        cost_unserved_energy_collection = {}
-        check_input_data = []
+
+    def sys_cost(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         
-        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        if self.AGG_BY == "zone":
-            mfunc.get_data(cost_unserved_energy_collection,"zone_Cost_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)
+        outputs = {}
+        
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
         else:
-            mfunc.get_data(cost_unserved_energy_collection,"region_Cost_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)
+            agg = 'region'
+            
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Total_Generation_Cost",self.Scenarios),
+                      (False,f"{agg}_Cost_Unserved_Energy",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            Total_Systems_Cost_Out = pd.DataFrame()
-            self.logger.info(self.AGG_BY + " = "+ zone_input)
+            total_cost_chunk = []
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
-                self.logger.info("Scenario = " + scenario)
+                self.logger.info(f"Scenario = {scenario}")
                 Total_Systems_Cost = pd.DataFrame()
 
-
-                Total_Gen_Cost = total_gen_cost_collection.get(scenario)
+                Total_Gen_Cost = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
 
                 try:
                     Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No Generators found for : "+zone_input)
+                    self.logger.warning(f"No Generators found for : {zone_input}")
                     continue
 
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
                 
-                try:
-                    cost_unserved_energy_collection[scenario]
-                except KeyError:
-                    cost_unserved_energy_collection[scenario] = total_gen_cost_collection[scenario].copy()
-                    cost_unserved_energy_collection[scenario].iloc[:,0] = 0
-                Cost_Unserved_Energy = cost_unserved_energy_collection.get(scenario)
+                if self.mplot_data_dict[f"{agg}_Cost_Unserved_Energy"] == {}:
+                    Cost_Unserved_Energy = self.mplot_data_dict["generator_Total_Generation_Cost"][scenario].copy()
+                    Cost_Unserved_Energy.iloc[:,0] = 0
+                else:
+                    Cost_Unserved_Energy = self.mplot_data_dict[f"{agg}_Cost_Unserved_Energy"][scenario]
                 Cost_Unserved_Energy = Cost_Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
@@ -193,9 +200,15 @@ class mplot(object):
 
                 Total_Systems_Cost.columns = Total_Systems_Cost.columns.str.replace('_',' ')
                 Total_Systems_Cost.rename({0:scenario}, axis='index', inplace=True)
-
-                Total_Systems_Cost_Out = pd.concat([Total_Systems_Cost_Out, Total_Systems_Cost], axis=0, sort=False)
-
+                
+                total_cost_chunk.append(Total_Systems_Cost)
+            
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not total_cost_chunk:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
+            Total_Systems_Cost_Out = pd.concat(total_cost_chunk, axis=0, sort=False)
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
 
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
@@ -203,12 +216,11 @@ class mplot(object):
 
              #Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Data table of values to return to main program
-            Data_Table_Out = Total_Systems_Cost_Out.add_suffix(f" (Million $)")
+            Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
 
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
@@ -256,35 +268,34 @@ class mplot(object):
         return outputs
 
 
-    def detailed_gen_cost(self):
-        outputs = {}
-        total_gen_cost_collection = {}
-        fuel_cost_collection = {}
-        vom_cost_collection = {}
-        start_shutdown_cost_collection = {}
-        emissions_cost_collection = {}
-        check_input_data = []
+    def detailed_gen_cost(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         
-        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(fuel_cost_collection,"generator_Fuel_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(vom_cost_collection,"generator_VO&M_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(start_shutdown_cost_collection,"generator_Start_&_Shutdown_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        mfunc.get_data(emissions_cost_collection,"generator_Emissions_Cost", self.Marmot_Solutions_folder, self.Scenarios)
+        outputs = {}
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Total_Generation_Cost",self.Scenarios),
+                      (True,"generator_Fuel_Cost",self.Scenarios),
+                      (True,"generator_VO&M_Cost",self.Scenarios),
+                      (True,"generator_Start_&_Shutdown_Cost",self.Scenarios),
+                      (False,"generator_Emissions_Cost",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
-
-            Detailed_Gen_Cost_Out = pd.DataFrame()
+            gen_cost_out_chunks = []
 
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                Fuel_Cost = fuel_cost_collection.get(scenario)
+                Fuel_Cost = self.mplot_data_dict["generator_Fuel_Cost"].get(scenario)
                 # Check if Fuel_cost contains zone_input, skips if not
                 try:
                     Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
@@ -295,25 +306,23 @@ class mplot(object):
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
 
-                VOM_Cost = vom_cost_collection.get(scenario)
+                VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
                 VOM_Cost[0].values[VOM_Cost[0].values < 0] = 0
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
                 
-
-                Start_Shutdown_Cost = start_shutdown_cost_collection.get(scenario)
+                Start_Shutdown_Cost = self.mplot_data_dict["generator_Start_&_Shutdown_Cost"].get(scenario)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.xs(zone_input,level=self.AGG_BY)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
-
-                try:
-                    emissions_cost_collection[scenario]
-                except KeyError:
+                
+                if self.mplot_data_dict["generator_Emissions_Cost"] == {}:
                     self.logger.warning(f"generator_Emissions_Cost not included in {scenario} results, Emissions_Cost will not be included in plot")
-                    emissions_cost_collection[scenario] = start_shutdown_cost_collection[scenario].copy()
-                    emissions_cost_collection[scenario].iloc[:,0] = 0
-                Emissions_Cost = emissions_cost_collection.get(scenario)
+                    Emissions_Cost = self.mplot_data_dict["generator_Start_&_Shutdown_Cost"][scenario].copy()
+                    Emissions_Cost.iloc[:,0] = 0
+                else:
+                    Emissions_Cost = self.mplot_data_dict["generator_Emissions_Cost"][scenario]
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)
@@ -323,24 +332,29 @@ class mplot(object):
                 Detailed_Gen_Cost.columns = Detailed_Gen_Cost.columns.str.replace('_',' ')
                 Detailed_Gen_Cost = Detailed_Gen_Cost.sum(axis=0)
                 Detailed_Gen_Cost = Detailed_Gen_Cost.rename(scenario)
-
-                Detailed_Gen_Cost_Out = pd.concat([Detailed_Gen_Cost_Out, Detailed_Gen_Cost], axis=1, sort=False)
-
+                
+                gen_cost_out_chunks.append(Detailed_Gen_Cost)
+            
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
+            Detailed_Gen_Cost_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False)
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
             
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(5, break_long_words=False)
             # Deletes columns that are all 0
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
-
+            
             # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
             if Detailed_Gen_Cost_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-
+            
             # Data table of values to return to main program
-            Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(f" (Million $)")
+            Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
 
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
@@ -357,7 +371,6 @@ class mplot(object):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
 
             cost_totals = Detailed_Gen_Cost_Out.sum(axis=1) #holds total of each bar
 
@@ -389,28 +402,32 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
-    def sys_cost_type(self):
+
+    def sys_cost_type(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+        
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
-        stacked_gen_cost_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(stacked_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Total_Generation_Cost",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            Total_Generation_Stack_Out = pd.DataFrame()
+            gen_cost_out_chunks = []
             self.logger.info(f"Zone = {zone_input}")
 
             for scenario in self.Scenarios:
-
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Gen_Stack = stacked_gen_cost_collection.get(scenario)
+                Total_Gen_Stack = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
                 # Check if Total_Gen_Stack contains zone_input, skips if not
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
@@ -421,20 +438,25 @@ class mplot(object):
 
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
-                Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
-
+                gen_cost_out_chunks.append(Total_Gen_Stack)
+            
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
+            Total_Generation_Stack_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False).fillna(0)
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
             if Total_Generation_Stack_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Data table of values to return to main program
-            Data_Table_Out = Total_Generation_Stack_Out.add_suffix(f" (Million $)")
+            Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
@@ -461,32 +483,38 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-    def sys_cost_diff(self):
-        outputs = {}
-        total_gen_cost_collection = {}
-        cost_unserved_energy_collection = {}
-        check_input_data = []
+
+    def sys_cost_diff(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         
-        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        if self.AGG_BY == "zone":
-            mfunc.get_data(cost_unserved_energy_collection,"zone_Cost_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
         else:
-            mfunc.get_data(cost_unserved_energy_collection,"region_Cost_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)
+            agg = 'region'
+            
+        outputs = {}
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, "generator_Total_Generation_Cost", self.Scenarios),
+                      (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            Total_Systems_Cost_Out = pd.DataFrame()
+            total_cost_chunk = []
             self.logger.info(f"Zone = {zone_input}")
 
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
                 Total_Systems_Cost = pd.DataFrame()
-
-                Total_Gen_Cost = total_gen_cost_collection.get(scenario)
+                
+                Total_Gen_Cost = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
 
                 try:
                     Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
@@ -497,12 +525,11 @@ class mplot(object):
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
                 
-                try:
-                    cost_unserved_energy_collection[scenario]
-                except KeyError:
-                    cost_unserved_energy_collection[scenario] = total_gen_cost_collection[scenario].copy()
-                    cost_unserved_energy_collection[scenario].iloc[:,0] = 0
-                Cost_Unserved_Energy = cost_unserved_energy_collection.get(scenario)
+                if self.mplot_data_dict[f"{agg}_Cost_Unserved_Energy"] == {}:
+                    Cost_Unserved_Energy = self.mplot_data_dict["generator_Total_Generation_Cost"][scenario].copy()
+                    Cost_Unserved_Energy.iloc[:,0] = 0
+                else:
+                    Cost_Unserved_Energy = self.mplot_data_dict[f"{agg}_Cost_Unserved_Energy"][scenario]
                 Cost_Unserved_Energy = Cost_Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
@@ -511,27 +538,31 @@ class mplot(object):
 
                 Total_Systems_Cost.columns = Total_Systems_Cost.columns.str.replace('_',' ')
                 Total_Systems_Cost.rename({0:scenario}, axis='index', inplace=True)
-
-                Total_Systems_Cost_Out = pd.concat([Total_Systems_Cost_Out, Total_Systems_Cost], axis=0, sort=False)
-
+                total_cost_chunk.append(Total_Systems_Cost)
+            
+            # Checks if total_cost_chunk contains data, if not skips zone and does not return a plot
+            if not total_cost_chunk:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
+            Total_Systems_Cost_Out = pd.concat(total_cost_chunk, axis=0, sort=False)
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
             #Ensures region has generation, else skips
             try:
                 Total_Systems_Cost_Out = Total_Systems_Cost_Out-Total_Systems_Cost_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             Total_Systems_Cost_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             # Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
+            
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
-            Data_Table_Out = Data_Table_Out.add_suffix(f" (Million $)")
+            Data_Table_Out = Data_Table_Out.add_suffix(" (Million $)")
 
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
@@ -549,7 +580,7 @@ class mplot(object):
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-    #        plt.ylim((0,600))
+            # plt.ylim((0,600))
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
@@ -557,39 +588,50 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
-    def sys_cost_type_diff(self):
+
+    def sys_cost_type_diff(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+        
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
-        stacked_gen_cost_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(stacked_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, "generator_Total_Generation_Cost" ,self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
-            Total_Generation_Stack_Out = pd.DataFrame()
+            gen_cost_out_chunks = []
             self.logger.info(f"Zone = {zone_input}")
 
             for scenario in self.Scenarios:
-
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Gen_Stack = stacked_gen_cost_collection.get(scenario)
+                Total_Gen_Stack = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
 
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     self.logger.warning(f"No Generators found for : {zone_input}")
                     continue
+                
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
-                Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
-
+                gen_cost_out_chunks.append(Total_Gen_Stack)
+            
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
+            Total_Generation_Stack_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False).fillna(0)
             Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
@@ -597,19 +639,17 @@ class mplot(object):
             try:
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             Total_Generation_Stack_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
             if Total_Generation_Stack_Out.empty == True:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Data table of values to return to main program
-            Data_Table_Out = Total_Generation_Stack_Out.add_suffix(f" (Million $)")
+            Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
@@ -618,7 +658,6 @@ class mplot(object):
 
             Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
-
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
@@ -634,7 +673,7 @@ class mplot(object):
             plt.xticks(ticks=locs,labels=self.xlabels[1:])
 
             ax.margins(x=0.01)
-    #        plt.ylim((0,600))
+            # plt.ylim((0,600))
 
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
@@ -643,35 +682,35 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-    def detailed_gen_cost_diff(self):
-        outputs = {}
-        total_gen_cost_collection = {}
-        fuel_cost_collection = {}
-        vom_cost_collection = {}
-        start_shutdown_cost_collection = {}
-        emissions_cost_collection = {}
-        check_input_data = []
+
+    def detailed_gen_cost_diff(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         
-        check_input_data.extend([mfunc.get_data(total_gen_cost_collection,"generator_Total_Generation_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(fuel_cost_collection,"generator_Fuel_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(vom_cost_collection,"generator_VO&M_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(start_shutdown_cost_collection,"generator_Start_&_Shutdown_Cost", self.Marmot_Solutions_folder, self.Scenarios)])
-        mfunc.get_data(emissions_cost_collection,"generator_Emissions_Cost", self.Marmot_Solutions_folder, self.Scenarios)
+        outputs = {}
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Total_Generation_Cost",self.Scenarios),
+                      (True,"generator_Fuel_Cost",self.Scenarios),
+                      (True,"generator_VO&M_Cost",self.Scenarios),
+                      (True,"generator_Start_&_Shutdown_Cost",self.Scenarios),
+                      (False,"generator_Emissions_Cost",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
-
-            Detailed_Gen_Cost_Out = pd.DataFrame()
+            gen_cost_out_chunks = []
 
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                Fuel_Cost = fuel_cost_collection.get(scenario)
+                Fuel_Cost = self.mplot_data_dict["generator_Fuel_Cost"].get(scenario)
                 try:
                     Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -680,24 +719,22 @@ class mplot(object):
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
 
-                VOM_Cost = vom_cost_collection.get(scenario)
+                VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
 
-                Start_Shutdown_Cost = start_shutdown_cost_collection.get(scenario)
+                Start_Shutdown_Cost = self.mplot_data_dict["generator_Start_&_Shutdown_Cost"].get(scenario)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.xs(zone_input,level=self.AGG_BY)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
                 
-                try:
-                    emissions_cost_collection[scenario]
-                except KeyError:
-                    self.logger.warning("generator_Emissions_Cost not included in %s results, Emissions_Cost will not be included in plot",scenario)
-                    emissions_cost_collection[scenario] = start_shutdown_cost_collection[scenario].copy()
-                    emissions_cost_collection[scenario].iloc[:,0] = 0
-                    
-                Emissions_Cost = emissions_cost_collection.get(scenario)
+                if self.mplot_data_dict["generator_Emissions_Cost"] == {}:
+                    self.logger.warning(f"generator_Emissions_Cost not included in {scenario} results, Emissions_Cost will not be included in plot")
+                    Emissions_Cost = self.mplot_data_dict["generator_Start_&_Shutdown_Cost"][scenario].copy()
+                    Emissions_Cost.iloc[:,0] = 0
+                else:
+                    Emissions_Cost = self.mplot_data_dict["generator_Emissions_Cost"][scenario]
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)
@@ -707,16 +744,20 @@ class mplot(object):
                 Detailed_Gen_Cost.columns = Detailed_Gen_Cost.columns.str.replace('_',' ')
                 Detailed_Gen_Cost = Detailed_Gen_Cost.sum(axis=0)
                 Detailed_Gen_Cost = Detailed_Gen_Cost.rename(scenario)
-
-                Detailed_Gen_Cost_Out = pd.concat([Detailed_Gen_Cost_Out, Detailed_Gen_Cost], axis=1, sort=False)
-
+                gen_cost_out_chunks.append(Detailed_Gen_Cost)
+            
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            if not gen_cost_out_chunks:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
+            Detailed_Gen_Cost_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False)
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
             #Ensures region has generation, else skips
             try:
                 Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out-Detailed_Gen_Cost_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             Detailed_Gen_Cost_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
             net_cost = Detailed_Gen_Cost_Out.sum(axis = 1)
@@ -727,12 +768,11 @@ class mplot(object):
 
             # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
             if Detailed_Gen_Cost_Out.empty == True:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
             # Data table of values to return to main program
-            Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(f" (Million $)")
+            Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
 
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
@@ -749,7 +789,7 @@ class mplot(object):
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-    #        plt.ylim((0,600))
+            # plt.ylim((0,600))
 
             #Add net cost line.
             for n, scenario in enumerate(self.Scenarios[1:]):

@@ -10,9 +10,8 @@ TO DO:
 """
 
 import pandas as pd
-import matplotlib.pyplot as plt
+import textwrap
 import matplotlib as mpl
-import os
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import logging
 import marmot.config.mconfig as mconfig
@@ -30,30 +29,36 @@ class mplot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.mplot_data_dict = {}
 
     # function to collect total emissions by fuel type
-    def total_emissions_by_type(self):
+    def total_emissions_by_type(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
+        
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
-        emit_gen_collection = {}
-        check_input_data = []
-        check_input_data.extend([mfunc.get_data(emit_gen_collection,"emissions_generators_Production", self.Marmot_Solutions_folder, self.Scenarios)])
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"emissions_generators_Production",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
-        # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-
+            return mfunc.MissingInputData()
+        
         for zone_input in self.Zones:
             emitList = []
-            self.logger.info("Zone = " + zone_input)
+            self.logger.info(f"Zone = {zone_input}")
 
             # collect data for all scenarios and pollutants
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + scenario)
+                self.logger.info(f"Scenario = {scenario}")
 
-                emit = emit_gen_collection.get(scenario)
+                emit = self.mplot_data_dict["emissions_generators_Production"].get(scenario)
 
                 # Check if Total_Gen_Stack contains zone_input, skips if not
                 try:
@@ -78,7 +83,6 @@ class mplot(object):
                 outputs[zone_input] = out
                 continue
             
-
             # format results
             emitOut = emitOut.T/1E6 # Convert from metric tons to million metric tons
             emitOut = emitOut.loc[:, (emitOut != 0).any(axis=0)] # drop any generators with no emissions
@@ -120,8 +124,8 @@ class mplot(object):
 
                 # replace x-axis with custom labels
                 if len(self.ticklabels) > 1:
-                    self.ticklabels = pd.Series(self.ticklabels).str.replace('-','- ').str.wrap(8, break_long_words=True)
-                    fig1.set_xticklabels(self.ticklabels)
+                    ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
+                    fig1.set_xticklabels(ticklabels)
 
                 outputs[zone_input] = {'fig': fig1, 'data_table': dataOut}
 

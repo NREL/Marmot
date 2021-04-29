@@ -31,8 +31,11 @@ class mplot(object):
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.mplot_data_dict = {}
 
-    def storage_volume(self):
+    def storage_volume(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
 
         """
         This method creates time series plot of aggregate storage volume for all storage objects in a given region, 
@@ -40,22 +43,28 @@ class mplot(object):
         All scenarios are plotted on a single figure.
         Figures and data tables are returned to plot_main
         """
-        initial_volume_collection = {}
-        unserved_e_collection = {}
-        max_volume_collection = {}
-        check_input_data = []
-        check_input_data.extend([mfunc.get_data(initial_volume_collection,"storage_Initial_Volume",self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(unserved_e_collection,"region_Unserved_Energy",self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(max_volume_collection,"storage_Max_Volume",self.Marmot_Solutions_folder, [self.Scenarios[0]])])
-
+        
+        if self.AGG_BY == 'zone':
+                agg = 'zone'
+        else:
+            agg = 'region'
+            
+        outputs = {}
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, "storage_Initial_Volume", self.Scenarios),
+                      (True, f"{agg}_Unserved_Energy", self.Scenarios),
+                      (True, "storage_Max_Volume", [self.Scenarios[0]])]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-
-        outputs = {}
+            return mfunc.MissingInputData()
+        
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             storage_volume_all_scenarios = pd.DataFrame()
             use_all_scenarios = pd.DataFrame()
@@ -64,7 +73,7 @@ class mplot(object):
 
                 self.logger.info(f"Scenario = {str(scenario)}")
 
-                storage_volume_read = initial_volume_collection.get(scenario)
+                storage_volume_read = self.mplot_data_dict["storage_Initial_Volume"].get(scenario)
                 try:
                     storage_volume = storage_volume_read.xs(zone_input, level = self.AGG_BY)
                 except KeyError:
@@ -81,7 +90,7 @@ class mplot(object):
 
                 max_volume = storage_volume.max().squeeze()
                 try:
-                    max_volume = max_volume_collection.get(scenario)
+                    max_volume = self.mplot_data_dict["storage_Max_Volume"].get(scenario)
                     max_volume = max_volume.xs(zone_input, level = self.AGG_BY)
                     max_volume = max_volume.groupby('timestamp').sum()
                     max_volume = max_volume.squeeze()[0]
@@ -89,34 +98,34 @@ class mplot(object):
                     self.logger.warning(f'No storage resources in {zone_input}')
 
                 #Pull unserved energy.
-                use_read = unserved_e_collection.get(scenario)
+                use_read = self.mplot_data_dict[f"{agg}_Unserved_Energy"].get(scenario)
                 use = use_read.xs(zone_input, level = self.AGG_BY)
                 use = use.groupby("timestamp").sum() / 1000
                 use.columns = [scenario]
 
-                if self.prop == "Peak Demand":
+                if prop == "Peak Demand":
 
                     peak_demand_t = Total_Demand.idxmax()
-                    end_date = peak_demand_t + dt.timedelta(days=self.end)
-                    start_date = peak_demand_t - dt.timedelta(days=self.start)
+                    end_date = peak_demand_t + dt.timedelta(days=end)
+                    start_date = peak_demand_t - dt.timedelta(days=start)
                     Peak_Demand = Total_Demand[peak_demand_t]
                     storage_volume = storage_volume[start_date : end_date]
                     use = use[start_date : end_date]
 
-                elif self.prop == "Min Net Load":
+                elif prop == "Min Net Load":
                     min_net_load_t = Net_Load.idxmin()
-                    end_date = min_net_load_t + dt.timedelta(days=self.end)
-                    start_date = min_net_load_t - dt.timedelta(days=self.start)
+                    end_date = min_net_load_t + dt.timedelta(days=end)
+                    start_date = min_net_load_t - dt.timedelta(days=start)
                     Min_Net_Load = Net_Load[min_net_load_t]
                     storage_volume = storage_volume[start_date : end_date]
                     use = use[start_date : end_date]
 
-                elif self.prop == 'Date Range':
+                elif prop == 'Date Range':
                     self.logger.info(f"Plotting specific date range: \
-                    {str(self.start_date)} to {str(self.end_date)}")
+                    {str(start_date_range)} to {str(end_date_range)}")
 
-                    storage_volume = storage_volume[self.start_date : self.end_date]
-                    use = use[self.start_date : self.end_date]
+                    storage_volume = storage_volume[start_date_range : end_date_range]
+                    use = use[start_date_range : end_date_range]
 
                 storage_volume_all_scenarios = pd.concat([storage_volume_all_scenarios,storage_volume], axis = 1)
                 #storage_volume_all_scenarios.columns = storage_volume_all_scenarios.columns.str.replace('_',' ')

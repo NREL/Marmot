@@ -28,21 +28,24 @@ class mplot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-
+        
+        self.mplot_data_dict = {}
     
-    def capacity_started(self):
+    def capacity_started(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+       
         outputs = {}
-        gen_collection = {}
-        cap_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -52,7 +55,7 @@ class mplot(object):
 
                 self.logger.info(f"Scenario = {str(scenario)}")
 
-                Gen = gen_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
@@ -67,7 +70,7 @@ class mplot(object):
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.
 
-                Cap = cap_collection.get(scenario)
+                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.drop(columns = ['timestamp','tech'])
@@ -75,11 +78,11 @@ class mplot(object):
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
                 
-                if self.prop == 'Date Range':
+                if prop == 'Date Range':
                     self.logger.info(f"Plotting specific date range: \
-                    {str(self.start_date)} to {str(self.end_date)}")
+                    {str(start_date_range)} to {str(end_date_range)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
-                    Gen = Gen.sort_index()[self.start_date : self.end_date]
+                    Gen = Gen.sort_index()[start_date_range : end_date_range]
 
                 tech_names = Gen['tech'].unique()
                 Cap_started = pd.DataFrame(columns = tech_names,index = [scenario])
@@ -160,22 +163,22 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-##############################################################################
 
-
-    def count_ramps(self):
+    def count_ramps(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+        
         outputs = {}
-        gen_collection = {}
-        cap_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(cap_collection,"generator_Installed_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone =  {zone_input}")
@@ -184,7 +187,7 @@ class mplot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = gen_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
 
                 Gen = Gen.reset_index()
@@ -194,7 +197,7 @@ class mplot(object):
                 Gen = Gen[['timestamp','gen_name','tech','Output (MWh)']]
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.tops.
 
-                Cap = cap_collection.get(scenario)
+                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
@@ -206,10 +209,10 @@ class mplot(object):
                 # Min = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
                 # Min = Min.xs(zone_input, level = AGG_BY)
 
-                if self.prop == 'Date Range':
+                if prop == 'Date Range':
                     self.logger.info(f"Plotting specific date range: \
-                    {str(self.start_date)} to {str(self.end_date)}")
-                    Gen = Gen[self.start_date : self.end_date]
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    Gen = Gen[start_date_range : end_date_range]
 
                 tech_names = Gen['tech'].unique()
                 ramp_counts = pd.DataFrame(columns = tech_names,index = [scenario])

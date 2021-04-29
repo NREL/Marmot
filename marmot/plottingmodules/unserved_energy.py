@@ -7,11 +7,8 @@ This module creates unserved energy timeseries line plots and total bat plots an
 @author: dlevie
 """
 
-import os
 import pandas as pd
-import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.dates as mdates
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
@@ -27,32 +24,37 @@ class mplot(object):
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.mplot_data_dict = {}
 
-    def unserved_energy_timeseries(self):
+
+    def unserved_energy_timeseries(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
 
         outputs = {}
-        unserved_energy_collection = {}
-        check_input_data = []
-
-        if self.AGG_BY == "zone":
-            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)])
+        
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
         else:
-            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)])
+            agg = 'region'
+            
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
-        # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
-
+            return mfunc.MissingInputData()
+        
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {zone_input}')
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
 
             for scenario in self.Scenarios:
-
                 self.logger.info(f'Scenario = {scenario}')
 
-                unserved_eng_timeseries = unserved_energy_collection.get(scenario)
+                unserved_eng_timeseries = self.mplot_data_dict[f"{agg}_Unserved_Energy"].get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
@@ -103,31 +105,35 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-    def tot_unserved_energy(self):
+
+    def tot_unserved_energy(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
         outputs = {}
-        unserved_energy_collection = {}
-        check_input_data = []
-
-        if self.AGG_BY == "zone":
-            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"zone_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)])
+        
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
         else:
-            check_input_data.extend([mfunc.get_data(unserved_energy_collection,"region_Unserved_Energy", self.Marmot_Solutions_folder, self.Scenarios)])
+            agg = 'region'
+            
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
-        # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
 
         for zone_input in self.Zones:
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
             Total_Unserved_Energy_Out = pd.DataFrame()
-
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            
             for scenario in self.Scenarios:
-
                 self.logger.info(f'Scenario = {scenario}')
 
-                unserved_eng_timeseries = unserved_energy_collection.get(scenario)
+                unserved_eng_timeseries = self.mplot_data_dict[f"{agg}_Unserved_Energy"].get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series

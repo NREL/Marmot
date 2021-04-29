@@ -10,7 +10,6 @@ and is called from Marmot_plot_main.py
 @author: adyreson
 """
 
-import os
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
@@ -39,20 +38,25 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.mplot_data_dict = {}
 
-    def uf_fleet(self):
+
+    def uf_fleet(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
+        
         outputs = {}
-        generation_collection = {}
-        gen_available_capacity_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -66,7 +70,7 @@ class mplot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = generation_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -75,7 +79,7 @@ class mplot(object):
 
                 Gen = df_process_gen_ind_inputs(Gen,self)
 
-                Ava = gen_available_capacity_collection.get(scenario)
+                Ava = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
                 Ava = df_process_gen_ind_inputs(Ava,self)
 
@@ -138,19 +142,22 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
 
-    def uf_gen(self):
+    def uf_gen(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
+        
         outputs = {}
-        generation_collection = {}
-        gen_available_capacity_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties, self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(self.AGG_BY + " = " + zone_input)
@@ -163,7 +170,7 @@ class mplot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = generation_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -171,7 +178,7 @@ class mplot(object):
                     continue
                 Gen=df_process_gen_ind_inputs(Gen,self)
 
-                Ava = gen_available_capacity_collection.get(scenario)
+                Ava = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
                 Ava = df_process_gen_ind_inputs(Ava,self)
                 Gen=pd.merge(Gen,Ava,on=['tech','timestamp','gen_name'])
@@ -233,19 +240,22 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig2, 'data_table': CF_all_scenarios}
         return outputs
 
-    def uf_fleet_by_type(self):
+    def uf_fleet_by_type(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
+        
         outputs = {}
-        generation_collection = {}
-        gen_available_capacity_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(gen_available_capacity_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -257,7 +267,7 @@ class mplot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = generation_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -265,7 +275,7 @@ class mplot(object):
                     continue
                 Gen = df_process_gen_ind_inputs(Gen,self)
 
-                Ava = gen_available_capacity_collection.get(scenario)
+                Ava = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
                 Ava = df_process_gen_ind_inputs(Ava,self)
 
@@ -326,17 +336,21 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
 
-    def GW_fleet(self):
+    def GW_fleet(self, figure_name=None, prop=None, start=None, 
+                             end=None, timezone=None, start_date_range=None, 
+                             end_date_range=None):
+        
         outputs = {}
-        generation_collection = {}
-        check_input_data = []
         
-        check_input_data.extend([mfunc.get_data(generation_collection,"generator_Generation", self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios)]
         
-        # Checks if all data required by plot is available, if 1 in list required data is missing
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
-            return outputs
+            return mfunc.MissingInputData()
         
         for zone_input in self.Zones:
             GW_all_scenarios = pd.DataFrame()
@@ -350,7 +364,7 @@ class mplot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = generation_collection.get(scenario)
+                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
