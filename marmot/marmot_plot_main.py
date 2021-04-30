@@ -474,6 +474,10 @@ class MarmotPlot():
                     logger.info("Required Meta Data Not Available For This Plot!\n")
                     continue
                 
+                if isinstance(Figure_Out, mfunc.UnsupportedAggregation):
+                    logger.info(f"Aggregation Type: '{self.AGG_BY}' not supported for This plot!\n")
+                    continue
+                
                 for zone_input in Zones:
                     if isinstance(Figure_Out[zone_input], mfunc.MissingZoneData):
                         logger.info(f"No Data to Plot in {zone_input}")

@@ -22,53 +22,53 @@ logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
 
 class MissingInputData:
-    """
-    Exception Class for handling return of missing data
-    """
+    """Exception Class for handling return of missing data."""
+    
     def __init__(self):
        return
 
 class MissingZoneData:
-    """
-    Exception Class for handling return of zones with no data
-    """
+    """Exception Class for handling return of zones with no data."""
+    
     def __init__(self):
         return
 
 class DataSavedInModule:
-    """
-    Exception Class for handling data saved within modules
-    """
+    """Exception Class for handling data saved within modules."""
+    
     def __init__(self):
         return
 
 class UnderDevelopment:
-    """
-    Exception Class for handling methods under development
-    """
+    """Exception Class for handling methods under development."""
+    
     def __init__(self):
         return
 
 class InputSheetError:
-    """
-    Exception Class for handling user input sheet errors
-    """
+    """Exception Class for handling user input sheet errors."""
+    
     def __init__(self):
         return
 
 class FacetLabelError:
-    """
-    Exception Class for incorrect facet labeling.
-    """
+    """Exception Class for incorrect facet labeling."""
+    
     def __init__(self):
         return
     
 class MissingMetaData:
-    """
-    Exception Class for missing meta data.
-    """
+    """Exception Class for missing meta data."""
+    
     def __init__(self):
         return
+    
+class UnsupportedAggregation:
+    """Exception Class for plotting using unsupported AGG_BY attribute."""
+    
+    def __init__(self):
+        return
+    
     
 
 def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):

@@ -806,7 +806,7 @@ class mplot(object):
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y= 0 ,linewidth=0.5,linestyle='--',color='grey')
-            ax.axhline(y = 65.4, linewidth = 1, linestyle = ':',color = 'orange',label = 'Avg 2032 LCOE')
+            # ax.axhline(y = 65.4, linewidth = 1, linestyle = ':',color = 'orange',label = 'Avg 2032 LCOE')
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
             locs,labels=plt.xticks()

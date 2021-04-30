@@ -1809,6 +1809,10 @@ class mplot(object):
         The method will only work if agg_by = "zone".
         """
         
+        if self.AGG_BY not in ["zone", "zones", "Zone", "Zones"]:
+            self.logger.warning("This plot only supports aggregation zone")
+            return mfunc.UnsupportedAggregation()
+        
         duration_curve=False
         if 'duration_curve' in figure_name:
             duration_curve = True
@@ -1972,6 +1976,10 @@ class mplot(object):
         Figures and data tables are returned to plot_main.
         The method will only work if agg_by = "zone".
         """
+        
+        if self.AGG_BY not in ["zone", "zones", "Zone", "Zones"]:
+            self.logger.warning("This plot only supports aggregation zone")
+            return mfunc.UnsupportedAggregation()
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
