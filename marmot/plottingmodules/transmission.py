@@ -1794,7 +1794,8 @@ class mplot(object):
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
-                fig1.set_title(zone_input)            
+                ax.set_title(zone_input)            
+                
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
@@ -1937,6 +1938,7 @@ class mplot(object):
 
                 #Add scenario column to output table.
                 scenario_names = pd.Series([scenario] * len(net_exports),name = 'Scenario')
+                net_exports = net_exports.add_suffix(f" ({unitconversion['units']})")
                 net_exports = net_exports.set_index([scenario_names],append = True)
                 net_exports_all.append(net_exports)
 
@@ -1949,13 +1951,13 @@ class mplot(object):
 
             fig7.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            net_exports_all = pd.concat(net_exports_all)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             plt.ylabel(f"Net export ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=60)
             if duration_curve:
                 plt.xlabel('Sorted hour of the year',color = 'black', labelpad = 30)
-            Data_Table_Out = pd.concat(net_exports_all).add_suffix(f" ({unitconversion['units']})")
+            
+            Data_Table_Out = pd.concat(net_exports_all)
             # if plotting all scenarios return figures to plot_main
             outputs[zone_input] = {'fig': fig7,'data_table' : Data_Table_Out}
 
@@ -2073,9 +2075,10 @@ class mplot(object):
                 #Add scenario column to output table.
                 scenario_names = pd.Series([scenario] * len(both),name = 'Scenario')
                 data_table = both.set_index([scenario_names],append = True)
+                data_table = data_table.add_suffix(f" ({unitconversion['units']})")
                 data_out_chunk.append(data_table)
 
-            Data_Table_Out = pd.concat(data_out_chunk).add_suffix(f" ({unitconversion['units']})")
+            Data_Table_Out = pd.concat(data_out_chunk)
 
             fig10 = mfunc.create_clustered_stacked_bar_plot(net_exports_all,self.Scenarios)
             fig10.hlines(y = 0, xmin = fig10.get_xlim()[0], xmax = fig10.get_xlim()[1], linestyle = ':')

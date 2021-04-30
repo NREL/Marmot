@@ -107,6 +107,8 @@ class mplot(object):
             ax2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             ax2.margins(x=0.01)
+            if mconfig.parser("plot_title_as_region"):
+                ax2.set_title(zone_input)
 
             handles, labels = ax2.get_legend_handles_labels()
 
@@ -114,8 +116,7 @@ class mplot(object):
                               facecolor='inherit', frameon=True)
 
             ax2.add_artist(leg1)
-            if mconfig.parser("plot_title_as_region"):
-                fig2.set_title(zone_input)
+            
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Continent_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
         
         outputs = mfunc.DataSavedInModule()
@@ -214,7 +215,9 @@ class mplot(object):
                 formatter.show_offset = False
                 ax.xaxis.set_major_locator(locator)
                 ax.xaxis.set_major_formatter(formatter)
-
+                
+                if mconfig.parser("plot_title_as_region"):
+                    ax.set_title(zone_input)
 
 
                 handles, labels = ax.get_legend_handles_labels()
@@ -261,7 +264,7 @@ class mplot(object):
 
             ax2.add_artist(leg1)
             if mconfig.parser("plot_title_as_region"):
-                fig2.set_title(zone_input)
+                ax2.set_title(zone_input)
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
         
         outputs = mfunc.DataSavedInModule()

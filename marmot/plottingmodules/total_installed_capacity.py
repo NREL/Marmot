@@ -223,6 +223,7 @@ class mplot(object):
                       bbox_to_anchor=(1, 0), facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
+                
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
@@ -322,7 +323,7 @@ class mplot(object):
             axs[1].tick_params(axis='y', which='major', length=5, width=1)
             axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
-            data_tables = {}
+            data_tables = []
             for n, scenario in enumerate(self.Scenarios):
 
                 x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + axs[1].patches[n].get_width()]
@@ -337,7 +338,7 @@ class mplot(object):
                                         facecolor='#DD0200',
                                         alpha=0.5)
 
-                data_tables[scenario] = pd.DataFrame()
+                data_tables = pd.DataFrame() #TODO pass output data back to plot main 
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
@@ -378,9 +379,11 @@ class mplot(object):
             # add labels to panels
             axs[0].set_title("A.", fontdict={"weight": "bold"}, loc='left')
             axs[1].set_title("B.", fontdict={"weight": "bold"}, loc='left')
-
-            if mconfig.parser("plot_title_as_region"):
-                fig.set_title(zone_input)
+            
+            fig.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser('plot_title_as_region'):
+                plt.title(zone_input)
 
             # output figure
             outputs[zone_input] = {'fig': fig, 'data_table': data_tables}

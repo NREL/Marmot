@@ -14,6 +14,7 @@ import numpy as np
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
+import matplotlib.pyplot as plt
 
 
 class mplot(object):
@@ -213,9 +214,9 @@ class mplot(object):
             
             Data_Table_Out = CF_all_scenarios.T
 
-            fig1,ax = plt.subplots(self.x,self.y)
+            fig1,ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
             #TODO: rewrite with mfunc functions.
-            CF_all_scenarios.plot.bar(stacked = False, figsize=(self.x*1.5,self.y*1.5), rot=0,
+            CF_all_scenarios.plot.bar(stacked = False, rot=0,
                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
 
             ax.spines['right'].set_visible(False)

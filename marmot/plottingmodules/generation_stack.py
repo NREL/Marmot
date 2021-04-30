@@ -417,13 +417,13 @@ class mplot(object):
                 Load = Load.rename('Total Load \n (Demand + Storage Charging)')
                 Total_Demand = Total_Demand.rename('Total Demand')
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
-
+                
                 # Data table of values to return to main program
                 single_scen_out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
                 scenario_names = pd.Series([scenario] * len(single_scen_out),name = 'Scenario')
+                single_scen_out = single_scen_out.add_suffix(f" ({unitconversion['units']})")
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
-                single_scen_out = single_scen_out.add_suffix((f" ({unitconversion['units']})")
-                data_tables.append(single_scen_out * unitconversion['divisor'])
+                data_tables.append(single_scen_out)
 
                 ##DO NOT COMMIT
                 #Pull P05 hourly flow
@@ -498,14 +498,10 @@ class mplot(object):
             if (Pump_Load == 0).all() == False:
                 handles.append(lp3[0])
                 handles.append(lp[0])
-                #handles.append(l4[0])
-                #labels += ['Demand','Demand + \n Storage Charging','P05 flow']
                 labels += ['Demand','Demand + \n Storage Charging']
 
             else:
                 handles.append(lp[0])
-                #handles.append(lp4[0])
-                #labels += ['Demand','P05 flow']
                 labels += ['Demand']
 
             if (Unserved_Energy == 0).all() == False:

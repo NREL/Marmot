@@ -100,10 +100,11 @@ class mplot(object):
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
                 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
-                if not pd.isnull(self.start_date):
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Total_Gen_Stack = Total_Gen_Stack[self.start_date:self.end_date]
+                
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                     {str(start_date_range)} to {str(end_date_range)}")
+                    Total_Gen_Stack = Total_Gen_Stack[start_date_range:end_date_range]
 
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
@@ -113,10 +114,10 @@ class mplot(object):
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
 
-                if not pd.isnull(self.start_date):
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Total_Load = Total_Load[self.start_date:self.end_date]
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                     {str(start_date_range)} to {str(end_date_range)}")
+                    Total_Load = Total_Load[start_date_range:end_date_range]
 
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
@@ -130,10 +131,10 @@ class mplot(object):
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
 
-                if not pd.isnull(self.start_date):
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Unserved_Energy = Unserved_Energy[self.start_date:self.end_date]
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                     {str(start_date_range)} to {str(end_date_range)}")
+                    Unserved_Energy = Unserved_Energy[start_date_range:end_date_range]
 
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
@@ -151,10 +152,10 @@ class mplot(object):
                     Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
-                if not pd.isnull(self.start_date):
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Pump_Load = Pump_Load[self.start_date:self.end_date]
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                     {str(start_date_range)} to {str(end_date_range)}")
+                    Pump_Load = Pump_Load[start_date_range:end_date_range]
                 Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
                 Pump_Load = Pump_Load/interval_count
                 if (Pump_Load == 0).all() == False:
@@ -299,10 +300,10 @@ class mplot(object):
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
-                if not pd.isnull(self.start_date):
-                    self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    Total_Gen_Stack = Total_Gen_Stack[self.start_date:self.end_date]
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                     {str(start_date_range)} to {str(end_date_range)}")
+                    Total_Gen_Stack = Total_Gen_Stack[start_date_range:end_date_range]
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)

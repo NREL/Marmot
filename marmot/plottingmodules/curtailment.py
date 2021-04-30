@@ -680,8 +680,8 @@ class mplot(object):
                 chunks_scen.append(curt)
 
             curt_8760_scen = pd.concat(chunks_scen,axis = 1)
-            scen_name = pd.Series([scenario] * len(ti),name = 'Scenario')
-            curt_8760_scen = curt_8760_scen.set_index(scen_name,append = True)
+            scen_name = pd.Series([scenario] * len(curt_8760_scen),name = 'Scenario')
+            curt_8760_scen = curt_8760_scen.set_index([scen_name],append = True)
             chunks.append(curt_8760_scen)
 
             sites.name = scenario

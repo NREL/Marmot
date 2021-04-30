@@ -159,6 +159,8 @@ class mplot(object):
             fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             fig1.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -265,6 +267,8 @@ class mplot(object):
             fig2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             fig2.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs

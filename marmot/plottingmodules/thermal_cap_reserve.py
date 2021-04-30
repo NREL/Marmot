@@ -101,7 +101,7 @@ class mplot(object):
                     outputs[zone_input] = out
                     continue
                    
-                if self.prop == 'Date Range':
+                if prop == 'Date Range':
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     thermal_reserve = thermal_reserve[start_date_range : end_date_range]

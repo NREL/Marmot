@@ -11,6 +11,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
+
 
 #===============================================================================
 
@@ -59,7 +61,7 @@ class mplot(object):
 
         #setup plot
         fig2, axs = mfunc.setup_plot(xdimension,ydimension)
-        plt.subplots_adjust(wspace=0.1, hspace=0.2)
+        plt.subplots_adjust(wspace=0.1, hspace=0.3)
         
         data_table = []
         for n, zone_input in enumerate(self.Zones):
@@ -85,7 +87,7 @@ class mplot(object):
                 if (prop!=prop)==False:
                     axs[n].set_ylim(bottom=0,top=int(prop))
                 axs[n].set_xlim(0,len(duration_curve))
-                axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
+                axs[n].set_title(zone_input.replace('_',' '))
 
                 handles, labels = axs[region_number-1].get_legend_handles_labels()
                 #Legend
@@ -98,8 +100,6 @@ class mplot(object):
         plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
-        if mconfig.parser("plot_title_as_region"):
-            fig2.set_title(zone_input)
 
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
@@ -313,7 +313,7 @@ class mplot(object):
 
         #setup plot
         fig4, axs = mfunc.setup_plot(xdimension,ydimension)
-        plt.subplots_adjust(wspace=0.1, hspace=0.2)
+        plt.subplots_adjust(wspace=0.1, hspace=0.3)
 
         data_table = []
         for n, zone_input in enumerate(self.Zones):
@@ -336,7 +336,7 @@ class mplot(object):
 
             for column in timeseries:
                 mfunc.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
-                axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
+                axs[n].set_title(zone_input.replace('_',' '))
                 if (prop!=prop)==False:
                     axs[n].set_ylim(bottom=0,top=int(prop))
                 mfunc.set_plot_timeseries_format(axs,n)
@@ -352,8 +352,7 @@ class mplot(object):
         plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
-        if mconfig.parser("plot_title_as_region"):
-            fig4.set_title(zone_input)
+
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
         fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')

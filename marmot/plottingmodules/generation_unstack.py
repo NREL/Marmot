@@ -97,7 +97,7 @@ class mplot(object):
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.25)
             axs = axs.ravel()
-            data_table = {}
+            data_tables = []
             unique_tech_names = []
 
             for i, scenario in enumerate(all_scenarios):
@@ -218,8 +218,10 @@ class mplot(object):
                 Stacked_Gen = Stacked_Gen/unitconversion['divisor']
                 Unserved_Energy = Unserved_Energy/unitconversion['divisor']
                 
-                Data_Table_Out = Stacked_Gen
-                data_table[scenario] = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
+                scenario_names = pd.Series([scenario]*len(Stacked_Gen),name='Scenario')
+                data_table = Stacked_Gen.add_suffix(f" ({unitconversion['units']})")
+                data_table = data_table.set_index([scenario_names],append=True)
+                data_tables.append(data_table)
                 
                 for column in Stacked_Gen.columns:
                     axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2,
@@ -240,7 +242,7 @@ class mplot(object):
                 l1 = Stacked_Gen.columns.tolist()
                 unique_tech_names.extend(l1)
             
-            if not data_table:
+            if not data_tables:
                 self.logger.warning(f'No generation in {zone_input}')
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
@@ -283,8 +285,7 @@ class mplot(object):
             if excess_axs != 0:
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
-            if not facet:
-                data_table = data_table[self.Scenarios[0]]
+            data_table_out = pd.concat(data_tables)
                 
-            outputs[zone_input] = {'fig':fig1, 'data_table':data_table}
+            outputs[zone_input] = {'fig':fig1, 'data_table':data_table_out}
         return outputs
