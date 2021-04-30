@@ -61,7 +61,7 @@ class mplot(object):
 
         #setup plot
         fig2, axs = mfunc.setup_plot(xdimension,ydimension)
-        plt.subplots_adjust(wspace=0.1, hspace=0.3)
+        plt.subplots_adjust(wspace=0.1, hspace=0.50)
         
         data_table = []
         for n, zone_input in enumerate(self.Zones):
@@ -313,7 +313,7 @@ class mplot(object):
 
         #setup plot
         fig4, axs = mfunc.setup_plot(xdimension,ydimension)
-        plt.subplots_adjust(wspace=0.1, hspace=0.3)
+        plt.subplots_adjust(wspace=0.1, hspace=0.70)
 
         data_table = []
         for n, zone_input in enumerate(self.Zones):

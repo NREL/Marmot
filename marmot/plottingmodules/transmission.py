@@ -165,13 +165,13 @@ class mplot(object):
                 else:
                     prop_name = prop
                 plt.ylabel('Number of lines',  color='black', rotation='vertical', labelpad=30)
-                plt.xlabel(f'Line Utilization: {prop_name}',  color='black', rotation='horizontal', labelpad=20)
+                plt.xlabel(f'Line Utilization: {prop_name}',  color='black', rotation='horizontal', labelpad=30)
             else:
                 if (prop != prop)==True:
                     prop_name ='Top 10 Lines'
                 else:
                     prop_name = prop
-                plt.ylabel(f'Line Utilization: {prop_name}',  color='black', rotation='vertical', labelpad=30)
+                plt.ylabel(f'Line Utilization: {prop_name}',  color='black', rotation='vertical', labelpad=40)
                 plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
@@ -1407,7 +1407,7 @@ class mplot(object):
                     plot_number = len(parent_region)
                     xdimension, ydimension =  mfunc.set_x_y_dimension(plot_number)
                     fig3, axs = mfunc.setup_plot(xdimension,ydimension,sharey=False)
-                    plt.subplots_adjust(wspace=0.6, hspace=0.3)
+                    plt.subplots_adjust(wspace=0.6, hspace=0.7)
 
                 else:
                     parent_region = [zone_input]
@@ -1465,8 +1465,8 @@ class mplot(object):
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.xlabel(f"Date {(timezone)}",  color='black', rotation='horizontal',labelpad = 60)
-            plt.ylabel(f"Net Interchange ({unitconversion['units']})",  color='black', rotation='vertical', labelpad = 60)
+            plt.xlabel(f"Date {(timezone)}",  color='black', rotation='horizontal',labelpad = 30)
+            plt.ylabel(f"Net Interchange ({unitconversion['units']})",  color='black', rotation='vertical', labelpad = 40)
 
             # If plotting all regions save output and return none plot_main
             if plot_scenario == False:
@@ -1477,8 +1477,6 @@ class mplot(object):
                 Data_Table_Out.to_csv(os.path.join(save_figures, "Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
                 outputs = mfunc.DataSavedInModule()
                 return outputs
-            if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
 
             Data_Out = pd.concat(data_table_chunks, copy=False, axis=0)
 
@@ -1580,8 +1578,8 @@ class mplot(object):
         cax=cax, label='Total Net Interchange [GWh]')
         fig4.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.xlabel('To Region',  color='black', rotation='horizontal',labelpad = 40, fontsize=20)
-        plt.ylabel('From Region', color='black', rotation='vertical', labelpad = 30, fontsize=20)
+        plt.xlabel('To Region',  color='black', rotation='horizontal',labelpad = 40)
+        plt.ylabel('From Region', color='black', rotation='vertical', labelpad = 40)
 
         Data_Table_Out = pd.concat(Data_Out,axis=1)
         save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_transmission')
@@ -1957,7 +1955,7 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
-            plt.ylabel(f"Net export ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel(f"Net export ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=40)
             if duration_curve:
                 plt.xlabel('Sorted hour of the year',color = 'black', labelpad = 30)
             

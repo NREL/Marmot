@@ -377,8 +377,8 @@ class mplot(object):
                           facecolor='inherit', frameon=True)
 
             # add labels to panels
-            axs[0].set_title("A.", fontdict={"weight": "bold"}, loc='left')
-            axs[1].set_title("B.", fontdict={"weight": "bold"}, loc='left')
+            axs[0].set_title("A.", fontdict={"weight": "bold", "size": 11}, loc='left',pad=4)
+            axs[1].set_title("B.", fontdict={"weight": "bold", "size": 11}, loc='left',pad=4)
             
             fig.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)

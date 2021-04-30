@@ -83,6 +83,7 @@ class mplot(object):
             plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
             plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
             plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+            plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
         
         grid_size = xdimension*ydimension
             
@@ -95,7 +96,7 @@ class mplot(object):
             excess_axs = grid_size - plot_number
         
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
-            plt.subplots_adjust(wspace=0.05, hspace=0.25)
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
             axs = axs.ravel()
             data_tables = []
             unique_tech_names = []
@@ -268,8 +269,8 @@ class mplot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
             
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
+            ylabels = [y.replace('_',' ') for y in self.ylabels]
             
             # add facet labels
             mfunc.add_facet_labels(fig1, xlabels, ylabels)
@@ -278,8 +279,8 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
-            labelpad = 50 if facet else 30
-            plt.ylabel(f"Genertaion ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
+            labelpad = 40
+            plt.ylabel(f"Generation ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
             
              #Remove extra axis
             if excess_axs != 0:

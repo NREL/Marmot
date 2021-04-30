@@ -161,14 +161,14 @@ class mplot(object):
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
             mfunc.add_facet_labels(fig1, xlabels, self.ylabels)
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(region)
-            plt.ylabel(f"Reserve Provision ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=30)
+            plt.ylabel(f"Reserve Provision ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=40)
 
             data_table_out = pd.concat(data_tables)
 
@@ -519,13 +519,13 @@ class mplot(object):
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
             mfunc.add_facet_labels(fig3, xlabels, self.ylabels)
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             # plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
-            plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 30)
+            plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 40)
             
             if mconfig.parser("plot_title_as_region"):
                plt.title(region)

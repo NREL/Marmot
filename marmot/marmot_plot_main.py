@@ -218,9 +218,10 @@ class MarmotPlot():
         
         shift_leapday = str(mconfig.parser("shift_leapday")).upper()
         font_defaults = mconfig.parser("font_settings")
+        text_position = mconfig.parser("text_position")
         minticks = mconfig.parser("axes_options","x_axes_minticks")
         maxticks = mconfig.parser("axes_options","x_axes_maxticks")
-
+        
         #===============================================================================
         # Input and Output Directories
         #===============================================================================
@@ -439,6 +440,8 @@ class MarmotPlot():
                 mpl.rc('legend', fontsize=font_defaults['legend_size'])
                 mpl.rc('font', family=font_defaults['font_family'])
                 mpl.rc('figure', max_open_warning = 0)
+                mpl.rc('axes', titlesize=font_defaults['title_size'], 
+                       titlepad=text_position['title_height'])
                 
                 print("\n\n\n")
                 logger.info(f"Plot =  {row['Figure Output Name']}")
@@ -485,15 +488,15 @@ class MarmotPlot():
                     else:
                         # Save figures
                         try:
-                            Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
+                            Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'), dpi=600, bbox_inches='tight')
                         except AttributeError:
-                            Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + '.' + figure_format), dpi=600, bbox_inches='tight')
+                            Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'), dpi=600, bbox_inches='tight')
 
-                        #Save .csv's.
+                        # Save .csv's.
                         if Figure_Out[zone_input]['data_table'].empty:
                             logger.info(f'{row["Figure Output Name"]} does not return a data table')
                         else:
-                            Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, zone_input.replace('.','') + "_" + row["Figure Output Name"] + ".csv"))
+                            Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, f'{zone_input}_{row["Figure Output Name"]}.csv'))
 
                 logger.info(f'Plotting Completed for {row["Figure Output Name"]}\n')
                 mpl.pyplot.close('all')

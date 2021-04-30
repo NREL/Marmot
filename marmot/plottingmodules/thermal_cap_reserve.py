@@ -143,7 +143,7 @@ class mplot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
 
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
 
             # add facet labels
             mfunc.add_facet_labels(fig1, xlabels, self.ylabels)           
@@ -154,7 +154,7 @@ class mplot(object):
             
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=50)
+            plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=40)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             # If data_table_chunks is empty, does not return data or figure

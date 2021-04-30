@@ -33,7 +33,12 @@ def createConfig(configfile_path):
             ytick_size = 12,
             axes_label_size = 16,
             legend_size = 11,
+            title_size = 16,
             font_family = 'serif'
+            ),
+        
+        text_position = dict(
+            title_height = 40
             ),
         
         figure_size = dict(
