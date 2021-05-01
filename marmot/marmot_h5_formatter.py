@@ -1007,8 +1007,11 @@ if __name__ == '__main__':
     PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
 
     # Folder to save your processed solutions
-    Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
-
+    if pd.isna(Marmot_user_defined_inputs.loc['Marmot_Solutions_folder','User_defined_value']):
+        Marmot_Solutions_folder = None
+    else:
+        Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
+    
     # This folder contains all the csv required for mapping and selecting outputs to process
     # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
     Mapping_folder = 'mapping_folder'

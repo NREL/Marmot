@@ -1,15 +1,15 @@
 Input,Input_type,Importance,User_defined_value
 PLEXOS_Solutions_folder,folder,required,/path/to/PLEXOSsolutionh5s
-Marmot_Solutions_folder,folder,required,/path/to/Marmotplots
-Scenario_process_list,List,required,Scenario1
+Marmot_Solutions_folder,folder,optional,/path/to/Marmotplots
+Scenario_process_list,List,required,"Scenario1, Scenario2"
 VoLL,int,required,10000
 Region_Mapping.csv_name,string,optional(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,required(default),emit_names.csv
-Scenarios,string or List,required,Scenario1
+Scenarios,string or List,required,"Scenario1, Scenario2, Scenario3"
 Scenario_Diff_plot,List [Max 2],optional,"Scenario1, Scenario2"
-AGG_BY,string,required,region
-zone_region_sublist,List,optional,1
+AGG_BY,string,required,zone
+zone_region_sublist,List,optional,"PJM_EI, MISO_EI"
 Facet_ylabels,List,optional,ylabel1
-Facet_xlabels,List,optional,"xlabel1,xlabel2"
+Facet_xlabels,List,optional,"xlabel1,xlabel2,xlabel3"
 Tick_labels,List,optional,

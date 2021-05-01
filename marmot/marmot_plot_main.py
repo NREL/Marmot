@@ -526,8 +526,11 @@ if __name__ == '__main__':
     Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
     
     # Folder to save your processed solutions
-    Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
-    
+    if pd.isna(Marmot_user_defined_inputs.loc['Marmot_Solutions_folder','User_defined_value']):
+        Marmot_Solutions_folder = None
+    else:
+        Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
+        
     Scenarios = pd.Series(Marmot_user_defined_inputs.loc['Scenarios'].squeeze().split(",")).str.strip().tolist()
     
     # These variables (along with Region_Mapping) are used to initialize MetaData
