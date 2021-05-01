@@ -94,11 +94,17 @@ class mplot(object):
                         for gen in gen_names:
                             sgt = stt.loc[stt['gen_name'] == gen]
                             if not all(sgt['Output (MWh)'] == 0):
-
-                                time_delta = sgt.index[1] - sgt.index[0]  # Calculates interval step to correct for MWh of generation.
+                                
+                                # Calculates interval step to correct for MWh of generation
+                                time_delta = sgt.index[1] - sgt.index[0]
+                                duration = sgt.index[len(sgt)-1] - sgt.index[0]
+                                duration = duration + time_delta #Account for last timestep.
+                                # Finds intervals in 60 minute period
+                                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                                duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
+                                                     
                                 sgt = sgt[sgt['Output (MWh)'] !=0] #Remove time intervals when output is zero.
-                                duration_hours = (len(sgt) * time_delta + time_delta)/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation
-                                total_gen = sgt['Output (MWh)'].sum()
+                                total_gen = sgt['Output (MWh)'].sum()/interval_count
                                 cap = sgt['Installed Capacity (MW)'].mean()
 
                                 #Calculate CF
