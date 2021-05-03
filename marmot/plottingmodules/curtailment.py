@@ -661,19 +661,26 @@ class mplot(object):
                     cap_site = cap.xs(site,level = 'gen_name') 
                     curt = cap_site - gen_site
                     curt = vre_curt.xs(site,level = 'gen_name')
+
                     curt_tot = curt.sum()
                     gen_tot = gen_site.sum()
                     curt_perc = pd.Series(curt_tot / gen_tot)
 
                     levels2drop = [level for level in gen_site.index.names if level != 'timestamp']
                     gen_site = gen_site.droplevel(levels2drop)
-                    gen_site.columns = [site]
+
 
                 else:
                     curt_perc = pd.Series([0])
                     curt_tot = pd.Series([0])
                     gen_tot = pd.Series([0])
                     curt = pd.Series([0] * len(ti),name = site,index = ti)
+
+                gen_tot.columns = [site]
+                curt_perc.columns = [site]
+                curt_tot.columns = [site]
+                curt.columns = [site]
+
                 sites_gen = sites_gen.append(gen_tot)
                 sites = sites.append(curt_perc)
                 curt_tots = curt_tots.append(curt_tot)
@@ -705,7 +712,7 @@ class mplot(object):
         fig1.spines['right'].set_visible(False)
         fig1.spines['top'].set_visible(False)
         fig1.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
-        fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 2))         #adds % to y axis data
+        fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
         fig1.tick_params(axis='y', which='major', length=5, width=1)
         fig1.tick_params(axis='x', which='major', length=5, width=1)
         
@@ -714,15 +721,21 @@ class mplot(object):
         
         Total_Curt = round(Total_Curt,2)
         Total_Curt = Total_Curt.melt()
-        #inserts total bar value above each bar
+        #inserts total bar value above each bar, 
+        #but only if it is the max in the bar group.
+        #to do this, take the n highest patches, where n is the number of bar broups (select_sites)
+        heights = [patch.get_height() for patch in fig1.patches]
+        heights.sort(reverse = True)
+        toph = heights[0:len(select_sites)]
         for k, patch in enumerate(fig1.patches):
             height = patch.get_height()
-            width = patch.get_width()
-            x, y = patch.get_xy()
-            fig1.text(x+width/2,y + height + 0.05*max(fig1.get_ylim()),
-                str(Total_Curt.iloc[k][1]) + f" {unitconversion['units']}h",
-                horizontalalignment='center',
-                verticalalignment='center', fontsize=11)
+            if height in toph:
+                width = patch.get_width()
+                x, y = patch.get_xy()
+                fig1.text(x+width/2,y + height + 0.05*max(fig1.get_ylim()),
+                    str(Total_Curt.iloc[k][1]) + f" {unitconversion['units']}h",
+                    horizontalalignment='center',
+                    verticalalignment='center', fontsize=11)
 
         fig1.figure.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.svg'),dpi=600, bbox_inches='tight')
 
