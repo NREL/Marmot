@@ -16,7 +16,6 @@ have descriptive names such as total_generation.py, generation_stack.py, curtaim
 import os
 import sys
 import pathlib
-FILE_DIR = pathlib.Path(__file__).parent.absolute()
 if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
     #If running from top level of repo.
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
@@ -41,6 +40,8 @@ except ModuleNotFoundError:
     sys.exit()
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
+
+FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 
 #===============================================================================
 
@@ -68,7 +69,7 @@ class SetupLogger():
         configures logger from marmot_logging_config.yml file,
         handles rollover of log file on each instantiation.
         
-        Allows log_directory to be chnaged from default
+        Allows log_directory to be changed from default
         
         Parameters
         ----------
@@ -300,31 +301,41 @@ class MarmotPlot(SetupLogger):
         #===============================================================================
         
         try:
-            ordered_gen = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('ordered_gen_file')),squeeze=True).str.strip().tolist()
+            ordered_gen = pd.read_csv(os.path.join(self.mapping_folder,
+                                                   mconfig.parser('ordered_gen_file')),
+                                      squeeze=True).str.strip().tolist()
         except FileNotFoundError:
-            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "ordered_gen.csv")}"; Check file name in config file. This is required to run Marmot, system will now exit')
+            self.logger.warning((f'Could not find "{os.path.join(self.mapping_folder, "ordered_gen.csv")}"; Check file name in config file. This is required to run Marmot, system will now exit'))
             sys.exit()
         
         try:
-            pv_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','pv_gen_cat')),squeeze=True).str.strip().tolist()
+            pv_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
+                                                  mconfig.parser('category_file_names','pv_gen_cat')),
+                                     squeeze=True).str.strip().tolist()
         except FileNotFoundError:
             self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "pv_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
             pv_gen_cat = []
         
         try:
-            re_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','re_gen_cat')),squeeze=True).str.strip().tolist()
+            re_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
+                                                  mconfig.parser('category_file_names','re_gen_cat')),
+                                     squeeze=True).str.strip().tolist()
         except FileNotFoundError:
             self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "re_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
             re_gen_cat = []
         
         try:
-            vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','vre_gen_cat')),squeeze=True).str.strip().tolist()
+            vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
+                                                   mconfig.parser('category_file_names','vre_gen_cat')),
+                                      squeeze=True).str.strip().tolist()
         except FileNotFoundError:
             self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
             vre_gen_cat = []
         
         try:
-            thermal_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names','thermal_gen_cat')), squeeze = True).str.strip().tolist()
+            thermal_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
+                                                       mconfig.parser('category_file_names','thermal_gen_cat')),
+                                          squeeze = True).str.strip().tolist()
         except FileNotFoundError:
             self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "thermal_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
             thermal_gen_cat = []
@@ -334,7 +345,8 @@ class MarmotPlot(SetupLogger):
                             self.logger.warning(f"The new categories from the gen_names csv do not exist in ordered_gen!:{set(self.gen_names.New.unique()) - (set(ordered_gen))}")
         
         try:
-            PLEXOS_color_dict = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('color_dictionary_file')))
+            PLEXOS_color_dict = pd.read_csv(os.path.join(self.mapping_folder,
+                                                         mconfig.parser('color_dictionary_file')))
             PLEXOS_color_dict = PLEXOS_color_dict.rename(columns={PLEXOS_color_dict.columns[0]:'Generator',PLEXOS_color_dict.columns[1]:'Colour'})
             PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
             PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
@@ -533,7 +545,7 @@ class MarmotPlot(SetupLogger):
                     continue
                 
                 if isinstance(Figure_Out, mfunc.UnsupportedAggregation):
-                    logger.info(f"Aggregation Type: '{self.AGG_BY}' not supported for This plot!\n")
+                    self.logger.info(f"Aggregation Type: '{self.AGG_BY}' not supported for This plot!\n")
                     continue
                 
                 for zone_input in Zones:
@@ -544,15 +556,22 @@ class MarmotPlot(SetupLogger):
                     else:
                         # Save figures
                         try:
-                            Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'), dpi=600, bbox_inches='tight')
+                            Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, 
+                                                                                      f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
+                                                                         dpi=600,
+                                                                         bbox_inches='tight')
                         except AttributeError:
-                            Figure_Out[zone_input]["fig"].savefig(os.path.join(figures, f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'), dpi=600, bbox_inches='tight')
+                            Figure_Out[zone_input]["fig"].savefig(os.path.join(figures,
+                                                                               f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
+                                                                  dpi=600,
+                                                                  bbox_inches='tight')
 
                         # Save .csv's.
                         if Figure_Out[zone_input]['data_table'].empty:
-                            logger.info(f'{row["Figure Output Name"]} does not return a data table')
+                            self.logger.info(f'{row["Figure Output Name"]} does not return a data table')
                         else:
-                            Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures, f'{zone_input}_{row["Figure Output Name"]}.csv'))
+                            Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures,
+                                                                                     f'{zone_input}_{row["Figure Output Name"]}.csv'))
 
                 self.logger.info(f'Plotting Completed for {row["Figure Output Name"]}\n')
 
