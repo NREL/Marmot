@@ -466,21 +466,23 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
-    def curt_total_diff(self):
+    def curt_total_diff(self,figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
 
         """
         This module calculates the total curtailment, broken down by technology. 
         It produces a stacked bar plot, with a bar for each scenario.
         """
 
+        return mfunc.UnderDevelopment()
+
         outputs = {}
-        curtailment_collection = {}
-        avail_gen_collection = {}
-        check_input_data = []
+        properties = [(True, "generator_Curtailment", self.Scenarios),
+                      (True, "generator_Available_Capacity", self.Scenarios)]
         
-        check_input_data.extend([mfunc.get_data(curtailment_collection,"generator_Curtailment", self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(avail_gen_collection,"generator_Available_Capacity", self.Marmot_Solutions_folder, self.Scenarios)])
-        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
@@ -503,7 +505,7 @@ class mplot(object):
                 vre_collection = {}
                 avail_vre_collection = {}
 
-                vre_curt = curtailment_collection.get(scenario)
+                vre_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -511,7 +513,7 @@ class mplot(object):
                     continue
                 vre_curt = vre_curt[vre_curt.index.isin(self.vre_gen_cat,level='tech')]
 
-                avail_gen = avail_gen_collection.get(scenario)
+                avail_gen = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
                 try: #Check for regions missing all generation.
                     avail_gen = avail_gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -702,11 +704,11 @@ class mplot(object):
             Total_Curt = pd.concat([Total_Curt,curt_tots],axis = 1)
 
         Curt_8760 = pd.concat(chunks,axis = 0, copy = False)
-        Curt_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curt_8760.csv'))
+        Curt_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_8760.csv'))
 
         Total_Gen = Total_Gen / 1000000
-        Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
-        Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen.csv'))
+        Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.csv'))
+        Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
                     
         fig1 = Total_Curtailment_Out_perc.plot.bar(stacked = False, figsize=(9,6), rot=0,edgecolor='black', linewidth='0.1')
         fig1.spines['right'].set_visible(False)
@@ -737,7 +739,7 @@ class mplot(object):
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11)
 
-        fig1.figure.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.svg'),dpi=600, bbox_inches='tight')
+        fig1.figure.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
 
         outputs = mfunc.DataSavedInModule()
         return outputs
