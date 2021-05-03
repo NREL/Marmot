@@ -16,7 +16,7 @@ it can be read into the marmot_plot_main.py file
 import os
 import sys
 import pathlib
-file_dir = pathlib.Path(__file__).parent.absolute()
+FILE_DIR = pathlib.Path(__file__).parent.absolute()
 if __name__ == '__main__':  # Add Marmot directory to sys path if running from __main__
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -46,24 +46,6 @@ except ModuleNotFoundError:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 
 # ============================================================================
-# Setup Logger
-# ============================================================================
-
-current_dir = os.getcwd()
-os.chdir(file_dir)
-
-with open('config/marmot_logging_config.yml', 'rt') as f:
-    conf = yaml.safe_load(f.read())
-    logging.config.dictConfig(conf)
-
-logger = logging.getLogger('marmot_format')
-# Creates a new log file for next run
-logger.handlers[1].doRollover()
-logger.handlers[2].doRollover()
-
-os.chdir(current_dir)
-
-# ============================================================================
 
 # A bug in pandas requires this to be included,
 # otherwise df.to_string truncates long strings. Fix available in Pandas 1.0
@@ -71,14 +53,76 @@ os.chdir(current_dir)
 pd.set_option("display.max_colwidth", 1000)
 
 
-class Process():
-    '''
-    Process Class contains methods for processing h5plexos query data
-    '''
+class SetupLogger():
+    """Sets up the python logger.
+    
+    Allows an optional suffix to be included which will be appended to the
+    end of the log file name, this is useful when running multiple 
+    processes in parallel to allow logging to seperate files.
+    
+    Allows log_directory to be changed from default
+    
+    SetupLogger is a subclass of all other module classes 
+    """
+    
+    def __init__(self, log_directory='logs', log_suffix=None):
+        """Setuplogger __init__ method.
+        
+        Formats log filename, 
+        configures logger from marmot_logging_config.yml file,
+        handles rollover of log file on each instantiation.
+        
+        Allows log_directory to be changed from default
+        
+        Parameters
+        ----------
+        log_directory : string, optional
+            log directory to save logs, The default is 'logs'
+        log_suffix : string, optional
+            optional suffix to add to end of log file. The default is None.
+
+        Returns
+        -------
+        None.
+
+        """
+        if log_suffix is None:
+            self.log_suffix = ''
+        else:
+             self.log_suffix = f'_{log_suffix}'
+                 
+        current_dir = os.getcwd()
+        os.chdir(FILE_DIR)
+        
+        with open('config/marmot_logging_config.yml', 'rt') as f:
+            conf = yaml.safe_load(f.read())
+            conf['handlers']['warning_handler']['filename'] = \
+                (conf['handlers']['warning_handler']['filename']
+                .format(log_directory, 'formatter', self.log_suffix))
+            conf['handlers']['info_handler']['filename'] = \
+                (conf['handlers']['info_handler']['filename']
+                .format(log_directory, 'formatter', self.log_suffix))
+            
+            logging.config.dictConfig(conf)
+        
+        self.logger = logging.getLogger('marmot_format')
+        # Creates a new log file for next run 
+        self.logger.handlers[1].doRollover()
+        self.logger.handlers[2].doRollover()
+        
+        os.chdir(current_dir)
+        
+        
+class Process(SetupLogger):
+    """Conatins methods for processing h5plexos query data.
+    
+    All methods are PLEXOS Class specific
+    e.g generator, region, zone, line etc.
+    """
 
     def __init__(self, df, metadata, Region_Mapping, gen_names, emit_names):
-        '''
-
+        """Process __init__ method.
+        
         Parameters
         ----------
         df : pd.DataFrame
@@ -96,9 +140,7 @@ class Process():
         Returns
         -------
         None.
-
-        '''
-
+        """
         # certain methods require information from metadata.  metadata is now
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
@@ -113,15 +155,14 @@ class Process():
         self.gen_names_dict = self.gen_names[['Original', 'New']].set_index("Original").to_dict()["New"]
 
     def df_process_generator(self):
-        '''
-        Method for formatting data which comes form the PLEXOS Generator Class
+        """Format data which comes form the PLEXOS Generator Class.
 
         Returns
         -------
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['tech', 'gen_name'], level=['category', 'name'], inplace=True)
 
@@ -179,19 +220,18 @@ class Process():
         # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
         if set(df.index.unique(level="tech")).issubset(self.gen_names["New"].unique()) is False:
             missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(self.gen_names["New"].unique())))
-            logger.warning("The Following Generators do not have a correct category mapping: %s\n", missing_gen_cat)
+            self.logger.warning("The Following Generators do not have a correct category mapping: %s\n", missing_gen_cat)
         return df
 
     def df_process_region(self):
-        '''
-        Function for formating data which comes from the PLEXOS Region Class
-
+        """Format data which comes from the PLEXOS Region Class.
+         
         Returns
         -------
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
         if not self.Region_Mapping.empty:  # checks if Region_Mapping contains data to merge, skips if empty
@@ -216,7 +256,7 @@ class Process():
         return df
 
     def df_process_zone(self):
-        '''
+        """
         Method for formating data which comes from the PLEXOS Zone Class
 
         Returns
@@ -224,7 +264,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('zone', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -235,7 +275,7 @@ class Process():
         return df
 
     def df_process_line(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Line Class
 
         Returns
@@ -243,7 +283,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('line_name', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -254,7 +294,7 @@ class Process():
         return df
 
     def df_process_interface(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Interface Class
 
         Returns
@@ -262,7 +302,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['interface_name', 'interface_category'], level=['name', 'category'], inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -273,7 +313,7 @@ class Process():
         return df
 
     def df_process_reserve(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Reserve Class
 
         Returns
@@ -281,7 +321,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['parent', 'Type'], level=['name', 'category'], inplace=True)
         df = df.reset_index()  # unzip the levels in index
@@ -297,7 +337,7 @@ class Process():
         return df
 
     def df_process_reserves_generators(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Reserve_Generators Relational Class
 
         Returns
@@ -305,7 +345,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df = df.reset_index()  # unzip the levels in index
@@ -332,7 +372,7 @@ class Process():
         return df
 
     def df_process_fuel(self):
-        '''
+        """
         Methodfor formatting data which comes form the PLEXOS Fuel Class
 
         Returns
@@ -340,7 +380,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('fuel_type', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -351,7 +391,7 @@ class Process():
         return df
 
     def df_process_constraint(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Constraint Class
 
         Returns
@@ -359,7 +399,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['constraint_category', 'constraint'], level=['category', 'name'], inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -370,7 +410,7 @@ class Process():
         return df
 
     def df_process_emission(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Emission Class
 
         Returns
@@ -378,7 +418,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename('emission_type', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -389,7 +429,7 @@ class Process():
         return df
 
     def df_process_emissions_generators(self):
-        '''
+        """
         Method for formatting data which comes from the PLEXOS Emissions_Generators Relational Class
 
         Returns
@@ -397,7 +437,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df.index.rename(['pollutant'], level=['parent'], inplace=True)
@@ -429,7 +469,7 @@ class Process():
         if not self.emit_names.empty:
             if self.emit_names_dict != {} and (set(df['pollutant'].unique()).issubset(self.emit_names["New"].unique())) is False:
                 missing_emit_cat = list((set(df['pollutant'].unique())) - (set(self.emit_names["New"].unique())))
-                logger.warning(f"The following emission objects do not have a correct category mapping: {missing_emit_cat}\n")
+                self.logger.warning(f"The following emission objects do not have a correct category mapping: {missing_emit_cat}\n")
 
         df_col = list(df.columns)  # Gets names of all columns in df and places in list
         df_col.remove(0)
@@ -442,7 +482,7 @@ class Process():
         return df
 
     def df_process_storage(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Storage Class
 
         Returns
@@ -450,7 +490,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property", "category"])
         df = df.reset_index()  # unzip the levels in index
         df = df.merge(self.metadata.generator_storage(), how='left', on='name')
@@ -469,7 +509,7 @@ class Process():
         return df
 
     def df_process_region_regions(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Region_Regions Relational Class
 
         Returns
@@ -477,7 +517,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property"])
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names)  # Gets names of all columns in df and places in list
@@ -487,7 +527,7 @@ class Process():
         return df
 
     def df_process_node(self):
-        '''
+        """
         Method for formatting data which comes form the PLEXOS Node Class
 
         Returns
@@ -495,7 +535,7 @@ class Process():
         df : pd.DataFrame
             Processed Output, single value column with multiindex.
 
-        '''
+        """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('node', level='name', inplace=True)
         df.sort_index(level=['node'], inplace=True)
@@ -538,22 +578,23 @@ class Process():
         return df
 
 
-class MarmotFormat():
-    '''
-    This is the main MarmotFormat class which needs to be instantiated to run the formatter.
-    The fromatter reads in PLEXOS hdf5 files created with the h5plexos library
+class MarmotFormat(SetupLogger):
+    """Main module class to be instantiated to run the formatter.
+
+    MarmotFormat reads in PLEXOS hdf5 files created with the h5plexos library
     and processes the output results to ready them for plotting.
     Once the outputs have been processed, they are saved to an intermediary hdf5 file
     which can then be read into the Marmot plotting code
-    '''
+    """
 
     def __init__(self, Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
                  Marmot_Solutions_folder=None,
                  mapping_folder='mapping_folder',
                  Region_Mapping=pd.DataFrame(),
                  emit_names=pd.DataFrame(),
-                 VoLL=10000):
-        '''
+                 VoLL=10000,
+                 **kwargs):
+        """Marmotformat class __init__ method.
 
         Parameters
         ----------
@@ -584,7 +625,8 @@ class MarmotFormat():
         -------
         None.
 
-        '''
+        """
+        super().__init__(**kwargs) # Instantiation of SetupLogger
 
         self.Scenario_name = Scenario_name
         self.PLEXOS_Solutions_folder = PLEXOS_Solutions_folder
@@ -601,7 +643,7 @@ class MarmotFormat():
                 self.gen_names = gen_names.rename(columns={gen_names.columns[0]: 'Original',
                                                            gen_names.columns[1]: 'New'})
             except FileNotFoundError:
-                logger.warning('Could not find specified gen_names file; check file name. This is required to run Marmot, system will now exit')
+                self.logger.warning('Could not find specified gen_names file; check file name. This is required to run Marmot, system will now exit')
                 sys.exit()
         elif isinstance(gen_names, pd.DataFrame):
             self.gen_names = gen_names.rename(columns={gen_names.columns[0]: 'Original',
@@ -611,7 +653,7 @@ class MarmotFormat():
             try:
                 self.Plexos_Properties = pd.read_csv(Plexos_Properties)
             except FileNotFoundError:
-                logger.warning('Could not find specified Plexos_Properties file; check file name. This is required to run Marmot, system will now exit')
+                self.logger.warning('Could not find specified Plexos_Properties file; check file name. This is required to run Marmot, system will now exit')
                 sys.exit()
         elif isinstance(Plexos_Properties, pd.DataFrame):
             self.Plexos_Properties = Plexos_Properties
@@ -619,7 +661,7 @@ class MarmotFormat():
         try:
             self.vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names', 'vre_gen_cat')), squeeze=True).str.strip().tolist()
         except FileNotFoundError:
-            logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required to calculate Curtailment')
+            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required to calculate Curtailment')
             self.vre_gen_cat = []
 
         if isinstance(Region_Mapping, str):
@@ -628,12 +670,12 @@ class MarmotFormat():
                 if not self.Region_Mapping.empty:
                     self.Region_Mapping = self.Region_Mapping.astype(str)
             except FileNotFoundError:
-                logger.warning('Could not find specified Region Mapping file; check file name\n')
+                self.logger.warning('Could not find specified Region Mapping file; check file name\n')
                 self.Region_Mapping = pd.DataFrame()
         elif isinstance(Region_Mapping, pd.DataFrame):
             self.Region_Mapping = Region_Mapping
             if not self.Region_Mapping.empty:
-                self.Region_Mapping = self.Region_Mapping.astype(str)
+                self.Region_Mapping = self.Region_Mapping.astype('string')
 
         try:
             self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)  # delete category columns if exists
@@ -648,7 +690,7 @@ class MarmotFormat():
                                                     self.emit_names.columns[1]: 'New'}, 
                                            inplace=True)
             except FileNotFoundError:
-                logger.warning('Could not find specified emissions mapping file; check file name\n')
+                self.logger.warning('Could not find specified emissions mapping file; check file name\n')
                 self.emit_names = pd.DataFrame()
         elif isinstance(emit_names, pd.DataFrame):
             self.emit_names = emit_names
@@ -699,7 +741,7 @@ class MarmotFormat():
         # Process attribute and return to df
         df = process_att()
         if plexos_class == 'region' and plexos_prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
-            logger.warning(f"Scenario contains Unserved Energy: {int(df.sum(axis=0))} MW\n")
+            self.logger.warning(f"Scenario contains Unserved Energy: {int(df.sum(axis=0))} MW\n")
         return df
 
     def _report_prop_error(self, plexos_prop, plexos_class):
@@ -720,8 +762,8 @@ class MarmotFormat():
             Empty DataFrame.
 
         '''
-        logger.warning(f'CAN NOT FIND "{plexos_class} {plexos_prop}". "{plexos_prop}" DOES NOT EXIST')
-        logger.info('SKIPPING PROPERTY\n')
+        self.logger.warning(f'CAN NOT FIND "{plexos_class} {plexos_prop}". "{plexos_prop}" DOES NOT EXIST')
+        self.logger.info('SKIPPING PROPERTY\n')
         df = pd.DataFrame()
         return df
 
@@ -737,7 +779,7 @@ class MarmotFormat():
 
         '''
 
-        logger.info(f"#### Processing {self.Scenario_name} PLEXOS Results ####")
+        self.logger.info(f"#### Processing {self.Scenario_name} PLEXOS Results ####")
 
         # ===============================================================================
         # Input and Output Directories
@@ -773,7 +815,7 @@ class MarmotFormat():
         os.chdir(startdir)
 
         # Read in all HDF5 files into dictionary
-        logger.info("Loading all HDF5 files to prepare for processing")
+        self.logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
         for file in files_list:
             hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
@@ -785,7 +827,7 @@ class MarmotFormat():
         # Creates Initial HDF5 file for ouputing formated data
         Processed_Data_Out = pd.DataFrame()
         if os.path.isfile(os.path.join(hdf_out_folder, HDF5_output)) is True:
-            logger.info(f"'{hdf_out_folder}\{HDF5_output}' already exists: New variables will be added\n")
+            self.logger.info(f"'{hdf_out_folder}\{HDF5_output}' already exists: New variables will be added\n")
             # Skip properties that already exist in *formatted.h5 file.
             with h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') as f:
                 existing_keys = [key for key in f.keys()]
@@ -807,20 +849,20 @@ class MarmotFormat():
             # if any(meta.regions()['region'] not in Region_Mapping['region']):
             if set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) is False:
                 missing_regions = list(set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
-                logger.warning(f'The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: {missing_regions}\n',)
+                self.logger.warning(f'The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: {missing_regions}\n',)
 
         # Main loop to process each ouput and pass data to functions
         for index, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
             data_chunks = []
 
-            logger.info(f'Processing {row["group"]} {row["data_set"]}')
+            self.logger.info(f'Processing {row["group"]} {row["data_set"]}')
             prop_underscore = row["data_set"].replace(' ', '_')
             key_path = row["group"] + "_" + prop_underscore
             if key_path not in existing_keys:
 
                 for model in files_list:
-                    logger.info(f"      {model}")
+                    self.logger.info(f"      {model}")
 
                     # Create an instance of metadata, and pass that as a variable to get data.
                     meta = MetaData(HDF5_folder_in, self.Region_Mapping, model)
@@ -847,7 +889,7 @@ class MarmotFormat():
                             | (row["data_set"] == "Import Limit")
                             ):
                         data_chunks.append(processed_data*row["unit_multiplier"])
-                        logger.info(f"{row['data_set']} Year property reported from only the first partition")
+                        self.logger.info(f"{row['data_set']} Year property reported from only the first partition")
                         break
                     else:
                         data_chunks.append(processed_data*row["unit_multiplier"])
@@ -857,7 +899,7 @@ class MarmotFormat():
 
                 if Processed_Data_Out.empty is False:
                     if (row["data_type"] == "year"):
-                        logger.info("Please Note: Year properties can not be checked for duplicates.\n\
+                        self.logger.info("Please Note: Year properties can not be checked for duplicates.\n\
                         Overlaping data can not be removed from 'Year' grouped data.\n\
                         This will effect Year data that differs between partitions such as cost results.\n\
                         It will not effect Year data that is equal in all partitions such as Installed Capacity or Line Limit results")
@@ -866,19 +908,19 @@ class MarmotFormat():
                         oldsize = Processed_Data_Out.size
                         Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')]  # Remove duplicates; keep first entry
                         if (oldsize - Processed_Data_Out.size) > 0:
-                            logger.info(f'Drop duplicates removed {oldsize-Processed_Data_Out.size} rows')
+                            self.logger.info(f'Drop duplicates removed {oldsize-Processed_Data_Out.size} rows')
         
                     row["data_set"] = row["data_set"].replace(' ', '_')
                     try:
-                        logger.info("Saving data to h5 file...")
+                        self.logger.info("Saving data to h5 file...")
                         Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
                                                   key=f'{row["group"]}_{row["data_set"]}',
                                                   mode="a",
                                                   complevel=9,
                                                   complib='blosc:zlib')
-                        logger.info("Data saved to h5 file successfully\n")
+                        self.logger.info("Data saved to h5 file successfully\n")
                     except:
-                        logger.warning("h5 File is probably in use, waiting to attempt save for a second time")
+                        self.logger.warning("h5 File is probably in use, waiting to attempt save for a second time")
                         time.sleep(120)
                         try:
                             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
@@ -886,9 +928,9 @@ class MarmotFormat():
                                                       mode="a",
                                                       complevel=9,
                                                       complib='blosc:zlib')
-                            logger.info("h5 File save succeded on second attempt")
+                            self.logger.info("h5 File save succeded on second attempt")
                         except:
-                            logger.warning("h5 File is probably in use, waiting to attempt save for a third time")
+                            self.logger.warning("h5 File is probably in use, waiting to attempt save for a third time")
                             time.sleep(240)
                             try:
                                 Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
@@ -896,14 +938,15 @@ class MarmotFormat():
                                                           mode="a",
                                                           complevel=9,
                                                           complib='blosc:zlib')
-                                logger.info("h5 File save succeded on third attempt")
+                                self.logger.info("h5 File save succeded on third attempt")
                             except:
-                                logger.warning("h5 Save failed on third try; will not attempt again\n")
+                                self.logger.warning("h5 Save failed on third try; will not attempt again\n")
                     # del Processed_Data_Out
                 else:
                     continue
             else:
-                logger.info(f"{key_path} already exists in output .h5 file.\nSkipping property.\n")
+                self.logger.info(f"{key_path} already exists in output .h5 file.")
+                self.logger.info("PROPERTY ALREADY PROCESSED\n")
                 continue
 
         # ===================================================================================
@@ -911,21 +954,21 @@ class MarmotFormat():
         # ===================================================================================
         if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r'):
             try:
-                logger.info("Processing generator Curtailment")
+                self.logger.info("Processing generator Curtailment")
                 try:
                     Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
                     Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
                     if Total_Gen_Out.empty is True:
-                        logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+                        self.logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
                 except KeyError:
-                    logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
+                    self.logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
 
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
                 adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
 
                 if not adjusted_vre_gen_list:
-                    logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
-                    logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
+                    self.logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
+                    self.logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
                     For more information see Marmot Readme under 'Mapping Files'")
 
                 # Output Curtailment#
@@ -937,17 +980,17 @@ class MarmotFormat():
                                        mode="a",
                                        complevel=9,
                                        complib='blosc:zlib')
-                logger.info("Data saved to h5 file successfully\n")
+                self.logger.info("Data saved to h5 file successfully\n")
                 # Clear Some Memory
                 del Total_Gen_Out
                 del Avail_Gen_Out
                 del Curtailment_Out
             except Exception:
-                logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
+                self.logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
 
         if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r'):
             try:
-                logger.info("Calculating Cost Unserved Energy: Regions")
+                self.logger.info("Calculating Cost Unserved Energy: Regions")
                 Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
                 Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
                 Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
@@ -956,12 +999,12 @@ class MarmotFormat():
                                             complevel=9,
                                             complib='blosc:zlib')
             except KeyError:
-                logger.warning("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
+                self.logger.warning("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
                 pass
 
         if "zone_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r'):
             try:
-                logger.info("Calculating Cost Unserved Energy: Zones")
+                self.logger.info("Calculating Cost Unserved Energy: Zones")
                 Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
                 Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
                 Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
@@ -970,13 +1013,13 @@ class MarmotFormat():
                                             complevel=9,
                                             complib='blosc:zlib')
             except KeyError:
-                logger.warning("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
+                self.logger.warning("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
                 pass
 
         end = time.time()
         elapsed = end - start
-        logger.info('Main loop took %s minutes', round(elapsed/60, 2))
-        logger.info(f'Formatting COMPLETED for {self.Scenario_name}')
+        self.logger.info('Main loop took %s minutes', round(elapsed/60, 2))
+        self.logger.info(f'Formatting COMPLETED for {self.Scenario_name}')
 
 
 if __name__ == '__main__':
@@ -991,7 +1034,7 @@ if __name__ == '__main__':
     # ===============================================================================
 
     # Changes working directory to location of this python file
-    os.chdir(file_dir)
+    os.chdir(FILE_DIR)
 
     Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"),
                                              usecols=['Input', 'User_defined_value'],
@@ -1016,7 +1059,10 @@ if __name__ == '__main__':
     # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
     Mapping_folder = 'mapping_folder'
     
-    Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
+    if pd.isna(Marmot_user_defined_inputs.loc['Region_Mapping.csv_name', 'User_defined_value']) is True:
+        Region_Mapping = pd.DataFrame()
+    else:
+        Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
 
     # Value of Lost Load for calculatinhg cost of unserved energy
     VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))
@@ -1051,7 +1097,6 @@ if __name__ == '__main__':
 #===============================================================================
 # Code that can be used to test PLEXOS_H5_results_formatter
 #===============================================================================
-
     # test = pd.read_hdf(file, 'generator_Generation')
     # test = test.xs("p60",level='region')
     # test = test.xs("gas-ct",level='tech')
