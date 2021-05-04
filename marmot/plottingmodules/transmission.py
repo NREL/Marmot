@@ -88,7 +88,7 @@ class mplot(object):
             self.logger.info(f"For all lines touching Zone = {zone_input}")
 
             fig2, axs = mfunc.setup_plot(xdimension = xdimension, ydimension=ydimension,sharey = True)
-            plt.subplots_adjust(wspace=0.05, hspace=0.25)
+            plt.subplots_adjust(wspace=0.1, hspace=0.25)
 
             data_table=[]
 
@@ -291,7 +291,7 @@ class mplot(object):
                     interf = interf[1:]
                 if interf in reported_ints:
                     chunks_interf = []
-                    single_exp_lim = export_limits.loc[interf] / 1000
+                    single_exp_lim = export_limits.loc[interf] / 1000 #TODO: Use auto unit converter 
                     single_imp_lim = import_limits.loc[interf] / 1000
 
                     #Check if all hours have the same limit.
@@ -386,6 +386,8 @@ class mplot(object):
         The plot includes every interchange that originates or ends in the aggregation zone.
         Figures and data tables are returned to plot_main
         """
+        
+        #TODO: Use auto unit converter in method
         
         duration_curve=False
         if 'duration_curve' in figure_name:
@@ -596,7 +598,13 @@ class mplot(object):
         The interfaces are specified in the plot properties field of Marmot_plot_select.csv (column 4).
         The figure and data tables are saved within the module.
         """
-
+        
+        return mfunc.UnderDevelopment() # TODO: add new get_data method 
+        
+        duration_curve=False
+        if 'duration_curve' in figure_name:
+            duration_curve = True
+        
         check_input_data = []
         Flow_Collection = {}
         Import_Limit_Collection = {}
@@ -695,7 +703,7 @@ class mplot(object):
                     interf = interf[1:]
                 if interf in reported_ints:
                     chunks_interf = []
-                    single_exp_lim = export_limits.loc[interf] / 1000
+                    single_exp_lim = export_limits.loc[interf] / 1000         #TODO: Use auto unit converter in method
                     single_imp_lim = import_limits.loc[interf] / 1000
 
                     #Check if all hours have the same limit.
@@ -795,6 +803,9 @@ class mplot(object):
         The plot includes every interchange that originates or ends in the aggregation zone.
         Figures and data tables are returned to plot_main
         """
+        
+        #TODO: Use auto unit converter in method
+
         
         duration_curve=False
         if 'duration_curve' in figure_name:
@@ -969,7 +980,10 @@ class mplot(object):
         The lines are specified in the plot properties field of Marmot_plot_select.csv (column 4).
         Figures and data tables are saved in the module.
         """
+        
+        #TODO: Use auto unit converter in method
 
+        
         duration_curve=False
         if 'duration_curve' in figure_name:
             duration_curve = True
@@ -1079,7 +1093,10 @@ class mplot(object):
         Figures and data tables saved in the module.
 
         """
+        
+        #TODO: Use auto unit converter in method
 
+        
         if pd.isna(start_date_range):
             self.logger.warning('You are attempting to plot a time series facetted by two seasons,\n\
             but you are missing a value in the "Start Date" column of "Marmot_plot_select.csv" \
@@ -1245,7 +1262,7 @@ class mplot(object):
     def extract_tx_cap(self, figure_name=None, prop=None, start=None, end=None, 
                         timezone=None, start_date_range=None, end_date_range=None):
      
-        return mfunc.UnderDevelopment()
+        return mfunc.UnderDevelopment() #TODO: Needs finishing
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -1573,10 +1590,8 @@ class mplot(object):
             n+=1
 
         #Remove extra axes
-        if excess_axs != 0:
-            while excess_axs > 0:
-                fig4.delaxes(axs[(grid_size)-excess_axs])
-                excess_axs-=1
+            if excess_axs != 0:
+                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
         cmap = mpl.cm.inferno
         norm = mpl.colors.Normalize(vmin=0, vmax=max(max_flow_group))
@@ -1868,7 +1883,7 @@ class mplot(object):
 
             #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
             fig7, axs = mfunc.setup_plot(xdimension,ydimension,sharey = True)
-            plt.subplots_adjust(wspace=0.6, hspace=0.3)
+            plt.subplots_adjust(wspace=0.1, hspace=0.5)
 
             net_exports_all = []
 
@@ -2021,7 +2036,7 @@ class mplot(object):
 
             #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
             fig7, axs = mfunc.setup_plot(1,1,sharey = True)
-            plt.subplots_adjust(wspace=0.6, hspace=0.3)
+            # plt.subplots_adjust(wspace=0.6, hspace=0.3)
 
             net_exports_all = []
             # Holds each scenario output table
@@ -2114,7 +2129,7 @@ class mplot(object):
         Figures and data tables are returned to plot_main.
         The method will only work if agg_by = "zone".
         """
-        return mfunc.UnderDevelopment()
+        return mfunc.UnderDevelopment() #TODO: Complete plot 
         
         int_flow_collection = {}
         check_input_data = []

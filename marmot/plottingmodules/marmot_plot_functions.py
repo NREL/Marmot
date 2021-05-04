@@ -692,11 +692,12 @@ def sort_duration(df,col):
     df : Sorted time series. 
 
     """
+
+    sorted_duration = (df.sort_values(by=col, ascending=False)
+                       .reset_index()
+                       .drop(columns=['timestamp']))
     
-    df.sort_values(by = col,ascending = False,inplace = True)
-    df.reset_index(inplace = True)
-    df.drop(columns = ['timestamp'],inplace = True)
-    return(df)
+    return sorted_duration
 
 
 # test = pd.DataFrame({'A':[1,3,2],
