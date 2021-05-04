@@ -171,7 +171,7 @@ class mplot(object):
                     prop_name ='Top 10 Lines'
                 else:
                     prop_name = prop
-                plt.ylabel(f'Line Utilization: {prop_name}',  color='black', rotation='vertical', labelpad=40)
+                plt.ylabel(f'Line Utilization: {prop_name}',  color='black', rotation='vertical', labelpad=60)
                 plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
@@ -196,7 +196,7 @@ class mplot(object):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"line_Flow",self.Scenarios),
+        properties = [(True,"interface_Flow",self.Scenarios),
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
@@ -263,7 +263,7 @@ class mplot(object):
             import_limits.set_index('interface_name',inplace = True)
 
             #Extract time index
-            ti = self.mplot_data_dict["line_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
+            ti = self.mplot_data_dict["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
 
             if prop != '':
                 interf_list = prop.split(',')
@@ -304,7 +304,7 @@ class mplot(object):
                     limits.index = ti
 
                     for scenario in self.Scenarios:
-                        flow = self.mplot_data_dict["line_Flow"].get(scenario)
+                        flow = self.mplot_data_dict["interface_Flow"].get(scenario)
                         single_int = flow.xs(interf,level = 'interface_name') / 1000
                         single_int.index = single_int.index.droplevel('interface_category')
                         single_int.columns = [interf]
@@ -357,7 +357,7 @@ class mplot(object):
 
             Data_Table_Out = pd.concat(chunks,axis = 1)
             Data_Table_Out = Data_Table_Out.reset_index()
-            index_name = 'level_0' if self.duration_curve else 'timestamp'
+            index_name = 'level_0' if duration_curve else 'timestamp'
             Data_Table_Out = Data_Table_Out.pivot(index = index_name,columns = 'Scenario')
             #Limits_Out = pd.concat(limits_chunks,axis = 1)
             #Limits_Out.index = ['Export Limit','Import Limit']
@@ -393,7 +393,7 @@ class mplot(object):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"line_Flow",self.Scenarios),
+        properties = [(True,"interface_Flow",self.Scenarios),
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
@@ -455,7 +455,7 @@ class mplot(object):
             import_limits.set_index('interface_name',inplace = True)
 
             #Extract time index
-            ti = self.mplot_data_dict["line_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
+            ti = self.mplot_data_dict["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
 
             if prop != '':
                 interf_list = prop.split(',')
@@ -509,7 +509,7 @@ class mplot(object):
                 limits.index = ti
 
                 for scenario in self.Scenarios:
-                    flow = self.mplot_data_dict["line_Flow"].get(scenario)
+                    flow = self.mplot_data_dict["interface_Flow"].get(scenario)
                     single_int = flow.xs(interf,level = 'interface_name') / 1000
                     single_int.index = single_int.index.droplevel('interface_category')
                     single_int.columns = [interf]
@@ -723,14 +723,14 @@ class mplot(object):
                             single_int = single_int[self.start_date : self.end_date]
                             limits = limits[self.start_date : self.end_date]
 
-                        if self.duration_curve:
+                        if duration_curve:
                             single_int = mfunc.sort_duration(single_int,interf)
                             
 
                         mfunc.create_line_plot(axs,single_int,interf,label = scenario + '\n interface flow', n = n)
                         
                         #Only print limits if it doesn't change monthly or if you are plotting a time series. Otherwise the limit lines could be misleading.
-                        if not self.duration_curve or identical[0]: 
+                        if not duration_curve or identical[0]: 
                             if scenario == self.Scenarios[-1]:
                                 #Only plot limits for last scenario.
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
@@ -754,7 +754,7 @@ class mplot(object):
 
                 axs[n].set_title(interf)
                 handles, labels = axs[n].get_legend_handles_labels()
-                if not self.duration_curve:
+                if not duration_curve:
                     mfunc.set_plot_timeseries_format(axs, n=n)
                 if n == len(interf_list) - 1:
                     axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
@@ -765,7 +765,7 @@ class mplot(object):
 
             Data_Table_Out = pd.concat(chunks,axis = 1)
             Data_Table_Out = Data_Table_Out.reset_index()
-            index_name = 'level_0' if self.duration_curve else 'timestamp'
+            index_name = 'level_0' if duration_curve else 'timestamp'
             Data_Table_Out = Data_Table_Out.pivot(index = index_name,columns = 'Scenario')
             #Limits_Out = pd.concat(limits_chunks,axis = 1)
             #Limits_Out.index = ['Export Limit','Import Limit']
@@ -777,7 +777,7 @@ class mplot(object):
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
-            if self.duration_curve:
+            if duration_curve:
                 plt.xlabel('Sorted hour of the year', color = 'black', labelpad = 30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
@@ -953,14 +953,15 @@ class mplot(object):
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
-        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + fn_suffix + '.csv'))
-       # Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + 'limits.csv'))
+        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
+       # Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + 'limits.csv'))
 
         outputs = mfunc.DataSavedInModule()
         return outputs
 
-    def line_flow_ind_diff(self):
+    def line_flow_ind_diff(self, figure_name=None, prop=None, start=None, end=None, 
+                        timezone=None, start_date_range=None, end_date_range=None):
 
         """
         This method plots the flow difference for individual transmission lines, with a facet for each line.
@@ -969,17 +970,23 @@ class mplot(object):
         Figures and data tables are saved in the module.
         """
 
-        check_input_data = []
-        Flow_Collection = {}
-
-        check_input_data.extend([mfunc.get_data(Flow_Collection,"line_Flow",self.Marmot_Solutions_folder, self.Scenario_Diff)])
+        duration_curve=False
+        if 'duration_curve' in figure_name:
+            duration_curve = True
+            
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"line_Flow",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
 
         #Select only lines specified in Marmot_plot_select.csv.
-        select_lines = self.prop.split(",")
+        select_lines = prop.split(",")
         if select_lines == None:
             outpus = mfunc.InputSheetError()
             return outputs
@@ -987,7 +994,7 @@ class mplot(object):
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
 
-        flow_diff = Flow_Collection[self.Scenario_Diff[1]] - Flow_Collection[self.Scenario_Diff[0]]
+        flow_diff = self.mplot_data_dict["line_Flow"].get(self.Scenario_Diff[1]) - self.mplot_data_dict["line_Flow"].get(self.Scenario_Diff[0])
 
         xdim,ydim = mfunc.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
@@ -995,7 +1002,7 @@ class mplot(object):
         fig2, axs = mfunc.setup_plot(xdim,ydim,sharey = False)
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-        reported_lines = Flow_Collection[self.Scenarios[0]].index.get_level_values('line_name').unique()
+        reported_lines = self.mplot_data_dict["line_Flow"].get(self.Scenarios[0]).index.get_level_values('line_name').unique()
         n = -1
         missing_lines = 0
         chunks = []
@@ -1013,7 +1020,7 @@ class mplot(object):
                     single_line = mfunc.shift_leapday(single_line,self.Marmot_Solutions_folder)
 
                 single_line_out = single_line.copy()
-                if self.duration_curve:
+                if duration_curve:
                     single_line = mfunc.sort_duration(single_line,line)
                                         
                 #mfunc.create_line_plot(axs,single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', n = n)
@@ -1029,7 +1036,7 @@ class mplot(object):
             mfunc.remove_excess_axs(axs,excess_axs,grid_size)     
             axs[n].set_title(line)
             handles, labels = axs[n].get_legend_handles_labels()
-            if not self.duration_curve:
+            if not duration_curve:
                 mfunc.set_plot_timeseries_format(axs, n=n)
             if n == len(select_lines) - 1:
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
@@ -1049,10 +1056,10 @@ class mplot(object):
         plt.tight_layout(rect=[0, 0.03, 1, 0.97])
         plt.tight_layout()
 
-        fn_suffix = '_duration_curve' if self.duration_curve else ''
+        fn_suffix = '_duration_curve' if duration_curve else ''
 
-        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',self.figure_name + fn_suffix + '.csv'))
+        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
 
         outputs = mfunc.DataSavedInModule()
         return outputs
@@ -2097,7 +2104,9 @@ class mplot(object):
 
         return outputs
 
-    def total_int_flow_ind(self):
+    def total_int_flow_ind(self,figure_name=None, prop=None, start=None,
+                    end=None, timezone=None, start_date_range=None,
+                    end_date_range=None):
         
         """
         This method plots the total flow for a specific interface, separated by positive and negative flows.
