@@ -139,7 +139,7 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            
+
             unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
@@ -159,6 +159,8 @@ class mplot(object):
             fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             fig1.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -253,6 +255,7 @@ class mplot(object):
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
+            #TODO: use mfunc functions
             fig2 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
                                   color = self.color_list,edgecolor='black', linewidth='0.1')
 
@@ -264,6 +267,8 @@ class mplot(object):
             fig2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             fig2.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs

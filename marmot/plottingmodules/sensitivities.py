@@ -47,6 +47,7 @@ class mplot(object):
         Each zone is plotted on a separate figure.
         Figures and data tables are returned to plot_main
         """
+        return mfunc.UnderDevelopment()
 
         outputs = {}
         
@@ -210,6 +211,8 @@ class mplot(object):
                 mfunc.set_plot_timeseries_format(axs)
                 handles, labels = axs[0].get_legend_handles_labels()
                 axs[0].legend(reversed(handles), reversed(labels),facecolor='inherit', frameon=True,loc='lower left',bbox_to_anchor=(1,0))
+                if mconfig.parser("plot_title_as_region"):
+                	fig2.title(zone_input)
                 outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
 
         # diff_csv.to_csv(self.Marmot_Solutions_folder + '/' + self.Scenario_name + '/icing_regional_MWdiffs.csv')

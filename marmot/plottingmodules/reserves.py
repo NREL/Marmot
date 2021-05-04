@@ -78,7 +78,7 @@ class mplot(object):
             fig1, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-            data_tables = {}
+            data_tables = []
             unique_tech_names = []
             for n, scenario in enumerate(Scenarios):
                 self.logger.info(f"Scenario = {scenario}")
@@ -114,7 +114,11 @@ class mplot(object):
                     self.logger.info("Plotting graph for entire timeperiod")
                 
                 reserve_provision_timeseries = reserve_provision_timeseries/unitconversion['divisor']
-                data_tables[scenario] = reserve_provision_timeseries.add_suffix(f" ({unitconversion['units']})")
+                
+                scenario_names = pd.Series([scenario] * len(reserve_provision_timeseries),name = 'Scenario')
+                data_table = reserve_provision_timeseries.add_suffix(f" ({unitconversion['units']})")
+                data_table = data_table.set_index([scenario_names],append = True)
+                data_tables.append(data_table)
                 
                 mfunc.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, label=reserve_provision_timeseries.columns,n=n)
                 mfunc.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
@@ -157,17 +161,18 @@ class mplot(object):
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
             mfunc.add_facet_labels(fig1, xlabels, self.ylabels)
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(f"Reserve Provision ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=30)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(region)
+            plt.ylabel(f"Reserve Provision ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=40)
 
-            if not facet:
-                data_tables = data_tables[self.Scenarios[0]]
+            data_table_out = pd.concat(data_tables)
 
-            outputs[region] = {'fig': fig1, 'data_table': data_tables}
+            outputs[region] = {'fig': fig1, 'data_table': data_table_out}
         return outputs
 
     def total_reserves_by_gen(self, figure_name=None, prop=None, start=None, 
@@ -270,6 +275,9 @@ class mplot(object):
             fig1.legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
                      facecolor='inherit', frameon=True)
 
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(region)
+
             outputs[region] = {'fig': fig1, 'data_table': data_table_out}
         return outputs
 
@@ -359,8 +367,6 @@ class mplot(object):
             
             if reserve_total_chunk:
                 reserve_out = pd.concat(reserve_total_chunk,axis=1, sort='False')
-                # remove any rows that all eqaul 0
-                reserve_out = reserve_out.loc[(reserve_out != 0).any(axis=1),:]
                 reserve_out.columns = reserve_out.columns.str.replace('_',' ')
             else:
                 reserve_out=pd.DataFrame()
@@ -390,7 +396,8 @@ class mplot(object):
             handles, labels = fig2.get_legend_handles_labels()
             fig2.legend(handles,labels, loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(region)
             outputs[region] = {'fig': fig2,'data_table': Data_Table_Out}
         return outputs
 
@@ -438,9 +445,8 @@ class mplot(object):
             fig3, axs = mfunc.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-            data_tables = {}
+            data_tables = []
             unique_reserve_types = []
-            
 
             for n, scenario in enumerate(Scenarios):
 
@@ -470,7 +476,10 @@ class mplot(object):
                 # create color dictionary
                 color_dict = dict(zip(reserve_timeseries.columns,self.color_list))
 
-                data_tables[scenario] = reserve_timeseries.add_suffix(f" (MW)")
+                scenario_names = pd.Series([scenario] * len(reserve_timeseries),name = 'Scenario')
+                data_table = reserve_timeseries.add_suffix(" (MW)")
+                data_table = data_table.set_index([scenario_names],append = True)
+                data_tables.append(data_table)
 
                 for column in reserve_timeseries:
                     mfunc.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
@@ -510,19 +519,20 @@ class mplot(object):
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
             mfunc.add_facet_labels(fig3, xlabels, self.ylabels)
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             # plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
-            plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 30)
-
-            #Data_Out = pd.concat(reserve_timeseries_chunk,axis=0)
-            if not facet:
-                data_tables = data_tables[self.Scenarios[0]]
-
-            outputs[region] =  {'fig': fig3, 'data_table': data_tables}
+            plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 40)
+            
+            if mconfig.parser("plot_title_as_region"):
+               plt.title(region)
+            
+            data_table_out = pd.concat(data_tables)
+            
+            outputs[region] =  {'fig': fig3, 'data_table': data_table_out}
 
         return outputs
             

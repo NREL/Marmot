@@ -101,8 +101,10 @@ class mplot(object):
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             mfunc.set_plot_timeseries_format(axs)
-
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+
         return outputs
 
 
@@ -178,7 +180,8 @@ class mplot(object):
             ax.margins(x=0.01)
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)  
             for patch in ax.patches:
                 width, height = patch.get_width(), patch.get_height()
                 if height<=1:
@@ -191,4 +194,5 @@ class mplot(object):
                     verticalalignment='center', fontsize=13)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+
         return outputs

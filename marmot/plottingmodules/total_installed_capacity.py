@@ -35,11 +35,9 @@ class mplot(object):
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-
-        self.x = mconfig.parser("figure_size", "xdimension")
-        self.y = mconfig.parser("figure_size", "ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options", "y_axes_decimalpt")
-
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.mplot_data_dict = {}
 
     def total_cap(self, figure_name=None, prop=None, start=None, end=None,
@@ -120,10 +118,11 @@ class mplot(object):
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
-
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',
                       bbox_to_anchor=(1, 0), facecolor='inherit', frameon=True)
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -222,7 +221,9 @@ class mplot(object):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',
                       bbox_to_anchor=(1, 0), facecolor='inherit', frameon=True)
-
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
+                
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
@@ -262,6 +263,7 @@ class mplot(object):
 
             # Remove any suffixes from column names
             Total_Installed_Capacity_Out.columns = [re.sub('[\s (]|GW|TW|MW|kW|\)', '', i) for i in Total_Installed_Capacity_Out.columns]
+
 
             Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=axs[0],
                                                   color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
@@ -321,7 +323,7 @@ class mplot(object):
             axs[1].tick_params(axis='y', which='major', length=5, width=1)
             axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
-            data_tables = {}
+            data_tables = []
             for n, scenario in enumerate(self.Scenarios):
 
                 x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + axs[1].patches[n].get_width()]
@@ -336,7 +338,7 @@ class mplot(object):
                                         facecolor='#DD0200',
                                         alpha=0.5)
 
-                data_tables[scenario] = pd.DataFrame()
+                data_tables = pd.DataFrame() #TODO pass output data back to plot main 
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
@@ -375,8 +377,13 @@ class mplot(object):
                           facecolor='inherit', frameon=True)
 
             # add labels to panels
-            axs[0].set_title("A.", fontdict={"weight": "bold"}, loc='left')
-            axs[1].set_title("B.", fontdict={"weight": "bold"}, loc='left')
+            axs[0].set_title("A.", fontdict={"weight": "bold", "size": 11}, loc='left',pad=4)
+            axs[1].set_title("B.", fontdict={"weight": "bold", "size": 11}, loc='left',pad=4)
+            
+            fig.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser('plot_title_as_region'):
+                plt.title(zone_input)
 
             # output figure
             outputs[zone_input] = {'fig': fig, 'data_table': data_tables}

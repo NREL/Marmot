@@ -64,9 +64,10 @@ class mplot(object):
                 self.logger.info(f"Scenario = {scenario}")
                 i+=1
                 
+
                 install_cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario).copy()
                 avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
-                if self.shift_leapday:
+                if self.shift_leapday == True:
                     avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)
                 if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():
                     avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
@@ -119,6 +120,9 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
+
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
@@ -253,6 +257,8 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal', labelpad = 40)
             plt.ylabel('Capacity out (MW)',  color='black', rotation='vertical', labelpad = 60)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
 
            #fig1.savefig('/home/mschwarz/PLEXOS results analysis/test/PJM_outages_2024_2011_test', dpi=600, bbox_inches='tight') #Test
 

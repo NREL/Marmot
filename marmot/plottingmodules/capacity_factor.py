@@ -14,6 +14,7 @@ import numpy as np
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
+import matplotlib.pyplot as plt
 
 
 class mplot(object):
@@ -24,7 +25,6 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         
@@ -94,11 +94,17 @@ class mplot(object):
                         for gen in gen_names:
                             sgt = stt.loc[stt['gen_name'] == gen]
                             if not all(sgt['Output (MWh)'] == 0):
-
-                                time_delta = sgt.index[1] - sgt.index[0]  # Calculates interval step to correct for MWh of generation.
+                                
+                                # Calculates interval step to correct for MWh of generation
+                                time_delta = sgt.index[1] - sgt.index[0]
+                                duration = sgt.index[len(sgt)-1] - sgt.index[0]
+                                duration = duration + time_delta #Account for last timestep.
+                                # Finds intervals in 60 minute period
+                                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                                duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
+                                                     
                                 sgt = sgt[sgt['Output (MWh)'] !=0] #Remove time intervals when output is zero.
-                                duration_hours = (len(sgt) * time_delta + time_delta)/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation
-                                total_gen = sgt['Output (MWh)'].sum()
+                                total_gen = sgt['Output (MWh)'].sum()/interval_count
                                 cap = sgt['Installed Capacity (MW)'].mean()
 
                                 #Calculate CF
@@ -131,6 +137,9 @@ class mplot(object):
             fig2.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig2.tick_params(axis='y', which='major', length=5, width=1)
             fig2.tick_params(axis='x', which='major', length=5, width=1)
+            if mconfig.parser("plot_title_as_region"):
+                fig2.set_title(zone_input)
+
             fig2.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
@@ -211,25 +220,28 @@ class mplot(object):
             
             Data_Table_Out = CF_all_scenarios.T
 
-            fig1 = CF_all_scenarios.plot.bar(stacked = False, figsize=(self.x*1.5,self.y*1.5), rot=0,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1')
+            fig1,ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
+            #TODO: rewrite with mfunc functions.
+            CF_all_scenarios.plot.bar(stacked = False, rot=0,
+                                 color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
 
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
             #adds % to y axis data
-            fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
-            fig1.legend(loc='lower left',bbox_to_anchor=(1,0),
+            ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
-            handles, labels = fig1.get_legend_handles_labels()
+            handles, labels = ax.get_legend_handles_labels()
 
             #Legend 1
-            fig1.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
+            ax.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
         return outputs
@@ -301,7 +313,10 @@ class mplot(object):
                 time_at_min_individ = pd.DataFrame(columns = tech_names, index = [scenario])
                 for tech_name in tech_names:
                     stt = Min.loc[Min['tech'] == tech_name]
-                    output = np.average(stt.fraction_at_min,weights = stt['Installed Capacity (MW)'])
+                    wgts = stt['Installed Capacity (MW)']
+                    if wgts.sum() == 0:
+                        wgts = pd.Series([1] * len(stt))
+                    output = np.average(stt.fraction_at_min,weights = wgts)
                     time_at_min_individ[tech_name] = output
 
                 time_at_min = time_at_min.append(time_at_min_individ)
@@ -322,8 +337,11 @@ class mplot(object):
             fig3.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             fig3.tick_params(axis='y', which='major', length=5, width=1)
             fig3.tick_params(axis='x', which='major', length=5, width=1)
+
+            if mconfig.parser("plot_title_as_region"):
+                fig3.set_title(zone_input)
+
             fig3.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs

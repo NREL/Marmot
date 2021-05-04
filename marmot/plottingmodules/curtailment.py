@@ -145,6 +145,8 @@ class mplot(object):
             ax.margins(x=0.01)
             ax.set_xlim(0, 9490)
             ax.set_ylim(bottom=0)
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
@@ -324,6 +326,8 @@ class mplot(object):
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.margins(x=0.01)
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             handles, labels = plt.gca().get_legend_handles_labels()
             by_label = OrderedDict(zip(labels, handles))
@@ -331,7 +335,6 @@ class mplot(object):
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
-
 
     def curt_total(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone=None, start_date_range=None, end_date_range=None):
@@ -438,6 +441,8 @@ class mplot(object):
             fig3.tick_params(axis='y', which='major', length=5, width=1)
             fig3.tick_params(axis='x', which='major', length=5, width=1)
             fig3.margins(x=0.01)
+            if mconfig.parser("plot_title_as_region"):
+                fig3.set_title(zone_input)
 
             handles, labels = fig3.get_legend_handles_labels()
             fig3.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
@@ -461,6 +466,139 @@ class mplot(object):
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
+    def curt_total_diff(self,figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+
+        """
+        This module calculates the total curtailment, broken down by technology. 
+        It produces a stacked bar plot, with a bar for each scenario.
+        """
+
+        return mfunc.UnderDevelopment()
+
+        outputs = {}
+        properties = [(True, "generator_Curtailment", self.Scenarios),
+                      (True, "generator_Available_Capacity", self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        for zone_input in self.Zones:
+            self.logger.info(self.AGG_BY +  " = " + zone_input)
+
+            Total_Curtailment_out = pd.DataFrame()
+            Total_Available_gen = pd.DataFrame()
+            vre_curt_chunks = []
+            avail_gen_chunks = []
+
+            for scenario in self.Scenarios:
+
+                self.logger.info("Scenario = " + scenario)
+                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+                #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
+
+                vre_collection = {}
+                avail_vre_collection = {}
+
+                vre_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                try:
+                    vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    self.logger.info('No curtailment in ' + zone_input)
+                    continue
+                vre_curt = vre_curt[vre_curt.index.isin(self.vre_gen_cat,level='tech')]
+
+                avail_gen = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
+                try: #Check for regions missing all generation.
+                    avail_gen = avail_gen.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                        self.logger.info('No available generation in ' + zone_input)
+                        continue
+                avail_gen = avail_gen[avail_gen.index.isin(self.vre_gen_cat,level='tech')]
+
+                for vre_type in self.vre_gen_cat:
+                    try:
+                        vre_curt_type = vre_curt.xs(vre_type,level='tech')
+                    except KeyError:
+                        self.logger.info('No ' + vre_type + ' in ' + zone_input)
+                        continue
+                    vre_collection[vre_type] = float(vre_curt_type.sum())
+
+                    avail_gen_type = avail_gen.xs(vre_type,level='tech')
+                    avail_vre_collection[vre_type] = float(avail_gen_type.sum())
+
+                vre_table = pd.DataFrame(vre_collection,index=[scenario])
+                avail_gen_table = pd.DataFrame(avail_vre_collection,index=[scenario])
+
+                vre_curt_chunks.append(vre_table)
+                avail_gen_chunks.append(avail_gen_table)
+            
+            Total_Curtailment_out = pd.concat(vre_curt_chunks, axis=0, sort=False)
+            Total_Available_gen = pd.concat(avail_gen_chunks, axis=0, sort=False)
+            
+            vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
+
+            #Change to a diff on the first scenario.
+            print(Total_Curtailment_out)
+            Total_Curtailment_out = Total_Curtailment_out-Total_Curtailment_out.xs(self.Scenarios[0]) 
+            Total_Curtailment_out.drop(self.Scenarios[0],inplace=True) #Drop base entry
+            
+            Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
+            Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
+            
+            # Data table of values to return to main program
+            Data_Table_Out = Total_Curtailment_out
+
+            if Total_Curtailment_out.empty == True:
+                outputs[zone_input] = mfunc.MissingZoneData()
+                continue
+            
+            # unit conversion return divisor and energy units
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
+            Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
+            
+            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
+                             edgecolor='black', linewidth='0.1')
+            fig3.spines['right'].set_visible(False)
+            fig3.spines['top'].set_visible(False)
+            fig3.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            fig3.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            fig3.tick_params(axis='y', which='major', length=5, width=1)
+            fig3.tick_params(axis='x', which='major', length=5, width=1)
+            fig3.margins(x=0.01)
+            if mconfig.parser("plot_title_as_region"):
+                fig3.set_title(zone_input)
+
+            handles, labels = fig3.get_legend_handles_labels()
+            fig3.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
+
+            curt_totals = Total_Curtailment_out.sum(axis=1)
+            print(Total_Curtailment_out)
+            print(curt_totals)
+            #inserts total bar value above each bar
+            k=0
+            for i in fig3.patches:
+                height = curt_totals[k]
+                width = i.get_width()
+                x, y = i.get_xy()
+                fig3.text(x+width/2,
+                    y+height + 0.05*max(fig3.get_ylim()),
+                    '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
+                    horizontalalignment='center',
+                    verticalalignment='center', fontsize=11, color='red')
+                k += 1
+                if k>=len(vre_pct_curt):
+                    break
+
+            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
+        return outputs
 
     def curt_ind(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone=None, start_date_range=None, end_date_range=None):
@@ -525,27 +663,34 @@ class mplot(object):
                     cap_site = cap.xs(site,level = 'gen_name') 
                     curt = cap_site - gen_site
                     curt = vre_curt.xs(site,level = 'gen_name')
+
                     curt_tot = curt.sum()
                     gen_tot = gen_site.sum()
                     curt_perc = pd.Series(curt_tot / gen_tot)
 
                     levels2drop = [level for level in gen_site.index.names if level != 'timestamp']
                     gen_site = gen_site.droplevel(levels2drop)
-                    gen_site.columns = [site]
+
 
                 else:
                     curt_perc = pd.Series([0])
                     curt_tot = pd.Series([0])
                     gen_tot = pd.Series([0])
                     curt = pd.Series([0] * len(ti),name = site,index = ti)
+
+                gen_tot.columns = [site]
+                curt_perc.columns = [site]
+                curt_tot.columns = [site]
+                curt.columns = [site]
+
                 sites_gen = sites_gen.append(gen_tot)
                 sites = sites.append(curt_perc)
                 curt_tots = curt_tots.append(curt_tot)
                 chunks_scen.append(curt)
 
             curt_8760_scen = pd.concat(chunks_scen,axis = 1)
-            scen_name = pd.Series([scenario] * len(ti),name = 'Scenario')
-            curt_8760_scen = curt_8760_scen.set_index(scen_name,append = True)
+            scen_name = pd.Series([scenario] * len(curt_8760_scen),name = 'Scenario')
+            curt_8760_scen = curt_8760_scen.set_index([scen_name],append = True)
             chunks.append(curt_8760_scen)
 
             sites.name = scenario
@@ -559,17 +704,17 @@ class mplot(object):
             Total_Curt = pd.concat([Total_Curt,curt_tots],axis = 1)
 
         Curt_8760 = pd.concat(chunks,axis = 0, copy = False)
-        Curt_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curt_8760.csv'))
+        Curt_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_8760.csv'))
 
         Total_Gen = Total_Gen / 1000000
-        Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.csv'))
-        Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment','Individual_gen.csv'))
+        Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.csv'))
+        Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
                     
         fig1 = Total_Curtailment_Out_perc.plot.bar(stacked = False, figsize=(9,6), rot=0,edgecolor='black', linewidth='0.1')
         fig1.spines['right'].set_visible(False)
         fig1.spines['top'].set_visible(False)
         fig1.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
-        fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 2))         #adds % to y axis data
+        fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
         fig1.tick_params(axis='y', which='major', length=5, width=1)
         fig1.tick_params(axis='x', which='major', length=5, width=1)
         
@@ -578,17 +723,23 @@ class mplot(object):
         
         Total_Curt = round(Total_Curt,2)
         Total_Curt = Total_Curt.melt()
-        #inserts total bar value above each bar
+        #inserts total bar value above each bar, 
+        #but only if it is the max in the bar group.
+        #to do this, take the n highest patches, where n is the number of bar broups (select_sites)
+        heights = [patch.get_height() for patch in fig1.patches]
+        heights.sort(reverse = True)
+        toph = heights[0:len(select_sites)]
         for k, patch in enumerate(fig1.patches):
             height = patch.get_height()
-            width = patch.get_width()
-            x, y = patch.get_xy()
-            fig1.text(x+width/2,y + height + 0.05*max(fig1.get_ylim()),
-                str(Total_Curt.iloc[k][1]) + f" {unitconversion['units']}h",
-                horizontalalignment='center',
-                verticalalignment='center', fontsize=11)
-        
-        fig1.figure.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment','Individual_curtailment.svg'),dpi=600, bbox_inches='tight')
+            if height in toph:
+                width = patch.get_width()
+                x, y = patch.get_xy()
+                fig1.text(x+width/2,y + height + 0.05*max(fig1.get_ylim()),
+                    str(Total_Curt.iloc[k][1]) + f" {unitconversion['units']}h",
+                    horizontalalignment='center',
+                    verticalalignment='center', fontsize=11)
+
+        fig1.figure.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
 
         outputs = mfunc.DataSavedInModule()
         return outputs

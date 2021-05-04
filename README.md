@@ -25,7 +25,7 @@ A high-level explanation of what these files do and suggested settings to change
   - numpy
   - pandas
   - PyYAML
-  - h5py>=2.10.0
+  - h5py==2.10.0
   - matplotlib>=3.1.0
   - [h5plexos](https://github.com/NREL/h5plexos)>=0.6 *(See more details [below](https://github.nrel.gov/PCM/Marmot#marmot_h5_formatter))*
   - tables
@@ -75,21 +75,21 @@ The **marmot_h5_formatter** reads in PLEXOS hdf5 files created with the h5plexos
 
 Before you use the **marmot_h5_formatter** you will need to adjust and set the input settings in the **Marmot_user_defined_inputs.csv** and set which PLEXOS properties to process in the **plexos_properties.csv**. You may also want to edit the Mapping Files described [here](https://github.nrel.gov/PCM/Marmot#mapping-files). These files are located in the repo and are available to be edited once you clone the repo. 
 
-Settings to adjust in the **Marmot_user_defined_inputs.csv** required to run the formatter include:
+Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the plotting code include:
 
-- `PLEXOS_Solutions_folder` The folder that contains all h5plexos files that have come from PLEXOS. This folder should contain the Scenario_process_list sub-folders in which the h5plexos files are contained. Here's an example of how that would look:
+- `PLEXOS_Solutions_folder` **Required** The folder that contains all h5plexos files that have come from PLEXOS. This folder should contain the Scenario_process_list sub-folders in which the h5plexos files are contained. Here's an example of how that would look:
   
   ![marmot folder structure](https://github.nrel.gov/storage/user/1084/files/bf9d1670-1254-11eb-8e62-c06455591fb2)
 
-- `Marmot_Solutions_folder` This is the base directory to create folders and save outputs in. When **marmot_h5_formatter** is run it will create a `Processed_HDF5 folder` here, in which all the proceessed results will be saved with the extension "*_formatted.h5*". This folder can have the same address as PLEXOS_Solutions_folder, having an alternative address allows the user to save outputs in a different location from inputs if desired. 
+- `Marmot_Solutions_folder` **Optional** This is the base directory to create folders and save outputs in. When **marmot_h5_formatter** is run it will create a `Processed_HDF5 folder` here, in which all the proceessed results will be saved with the extension "*_formatted.h5*". This folder can have the same address as PLEXOS_Solutions_folder, having an alternative address allows the user to save outputs in a different location from inputs if desired. if left blank all data and plots will be saved in PLEXOS_Solutions_folder.
 
-- `Scenario_process_list` This is the list of scenarios to process. The h5plexos hdf5 results files should be saved in folders with these names. The list must contain at least one entry. Using the above example this would be "*Scenario_name_1, Scenario_name_2*"
+- `Scenario_process_list` **Required** This is the list of scenarios to process. The h5plexos hdf5 results files should be saved in folders with these names. The list must contain at least one entry. Using the above example this would be "*Scenario_name_1, Scenario_name_2*"
 
-- `VoLL` Value of lost load for calculating the Cost of Unserved Energy, default is 10,000 $/MWh
+- `VoLL` **Required** Value of lost load for calculating the Cost of Unserved Energy, default is 10,000 $/MWh
 
-- `Region_Mapping.csv_name` The name of the Region_Mapping.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) bellow.
+- `Region_Mapping.csv_name` **Optional** The name of the Region_Mapping.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) bellow.
 
-- `gen_names.csv_name` The name of the gen_names.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) bellow.
+- `gen_names.csv_name` **Required** The name of the gen_names.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) bellow.
 
 Finally adjust the PLEXOS properties to process in the **plexos_properties.csv**. This csv file determines which PLEXOS properties to pull from the h5plexos results and process. Under the *"collect_data"* column adjust the property to be TRUE or FALSE to change if the data is processed. If your property is not here, add it as a new line with the same format. 
 
@@ -101,7 +101,7 @@ Examples of these files can be found within in the repo in the [mapping_folder](
 
 - **ordered_gen** Ordered list of generators which determines how they appear in a stack plot; generator names should equal those in the gen_names.csv *"New"* column
 
-- **Region_mapping.csv** This file allows you to group PLEXOS regions together to create aggregated regions. The first column in the file should always be called *"region"* and should contain the name of all the regions in your PLEXOS database. The names given to all other columns is up to you. In the example given in the repo, we aggregated NARIS regions to the country and interconnect level.   
+- **Region_mapping.csv** This file allows you to group PLEXOS regions together to create aggregated regions. The first column in the file should always be called *"region"* and should contain the name of all the regions in your PLEXOS database. The names given to all other columns is up to you. In the example given in the repo, we aggregated NARIS regions to the country and interconnect level. The use of Region_mapping is entirely optional, if not needed its entry in the **Marmot_user_defined_inputs.csv** can be left blank.
 
 - **colour_dictionary.csv** This allows the user to adjust the color used to plot generation technology types e.g Gas-CC, Wind, PV etc. The names in the generator column should equal those in the gen_names.csv *"New"* column. The current colors are the default SEAC colors recommended for use in publications.
 
@@ -127,7 +127,7 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 
 - `PLEXOS_Solutions_folder` **Required** Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
 
-- `Marmot_Solutions_folder` **Required** Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
+- `Marmot_Solutions_folder` **Optional** Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
 
 - `Scenarios` **Required** This is the name of the scenario(s) to plot. The order of the scenarios will determine the order of the scenarios in the plot. Resulting outputs will be saved in the "*Figures_Output*" folder contained with the `Marmot_Solutions_folder`. "*Figures_Output*" is created automatically when **marmot_plot_main.py** is run
 
@@ -137,7 +137,7 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 
 - `zone_region_sublist` **Optional** List of *"regions/zones”* to plot if results are not required for all regions. The list of *"regions/zones”* should be contained within the `AGG_BY` aggregation. This is an optional field and can be left empty if not needed.
 
-- `Facet_ylabels` & `Facet_xlabels` **Optional** If you wish to create a Facet plot, these labels will be applied to the axis. The amount of entries given to each label will determine the dimensions of the Facet plot. This should be equal to the number of scenarios you are plotting. For example, if you have 6 scenarios your Facet Grid dimensions may be [2,3], [3,2] or [1,6] etc. This is an optional field and can be left empty if not needed.
+- `Facet_ylabels` & `Facet_xlabels` **Optional** If you wish to create a Facet plot, these labels will be applied to the axis. The amount of entries given to each label will determine the dimensions of the Facet plot.  For example, if you have 6 scenarios your Facet Grid dimensions in x,y coordinates may be [2,3], [3,2] or [1,6] etc. This is an optional field and can be left empty if not needed. Facet plots can still be created without labels if desired, the facet layout will default to max 3 plots wide, with no maximum to the length.
 
 - `Tick_labels` **Optional** List of custom tick labels, allows adjustment of scenario names on certain plots. Not setup for every plot. 
 
@@ -156,8 +156,14 @@ The **config.yml** settings and their defaults are as follows:
   - legend_size: 11
   - xtick_size: 11
   - ytick_size: 12
+  - title_size: 16
   
   *Settings to adjust font sizes, family, and tick size within figures*
+
+- **text_position:**
+  - title_height: 40
+  
+  *Adjust the position of text relative to the edge of the plot (matplotlib points)*
   
 - **figure_size:**
   - xdimension: 6
@@ -206,3 +212,8 @@ The **config.yml** settings and their defaults are as follows:
 - **auto_convert_units:** true
 
   *If True automatically converts Energy and Capacity units so that no number exceeds 1000, all base units are in MW, units can be converted to GW, TW and kW*
+  
+- **plot_title_as_region:** true
+
+  *If True a title will be added to the figure which will be the region/zone name*
+

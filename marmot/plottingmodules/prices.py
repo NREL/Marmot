@@ -11,6 +11,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
+
 
 #===============================================================================
 
@@ -59,7 +61,7 @@ class mplot(object):
 
         #setup plot
         fig2, axs = mfunc.setup_plot(xdimension,ydimension)
-        plt.subplots_adjust(wspace=0.1, hspace=0.2)
+        plt.subplots_adjust(wspace=0.1, hspace=0.50)
         
         data_table = []
         for n, zone_input in enumerate(self.Zones):
@@ -85,7 +87,7 @@ class mplot(object):
                 if (prop!=prop)==False:
                     axs[n].set_ylim(bottom=0,top=int(prop))
                 axs[n].set_xlim(0,len(duration_curve))
-                axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
+                axs[n].set_title(zone_input.replace('_',' '))
 
                 handles, labels = axs[region_number-1].get_legend_handles_labels()
                 #Legend
@@ -98,7 +100,9 @@ class mplot(object):
         plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
+
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
+
         fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
         outputs = mfunc.DataSavedInModule()
@@ -183,7 +187,8 @@ class mplot(object):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
             plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
-
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table':Data_Out}
         return outputs
 
@@ -264,6 +269,8 @@ class mplot(object):
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
             plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
             plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
@@ -306,7 +313,7 @@ class mplot(object):
 
         #setup plot
         fig4, axs = mfunc.setup_plot(xdimension,ydimension)
-        plt.subplots_adjust(wspace=0.1, hspace=0.2)
+        plt.subplots_adjust(wspace=0.1, hspace=0.70)
 
         data_table = []
         for n, zone_input in enumerate(self.Zones):
@@ -329,7 +336,7 @@ class mplot(object):
 
             for column in timeseries:
                 mfunc.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
-                axs[n].set_ylabel(zone_input.replace('_',' '), color='black', rotation='vertical')
+                axs[n].set_title(zone_input.replace('_',' '))
                 if (prop!=prop)==False:
                     axs[n].set_ylim(bottom=0,top=int(prop))
                 mfunc.set_plot_timeseries_format(axs,n)
@@ -345,7 +352,9 @@ class mplot(object):
         plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
+
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
+
         fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
         outputs = mfunc.DataSavedInModule()

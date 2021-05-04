@@ -16,7 +16,6 @@ it can be read into the marmot_plot_main.py file
 import os
 import sys
 import pathlib
-FILE_DIR = pathlib.Path(__file__).parent.absolute()
 if __name__ == '__main__':  # Add Marmot directory to sys path if running from __main__
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -44,6 +43,8 @@ try:
     from h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
+
+FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 
 # ============================================================================
 
@@ -659,7 +660,9 @@ class MarmotFormat(SetupLogger):
             self.Plexos_Properties = Plexos_Properties
 
         try:
-            self.vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder, mconfig.parser('category_file_names', 'vre_gen_cat')), squeeze=True).str.strip().tolist()
+            self.vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
+                                                        mconfig.parser('category_file_names', 'vre_gen_cat')),
+                                           squeeze=True).str.strip().tolist()
         except FileNotFoundError:
             self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required to calculate Curtailment')
             self.vre_gen_cat = []
@@ -956,8 +959,12 @@ class MarmotFormat(SetupLogger):
             try:
                 self.logger.info("Processing generator Curtailment")
                 try:
-                    Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Available_Capacity')
-                    Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'generator_Generation')
+                    Avail_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder,
+                                                             HDF5_output),
+                                                'generator_Available_Capacity')
+                    Total_Gen_Out = pd.read_hdf(os.path.join(hdf_out_folder,
+                                                             HDF5_output),
+                                                'generator_Generation')
                     if Total_Gen_Out.empty is True:
                         self.logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
                 except KeyError:
@@ -991,7 +998,9 @@ class MarmotFormat(SetupLogger):
         if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r'):
             try:
                 self.logger.info("Calculating Cost Unserved Energy: Regions")
-                Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'region_Unserved_Energy')
+                Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder,
+                                                                HDF5_output),
+                                                   'region_Unserved_Energy')
                 Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
                 Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
                                             key="region_Cost_Unserved_Energy",
@@ -1005,7 +1014,9 @@ class MarmotFormat(SetupLogger):
         if "zone_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r'):
             try:
                 self.logger.info("Calculating Cost Unserved Energy: Zones")
-                Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder, HDF5_output), 'zone_Unserved_Energy')
+                Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder,
+                                                                HDF5_output),
+                                                   'zone_Unserved_Energy')
                 Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
                 Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
                                             key="zone_Cost_Unserved_Energy",
@@ -1050,8 +1061,11 @@ if __name__ == '__main__':
     PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
 
     # Folder to save your processed solutions
-    Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
-
+    if pd.isna(Marmot_user_defined_inputs.loc['Marmot_Solutions_folder','User_defined_value']):
+        Marmot_Solutions_folder = None
+    else:
+        Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
+    
     # This folder contains all the csv required for mapping and selecting outputs to process
     # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
     Mapping_folder = 'mapping_folder'

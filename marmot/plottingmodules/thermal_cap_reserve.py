@@ -71,10 +71,10 @@ class mplot(object):
                 self.logger.info(f"Scenario = {scenario}")
 
                 Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
-                if self.shift_leapday is True:
+                if self.shift_leapday == True:
                     Gen = mfunc.shift_leapday(Gen,self.Marmot_Solutions_folder)
                 avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
-                if self.shift_leapday is True:
+                if self.shift_leapday == True:
                     avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)               
                
                 # Check if zone is in avail_cap
@@ -100,6 +100,11 @@ class mplot(object):
                     out = mfunc.MissingZoneData()
                     outputs[zone_input] = out
                     continue
+                   
+                if prop == 'Date Range':
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    thermal_reserve = thermal_reserve[start_date_range : end_date_range]
                 
                 # Create data table for each scenario
                 scenario_names = pd.Series([scenario]*len(thermal_reserve),name='Scenario')
@@ -138,7 +143,7 @@ class mplot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
 
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
 
             # add facet labels
             mfunc.add_facet_labels(fig1, xlabels, self.ylabels)           
@@ -149,8 +154,9 @@ class mplot(object):
             
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=50)
-            
+            plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=40)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
             # If data_table_chunks is empty, does not return data or figure
             if not data_table_chunks:
                 outputs[zone_input] = mfunc.MissingZoneData()

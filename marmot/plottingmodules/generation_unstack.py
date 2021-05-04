@@ -83,6 +83,7 @@ class mplot(object):
             plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
             plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
             plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+            plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
         
         grid_size = xdimension*ydimension
             
@@ -95,9 +96,9 @@ class mplot(object):
             excess_axs = grid_size - plot_number
         
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
-            plt.subplots_adjust(wspace=0.05, hspace=0.25)
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
             axs = axs.ravel()
-            data_table = {}
+            data_tables = []
             unique_tech_names = []
 
             for i, scenario in enumerate(all_scenarios):
@@ -105,8 +106,9 @@ class mplot(object):
                 # Pump_Load = pd.Series() # Initiate pump load
 
                 try:
+
                     Stacked_Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
-                    if self.shift_leapday is True:
+                    if self.shift_leapday == True:
                         Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -121,9 +123,10 @@ class mplot(object):
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
             
                 # Insert Curtailmnet into gen stack if it exhists in database
+
                 if self.mplot_data_dict["generator_Curtailment"]:
                     Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario).copy()
-                    if self.shift_leapday is True:
+                    if self.shift_leapday == True:
                         Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
@@ -147,18 +150,18 @@ class mplot(object):
                 Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
                 Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario).copy()
-                if self.shift_leapday is True:
+                if self.shift_leapday == True:
                     Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)     
                 Load = Load.xs(zone_input,level=self.AGG_BY)
                 Load = Load.groupby(["timestamp"]).sum()
                 Load = Load.squeeze() #Convert to Series
-           
+
                 if self.mplot_data_dict["generator_Pump_Load"] == {}:
                     Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
                 else:
                     Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
-                if self.shift_leapday is True:
+                if self.shift_leapday == True:
                     Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)                                
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
@@ -168,13 +171,12 @@ class mplot(object):
                 else:
                     Pump_Load = Load
                 
-                
                 if self.mplot_data_dict[f"{agg}_Unserved_Energy"] == {}:
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Load"][scenario].copy()
                     Unserved_Energy.iloc[:,0] = 0
                 else:
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario].copy()                
-                if self.shift_leapday is True:
+                if self.shift_leapday == True:
                     Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)                    
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
@@ -217,8 +219,10 @@ class mplot(object):
                 Stacked_Gen = Stacked_Gen/unitconversion['divisor']
                 Unserved_Energy = Unserved_Energy/unitconversion['divisor']
                 
-                Data_Table_Out = Stacked_Gen
-                data_table[scenario] = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
+                scenario_names = pd.Series([scenario]*len(Stacked_Gen),name='Scenario')
+                data_table = Stacked_Gen.add_suffix(f" ({unitconversion['units']})")
+                data_table = data_table.set_index([scenario_names],append=True)
+                data_tables.append(data_table)
                 
                 for column in Stacked_Gen.columns:
                     axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2,
@@ -239,7 +243,7 @@ class mplot(object):
                 l1 = Stacked_Gen.columns.tolist()
                 unique_tech_names.extend(l1)
             
-            if not data_table:
+            if not data_tables:
                 self.logger.warning(f'No generation in {zone_input}')
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
@@ -265,23 +269,24 @@ class mplot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
             
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
+            ylabels = [y.replace('_',' ') for y in self.ylabels]
             
             # add facet labels
             mfunc.add_facet_labels(fig1, xlabels, ylabels)
                         
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            labelpad = 50 if facet else 30
-            plt.ylabel(f"Genertaion ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
+            labelpad = 40
+            plt.ylabel(f"Generation ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
             
              #Remove extra axis
             if excess_axs != 0:
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
 
-            if not facet:
-                data_table = data_table[self.Scenarios[0]]
+            data_table_out = pd.concat(data_tables)
                 
-            outputs[zone_input] = {'fig':fig1, 'data_table':data_table}
+            outputs[zone_input] = {'fig':fig1, 'data_table':data_table_out}
         return outputs

@@ -141,6 +141,8 @@ class mplot(object):
 
             # Manually add the first legend back
             ax.add_artist(leg1)
+            if mconfig.parser("plot_title_as_region"):
+                fig1.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -236,6 +238,9 @@ class mplot(object):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
+            
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             cost_totals = Total_Systems_Cost_Out.sum(axis=1) #holds total of each bar
 
@@ -263,6 +268,7 @@ class mplot(object):
                     verticalalignment='center', fontsize=15, color='red')
                 if k>=len(cost_totals)-1:
                     break
+            
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
@@ -371,7 +377,10 @@ class mplot(object):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
+            
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
+                
             cost_totals = Detailed_Gen_Cost_Out.sum(axis=1) #holds total of each bar
 
             #inserts values into bar stacks
@@ -398,7 +407,7 @@ class mplot(object):
                     verticalalignment='center', fontsize=15, color='red')
                 if k>=len(cost_totals)-1:
                     break
-
+            
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
@@ -479,6 +488,9 @@ class mplot(object):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
+
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -575,8 +587,8 @@ class mplot(object):
             locs,labels=plt.xticks()
             ax.axhline(y = 0, color = 'black')
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-            self.xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-            plt.xticks(ticks=locs,labels=self.xlabels[1:])
+            xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
+            plt.xticks(ticks=locs,labels=xlabels[1:])
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
@@ -584,6 +596,9 @@ class mplot(object):
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
+
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
@@ -669,15 +684,19 @@ class mplot(object):
             locs,labels=plt.xticks()
             ax.axhline(y = 0)
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-            self.xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-            plt.xticks(ticks=locs,labels=self.xlabels[1:])
+            xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
+            plt.xticks(ticks=locs,labels=xlabels[1:])
 
             ax.margins(x=0.01)
             # plt.ylim((0,600))
 
             handles, labels = ax.get_legend_handles_labels()
+
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
+            
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -744,6 +763,7 @@ class mplot(object):
                 Detailed_Gen_Cost.columns = Detailed_Gen_Cost.columns.str.replace('_',' ')
                 Detailed_Gen_Cost = Detailed_Gen_Cost.sum(axis=0)
                 Detailed_Gen_Cost = Detailed_Gen_Cost.rename(scenario)
+
                 gen_cost_out_chunks.append(Detailed_Gen_Cost)
             
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
@@ -753,14 +773,20 @@ class mplot(object):
             
             Detailed_Gen_Cost_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False)
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
+            #TODO: Add $ unit conversion.
+
             #Ensures region has generation, else skips
             try:
                 Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out-Detailed_Gen_Cost_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
+
             except KeyError:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
+
             Detailed_Gen_Cost_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
+
             net_cost = Detailed_Gen_Cost_Out.sum(axis = 1)
+
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(10, break_long_words=False)
             # Deletes columns that are all 0
@@ -780,16 +806,16 @@ class mplot(object):
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y= 0 ,linewidth=0.5,linestyle='--',color='grey')
+            # ax.axhline(y = 65.4, linewidth = 1, linestyle = ':',color = 'orange',label = 'Avg 2032 LCOE')
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
             locs,labels=plt.xticks()
-            ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-            self.xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-            plt.xticks(ticks=locs,labels=self.xlabels[1:])
+            ax.set_ylabel('Generation Cost Change \n relative to '+ self.Scenarios[0] + ' (Million $)',  color='black', rotation='vertical') #TODO: Add $ unit conversion.
+            xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
+            plt.xticks(ticks=locs,labels=xlabels[1:])
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            # plt.ylim((0,600))
 
             #Add net cost line.
             for n, scenario in enumerate(self.Scenarios[1:]):
@@ -807,6 +833,9 @@ class mplot(object):
             leg_net = ax.legend(net_line,['Net Cost Change'],loc='center left',bbox_to_anchor=(1, -0.05),facecolor='inherit', frameon=True)
             ax.add_artist(leg_main)
             ax.add_artist(leg_net)
+
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs

@@ -33,7 +33,12 @@ def createConfig(configfile_path):
             ytick_size = 12,
             axes_label_size = 16,
             legend_size = 11,
+            title_size = 16,
             font_family = 'serif'
+            ),
+        
+        text_position = dict(
+            title_height = 40
             ),
         
         figure_size = dict(
@@ -50,6 +55,7 @@ def createConfig(configfile_path):
         shift_leapday = False,
         skip_existing_properties = True,
         auto_convert_units = True,
+        plot_title_as_region = True,
         
         user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
         

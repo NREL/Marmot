@@ -170,6 +170,8 @@ class mplot(object):
             axs[0].axhline(y = max_volume, linestyle = ':',label = 'Max Volume')
             axs[0].legend(loc = 'lower left',bbox_to_anchor = (1.15,0),facecolor = 'inherit',frameon = True)
             axs[1].legend(loc = 'lower left',bbox_to_anchor = (1.15,0.2),facecolor = 'inherit',frameon = True)
+            if mconfig.parser("plot_title_as_region"):
+                fig1.title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs

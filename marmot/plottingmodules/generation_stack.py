@@ -16,7 +16,9 @@ import marmot.config.mconfig as mconfig
 import logging
 import textwrap
 
-# ===============================================================================
+
+#mpl.rcParams['axes.titlesize'] = mconfig.parser("font_settings","title_size")
+#===============================================================================
 
 custom_legend_elements = Patch(facecolor='#DD0200',
                                alpha=0.5, edgecolor='#DD0200')
@@ -158,9 +160,10 @@ class mplot(object):
             #fig4.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
             fig4.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser("plot_title_as_region"):
+                plt.title(zone_input)
             plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=60)
-
-            data_table = pd.DataFrame()
+            data_table = pd.DataFrame() #TODO: write actual data out
             outputs[zone_input] = {'fig':fig4, 'data_table':data_table}
         return outputs
 
@@ -199,7 +202,7 @@ class mplot(object):
             # Insert Curtailmnet into gen stack if it exhists in database
             if self.mplot_data_dict['generator_Curtailment']:
                 Stacked_Curt = self.mplot_data_dict['generator_Curtailment'].get(scenario).copy()
-                if self.shift_leapday is True:
+                if self.shift_leapday == True:
                     Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
                 if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                     Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
@@ -222,8 +225,9 @@ class mplot(object):
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
+
             Load = self.mplot_data_dict[f'{agg}_Load'].get(scenario).copy()
-            if self.shift_leapday is True:
+            if self.shift_leapday == True:
                 Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
             Load = Load.xs(zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
@@ -239,6 +243,7 @@ class mplot(object):
             # Total_Demand.index = Total_Demand.index.shift(-2,freq = 'H')
             # Total_Demand = Total_Demand.loc[Stacked_Gen.index]
             # Total_Demand = Total_Demand.squeeze()
+
             ###DO NOT COMMIT
             #######################
 
@@ -248,7 +253,7 @@ class mplot(object):
             except KeyError:
                 Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
                 Pump_Load.iloc[:,0] = 0
-            if self.shift_leapday is True:
+            if self.shift_leapday == True:
                 Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
@@ -265,7 +270,7 @@ class mplot(object):
             except KeyError:
                 Unserved_Energy = self.mplot_data_dict[f'{agg}_Load'][scenario].copy()
                 Unserved_Energy.iloc[:,0] = 0
-            if self.shift_leapday is True:
+            if self.shift_leapday == True:
                 Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)
 
             Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
@@ -328,14 +333,6 @@ class mplot(object):
                 Total_Demand = Total_Demand[start_date_range : end_date_range]
                 unserved_eng_data_table = unserved_eng_data_table[start_date_range : end_date_range]
 
-                #SHIFTING TIME ZONE, DON'T PUSH
-                # self.logger.info('Shifting EST -> PST')
-                # Stacked_Gen.index = Stacked_Gen.index.shift(-3,freq = 'H')
-                # Load.index = Load.index.shift(-3,freq = 'H')
-                # Total_Demand.index = Total_Demand.index.shift(-3,freq = 'H')
-                # Unserved_Energy.index = Unserved_Energy.index.shift(-3,freq = 'H')
-                # unserved_eng_data_table.index = unserved_eng_data_table.index.shift(-3,freq = 'H')
-
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
 
@@ -363,17 +360,18 @@ class mplot(object):
             excess_axs = grid_size - plot_number
 
             fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
-            plt.subplots_adjust(wspace=0.05, hspace=0.25)
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
             axs = axs.ravel()
-            data_tables = {}
+            data_tables = []
             unique_tech_names = []
 
             for i, scenario in enumerate(all_scenarios):
                 self.logger.info(f"Scenario = {scenario}")
 
                 try:
+
                     Stacked_Gen = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
-                    if self.shift_leapday is True:
+                    if self.shift_leapday == True:
                         Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -384,7 +382,7 @@ class mplot(object):
                 Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
                 data = setup_data(zone_input, scenario, Stacked_Gen)
                 data = data_prop(data)
-
+                
                 # if no Generation return empty dataframe
                 if data["Stacked_Gen"].empty == True:
                     self.logger.warning(f'No generation during time period in {zone_input}')
@@ -419,11 +417,27 @@ class mplot(object):
                 Load = Load.rename('Total Load \n (Demand + Storage Charging)')
                 Total_Demand = Total_Demand.rename('Total Demand')
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
+                
                 # Data table of values to return to main program
-                Data_Table_Out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
-                data_tables[scenario] = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
+                single_scen_out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
+                scenario_names = pd.Series([scenario] * len(single_scen_out),name = 'Scenario')
+                single_scen_out = single_scen_out.add_suffix(f" ({unitconversion['units']})")
+                single_scen_out = single_scen_out.set_index([scenario_names],append = True)
+                data_tables.append(single_scen_out)
 
-                # only difference linewidth = 0,5
+                ##DO NOT COMMIT
+                #Pull P05 hourly flow
+                # interface_Flow_collection = {}
+                # mfunc.get_data(interface_Flow_collection,"interface_Flow", self.Marmot_Solutions_folder, self.Scenarios)
+                # int_flow = interface_Flow_collection[scenario]
+                # int_flow = int_flow.xs('P05 West of Cascades-South_WI',level = 'interface_name')
+                # int_flow = mfunc.shift_leapday(int_flow,self.Marmot_Solutions_folder)
+                # int_flow = int_flow.droplevel('interface_category')
+                # int_flow = int_flow[self.start_date : self.end_date]
+                # int_flow = int_flow /unitconversion['divisor']
+                # int_flow.columns = ['P05 flow']
+
+                # # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
                       colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
 
@@ -498,31 +512,30 @@ class mplot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
 
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
+            ylabels = [y.replace('_',' ') for y in self.ylabels]
 
             # add facet labels
             mfunc.add_facet_labels(fig1, xlabels, ylabels)
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser('plot_title_as_region'):
+                plt.title(zone_input)
 
-            #Ylabel should change if there are facet labels.
-            labelpad = 50 if facet else 30
+            #Ylabel should change if there are facet labels, leave at 40 for now, works for all values in spacing
+            labelpad = 40
             plt.ylabel(f"Generation ({unitconversion['units']})", color='black', rotation='vertical', labelpad = labelpad)
 
             #Remove extra axes
             if excess_axs != 0:
                 mfunc.remove_excess_axs(axs,excess_axs,grid_size)
-
-            if not facet:
-                data_tables = data_tables[self.Scenarios[0]]
-            out = {'fig':fig1, 'data_table':data_tables}
-
-            plt.close(fig1)
-
+            Data_Table_Out = pd.concat(data_tables)
+            out = {'fig':fig1, 'data_table':Data_Table_Out}
             return out
 
+        #TODO: combine data_prop(), setup_data(), mkplot(), into gen_stack()
+                                                             
         # Main loop for gen_stack
         outputs = {}
         if facet:
@@ -550,6 +563,8 @@ class mplot(object):
             plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
             plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
             plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+            plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
+ 
 
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
@@ -653,6 +668,7 @@ class mplot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
+
             mfunc.set_plot_timeseries_format(axs)
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs

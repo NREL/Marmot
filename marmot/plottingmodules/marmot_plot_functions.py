@@ -22,53 +22,53 @@ logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
 
 class MissingInputData:
-    """
-    Exception Class for handling return of missing data
-    """
+    """Exception Class for handling return of missing data."""
+    
     def __init__(self):
        return
 
 class MissingZoneData:
-    """
-    Exception Class for handling return of zones with no data
-    """
+    """Exception Class for handling return of zones with no data."""
+    
     def __init__(self):
         return
 
 class DataSavedInModule:
-    """
-    Exception Class for handling data saved within modules
-    """
+    """Exception Class for handling data saved within modules."""
+    
     def __init__(self):
         return
 
 class UnderDevelopment:
-    """
-    Exception Class for handling methods under development
-    """
+    """Exception Class for handling methods under development."""
+    
     def __init__(self):
         return
 
 class InputSheetError:
-    """
-    Exception Class for handling user input sheet errors
-    """
+    """Exception Class for handling user input sheet errors."""
+    
     def __init__(self):
         return
 
 class FacetLabelError:
-    """
-    Exception Class for incorrect facet labeling.
-    """
+    """Exception Class for incorrect facet labeling."""
+    
     def __init__(self):
         return
     
 class MissingMetaData:
-    """
-    Exception Class for missing meta data.
-    """
+    """Exception Class for missing meta data."""
+    
     def __init__(self):
         return
+    
+class UnsupportedAggregation:
+    """Exception Class for plotting using unsupported AGG_BY attribute."""
+    
+    def __init__(self):
+        return
+    
     
 
 def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
@@ -366,7 +366,7 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
 
     for df in df_list : # for each data frame
         fig = df.plot(kind="bar",
-                      linewidth=0,
+                      linewidth=0.5,
                       stacked=True,
                       ax=fig,
                       legend=False,
@@ -382,7 +382,8 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
                 rect.set_width(1 / float(n_df + 1))
 
     fig.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
-    fig.set_xticklabels(df.index, rotation = 0)
+    labels = df.index.get_level_values(None)
+    fig.set_xticklabels(labels, rotation = 90)
     fig.set_title(title)
 
     # Add invisible data to add another legend
@@ -395,6 +396,8 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
         l2 = plt.legend(n, labels, loc=[1.01, 0.1]) 
     fig.add_artist(l1)
     
+    fig.legend(loc = [1.01,0.5])
+
     fig.spines['right'].set_visible(False)
     fig.spines['top'].set_visible(False)
     fig.tick_params(axis='y', which='major', length=5, width=1)
@@ -621,11 +624,11 @@ def shift_leapday(df, Marmot_Solutions_folder):
             level = 'timestamp',
             inplace = True)
 
-        #Special case where timezone shifting may also be necessary.
-        # df.index.set_levels(
-        #     df.index.levels[df.index.names.index('timestamp')].shift(-2,freq = 'H'),
-        #     level = 'timestamp',
-        #     inplace = True)
+    #Special case where timezone shifting may also be necessary.
+    # df.index.set_levels(
+    #     df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
+    #     level = 'timestamp',
+    #     inplace = True)
 
     return(df)
 
@@ -689,11 +692,12 @@ def sort_duration(df,col):
     df : Sorted time series. 
 
     """
+
+    sorted_duration = (df.sort_values(by=col, ascending=False)
+                       .reset_index()
+                       .drop(columns=['timestamp']))
     
-    df.sort_values(by = col,ascending = False,inplace = True)
-    df.reset_index(inplace = True)
-    df.drop(columns = ['timestamp'],inplace = True)
-    return(df)
+    return sorted_duration
 
 
 # test = pd.DataFrame({'A':[1,3,2],
