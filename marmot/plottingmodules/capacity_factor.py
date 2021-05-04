@@ -313,7 +313,10 @@ class mplot(object):
                 time_at_min_individ = pd.DataFrame(columns = tech_names, index = [scenario])
                 for tech_name in tech_names:
                     stt = Min.loc[Min['tech'] == tech_name]
-                    output = np.average(stt.fraction_at_min,weights = stt['Installed Capacity (MW)'])
+                    wgts = stt['Installed Capacity (MW)']
+                    if wgts.sum() == 0:
+                        wgts = pd.Series([1] * len(stt))
+                    output = np.average(stt.fraction_at_min,weights = wgts)
                     time_at_min_individ[tech_name] = output
 
                 time_at_min = time_at_min.append(time_at_min_individ)
