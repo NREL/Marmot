@@ -1223,7 +1223,8 @@ class mplot(object):
                     axs[i,j].tick_params(axis='y', which='major', length=5, width=1)
                     axs[i,j].tick_params(axis='x', which='major', length=5, width=1)
                     axs[i,j].set_title(line)
-                    axs[i,j].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
+                    if i == len(select_lines) - 1:
+                        axs[i,j].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
 
                 #For output time series .csv
                 scenario_names = pd.Series([scenario] * len(single_line_out),name = 'Scenario')
