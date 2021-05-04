@@ -39,6 +39,8 @@ After all required prerequisites are installed, you are ready to install and run
 
 ### Downloading, installing, and running Marmot Directly 
 
+*The following command will clone the most recent commit to the master branch of Marmot which may not be production ready, to get the most recent stable release see the [Releases](https://github.nrel.gov/PCM/Marmot/releases) section of the repo.*
+
 - First `git clone --recurse-submodules https://github.nrel.gov/PCM/Marmot.git` to any location you like, make sure to include `--recurse-submodules` else h5plexos will not be included correctly.
 
 - The Marmot formatter imports h5plexos. To avoid import and version errors, h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot `--recurse-submodules`, you can combine the git submodule init and git submodule update steps by running `git submodule update --init`.
