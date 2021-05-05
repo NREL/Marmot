@@ -498,7 +498,11 @@ def create_stackplot(axs,data,color_dict,label=None,n=0):
     axs[n].margins(x=0.01)
 
 
-def set_plot_timeseries_format(axs,n=0,minticks=6, maxticks=8):
+def set_plot_timeseries_format(axs,
+                               n=0,
+                               minticks=mconfig.parser("axes_options","x_axes_minticks"),
+                               maxticks=mconfig.parser("axes_options","x_axes_maxticks")
+                               ):
     """
     Auto sets timeseries format
 
