@@ -1371,9 +1371,6 @@ class mplot(object):
                                    figure_name=None, prop=None, start=None, end=None,
                         timezone=None, start_date_range=None, end_date_range=None):
 
-        if self.AGG_BY not in ['zone','region']:
-            return mfunc.UnsupportedAggregation()
-
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -1383,7 +1380,7 @@ class mplot(object):
             
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
+        properties = [(True,f"{agg}_{agg}s_Net_Interchange",scenario_type)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -1394,11 +1391,10 @@ class mplot(object):
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
 
-            xdimension=len(self.xlabels)
-            ydimension=len(self.ylabels)
-            if self.xlabels == [''] or self.ylabels == ['']:
-                xdimension, ydimension =  mfunc.set_x_y_dimension(len(scenario_type))
+            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=scenario_type)
+
             fig3, axs = mfunc.setup_plot(xdimension,ydimension)
+            
             plt.subplots_adjust(wspace=0.6, hspace=0.3)
 
             data_table_chunks=[]
@@ -1417,6 +1413,9 @@ class mplot(object):
 
                 if self.AGG_BY != 'region' and self.AGG_BY != 'zone':
                     agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
+                    # Checks if keys all aggregate to a single value, this plot requires multiple values to work 
+                    if len(set(agg_region_mapping.values())) == 1:
+                        return mfunc.UnsupportedAggregation()
                     rr_int = rr_int.reset_index()
                     rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)
@@ -1520,9 +1519,6 @@ class mplot(object):
         Each sceanrio is plotted on its own facet plot
         Figures and data tables are saved within method
         """
-        
-        if self.AGG_BY not in ['zone','region']:
-            return mfunc.UnsupportedAggregation()
 
         outputs = {}
         
@@ -1557,6 +1553,9 @@ class mplot(object):
 
             if self.AGG_BY != 'region' and self.AGG_BY != 'zone':
                     agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
+                    # Checks if keys all aggregate to a single value, this plot requires multiple values to work 
+                    if len(set(agg_region_mapping.values())) == 1:
+                        return mfunc.UnsupportedAggregation()
                     rr_int = rr_int.reset_index()
                     rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)

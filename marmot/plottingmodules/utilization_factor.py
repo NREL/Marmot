@@ -15,6 +15,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.config.mconfig as mconfig
 
 #===============================================================================
 
@@ -45,6 +46,7 @@ class mplot(object):
                              end=None, timezone=None, start_date_range=None, 
                              end_date_range=None):
         
+        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -148,6 +150,7 @@ class mplot(object):
                              end=None, timezone=None, start_date_range=None, 
                              end_date_range=None):
         
+        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -247,6 +250,7 @@ class mplot(object):
                              end=None, timezone=None, start_date_range=None, 
                              end_date_range=None):
         
+        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -345,6 +349,7 @@ class mplot(object):
                              end=None, timezone=None, start_date_range=None, 
                              end_date_range=None):
         
+        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
