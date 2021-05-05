@@ -130,13 +130,11 @@ class mplot(object):
                 else:
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
-
+                Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 if not pd.isnull(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                      {str(start_date_range)} to {str(end_date_range)}")
                     Unserved_Energy = Unserved_Energy[start_date_range:end_date_range]
-
-                Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
                 Unserved_Energy = Unserved_Energy/interval_count
 

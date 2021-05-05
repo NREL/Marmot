@@ -1371,6 +1371,9 @@ class mplot(object):
                                    figure_name=None, prop=None, start=None, end=None,
                         timezone=None, start_date_range=None, end_date_range=None):
 
+        if self.AGG_BY not in ['zone','region']:
+            return mfunc.UnsupportedAggregation()
+
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -1518,6 +1521,9 @@ class mplot(object):
         Figures and data tables are saved within method
         """
         
+        if self.AGG_BY not in ['zone','region']:
+            return mfunc.UnsupportedAggregation()
+
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -1554,7 +1560,6 @@ class mplot(object):
                     rr_int = rr_int.reset_index()
                     rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)
-
             rr_int_agg = rr_int.groupby(['parent','child'],as_index=True).sum()
             rr_int_agg.rename(columns = {0:'flow (MW)'}, inplace = True)
             rr_int_agg=rr_int_agg.loc[rr_int_agg['flow (MW)']>0.01] # Keep only positive flows
@@ -1563,6 +1568,7 @@ class mplot(object):
 
             data_out = rr_int_agg.copy()
             data_out.rename(columns={'flow (MW)':'{} flow (GWh)'.format(scenario)},inplace=True)
+
             max_flow = max(rr_int_agg['flow (MW)'])
             rr_int_agg = rr_int_agg.unstack('child')
             rr_int_agg = rr_int_agg.droplevel(level = 0, axis = 1)
