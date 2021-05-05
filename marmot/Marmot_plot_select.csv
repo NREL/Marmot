@@ -92,3 +92,8 @@ P05_total_flow,FALSE,P05 West of Cascades-South_WI,,,,,,transmission,total_int_f
 Zonal_Interchange,TRUE,,,,,5/7/24,5/11/24,transmission,zonal_interchange
 Zonal_Interchange_Total,FALSE,,,,,,,transmission,zonal_interchange_total
 Total_Unserved_Energy,FALSE,,,,,,,unserved_energy,tot_unserved_energy
+Unserved_Energy_Timeseries,FALSE,,,,EST,,,unserved_energy,unserved_energy_timeseries
+Utilization_GW_Fleet,FALSE,,,,,,,utilization_factor,GW_fleet
+Utilization_Factor_Fleet,FALSE,,,,EST,,,utilization_factor,uf_fleet
+Utilization_Factor_Fleet_Type,FALSE,,,,,,,utilization_factor,uf_fleet_by_type
+Utilization_Factor_Generators,FALSE,,,,EST,,,utilization_factor,uf_gen
