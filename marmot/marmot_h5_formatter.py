@@ -16,6 +16,7 @@ it can be read into the marmot_plot_main.py file
 import os
 import sys
 import pathlib
+FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 if __name__ == '__main__':  # Add Marmot directory to sys path if running from __main__
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
@@ -43,8 +44,6 @@ try:
     from h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
-
-FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 
 # ============================================================================
 

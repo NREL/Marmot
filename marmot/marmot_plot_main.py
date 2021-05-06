@@ -16,6 +16,7 @@ have descriptive names such as total_generation.py, generation_stack.py, curtaim
 import os
 import sys
 import pathlib
+FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 if __name__ == '__main__': # Add Marmot directory to sys path if running from __main__
     #If running from top level of repo.
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
@@ -40,8 +41,6 @@ except ModuleNotFoundError:
     sys.exit()
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
-
-FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 
 #===============================================================================
 
@@ -595,7 +594,7 @@ if __name__ == '__main__':
     
     #changes working directory to location of this python file
     os.chdir(FILE_DIR)
-    
+
     Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
 
