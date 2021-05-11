@@ -1104,8 +1104,7 @@ if __name__ == '__main__':
                                 mapping_folder='mapping_folder',
                                 Region_Mapping=Region_Mapping,
                                 emit_names=emit_names,
-                                VoLL=VoLL,
-                                log_suffix=Scenario_name)
+                                VoLL=VoLL)
 
         initiate.run_formatter()
 
