@@ -120,7 +120,7 @@ class Process(SetupLogger):
     e.g generator, region, zone, line etc.
     """
 
-    def __init__(self, df, metadata, Region_Mapping, gen_names, emit_names):
+    def __init__(self, df, metadata, Region_Mapping, gen_names, emit_names, logger):
         """Process __init__ method.
         
         Parameters
@@ -136,11 +136,14 @@ class Process(SetupLogger):
             DataFrame with 2 columns to rename generator technologies.
         emit_names : pd.DataFrame
             DataFrame with 2 columns to rename emmission names.
+        logger : logger object.
+            logger object from SetupLOgger.
 
         Returns
         -------
         None.
         """
+
         # certain methods require information from metadata.  metadata is now
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
@@ -148,6 +151,7 @@ class Process(SetupLogger):
         self.Region_Mapping = Region_Mapping
         self.gen_names = gen_names
         self.emit_names = emit_names
+        self.logger = logger
 
         if not self.emit_names.empty:
             self.emit_names_dict = self.emit_names[['Original', 'New']].set_index("Original").to_dict()["New"]
@@ -220,7 +224,7 @@ class Process(SetupLogger):
         # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
         if set(df.index.unique(level="tech")).issubset(self.gen_names["New"].unique()) is False:
             missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(self.gen_names["New"].unique())))
-            self.logger.warning("The Following Generators do not have a correct category mapping: %s\n", missing_gen_cat)
+            self.logger.warning(f"The Following Generators do not have a correct category mapping: {missing_gen_cat}\n", )
         return df
 
     def df_process_region(self):
@@ -737,7 +741,7 @@ class MarmotFormat(SetupLogger):
 
         # Instantiate instance of Process Class
         # metadata is used as a paramter to initialize process_cl
-        process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.emit_names)
+        process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.emit_names, self.logger)
         # Instantiate Method of Process Class
         process_att = getattr(process_cl, f'df_process_{plexos_class}')
         # Process attribute and return to df
@@ -1100,7 +1104,8 @@ if __name__ == '__main__':
                                 mapping_folder='mapping_folder',
                                 Region_Mapping=Region_Mapping,
                                 emit_names=emit_names,
-                                VoLL=VoLL)
+                                VoLL=VoLL,
+                                log_suffix=Scenario_name)
 
         initiate.run_formatter()
 
