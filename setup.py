@@ -8,7 +8,8 @@ Created on Thu Mar 18 13:32:13 2021
 from setuptools import setup
 
 setup(name='marmot',
-      version='0.5.0',
+      version_config=True,
+      setup_requires=['setuptools-git-versioning'],
       author='Daniel Levie',
       author_email='daniel.levie@nrel.gov',
       description='A Python package to process and plot PLEXOS outputs',
