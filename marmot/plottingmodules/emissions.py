@@ -25,30 +25,30 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
+
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.mplot_data_dict = {}
 
     # function to collect total emissions by fuel type
-    def total_emissions_by_type(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+    def total_emissions_by_type(self, figure_name=None, prop=None, start=None,
+                             end=None, timezone=None, start_date_range=None,
                              end_date_range=None):
-        
+
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
-        
+
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"emissions_generators_Production",self.Scenarios)]
-        
+
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
         if 1 in check_input_data:
             return mfunc.MissingInputData()
-        
+
         for zone_input in self.Zones:
             emitList = []
             self.logger.info(f"Zone = {zone_input}")
@@ -82,7 +82,7 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            
+
             # format results
             emitOut = emitOut.T/1E6 # Convert from metric tons to million metric tons
             emitOut = emitOut.loc[:, (emitOut != 0).any(axis=0)] # drop any generators with no emissions
@@ -96,7 +96,7 @@ class mplot(object):
 
             # subset to relevant pollutant (specified by user as property)
             try:
-                emitPlot = emitOut.xs(self.prop, level="pollutant").T
+                emitPlot = emitOut.xs(prop, level="pollutant").T
                 dataOut = emitPlot.copy()
 
                 # formatting for plot
@@ -110,7 +110,7 @@ class mplot(object):
                 # plot formatting
                 fig1.spines['right'].set_visible(False)
                 fig1.spines['top'].set_visible(False)
-                fig1.set_ylabel('Annual ' + self.prop + ' Emissions\n(million metric tons)',  color='black', rotation='vertical')
+                fig1.set_ylabel('Annual ' + prop + ' Emissions\n(million metric tons)',  color='black', rotation='vertical')
                 #adds comma to y axis data
                 fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 fig1.tick_params(axis='y', which='major', length=5, width=1)
