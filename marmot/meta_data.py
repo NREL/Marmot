@@ -22,20 +22,17 @@ class MetaData:
         ----------
         HDF5_folder_in : folder
             Folder containing h5plexos h5 files .
+        processed_h5 : Boolean
+            Boolean for whether the metadata is being read from the processed hdf5 file or the original PLEXOS solution file.
         Region_Mapping : pd.DataFrame
             DataFrame of extra regions to map.
-        model : string, optional
-            Name of model h5 file. The default is None.
+        file : string, optional
+            Name of h5 file. The default is None.  Some scenarios have multiple partitions.
         """
         self.logger = logging.getLogger('marmot_format.'+__name__)        
         self.HDF5_folder_in = HDF5_folder_in
         self.Region_Mapping = Region_Mapping
         self.processed_h5 = processed_h5
-        
-# In marmot_h5_formatter.py, metadata is initiated and read in the same way as before.
-# However, when metadata is copied over to the processed file, a subgroup tab for each partition is
-# made within the metadata group.  This structure changes how the metadata class must be initialize
-
         
         if self.processed_h5:
             try:

@@ -729,7 +729,7 @@ class MarmotFormat(SetupLogger):
                 if 'metadata' not in existing_groups:
                     grp = g.create_group('metadata')
                 else:
-                    grp. g['metadata']
+                    grp = g['metadata']
                 
                 partition_group = grp.create_group(partition)
                 for key in list(group_dict.keys()):
