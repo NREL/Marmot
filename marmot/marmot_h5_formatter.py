@@ -52,7 +52,6 @@ except ModuleNotFoundError:
 # but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
 
-
 class SetupLogger():
     """Sets up the python logger.
     
@@ -682,7 +681,6 @@ class MarmotFormat(SetupLogger):
             self.Region_Mapping = Region_Mapping
             if not self.Region_Mapping.empty:
                 self.Region_Mapping = self.Region_Mapping.astype('string')
-
         try:
             self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)  # delete category columns if exists
         except KeyError:
@@ -704,7 +702,46 @@ class MarmotFormat(SetupLogger):
                 self.emit_names.rename(columns={self.emit_names.columns[0]: 'Original', 
                                                 self.emit_names.columns[1]: 'New'},
                                        inplace=True)
+                
+                
+    def output_metadata(self, files_list, hdf_out_folder, HDF5_output, HDF5_folder_in):
+        """ This function is used to output metadata from the original PLEXOS solutions
+        file to the processed HDF5 file.  For each partition in a given scenario,
+        the metadata from that partition is copied over and saved in the processed output file.
+        This function is called within the run_formatter method of this class."""
         
+        for partition in files_list:
+            f = h5py.File(os.path.join(HDF5_folder_in, partition),'r')
+            meta_keys = [key for key in f['metadata'].keys()]
+            
+            group_dict = {}
+            for key in meta_keys:
+                sub_dict = {}
+                subkeys = [key for key in f['metadata'][key].keys()]
+                for sub in subkeys:
+                    dset = f['metadata'][key][sub]
+                    sub_dict[sub] = dset
+                group_dict[key] = sub_dict
+                
+            with h5py.File(os.path.join(hdf_out_folder, HDF5_output),"a") as g:
+                # check if metadata group already exists
+                existing_groups = [key for key in g.keys()]
+                if 'metadata' not in existing_groups:
+                    grp = g.create_group('metadata')
+                else:
+                    grp = g['metadata']
+                
+                partition_group = grp.create_group(partition)
+                for key in list(group_dict.keys()):
+                    subgrp = partition_group.create_group(key)
+                    s_dict = group_dict[key]
+                    for key2 in list(s_dict.keys()):
+                        dset = s_dict[key2]
+                        subgrp.create_dataset(name=key2,data=dset)
+            f.close()    
+        return
+    
+    
     def _get_data(self, plexos_class, plexos_prop, timescale, db, metadata):
         """
         This method handles the pulling of the data from the H5plexos hdf5
@@ -814,18 +851,19 @@ class MarmotFormat(SetupLogger):
         for names in os.listdir():
             if names.endswith(".h5"):
                 files.append(names)  # Creates a list of only the hdf5 files
-
+        
         # List of all hf files in hdf5 folder in alpha numeric order
         files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
-
+        
         os.chdir(startdir)
+        
+        #self.output_metadata(files_list[0], hdf_out_folder, HDF5_output, HDF5_folder_in)
 
         # Read in all HDF5 files into dictionary
         self.logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
         for file in files_list:
             hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
-
         # ===================================================================================
         # Process the Outputs
         # ===================================================================================
@@ -837,9 +875,17 @@ class MarmotFormat(SetupLogger):
             # Skip properties that already exist in *formatted.h5 file.
             with h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') as f:
                 existing_keys = [key for key in f.keys()]
-
+            
+# The processed HDF5 output file already exists.  If metadata is already in
+# this file, leave as is.  Otherwise, append it to the file.           
+            if 'metadata' not in existing_keys:
+                self.logger.info('Adding metadata to processed HDF5 file.')
+                self.output_metadata(files_list, hdf_out_folder, HDF5_output, HDF5_folder_in)
+            
             if not mconfig.parser('skip_existing_properties'):
                 existing_keys = []
+
+# The processed HDF5 file does not exist.  Create the file and add metadata to it.
         else:
             existing_keys = []
             Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
@@ -847,14 +893,15 @@ class MarmotFormat(SetupLogger):
                                       mode="w",
                                       complevel=9,
                                       complib='blosc:zlib')
+            self.output_metadata(files_list, hdf_out_folder, HDF5_output, HDF5_folder_in)
+            
         process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
-
         start = time.time()
 
         if not self.Region_Mapping.empty:
             # if any(meta.regions()['region'] not in Region_Mapping['region']):
-            if set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) is False:
-                missing_regions = list(set(MetaData(HDF5_folder_in, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
+            if set(MetaData(HDF5_folder_in, False, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) is False:
+                missing_regions = list(set(MetaData(HDF5_folder_in, False, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
                 self.logger.warning(f'The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: {missing_regions}\n',)
 
         # Main loop to process each ouput and pass data to functions
@@ -871,7 +918,8 @@ class MarmotFormat(SetupLogger):
                     self.logger.info(f"      {model}")
 
                     # Create an instance of metadata, and pass that as a variable to get data.
-                    meta = MetaData(HDF5_folder_in, self.Region_Mapping, model)
+                    meta = MetaData(HDF5_folder_in, False, self.Region_Mapping, model)
+                    
                     db = hdf5_collection.get(model)
                     processed_data = self._get_data(row["group"], row["data_set"], row["data_type"], db, meta)
 
@@ -906,7 +954,7 @@ class MarmotFormat(SetupLogger):
                 if Processed_Data_Out.empty is False:
                     if (row["data_type"] == "year"):
                         self.logger.info("Please Note: Year properties can not be checked for duplicates.\n\
-                        Overlaping data can not be removed from 'Year' grouped data.\n\
+                        Overlaping data cannot be removed from 'Year' grouped data.\n\
                         This will effect Year data that differs between partitions such as cost results.\n\
                         It will not effect Year data that is equal in all partitions such as Installed Capacity or Line Limit results")
 
