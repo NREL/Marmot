@@ -14,7 +14,7 @@ import numpy as np
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import logging
-import textwrap
+#import textwrap
 
 
 #mpl.rcParams['axes.titlesize'] = mconfig.parser("font_settings","title_size")
@@ -23,7 +23,7 @@ import textwrap
 custom_legend_elements = Patch(facecolor='#DD0200',
                                alpha=0.5, edgecolor='#DD0200')
 
-class mplot(object):
+class MPlot(object):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class

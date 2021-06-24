@@ -497,7 +497,7 @@ class MarmotPlot(SetupLogger):
             # Import plot module from plottingmodules package
             plot_module = importlib.import_module('marmot.plottingmodules.' + module)
             # Instantiate the module class
-            instantiate_mplot = plot_module.mplot(argument_dict)
+            instantiate_mplot = plot_module.MPlot(argument_dict)
             
             # Main loop to process each figure and pass plot specific variables to methods
             for index, row in module_plots.iterrows(): 
@@ -557,14 +557,8 @@ class MarmotPlot(SetupLogger):
 
                     else:
                         # Save figures
-                        try:
-                            Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, 
-                                                                                      f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
-                                                                         dpi=600,
-                                                                         bbox_inches='tight')
-                        except AttributeError:
-                            Figure_Out[zone_input]["fig"].savefig(os.path.join(figures,
-                                                                               f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
+                        Figure_Out[zone_input]["fig"].savefig(os.path.join(figures,
+                                                                                f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
                                                                   dpi=600,
                                                                   bbox_inches='tight')
 

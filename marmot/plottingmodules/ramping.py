@@ -11,12 +11,13 @@ This module creates bar plot of the total volume of generator starts in MW,GW,et
 import pandas as pd
 import logging
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 
 
 #===============================================================================
-class mplot(object):
+class MPlot(object):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
@@ -148,19 +149,20 @@ class mplot(object):
             cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
             cap_started_all_scenarios.columns = cap_started_all_scenarios.columns.str.wrap(10, break_long_words=False)
             
-            fig1 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1')
+            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
+                                 color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
-            fig1.spines['right'].set_visible(False)
-            fig1.spines['top'].set_visible(False)
-            fig1.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
-            fig1.tick_params(axis='y', which='major', length=5, width=1)
-            fig1.tick_params(axis='x', which='major', length=5, width=1)
-            fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig1.legend(loc='lower left',bbox_to_anchor=(1,0),
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
-                fig1.set_title(zone_input)
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -256,19 +258,21 @@ class mplot(object):
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
             #TODO: use mfunc functions
-            fig2 = cap_started_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
-                                  color = self.color_list,edgecolor='black', linewidth='0.1')
+            
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
+            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
+                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
-            fig2.spines['right'].set_visible(False)
-            fig2.spines['top'].set_visible(False)
-            fig2.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
-            fig2.tick_params(axis='y', which='major', length=5, width=1)
-            fig2.tick_params(axis='x', which='major', length=5, width=1)
-            fig2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig2.legend(loc='lower left',bbox_to_anchor=(1,0),
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
-                fig2.set_title(zone_input)
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
