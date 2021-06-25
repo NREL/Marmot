@@ -97,7 +97,7 @@ Utilization_GW_Fleet,FALSE,,,,,,,utilization_factor,GW_fleet
 Utilization_Factor_Fleet,FALSE,,,,EST,,,utilization_factor,uf_fleet
 Utilization_Factor_Fleet_Type,FALSE,,,,,,,utilization_factor,uf_fleet_by_type
 Utilization_Factor_Generators,FALSE,,,,EST,,,utilization_factor,uf_gen
-Node_Price_Duration_Curve,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,,prices,node_pdc
-Node_Price_Timeseries,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,EST,9/30/2024,10/20/2024,prices,node_timeseries_price
-Node_Price_Histogram,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,,prices,node_price_hist
+Node_Price_Duration_Curve,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,,,prices,node_pdc
+Node_Price_Timeseries,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,EST,9/30/2024,10/20/2024,prices,node_timeseries_price
+Node_Price_Histogram,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,9/30/2024,10/20/2024,prices,node_price_hist
 Node_Price_Histogram_Difference,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,,,prices,node_price_hist_diff
