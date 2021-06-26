@@ -59,6 +59,10 @@ class mplot(object):
         region_number = len(self.Zones)
         # determine x,y length for plot
         xdimension, ydimension =  mfunc.set_x_y_dimension(region_number)
+        
+        grid_size = xdimension*ydimension
+        # Used to calculate any excess axis to delete
+        excess_axs = grid_size - region_number
 
         #setup plot
         fig2, axs = mfunc.setup_plot(xdimension,ydimension)
@@ -90,11 +94,15 @@ class mplot(object):
                 axs[n].set_xlim(0,len(duration_curve))
                 axs[n].set_title(zone_input.replace('_',' '))
 
-                handles, labels = axs[region_number-1].get_legend_handles_labels()
+                handles, labels = axs[n].get_legend_handles_labels()
                 #Legend
-                axs[region_number-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
+                axs[grid_size-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-
+        
+        # Remove extra axes
+        if excess_axs != 0:
+            mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+        
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=30)
@@ -311,6 +319,10 @@ class mplot(object):
 
         region_number = len(self.Zones)
         xdimension, ydimension =  mfunc.set_x_y_dimension(region_number)
+        
+        grid_size = xdimension*ydimension
+        # Used to calculate any excess axis to delete
+        excess_axs = grid_size - region_number
 
         #setup plot
         fig4, axs = mfunc.setup_plot(xdimension,ydimension)
@@ -342,11 +354,15 @@ class mplot(object):
                     axs[n].set_ylim(bottom=0,top=int(prop))
                 mfunc.set_plot_timeseries_format(axs,n)
 
-                handles, labels = axs[region_number-1].get_legend_handles_labels()
+                handles, labels = axs[n].get_legend_handles_labels()
                 #Legend
-                axs[region_number-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
+                axs[grid_size-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-
+        
+        # Remove extra axes
+        if excess_axs != 0:
+            mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+        
         fig4.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=30)
