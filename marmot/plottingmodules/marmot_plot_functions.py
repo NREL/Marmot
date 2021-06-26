@@ -636,16 +636,14 @@ def shift_leapday(df, Marmot_Solutions_folder):
 
     """
     if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0):
-        df.index.set_levels(
+        df.index = df.index.set_levels(
             df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'),
-            level = 'timestamp',
-            inplace = True)
-
-    #Special case where timezone shifting may also be necessary.
-    # df.index.set_levels(
-    #     df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
-    #     level = 'timestamp',
-    #     inplace = True)
+            level = 'timestamp')
+        
+    # # Special case where timezone shifting may also be necessary.
+    #     df.index = df.index.set_levels(
+    #         df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
+    #         level = 'timestamp')
 
     return(df)
 
