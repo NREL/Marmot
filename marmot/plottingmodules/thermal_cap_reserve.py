@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon Dec  9 10:34:48 2019
+Created on Mon Dec 9 10:34:48 2019
+Updated July 26th 16:20:00 2021
 
 
-@author: dlevie
+@author: Daniel Levie and Marty Schwarz
 """
 
 import pandas as pd
@@ -34,6 +35,14 @@ class mplot(object):
     def thermal_cap_reserves(self, figure_name=None, prop=None, start=None, 
                              end=None, timezone=None, start_date_range=None, 
                              end_date_range=None):
+        """ 
+        Plots the total thermal generation capacity that is not commited, 
+        i.e in reserve
+        
+        If multiple scenarios are included, each one will be plotted on a 
+        seperate subplot
+        
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -89,7 +98,11 @@ class mplot(object):
                 Gen = Gen.loc[:, (Gen != 0).any(axis=0)]
 
                 thermal_reserve = avail_cap - Gen
-
+                                
+                non_thermal_gen = set(thermal_reserve.columns) - set(self.thermal_gen_cat)
+                # filter for only thermal generation 
+                thermal_reserve = thermal_reserve.drop(labels = non_thermal_gen, axis=1)
+                
                 #Convert units
                 if i == 0:
                     unitconversion = mfunc.capacity_energy_unitconversion(max(thermal_reserve.sum(axis=1)))
