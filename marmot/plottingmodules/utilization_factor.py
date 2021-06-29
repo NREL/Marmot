@@ -31,7 +31,7 @@ def df_process_gen_ind_inputs(df,self):
 
     return df
 
-class mplot(object):
+class MPlot(object):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
@@ -142,7 +142,7 @@ class mplot(object):
                 continue
 
             if mconfig.parser("plot_title_as_region"):
-            	ax.set_title(zone_input)          
+            	ax3.set_title(zone_input)          
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
 

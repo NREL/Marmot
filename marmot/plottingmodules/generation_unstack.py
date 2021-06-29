@@ -14,7 +14,7 @@ import marmot.config.mconfig as mconfig
 import logging
 import textwrap
 
-class mplot(object):
+class MPlot(object):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class

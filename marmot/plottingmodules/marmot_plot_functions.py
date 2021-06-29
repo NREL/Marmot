@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Sep 18 16:37:06 2020
-
 Functions required to create Marmot plots
-
 @author: Daniel Levie
 """
 
@@ -75,7 +73,6 @@ def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
     """
     Used to get data from formatted h5 file
     Adds data to dictionary with scenario name as key
-
     Parameters
     ----------
     mplot_data_dict : dictionary
@@ -86,7 +83,6 @@ def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
         Main Mamrmot folder
     scenario_list : List
         List of scenarios to plot.
-
     Returns
     -------
     return_value : list
@@ -119,14 +115,12 @@ def df_process_gen_inputs(df,ordered_gen):
     Processes generation data into a pivot
     Technology names as columns,
     Timeseries as index
-
     Parameters
     ----------
     df : DataFrame
         Dataframe to process.
     ordered_gen : list
         List of gen tech types ordered.
-
     Returns
     -------
     df : DataFrame
@@ -143,14 +137,12 @@ def df_process_gen_inputs(df,ordered_gen):
 def df_process_categorical_index(df, ordered_gen):
     """
     Creates categorical index based on generators
-
     Parameters
     ----------
     df : DataFrame
         Dataframe to process.
     ordered_gen : list
         List of gen tech types ordered.
-
     Returns
     -------
     df : DataFrame
@@ -165,7 +157,6 @@ def df_process_categorical_index(df, ordered_gen):
 def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
     """
     Sets facet plot x,y dimensions baded on provided labeles
-
     Parameters
     ----------
     xlabels : list
@@ -176,7 +167,6 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
         Trigger for plotting facet plots.
     multi_scenario : list, optional
         list of scenarios. The default is None.
-
     Returns
     -------
     xdimension : int
@@ -205,12 +195,10 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
 def set_x_y_dimension(region_number):
     """
     Sets X,Y dimension of plots without x,y labels
-
     Parameters
     ----------
     region_number : int
         # regions/scenarios.
-
     Returns
     -------
     xdimension : int
@@ -233,7 +221,6 @@ def set_x_y_dimension(region_number):
 def setup_plot(xdimension=1,ydimension=1,sharey=True):
     """
     Setup matplotlib plot
-
     Parameters
     ----------
     xdimension : int, optional
@@ -242,7 +229,6 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
         facet plot y dimension. The default is 1.
     sharey : bool, optional
         Share y axes labels. The default is True.
-
     Returns
     -------
     fig : matplotlib fig
@@ -261,7 +247,6 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
 def create_bar_plot(df, axs, colour, stacked=False):
     """
     Creates a bar plot
-
     Parameters
     ----------
     df : DataFrame
@@ -272,7 +257,6 @@ def create_bar_plot(df, axs, colour, stacked=False):
         colour dictionary.
     stacked : Bool
         True/False for stacked bar
-
     Returns
     -------
     fig : matplotlib fig
@@ -280,49 +264,48 @@ def create_bar_plot(df, axs, colour, stacked=False):
     """
     fig = df.plot.bar(stacked=stacked, rot=0, edgecolor='white', linewidth='1.5',
                      color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
-    fig.spines['right'].set_visible(False)
-    fig.spines['top'].set_visible(False)
-    fig.tick_params(axis='y', which='major', length=5, width=1)
-    fig.tick_params(axis='x', which='major', length=5, width=1)
+
+    
+    axs.spines['right'].set_visible(False)
+    axs.spines['top'].set_visible(False)
+    axs.tick_params(axis='y', which='major', length=5, width=1)
+    axs.tick_params(axis='x', which='major', length=5, width=1)
     return fig
 
 
 def create_grouped_bar_plot(df, colour):
     """
     Creates a grouped bar plot
-
     Parameters
     ----------
     df : DataFrame
         DataFrame of data to plot.
     colour : dictionary
         colour dictionary.
-
     Returns
     -------
     fig : matplotlib fig
         matplotlib fig.
     """
     
-    fig = df.plot.bar(figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='white', linewidth='1.5',
-                                      color=[colour.get(x, '#333333') for x in df.columns])
-    fig.spines['right'].set_visible(False)
-    fig.spines['top'].set_visible(False)
-    fig.tick_params(axis='y', which='major', length=5, width=1)
-    fig.tick_params(axis='x', which='major', length=5, width=1)
-    return fig
+    fig, axs = plt.subplots(figsize=tuple(mconfig.parser("figure_size").values()))
+    df.plot.bar(rot=0, edgecolor='white', linewidth='1.5',
+                                      color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
+    axs.spines['right'].set_visible(False)
+    axs.spines['top'].set_visible(False)
+    axs.tick_params(axis='y', which='major', length=5, width=1)
+    axs.tick_params(axis='x', which='major', length=5, width=1)
+    return fig,axs
 
 def create_stacked_bar_plot(df, colour):
     """
     Creates a stacked bar plot
-
     Parameters
     ----------
     df : DataFrame
         DataFrame of data to plot.
     colour : dictionary
         colour dictionary.
-
     Returns
     -------
     fig : matplotlib fig
@@ -330,16 +313,17 @@ def create_stacked_bar_plot(df, colour):
     """
     
     y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-
-    fig = df.plot.bar(stacked=True, figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='black', linewidth='0.1',
-                                                color=[colour.get(x, '#333333') for x in df.columns])
-    fig.spines['right'].set_visible(False)
-    fig.spines['top'].set_visible(False)
+    
+    fig, axs = plt.subplots(figsize=tuple(mconfig.parser("figure_size").values()))
+    df.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1',
+                                                color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
+    axs.spines['right'].set_visible(False)
+    axs.spines['top'].set_visible(False)
     #adds comma to y axis data
-    fig.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
-    fig.tick_params(axis='y', which='major', length=5, width=1)
-    fig.tick_params(axis='x', which='major', length=5, width=1)
-    return fig
+    axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
+    axs.tick_params(axis='y', which='major', length=5, width=1)
+    axs.tick_params(axis='x', which='major', length=5, width=1)
+    return fig, axs
 
 def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **kwargs):
     """Given a lbar plot with both stacked and unstacked bars.
@@ -408,7 +392,6 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
 def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'solid',n=0,alpha = 1):
     """
     Creates a line plot
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -423,7 +406,6 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'sol
         list of labels for legend. The default is None.
     n : int, optional
         counter for facet plot. The default is 0.
-
     Returns
     -------
     None.
@@ -441,7 +423,6 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'sol
 def create_hist_plot(axs,data,color_dict,label=None,n=0):
     """
     Creates a histogram plot
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -454,7 +435,6 @@ def create_hist_plot(axs,data,color_dict,label=None,n=0):
         list of labels for legend. The default is None.
     n : int, optional
         counter for facet plot. The default is 0.
-
     Returns
     -------
     None.
@@ -468,7 +448,6 @@ def create_hist_plot(axs,data,color_dict,label=None,n=0):
 def create_stackplot(axs,data,color_dict,label=None,n=0):
     """
     Creates a stacked area plot
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -481,7 +460,6 @@ def create_stackplot(axs,data,color_dict,label=None,n=0):
         list of labels for legend. The default is None.
     n : int, optional
         counter for facet plot. The default is 0.
-
     Returns
     -------
     None.
@@ -505,7 +483,6 @@ def set_plot_timeseries_format(axs,
                                ):
     """
     Auto sets timeseries format
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -516,7 +493,6 @@ def set_plot_timeseries_format(axs,
         Minimum tick marks. The default is 6.
     maxticks : int, optional
         Max tick marks. The default is 8.
-
     Returns
     -------
     None.
@@ -536,7 +512,6 @@ def set_plot_timeseries_format(axs,
 def remove_excess_axs(axs, excess_axs, grid_size):
     """
     Removes excess axes spins + tick marks
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -545,7 +520,6 @@ def remove_excess_axs(axs, excess_axs, grid_size):
         # of excess axes.
     grid_size : int
         Size of facet grid.
-
     Returns
     -------
     None.
@@ -564,7 +538,6 @@ def remove_excess_axs(axs, excess_axs, grid_size):
 def add_facet_labels(fig, xlabels, ylabels):
     """
     Adds labels to outside of Facet plot
-
     Parameters
     ----------
     fig : matplotlib fig
@@ -573,11 +546,9 @@ def add_facet_labels(fig, xlabels, ylabels):
         X axes labels.
     ylabels : list
         Y axes labels.
-
     Returns
     -------
     None.
-
     """
     font_defaults = mconfig.parser("font_settings")
 
@@ -605,7 +576,6 @@ def shift_leapday(df, Marmot_Solutions_folder):
     """
     Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
     Modeled year must be included in the scenario parent directory name.
-
     Parameters
     ----------
     df : Pandas multiindex dataframe
@@ -615,12 +585,10 @@ def shift_leapday(df, Marmot_Solutions_folder):
     shift_leap_day : boolean
         Switch to turn on/off leap day shifting.
         Defined in the "shift_leap_day" field of Marmot_user_defined_inputs.csv.
-
     Returns
     -------
     df: Pandas multiindex dataframe
         same dataframe, with time index shifted
-
     """
     if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0):
         df.index.set_levels(
@@ -641,7 +609,6 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
 
     """
     Adds new region aggregation in the plotting step. This allows one to create a new aggregation without re-formatting the .h5 file.
-
     Parameters
     ----------
     df : Pandas multiindex dataframe
@@ -650,12 +617,10 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
         Dataframe that maps regions to user-specified aggregation levels.
     AGG_BY : string
         Name of new aggregation. Needs to match the appropriate column in the user defined Region Mapping file.
-
     Returns
     -------
     df: Pandas multiindex dataframe
         same dataframe, with new aggregation level added
-
     """
 
     agg_new = Region_Mapping[['region',AGG_BY]]
@@ -666,15 +631,12 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
 def get_interval_count(df):
     """
     Detects the interval spacing; used to adjust sums of certain for variables for sub-hourly runs
-
     Parameters
     ----------
     df : Pandas multiindex dataframe for some reported parameter (e.g. generator_Generation)
-
     Returns
     -------
     interval_count : number of intervals per 60 minutes
-
     """
     time_delta = df.index[1]- df.index[0]
     # Finds intervals in 60 minute period
@@ -690,11 +652,9 @@ def sort_duration(df,col):
     ----------
     df : Pandas multiindex dataframe for some reported parameter (e.g. line_Flow)
     col : Column name by which to sort.
-
     Returns
     -------
     df : Sorted time series. 
-
     """
 
     sorted_duration = (df.sort_values(by=col, ascending=False)
@@ -712,17 +672,14 @@ def sort_duration(df,col):
 def capacity_energy_unitconversion(max_value):
     """
     auto unitconversion for capacity and energy figures.
-
     Parameters
     ----------
     max_value : float
         value used to determine divisor and units.
-
     Returns
     -------
     dict
         dictionary containing divisor and units.
-
     """
     
     if max_value < 1000 and max_value > 1:

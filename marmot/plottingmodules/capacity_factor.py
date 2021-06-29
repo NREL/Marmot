@@ -17,7 +17,7 @@ import marmot.config.mconfig as mconfig
 import matplotlib.pyplot as plt
 
 
-class mplot(object):
+class MPlot(object):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
@@ -126,23 +126,24 @@ class mplot(object):
                 continue
             
             Data_Table_Out = CF_all_scenarios.T
-
-            fig2 = CF_all_scenarios.T.plot.bar(stacked = False, figsize=(self.x,self.y), rot=0,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1')
-
-            fig2.spines['right'].set_visible(False)
-            fig2.spines['top'].set_visible(False)
-            fig2.set_ylabel('Average Output When Committed',  color='black', rotation='vertical')
+            
+            fig2, ax = plt.subplots(figsize=(self.x,self.y))
+            CF_all_scenarios.T.plot.bar(stacked = False, rot=0,
+                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
+            
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel('Average Output When Committed',  color='black', rotation='vertical')
             #adds % to y axis data
-            fig2.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            fig2.tick_params(axis='y', which='major', length=5, width=1)
-            fig2.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             if mconfig.parser("plot_title_as_region"):
-                fig2.set_title(zone_input)
+                ax.set_title(zone_input)
 
-            fig2.legend(loc='lower left',bbox_to_anchor=(1,0),
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-
+            
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
@@ -327,21 +328,23 @@ class mplot(object):
             
             Data_Table_Out = time_at_min.T
             
-            fig3 = time_at_min.T.plot.bar(stacked = False, figsize=(self.x*1.5,self.y*1.5), rot=0,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1')
+            fig3, ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
+            time_at_min.T.plot.bar(stacked = False, rot=0,
+                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
+            
 
-            fig3.spines['right'].set_visible(False)
-            fig3.spines['top'].set_visible(False)
-            fig3.set_ylabel('Percentage of time online at minimum generation',  color='black', rotation='vertical')
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel('Percentage of time online at minimum generation',  color='black', rotation='vertical')
             #adds % to y axis data
-            fig3.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            fig3.tick_params(axis='y', which='major', length=5, width=1)
-            fig3.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
             if mconfig.parser("plot_title_as_region"):
-                fig3.set_title(zone_input)
+                ax.set_title(zone_input)
 
-            fig3.legend(loc='lower left',bbox_to_anchor=(1,0),
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs

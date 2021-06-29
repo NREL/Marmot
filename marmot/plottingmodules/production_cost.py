@@ -14,7 +14,7 @@ import marmot.config.mconfig as mconfig
 
 #===============================================================================
 
-class mplot(object):
+class MPlot(object):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties

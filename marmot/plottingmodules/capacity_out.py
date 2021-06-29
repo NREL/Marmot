@@ -12,7 +12,7 @@ import config.mconfig as mconfig
 
 #===============================================================================
 
-class mplot(object):
+class MPlot(object):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
@@ -119,7 +119,11 @@ class mplot(object):
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=30)
-            plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+            # Looks better for a one scenario plot
+            #plt.tight_layout(rect=[0, 0.03, 1.25, 0.97])
+            
+            plt.tight_layout(rect=[0,0.03,1,0.97])
+            
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
 

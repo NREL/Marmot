@@ -21,7 +21,7 @@ import marmot.config.mconfig as mconfig
 
 #===============================================================================
 
-class mplot(object):
+class MPlot(object):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
@@ -1007,7 +1007,6 @@ class mplot(object):
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
-
         flow_diff = self.mplot_data_dict["line_Flow"].get(self.Scenario_Diff[1]) - self.mplot_data_dict["line_Flow"].get(self.Scenario_Diff[0])
 
         xdim,ydim = mfunc.set_x_y_dimension(len(select_lines))

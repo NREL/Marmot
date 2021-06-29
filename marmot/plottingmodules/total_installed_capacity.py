@@ -24,7 +24,7 @@ custom_legend_elements = Patch(facecolor='#DD0200',
                                alpha=0.5, edgecolor='#DD0200')
 
 
-class mplot(object):
+class MPlot(object):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
@@ -233,7 +233,8 @@ class mplot(object):
 
         # generation figure
         self.logger.info("Generation data")
-        gen_obj = gen.mplot(self.argument_dict)
+        # gen_obj = gen.mplot(self.argument_dict)
+        gen_obj = gen.MPlot(self.argument_dict)
         gen_outputs = gen_obj.total_gen()
 
         self.logger.info("Installed capacity data")

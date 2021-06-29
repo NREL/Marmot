@@ -20,7 +20,7 @@ import matplotlib.ticker as mtick
 
 #===============================================================================
 
-class mplot(object):
+class MPlot(object):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
@@ -431,31 +431,32 @@ class mplot(object):
             Data_Table_Out = Total_Curtailment_out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
             
-            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+            fig3, ax = plt.subplots(figsize=(self.x,self.y))
+            Total_Curtailment_out.plot.bar(stacked=True, rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
-                             edgecolor='black', linewidth='0.1')
-            fig3.spines['right'].set_visible(False)
-            fig3.spines['top'].set_visible(False)
-            fig3.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)",  color='black', rotation='vertical')
-            fig3.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig3.tick_params(axis='y', which='major', length=5, width=1)
-            fig3.tick_params(axis='x', which='major', length=5, width=1)
-            fig3.margins(x=0.01)
+                             edgecolor='black', linewidth='0.1',ax=ax)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)",  color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
-                fig3.set_title(zone_input)
+                ax.set_title(zone_input)
 
-            handles, labels = fig3.get_legend_handles_labels()
-            fig3.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+            handles, labels = ax.get_legend_handles_labels()
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
             curt_totals = Total_Curtailment_out.sum(axis=1)
             #inserts total bar value above each bar
-            for k, patch in enumerate(fig3.patches):
+            for k, patch in enumerate(ax.patches):
                 height = curt_totals[k]
                 width = patch.get_width()
                 x, y = patch.get_xy()
-                fig3.text(x+width/2,
-                    y+height + 0.05*max(fig3.get_ylim()),
+                ax.text(x+width/2,
+                    y+height + 0.05*max(ax.get_ylim()),
                     '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11, color='red')
@@ -561,22 +562,23 @@ class mplot(object):
             # unit conversion return divisor and energy units
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
-            
-            fig3 = Total_Curtailment_out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+        
+            fig3, ax= plt.subplots(figsize=(self.x,self.y))
+            Total_Curtailment_out.plot.bar(stacked=True, rot=0,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
-                             edgecolor='black', linewidth='0.1')
-            fig3.spines['right'].set_visible(False)
-            fig3.spines['top'].set_visible(False)
-            fig3.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
-            fig3.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            fig3.tick_params(axis='y', which='major', length=5, width=1)
-            fig3.tick_params(axis='x', which='major', length=5, width=1)
-            fig3.margins(x=0.01)
+                             edgecolor='black', linewidth='0.1',ax=ax)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
-                fig3.set_title(zone_input)
+                ax.set_title(zone_input)
 
-            handles, labels = fig3.get_legend_handles_labels()
-            fig3.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+            handles, labels = ax.get_legend_handles_labels()
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
             curt_totals = Total_Curtailment_out.sum(axis=1)
@@ -584,12 +586,12 @@ class mplot(object):
             print(curt_totals)
             #inserts total bar value above each bar
             k=0
-            for i in fig3.patches:
+            for i in ax.patches:
                 height = curt_totals[k]
                 width = i.get_width()
                 x, y = i.get_xy()
-                fig3.text(x+width/2,
-                    y+height + 0.05*max(fig3.get_ylim()),
+                ax.text(x+width/2,
+                    y+height + 0.05*max(ax.get_ylim()),
                     '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11, color='red')
@@ -709,14 +711,15 @@ class mplot(object):
         Total_Gen = Total_Gen / 1000000
         Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.csv'))
         Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
-                    
-        fig1 = Total_Curtailment_Out_perc.plot.bar(stacked = False, figsize=(9,6), rot=0,edgecolor='black', linewidth='0.1')
-        fig1.spines['right'].set_visible(False)
-        fig1.spines['top'].set_visible(False)
-        fig1.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
-        fig1.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
-        fig1.tick_params(axis='y', which='major', length=5, width=1)
-        fig1.tick_params(axis='x', which='major', length=5, width=1)
+
+        fig1, ax = plt.subplots(figsize=(9,6))
+        Total_Curtailment_Out_perc.plot.bar(stacked = False, rot=0,edgecolor='black', linewidth='0.1',ax=ax)
+        ax.spines['right'].set_visible(False)
+        ax.spines['top'].set_visible(False)
+        ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
+        ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
+        ax.tick_params(axis='y', which='major', length=5, width=1)
+        ax.tick_params(axis='x', which='major', length=5, width=1)
         
         unitconversion = mfunc.capacity_energy_unitconversion(Total_Curt.values.max())
         Total_Curt = Total_Curt/unitconversion['divisor'] 
@@ -726,20 +729,19 @@ class mplot(object):
         #inserts total bar value above each bar, 
         #but only if it is the max in the bar group.
         #to do this, take the n highest patches, where n is the number of bar broups (select_sites)
-        heights = [patch.get_height() for patch in fig1.patches]
+        heights = [patch.get_height() for patch in ax.patches]
         heights.sort(reverse = True)
         toph = heights[0:len(select_sites)]
-        for k, patch in enumerate(fig1.patches):
+        for k, patch in enumerate(ax.patches):
             height = patch.get_height()
             if height in toph:
                 width = patch.get_width()
                 x, y = patch.get_xy()
-                fig1.text(x+width/2,y + height + 0.05*max(fig1.get_ylim()),
+                ax.text(x+width/2,y + height + 0.05*max(ax.get_ylim()),
                     str(Total_Curt.iloc[k][1]) + f" {unitconversion['units']}h",
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11)
 
-        fig1.figure.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
-
+        fig1.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
         outputs = mfunc.DataSavedInModule()
         return outputs
