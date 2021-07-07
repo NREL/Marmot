@@ -68,7 +68,7 @@ class MetaData:
             try:
                 gen_category = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/generator']))
             except KeyError:
-                gen_category = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/generator']))
+                gen_category = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/generators']))
             gen_category.rename(columns={'name':'gen_name','category':'tech'}, inplace=True)
             gen_category = gen_category.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return gen_category
