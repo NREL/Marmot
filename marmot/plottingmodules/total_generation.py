@@ -100,10 +100,11 @@ class MPlot(object):
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
                 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
-                
+
+
                 if not pd.isnull(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
+                                      {str(start_date_range)} to {str(end_date_range)}")
                     Total_Gen_Stack = Total_Gen_Stack[start_date_range:end_date_range]
 
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -115,8 +116,6 @@ class MPlot(object):
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
 
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Total_Load = Total_Load[start_date_range:end_date_range]
 
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
@@ -131,9 +130,9 @@ class MPlot(object):
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
+                
+                
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Unserved_Energy = Unserved_Energy[start_date_range:end_date_range]
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
                 Unserved_Energy = Unserved_Energy/interval_count
@@ -151,9 +150,8 @@ class MPlot(object):
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Pump_Load = Pump_Load[start_date_range:end_date_range]
+                
                 Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
                 Pump_Load = Pump_Load/interval_count
                 if (Pump_Load == 0).all() == False:
@@ -212,6 +210,7 @@ class MPlot(object):
 
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 height1 = [int(Total_Load_Out[scenario].sum())]*2
+                print("total load height: " + str(height1))
                 lp1 = plt.plot(x,height1, c='black', linewidth=3)
                 if Pump_Load_Out[scenario].values.sum() > 0:
                     height2 = [int(Total_Demand_Out[scenario])]*2

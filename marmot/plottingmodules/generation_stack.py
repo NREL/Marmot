@@ -326,7 +326,6 @@ class MPlot(object):
 
                 self.logger.info(f"Plotting specific date range: \
                 {str(start_date_range)} to {str(end_date_range)}")
-
                 Stacked_Gen = Stacked_Gen[start_date_range : end_date_range]
                 Load = Load[start_date_range : end_date_range]
                 Unserved_Energy = Unserved_Energy[start_date_range : end_date_range]

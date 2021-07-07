@@ -289,7 +289,7 @@ class MPlot(object):
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-        
+    
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
             return mfunc.MissingInputData()
@@ -310,10 +310,9 @@ class MPlot(object):
                     continue
 
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
-                Fuel_Cost.rename("Fuel_Cost", inplace=True)
-
+                
                 VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
-                VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
+                VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY) 
                 VOM_Cost[0].values[VOM_Cost[0].values < 0] = 0
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
@@ -332,7 +331,7 @@ class MPlot(object):
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)
-
+            
                 Detailed_Gen_Cost = pd.concat([Fuel_Cost, VOM_Cost, Start_Shutdown_Cost, Emissions_Cost], axis=1, sort=False)
 
                 Detailed_Gen_Cost.columns = Detailed_Gen_Cost.columns.str.replace('_',' ')

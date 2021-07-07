@@ -12,6 +12,7 @@ import matplotlib.pyplot as plt
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
+import math
 
 
 #===============================================================================
@@ -69,6 +70,11 @@ class MPlot(object):
             all_prices=[]
             for scenario in self.Scenarios:
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
+                price = price.groupby(["timestamp"]).sum()
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                      {str(start_date_range)} to {str(end_date_range)}")
+                    price = price[start_date_range:end_date_range]
                 price.sort_values(by=scenario,ascending=False,inplace=True)
                 price.reset_index(drop=True,inplace=True)
                 all_prices.append(price)
@@ -145,6 +151,12 @@ class MPlot(object):
             for scenario in self.Scenarios:
 
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
+                price = price.groupby(["timestamp"]).sum()
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                      {str(start_date_range)} to {str(end_date_range)}")
+                    price = price[start_date_range:end_date_range]
+                
                 price.sort_values(by=scenario,ascending=False,inplace=True)
                 price.reset_index(drop=True,inplace=True)
                 all_prices.append(price)
@@ -230,6 +242,12 @@ class MPlot(object):
             for scenario in self.Scenarios:
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
+                
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                      {str(start_date_range)} to {str(end_date_range)}")
+                    price = price[start_date_range:end_date_range]
+                
                 all_prices.append(price)
 
             timeseries = pd.concat(all_prices, axis=1)
@@ -272,7 +290,8 @@ class MPlot(object):
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
-            plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
+            if not math.isnan(timezone):
+                plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
             outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
         return outputs
@@ -323,6 +342,11 @@ class MPlot(object):
             for scenario in self.Scenarios:
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
+                
+                if not pd.isnull(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                                      {str(start_date_range)} to {str(end_date_range)}")
+                    price = price[start_date_range:end_date_range]
                 all_prices.append(price)
 
             timeseries = pd.concat(all_prices, axis=1)

@@ -276,6 +276,7 @@ class MPlot(object):
 
                 Min = self.mplot_data_dict["generator_Hours_at_Minimum"].get(scenario)
                 Min = Min.xs(zone_input,level = self.AGG_BY)
+                
                 Min = Min.reset_index()
                 Min = Min.set_index('gen_name')
                 Min = Min.rename(columns = {0:"Hours at Minimum"})

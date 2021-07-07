@@ -57,6 +57,13 @@ class MPlot(object):
                 unserved_eng_timeseries = self.mplot_data_dict[f"{agg}_Unserved_Energy"].get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
+####################################################################
+# Unable to test due to lack of data
+                # if pd.isna(start_date_range) == False:
+                #     self.logger.info(f"Plotting specific date range: \
+                #                       {str(start_date_range)} to {str(end_date_range)}")
+                #     unserved_eng_timeseries = unserved_eng_timeseries[start_date_range : end_date_range]
+######################################################################
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
                 unserved_eng_timeseries.rename(scenario, inplace=True)
                 Unserved_Energy_Timeseries_Out = pd.concat([Unserved_Energy_Timeseries_Out, unserved_eng_timeseries], axis=1, sort=False).fillna(0)
@@ -138,6 +145,13 @@ class MPlot(object):
                 unserved_eng_timeseries = self.mplot_data_dict[f"{agg}_Unserved_Energy"].get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
+####################################################################
+# Unable to test due to lack of data
+                # if pd.isna(start_date_range) == False:
+                #     self.logger.info(f"Plotting specific date range: \
+                #                       {str(start_date_range)} to {str(end_date_range)}")
+                #     unserved_eng_timeseries = unserved_eng_timeseries[start_date_range : end_date_range]
+######################################################################
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
                 unserved_eng_timeseries.rename(scenario, inplace=True)
                                 
