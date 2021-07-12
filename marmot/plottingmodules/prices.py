@@ -611,7 +611,7 @@ class mplot(object):
             
             p_hist.columns = p_hist.columns.str.replace('_',' ')
             data_out = p_hist.add_suffix(" ($/MWh)")
-
+            
             xdimension, ydimension =  mfunc.setup_facet_xy_dimensions(self.xlabels,
                                                                       self.ylabels,
                                                                       multi_scenario=self.Scenarios)
@@ -621,7 +621,7 @@ class mplot(object):
             excess_axs = grid_size - plot_number
         
             #setup plot
-            fig, axs = mfunc.setup_plot(3,2, sharey=True)
+            fig, axs = mfunc.setup_plot(xdimension,ydimension, sharey=True)
             axs = axs.ravel()
             plt.subplots_adjust(wspace=0.1, hspace=0.25)
             
