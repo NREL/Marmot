@@ -142,7 +142,7 @@ class MPlot(object):
             # Manually add the first legend back
             ax.add_artist(leg1)
             if mconfig.parser("plot_title_as_region"):
-                fig1.set_title(zone_input)
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
@@ -740,6 +740,7 @@ class MPlot(object):
 
                 VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
+                VOM_Cost[0].values[VOM_Cost[0].values < 0] = 0
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
 

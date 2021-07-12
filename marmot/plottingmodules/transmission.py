@@ -2001,7 +2001,6 @@ class MPlot(object):
         Figures and data tables are returned to plot_main.
         The method will only work if agg_by = "zone".
         """
-        
         if self.AGG_BY not in ["zone", "zones", "Zone", "Zones"]:
             self.logger.warning("This plot only supports aggregation zone")
             return mfunc.UnsupportedAggregation()
@@ -2038,16 +2037,19 @@ class MPlot(object):
 
             other_zones = self.meta.zones().name.tolist()
             other_zones.remove(zone_input)
-
-            #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
-            fig7, axs = mfunc.setup_plot(1,1,sharey = True)
-            # plt.subplots_adjust(wspace=0.6, hspace=0.3)
+            
+            
+            fig, axs = mfunc.setup_plot(1,1,sharey = True)
+            plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            # flatten object
+            ax = axs[0]
 
             net_exports_all = []
             # Holds each scenario output table
             data_out_chunk = []
 
             for n, scenario in enumerate(self.Scenarios):
+
                 net_exports = []
                 self.logger.info(f"Scenario = {str(scenario)}")
                 flow = self.mplot_data_dict["line_Flow"][scenario]
@@ -2090,18 +2092,19 @@ class MPlot(object):
                 net_exports = pd.concat(net_exports,axis = 1)
                 net_exports = net_exports.dropna(axis = 'columns')
                 net_exports.index = pd.to_datetime(net_exports.index)
-                net_exports['Net export'] = net_exports.sum(axis = 1)
+                net_exports['Net Export'] = net_exports.sum(axis = 1)
 
                 positive = net_exports.agg(lambda x: x[x>0].sum())
                 negative = net_exports.agg(lambda x: x[x<0].sum())
 
                 # unitconversion based off peak export hour, only checked once
                 if scenario == self.Scenarios[0]:
-                    max_val = max(positive['Net export'].max(),abs(negative['Net export']).max())
+                    max_val = max(positive['Net Export'].max(),abs(negative['Net Export']).max())
                     unitconversion = mfunc.capacity_energy_unitconversion(max_val)
 
                 both = pd.concat([positive,negative],axis = 1)
-                both.columns = ['Total export','Total import']
+                both.columns = [f"Total Export",
+                                f"Total Import"]
                 both = both / unitconversion['divisor']
                 net_exports_all.append(both)
 
@@ -2112,15 +2115,17 @@ class MPlot(object):
                 data_out_chunk.append(data_table)
 
             Data_Table_Out = pd.concat(data_out_chunk)
-
-            fig10 = mfunc.create_clustered_stacked_bar_plot(net_exports_all,self.Scenarios)
-            fig10.hlines(y = 0, xmin = fig10.get_xlim()[0], xmax = fig10.get_xlim()[1], linestyle = ':')
-            fig10.set_ylabel(f"Interchange ({unitconversion['units']}h)",  color='black', rotation='vertical')
+            
+            #Make scenario/color dictionary.
+            color_dict = dict(zip(self.Scenarios, self.color_list))
+            
+            mfunc.create_clustered_stacked_bar_plot(net_exports_all, ax, labels=self.Scenarios, color_dict=color_dict)
+            ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
+            ax.set_ylabel(f"Interchange ({unitconversion['units']}h)",  color='black', rotation='vertical')
             if mconfig.parser("plot_title_as_region"):
-                fig10.set_title(zone_input)
+                ax.set_title(zone_input)
 
-
-            outputs[zone_input] = {'fig': fig10,'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig,'data_table': Data_Table_Out}
 
         return outputs
 
@@ -2132,51 +2137,50 @@ class MPlot(object):
         This method plots the total flow for a specific interface, separated by positive and negative flows.
         Specify the interface of interest in column C of Marmot_plot_select.csv. 
         Figures and data tables are returned to plot_main.
-        The method will only work if agg_by = "zone".
         """
-        return mfunc.UnderDevelopment() #TODO: Complete plot 
         
-        int_flow_collection = {}
-        check_input_data = []
-        check_input_data.extend([mfunc.get_data(int_flow_collection,"interface_Flow",self.Marmot_Solutions_folder, self.Scenarios)])
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"interface_Flow",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
         if 1 in check_input_data:
             return mfunc.MissingInputData()
 
         #Select only interfaces specified in Marmot_plot_select.csv.
-        select_ints = self.prop.split(",")
+        select_ints = prop.split(",")
         if select_ints == None:
             return mfunc.InputSheetError()
 
         self.logger.info('Plotting only the interfaces specified in Marmot_plot_select.csv')
         self.logger.info(select_ints) 
 
-        xdimension=len(self.xlabels)
-        if xdimension == 0:
-            xdimension = 1
-        ydimension=len(self.ylabels)
-        if ydimension == 0:
-            ydimension = 1
-
-        grid_size = xdimension*ydimension
-
-        # Used to calculate any excess axis to delete
-        plot_number = len(self.Scenarios)
-        excess_axs = grid_size - plot_number
-
-        #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
-        fig11, axs = mfunc.setup_plot(xdimension,ydimension,sharey = True)
-        plt.subplots_adjust(wspace=0.6, hspace=0.3)
-        missing_lines = 0
+        fig, axs = mfunc.setup_plot(1,1,sharey = True)
+        plt.subplots_adjust(wspace=0.05, hspace=0.2)
+        # flatten object
+        ax = axs[0]
+        
         net_flows_all = []
-
-        for i,scenario in enumerate(self.Scenarios):
-            flow_all = int_flow_collection[scenario]
-            pos = pd.Series(name = 'Positive flow')
-            neg = pd.Series(name = 'Negative flow')
-
+        # Holds each scenario output table
+        data_out_chunk = []
+        
+        for i, scenario in enumerate(self.Scenarios):
+            
+            self.logger.info(f"Scenario = {str(scenario)}")
+            flow_all = self.mplot_data_dict["interface_Flow"][scenario]
+            pos = pd.Series(name = 'Total Export')
+            neg = pd.Series(name = 'Total Import')
+            
+            available_inter = select_ints.copy()
+            
             for inter in select_ints:
-
+                if inter not in flow_all.index.get_level_values('interface_name'):
+                    self.logger.info(f'{inter} Not in Data')
+                    available_inter.remove(inter)
+                    continue
+                
                 #Remove leading spaces
                 if inter[0] == ' ':
                     inter = inter[1:]
@@ -2184,38 +2188,44 @@ class MPlot(object):
                 flow = flow_all.xs(inter,level = 'interface_name')
                 flow = flow.reset_index()
                  
-                if not pd.isnull(self.start_date):
+                if not pd.isnull(start_date_range):
                     self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(self.start_date),str(self.end_date)))
-                    flow = flow[self.start_date : self.end_date]
+                    {} to {}".format(str(start_date_range),str(end_date_range)))
+                    flow = flow[start_date_range : end_date_range]
             
                 flow = flow[0]
+
                 pos_sing = pd.Series(flow.where(flow > 0).sum())
                 pos = pos.append(pos_sing)
                 neg_sing = pd.Series(flow.where(flow < 0).sum())
                 neg = neg.append(neg_sing)
+                
+            if scenario == self.Scenarios[0]:
+                max_val = max(pos.max(),abs(neg.max()))
+                unitconversion = mfunc.capacity_energy_unitconversion(max_val)
 
             both = pd.concat([pos,neg],axis = 1)
-            both.columns = ['Positive flow','Negative flow']
-            both.index = select_ints
-            scenario_names = pd.Series([scenario] * len(both),name = 'Scenario')
-            both = both.set_index([scenario_names],append = True)
+            both.columns = ['Total Export','Total Import']
+            both = both / unitconversion['divisor']
+            both.index = available_inter
             net_flows_all.append(both)
 
-        #For output time series .csv
-        Data_Table_Out = pd.concat(net_flows_all)
-
-        # unitconversion based off peak flow hour, only checked once
-        val = max(Data_Table_Out['Positive flow'].max(),abs(Data_Table_Out['Negative flow']).max())
-        unitconversion = mfunc.capacity_energy_unitconversion(val)
-        Data_Table_Out['Negative flow'] = round(Data_Table_Out['Negative flow'] / unitconversion['divisor'],1)
-        Data_Table_Out['Positive flow'] = round(Data_Table_Out['Positive flow'] / unitconversion['divisor'],1)
+            #Add scenario column to output table.
+            scenario_names = pd.Series([scenario] * len(both),name = 'Scenario')
+            data_table = both.set_index([scenario_names],append = True)
+            data_table = data_table.add_suffix(f" ({unitconversion['units']})")
+            data_out_chunk.append(data_table)
+        
+        Data_Table_Out = pd.concat(data_out_chunk)
          
-        fig11 = mfunc.create_clustered_stacked_bar_plot(net_flows_all,self.Scenarios)
-        fig11.hlines(y = 0, xmin = fig11.get_xlim()[0], xmax = fig11.get_xlim()[1], linestyle = ':')
-        fig11.set_ylabel('Flow ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
-        fig11.set_xlabel('')
-        fig11.figure.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Total_Flow.svg'), dpi=600, bbox_inches='tight')
+        #Make scenario/color dictionary.
+        color_dict = dict(zip(self.Scenarios, self.color_list))
+        
+        mfunc.create_clustered_stacked_bar_plot(net_flows_all, ax, labels=self.Scenarios, color_dict=color_dict)
+        ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
+        ax.set_ylabel('Flow ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+        ax.set_xlabel('')
+        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Total_Flow.svg'), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Total_Flow.csv'))
         outputs = mfunc.DataSavedInModule()
         return outputs

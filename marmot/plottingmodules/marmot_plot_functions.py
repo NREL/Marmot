@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.patches import Patch
 import marmot.config.mconfig as mconfig
 
 logger = logging.getLogger('marmot_plot.'+__name__)
@@ -325,7 +326,7 @@ def create_stacked_bar_plot(df, colour):
     axs.tick_params(axis='x', which='major', length=5, width=1)
     return fig, axs
 
-def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **kwargs):
+def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",  H="//", **kwargs):
     """Given a lbar plot with both stacked and unstacked bars.
     
     Parameters
@@ -333,61 +334,73 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
     df_list: List of Pandas DataFrames.
         The columns within each dataframe will be stacked with different colors. 
         The corresponding columns between each dataframe will be set next to each other and given different hatches.
-    labels: A list of strings, for use in the secondary legend which labels the hatching.
+    ax : matplotlib.axes
+        matplotlib.axes.
+    labels: A list of strings, usually the sceanrio names
+    color_dict: color dictionary, keys should be the same as labels 
     title: Optional plot title.
     H: Sets the hatch pattern to differentiate dataframe bars. Each consecutive bar will have a higher density of the same hatch pattern.
         
-    
     Returns
-    ---------
-    fig: matplotlib fig
+    -------
+    None.
     """
 
     n_df = len(df_list)
     n_col = len(df_list[0].columns) 
     n_ind = len(df_list[0].index)
-    fig = plt.subplot(111)
-
-    for df in df_list : # for each data frame
-        fig = df.plot(kind="bar",
-                      linewidth=0.5,
-                      stacked=True,
-                      ax=fig,
-                      legend=False,
-                      grid=False,
-                      **kwargs)  # make bar plots
-
-    h,l = fig.get_legend_handles_labels() # get the handles we want to modify
+    
+    column_names = []
+    for df, label in zip(df_list, labels) : # for each data frame
+        df.plot(kind="bar",
+            linewidth=0.5,
+            stacked=True,
+            ax=ax,
+            legend=False,
+            grid=False,
+            color=[color_dict.get(x, '#333333') for x in [label]],
+            **kwargs)  # make bar plots
+        
+        column_names.append(df.columns)
+    
+    #Unique Column names
+    column_names = np.unique(np.array(column_names)).tolist()
+    
+    h,l = ax.get_legend_handles_labels() # get the handles we want to modify
     for i in range(0, n_df * n_col, n_col): # len(h) = n_col * n_df
         for j, pa in enumerate(h[i:i+n_col]):
+
             for rect in pa.patches: # for each index
-                rect.set_x(rect.get_x() + 1 / float(n_df + 1) * i / float(n_col))
-                rect.set_hatch(H * int(i / n_col)) #edited part     
+                rect.set_x((rect.get_x() + 1 / float(n_df + 1) * i / float(n_col))-0.15)
+                if rect.get_height() < 0:
+                    rect.set_hatch(H) #edited part 
                 rect.set_width(1 / float(n_df + 1))
-
-    fig.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
-    labels = df.index.get_level_values(None)
-    fig.set_xticklabels(labels, rotation = 90)
-    fig.set_title(title)
-
-    # Add invisible data to add another legend
-    n=[]        
-    for i in range(n_df):
-        n.append(fig.bar(0, 0, color="gray", hatch=H * i))
-
-    l1 = fig.legend(h[:n_col], l[:n_col], loc=[1.01, 0.5])
-    if labels is not None:
-        l2 = plt.legend(n, labels, loc=[1.01, 0.1]) 
-    fig.add_artist(l1)
     
-    fig.legend(loc = [1.01,0.5])
-
-    fig.spines['right'].set_visible(False)
-    fig.spines['top'].set_visible(False)
-    fig.tick_params(axis='y', which='major', length=5, width=1)
-    fig.tick_params(axis='x', which='major', length=5, width=1)
+    ax.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
+    x_labels = df.index.get_level_values(0)
+    ax.set_xticklabels(x_labels, rotation = 90)
+    ax.set_title(title)
     
-    return fig
+    def custom_legend_elements(label):
+        color = color_dict.get(label, '#333333')
+        return Patch(facecolor=color, edgecolor=color)
+    
+    handles = []
+    label_list = labels.copy()
+    for label in label_list:
+        handles.append(custom_legend_elements(label))
+    
+    for i, c_name in enumerate(column_names):
+        handles.append(Patch(facecolor='gray', hatch=H*i))
+        label_list.append(c_name)
+        
+    ax.legend(handles,label_list,loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
+
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.tick_params(axis='y', which='major', length=5, width=1)
+    ax.tick_params(axis='x', which='major', length=5, width=1)
+
 
 def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'solid',n=0,alpha = 1):
     """

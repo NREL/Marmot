@@ -209,7 +209,13 @@ class MPlot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
-
+            
+            # replace x-axis with custom labels if present 
+            if len(self.ticklabels) > 1:
+                ticklabels = [textwrap.fill(x.replace('_', ' '), 8) for x in self.ticklabels]
+                ax.set_xticklabels(ticklabels)
+            
+            
             for n, scenario in enumerate(self.Scenarios):
 
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
@@ -341,7 +347,7 @@ class MPlot(object):
             net_diff = net_diff.sum(axis = 1)
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
+            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(8, break_long_words=False)
 
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
             Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0,
@@ -361,10 +367,16 @@ class MPlot(object):
             locs,labels=plt.xticks()
 
             ax.set_ylabel(f"Generation Change ({format(unitconversion['units'])}h) \n relative to {self.Scenarios[0].replace('_',' ')}",  color='black', rotation='vertical')
+            
+            # replace x-axis with custom labels if present 
+            if len(self.ticklabels) > 1:
+                ticklabels = [textwrap.fill(x.replace('_', ' '), 8) for x in self.ticklabels]
+                ax.set_xticklabels(ticklabels)
+            
+            
+            # xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
 
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-
-            plt.xticks(ticks=locs,labels=xlabels[1:])
+            # plt.xticks(ticks=locs,labels=xlabels[1:])
             ax.margins(x=0.01)
 
             plt.axhline(linewidth=0.5,linestyle='--',color='grey')
