@@ -638,8 +638,8 @@ class mplot(object):
             
             for n, column in enumerate(p_hist):
                 
-                # Set difference plot data eqaul to 0 if a diff plot 
-                if diff_plot and column==f"{self.Scenarios[0].replace('_',' ')}":
+                # Set plot data eqaul to 0 if all zero, e.g diff plot
+                if sum(p_hist[column]) == 0:
                     data = 0
                 else:
                     data = p_hist[column]
