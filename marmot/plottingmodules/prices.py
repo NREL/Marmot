@@ -611,7 +611,7 @@ class MPlot(object):
             
             p_hist.columns = p_hist.columns.str.replace('_',' ')
             data_out = p_hist.add_suffix(" ($/MWh)")
-
+            
             xdimension, ydimension =  mfunc.setup_facet_xy_dimensions(self.xlabels,
                                                                       self.ylabels,
                                                                       multi_scenario=self.Scenarios)
@@ -621,7 +621,7 @@ class MPlot(object):
             excess_axs = grid_size - plot_number
         
             #setup plot
-            fig, axs = mfunc.setup_plot(3,2, sharey=True)
+            fig, axs = mfunc.setup_plot(xdimension,ydimension, sharey=True)
             axs = axs.ravel()
             plt.subplots_adjust(wspace=0.1, hspace=0.25)
             
@@ -638,8 +638,8 @@ class MPlot(object):
             
             for n, column in enumerate(p_hist):
                 
-                # Set difference plot data eqaul to 0 if a diff plot 
-                if diff_plot and column==f"{self.Scenarios[0].replace('_',' ')}":
+                # Set plot data eqaul to 0 if all zero, e.g diff plot
+                if sum(p_hist[column]) == 0:
                     data = 0
                 else:
                     data = p_hist[column]
