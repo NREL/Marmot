@@ -50,6 +50,11 @@ def createConfig(configfile_path):
             x_axes_maxticks = 8,
             y_axes_decimalpt = 1),
         
+        axes_label_options = dict(
+            rotate_x_labels = True,
+            rotate_at_num_labels = 7,
+            rotation_angle = 45),
+        
         figure_file_format = 'svg',
         
         shift_leapday = False,
@@ -147,3 +152,5 @@ def reset_defaults():
 
     '''
     createConfig(configfile_path)
+
+createConfig(configfile_path)

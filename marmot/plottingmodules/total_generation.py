@@ -191,11 +191,11 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
             
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
             
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=ax,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle, ax=ax,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
@@ -210,7 +210,7 @@ class MPlot(object):
 
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 height1 = [int(Total_Load_Out[scenario].sum())]*2
-                print("total load height: " + str(height1))
+                #print("total load height: " + str(height1))
                 lp1 = plt.plot(x,height1, c='black', linewidth=3)
                 if Pump_Load_Out[scenario].values.sum() > 0:
                     height2 = [int(Total_Demand_Out[scenario])]*2
@@ -338,10 +338,10 @@ class MPlot(object):
             net_diff = net_diff.sum(axis = 1)
             
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
@@ -451,8 +451,8 @@ class MPlot(object):
     #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(11, break_long_words=False)
 
     #     Total_Load_Out.index = Total_Load_Out.index.str.replace('_',' ')
-    #     Total_Load_Out.index = Total_Load_Out.index.str.wrap(11, break_long_words=False)
-
+    #     
+    #     Total_Load_Out, angle = mfunc.check_label_angle(Total_Load_Out, False)
     #     Total_Load_Out = Total_Load_Out.T/1000
 
     #     xdimension=len(self.xlabels)
@@ -466,7 +466,7 @@ class MPlot(object):
     #     i=0
     #     for index in Total_Generation_Stack_Out.index:
 
-    #         sb = Total_Generation_Stack_Out.iloc[i:i+1].plot.bar(stacked=True, rot=0,
+    #         sb = Total_Generation_Stack_Out.iloc[i:i+1].plot.bar(stacked=True, rot=angle,
     #         color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',
     #                                      ax=axs[i])
 

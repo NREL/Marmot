@@ -119,16 +119,15 @@ class MPlot(object):
                 CF_all_scenarios = CF_all_scenarios.append(CF)
             
             CF_all_scenarios.index = CF_all_scenarios.index.str.replace('_',' ')
-            CF_all_scenarios.columns = CF_all_scenarios.columns.str.wrap(10, break_long_words = False)
+            CF_all_scenarios, angle = mfunc.check_label_angle(CF_all_scenarios, True)
             
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             
             Data_Table_Out = CF_all_scenarios.T
-            
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
-            CF_all_scenarios.T.plot.bar(stacked = False, rot=0,
+            CF_all_scenarios.T.plot.bar(stacked = False, rot=angle,
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
             
             ax.spines['right'].set_visible(False)
@@ -213,7 +212,7 @@ class MPlot(object):
                 CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
 
             CF_all_scenarios.columns = CF_all_scenarios.columns.str.replace('_',' ')
-            CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
+            CF_all_scenarios, angle = mfunc.check_label_angle(CF_all_scenarios, False)           
 
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
@@ -223,7 +222,10 @@ class MPlot(object):
 
             fig1,ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
             #TODO: rewrite with mfunc functions.
-            CF_all_scenarios.plot.bar(stacked = False, rot=0,
+
+        
+            #angle = mfunc.check_label_angle(CF_all_scenarios)
+            CF_all_scenarios.plot.bar(stacked = False, rot=angle,
                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
 
             ax.spines['right'].set_visible(False)
@@ -275,7 +277,10 @@ class MPlot(object):
                 self.logger.info(f"Scenario = {str(scenario)}")
 
                 Min = self.mplot_data_dict["generator_Hours_at_Minimum"].get(scenario)
-                Min = Min.xs(zone_input,level = self.AGG_BY)
+                try:
+                    Min = Min.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                    continue
                 
                 Min = Min.reset_index()
                 Min = Min.set_index('gen_name')
@@ -327,10 +332,11 @@ class MPlot(object):
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             
+            time_at_min, angle = mfunc.check_label_angle(time_at_min, True)
             Data_Table_Out = time_at_min.T
             
             fig3, ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
-            time_at_min.T.plot.bar(stacked = False, rot=0,
+            time_at_min.T.plot.bar(stacked = False, rot=angle,
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
             
 

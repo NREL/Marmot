@@ -147,10 +147,11 @@ class MPlot(object):
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
             cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
-            cap_started_all_scenarios.columns = cap_started_all_scenarios.columns.str.wrap(10, break_long_words=False)
+            
+            cap_started_all_scenarios, angle = mfunc.check_label_angle(cap_started_all_scenarios, True)
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
+            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=angle,
                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
@@ -258,9 +259,10 @@ class MPlot(object):
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
             #TODO: use mfunc functions
+            cap_started_all_scenarios, angle = mfunc.check_label_angle(cap_started_all_scenarios, True)
             
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
-            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
+            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=angle,
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)

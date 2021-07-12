@@ -103,11 +103,11 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
-            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
-
+            Total_Installed_Capacity_Out, angle = mfunc.check_label_angle(Total_Installed_Capacity_Out, False)
+            
             fig1, ax = plt.subplots(figsize=(self.x, self.y))
 
-            Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x, self.y), rot=0, ax=ax,
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x, self.y), rot=angle, ax=ax,
                                                   color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 
@@ -203,11 +203,11 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
-            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
+            Total_Installed_Capacity_Out, angle = mfunc.check_label_angle(Total_Installed_Capacity_Out, False)
 
             fig2, ax = plt.subplots(figsize=(self.x, self.y))
 
-            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=ax,
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=angle, ax=ax,
                                                   color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 
@@ -256,7 +256,7 @@ class MPlot(object):
                 continue
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
-            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.wrap(5, break_long_words=False)
+            Total_Installed_Capacity_Out, angle = mfunc.check_label_angle(Total_Installed_Capacity_Out, False)
 
             # Check units of data
             capacity_units = [re.search('GW|MW|TW|kW', unit) for unit in Total_Installed_Capacity_Out.columns]
@@ -266,7 +266,7 @@ class MPlot(object):
             Total_Installed_Capacity_Out.columns = [re.sub('[\s (]|GW|TW|MW|kW|\)', '', i) for i in Total_Installed_Capacity_Out.columns]
 
 
-            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=0, ax=axs[0],
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=angle, ax=axs[0],
                                                   color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 

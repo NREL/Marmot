@@ -165,7 +165,7 @@ class MPlot(object):
 
             Total_Unserved_Energy_Out = Unserved_Energy_Timeseries_Out.sum(axis=0)
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.replace('_',' ')
-            Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.wrap(10, break_long_words=False)
+            Total_Unserved_Energy_Out, angle = mfunc.check_label_angle(Total_Unserved_Energy_Out, True)
             Total_Unserved_Energy_Out = pd.DataFrame(Total_Unserved_Energy_Out.T)
 
             if Total_Unserved_Energy_Out.values.sum() == 0:
@@ -187,7 +187,7 @@ class MPlot(object):
             #flatten object
             ax=axs[0]
             
-            mfunc.create_bar_plot(Total_Unserved_Energy_Out.T,ax,color_dict)
+            mfunc.create_bar_plot(Total_Unserved_Energy_Out.T,ax,color_dict,angle)
             ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.xaxis.set_visible(False)

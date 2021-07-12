@@ -456,8 +456,8 @@ class MPlot(object):
             vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
             
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
-            Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
-
+            Total_Curtailment_out, angle = mfunc.check_label_angle(Total_Curtailment_out, False)
+            
             if Total_Curtailment_out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
@@ -472,7 +472,7 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
             
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Curtailment_out.plot.bar(stacked=True, rot=0,
+            Total_Curtailment_out.plot.bar(stacked=True, rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
@@ -590,7 +590,7 @@ class MPlot(object):
             Total_Curtailment_out.drop(self.Scenarios[0],inplace=True) #Drop base entry
             
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
-            Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
+            Total_Curtailment_out, angle = mfunc.check_label_angle(Total_Curtailment_out, False)
             
             # Data table of values to return to main program
             Data_Table_Out = Total_Curtailment_out
@@ -602,9 +602,9 @@ class MPlot(object):
             # unit conversion return divisor and energy units
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
-        
+            
             fig3, ax= plt.subplots(figsize=(self.x,self.y))
-            Total_Curtailment_out.plot.bar(stacked=True, rot=0,
+            Total_Curtailment_out.plot.bar(stacked=True, rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
@@ -751,9 +751,11 @@ class MPlot(object):
         Total_Gen = Total_Gen / 1000000
         Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.csv'))
         Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
-
+        
+        Total_Curtailment_Out_perc, angle = mfunc.check_label_angle(Total_Curtailment_Out_perc, False)
+        
         fig1, ax = plt.subplots(figsize=(9,6))
-        Total_Curtailment_Out_perc.plot.bar(stacked = False, rot=0,edgecolor='black', linewidth='0.1',ax=ax)
+        Total_Curtailment_Out_perc.plot.bar(stacked = False, rot=angle, edgecolor='black', linewidth='0.1',ax=ax)
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')

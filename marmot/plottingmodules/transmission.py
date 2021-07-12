@@ -94,7 +94,6 @@ class MPlot(object):
 
             for n, scenario in enumerate(self.Scenarios):
                 self.logger.info(f"Scenario = {str(scenario)}")
-
                 # gets correct metadata based on area aggregation
                 if self.AGG_BY=='zone':
                     zone_lines = self.meta.zone_lines()
@@ -106,8 +105,13 @@ class MPlot(object):
                     self.logger.warning("Column to Aggregate by is missing")
                     continue
 
-                zone_lines = zone_lines.xs(zone_input)
-                zone_lines=zone_lines['line_name'].unique()
+                try:
+                    zone_lines = zone_lines.xs(zone_input)
+                    zone_lines=zone_lines['line_name'].unique()
+                except KeyError:
+                    self.logger.warning('No data to plot for scenario')
+                    outputs[zone_input] = mfunc.MissingZoneData()
+                    continue
 
                 flow = self.mplot_data_dict["line_Flow"].get(scenario).copy()
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] #Limit to only lines touching to this zone
@@ -175,7 +179,10 @@ class MPlot(object):
                 plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
-            del annual_util, limits
+            try:
+                del annual_util, 
+            except:
+                continue
 
             Data_Out = pd.concat(data_table)
 

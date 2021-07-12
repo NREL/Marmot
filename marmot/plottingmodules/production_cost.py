@@ -99,8 +99,9 @@ class MPlot(object):
 
             Total_Systems_Cost_Out = Total_Systems_Cost_Out.T
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
-            Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(10, break_long_words=False)
-
+            
+            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
+            
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000 #Change to $/kW-year
             Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
 
@@ -114,9 +115,9 @@ class MPlot(object):
             Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" ($/KW-yr)")
 
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-
+            
             net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', linestyle='None', marker='o')
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
@@ -214,8 +215,8 @@ class MPlot(object):
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
 
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
-            Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(5, break_long_words=False)
-
+            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
+            
              #Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
                 outputs[zone_input] = mfunc.MissingZoneData()
@@ -223,10 +224,10 @@ class MPlot(object):
 
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
-
+            
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
@@ -349,7 +350,8 @@ class MPlot(object):
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
             
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
-            Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(5, break_long_words=False)
+            Detailed_Gen_Cost_Out, angle = mfunc.check_label_angle(Detailed_Gen_Cost_Out, False)
+         
             # Deletes columns that are all 0
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
             
@@ -360,10 +362,10 @@ class MPlot(object):
             
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
-
+            
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y = 0)
@@ -463,6 +465,7 @@ class MPlot(object):
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
 
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             # Data table of values to return to main program
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
@@ -471,7 +474,7 @@ class MPlot(object):
 
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
@@ -571,13 +574,15 @@ class MPlot(object):
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             
+            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
+            
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
             Data_Table_Out = Data_Table_Out.add_suffix(" (Million $)")
 
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
@@ -661,16 +666,16 @@ class MPlot(object):
             if Total_Generation_Stack_Out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-
+            
             # Data table of values to return to main program
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
-
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
+            
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
@@ -795,13 +800,15 @@ class MPlot(object):
             if Detailed_Gen_Cost_Out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-
+            
+            Detailed_Gen_Cost_Out, angle = mfunc.check_label_angle(Detailed_Gen_Cost_Out, False)
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
 
+            
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y= 0 ,linewidth=0.5,linestyle='--',color='grey')

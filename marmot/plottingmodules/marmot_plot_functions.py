@@ -16,6 +16,11 @@ import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 import marmot.config.mconfig as mconfig
 
+# curpath = os.getcwd()
+# os.chdir('..')
+# import config.mconfig as mconfig
+# os.chdir(curpath)
+
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
 
@@ -244,7 +249,7 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     return fig,axs
 
 
-def create_bar_plot(df, axs, colour, stacked=False):
+def create_bar_plot(df, axs, colour, angle,stacked=False):
     """
     Creates a bar plot
     Parameters
@@ -262,7 +267,7 @@ def create_bar_plot(df, axs, colour, stacked=False):
     fig : matplotlib fig
         matplotlib fig.
     """
-    fig = df.plot.bar(stacked=stacked, rot=0, edgecolor='white', linewidth='1.5',
+    fig = df.plot.bar(stacked=stacked, rot=angle, edgecolor='white', linewidth='1.5',
                      color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
 
     
@@ -273,7 +278,7 @@ def create_bar_plot(df, axs, colour, stacked=False):
     return fig
 
 
-def create_grouped_bar_plot(df, colour):
+def create_grouped_bar_plot(df, colour,angle):
     """
     Creates a grouped bar plot
     Parameters
@@ -289,7 +294,7 @@ def create_grouped_bar_plot(df, colour):
     """
     
     fig, axs = plt.subplots(figsize=tuple(mconfig.parser("figure_size").values()))
-    df.plot.bar(rot=0, edgecolor='white', linewidth='1.5',
+    df.plot.bar(rot=angle, edgecolor='white', linewidth='1.5',
                                       color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
@@ -297,7 +302,7 @@ def create_grouped_bar_plot(df, colour):
     axs.tick_params(axis='x', which='major', length=5, width=1)
     return fig,axs
 
-def create_stacked_bar_plot(df, colour):
+def create_stacked_bar_plot(df, colour,angle):
     """
     Creates a stacked bar plot
     Parameters
@@ -315,7 +320,7 @@ def create_stacked_bar_plot(df, colour):
     y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
     
     fig, axs = plt.subplots(figsize=tuple(mconfig.parser("figure_size").values()))
-    df.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1',
+    df.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1',
                                                 color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
@@ -604,6 +609,33 @@ def shift_leapday(df, Marmot_Solutions_folder):
 
     return(df)
 
+def check_label_angle(data_to_plot,dot_T):
+    rotate = mconfig.parser("axes_label_options", "rotate_x_labels")
+    num_labels = mconfig.parser("axes_label_options", "rotate_at_num_labels")
+    angle = mconfig.parser("axes_label_options", "rotation_angle")
+        
+    if rotate:
+        if dot_T:
+            if (len(data_to_plot.T)) >= num_labels:
+                return data_to_plot, angle
+            else:
+                data_to_plot.columns = data_to_plot.columns.str.wrap(10, break_long_words = False)
+                return data_to_plot, 0
+        
+        else:
+            if (len(data_to_plot)) >= num_labels:
+                return data_to_plot, angle
+            else:
+                data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
+                return data_to_plot, 0
+    
+    else:
+        if dot_T:
+            data_to_plot.columns = data_to_plot.columns.str.wrap(10, break_long_words = False)
+        else:
+            data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
+        return data_to_plot, 0
+            
 
 def merge_new_agg(df,Region_Mapping,AGG_BY):
 

@@ -102,11 +102,12 @@ class MPlot(object):
 
                 # formatting for plot
                 emitPlot.index = emitPlot.index.str.replace('_',' ')
-                emitPlot.index = emitPlot.index.str.wrap(10, break_long_words=False)
-
+                emitPlot, angle = mfunc.check_label_angle(emitPlot, False)
+                
                 # single pollutant plot
+                
                 fig1, ax = plt.subplots(figsize=(self.x,self.y))
-                emitPlot.plot.bar(stacked=True, rot=0,
+                emitPlot.plot.bar(stacked=True, rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in emitPlot.columns.values], edgecolor='black', linewidth='0.1',ax=ax)
 
                 # plot formatting

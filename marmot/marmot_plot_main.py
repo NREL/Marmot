@@ -41,7 +41,6 @@ except ModuleNotFoundError:
     sys.exit()
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
-import math
 
 #===============================================================================
 
