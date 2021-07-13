@@ -241,8 +241,8 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     axs : matplotlib.axes
         matplotlib axes.
     """
-    x = mconfig.parser("figure_size","xdimension")
-    y = mconfig.parser("figure_size","ydimension")
+    x = mconfig.parser("figure_size","xdimension") * 1.5
+    y = mconfig.parser("figure_size","ydimension") * 1.5
     
     fig, axs = plt.subplots(ydimension,xdimension, figsize=((x*xdimension),(y*ydimension)), sharey=sharey, squeeze=False)
     axs = axs.ravel()
@@ -268,8 +268,8 @@ def create_bar_plot(df, axs, colour, angle,stacked=False):
         matplotlib fig.
     """
     fig = df.plot.bar(stacked=stacked, rot=angle, edgecolor='white', linewidth='1.5',
-                     color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
-
+                      color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
+    
     
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
@@ -298,8 +298,13 @@ def create_grouped_bar_plot(df, colour,angle):
                                       color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
-    axs.tick_params(axis='y', which='major', length=5, width=1)
-    axs.tick_params(axis='x', which='major', length=5, width=1)
+    if angle > 0:
+        axs.set_xticklabels(df.index, ha="right")
+        tick_length = 8
+    else:
+        tick_length = 5
+    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
+    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
     return fig,axs
 
 def create_stacked_bar_plot(df, colour,angle):
@@ -326,8 +331,13 @@ def create_stacked_bar_plot(df, colour,angle):
     axs.spines['top'].set_visible(False)
     #adds comma to y axis data
     axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
-    axs.tick_params(axis='y', which='major', length=5, width=1)
-    axs.tick_params(axis='x', which='major', length=5, width=1)
+    if angle > 0:
+        axs.set_xticklabels(df.index, ha="right")
+        tick_length = 8
+    else:
+        tick_length = 5
+    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
+    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
     return fig, axs
 
 def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **kwargs):

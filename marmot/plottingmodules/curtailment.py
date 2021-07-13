@@ -479,8 +479,13 @@ class MPlot(object):
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Curtailment_out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
@@ -611,8 +616,13 @@ class MPlot(object):
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Curtailment_out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
@@ -760,8 +770,13 @@ class MPlot(object):
         ax.spines['top'].set_visible(False)
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
-        ax.tick_params(axis='y', which='major', length=5, width=1)
-        ax.tick_params(axis='x', which='major', length=5, width=1)
+        if angle > 0:
+            ax.set_xticklabels(Total_Curtailment_Out_perc.index, ha="right")
+            tick_length = 8
+        else:
+            tick_length = 5
+        ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+        ax.tick_params(axis='x', which='major', length=tick_length, width=1)
         
         unitconversion = mfunc.capacity_energy_unitconversion(Total_Curt.values.max())
         Total_Curt = Total_Curt/unitconversion['divisor'] 

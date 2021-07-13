@@ -116,8 +116,13 @@ class MPlot(object):
                 ax.set_ylabel('Annual ' + prop + ' Emissions\n(million metric tons)',  color='black', rotation='vertical')
                 #adds comma to y axis data
                 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                ax.tick_params(axis='y', which='major', length=5, width=1)
-                ax.tick_params(axis='x', which='major', length=5, width=1)
+                if angle > 0:
+                    ax.set_xticklabels(emitPlot.index, ha="right")
+                    tick_length = 8
+                else:
+                    tick_length = 5
+                ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+                ax.tick_params(axis='x', which='major', length=tick_length, width=1)
 
                 # legend formatting
                 handles, labels = ax.get_legend_handles_labels()

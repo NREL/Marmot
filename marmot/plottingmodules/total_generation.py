@@ -201,8 +201,13 @@ class MPlot(object):
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
             
@@ -346,8 +351,13 @@ class MPlot(object):
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
 
             #Add net gen difference line.
             for n, scenario in enumerate(self.Scenarios[1:]):
@@ -448,11 +458,12 @@ class MPlot(object):
     #     Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
 
     #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-    #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(11, break_long_words=False)
+    
+    #     Total_Generation_Stack_Out.index = mfunc.check_label_angle(Total_Generation_Stack_Out,False)
 
     #     Total_Load_Out.index = Total_Load_Out.index.str.replace('_',' ')
+    #     Total_Load_Out.index = Total_Load_Out.index.str.wrap(10, break_long_words=False)
     #     
-    #     Total_Load_Out, angle = mfunc.check_label_angle(Total_Load_Out, False)
     #     Total_Load_Out = Total_Load_Out.T/1000
 
     #     xdimension=len(self.xlabels)
@@ -474,8 +485,13 @@ class MPlot(object):
     #         axs[i].spines['right'].set_visible(False)
     #         axs[i].spines['top'].set_visible(False)
     #         axs[i].xaxis.set_ticklabels([])
-    #         axs[i].tick_params(axis='y', which='major', length=5, width=1)
-    #         axs[i].tick_params(axis='x', which='major', length=5, width=1)
+    #         if angle > 0:
+    #             ax.set_xticklabels(Total_Generation_Stack_Out.iloc[i:i+1].index, ha="right")
+    #             tick_length = 8
+    #         else:
+    #             tick_length = 5
+    #         ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+    #         ax.tick_params(axis='x', which='major', length=tick_length, width=1)
     #         axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     #         axs[i].margins(x=0.01)
 

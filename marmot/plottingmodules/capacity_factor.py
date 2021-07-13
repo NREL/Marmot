@@ -135,8 +135,13 @@ class MPlot(object):
             ax.set_ylabel('Average Output When Committed',  color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(CF_all_scenarios.columns, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
 
@@ -223,18 +228,26 @@ class MPlot(object):
             fig1,ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
             #TODO: rewrite with mfunc functions.
 
-        
-            #angle = mfunc.check_label_angle(CF_all_scenarios)
             CF_all_scenarios.plot.bar(stacked = False, rot=angle,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
-
+                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
+            
+# This code would be used to create the bar plot using mfunc.create_bar_plot()
+            # fig1, axs = mfunc.setup_plot()
+            # #flatten object
+            # ax=axs[0]
+            # mfunc.create_bar_plot(CF_all_scenarios, ax, self.color_list, angle)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(CF_all_scenarios.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
@@ -345,8 +358,13 @@ class MPlot(object):
             ax.set_ylabel('Percentage of time online at minimum generation',  color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(time_at_min.columns, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
 
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
