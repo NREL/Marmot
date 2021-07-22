@@ -153,4 +153,3 @@ def reset_defaults():
     '''
     createConfig(configfile_path)
 
-createConfig(configfile_path)

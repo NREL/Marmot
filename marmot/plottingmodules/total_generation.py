@@ -369,10 +369,10 @@ class MPlot(object):
 
             ax.set_ylabel(f"Generation Change ({format(unitconversion['units'])}h) \n relative to {self.Scenarios[0].replace('_',' ')}",  color='black', rotation='vertical')
             
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            # xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
 
-            plt.xticks(ticks=locs,labels=xlabels[1:])
-            ax.margins(x=0.01)
+            # plt.xticks(ticks=locs,labels=xlabels[1:])
+            # ax.margins(x=0.01)
 
             plt.axhline(linewidth=0.5,linestyle='--',color='grey')
 

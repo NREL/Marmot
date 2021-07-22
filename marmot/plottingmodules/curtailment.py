@@ -421,12 +421,10 @@ class MPlot(object):
                     except KeyError:
                         self.logger.info(f'No {vre_type} in {zone_input}')
                         continue
-                    #vre_collection[vre_type] = float(vre_curt_type.sum())
 
                     avail_gen_type = avail_gen.xs(vre_type,level='tech')
-                    avail_vre_collection[vre_type] = float(avail_gen_type.sum())
                     
-# Code to index data by date range, if a date range is listed in marmot_plot_select.csv
+                    # Code to index data by date range, if a date range is listed in marmot_plot_select.csv
                     if pd.isna(start_date_range) == False:
                         avail_gen_type = avail_gen_type.groupby(['timestamp']).sum()
                         vre_curt_type = vre_curt_type.groupby(['timestamp']).sum()
@@ -436,6 +434,7 @@ class MPlot(object):
                     if vre_curt_type.empty is False and avail_gen_type.empty is False:
                         all_empty = False
                     vre_collection[vre_type] = float(vre_curt_type.sum())
+                    avail_vre_collection[vre_type] = float(avail_gen_type.sum())
                 if all_empty:
                     self.logger.warning('No data in selected Date Range')
                     continue
