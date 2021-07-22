@@ -242,8 +242,8 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     axs : matplotlib.axes
         matplotlib axes.
     """
-    x = mconfig.parser("figure_size","xdimension") * 1.5
-    y = mconfig.parser("figure_size","ydimension") * 1.5
+    x = mconfig.parser("figure_size","xdimension")
+    y = mconfig.parser("figure_size","ydimension")
     
     fig, axs = plt.subplots(ydimension,xdimension, figsize=((x*xdimension),(y*ydimension)), sharey=sharey, squeeze=False)
     axs = axs.ravel()
@@ -631,6 +631,24 @@ def shift_leapday(df, Marmot_Solutions_folder):
     return(df)
 
 def check_label_angle(data_to_plot,dot_T):
+    """
+    Checks to see if the number of labels is greater than or equal to the default
+    number set in mconfig.py.  If this is the case, other values in mconfig.py
+    specify whether or not to rotate the labels and what angle they should 
+    be rotated to.
+    ----------
+    data_to_plot : Pandas dataframe
+    
+    dot_T : Boolean value for whether of not the label data is saved 
+    as columns or rows within data_to_plot.
+    
+    Returns
+    -------
+    data_to_plot: Pandas dataframe
+        same dataframe, with updated label strings
+    
+    angle: Integer value of angle to rotate labels, 0 --> no rotation
+    """    
     rotate = mconfig.parser("axes_label_options", "rotate_x_labels")
     num_labels = mconfig.parser("axes_label_options", "rotate_at_num_labels")
     angle = mconfig.parser("axes_label_options", "rotation_angle")
@@ -656,7 +674,6 @@ def check_label_angle(data_to_plot,dot_T):
         else:
             data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
         return data_to_plot, 0
-            
 
 def merge_new_agg(df,Region_Mapping,AGG_BY):
 
