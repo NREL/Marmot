@@ -1,6 +1,6 @@
 Figure Output Name,Plot Graph,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada], Emissions to plot [CO2, SO2, NOx]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
 Avg_Out_Committed,FALSE,,,,PST,,,capacity_factor,avg_output_when_committed
-Capacity_Factor,FALSE,,,,PST,,,capacity_factor,cf
+Capacity_Factor,TRUE,,,,PST,,,capacity_factor,cf
 Time_at_Min_Gen,FALSE,,,,,,,capacity_factor,time_at_min_gen
 Capacity_Out_Stacked,FALSE,,,,PST,,,capacity_out,capacity_out_stack
 Capacity_Out_Stacked_PASA,FALSE,,,,PST,,,capacity_out,capacity_out_stack_PASA
