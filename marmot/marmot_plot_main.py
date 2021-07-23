@@ -414,6 +414,7 @@ class MarmotPlot(SetupLogger):
                     self.logger.warning(f"None of: {self.zone_region_sublist} in model Regions. Plotting all Regions")
         
         elif not self.Region_Mapping.empty:
+            print(self.AGG_BY)
             self.logger.info("Plotting Custom region aggregation from Region_Mapping File")
             regions = meta.regions()
             self.Region_Mapping = regions.merge(self.Region_Mapping, how='left', on='region')
@@ -496,6 +497,8 @@ class MarmotPlot(SetupLogger):
             
             # Import plot module from plottingmodules package
             plot_module = importlib.import_module('marmot.plottingmodules.' + module)
+            # reload
+            # importlib.reload(plot_module)
             # Instantiate the module class
             instantiate_mplot = plot_module.MPlot(argument_dict)
             
@@ -517,6 +520,7 @@ class MarmotPlot(SetupLogger):
                         
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
+
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
                                            prop = row.iloc[2],
                                            start = row.iloc[3],
