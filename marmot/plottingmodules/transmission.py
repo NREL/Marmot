@@ -10,6 +10,7 @@ This code creates transmission line and interface plots and is called from Marmo
 import os
 import pandas as pd
 import numpy as np
+import re
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
@@ -1259,16 +1260,54 @@ class MPlot(object):
         outputs = mfunc.DataSavedInModule()
         return outputs
 
-    def extract_tx_cap(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
-     
-        return mfunc.UnderDevelopment() #TODO: Needs finishing
+    def gen_stack(self, figure_name=None, prop=None, start=None, end=None,
+                  timezone=None, start_date_range=None, end_date_range=None):
+        print('a gen_stack attempt')
+        facet=False
+        if 'Facet' in figure_name:
+            facet = True
+
+        if self.AGG_BY == 'zone':
+                agg = 'zone'
+        else:
+            agg = 'region'
+
+        def set_dicts(scenario_list):
+
+
+            # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+            # required True/False, property name and scenarios required, scenarios must be a list.
+            properties = [(True,"generator_Generation",scenario_list),
+                          (False,"generator_Curtailment",scenario_list),
+                          (False,"generator_Pump_Load",scenario_list),
+                          (True,f"{agg}_Load",scenario_list),
+                          (False,f"{agg}_Unserved_Energy",scenario_list)]
+
+            # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+            return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
+        outputs = {}
+        if facet:
+            check_input_data = set_dicts(self.Scenarios)
+        else:
+            check_input_data = set_dicts([self.Scenarios[0]])
+
+        return mfunc.UnderDevelopment()
+
+    def extract_tx_cap(self, figure_name=None, prop=None, start=None, end=None, 
+                        timezone=None, start_date_range=None, end_date_range=None,
+                        unique_label_limit=15):
+     
+        # return mfunc.UnderDevelopment() #TODO: Needs finishing
+        outputs = {}
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"interface_Import_Limit",self.Scenarios),
-                      (True,"interface_Export_Limit",self.Scenarios),
-                      (True,"line_Import_Limit",self.Scenarios),
+        # properties = [(True,"interface_Import_Limit",self.Scenarios),
+        #               (True,"interface_Export_Limit",self.Scenarios),
+        #               (True,"line_Import_Limit",self.Scenarios),
+        #               (True,"line_Export_Limit",self.Scenarios)]
+
+        properties = [(True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
@@ -1279,67 +1318,116 @@ class MPlot(object):
         
         for scenario in self.Scenarios:
             self.logger.info(scenario)
+            import_lim = self.mplot_data_dict["line_Import_Limit"][scenario].reset_index()
+            grouped_import_lims = import_lim.groupby(['line_name']).mean().reset_index()
+            export_lim = self.mplot_data_dict["line_Export_Limit"][scenario].reset_index()
+            grouped_export_lims = export_lim.groupby(['line_name']).mean().reset_index()
+            xdimension = mconfig.parser("figure_size","xdimension")
+            ydimension = mconfig.parser("figure_size","ydimension")
+
+            #convert values to appropriate units?
+            unitconversion = mfunc.capacity_energy_unitconversion(max(grouped_import_lims[0].values.max(),grouped_export_lims[0].values.max()))
+
             for zone_input in self.Zones:
+                self.logger.info(f"{self.AGG_BY} = {zone_input}")
+                lines = self.meta.region_interregionallines()
+                lines = lines[lines['region'] == zone_input]
+                
+                import_line_cap = lines.merge(grouped_import_lims,how = 'inner',on = 'line_name')
+                import_line_cap = import_line_cap[['region','line_name',0]] #.set_index('region')
+                import_line_cap[0] = import_line_cap[0].div(unitconversion['divisor'])
+                
 
-                #Lines
-                # lines = self.meta.region_interregionallines()
-                # if scenario == 'ADS':
-                #     zone_input = zone_input.split('_WI')[0]
-                #     lines = self.meta_ADS.region_interregionallines()
+                export_line_cap = lines.merge(grouped_export_lims, how='inner', on='line_name')
+                export_line_cap = export_line_cap[['region','line_name',0]]
+                export_line_cap[0] = export_line_cap[0].div(unitconversion['divisor'])
 
-                # lines = lines[lines['region'] == zone_input]
-                # import_lim = self.mplot_data_dict["line_Import_Limit"][scenario].reset_index()
-                # export_lim = self.mplot_data_dict["line_Export_Limit"][scenario].reset_index()
-                # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
-                # lines = lines[['line_name',0]]
-                # lines.columns = ['line_name','import_limit']
-                # lines = lines.merge(export_lim, how = 'inner',on = 'line_name')
-                # lines = lines[['line_name','import_limit',0]]
-                # lines.columns = ['line_name','import_limit','export_limit']
+                Data_Table_Out = pd.concat([import_line_cap,export_line_cap])
+                Data_Table_Out.set_index('region',inplace=True)
+                Data_Table_Out.columns = ['line_name',f"line_capacity ({unitconversion['units']})"]
+                Data_Table_Out['type'] = ['import' if v<0 else 'export' for v in Data_Table_Out[f"line_capacity ({unitconversion['units']})"]]
+                
+                # subgroup if too many lines for plotting
+                if len(import_line_cap.index) > unique_label_limit or len(export_line_cap.index) > unique_label_limit:
+                    print(f'more than {unique_label_limit} lines in {zone_input}, so grouping by voltage_label')
+                    import_line_cap['line_name'] = import_line_cap['line_name'].map(lambda a: re.sub(r'^([^_]*_){2}','',a))
+                    import_line_cap = import_line_cap.groupby(['region','line_name']).sum().reset_index()
+                    export_line_cap['line_name'] = export_line_cap['line_name'].map(lambda a: re.sub(r'^([^_]*_){2}','',a))
+                    export_line_cap = export_line_cap.groupby(['region','line_name']).sum().reset_index()
 
-                # fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interregional_Line_Limits_' + scenario + '.csv')
-                # lines.to_csv(fn)
+                import_line_cap = import_line_cap.pivot(index='region', columns='line_name', values=0)
+                export_line_cap = export_line_cap.pivot(index='region', columns='line_name', values=0)
 
-                # lines = self.meta.region_intraregionallines()
-                # if scenario == 'ADS':
-                #     lines = self.meta_ADS.region_intraregionallines()
+                # get unique names of lines to create custom legend
+                l1 = import_line_cap.columns.tolist()
+                l2 = export_line_cap.columns.tolist()
+                l1.extend(l2)
+                labels = np.unique(np.array(l1)).tolist()
 
-                # lines = lines[lines['region'] == zone_input]
-                # import_lim = self.mplot_data_dict["line_Import_Limit"][scenario].reset_index()
-                # export_lim = self.mplot_data_dict["line_Export_Limit"][scenario].reset_index()
-                # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
-                # lines = lines[['line_name',0]]
-                # lines.columns = ['line_name','import_limit']
-                # lines = lines.merge(export_lim, how = 'inner',on = 'line_name')
-                # lines = lines[['line_name','import_limit',0]]
-                # lines.columns = ['line_name','import_limit','export_limit']
+                # make a colormap for each unique line
+                cmap = plt.cm.get_cmap(lut=len(labels))
+                colors = [mpl.colors.rgb2hex(cmap(i)) for i in range(cmap.N)]
+                color_dict = dict(zip(labels,colors))
 
-                # fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','Individual_Intraregional_Line_Limits_' + scenario + '.csv')
-                # lines.to_csv(fn)
+                fig1, axs = plt.subplots(1, 2, figsize=(xdimension, ydimension))
+                plt.subplots_adjust(wspace=0.35, hspace=0.2)
+                axs = axs.ravel()
+                
+                #left panel
+                import_line_cap.plot.bar(stacked=True, figsize=(xdimension,ydimension), rot=0, ax=axs[0],
+                                        color=[color_dict[x] for x in import_line_cap.columns],
+                                        edgecolor='black',linewidth='0.1') #eventually you want to stack plot capacity by scenario
 
+                axs[0].spines['right'].set_visible(False)
+                axs[0].spines['top'].set_visible(False)
+                axs[0].set_ylabel(f"Import capacity in {self.AGG_BY} ({unitconversion['units']})",
+                            color='black', rotation='vertical')
+                axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                axs[0].tick_params(axis='y', which='major', length=5, width=1)
+                axs[0].tick_params(axis='x', which='major', length=5, width=1)
+                # handles, labels = axs[0].get_legend_handles_labels()
+                # axs[0].legend(reversed(handles), reversed(labels), loc='lower left',
+                #         bbox_to_anchor=(1, 0), facecolor='inherit', frameon=True)
+                axs[0].get_legend().remove()
+                if mconfig.parser("plot_title_as_region"):
+                    axs[0].set_title(zone_input)
+                
+                # right panel
+                export_line_cap.plot.bar(stacked=True, figsize=(xdimension,ydimension), rot=0, ax=axs[1],
+                                        color=[color_dict[x] for x in export_line_cap.columns],
+                                        edgecolor='black',linewidth='0.1') #eventually you want to stack plot capacity by scenario
 
-                #Interfaces
-                PSCo_ints = ['P39 TOT 5_WI','P40 TOT 7_WI']
+                axs[1].spines['right'].set_visible(False)
+                axs[1].spines['top'].set_visible(False)
+                axs[1].set_ylabel(f"Export capacity in {self.AGG_BY} ({unitconversion['units']})",
+                            color='black', rotation='vertical')
+                axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                axs[1].tick_params(axis='y', which='major', length=5, width=1)
+                axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
-                int_import_lim = self.mplot_data_dict["interface_Import_Limit"][scenario].reset_index()
-                int_export_lim = self.mplot_data_dict["interface_Export_Limit"][scenario].reset_index()
-                if scenario == 'NARIS':
-                    last_timestamp = int_import_lim['timestamp'].unique()[-1] #Last because ADS uses the last timestamp.
-                    int_import_lim = int_import_lim[int_import_lim['timestamp'] == last_timestamp]
-                    int_export_lim = int_export_lim[int_export_lim['timestamp'] == last_timestamp]
-                    lines2ints = self.meta_ADS.interface_lines()
-                else:
-                    lines2ints = self.meta.interface_lines()
+                if mconfig.parser("plot_title_as_region"):
+                    axs[0].set_title(zone_input)
 
-                fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')
-                lines2ints.to_csv(fn)
+                # create custom line legend
+                handles = []
+                for line in labels:
+                    line_legend = mpl.patches.Patch(facecolor=color_dict[line],
+                                        alpha=1.0)
+                    handles.append(line_legend)
 
+                axs[1].legend(reversed(handles), reversed(labels),
+                              loc='lower left', bbox_to_anchor=(1.05, 0),
+                              facecolor='inherit', frameon=True)
 
-                ints = pd.merge(int_import_lim,int_export_lim,how = 'inner', on = 'interface_name')
-                ints.rename(columns = {'0_x':'import_limit','0_y': 'export_limit'},inplace = True)
-                all_lines_in_ints = lines2ints['line'].unique()
-                test = [line for line in lines['line_name'].unique() if line in all_lines_in_ints]
-                ints = ints.merge(lines2ints, how = 'inner', left_on = 'interface_name',right_on = 'interface')
+                # add labels to panels
+                axs[0].set_title("A.", fontdict={"weight": "bold", "size": 11}, loc='left',pad=4)
+                axs[1].set_title("B.", fontdict={"weight": "bold", "size": 11}, loc='left',pad=4)
+            
+                fig1.add_subplot(111, frameon=False)
+                plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+
+                outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+        return outputs
 
     def region_region_interchange_all_scenarios(self, **kwargs):
 
