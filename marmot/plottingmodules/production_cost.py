@@ -99,8 +99,9 @@ class MPlot(object):
 
             Total_Systems_Cost_Out = Total_Systems_Cost_Out.T
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
-            Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(10, break_long_words=False)
-
+            
+            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
+            
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000 #Change to $/kW-year
             Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
 
@@ -114,16 +115,21 @@ class MPlot(object):
             Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" ($/KW-yr)")
 
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-
+            
             net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', linestyle='None', marker='o')
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total System Net Rev, Rev, & Cost ($/KW-yr)',  color='black', rotation='vertical')
             # ax.set_xticklabels(rotation='vertical')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Systems_Cost_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             plt.xticks(rotation=90)
@@ -214,8 +220,8 @@ class MPlot(object):
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
 
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
-            Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.wrap(5, break_long_words=False)
-
+            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
+            
              #Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
                 outputs[zone_input] = mfunc.MissingZoneData()
@@ -223,15 +229,20 @@ class MPlot(object):
 
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
-
+            
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Systems_Cost_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
 
@@ -289,7 +300,7 @@ class MPlot(object):
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-        
+    
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
             return mfunc.MissingInputData()
@@ -310,10 +321,9 @@ class MPlot(object):
                     continue
 
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
-                Fuel_Cost.rename("Fuel_Cost", inplace=True)
-
+                
                 VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
-                VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
+                VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY) 
                 VOM_Cost[0].values[VOM_Cost[0].values < 0] = 0
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
@@ -332,7 +342,7 @@ class MPlot(object):
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)
-
+            
                 Detailed_Gen_Cost = pd.concat([Fuel_Cost, VOM_Cost, Start_Shutdown_Cost, Emissions_Cost], axis=1, sort=False)
 
                 Detailed_Gen_Cost.columns = Detailed_Gen_Cost.columns.str.replace('_',' ')
@@ -350,7 +360,8 @@ class MPlot(object):
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
             
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
-            Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(5, break_long_words=False)
+            Detailed_Gen_Cost_Out, angle = mfunc.check_label_angle(Detailed_Gen_Cost_Out, False)
+         
             # Deletes columns that are all 0
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
             
@@ -361,16 +372,21 @@ class MPlot(object):
             
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
-
+            
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y = 0)
             ax.set_ylabel('Total Generation Cost (Million $)',  color='black', rotation='vertical')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Detailed_Gen_Cost_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
 
@@ -468,19 +484,24 @@ class MPlot(object):
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
-
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
+            
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
             ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
 
             ax.margins(x=0.01)
@@ -572,23 +593,31 @@ class MPlot(object):
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             
+            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
+            
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
             Data_Table_Out = Data_Table_Out.add_suffix(" (Million $)")
 
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Systems_Cost_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             locs,labels=plt.xticks()
             ax.axhline(y = 0, color = 'black')
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-            xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-            plt.xticks(ticks=locs,labels=xlabels[1:])
+            if angle == 0:
+                xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
+                plt.xticks(ticks=locs,labels=xlabels[1:])
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
@@ -662,30 +691,36 @@ class MPlot(object):
             if Total_Generation_Stack_Out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-
+            
             # Data table of values to return to main program
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
-
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
+            
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=0,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
 
             locs,labels=plt.xticks()
             ax.axhline(y = 0)
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-            xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-            plt.xticks(ticks=locs,labels=xlabels[1:])
+            if angle == 0:
+                xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
+                plt.xticks(ticks=locs,labels=xlabels[1:])
 
             ax.margins(x=0.01)
             # plt.ylim((0,600))
@@ -789,7 +824,7 @@ class MPlot(object):
             net_cost = Detailed_Gen_Cost_Out.sum(axis = 1)
 
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
-            Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.wrap(10, break_long_words=False)
+
             # Deletes columns that are all 0
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
 
@@ -797,23 +832,31 @@ class MPlot(object):
             if Detailed_Gen_Cost_Out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-
+            
+            Detailed_Gen_Cost_Out, angle = mfunc.check_label_angle(Detailed_Gen_Cost_Out, False)
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
 
+            
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1', ax=ax)
+            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y= 0 ,linewidth=0.5,linestyle='--',color='grey')
             # ax.axhline(y = 65.4, linewidth = 1, linestyle = ':',color = 'orange',label = 'Avg 2032 LCOE')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Detailed_Gen_Cost_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             locs,labels=plt.xticks()
             ax.set_ylabel('Generation Cost Change \n relative to '+ self.Scenarios[0] + ' (Million $)',  color='black', rotation='vertical') #TODO: Add $ unit conversion.
-            xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-            plt.xticks(ticks=locs,labels=xlabels[1:])
+            if angle == 0:
+                xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
+                plt.xticks(ticks=locs,labels=xlabels[1:])
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)

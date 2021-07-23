@@ -57,6 +57,13 @@ class MPlot(object):
                 unserved_eng_timeseries = self.mplot_data_dict[f"{agg}_Unserved_Energy"].get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
+####################################################################
+# Unable to test due to lack of data
+                # if pd.isna(start_date_range) == False:
+                #     self.logger.info(f"Plotting specific date range: \
+                #                       {str(start_date_range)} to {str(end_date_range)}")
+                #     unserved_eng_timeseries = unserved_eng_timeseries[start_date_range : end_date_range]
+######################################################################
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
                 unserved_eng_timeseries.rename(scenario, inplace=True)
                 Unserved_Energy_Timeseries_Out = pd.concat([Unserved_Energy_Timeseries_Out, unserved_eng_timeseries], axis=1, sort=False).fillna(0)
@@ -138,6 +145,13 @@ class MPlot(object):
                 unserved_eng_timeseries = self.mplot_data_dict[f"{agg}_Unserved_Energy"].get(scenario)
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
+####################################################################
+# Unable to test due to lack of data
+                # if pd.isna(start_date_range) == False:
+                #     self.logger.info(f"Plotting specific date range: \
+                #                       {str(start_date_range)} to {str(end_date_range)}")
+                #     unserved_eng_timeseries = unserved_eng_timeseries[start_date_range : end_date_range]
+######################################################################
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
                 unserved_eng_timeseries.rename(scenario, inplace=True)
                                 
@@ -151,7 +165,7 @@ class MPlot(object):
 
             Total_Unserved_Energy_Out = Unserved_Energy_Timeseries_Out.sum(axis=0)
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.replace('_',' ')
-            Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.wrap(10, break_long_words=False)
+            Total_Unserved_Energy_Out, angle = mfunc.check_label_angle(Total_Unserved_Energy_Out, True)
             Total_Unserved_Energy_Out = pd.DataFrame(Total_Unserved_Energy_Out.T)
 
             if Total_Unserved_Energy_Out.values.sum() == 0:
@@ -173,11 +187,18 @@ class MPlot(object):
             #flatten object
             ax=axs[0]
             
-            mfunc.create_bar_plot(Total_Unserved_Energy_Out.T,ax,color_dict)
+            mfunc.create_bar_plot(Total_Unserved_Energy_Out.T,ax,color_dict,angle)
             ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.xaxis.set_visible(False)
             ax.margins(x=0.01)
+            if angle > 0:
+                ax.set_xticklabels(Total_Unserved_Energy_Out.columns, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):

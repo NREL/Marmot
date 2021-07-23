@@ -147,17 +147,23 @@ class MPlot(object):
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
             cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
-            cap_started_all_scenarios.columns = cap_started_all_scenarios.columns.str.wrap(10, break_long_words=False)
+            
+            cap_started_all_scenarios, angle = mfunc.check_label_angle(cap_started_all_scenarios, True)
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
+            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=angle,
                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(cap_started_all_scenarios.columns, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
@@ -258,16 +264,22 @@ class MPlot(object):
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
             #TODO: use mfunc functions
+            cap_started_all_scenarios, angle = mfunc.check_label_angle(cap_started_all_scenarios, True)
             
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
-            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=0,
+            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=angle,
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(cap_started_all_scenarios.columns, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)

@@ -119,16 +119,15 @@ class MPlot(object):
                 CF_all_scenarios = CF_all_scenarios.append(CF)
             
             CF_all_scenarios.index = CF_all_scenarios.index.str.replace('_',' ')
-            CF_all_scenarios.columns = CF_all_scenarios.columns.str.wrap(10, break_long_words = False)
+            CF_all_scenarios, angle = mfunc.check_label_angle(CF_all_scenarios, True)
             
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             
             Data_Table_Out = CF_all_scenarios.T
-            
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
-            CF_all_scenarios.T.plot.bar(stacked = False, rot=0,
+            CF_all_scenarios.T.plot.bar(stacked = False, rot=angle,
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
             
             ax.spines['right'].set_visible(False)
@@ -136,8 +135,13 @@ class MPlot(object):
             ax.set_ylabel('Average Output When Committed',  color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(CF_all_scenarios.columns, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
 
@@ -213,7 +217,7 @@ class MPlot(object):
                 CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
 
             CF_all_scenarios.columns = CF_all_scenarios.columns.str.replace('_',' ')
-            CF_all_scenarios.index = CF_all_scenarios.index.str.wrap(10, break_long_words = False)
+            CF_all_scenarios, angle = mfunc.check_label_angle(CF_all_scenarios, False)           
 
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
@@ -223,16 +227,27 @@ class MPlot(object):
 
             fig1,ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
             #TODO: rewrite with mfunc functions.
-            CF_all_scenarios.plot.bar(stacked = False, rot=0,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
 
+            CF_all_scenarios.plot.bar(stacked = False, rot=angle,
+                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
+            
+# This code would be used to create the bar plot using mfunc.create_bar_plot()
+            # fig1, axs = mfunc.setup_plot()
+            # #flatten object
+            # ax=axs[0]
+            # mfunc.create_bar_plot(CF_all_scenarios, ax, self.color_list, angle)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(CF_all_scenarios.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
 
@@ -275,7 +290,11 @@ class MPlot(object):
                 self.logger.info(f"Scenario = {str(scenario)}")
 
                 Min = self.mplot_data_dict["generator_Hours_at_Minimum"].get(scenario)
-                Min = Min.xs(zone_input,level = self.AGG_BY)
+                try:
+                    Min = Min.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                    continue
+                
                 Min = Min.reset_index()
                 Min = Min.set_index('gen_name')
                 Min = Min.rename(columns = {0:"Hours at Minimum"})
@@ -326,10 +345,11 @@ class MPlot(object):
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             
+            time_at_min, angle = mfunc.check_label_angle(time_at_min, True)
             Data_Table_Out = time_at_min.T
             
             fig3, ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
-            time_at_min.T.plot.bar(stacked = False, rot=0,
+            time_at_min.T.plot.bar(stacked = False, rot=angle,
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
             
 
@@ -338,8 +358,13 @@ class MPlot(object):
             ax.set_ylabel('Percentage of time online at minimum generation',  color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(time_at_min.columns, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
 
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)

@@ -75,7 +75,23 @@ class MPlot(object):
 
                 re_curt = re_curt.squeeze() #Convert to Series
                 pv_curt = pv_curt.squeeze() #Convert to Series
-
+                
+                
+                if pd.isna(start_date_range) == False:
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    re_curt = re_curt[start_date_range : end_date_range]
+                    pv_curt = pv_curt[start_date_range : end_date_range]
+                    
+                    if re_curt.empty is True and prop == "PV+Wind": 
+                        self.logger.warning('No data in selected Date Range')
+                        continue
+                    
+                    if pv_curt.empty is True and prop == "PV":
+                        self.logger.warning('No data in selected Date Range')
+                        continue
+                
+                
                 # Sort from larget to smallest
                 re_cdc = re_curt.sort_values(ascending=False).reset_index(drop=True)
                 pv_cdc = pv_curt.sort_values(ascending=False).reset_index(drop=True)
@@ -110,6 +126,7 @@ class MPlot(object):
                 Data_Table_Out = PV_Curtailment_DC
                 Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
                 
+                x_axis_lim = 1.25 * len(PV_Curtailment_DC)
                 for column in PV_Curtailment_DC:
                     ax.plot(PV_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
                             label=column)
@@ -128,7 +145,8 @@ class MPlot(object):
                 RE_Curtailment_DC = RE_Curtailment_DC/unitconversion['divisor'] 
                 Data_Table_Out = RE_Curtailment_DC
                 Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
-
+                
+                x_axis_lim = 1.25 * len(RE_Curtailment_DC)
                 for column in RE_Curtailment_DC:
                     ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
                             label=column)
@@ -143,7 +161,9 @@ class MPlot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            ax.set_xlim(0, 9490)
+            #ax.set_xlim(0, 9490)
+            ax.set_xlim(0,x_axis_lim)
+            
             ax.set_ylim(bottom=0)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
@@ -187,14 +207,14 @@ class MPlot(object):
 
                 avail_gen = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
                 avail_gen = avail_gen.xs(zone_input,level=self.AGG_BY)
-
+                
                 re_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
                 try:
                     re_curt = re_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                         self.logger.info(f'No curtailment in {zone_input}')
                         continue
-
+                
                 # Finds the number of unique hours in the year
                 no_hours_year = len(gen.index.unique(level="timestamp"))
 
@@ -268,6 +288,7 @@ class MPlot(object):
                 # Total generation cost
                 Total_Gen_Cost = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
+                
                 Total_Gen_Cost = float(Total_Gen_Cost.sum())
 
                 vg_out = pd.Series([PV_Penetration ,RE_Penetration, VRE_Penetration, Max_PV_Curt,
@@ -389,18 +410,35 @@ class MPlot(object):
                         self.logger.info(f'No available generation in {zone_input}')
                         continue
                 avail_gen = avail_gen[avail_gen.index.isin(self.vre_gen_cat,level='tech')]
-
+                
+                all_empty = True
+                if pd.isna(start_date_range) == False:
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(start_date_range)} to {str(end_date_range)}")
                 for vre_type in self.vre_gen_cat:
                     try:
                         vre_curt_type = vre_curt.xs(vre_type,level='tech')
                     except KeyError:
                         self.logger.info(f'No {vre_type} in {zone_input}')
                         continue
-                    vre_collection[vre_type] = float(vre_curt_type.sum())
 
                     avail_gen_type = avail_gen.xs(vre_type,level='tech')
+                    
+                    # Code to index data by date range, if a date range is listed in marmot_plot_select.csv
+                    if pd.isna(start_date_range) == False:
+                        avail_gen_type = avail_gen_type.groupby(['timestamp']).sum()
+                        vre_curt_type = vre_curt_type.groupby(['timestamp']).sum()
+                        vre_curt_type = vre_curt_type[start_date_range : end_date_range]
+                        avail_gen_type = avail_gen_type[start_date_range : end_date_range]
+                    
+                    if vre_curt_type.empty is False and avail_gen_type.empty is False:
+                        all_empty = False
+                    vre_collection[vre_type] = float(vre_curt_type.sum())
                     avail_vre_collection[vre_type] = float(avail_gen_type.sum())
-
+                if all_empty:
+                    self.logger.warning('No data in selected Date Range')
+                    continue
+                
                 vre_table = pd.DataFrame(vre_collection,index=[scenario])
                 avail_gen_table = pd.DataFrame(avail_vre_collection,index=[scenario])
 
@@ -417,11 +455,12 @@ class MPlot(object):
             vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
             
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
-            Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
-
+            Total_Curtailment_out, angle = mfunc.check_label_angle(Total_Curtailment_out, False)
+            
             if Total_Curtailment_out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
+            
             
             # unit conversion return divisor and energy units
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
@@ -432,15 +471,20 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
             
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Curtailment_out.plot.bar(stacked=True, rot=0,
+            Total_Curtailment_out.plot.bar(stacked=True, rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Curtailment_out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
@@ -550,7 +594,7 @@ class MPlot(object):
             Total_Curtailment_out.drop(self.Scenarios[0],inplace=True) #Drop base entry
             
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
-            Total_Curtailment_out.index = Total_Curtailment_out.index.str.wrap(5, break_long_words=False)
+            Total_Curtailment_out, angle = mfunc.check_label_angle(Total_Curtailment_out, False)
             
             # Data table of values to return to main program
             Data_Table_Out = Total_Curtailment_out
@@ -562,17 +606,22 @@ class MPlot(object):
             # unit conversion return divisor and energy units
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
-        
+            
             fig3, ax= plt.subplots(figsize=(self.x,self.y))
-            Total_Curtailment_out.plot.bar(stacked=True, rot=0,
+            Total_Curtailment_out.plot.bar(stacked=True, rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Curtailment_out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
@@ -711,15 +760,22 @@ class MPlot(object):
         Total_Gen = Total_Gen / 1000000
         Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.csv'))
         Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
-
+        
+        Total_Curtailment_Out_perc, angle = mfunc.check_label_angle(Total_Curtailment_Out_perc, False)
+        
         fig1, ax = plt.subplots(figsize=(9,6))
-        Total_Curtailment_Out_perc.plot.bar(stacked = False, rot=0,edgecolor='black', linewidth='0.1',ax=ax)
+        Total_Curtailment_Out_perc.plot.bar(stacked = False, rot=angle, edgecolor='black', linewidth='0.1',ax=ax)
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
-        ax.tick_params(axis='y', which='major', length=5, width=1)
-        ax.tick_params(axis='x', which='major', length=5, width=1)
+        if angle > 0:
+            ax.set_xticklabels(Total_Curtailment_Out_perc.index, ha="right")
+            tick_length = 8
+        else:
+            tick_length = 5
+        ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+        ax.tick_params(axis='x', which='major', length=tick_length, width=1)
         
         unitconversion = mfunc.capacity_energy_unitconversion(Total_Curt.values.max())
         Total_Curt = Total_Curt/unitconversion['divisor'] 
