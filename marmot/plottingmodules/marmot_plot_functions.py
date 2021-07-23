@@ -17,6 +17,11 @@ import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 import marmot.config.mconfig as mconfig
 
+# curpath = os.getcwd()
+# os.chdir('..')
+# import config.mconfig as mconfig
+# os.chdir(curpath)
+
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
 
@@ -68,7 +73,7 @@ class UnsupportedAggregation:
     def __init__(self):
         return
     
-    
+# def days_in_date_range()    
 
 def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
     """
@@ -245,7 +250,7 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     return fig,axs
 
 
-def create_bar_plot(df, axs, colour, stacked=False):
+def create_bar_plot(df, axs, colour, angle,stacked=False):
     """
     Creates a bar plot
     Parameters
@@ -263,9 +268,9 @@ def create_bar_plot(df, axs, colour, stacked=False):
     fig : matplotlib fig
         matplotlib fig.
     """
-    fig = df.plot.bar(stacked=stacked, rot=0, edgecolor='white', linewidth='1.5',
-                     color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
-
+    fig = df.plot.bar(stacked=stacked, rot=angle, edgecolor='white', linewidth='1.5',
+                      color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
+    
     
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
@@ -274,7 +279,7 @@ def create_bar_plot(df, axs, colour, stacked=False):
     return fig
 
 
-def create_grouped_bar_plot(df, colour):
+def create_grouped_bar_plot(df, colour,angle):
     """
     Creates a grouped bar plot
     Parameters
@@ -290,15 +295,20 @@ def create_grouped_bar_plot(df, colour):
     """
     
     fig, axs = plt.subplots(figsize=tuple(mconfig.parser("figure_size").values()))
-    df.plot.bar(rot=0, edgecolor='white', linewidth='1.5',
+    df.plot.bar(rot=angle, edgecolor='white', linewidth='1.5',
                                       color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
-    axs.tick_params(axis='y', which='major', length=5, width=1)
-    axs.tick_params(axis='x', which='major', length=5, width=1)
+    if angle > 0:
+        axs.set_xticklabels(df.index, ha="right")
+        tick_length = 8
+    else:
+        tick_length = 5
+    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
+    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
     return fig,axs
 
-def create_stacked_bar_plot(df, colour):
+def create_stacked_bar_plot(df, colour,angle):
     """
     Creates a stacked bar plot
     Parameters
@@ -316,14 +326,19 @@ def create_stacked_bar_plot(df, colour):
     y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
     
     fig, axs = plt.subplots(figsize=tuple(mconfig.parser("figure_size").values()))
-    df.plot.bar(stacked=True, rot=0, edgecolor='black', linewidth='0.1',
+    df.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1',
                                                 color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
     #adds comma to y axis data
     axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
-    axs.tick_params(axis='y', which='major', length=5, width=1)
-    axs.tick_params(axis='x', which='major', length=5, width=1)
+    if angle > 0:
+        axs.set_xticklabels(df.index, ha="right")
+        tick_length = 8
+    else:
+        tick_length = 5
+    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
+    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
     return fig, axs
 
 def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",  H="//", **kwargs):
@@ -615,6 +630,50 @@ def shift_leapday(df, Marmot_Solutions_folder):
 
     return(df)
 
+def check_label_angle(data_to_plot,dot_T):
+    """
+    Checks to see if the number of labels is greater than or equal to the default
+    number set in mconfig.py.  If this is the case, other values in mconfig.py
+    specify whether or not to rotate the labels and what angle they should 
+    be rotated to.
+    ----------
+    data_to_plot : Pandas dataframe
+    
+    dot_T : Boolean value for whether of not the label data is saved 
+    as columns or rows within data_to_plot.
+    
+    Returns
+    -------
+    data_to_plot: Pandas dataframe
+        same dataframe, with updated label strings
+    
+    angle: Integer value of angle to rotate labels, 0 --> no rotation
+    """    
+    rotate = mconfig.parser("axes_label_options", "rotate_x_labels")
+    num_labels = mconfig.parser("axes_label_options", "rotate_at_num_labels")
+    angle = mconfig.parser("axes_label_options", "rotation_angle")
+        
+    if rotate:
+        if dot_T:
+            if (len(data_to_plot.T)) >= num_labels:
+                return data_to_plot, angle
+            else:
+                data_to_plot.columns = data_to_plot.columns.str.wrap(10, break_long_words = False)
+                return data_to_plot, 0
+        
+        else:
+            if (len(data_to_plot)) >= num_labels:
+                return data_to_plot, angle
+            else:
+                data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
+                return data_to_plot, 0
+    
+    else:
+        if dot_T:
+            data_to_plot.columns = data_to_plot.columns.str.wrap(10, break_long_words = False)
+        else:
+            data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
+        return data_to_plot, 0
 
 def merge_new_agg(df,Region_Mapping,AGG_BY):
 

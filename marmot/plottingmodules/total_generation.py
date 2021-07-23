@@ -103,7 +103,7 @@ class MPlot(object):
 
                 if not pd.isnull(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
+                                      {str(start_date_range)} to {str(end_date_range)}")
                     Total_Gen_Stack = Total_Gen_Stack[start_date_range:end_date_range]
 
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -115,8 +115,6 @@ class MPlot(object):
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
 
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Total_Load = Total_Load[start_date_range:end_date_range]
 
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
@@ -131,9 +129,9 @@ class MPlot(object):
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
+                
+                
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Unserved_Energy = Unserved_Energy[start_date_range:end_date_range]
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
                 Unserved_Energy = Unserved_Energy/interval_count
@@ -153,9 +151,8 @@ class MPlot(object):
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Pump_Load = Pump_Load[start_date_range:end_date_range]
+                
                 Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
                 Pump_Load = Pump_Load/interval_count
                 if (Pump_Load == 0).all() == False:
@@ -195,18 +192,23 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
-
+            
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=ax,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle, ax=ax,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
             
@@ -220,6 +222,7 @@ class MPlot(object):
 
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 height1 = [int(Total_Load_Out[scenario].sum())]*2
+                #print("total load height: " + str(height1))
                 lp1 = plt.plot(x,height1, c='black', linewidth=3)
                 if Pump_Load_Out[scenario].values.sum() > 0:
                     height2 = [int(Total_Demand_Out[scenario])]*2
@@ -347,16 +350,22 @@ class MPlot(object):
             net_diff = net_diff.sum(axis = 1)
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(8, break_long_words=False)
 
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
+            
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
 
             #Add net gen difference line.
             for n, scenario in enumerate(self.Scenarios[1:]):
@@ -368,16 +377,10 @@ class MPlot(object):
 
             ax.set_ylabel(f"Generation Change ({format(unitconversion['units'])}h) \n relative to {self.Scenarios[0].replace('_',' ')}",  color='black', rotation='vertical')
             
-            # replace x-axis with custom labels if present 
-            if len(self.ticklabels) > 1:
-                ticklabels = [textwrap.fill(x.replace('_', ' '), 8) for x in self.ticklabels]
-                ax.set_xticklabels(ticklabels)
-            
-            
             # xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
 
             # plt.xticks(ticks=locs,labels=xlabels[1:])
-            ax.margins(x=0.01)
+            # ax.margins(x=0.01)
 
             plt.axhline(linewidth=0.5,linestyle='--',color='grey')
 
@@ -463,11 +466,12 @@ class MPlot(object):
     #     Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
 
     #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-    #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(11, break_long_words=False)
+    
+    #     Total_Generation_Stack_Out.index = mfunc.check_label_angle(Total_Generation_Stack_Out,False)
 
     #     Total_Load_Out.index = Total_Load_Out.index.str.replace('_',' ')
-    #     Total_Load_Out.index = Total_Load_Out.index.str.wrap(11, break_long_words=False)
-
+    #     Total_Load_Out.index = Total_Load_Out.index.str.wrap(10, break_long_words=False)
+    #     
     #     Total_Load_Out = Total_Load_Out.T/1000
 
     #     xdimension=len(self.xlabels)
@@ -481,7 +485,7 @@ class MPlot(object):
     #     i=0
     #     for index in Total_Generation_Stack_Out.index:
 
-    #         sb = Total_Generation_Stack_Out.iloc[i:i+1].plot.bar(stacked=True, rot=0,
+    #         sb = Total_Generation_Stack_Out.iloc[i:i+1].plot.bar(stacked=True, rot=angle,
     #         color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',
     #                                      ax=axs[i])
 
@@ -489,8 +493,13 @@ class MPlot(object):
     #         axs[i].spines['right'].set_visible(False)
     #         axs[i].spines['top'].set_visible(False)
     #         axs[i].xaxis.set_ticklabels([])
-    #         axs[i].tick_params(axis='y', which='major', length=5, width=1)
-    #         axs[i].tick_params(axis='x', which='major', length=5, width=1)
+    #         if angle > 0:
+    #             ax.set_xticklabels(Total_Generation_Stack_Out.iloc[i:i+1].index, ha="right")
+    #             tick_length = 8
+    #         else:
+    #             tick_length = 5
+    #         ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+    #         ax.tick_params(axis='x', which='major', length=tick_length, width=1)
     #         axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     #         axs[i].margins(x=0.01)
 

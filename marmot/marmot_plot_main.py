@@ -457,7 +457,6 @@ class MarmotPlot(SetupLogger):
         
         for module in list_modules:
             module_plots = plot_selection.loc[plot_selection['Marmot Module'] == module]
-            
             # dictionary of arguments passed to plotting modules; 
             # key names match the instance variables in each module            
             argument_dict = {
@@ -514,7 +513,7 @@ class MarmotPlot(SetupLogger):
                 
                 print("\n\n\n")
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
-                        
+                
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
