@@ -95,6 +95,7 @@ class MPlot(object):
 
             for n, scenario in enumerate(self.Scenarios):
                 self.logger.info(f"Scenario = {str(scenario)}")
+
                 # gets correct metadata based on area aggregation
                 if self.AGG_BY=='zone':
                     zone_lines = self.meta.zone_lines()
@@ -106,13 +107,8 @@ class MPlot(object):
                     self.logger.warning("Column to Aggregate by is missing")
                     continue
 
-                try:
-                    zone_lines = zone_lines.xs(zone_input)
-                    zone_lines=zone_lines['line_name'].unique()
-                except KeyError:
-                    self.logger.warning('No data to plot for scenario')
-                    outputs[zone_input] = mfunc.MissingZoneData()
-                    continue
+                zone_lines = zone_lines.xs(zone_input)
+                zone_lines=zone_lines['line_name'].unique()
 
                 flow = self.mplot_data_dict["line_Flow"].get(scenario).copy()
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] #Limit to only lines touching to this zone
@@ -180,10 +176,7 @@ class MPlot(object):
                 plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
-            try:
-                del annual_util, 
-            except:
-                continue
+            del annual_util, limits
 
             Data_Out = pd.concat(data_table)
 
@@ -1267,9 +1260,11 @@ class MPlot(object):
         outputs = mfunc.DataSavedInModule()
         return outputs
 
-    def gen_stack(self, figure_name=None, prop=None, start=None, end=None,
+    def line_scatter(self, figure_name=None, prop=None, start=None, end=None,
                   timezone=None, start_date_range=None, end_date_range=None):
-        print('a gen_stack attempt')
+        
+        # return mfunc.UnderDevelopment()
+        #then we can rank-order the hours based on the thing we wish to facet on
         facet=False
         if 'Facet' in figure_name:
             facet = True
@@ -1299,7 +1294,142 @@ class MPlot(object):
         else:
             check_input_data = set_dicts([self.Scenarios[0]])
 
-        return mfunc.UnderDevelopment()
+        properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        
+        if 1 in check_input_data:
+            return mfunc.MissingInputData()
+
+        #here we can grab interchange
+        for zone_input in self.Zones:
+            self.logger.info(f"Zone = {zone_input}")
+            
+            data_table_chunks = []
+            for scenario in self.Scenarios:
+                
+                rr_int = self.mplot_data_dict[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
+                if self.shift_leapday == True:
+                    rr_int = mfunc.shift_leapday(rr_int,self.Marmot_Solutions_folder)
+                #may need to check agg here if not zone or region
+
+                rr_int_agg = rr_int.groupby(['timestamp','parent','child'],as_index=True).sum()
+                rr_int_agg.rename(columns = {0:'flow (MW)'}, inplace = True)
+                rr_int_agg = rr_int_agg.reset_index()
+
+                parent_region = [zone_input]
+                for parent in parent_region:
+                    single_parent = rr_int_agg[rr_int_agg['parent'] == parent]
+                    single_parent = single_parent.pivot(index = 'timestamp',columns = 'child',values = 'flow (MW)')
+                    single_parent = single_parent.loc[:,(single_parent != 0).any(axis = 0)] #Remove all 0 columns (uninteresting).
+                    if (parent in single_parent.columns):
+                        single_parent = single_parent.drop(columns = [parent]) #Remove columns if parent = child
+                    # single_parent = single_parent / unitconversion['divisor']
+                scenario_names = pd.Series([scenario]*len(single_parent),name='Scenario')
+                # data_table = single_parent.add_suffix(f" ({unitconversion['units']})")
+                data_table = single_parent.set_index([scenario_names],append=True)
+                
+                # great, now we can match against something
+                # eventually probably want this to be able to aggregate all zones
+                # and do things other than load
+            
+                lookup_label = "generator_Generation"#f'{agg}_Load'
+                if "generator" in lookup_label:
+                    Load = self.mplot_data_dict[lookup_label].get(scenario).copy()
+                    Load.reset_index(inplace=True)
+                    Load.set_index(['timestamp','region'],inplace=True)
+                    assert prop in Load['tech'].unique()
+                    Load = Load[Load['tech']==prop].copy()
+                    Load = Load[0].copy()
+                    lookup_label += f'_{prop}'
+                else:
+                    Load = self.mplot_data_dict[lookup_label].get(scenario).copy()
+                if self.shift_leapday == True:
+                    Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
+                Load = Load.xs(zone_input,level=self.AGG_BY)
+                Load = Load.groupby(["timestamp"]).sum()
+                data_table['sort_attribute'] = Load.squeeze().tolist()
+                data_table_chunks.append(data_table)
+
+                # sorted_data_table = data_table.sort_values(['sort_attribute'],ascending = False)
+                # data_avgs.append(sorted_data_table.mean(axis=0))
+                # data_table_chunks.append(sorted_data_table.iloc[:int(len(sorted_data_table.index)*top_pct),:])
+                # data_table_chunks.append(data_table)
+
+            zone_interchange_timeseries = pd.concat(data_table_chunks, copy=False, axis=0)
+            #create and bank unit conversions
+            line_unitconversion = mfunc.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,:-1].abs().values.max())
+            zone_interchange_timeseries.iloc[:,:-1] = zone_interchange_timeseries.iloc[:,:-1] / line_unitconversion['divisor']
+            # zone_interchange_avgs = pd.concat(data_avgs, copy=False, axis=0)
+            attr_unitconversion = mfunc.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,-1].abs().values.max())
+            zone_interchange_timeseries.iloc[:,-1] = zone_interchange_timeseries.iloc[:,-1] / attr_unitconversion['divisor']
+
+            #Make a facet plot, one panel for each child zone.
+            plot_number = len(zone_interchange_timeseries.columns)-1
+            xdimension, ydimension =  mfunc.set_x_y_dimension(plot_number)
+            grid_size = xdimension*ydimension
+            excess_axs = grid_size - plot_number
+            fig3, axs = mfunc.setup_plot(xdimension,ydimension,sharey=False)
+            plt.subplots_adjust(wspace=0.6, hspace=0.7)
+
+            # try it also as a scatter
+            for n,column in enumerate(zone_interchange_timeseries.columns[:-1]):
+                axs[n].scatter(zone_interchange_timeseries[column],zone_interchange_timeseries['sort_attribute'])
+                axs[n].set_xlabel(f"{zone_input} to {column} Flow ({line_unitconversion['units']})", fontsize=12)
+                axs[n].set_ylabel(f"{lookup_label} ({attr_unitconversion['units']})", fontsize=12)
+
+                z = np.polyfit(zone_interchange_timeseries[column],zone_interchange_timeseries['sort_attribute'], 1)
+                p = np.poly1d(z)
+                axs[n].plot(zone_interchange_timeseries[column],p(zone_interchange_timeseries[column]),"r--")
+            
+            # this actually seems too complicated for now
+            # then iterate across the child zones, plotting relevant info
+            # for n,column in enumerate(zone_interchange_timeseries.columns[:-1]):
+                         
+            #     mfunc.create_line_plot(axs,zone_interchange_timeseries.reset_index(),column,label=column,n=n)
+                
+            #     ax2 = axs[n].twinx()
+            #     ax2.plot(zone_interchange_timeseries.reset_index()['sort_attribute'], color='red', label='sort_attribute')
+            #     axs[n].axhline(y = zone_interchange_avgs[column], ls = '--',label = f'{column} avg',color = 'blue')
+            #     ax2.axhline(y = zone_interchange_avgs['sort_attribute'], ls = '--',label = 'attr avg',color = 'red')
+                
+            #     axs[n].set_title(f"{zone_input} to {column}")
+            #     axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            #     axs[n].margins(x=0.01)
+            #     axs[n].set_xlabel('Rank in timeseries')
+            #     axs[n].set_ylabel('Flow (MW)',color='blue',fontsize=12)
+            #     ax2.set_ylabel("Load (MW)",color="red",fontsize=12)
+
+            #     axs[n].set_xlim([0,int(len(zone_interchange_timeseries.index)*1.2)]) #extend
+            #     ax2.set_xlim([0,int(len(zone_interchange_timeseries.index)*1.2)]) #extend
+
+                #add labels
+                # for line,label in zip(axs[n].lines, ax1_labs):
+                #     y = line.get_ydata()[-1]
+                #     x = line.get_xdata()[-1]
+                #     axs[n].annotate(label, xy=(1,y), xytext=(.82*x,0), color=line.get_color(), 
+                #                 xycoords = axs[n].get_yaxis_transform(), textcoords="offset points",
+                #                 size=12, va="center")
+
+                # for line,label in zip(ax2.lines, ax2_labs):
+                #     y = line.get_ydata()[-1]
+                #     x = line.get_xdata()[-1]
+                #     ax2.annotate(label, xy=(.8,y), xytext=(.82*x,0), color=line.get_color(), 
+                #                 xycoords = ax2.get_yaxis_transform(), textcoords="offset points",
+                #                 size=12, va="center")
+                
+                # axs[n].legend(loc='lower left',bbox_to_anchor=(1,0), facecolor='inherit', frameon=True)
+
+            #clean empty and resize
+            #Remove extra axes
+            if excess_axs != 0:
+                mfunc.remove_excess_axs(axs, excess_axs, grid_size)
+            
+            outputs[zone_input] = {'fig': fig3, 'data_table': zone_interchange_timeseries}
+        
+        return outputs
+        # return mfunc.UnderDevelopment()
 
     def extract_tx_cap(self, figure_name=None, prop=None, start=None, end=None, 
                         timezone=None, start_date_range=None, end_date_range=None,
@@ -1392,9 +1522,6 @@ class MPlot(object):
                 axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].tick_params(axis='y', which='major', length=5, width=1)
                 axs[0].tick_params(axis='x', which='major', length=5, width=1)
-                # handles, labels = axs[0].get_legend_handles_labels()
-                # axs[0].legend(reversed(handles), reversed(labels), loc='lower left',
-                #         bbox_to_anchor=(1, 0), facecolor='inherit', frameon=True)
                 axs[0].get_legend().remove()
                 if mconfig.parser("plot_title_as_region"):
                     axs[0].set_title(zone_input)

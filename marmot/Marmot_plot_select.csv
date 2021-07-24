@@ -78,7 +78,7 @@ Individual_coastalline_Flow_duration_curve,FALSE,"40181_CARLTON To 41075_TILLAMO
 Individual_coastalline_Flow_diff_duration_curve,FALSE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI",,,EST,,,transmission,line_flow_ind_diff
 Individual_Line_Flow_duration_curve_seasonal,FALSE,300030_338187_500kV_Z1,,,EST,12/29/2024,12/31/2024,transmission,line_flow_ind_seasonal
 Tx_Capacity,TRUE,,,,,,,transmission,extract_tx_cap
-Line_Gen_Stack,FALSE,300030_338187_500kV_Z1,,,EST,,,transmission,gen_stack
+Line_Flow_v_attr_scatter,TRUE,PV,,,EST,,,transmission,line_scatter
 Line_Utilization_Histogram,FALSE,,,,,,,transmission,line_hist
 Line_Utilization_Histogram_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_hist
 Line_Utilization_Duration,FALSE,,,,,,,transmission,line_util
@@ -89,7 +89,7 @@ Net_Export_Date_Range,FALSE,Date Range,,,EST,12/29/2024,12/31/2024,transmission,
 Net_Export,FALSE,,,,EST,,,transmission,net_export
 Region-Region_Net_Interchange_Checkerboard,FALSE,,,,,,,transmission,region_region_checkerboard
 All_Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_regions
-Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_scenarios
+Region-Region_Net_Interchange,TRUE,,,,EST,,,transmission,region_region_interchange_all_scenarios
 P05_total_flow,FALSE,,,,,,,transmission,total_int_flow_ind
 Zonal_Interchange,FALSE,,,,,12/29/2024,12/31/2024,transmission,zonal_interchange
 Zonal_Interchange_Total,FALSE,,,,,,,transmission,zonal_interchange_total
