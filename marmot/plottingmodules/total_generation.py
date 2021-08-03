@@ -23,7 +23,7 @@ custom_legend_elements = Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
                          label='Unserved Energy')
 
-class mplot(object):
+class MPlot(object):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
@@ -31,18 +31,18 @@ class mplot(object):
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
+
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
         self.mplot_data_dict = {}
 
-    def total_gen(self, figure_name=None, prop=None, start=None, end=None, 
+    def total_gen(self, figure_name=None, prop=None, start=None, end=None,
                   timezone=None, start_date_range=None, end_date_range=None):
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
-        
+
         if self.AGG_BY == 'zone':
             agg = 'zone'
         else:
@@ -54,7 +54,7 @@ class mplot(object):
                       (False,"generator_Pump_Load",self.Scenarios),
                       (True,f"{agg}_Load",self.Scenarios),
                       (False,f"{agg}_Unserved_Energy",self.Scenarios)]
-        
+
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
@@ -88,7 +88,7 @@ class mplot(object):
                 interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
-            
+
                 # Insert Curtailmnet into gen stack if it exhists in database
                 if self.mplot_data_dict["generator_Curtailment"]:
                     Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
@@ -98,12 +98,12 @@ class mplot(object):
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
-                
+
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
-                
+
                 if not pd.isnull(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
+                                      {str(start_date_range)} to {str(end_date_range)}")
                     Total_Gen_Stack = Total_Gen_Stack[start_date_range:end_date_range]
 
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -115,15 +115,13 @@ class mplot(object):
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
 
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Total_Load = Total_Load[start_date_range:end_date_range]
 
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
-                
-                
+
+
                 if self.mplot_data_dict[f"{agg}_Unserved_Energy"] == {}:
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Load"][scenario].copy()
                     Unserved_Energy.iloc[:,0] = 0
@@ -131,18 +129,20 @@ class mplot(object):
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
+                
+                
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Unserved_Energy = Unserved_Energy[start_date_range:end_date_range]
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
                 Unserved_Energy = Unserved_Energy/interval_count
 
-                # Subtracts Unserved energt from load for graphing
+                # save for output
+                Unserved_Energy_Out = pd.concat([Unserved_Energy_Out, Unserved_Energy], axis=0, sort=False)
+
+                # subtract unserved energy from load for graphing (not sure this is actually used)
                 if (Unserved_Energy == 0).all() == False:
                     Unserved_Energy = Total_Load - Unserved_Energy
-                Unserved_Energy_Out = pd.concat([Unserved_Energy_Out, Unserved_Energy], axis=0, sort=False)
-                
+
                 if self.mplot_data_dict["generator_Pump_Load"] == {}:
                     Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
@@ -151,9 +151,8 @@ class mplot(object):
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
                 if not pd.isnull(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                     {str(start_date_range)} to {str(end_date_range)}")
                     Pump_Load = Pump_Load[start_date_range:end_date_range]
+                
                 Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
                 Pump_Load = Pump_Load/interval_count
                 if (Pump_Load == 0).all() == False:
@@ -175,43 +174,55 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            
+
             # unit conversion return divisor and energy units
             unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum()))
-            
-            Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor'] 
-            Total_Load_Out = Total_Load_Out.T/unitconversion['divisor'] 
+
+            Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
+            Total_Load_Out = Total_Load_Out.T/unitconversion['divisor']
             Pump_Load_Out = Pump_Load_Out.T/unitconversion['divisor']
-            Total_Demand_Out = Total_Demand_Out.T/unitconversion['divisor'] 
+            Total_Demand_Out = Total_Demand_Out.T/unitconversion['divisor']
             Unserved_Energy_Out = Unserved_Energy_Out.T/unitconversion['divisor']
 
             # Data table of values to return to main program
-            Data_Table_Out = pd.concat([Total_Load_Out.T, 
-                                        Total_Demand_Out.T, 
-                                        Unserved_Energy_Out.T, 
+            Data_Table_Out = pd.concat([Total_Load_Out.T,
+                                        Total_Demand_Out.T,
+                                        Unserved_Energy_Out.T,
                                         Total_Generation_Stack_Out],  axis=1, sort=False)
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
-            
+
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(5, break_long_words=False)
             
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0, ax=ax,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle, ax=ax,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
+            
+            # replace x-axis with custom labels if present 
+            if len(self.ticklabels) > 1:
+                ticklabels = [textwrap.fill(x.replace('_', ' '), 8) for x in self.ticklabels]
+                ax.set_xticklabels(ticklabels)
+            
             
             for n, scenario in enumerate(self.Scenarios):
 
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 height1 = [int(Total_Load_Out[scenario].sum())]*2
+                #print("total load height: " + str(height1))
                 lp1 = plt.plot(x,height1, c='black', linewidth=3)
                 if Pump_Load_Out[scenario].values.sum() > 0:
                     height2 = [int(Total_Demand_Out[scenario])]*2
@@ -234,7 +245,7 @@ class mplot(object):
             else:
                 handles.append(lp1[0])
                 labels += ['Demand']
-        
+
             if Unserved_Energy_Out.values.sum() > 0:
                 handles.append(custom_legend_elements)
                 labels += ['Unserved Energy']
@@ -245,19 +256,19 @@ class mplot(object):
 
         return outputs
 
-    def total_gen_diff(self, figure_name=None, prop=None, start=None, end=None, 
+    def total_gen_diff(self, figure_name=None, prop=None, start=None, end=None,
                        timezone=None, start_date_range=None, end_date_range=None):
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
-        
+
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios),
                       (False,"generator_Curtailment",self.Scenarios)]
-        
+
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-        
+
         if 1 in check_input_data:
             outputs = mfunc.MissingInputData()
             return outputs
@@ -286,7 +297,7 @@ class mplot(object):
                 interval_count = mfunc.get_interval_count(Total_Gen_Stack)
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
-            
+
                 # Insert Curtailmnet into gen stack if it exhists in database
                 if self.mplot_data_dict["generator_Curtailment"]:
                     Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
@@ -324,31 +335,37 @@ class mplot(object):
                 out = mfunc.MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            
+
             unitconversion = mfunc.capacity_energy_unitconversion(max(abs(Total_Generation_Stack_Out.sum())))
             Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
-            
+
             # Data table of values to return to main program
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(f" ({unitconversion['units']}h)")
-            
+
             net_diff = Total_Generation_Stack_Out
             try:
                 net_diff.drop(columns = curtailment_name,inplace=True)
             except KeyError:
                 pass
             net_diff = net_diff.sum(axis = 1)
-            
+
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(10, break_long_words=False)
+
+            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=0,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            if angle > 0:
+                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
+                tick_length = 8
+            else:
+                tick_length = 5
+            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
 
             #Add net gen difference line.
             for n, scenario in enumerate(self.Scenarios[1:]):
@@ -360,18 +377,18 @@ class mplot(object):
 
             ax.set_ylabel(f"Generation Change ({format(unitconversion['units'])}h) \n relative to {self.Scenarios[0].replace('_',' ')}",  color='black', rotation='vertical')
             
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
+            # xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
 
-            plt.xticks(ticks=locs,labels=xlabels[1:])
-            ax.margins(x=0.01)
+            # plt.xticks(ticks=locs,labels=xlabels[1:])
+            # ax.margins(x=0.01)
 
             plt.axhline(linewidth=0.5,linestyle='--',color='grey')
 
             handles, labels = ax.get_legend_handles_labels()
-            
+
             handles.append(net_line[0])
             labels += ['Net Gen Change']
-            
+
             #Main legend
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
@@ -383,7 +400,7 @@ class mplot(object):
     ## Total Gen Facet Plots removed for now, code not stable and needs testing
     #===============================================================================
 
-    def total_gen_facet(self, figure_name=None, prop=None, start=None, end=None, 
+    def total_gen_facet(self, figure_name=None, prop=None, start=None, end=None,
                         timezone=None, start_date_range=None, end_date_range=None):
         outputs = mfunc.UnderDevelopment()
         self.logger.warning('total_gen_facet is under development')
@@ -449,11 +466,12 @@ class mplot(object):
     #     Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
 
     #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-    #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.wrap(11, break_long_words=False)
+    
+    #     Total_Generation_Stack_Out.index = mfunc.check_label_angle(Total_Generation_Stack_Out,False)
 
     #     Total_Load_Out.index = Total_Load_Out.index.str.replace('_',' ')
-    #     Total_Load_Out.index = Total_Load_Out.index.str.wrap(11, break_long_words=False)
-
+    #     Total_Load_Out.index = Total_Load_Out.index.str.wrap(10, break_long_words=False)
+    #     
     #     Total_Load_Out = Total_Load_Out.T/1000
 
     #     xdimension=len(self.xlabels)
@@ -467,7 +485,7 @@ class mplot(object):
     #     i=0
     #     for index in Total_Generation_Stack_Out.index:
 
-    #         sb = Total_Generation_Stack_Out.iloc[i:i+1].plot.bar(stacked=True, rot=0,
+    #         sb = Total_Generation_Stack_Out.iloc[i:i+1].plot.bar(stacked=True, rot=angle,
     #         color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',
     #                                      ax=axs[i])
 
@@ -475,8 +493,13 @@ class mplot(object):
     #         axs[i].spines['right'].set_visible(False)
     #         axs[i].spines['top'].set_visible(False)
     #         axs[i].xaxis.set_ticklabels([])
-    #         axs[i].tick_params(axis='y', which='major', length=5, width=1)
-    #         axs[i].tick_params(axis='x', which='major', length=5, width=1)
+    #         if angle > 0:
+    #             ax.set_xticklabels(Total_Generation_Stack_Out.iloc[i:i+1].index, ha="right")
+    #             tick_length = 8
+    #         else:
+    #             tick_length = 5
+    #         ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+    #         ax.tick_params(axis='x', which='major', length=tick_length, width=1)
     #         axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     #         axs[i].margins(x=0.01)
 

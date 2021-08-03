@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Sep 18 16:37:06 2020
-
 Functions required to create Marmot plots
-
 @author: Daniel Levie
 """
 
@@ -16,7 +14,13 @@ import numpy as np
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+from matplotlib.patches import Patch
 import marmot.config.mconfig as mconfig
+
+# curpath = os.getcwd()
+# os.chdir('..')
+# import config.mconfig as mconfig
+# os.chdir(curpath)
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================
@@ -69,13 +73,12 @@ class UnsupportedAggregation:
     def __init__(self):
         return
     
-    
+# def days_in_date_range()    
 
 def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
     """
     Used to get data from formatted h5 file
     Adds data to dictionary with scenario name as key
-
     Parameters
     ----------
     mplot_data_dict : dictionary
@@ -86,7 +89,6 @@ def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
         Main Mamrmot folder
     scenario_list : List
         List of scenarios to plot.
-
     Returns
     -------
     return_value : list
@@ -119,14 +121,12 @@ def df_process_gen_inputs(df,ordered_gen):
     Processes generation data into a pivot
     Technology names as columns,
     Timeseries as index
-
     Parameters
     ----------
     df : DataFrame
         Dataframe to process.
     ordered_gen : list
         List of gen tech types ordered.
-
     Returns
     -------
     df : DataFrame
@@ -143,14 +143,12 @@ def df_process_gen_inputs(df,ordered_gen):
 def df_process_categorical_index(df, ordered_gen):
     """
     Creates categorical index based on generators
-
     Parameters
     ----------
     df : DataFrame
         Dataframe to process.
     ordered_gen : list
         List of gen tech types ordered.
-
     Returns
     -------
     df : DataFrame
@@ -165,7 +163,6 @@ def df_process_categorical_index(df, ordered_gen):
 def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
     """
     Sets facet plot x,y dimensions baded on provided labeles
-
     Parameters
     ----------
     xlabels : list
@@ -176,7 +173,6 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
         Trigger for plotting facet plots.
     multi_scenario : list, optional
         list of scenarios. The default is None.
-
     Returns
     -------
     xdimension : int
@@ -205,12 +201,10 @@ def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
 def set_x_y_dimension(region_number):
     """
     Sets X,Y dimension of plots without x,y labels
-
     Parameters
     ----------
     region_number : int
         # regions/scenarios.
-
     Returns
     -------
     xdimension : int
@@ -233,7 +227,6 @@ def set_x_y_dimension(region_number):
 def setup_plot(xdimension=1,ydimension=1,sharey=True):
     """
     Setup matplotlib plot
-
     Parameters
     ----------
     xdimension : int, optional
@@ -242,7 +235,6 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
         facet plot y dimension. The default is 1.
     sharey : bool, optional
         Share y axes labels. The default is True.
-
     Returns
     -------
     fig : matplotlib fig
@@ -258,10 +250,9 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     return fig,axs
 
 
-def create_bar_plot(df, axs, colour, stacked=False):
+def create_bar_plot(df, axs, colour, angle,stacked=False):
     """
     Creates a bar plot
-
     Parameters
     ----------
     df : DataFrame
@@ -272,57 +263,60 @@ def create_bar_plot(df, axs, colour, stacked=False):
         colour dictionary.
     stacked : Bool
         True/False for stacked bar
-
     Returns
     -------
     fig : matplotlib fig
         matplotlib fig.
     """
-    fig = df.plot.bar(stacked=stacked, rot=0, edgecolor='white', linewidth='1.5',
-                     color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
-    fig.spines['right'].set_visible(False)
-    fig.spines['top'].set_visible(False)
-    fig.tick_params(axis='y', which='major', length=5, width=1)
-    fig.tick_params(axis='x', which='major', length=5, width=1)
+    fig = df.plot.bar(stacked=stacked, rot=angle, edgecolor='white', linewidth='1.5',
+                      color=[colour.get(x, '#333333') for x in df.columns], ax=axs)
+    
+    
+    axs.spines['right'].set_visible(False)
+    axs.spines['top'].set_visible(False)
+    axs.tick_params(axis='y', which='major', length=5, width=1)
+    axs.tick_params(axis='x', which='major', length=5, width=1)
     return fig
 
 
-def create_grouped_bar_plot(df, colour):
+def create_grouped_bar_plot(df, colour,angle):
     """
     Creates a grouped bar plot
-
     Parameters
     ----------
     df : DataFrame
         DataFrame of data to plot.
     colour : dictionary
         colour dictionary.
-
     Returns
     -------
     fig : matplotlib fig
         matplotlib fig.
     """
     
-    fig = df.plot.bar(figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='white', linewidth='1.5',
-                                      color=[colour.get(x, '#333333') for x in df.columns])
-    fig.spines['right'].set_visible(False)
-    fig.spines['top'].set_visible(False)
-    fig.tick_params(axis='y', which='major', length=5, width=1)
-    fig.tick_params(axis='x', which='major', length=5, width=1)
-    return fig
+    fig, axs = plt.subplots(figsize=tuple(mconfig.parser("figure_size").values()))
+    df.plot.bar(rot=angle, edgecolor='white', linewidth='1.5',
+                                      color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
+    axs.spines['right'].set_visible(False)
+    axs.spines['top'].set_visible(False)
+    if angle > 0:
+        axs.set_xticklabels(df.index, ha="right")
+        tick_length = 8
+    else:
+        tick_length = 5
+    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
+    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
+    return fig,axs
 
-def create_stacked_bar_plot(df, colour):
+def create_stacked_bar_plot(df, colour,angle):
     """
     Creates a stacked bar plot
-
     Parameters
     ----------
     df : DataFrame
         DataFrame of data to plot.
     colour : dictionary
         colour dictionary.
-
     Returns
     -------
     fig : matplotlib fig
@@ -330,18 +324,24 @@ def create_stacked_bar_plot(df, colour):
     """
     
     y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-
-    fig = df.plot.bar(stacked=True, figsize=tuple(mconfig.parser("figure_size").values()), rot=0, edgecolor='black', linewidth='0.1',
-                                                color=[colour.get(x, '#333333') for x in df.columns])
-    fig.spines['right'].set_visible(False)
-    fig.spines['top'].set_visible(False)
+    
+    fig, axs = plt.subplots(figsize=tuple(mconfig.parser("figure_size").values()))
+    df.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1',
+                                                color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
+    axs.spines['right'].set_visible(False)
+    axs.spines['top'].set_visible(False)
     #adds comma to y axis data
-    fig.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
-    fig.tick_params(axis='y', which='major', length=5, width=1)
-    fig.tick_params(axis='x', which='major', length=5, width=1)
-    return fig
+    axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
+    if angle > 0:
+        axs.set_xticklabels(df.index, ha="right")
+        tick_length = 8
+    else:
+        tick_length = 5
+    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
+    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
+    return fig, axs
 
-def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **kwargs):
+def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",  H="//", **kwargs):
     """Given a lbar plot with both stacked and unstacked bars.
     
     Parameters
@@ -349,66 +349,77 @@ def create_clustered_stacked_bar_plot(df_list, labels=None, title="",  H="/", **
     df_list: List of Pandas DataFrames.
         The columns within each dataframe will be stacked with different colors. 
         The corresponding columns between each dataframe will be set next to each other and given different hatches.
-    labels: A list of strings, for use in the secondary legend which labels the hatching.
+    ax : matplotlib.axes
+        matplotlib.axes.
+    labels: A list of strings, usually the sceanrio names
+    color_dict: color dictionary, keys should be the same as labels 
     title: Optional plot title.
     H: Sets the hatch pattern to differentiate dataframe bars. Each consecutive bar will have a higher density of the same hatch pattern.
         
-    
     Returns
-    ---------
-    fig: matplotlib fig
+    -------
+    None.
     """
 
     n_df = len(df_list)
     n_col = len(df_list[0].columns) 
     n_ind = len(df_list[0].index)
-    fig = plt.subplot(111)
-
-    for df in df_list : # for each data frame
-        fig = df.plot(kind="bar",
-                      linewidth=0.5,
-                      stacked=True,
-                      ax=fig,
-                      legend=False,
-                      grid=False,
-                      **kwargs)  # make bar plots
-
-    h,l = fig.get_legend_handles_labels() # get the handles we want to modify
+    
+    column_names = []
+    for df, label in zip(df_list, labels) : # for each data frame
+        df.plot(kind="bar",
+            linewidth=0.5,
+            stacked=True,
+            ax=ax,
+            legend=False,
+            grid=False,
+            color=[color_dict.get(x, '#333333') for x in [label]],
+            **kwargs)  # make bar plots
+        
+        column_names.append(df.columns)
+    
+    #Unique Column names
+    column_names = np.unique(np.array(column_names)).tolist()
+    
+    h,l = ax.get_legend_handles_labels() # get the handles we want to modify
     for i in range(0, n_df * n_col, n_col): # len(h) = n_col * n_df
         for j, pa in enumerate(h[i:i+n_col]):
+
             for rect in pa.patches: # for each index
-                rect.set_x(rect.get_x() + 1 / float(n_df + 1) * i / float(n_col))
-                rect.set_hatch(H * int(i / n_col)) #edited part     
+                rect.set_x((rect.get_x() + 1 / float(n_df + 1) * i / float(n_col))-0.15)
+                if rect.get_height() < 0:
+                    rect.set_hatch(H) #edited part 
                 rect.set_width(1 / float(n_df + 1))
-
-    fig.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
-    labels = df.index.get_level_values(None)
-    fig.set_xticklabels(labels, rotation = 90)
-    fig.set_title(title)
-
-    # Add invisible data to add another legend
-    n=[]        
-    for i in range(n_df):
-        n.append(fig.bar(0, 0, color="gray", hatch=H * i))
-
-    l1 = fig.legend(h[:n_col], l[:n_col], loc=[1.01, 0.5])
-    if labels is not None:
-        l2 = plt.legend(n, labels, loc=[1.01, 0.1]) 
-    fig.add_artist(l1)
     
-    fig.legend(loc = [1.01,0.5])
-
-    fig.spines['right'].set_visible(False)
-    fig.spines['top'].set_visible(False)
-    fig.tick_params(axis='y', which='major', length=5, width=1)
-    fig.tick_params(axis='x', which='major', length=5, width=1)
+    ax.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
+    x_labels = df.index.get_level_values(0)
+    ax.set_xticklabels(x_labels, rotation = 90)
+    ax.set_title(title)
     
-    return fig
+    def custom_legend_elements(label):
+        color = color_dict.get(label, '#333333')
+        return Patch(facecolor=color, edgecolor=color)
+    
+    handles = []
+    label_list = labels.copy()
+    for label in label_list:
+        handles.append(custom_legend_elements(label))
+    
+    for i, c_name in enumerate(column_names):
+        handles.append(Patch(facecolor='gray', hatch=H*i))
+        label_list.append(c_name)
+        
+    ax.legend(handles,label_list,loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
+
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    ax.tick_params(axis='y', which='major', length=5, width=1)
+    ax.tick_params(axis='x', which='major', length=5, width=1)
+
 
 def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'solid',n=0,alpha = 1):
     """
     Creates a line plot
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -423,7 +434,6 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'sol
         list of labels for legend. The default is None.
     n : int, optional
         counter for facet plot. The default is 0.
-
     Returns
     -------
     None.
@@ -441,7 +451,6 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'sol
 def create_hist_plot(axs,data,color_dict,label=None,n=0):
     """
     Creates a histogram plot
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -454,7 +463,6 @@ def create_hist_plot(axs,data,color_dict,label=None,n=0):
         list of labels for legend. The default is None.
     n : int, optional
         counter for facet plot. The default is 0.
-
     Returns
     -------
     None.
@@ -468,7 +476,6 @@ def create_hist_plot(axs,data,color_dict,label=None,n=0):
 def create_stackplot(axs,data,color_dict,label=None,n=0):
     """
     Creates a stacked area plot
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -481,7 +488,6 @@ def create_stackplot(axs,data,color_dict,label=None,n=0):
         list of labels for legend. The default is None.
     n : int, optional
         counter for facet plot. The default is 0.
-
     Returns
     -------
     None.
@@ -505,7 +511,6 @@ def set_plot_timeseries_format(axs,
                                ):
     """
     Auto sets timeseries format
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -516,7 +521,6 @@ def set_plot_timeseries_format(axs,
         Minimum tick marks. The default is 6.
     maxticks : int, optional
         Max tick marks. The default is 8.
-
     Returns
     -------
     None.
@@ -536,7 +540,6 @@ def set_plot_timeseries_format(axs,
 def remove_excess_axs(axs, excess_axs, grid_size):
     """
     Removes excess axes spins + tick marks
-
     Parameters
     ----------
     axs : matplotlib.axes
@@ -545,7 +548,6 @@ def remove_excess_axs(axs, excess_axs, grid_size):
         # of excess axes.
     grid_size : int
         Size of facet grid.
-
     Returns
     -------
     None.
@@ -564,7 +566,6 @@ def remove_excess_axs(axs, excess_axs, grid_size):
 def add_facet_labels(fig, xlabels, ylabels):
     """
     Adds labels to outside of Facet plot
-
     Parameters
     ----------
     fig : matplotlib fig
@@ -573,11 +574,9 @@ def add_facet_labels(fig, xlabels, ylabels):
         X axes labels.
     ylabels : list
         Y axes labels.
-
     Returns
     -------
     None.
-
     """
     font_defaults = mconfig.parser("font_settings")
 
@@ -605,7 +604,6 @@ def shift_leapday(df, Marmot_Solutions_folder):
     """
     Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
     Modeled year must be included in the scenario parent directory name.
-
     Parameters
     ----------
     df : Pandas multiindex dataframe
@@ -615,33 +613,72 @@ def shift_leapday(df, Marmot_Solutions_folder):
     shift_leap_day : boolean
         Switch to turn on/off leap day shifting.
         Defined in the "shift_leap_day" field of Marmot_user_defined_inputs.csv.
-
     Returns
     -------
     df: Pandas multiindex dataframe
         same dataframe, with time index shifted
-
     """
     if '2008' not in Marmot_Solutions_folder and '2012' not in Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0):
-        df.index.set_levels(
+        df.index = df.index.set_levels(
             df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'),
-            level = 'timestamp',
-            inplace = True)
-
-    #Special case where timezone shifting may also be necessary.
-    # df.index.set_levels(
-    #     df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
-    #     level = 'timestamp',
-    #     inplace = True)
+            level = 'timestamp')
+        
+    # # Special case where timezone shifting may also be necessary.
+    #     df.index = df.index.set_levels(
+    #         df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
+    #         level = 'timestamp')
 
     return(df)
 
+def check_label_angle(data_to_plot,dot_T):
+    """
+    Checks to see if the number of labels is greater than or equal to the default
+    number set in mconfig.py.  If this is the case, other values in mconfig.py
+    specify whether or not to rotate the labels and what angle they should 
+    be rotated to.
+    ----------
+    data_to_plot : Pandas dataframe
+    
+    dot_T : Boolean value for whether of not the label data is saved 
+    as columns or rows within data_to_plot.
+    
+    Returns
+    -------
+    data_to_plot: Pandas dataframe
+        same dataframe, with updated label strings
+    
+    angle: Integer value of angle to rotate labels, 0 --> no rotation
+    """    
+    rotate = mconfig.parser("axes_label_options", "rotate_x_labels")
+    num_labels = mconfig.parser("axes_label_options", "rotate_at_num_labels")
+    angle = mconfig.parser("axes_label_options", "rotation_angle")
+        
+    if rotate:
+        if dot_T:
+            if (len(data_to_plot.T)) >= num_labels:
+                return data_to_plot, angle
+            else:
+                data_to_plot.columns = data_to_plot.columns.str.wrap(10, break_long_words = False)
+                return data_to_plot, 0
+        
+        else:
+            if (len(data_to_plot)) >= num_labels:
+                return data_to_plot, angle
+            else:
+                data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
+                return data_to_plot, 0
+    
+    else:
+        if dot_T:
+            data_to_plot.columns = data_to_plot.columns.str.wrap(10, break_long_words = False)
+        else:
+            data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
+        return data_to_plot, 0
 
 def merge_new_agg(df,Region_Mapping,AGG_BY):
 
     """
     Adds new region aggregation in the plotting step. This allows one to create a new aggregation without re-formatting the .h5 file.
-
     Parameters
     ----------
     df : Pandas multiindex dataframe
@@ -650,12 +687,10 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
         Dataframe that maps regions to user-specified aggregation levels.
     AGG_BY : string
         Name of new aggregation. Needs to match the appropriate column in the user defined Region Mapping file.
-
     Returns
     -------
     df: Pandas multiindex dataframe
         same dataframe, with new aggregation level added
-
     """
 
     agg_new = Region_Mapping[['region',AGG_BY]]
@@ -666,15 +701,12 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
 def get_interval_count(df):
     """
     Detects the interval spacing; used to adjust sums of certain for variables for sub-hourly runs
-
     Parameters
     ----------
     df : Pandas multiindex dataframe for some reported parameter (e.g. generator_Generation)
-
     Returns
     -------
     interval_count : number of intervals per 60 minutes
-
     """
     time_delta = df.index[1]- df.index[0]
     # Finds intervals in 60 minute period
@@ -690,11 +722,9 @@ def sort_duration(df,col):
     ----------
     df : Pandas multiindex dataframe for some reported parameter (e.g. line_Flow)
     col : Column name by which to sort.
-
     Returns
     -------
     df : Sorted time series. 
-
     """
 
     sorted_duration = (df.sort_values(by=col, ascending=False)
@@ -712,17 +742,14 @@ def sort_duration(df,col):
 def capacity_energy_unitconversion(max_value):
     """
     auto unitconversion for capacity and energy figures.
-
     Parameters
     ----------
     max_value : float
         value used to determine divisor and units.
-
     Returns
     -------
     dict
         dictionary containing divisor and units.
-
     """
     
     if max_value < 1000 and max_value > 1:

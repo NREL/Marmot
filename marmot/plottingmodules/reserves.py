@@ -1,11 +1,8 @@
 # -*- coding: utf-8 -*-
 """
 Created on Tue Jan 21 15:59:45 2020
-
 Updated on Monday 21 Sep 2020
-
 This module creates plots of reserve provision and shortage at the generation and region level
-
 @author: Daniel Levie
 """
 
@@ -25,7 +22,7 @@ import logging
 #===============================================================================
 
 
-class mplot(object):
+class MPlot(object):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
@@ -244,16 +241,19 @@ class mplot(object):
             
             data_table_out = Total_Reserves_Out.add_suffix(f" ({unitconversion['units']}h)")
             
+            Total_Reserves_Out, angle = mfunc.check_label_angle(Total_Reserves_Out, False)
             # create figure
-            fig1 = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict)
+            #fig1 = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict)
+            fig1, axs = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, angle)
 
             # additional figure formatting
-            fig1.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
+            #fig1.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
+            axs.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
 
             # replace x-axis with custom labels
             if len(self.ticklabels) > 1:
                 ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
-                fig1.set_xticklabels(ticklabels)
+                axs.set_xticklabels(ticklabels)
 
             # create list of gen technologies
             l1 = Total_Reserves_Out.columns.tolist()
@@ -272,11 +272,11 @@ class mplot(object):
                 gen_tech_legend.extend(legend_handles)
 
             # Add legend
-            fig1.legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
+            axs.legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
                      facecolor='inherit', frameon=True)
 
             if mconfig.parser("plot_title_as_region"):
-                fig1.set_title(region)
+                axs.set_title(region)
 
             outputs[region] = {'fig': fig1, 'data_table': data_table_out}
         return outputs
@@ -386,18 +386,19 @@ class mplot(object):
             
             # create color dictionary
             color_dict = dict(zip(reserve_out.columns,self.color_list))
-
-            fig2 = mfunc.create_grouped_bar_plot(reserve_out,color_dict)
+            
+            reserve_out, angle = mfunc.check_label_angle(reserve_out, False)
+            fig2,axs = mfunc.create_grouped_bar_plot(reserve_out,color_dict,angle)
             if count_hours == False:
-                fig2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                fig2.set_ylabel(f"Reserve {data_set} [{unitconversion['units']}h]",  color='black', rotation='vertical')
+                axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                axs.set_ylabel(f"Reserve {data_set} [{unitconversion['units']}h]",  color='black', rotation='vertical')
             elif count_hours == True:
-                fig2.set_ylabel(f"Reserve {data_set} Hours",  color='black', rotation='vertical')
-            handles, labels = fig2.get_legend_handles_labels()
-            fig2.legend(handles,labels, loc='lower left',bbox_to_anchor=(1,0),
+                axs.set_ylabel(f"Reserve {data_set} Hours",  color='black', rotation='vertical')
+            handles, labels = axs.get_legend_handles_labels()
+            axs.legend(handles,labels, loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
-                fig2.set_title(region)
+                axs.set_title(region)
             outputs[region] = {'fig': fig2,'data_table': Data_Table_Out}
         return outputs
 
@@ -535,4 +536,3 @@ class mplot(object):
             outputs[region] =  {'fig': fig3, 'data_table': data_table_out}
 
         return outputs
-            

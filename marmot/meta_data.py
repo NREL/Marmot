@@ -16,46 +16,59 @@ import logging
 
 class MetaData:
     
-    def __init__(self, HDF5_folder_in, Region_Mapping=pd.DataFrame(), model=None):
+    def __init__(self, HDF5_folder_in, processed_h5, Region_Mapping=pd.DataFrame(), file=None):
         """
         Parameters
         ----------
         HDF5_folder_in : folder
             Folder containing h5plexos h5 files .
+        processed_h5 : Boolean
+            Boolean for whether the metadata is being read from the processed hdf5 file or the original PLEXOS solution file.
         Region_Mapping : pd.DataFrame
             DataFrame of extra regions to map.
-        model : string, optional
-            Name of model h5 file. The default is None.
+        file : string, optional
+            Name of h5 file. The default is None.  Some scenarios have multiple partitions.
         """
         self.logger = logging.getLogger('marmot_format.'+__name__)        
         self.HDF5_folder_in = HDF5_folder_in
         self.Region_Mapping = Region_Mapping
-        if model == None: 
-            startdir=os.getcwd()
-            os.chdir(self.HDF5_folder_in)  
-            files = sorted(os.listdir()) 
-            os.chdir(startdir)
-            files_list = []
-            for names in files:
-                if names.endswith(".h5"):
-                    files_list.append(names) # Creates a list of only the hdf5 files
-            if len(files_list) == 0:
-                self.logger.info("\n In order to initialize your database's metadata, Marmot is looking for a h5plexos solution file.  \n It is looking in " + self.HDF5_folder_in + ", but it cannot find any *.h5 files there. \n Please check the 'PLEXOS_Solutions_folder' input in row 2 of your 'Marmot_user_defined_inputs.csv'. \n Ensure that it matches the filepath containing the *.h5 files created by h5plexos. \n \n Marmot will now quit.")
-                sys.exit()
-            else:
-                model=files_list[0]
-        self.data = h5py.File(os.path.join(self.HDF5_folder_in, model), 'r')
+        self.processed_h5 = processed_h5
         
+        if self.processed_h5:
+            try:
+                self.data = h5py.File(os.path.join(self.HDF5_folder_in, file), 'r')
+                self.partitions = [key for key in self.data['metadata'].keys()]
+                self.start_index = 'metadata/' + self.partitions[0] + '/'
+            except OSError:
+                self.logger.info('Unable to find processed HDF5 file required to run marmot_plot_main.py.  \n Check for file, or run marmot_h5_formatter.py again.')
+        else:
+            if file == None: 
+                startdir=os.getcwd()
+                os.chdir(self.HDF5_folder_in)  
+                files = sorted(os.listdir()) 
+                os.chdir(startdir)
+                files_list = []
+                for names in files:
+                    if names.endswith(".h5"):
+                        files_list.append(names) # Creates a list of only the hdf5 files
+                if len(files_list) == 0:
+                    self.logger.info("\n In order to initialize your database's metadata, Marmot is looking for a h5plexos solution file.  \n It is looking in " + self.HDF5_folder_in + ", but it cannot find any *.h5 files there. \n Please check the 'PLEXOS_Solutions_folder' input in row 2 of your 'Marmot_user_defined_inputs.csv'. \n Ensure that it matches the filepath containing the *.h5 files created by h5plexos. \n \n Marmot will now quit.")
+                    sys.exit()
+                else:
+                    file=files_list[0]
+            self.data = h5py.File(os.path.join(self.HDF5_folder_in, file), 'r')
+            self.start_index = 'metadata/'
+            
 # These methods are called in the Process class within results_formatter
-# If metadata does not contain that object or relation and empty dataframe is returned        
+# If metadata does not contain that object or relation an empty dataframe is returned        
 
 # Generator categories mapping
     def generator_category(self):
         try:    
             try:
-                gen_category = pd.DataFrame(np.asarray(self.data['metadata/objects/generators']))
+                gen_category = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/generator']))
             except KeyError:
-                gen_category = pd.DataFrame(np.asarray(self.data['metadata/objects/generator']))
+                gen_category = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/generators']))
             gen_category.rename(columns={'name':'gen_name','category':'tech'}, inplace=True)
             gen_category = gen_category.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return gen_category
@@ -67,9 +80,9 @@ class MetaData:
     def region_generators(self):
         try:    
             try:
-                region_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/regions_generators']))
+                region_gen = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/regions_generators']))
             except KeyError:
-                region_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/region_generators']))
+                region_gen = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_generators']))
             region_gen.rename(columns={'child':'gen_name','parent':'region'}, inplace=True)
             region_gen = region_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
@@ -93,9 +106,9 @@ class MetaData:
     def zone_generators(self):
         try:
             try:
-                zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zones_generators']))
+                zone_gen = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zones_generators']))
             except KeyError:
-                zone_gen = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_generators']))    
+                zone_gen = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_generators']))    
             zone_gen.rename(columns={'child':'gen_name','parent':'zone'}, inplace=True)
             zone_gen = zone_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
@@ -124,32 +137,32 @@ class MetaData:
             generator_headstorage = pd.DataFrame()
             generator_tailstorage = pd.DataFrame()
             try:
-                generator_headstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generators_headstorage']))
+                generator_headstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generators_headstorage']))
                 head_tail[0] = 1
             except KeyError:
                 pass
             try:
-                generator_headstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generator_headstorage']))
+                generator_headstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generator_headstorage']))
                 head_tail[0] = 1
             except KeyError:
                 pass
             try:
-                generator_headstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/exportinggenerators_headstorage']))
+                generator_headstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/exportinggenerators_headstorage']))
                 head_tail[0] = 1
             except KeyError:
                 pass
             try:
-                generator_tailstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generators_tailstorage']))
+                generator_tailstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generators_tailstorage']))
                 head_tail[1] = 1
             except KeyError:
                 pass
             try:
-                generator_tailstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/generator_tailstorage']))
+                generator_tailstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generator_tailstorage']))
                 head_tail[1] = 1
             except KeyError:
                 pass
             try:
-                generator_tailstorage = pd.DataFrame(np.asarray(self.data['metadata/relations/importinggenerators_tailstorage']))
+                generator_tailstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/importinggenerators_tailstorage']))
                 head_tail[1] = 1
             except KeyError:
                 pass
@@ -170,9 +183,9 @@ class MetaData:
     def node_region(self):
         try:
             try:
-                node_region = pd.DataFrame(np.asarray(self.data['metadata/relations/nodes_region']))
+                node_region = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/nodes_region']))
             except KeyError:
-                node_region = pd.DataFrame(np.asarray(self.data['metadata/relations/node_region']))
+                node_region = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/node_region']))
             node_region.rename(columns={'child':'region','parent':'node'}, inplace=True)
             node_region = node_region.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             node_region = node_region.sort_values(by=['node']).set_index('region')
@@ -184,9 +197,9 @@ class MetaData:
     def node_zone(self):
         try:
             try:
-                node_zone = pd.DataFrame(np.asarray(self.data['metadata/relations/nodes_zone']))
+                node_zone = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/nodes_zone']))
             except KeyError:
-                node_zone = pd.DataFrame(np.asarray(self.data['metadata/relations/node_zone']))
+                node_zone = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/node_zone']))
             node_zone.rename(columns={'child':'zone','parent':'node'}, inplace=True)
             node_zone = node_zone.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             node_zone = node_zone.sort_values(by=['node']).set_index('zone')
@@ -198,9 +211,9 @@ class MetaData:
     def generator_node(self):
         try:
             try:
-                generator_node = pd.DataFrame(np.asarray(self.data['metadata/relations/generators_nodes']))
+                generator_node = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generators_nodes']))
             except KeyError:
-                generator_node = pd.DataFrame(np.asarray(self.data['metadata/relations/generator_nodes']))
+                generator_node = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generator_nodes']))
             generator_node.rename(columns={'child':'node','parent':'gen_name'}, inplace=True)
             generator_node = generator_node.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             # generators_nodes = generators_nodes.sort_values(by=['generator'])
@@ -220,9 +233,9 @@ class MetaData:
     def regions(self):
         try:
             try:
-                regions = pd.DataFrame(np.asarray(self.data['metadata/objects/regions']))
+                regions = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/regions']))
             except KeyError:
-                regions = pd.DataFrame(np.asarray(self.data['metadata/objects/region']))
+                regions = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/region']))
             regions = regions.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             regions.rename(columns={'name':'region'}, inplace=True)
             regions.sort_values(['category','region'],inplace=True)
@@ -234,9 +247,9 @@ class MetaData:
     def zones(self):
         try:
             try:
-                zones = pd.DataFrame(np.asarray(self.data['metadata/objects/zones']))
+                zones = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/zones']))
             except KeyError:
-                zones = pd.DataFrame(np.asarray(self.data['metadata/objects/zone']))
+                zones = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/zone']))
             zones = zones.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return zones
         except KeyError:
@@ -246,9 +259,9 @@ class MetaData:
     def lines(self):
         try:
             try:
-                lines=pd.DataFrame(np.asarray(self.data['metadata/objects/lines']))
+                lines=pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/lines']))
             except KeyError:
-                lines=pd.DataFrame(np.asarray(self.data['metadata/objects/line']))
+                lines=pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/line']))
             lines = lines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             lines.rename(columns={"name":"line_name"},inplace=True)
             return lines
@@ -257,7 +270,7 @@ class MetaData:
     
     def region_regions(self):
         try:
-            region_regions = pd.DataFrame(np.asarray(self.data['metadata/relations/region_regions']))
+            region_regions = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_regions']))
             region_regions = region_regions.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return region_regions
         except KeyError:
@@ -267,9 +280,9 @@ class MetaData:
     def region_interregionallines(self):
         try:
             try:
-                region_interregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionallines']))
+                region_interregionallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_interregionallines']))
             except KeyError:
-                region_interregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_interregionalline']))
+                region_interregionallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_interregionalline']))
             
             region_interregionallines = region_interregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_interregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
@@ -285,13 +298,13 @@ class MetaData:
     def region_intraregionallines(self):
        try:
            try:
-               region_intraregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionallines']))
+               region_intraregionallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_intraregionallines']))
            except KeyError:
                try:
-                   region_intraregionallines=pd.DataFrame(np.asarray(self.data['metadata/relations/region_intraregionalline']))
+                   region_intraregionallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_intraregionalline']))
                except KeyError:
-                   region_intraregionallines=pd.concat([pd.DataFrame(np.asarray(self.data['metadata/relations/region_importinglines'])),
-                                                        pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))]).drop_duplicates()
+                   region_intraregionallines=pd.concat([pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_importinglines'])),
+                                                        pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_exportinglines']))]).drop_duplicates()
            region_intraregionallines = region_intraregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
            region_intraregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
            if not self.Region_Mapping.empty:
@@ -306,9 +319,9 @@ class MetaData:
     def region_exporting_lines(self):
       try:
           try:
-              region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportinglines']))
+              region_exportinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_exportinglines']))
           except KeyError:
-              region_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_exportingline']))
+              region_exportinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_exportingline']))
           region_exportinglines = region_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
           region_exportinglines = region_exportinglines.rename(columns={'parent':'region','child':'line_name'})
           if not self.Region_Mapping.empty:
@@ -320,9 +333,9 @@ class MetaData:
     def region_importing_lines(self):
         try:
             try:
-                region_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_importinglines']))
+                region_importinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_importinglines']))
             except KeyError:
-                region_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/region_importingline']))
+                region_importinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_importingline']))
             region_importinglines = region_importinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_importinglines = region_importinglines.rename(columns={'parent':'region','child':'line_name'})
             if not self.Region_Mapping.empty:
@@ -334,9 +347,9 @@ class MetaData:
     def zone_interzonallines(self):
             try:
                 try:
-                    zone_interzonallines=pd.DataFrame(np.asarray(self.data['metadata/relations/zone_interzonallines']))
+                    zone_interzonallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_interzonallines']))
                 except KeyError:
-                    zone_interzonallines=pd.DataFrame(np.asarray(self.data['metadata/relations/zone_interzonalline']))
+                    zone_interzonallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_interzonalline']))
                 
                 zone_interzonallines = zone_interzonallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
                 zone_interzonallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
@@ -349,9 +362,9 @@ class MetaData:
     def zone_intrazonallines(self):
        try:
            try:
-               zone_intrazonallines=pd.DataFrame(np.asarray(self.data['metadata/relations/zone_intrazonallines']))
+               zone_intrazonallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_intrazonallines']))
            except KeyError:
-               zone_intrazonallines=pd.DataFrame(np.asarray(self.data['metadata/relations/zone_intrazonalline']))
+               zone_intrazonallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_intrazonalline']))
            zone_intrazonallines = zone_intrazonallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
            zone_intrazonallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
            return zone_intrazonallines
@@ -363,9 +376,9 @@ class MetaData:
     def zone_exporting_lines(self):
         try:
             try:
-                zone_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_exportinglines']))
+                zone_exportinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_exportinglines']))
             except KeyError:
-                zone_exportinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_exportingline']))
+                zone_exportinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_exportingline']))
             zone_exportinglines = zone_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_exportinglines = zone_exportinglines.rename(columns={'parent':'region','child':'line_name'})
             return zone_exportinglines 
@@ -376,9 +389,9 @@ class MetaData:
     def zone_importing_lines(self):
         try:
             try:
-                zone_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_importinglines']))
+                zone_importinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_importinglines']))
             except KeyError:
-                zone_importinglines = pd.DataFrame(np.asarray(self.data['metadata/relations/zone_importingline']))
+                zone_importinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_importingline']))
             zone_importinglines = zone_importinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_importinglines = zone_importinglines.rename(columns={'parent':'region','child':'line_name'})
             return zone_importinglines 
@@ -389,9 +402,9 @@ class MetaData:
     def interface_lines(self):
             try:
                 try:
-                    interface_lines = pd.DataFrame(np.asarray(self.data['metadata/relations/interface_lines']))
+                    interface_lines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/interface_lines']))
                 except KeyError:
-                    interface_lines = pd.DataFrame(np.asarray(self.data['metadata/relations/interfaces_lines']))
+                    interface_lines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/interfaces_lines']))
                 interface_lines = interface_lines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
                 interface_lines = interface_lines.rename(columns={'parent':'interface','child':'line'})
                 return interface_lines
@@ -416,9 +429,9 @@ class MetaData:
     def reserves(self):
         try:
             try:
-                reserves = pd.DataFrame(np.asarray(self.data['metadata/objects/reserves']))
+                reserves = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/reserves']))
             except KeyError:
-                reserves = pd.DataFrame(np.asarray(self.data['metadata/objects/reserve']))
+                reserves = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/reserve']))
             reserves = reserves.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             return reserves 
         except KeyError:
@@ -427,9 +440,9 @@ class MetaData:
     def reserves_generators(self):
         try:
             try:
-                reserves_generators = pd.DataFrame(np.asarray(self.data['metadata/relations/reserves_generators']))
+                reserves_generators = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/reserves_generators']))
             except KeyError:
-                reserves_generators = pd.DataFrame(np.asarray(self.data['metadata/relations/reserve_generators']))
+                reserves_generators = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/reserve_generators']))
             reserves_generators = reserves_generators.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             reserves_generators = reserves_generators.rename(columns={'child':'gen_name'})
             return reserves_generators 
@@ -464,3 +477,6 @@ class MetaData:
         reserves_zones.drop_duplicates(inplace=True)
         reserves_zones.reset_index(drop=True,inplace=True)
         return reserves_zones
+    
+    def close_file(self):
+        self.data.close()

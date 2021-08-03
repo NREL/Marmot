@@ -171,6 +171,7 @@ class MarmotPlot(SetupLogger):
         elif isinstance(Scenarios, list):
             self.Scenarios = Scenarios
         
+        
         self.AGG_BY = AGG_BY
         self.PLEXOS_Solutions_folder = PLEXOS_Solutions_folder
         
@@ -265,7 +266,8 @@ class MarmotPlot(SetupLogger):
         if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
             self.logger.info(f"Only plotting {self.AGG_BY}: {self.zone_region_sublist}")
 
-        metadata_HDF5_folder_in = os.path.join(self.PLEXOS_Solutions_folder, self.Scenarios[0])
+        #metadata_HDF5_folder_in = os.path.join(self.PLEXOS_Solutions_folder, self.Scenarios[0])
+        metadata_HDF5_folder_in = os.path.join(self.Marmot_Solutions_folder,'Processed_HDF5_folder')
         
         figure_format = mconfig.parser("figure_file_format")
         if figure_format == 'nan':
@@ -369,7 +371,8 @@ class MarmotPlot(SetupLogger):
         #===============================================================================
         
         # Create an instance of MetaData, and pass that as a variable to get data.
-        meta = MetaData(metadata_HDF5_folder_in, self.Region_Mapping)
+        meta_file = self.Scenarios[0] + '_formatted.h5'
+        meta = MetaData(metadata_HDF5_folder_in, True, self.Region_Mapping,file=meta_file)
         
         if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
             self.AGG_BY = 'zone'
@@ -454,7 +457,6 @@ class MarmotPlot(SetupLogger):
         
         for module in list_modules:
             module_plots = plot_selection.loc[plot_selection['Marmot Module'] == module]
-            
             # dictionary of arguments passed to plotting modules; 
             # key names match the instance variables in each module            
             argument_dict = {
@@ -494,7 +496,7 @@ class MarmotPlot(SetupLogger):
             # Import plot module from plottingmodules package
             plot_module = importlib.import_module('marmot.plottingmodules.' + module)
             # Instantiate the module class
-            instantiate_mplot = plot_module.mplot(argument_dict)
+            instantiate_mplot = plot_module.MPlot(argument_dict)
             
             # Main loop to process each figure and pass plot specific variables to methods
             for index, row in module_plots.iterrows(): 
@@ -511,7 +513,7 @@ class MarmotPlot(SetupLogger):
                 
                 print("\n\n\n")
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
-                        
+                
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
@@ -554,14 +556,8 @@ class MarmotPlot(SetupLogger):
 
                     else:
                         # Save figures
-                        try:
-                            Figure_Out[zone_input]["fig"].figure.savefig(os.path.join(figures, 
-                                                                                      f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
-                                                                         dpi=600,
-                                                                         bbox_inches='tight')
-                        except AttributeError:
-                            Figure_Out[zone_input]["fig"].savefig(os.path.join(figures,
-                                                                               f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
+                        Figure_Out[zone_input]["fig"].savefig(os.path.join(figures,
+                                                                                f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
                                                                   dpi=600,
                                                                   bbox_inches='tight')
 
@@ -580,6 +576,7 @@ class MarmotPlot(SetupLogger):
         time_elapsed = end_timer - start_timer
         self.logger.info(f'Main Plotting loop took {round(time_elapsed/60,2)} minutes')
         self.logger.info('All Plotting COMPLETED')
+        meta.close_file()
 
                             
 if __name__ == '__main__':
@@ -639,9 +636,9 @@ if __name__ == '__main__':
     ticklabels = pd.Series(str(Marmot_user_defined_inputs.loc['Tick_labels'].squeeze()).split(",")).str.strip().tolist()
     if ticklabels == ['nan']: ticklabels = [""]
     
-    
     initiate = MarmotPlot(Scenarios,AGG_BY,PLEXOS_Solutions_folder,gen_names,Marmot_plot_select,
                           Marmot_Solutions_folder,Mapping_folder,Scenario_Diff,zone_region_sublist,
                           xlabels,ylabels,ticklabels,Region_Mapping)
     
     initiate.run_plotter()
+    

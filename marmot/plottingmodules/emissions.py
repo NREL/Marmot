@@ -12,13 +12,14 @@ TO DO:
 import pandas as pd
 import textwrap
 import matplotlib as mpl
+import matplotlib.pyplot as plt
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import logging
 import marmot.config.mconfig as mconfig
 
 #===============================================================================
 
-class mplot(object):
+class MPlot(object):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
@@ -101,32 +102,39 @@ class mplot(object):
 
                 # formatting for plot
                 emitPlot.index = emitPlot.index.str.replace('_',' ')
-                emitPlot.index = emitPlot.index.str.wrap(10, break_long_words=False)
-
+                emitPlot, angle = mfunc.check_label_angle(emitPlot, False)
+                
                 # single pollutant plot
-                fig1 = emitPlot.plot.bar(stacked=True, figsize=(self.x,self.y), rot=0,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in emitPlot.columns.values], edgecolor='black', linewidth='0.1')
+                
+                fig1, ax = plt.subplots(figsize=(self.x,self.y))
+                emitPlot.plot.bar(stacked=True, rot=angle,
+                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in emitPlot.columns.values], edgecolor='black', linewidth='0.1',ax=ax)
 
                 # plot formatting
-                fig1.spines['right'].set_visible(False)
-                fig1.spines['top'].set_visible(False)
-                fig1.set_ylabel('Annual ' + prop + ' Emissions\n(million metric tons)',  color='black', rotation='vertical')
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
+                ax.set_ylabel('Annual ' + prop + ' Emissions\n(million metric tons)',  color='black', rotation='vertical')
                 #adds comma to y axis data
-                fig1.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                fig1.tick_params(axis='y', which='major', length=5, width=1)
-                fig1.tick_params(axis='x', which='major', length=5, width=1)
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                if angle > 0:
+                    ax.set_xticklabels(emitPlot.index, ha="right")
+                    tick_length = 8
+                else:
+                    tick_length = 5
+                ax.tick_params(axis='y', which='major', length=tick_length, width=1)
+                ax.tick_params(axis='x', which='major', length=tick_length, width=1)
 
                 # legend formatting
-                handles, labels = fig1.get_legend_handles_labels()
-                leg1 = fig1.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+                handles, labels = ax.get_legend_handles_labels()
+                leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-                fig1.add_artist(leg1)
+                ax.add_artist(leg1)
                 if mconfig.parser("plot_title_as_region"):
-                    fig1.set_title(zone_input)
+                    ax.set_title(zone_input)
                 # replace x-axis with custom labels
                 if len(self.ticklabels) > 1:
                     ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
-                    fig1.set_xticklabels(ticklabels)
+                    ax.set_xticklabels(ticklabels)
 
                 outputs[zone_input] = {'fig': fig1, 'data_table': dataOut}
 
