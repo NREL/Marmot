@@ -12,7 +12,7 @@ output:
     df_print: paged
 ---
 
-```{r setOptions, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
+```{r setOptions, echo = TRUE, warning = TRUE, message = TRUE, error = FALSE}
 
 # Options
 fontsize = 20
@@ -55,7 +55,7 @@ names(sections) = c('Total Generation',
                     )
 
 # set up default options for chunks, turn off error or warning messages
-knitr::opts_chunk$set(echo=T, comment=NA, warning=T, message=T, include=T,dev='svg', cache = F, fig.width = 20,results = 'asis',out.width = "100%", fig.asp = 0.675)
+knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='svg', cache = F, fig.width = 20,results = 'asis',out.width = "100%", fig.asp = 0.675)
 
 ```
 
