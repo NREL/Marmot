@@ -15,13 +15,16 @@ import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import textwrap
-
+import sys
 
 #===============================================================================
 
 custom_legend_elements = Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
                          label='Unserved Energy')
+
+custom_legend_elements_month = Patch(facecolor='#DD0200',alpha=0.7,edgecolor='#DD0200',
+                                     label='Unserved_Energy')
 
 class MPlot(object):
 
@@ -538,3 +541,496 @@ class MPlot(object):
     #     plt.ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical', labelpad=60)
 
     #     return {'fig': fig2, 'data_table': Data_Table_Out}
+    
+    
+    
+    
+###############################################################################
+
+#################################################################################
+
+# Monthly generation plots for Philippines project
+    
+    def total_gen_monthly(self, figure_name=None, prop=None, start=None, end=None,
+                  timezone=None, start_date_range=None, end_date_range=None):
+        # Create Dictionary to hold Datframes for each scenario
+        
+        outputs = {}
+
+        if self.AGG_BY == 'zone':
+            agg = 'zone'
+        else:
+            agg = 'region'
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios),
+                      (False,"generator_Energy_Curtailed",self.Scenarios),
+                      (False,"generator_Pump_Load",self.Scenarios),
+                      (True,f"{agg}_Load",self.Scenarios),
+                      (False,f"{agg}_Unserved_Energy",self.Scenarios)]
+
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
+        grid_size = xdimension*ydimension
+        
+        if xdimension > 1:
+            font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+            plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
+            plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
+            plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
+            plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+            plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
+         
+        for zone_input in self.Zones:
+            Monthly_Gen_Stack_Out = pd.DataFrame()
+            #monthly_gen_stack_collect = pd.DataFrame()
+            Total_Load_Out = pd.DataFrame()
+            Pump_Load_Out = pd.DataFrame()
+            Total_Demand_Out = pd.DataFrame()
+            Unserved_Energy_Out = pd.DataFrame()
+            self.logger.info(f"Zone = {zone_input}")
+
+            #for scenario in self.Scenarios:
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
+            axs = axs.ravel()
+            #data_tables = []    
+            
+            for i, scenario in enumerate(self.Scenarios):
+                
+                self.logger.info(f"Scenario = {scenario}")
+                Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
+    
+                #Check if zone has generation, if not skips
+                try:
+                    Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    self.logger.warning(f"No installed capacity in: {zone_input}")
+                    continue
+    
+                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+    
+                # Insert Curtailmnet into gen stack if it exhists in database
+                if self.mplot_data_dict["generator_Energy_Curtailed"]:
+                    Stacked_Curt = self.mplot_data_dict["generator_Energy_Curtailed"].get(scenario)
+                    if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
+                        Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = Stacked_Curt.sum(axis=1)
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                        Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
+    
+                
+                months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+                monthly_gen_stack = Total_Gen_Stack
+                monthly_gen_stack.index = months
+                    
+                    
+                monthly_gen_stack.columns = monthly_gen_stack.columns.add_categories('scenario')
+                monthly_gen_stack["scenario"] = scenario
+                Monthly_Gen_Stack_Out = pd.concat([Monthly_Gen_Stack_Out,monthly_gen_stack],axis=0,sort=False)
+                
+                    
+                Total_Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario)
+                Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
+                Total_Load = Total_Load.groupby(["timestamp"]).sum()
+                Total_Load.index = months
+    
+                Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
+                
+                if self.mplot_data_dict[f"{agg}_Unserved_Energy"] == {}:
+                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Load"][scenario].copy()
+                    Unserved_Energy.iloc[:,0] = 0
+                else:
+                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
+                Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
+                Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
+                Unserved_Energy.index = months
+    
+                # save for output
+                Unserved_Energy_Out = pd.concat([Unserved_Energy_Out, Unserved_Energy], axis=0, sort=False)
+    
+                if self.mplot_data_dict["generator_Pump_Load"] == {}:
+                    Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
+                    Pump_Load.iloc[:,0] = 0
+                else:
+                    Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
+                Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
+                Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
+                Pump_Load.index = months
+                
+                Total_Demand = Total_Load - Pump_Load
+                
+                Pump_Load_Out = pd.concat([Pump_Load_Out, Pump_Load], axis=0, sort=False)
+                Total_Demand_Out = pd.concat([Total_Demand_Out, Total_Demand], axis=0, sort=False)
+
+            
+            Pump_Load_Out = Pump_Load_Out.rename(columns={0:'Pump Load'})
+            Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load (Demand + \n Storage Charging)'})
+            Total_Demand_Out = Total_Demand_Out.rename(columns={0:'Total Demand'})
+            Unserved_Energy_Out = Unserved_Energy_Out.rename(columns={0: 'Unserved Energy'})
+
+            
+            Monthly_Gen_Stack_Out = Monthly_Gen_Stack_Out.loc[:, (Monthly_Gen_Stack_Out != 0).any(axis=0)]
+
+            if Monthly_Gen_Stack_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
+            scenario_data = pd.DataFrame(Monthly_Gen_Stack_Out['scenario'])
+            Monthly_Gen_Stack_Out = Monthly_Gen_Stack_Out.drop('scenario',axis=1)
+            Monthly_Gen_Stack_Out = Monthly_Gen_Stack_Out.T
+            #print(Monthly_Gen_Stack_Out)
+            
+            # unit conversion return divisor and energy units, only check once
+
+            unitconversion = mfunc.capacity_energy_unitconversion(max(Monthly_Gen_Stack_Out.sum()))
+
+            #monthly_gen_stack = monthly_gen_stack/unitconversion['divisor']
+            Monthly_Gen_Stack_Out = Monthly_Gen_Stack_Out/unitconversion['divisor']
+            Total_Load_Out = Total_Load_Out/unitconversion['divisor']
+            Pump_Load_Out = Pump_Load_Out/unitconversion['divisor']
+            Total_Demand_Out = Total_Demand_Out/unitconversion['divisor']
+            Unserved_Energy_Out = Unserved_Energy_Out/unitconversion['divisor']
+        
+            
+            #Data table of values to return to main program
+            Data_Table_Out = pd.concat([scenario_data.T,
+                                        Total_Load_Out.T,
+                                        Total_Demand_Out.T,
+                                        Unserved_Energy_Out.T,
+                                        Monthly_Gen_Stack_Out],  axis=0, sort=False)
+
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
+            
+            
+            for i, scenario in enumerate(self.Scenarios):
+                month_data_scenario = pd.concat([scenario_data.T,Monthly_Gen_Stack_Out],axis=0,sort=False)
+                month_data_scenario = month_data_scenario.T
+                month_data_scenario = month_data_scenario.loc[month_data_scenario['scenario']==scenario]
+                month_data_scenario = month_data_scenario.drop('scenario',axis=1)
+                
+                month_data_scenario, angle = mfunc.check_label_angle(month_data_scenario, False)
+                
+                month_data_scenario.plot.bar(stacked=True, rot=angle, ax=axs[i],
+                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in month_data_scenario.columns], edgecolor='black', linewidth='0.1')
+                axs[i].spines['right'].set_visible(False)
+                axs[i].spines['top'].set_visible(False)
+                axs[i].margins(x=0.01)
+                axs[i].set_ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical')
+                axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                if angle > 0:
+                    axs[i].set_xticklabels(month_data_scenario.index, ha="right")
+                    tick_length = 8
+                else:
+                    tick_length = 5
+                axs[i].tick_params(axis='y', which='major', length=tick_length, width=1)
+                axs[i].tick_params(axis='x', which='major', length=tick_length, width=1)
+                
+                handles, labels = axs[i].get_legend_handles_labels()
+                axs[i].legend().set_visible(False)
+            
+            axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                    facecolor='inherit', frameon=True)
+
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
+            if self.ylabels == ['']:
+                ylabels = [f"Total Generation ({unitconversion['units']}h)"]
+            else:
+                self.ylabels = [y.replace('_',' ') for y in self.ylabels]
+
+
+            # add facet labels
+            mfunc.add_facet_labels(fig1, xlabels, ylabels)
+            
+            fig1.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser('plot_title_as_region'):
+                plt.title(zone_input)
+            
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+
+        return outputs
+    
+    
+    
+    def monthly_wind_solar(self, figure_name=None, prop=None, start=None, end=None,
+                  timezone=None, start_date_range=None, end_date_range=None):
+        # Create Dictionary to hold Datframes for each scenario
+        
+        outputs = {}
+        
+        percentage = False
+        if 'Percentage' in figure_name:
+            percentage = True
+            
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios), 
+                      (False,"generator_Energy_Curtailed",self.Scenarios)]
+
+
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
+        grid_size = xdimension*ydimension
+        
+        if xdimension > 1:
+            font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+            plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
+            plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
+            plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
+            plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+            plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
+         
+        for zone_input in self.Zones:
+            Wind_Solar_Out = pd.DataFrame()
+            self.logger.info(f"Zone = {zone_input}")
+
+            #for scenario in self.Scenarios:
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
+            axs = axs.ravel()
+               
+            for i, scenario in enumerate(self.Scenarios):
+                
+                self.logger.info(f"Scenario = {scenario}")
+                Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
+    
+                #Check if zone has generation, if not skips
+                try:
+                    Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    self.logger.warning(f"No installed capacity in: {zone_input}")
+                    continue
+    
+                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                
+                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+    
+                #Insert Curtailmnet into gen stack if it exhists in database
+                if self.mplot_data_dict["generator_Energy_Curtailed"]:
+                    Stacked_Curt = self.mplot_data_dict["generator_Energy_Curtailed"].get(scenario)
+                    if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
+                        Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = Stacked_Curt.sum(axis=1)
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                        Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
+    
+                
+                months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+                monthly_gen_stack = Total_Gen_Stack
+                monthly_gen_stack.index = months
+                
+                wind_solar = pd.DataFrame(monthly_gen_stack[["Wind","PV"]])
+                wind_solar.columns = wind_solar.columns.add_categories('scenario')
+                wind_solar["scenario"] = scenario
+                
+                monthly_total_gen = pd.DataFrame(monthly_gen_stack.T.sum(),columns=['Total Generation'])
+                
+                
+                if percentage:
+                    wind_solar['Wind'] = (wind_solar['Wind'] / monthly_total_gen['Total Generation']) * 100
+                    wind_solar['PV'] = (wind_solar['PV'] / monthly_total_gen['Total Generation']) * 100
+                    
+                
+                Wind_Solar_Out = pd.concat([Wind_Solar_Out,wind_solar],axis=0,sort=False)
+                
+            Wind_Solar_Out = Wind_Solar_Out.loc[:, (Wind_Solar_Out != 0).any(axis=0)]
+
+            if Wind_Solar_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+            
+            scenario_data = pd.DataFrame(Wind_Solar_Out['scenario'])
+            Wind_Solar_Out = Wind_Solar_Out.drop('scenario',axis=1)
+            Wind_Solar_Out = Wind_Solar_Out.T
+            
+            # unit conversion return divisor and energy units
+            if not percentage:
+                unitconversion = mfunc.capacity_energy_unitconversion(max(Wind_Solar_Out.sum()))
+                Wind_Solar_Out = Wind_Solar_Out/unitconversion['divisor']
+    
+            #Data table of values to return to main program
+            Data_Table_Out = pd.concat([scenario_data.T,
+                                        Wind_Solar_Out],  axis=0, sort=False)
+
+            if not percentage:
+                Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
+            
+            
+            for i, scenario in enumerate(self.Scenarios):
+                month_data_scenario = pd.concat([scenario_data.T,Wind_Solar_Out],axis=0,sort=False)
+                month_data_scenario = month_data_scenario.T
+                month_data_scenario = month_data_scenario.loc[month_data_scenario['scenario']==scenario]
+                month_data_scenario = month_data_scenario.drop('scenario',axis=1)
+                
+                month_data_scenario, angle = mfunc.check_label_angle(month_data_scenario, False)
+                
+                month_data_scenario.plot.bar(stacked=False, rot=angle, ax=axs[i],
+                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in month_data_scenario.columns], edgecolor='black', linewidth='0.1')
+                axs[i].spines['right'].set_visible(False)
+                axs[i].spines['top'].set_visible(False)
+                axs[i].margins(x=0.01)
+                axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                if angle > 0:
+                    axs[i].set_xticklabels(month_data_scenario.index, ha="right")
+                    tick_length = 8
+                else:
+                    tick_length = 5
+                axs[i].tick_params(axis='y', which='major', length=tick_length, width=1)
+                axs[i].tick_params(axis='x', which='major', length=tick_length, width=1)
+                
+                handles, labels = axs[i].get_legend_handles_labels()
+                axs[i].legend().set_visible(False)
+            
+            axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                    facecolor='inherit', frameon=True)
+
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
+            if self.ylabels == ['']:
+                if percentage:
+                    ylabels = ["% of Generation"]
+                else:
+                    ylabels = [f"Generation ({unitconversion['units']}h)"]
+            else:
+                self.ylabels = [y.replace('_',' ') for y in self.ylabels]
+
+
+            # add facet labels
+            mfunc.add_facet_labels(fig1, xlabels, ylabels)
+            
+            fig1.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser('plot_title_as_region'):
+                plt.title(zone_input)
+            
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+
+        return outputs
+    
+    
+    
+# Total Generation Pie Chart
+
+    def total_gen_pie(self, figure_name=None, prop=None, start=None, end=None,
+                  timezone=None, start_date_range=None, end_date_range=None):
+        # Create Dictionary to hold Datframes for each scenario
+        
+        outputs = {}
+                    
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,"generator_Generation",self.Scenarios), 
+                      (False,"generator_Energy_Curtailed",self.Scenarios)]
+
+
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
+        if 1 in check_input_data:
+            outputs = mfunc.MissingInputData()
+            return outputs
+        
+        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
+        grid_size = xdimension*ydimension
+        
+         
+        for zone_input in self.Zones:
+            Total_Gen_Out = pd.DataFrame()
+            self.logger.info(f"Zone = {zone_input}")
+
+            #for scenario in self.Scenarios:
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
+            axs = axs.ravel()
+               
+            for i, scenario in enumerate(self.Scenarios):
+                
+                self.logger.info(f"Scenario = {scenario}")
+                Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
+    
+                #Check if zone has generation, if not skips
+                try:
+                    Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
+                except KeyError:
+                    self.logger.warning(f"No installed capacity in: {zone_input}")
+                    continue
+    
+                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                
+                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+    
+                #Insert Curtailmnet into gen stack if it exhists in database
+                if self.mplot_data_dict["generator_Energy_Curtailed"]:
+                    Stacked_Curt = self.mplot_data_dict["generator_Energy_Curtailed"].get(scenario)
+                    if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
+                        Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
+                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = Stacked_Curt.sum(axis=1)
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                        Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
+                
+                Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
+                Total_Gen_Stack.rename(scenario, inplace=True)
+                Total_Gen_Stack = (Total_Gen_Stack/sum(Total_Gen_Stack))*100
+                
+                Total_Gen_Out = pd.concat([Total_Gen_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
+                
+            Total_Gen_Out = Total_Gen_Out.loc[:, (Total_Gen_Out != 0).any(axis=0)]
+            
+            if Total_Gen_Out.empty:
+                out = mfunc.MissingZoneData()
+                outputs[zone_input] = out
+                continue
+                        
+            for i, scenario in enumerate(self.Scenarios):
+                
+                scenario_data = Total_Gen_Out[scenario]
+                print(scenario_data)
+                #scenario_data, angle = mfunc.check_label_angle(scenario_data, False)
+                
+                axs[i].pie(scenario_data,labels=scenario_data.index, # color = [self.PLEXOS_color_dict.get(x, '#333333') for x in scenario_data],
+                                       shadow=True,startangle=90, labeldistance=None,
+                                       colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in scenario_data.index]) #,
+                
+                handles, labels = axs[i].get_legend_handles_labels()
+                axs[i].legend().set_visible(False)
+            
+            axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                    facecolor='inherit', frameon=True)
+
+            xlabels = [x.replace('_',' ') for x in self.xlabels]
+
+            ylabels = ['']
+
+            # add facet labels
+            mfunc.add_facet_labels(fig1, xlabels, ylabels)
+            
+            fig1.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            if mconfig.parser('plot_title_as_region'):
+                plt.title(zone_input)
+            
+            outputs[zone_input] = {'fig': fig1, 'data_table': Total_Gen_Out}
+
+        return outputs
+     

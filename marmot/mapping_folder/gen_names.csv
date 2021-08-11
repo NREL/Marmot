@@ -245,3 +245,6 @@ XcelBattery,Storage
 OSW_BESS,OSW-Battery
 Curtailment,Curtailment
 Curtailment,Curtailment
+Solar,PV
+Liquid Fuel,Oil-Gas-Steam
+Natural Gas,Oil-Gas-Steam

@@ -1,6 +1,6 @@
 Figure Output Name,Plot Graph,"Gen Stack properties [Min Net Load, Peak Demand, None], Curtailment properties [PV, Wind, PV + Wind], customize time horizon [Date Range], Line category [ReEDS_Expansion, etc.], Price cutoff [300], Top transmission paths [5], Hydro selection [Canada], Emissions to plot [CO2, SO2, NOx]",Gen Stack Day Before,Gen Stack Day After,"Timezone [EST, PST, MT]",Start date [year/m/d],End date [year/m/d],Marmot Module,Method
 Avg_Out_Committed,FALSE,,,,PST,,,capacity_factor,avg_output_when_committed
-Capacity_Factor,TRUE,,,,PST,,,capacity_factor,cf
+Capacity_Factor,FALSE,,,,PST,,,capacity_factor,cf
 Time_at_Min_Gen,FALSE,,,,,,,capacity_factor,time_at_min_gen
 Capacity_Out_Stacked,FALSE,,,,PST,,,capacity_out,capacity_out_stack
 Capacity_Out_Stacked_PASA,FALSE,,,,PST,,,capacity_out,capacity_out_stack_PASA
@@ -17,11 +17,17 @@ Committed_Capacity_Stack,FALSE,,,,PST,5/7/2024,5/11/2024,generation_stack,commit
 Generation_Timeseries_Diff,FALSE,,,,EST,,,generation_stack,gen_diff
 Generation_Timeseries_Diff_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_diff
 Stacked_Gen,FALSE,,,,PST,,,generation_stack,gen_stack
-Stacked_Gen_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Stacked_Gen_Date_Range,FALSE,Date Range,,,EST,1/3/2024,1/9/2024,generation_stack,gen_stack
-Stacked_Gen_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Min_Net_Load,TRUE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Date_Range,FALSE,Date Range,,,EST,8/4/2030,8/8/2030,generation_stack,gen_stack
+Stacked_Gen_Peak_Demand,TRUE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Peak_RE,TRUE,Peak RE,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Unserved_Energy,TRUE,Peak Unserved Energy,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Peak_Curtailment,TRUE,Peak Curtailment,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Facet_Grid_Peak_RE,FALSE,Peak RE,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Facet_Grid_Peak_Unserved_Energy,FALSE,Peak Unserved Energy,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Facet_Grid_Peak_Curtailment,FALSE,Peak Curtailment,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid,FALSE,,,,PST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid_Range,FALSE,Date Range,,,PST,10/19/2024,10/23/2024,generation_stack,gen_stack
 Stacked_Gen_All_Periods,FALSE,,,,EST,,,generation_stack,gen_stack_all_periods
@@ -67,6 +73,10 @@ Sensitivities_Difference_Hydro,FALSE,Hydro,,,EST,,,sensitivities,sensitivities_g
 Sensitivities_Difference_Wind,FALSE,Wind,,,EST,,,sensitivities,sensitivities_gas
 Thermal_Capacity_Reserves,FALSE,Date Range,,,PST,5/7/2024,5/11/2024,thermal_cap_reserve,thermal_cap_reserves
 Total_Generation,FALSE,,,,,5/8/2024,5/10/2024,total_generation,total_gen
+Total_Generation_Monthly,TRUE,,,,EST,,,total_generation,total_gen_monthly
+Monthly_Wind_Solar,TRUE,,,,EST,,,total_generation,monthly_wind_solar
+Monthly_Wind_Solar_Percentage,TRUE,,,,EST,,,total_generation,monthly_wind_solar
+Total_Generation_Pie,TRUE,,,,EST,,,total_generation,total_gen_pie
 Total_Generation_Diff,FALSE,,,,,3/1/2024,3/15/2024,total_generation,total_gen_diff
 Total_Generation_Facet_Grid,FALSE,,,,,,,total_generation,total_gen_facet
 Total_Installed_Capacity,FALSE,,,,,,,total_installed_capacity,total_cap
@@ -103,3 +113,5 @@ Node_Price_Duration_Curve,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,
 Node_Price_Timeseries,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,EST,9/30/2024,10/20/2024,prices,node_timeseries_price
 Node_Price_Histogram,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,9/30/2024,10/20/2024,prices,node_price_hist
 Node_Price_Histogram_Difference,FALSE,"669784_GRTFAL1G_11,275172_CRAWFOD  ;4M_138",,,,,,prices,node_price_hist_diff
+Average_Diurnal_Curtailment,TRUE,,,,EST,,,philippines_plots,average_diurnal_curt
+Average_Diurnal_Unserved_Energy,TRUE,,,,EST,,,philippines_plots,average_diurnal_ue
