@@ -15,7 +15,6 @@ import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import textwrap
-import sys
 
 #===============================================================================
 
