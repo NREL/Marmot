@@ -1289,14 +1289,14 @@ class MPlot(object):
 
     def line_scatter(self, figure_name=None, prop=None, start=None, end=None,
                   timezone=None, start_date_range=None, end_date_range=None):
-
+        
         if ',' in prop:
             prop = tuple(prop.replace(" ", "").split(","))
         else:
             prop = prop+', '
             prop = tuple(prop.split(","))
 
-        # assert prop in ['Generation','Curtailment','Pump_Load','Load','Unserved_Energy']
+        # assert prop in ['Generation','Curtailment','Pump_Load','Load','Unserved_Energy', 'Net_Interchange']
         
         # return mfunc.UnderDevelopment()
         #then we can rank-order the hours based on the thing we wish to facet on
@@ -1317,7 +1317,8 @@ class MPlot(object):
                           (False,"generator_Curtailment",scenario_list),
                           (False,"generator_Pump_Load",scenario_list),
                           (True,f"{agg}_Load",scenario_list),
-                          (False,f"{agg}_Unserved_Energy",scenario_list)]
+                          (False,f"{agg}_Unserved_Energy",scenario_list),
+                          (False,f"{agg}_Net_Interchange",scenario_list)]
 
             # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
             return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -1393,6 +1394,8 @@ class MPlot(object):
                 # lookup_label = f'{agg}_Load'#"generator_Generation"#f'{agg}_Load'
                 if prop[0] == "Load" or prop[0]=="Unserved_Energy":
                     lookup_label = f'{agg}_{prop[0]}'
+                elif prop[0] == "Net_Interchange":
+                    lookup_label = f'{agg}_{prop[0]}'
                 else:
                     lookup_label = f'generator_{prop[0]}'
 
@@ -1408,8 +1411,13 @@ class MPlot(object):
                     Load = self.mplot_data_dict[lookup_label].get(scenario).copy()
                 if self.shift_leapday == True:
                     Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
-
-                Load = Load.xs(zone_input,level=self.AGG_BY)
+                
+                if prop[0]=="Net_Interchange": #want a second prop to tell what to replace?
+                    Load = Load.xs("PJM-W",level=self.AGG_BY)
+                    lookup_label = lookup_label.replace("region","PJM-W")
+                    print(f'lookup_label is {lookup_label}')
+                else:
+                    Load = Load.xs(zone_input,level=self.AGG_BY)
                 Load = Load.groupby(["timestamp"]).sum()
                 data_table['sort_attribute'] = Load.squeeze().tolist()
                 data_table_chunks.append(data_table)
@@ -1437,7 +1445,8 @@ class MPlot(object):
 
             #then have a flag for whether you want to use them to set color of scatter
 
-            color_list = ['r','g','y','b','o']
+            color_list = self.color_list # ['r','g','y','b','o']
+            
             # try it also as a scatter
             for n,column in enumerate(zone_interchange_timeseries.columns[:-1]):
                 if categorize_hours:

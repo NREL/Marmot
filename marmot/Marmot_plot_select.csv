@@ -77,12 +77,13 @@ Individual_Line_Flow,FALSE,p70_p80_1,,,EST,,,transmission,line_flow_ind
 Individual_coastalline_Flow_duration_curve,FALSE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI",,,EST,,,transmission,line_flow_ind
 Individual_coastalline_Flow_diff_duration_curve,FALSE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI",,,EST,,,transmission,line_flow_ind_diff
 Individual_Line_Flow_duration_curve_seasonal,FALSE,300030_338187_500kV_Z1,,,EST,12/29/2024,12/31/2024,transmission,line_flow_ind_seasonal
-Tx_Capacity,FALSE,,,,,,,transmission,extract_tx_cap
-Line_Flow_v_PV_scatter,FALSE,"Generation, PV",,,EST,,,transmission,line_scatter
-Line_Flow_v_Wind_scatter,FALSE,"Generation, Wind",,,EST,,,transmission,line_scatter
-Line_Flow_v_CurtailmentWind_scatter,FALSE,"Curtailment, Wind",,,EST,,,transmission,line_scatter
-Line_Flow_v_Load_scatter,FALSE,Load,,,EST,,,transmission,line_scatter
-Line_Flow_v_USE_scatter,FALSE,Unserved_Energy,,,EST,,,transmission,line_scatter
+Tx_Capacity,TRUE,,,,,,,transmission,extract_tx_cap
+Line_Flow_v_PV_scatter,TRUE,"Generation, PV",,,EST,,,transmission,line_scatter
+Line_Flow_v_Wind_scatter,TRUE,"Generation, Wind",,,EST,,,transmission,line_scatter
+Line_Flow_v_CurtailmentWind_scatter,TRUE,"Curtailment, Wind",,,EST,,,transmission,line_scatter
+Line_Flow_v_Load_scatter,TRUE,Load,,,EST,,,transmission,line_scatter
+Line_Flow_v_Net_Interchange_scatter,TRUE,Net_Interchange,,,EST,,,transmission,line_scatter
+Line_Flow_v_USE_scatter,TRUE,Unserved_Energy,,,EST,,,transmission,line_scatter
 Line_Utilization_Histogram,FALSE,,,,,,,transmission,line_hist
 Line_Utilization_Histogram_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_hist
 Line_Utilization_Duration,FALSE,,,,,,,transmission,line_util
