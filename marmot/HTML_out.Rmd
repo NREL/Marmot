@@ -1,3 +1,4 @@
+
 ---
 author: "Created by: National Renewable Energy Laboratory (NREL)"
 date: "`r format(Sys.time(), '%d %B %Y')`"
@@ -60,6 +61,8 @@ knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='s
 
 
 ```{r}
+print(parent_dir)
+print(scenario_dir)
 for (section_name in names(sections)){
   pandoc.header(section_name)
   all.plots = c()
