@@ -12,7 +12,7 @@ output:
     df_print: paged
 ---
 
-```{r setOptions, echo = TRUE, warning = TRUE, message = TRUE, error = FALSE}
+```{r setOptions, echo = FALSE, warning = FALSE, message = FALSE, error = FALSE}
 
 # Options
 fontsize = 20
@@ -57,22 +57,17 @@ names(sections) = c('Total Generation',
 
 # set up default options for chunks, turn off error or warning messages
 knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='svg', cache = F, fig.width = 20,results = 'asis',out.width = "100%", fig.asp = 0.675)
-print(parent_dir)
-print(scenario_dir)
 ```
 
 
-```{r, echo = TRUE, warning = TRUE, message = TRUE, error = TRUE}
+```{r}
 for (section_name in names(sections)){
   pandoc.header(section_name)
   all.plots = c()
   for (agg_level in agg_levels){
-  print(file.path(parent_dir,'Figures_Output',paste0(agg_level,sections[section_name])))
-  print(list.files(file.path(parent_dir,'Figures_Output',paste0(agg_level,sections[section_name]))))
   all.plots = c(all.plots,list.files(file.path(parent_dir,'Figures_Output',paste0(agg_level,sections[section_name])),
                    pattern = plot_dev,full.name = T,recursive = T,all.files = T))
   }
-  print(all.plots)
   diff.plots = all.plots[grepl('Diff',all.plots)]
   if(!is_empty(diff.plots)){-
   abs.plots = all.plots[-which(all.plots == diff.plots)]
