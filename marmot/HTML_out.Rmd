@@ -67,9 +67,9 @@ for (section_name in names(sections)){
   pandoc.header(section_name)
   all.plots = c()
   for (agg_level in agg_levels){
-  print(file.path(parent_dir,scenario_dir,'Figures_Output',paste0(agg_level,sections[section_name])))
-  print(list.files(file.path(parent_dir,scenario_dir,'Figures_Output',paste0(agg_level,sections[section_name]))))
-  all.plots = c(all.plots,list.files(file.path(parent_dir,scenario_dir,'Figures_Output',paste0(agg_level,sections[section_name])),
+  print(file.path(parent_dir,'Figures_Output',paste0(agg_level,sections[section_name])))
+  print(list.files(file.path(parent_dir,'Figures_Output',paste0(agg_level,sections[section_name]))))
+  all.plots = c(all.plots,list.files(file.path(parent_dir,'Figures_Output',paste0(agg_level,sections[section_name])),
                    pattern = plot_dev,full.name = T,recursive = T,all.files = T))
   }
   print(all.plots)
