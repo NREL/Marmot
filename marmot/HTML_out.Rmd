@@ -34,7 +34,7 @@ Multi_Scenario = as.character(inputs[Input == 'Multi_Scenario']$User_defined_val
 agg_level = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
 plot_dev = as.character(inputs[Input == 'Figure_Format']$User_defined_value)
 
-agg_levels = c('Summary','Usual')
+agg_levels = c('Summary','Usual', 'Usual_and_RTOZone')
 
 sections = c('_total_generation',
              #'_total_generation',
