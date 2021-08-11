@@ -34,7 +34,7 @@ parent_dir = as.character(inputs[Input == 'Marmot_Solutions_folder']$User_define
 scenario_dir = as.character(inputs[Input == 'Scenarios']$User_defined_value)
 #Multi_Scenario = as.character(inputs[Input == 'Multi_Scenario']$User_defined_value)
 agg_level = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
-plot_dev = "svg"#as.character(inputs[Input == 'Figure_Format']$User_defined_value)
+plot_dev = ".svg"#as.character(inputs[Input == 'Figure_Format']$User_defined_value)
 
 agg_levels = c('Summary','Usual','Usual_and_RTOZone')
 
