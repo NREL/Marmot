@@ -15,7 +15,6 @@ import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import textwrap
-import sys
 
 #===============================================================================
 
@@ -1027,10 +1026,8 @@ class MPlot(object):
             for i, scenario in enumerate(self.Scenarios):
                 
                 scenario_data = Total_Gen_Out[scenario]
-                print(scenario_data)
-                #scenario_data, angle = mfunc.check_label_angle(scenario_data, False)
-                
-                axs[i].pie(scenario_data,labels=scenario_data.index, # color = [self.PLEXOS_color_dict.get(x, '#333333') for x in scenario_data],
+               
+                axs[i].pie(scenario_data,labels=scenario_data.index, 
                                        shadow=True,startangle=90, labeldistance=None,
                                        colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in scenario_data.index]) #,
                 
