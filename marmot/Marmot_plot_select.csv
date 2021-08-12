@@ -81,8 +81,8 @@ Tx_Capacity,TRUE,,,,,,,transmission,extract_tx_cap
 Line_Flow_v_PV_scatter,FALSE,"Generation, PV",,,EST,,,transmission,line_scatter
 Line_Flow_v_Wind_scatter,FALSE,"Generation, Wind",,,EST,,,transmission,line_scatter
 Line_Flow_v_CurtailmentWind_scatter,FALSE,"Curtailment, Wind",,,EST,,,transmission,line_scatter
-Line_Flow_v_Load_scatter,TRUE,Load,,,EST,,,transmission,line_scatter
-Line_Flow_v_Net_Interchange_scatter,TRUE,Net_Interchange,,,EST,,,transmission,line_scatter
+Line_Flow_v_Load_scatter,FALSE,Load,,,EST,,,transmission,line_scatter
+Line_Flow_v_Net_Interchange_scatter,FALSE,Net_Interchange,,,EST,,,transmission,line_scatter
 Line_Flow_v_USE_scatter,FALSE,Unserved_Energy,,,EST,,,transmission,line_scatter
 Line_Utilization_Histogram,FALSE,,,,,,,transmission,line_hist
 Line_Utilization_Histogram_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_hist
