@@ -15,6 +15,7 @@ import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import textwrap
+import sys
 
 #===============================================================================
 
@@ -629,8 +630,14 @@ class MPlot(object):
                 
                 months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
                 monthly_gen_stack = Total_Gen_Stack
+                
+                monthly_gen_stack = monthly_gen_stack.groupby(pd.Grouper(freq='M')).mean()
+                
+                if len(monthly_gen_stack.index) > 12:
+                    monthly_gen_stack = monthly_gen_stack[:-1]
+                
                 monthly_gen_stack.index = months
-                    
+
                     
                 monthly_gen_stack.columns = monthly_gen_stack.columns.add_categories('scenario')
                 monthly_gen_stack["scenario"] = scenario
@@ -640,6 +647,10 @@ class MPlot(object):
                 Total_Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
+                Total_Load = Total_Load.groupby(pd.Grouper(freq='M')).mean()
+                if len(Total_Load.index) > 12:
+                    Total_Load = Total_Load[:-1]
+                
                 Total_Load.index = months
     
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
@@ -651,6 +662,10 @@ class MPlot(object):
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
+                Unserved_Energy = Unserved_Energy.groupby(pd.Grouper(freq='M')).mean()
+                if len(Unserved_Energy.index) > 12:
+                    Unserved_Energy = Unserved_Energy[:-1]
+                
                 Unserved_Energy.index = months
     
                 # save for output
@@ -663,6 +678,9 @@ class MPlot(object):
                     Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
+                Pump_Load = Pump_Load.groupby(pd.Grouper(freq='M')).mean()
+                if len(Pump_Load.index) > 12:
+                    Pump_Load = Pump_Load[:-1]
                 Pump_Load.index = months
                 
                 Total_Demand = Total_Load - Pump_Load
@@ -834,6 +852,12 @@ class MPlot(object):
                 
                 months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
                 monthly_gen_stack = Total_Gen_Stack
+                
+                monthly_gen_stack = monthly_gen_stack.groupby(pd.Grouper(freq='M')).mean()
+                
+                if len(monthly_gen_stack.index) > 12:
+                    monthly_gen_stack = monthly_gen_stack[:-1]
+                
                 monthly_gen_stack.index = months
                 
                 wind_solar = pd.DataFrame(monthly_gen_stack[["Wind","PV"]])
