@@ -79,8 +79,8 @@ for (section_name in names(sections)){
     region_name = unlist(strsplit(end_of_string,'_'))[1]
   
     #Print plot
-    print(ggdraw() + draw_image(plot) + draw_label(region_name, y = 0.975, fontfamily = "serif", size = 48))
-  
+    print(ggdraw() + draw_image(plot))
+    #  + draw_label(region_name, y = 0.975, fontfamily = "serif", size = 48)
     #Print data
     data = str_replace(plot,plot_dev,'csv')
     if (section_name != 'Generation Stack' & section_name != 'Transmission'){

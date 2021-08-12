@@ -16,7 +16,7 @@ Total_Emissions_By_Gen_Type_SO2,FALSE,SO2,,,,,,emissions,total_emissions_by_type
 Committed_Capacity_Stack,FALSE,,,,PST,5/7/2024,5/11/2024,generation_stack,committed_stack
 Generation_Timeseries_Diff,FALSE,,,,EST,,,generation_stack,gen_diff
 Generation_Timeseries_Diff_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_diff
-Stacked_Gen,FALSE,,,,PST,,,generation_stack,gen_stack
+Stacked_Gen,TRUE,,,,PST,,,generation_stack,gen_stack
 Stacked_Gen_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Date_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_stack
 Stacked_Gen_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
