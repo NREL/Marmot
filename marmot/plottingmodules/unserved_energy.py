@@ -163,9 +163,9 @@ class MPlot(object):
             interval_count = mfunc.get_interval_count(Unserved_Energy_Timeseries_Out)
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/interval_count
 
-            Total_Unserved_Energy_Out = Unserved_Energy_Timeseries_Out.sum(axis=0)
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.replace('_',' ')
             Total_Unserved_Energy_Out, angle = mfunc.check_label_angle(Total_Unserved_Energy_Out, True)
+            Total_Unserved_Energy_Out = Unserved_Energy_Timeseries_Out.sum(axis=0)
             Total_Unserved_Energy_Out = pd.DataFrame(Total_Unserved_Energy_Out.T)
 
             if Total_Unserved_Energy_Out.values.sum() == 0:

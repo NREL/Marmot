@@ -321,6 +321,7 @@ class MPlot(object):
                     continue
 
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
+                Fuel_Cost.rename("Fuel_Cost", inplace=True)
                 
                 VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY) 

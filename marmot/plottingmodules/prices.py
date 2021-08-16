@@ -299,8 +299,7 @@ class MPlot(object):
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
-            if not math.isnan(timezone):
-                plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
+            plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
             outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
         return outputs

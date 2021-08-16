@@ -143,7 +143,7 @@ class MPlot(object):
                 if (Unserved_Energy == 0).all() == False:
                     Unserved_Energy = Total_Load - Unserved_Energy
 
-                if self.mplot_data_dict["generator_Pump_Load"] == {}:
+                if self.mplot_data_dict["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_total_pumped_load_line"):
                     Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
                 else:

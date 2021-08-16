@@ -247,12 +247,12 @@ class MPlot(object):
             ###DO NOT COMMIT
             #######################
 
-
-            try:
-                Pump_Load = self.mplot_data_dict['generator_Pump_Load'][scenario].copy()
-            except KeyError:
+            if self.mplot_data_dict["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_timeseries_pumped_load_line"):
                 Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
                 Pump_Load.iloc[:,0] = 0
+            else:
+                Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
+
             if self.shift_leapday == True:
                 Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)

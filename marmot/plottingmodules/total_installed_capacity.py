@@ -121,6 +121,12 @@ class MPlot(object):
                 tick_length = 8
             else:
                 tick_length = 5
+
+            # replace x-axis with custom labels
+            if len(self.ticklabels) > 1:
+                ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.ticklabels]
+                ax.set_xticklabels(ticklabels)
+
             ax.tick_params(axis='y', which='major', length=tick_length, width=1)
             ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             handles, labels = ax.get_legend_handles_labels()
