@@ -34,6 +34,7 @@ class MPlot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         self.mplot_data_dict = {}
 
@@ -184,7 +185,7 @@ class MPlot(object):
             # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
             # required True/False, property name and scenarios required, scenarios must be a list.
             properties = [(True,"generator_Generation",scenario_list),
-                          (False,"generator_Capacity_Curtailed",scenario_list),
+                          (False,f"generator_{self.curtailment_prop}",scenario_list),
                           (False,"generator_Pump_Load",scenario_list),
                           (True,f"{agg}_Load",scenario_list),
                           (False,f"{agg}_Unserved_Energy",scenario_list)]
@@ -197,10 +198,8 @@ class MPlot(object):
 
             curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
             # Insert Curtailmnet into gen stack if it exhists in database
-            #if self.mplot_data_dict['generator_Curtailment']:
-            if self.mplot_data_dict['generator_Capacity_Curtailed']:
-                #Stacked_Curt = self.mplot_data_dict['generator_Curtailment'].get(scenario).copy()
-                Stacked_Curt = self.mplot_data_dict['generator_Capacity_Curtailed'].get(scenario).copy()
+            if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
+                Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario).copy()
                 if self.shift_leapday == True:
                     Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
                 if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
@@ -807,7 +806,7 @@ class MPlot(object):
     #     except:
     #         Pump_Load_read = Stacked_Gen_read.copy()
     #         Pump_Load_read.iloc[:,0] = 0
-    #     Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "generator_Curtailment" )
+    #     Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", f"generator_{self.curtailment_prop}" )
 
     #     # If data is to be aggregated by zone, then zone properties are loaded, else region properties are loaded
     #     if self.AGG_BY == "zone":

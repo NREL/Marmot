@@ -30,6 +30,7 @@ class MPlot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
         
         self.mplot_data_dict = {}
 
@@ -41,7 +42,7 @@ class MPlot(object):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Curtailment",self.Scenarios)]
+        properties = [(True,f"generator_{self.curtailment_prop}",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -58,7 +59,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                re_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                re_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
 
                 # Timeseries [MW] RE curtailment [MWh]
                 try: #Check for regions missing all generation.
@@ -181,7 +182,7 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios),
-                      (True, "generator_Curtailment", self.Scenarios),
+                      (True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Total_Generation_Cost", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
@@ -208,7 +209,7 @@ class MPlot(object):
                 avail_gen = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
                 avail_gen = avail_gen.xs(zone_input,level=self.AGG_BY)
                 
-                re_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                re_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                 try:
                     re_curt = re_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -369,7 +370,7 @@ class MPlot(object):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True, "generator_Curtailment", self.Scenarios),
+        properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
@@ -390,12 +391,12 @@ class MPlot(object):
 
                 self.logger.info(f"Scenario = {scenario}")
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in self.mplot_data_dict["generator_Curtailment"].get(scenario).index.unique(level="tech")]
+                #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario).index.unique(level="tech")]
 
                 vre_collection = {}
                 avail_vre_collection = {}
 
-                vre_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                vre_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -522,7 +523,7 @@ class MPlot(object):
         return mfunc.UnderDevelopment()
 
         outputs = {}
-        properties = [(True, "generator_Curtailment", self.Scenarios),
+        properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
@@ -550,7 +551,7 @@ class MPlot(object):
                 vre_collection = {}
                 avail_vre_collection = {}
 
-                vre_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                vre_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -669,7 +670,7 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios),
-                      (True, "generator_Curtailment", self.Scenarios)]
+                      (True, f"generator_{self.curtailment_prop}", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -689,7 +690,7 @@ class MPlot(object):
             scen_idx += 1
             self.logger.info(f"Scenario = {scenario}")
 
-            vre_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+            vre_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
             gen = self.mplot_data_dict["generator_Generation"].get(scenario)
             cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
             

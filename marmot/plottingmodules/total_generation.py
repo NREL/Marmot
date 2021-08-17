@@ -27,6 +27,21 @@ custom_legend_elements_month = Patch(facecolor='#DD0200',alpha=0.7,edgecolor='#D
 
 class MPlot(object):
 
+    MONTHS = {  1 : "January",
+                2 : "February",
+                3 : "March",
+                4 : "April",
+                5 : "May",
+                6 : "June",
+                7 : "July",
+                8 : "August",
+                9 : "September",
+                10 : "October",
+                11 : "November",
+                12 : "December"
+            }
+
+
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
@@ -37,6 +52,7 @@ class MPlot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         self.mplot_data_dict = {}
 
@@ -52,7 +68,7 @@ class MPlot(object):
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios),
-                      (False,"generator_Curtailment",self.Scenarios),
+                      (False,f"generator_{self.curtailment_prop}",self.Scenarios),
                       (False,"generator_Pump_Load",self.Scenarios),
                       (True,f"{agg}_Load",self.Scenarios),
                       (False,f"{agg}_Unserved_Energy",self.Scenarios)]
@@ -92,8 +108,8 @@ class MPlot(object):
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
                 # Insert Curtailmnet into gen stack if it exhists in database
-                if self.mplot_data_dict["generator_Curtailment"]:
-                    Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
+                    Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
@@ -266,7 +282,7 @@ class MPlot(object):
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios),
-                      (False,"generator_Curtailment",self.Scenarios)]
+                      (False,f"generator_{self.curtailment_prop}",self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -301,8 +317,8 @@ class MPlot(object):
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
                 # Insert Curtailmnet into gen stack if it exhists in database
-                if self.mplot_data_dict["generator_Curtailment"]:
-                    Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
+                    Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
@@ -410,12 +426,12 @@ class MPlot(object):
 
     #     self.mplot_data_dict['generator_Generation'] = {}
     #     self.mplot_data_dictf"{self.AGG_BY}_Load"] = {}
-    #     self.mplot_data_dict["generator_Curtailment"] = {}
+    #     self.mplot_data_dict[f"generator_{self.curtailment_prop}"] = {}
 
     #     for scenario in self.Scenarios:
     #         try:
     #             self.mplot_data_dict['generator_Generation'][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
-    #             self.mplot_data_dict["generator_Curtailment"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "generator_Curtailment")
+    #             self.mplot_data_dict[f"generator_{self.curtailment_prop}"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  f"generator_{self.curtailment_prop}")
     #             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
     #             if self.AGG_BY == "zone":
     #                 self.mplot_data_dictf"{self.AGG_BY}_Load"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
@@ -437,7 +453,7 @@ class MPlot(object):
     #             Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
     #             Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)
     #             Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
-    #             Stacked_Curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+    #             Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
     #             Stacked_Curt = Stacked_Curt.xs(self.zone_input,level=self.AGG_BY)
     #             Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
     #             Stacked_Curt = Stacked_Curt.sum(axis=1)
@@ -627,7 +643,6 @@ class MPlot(object):
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
     
                 
-                months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
                 monthly_gen_stack = Total_Gen_Stack
                 
                 monthly_gen_stack = monthly_gen_stack.groupby(pd.Grouper(freq='M')).mean()
@@ -635,13 +650,13 @@ class MPlot(object):
                 if len(monthly_gen_stack.index) > 12:
                     monthly_gen_stack = monthly_gen_stack[:-1]
                 
-                monthly_gen_stack.index = months
+                monthly_gen_stack.columns = monthly_gen_stack.columns.add_categories(['scenario','timestamp'])
+                monthly_gen_stack.reset_index(drop=False, inplace=True)
+                monthly_gen_stack['timestamp'] = monthly_gen_stack['timestamp'].dt.month.apply(lambda x: self.MONTHS[x])
+                monthly_gen_stack.set_index('timestamp', inplace=True)
 
-                    
-                monthly_gen_stack.columns = monthly_gen_stack.columns.add_categories('scenario')
                 monthly_gen_stack["scenario"] = scenario
                 Monthly_Gen_Stack_Out = pd.concat([Monthly_Gen_Stack_Out,monthly_gen_stack],axis=0,sort=False)
-                
                     
                 Total_Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
@@ -650,7 +665,9 @@ class MPlot(object):
                 if len(Total_Load.index) > 12:
                     Total_Load = Total_Load[:-1]
                 
-                Total_Load.index = months
+                Total_Load.reset_index(drop=False, inplace=True)
+                Total_Load['timestamp'] = Total_Load['timestamp'].dt.month.apply(lambda x: self.MONTHS[x])
+                Total_Load.set_index('timestamp', inplace=True)
     
                 Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
                 
@@ -665,7 +682,9 @@ class MPlot(object):
                 if len(Unserved_Energy.index) > 12:
                     Unserved_Energy = Unserved_Energy[:-1]
                 
-                Unserved_Energy.index = months
+                Unserved_Energy.reset_index(drop=False, inplace=True)
+                Unserved_Energy['timestamp'] = Unserved_Energy['timestamp'].dt.month.apply(lambda x: self.MONTHS[x])
+                Unserved_Energy.set_index('timestamp', inplace=True)
     
                 # save for output
                 Unserved_Energy_Out = pd.concat([Unserved_Energy_Out, Unserved_Energy], axis=0, sort=False)
@@ -680,7 +699,9 @@ class MPlot(object):
                 Pump_Load = Pump_Load.groupby(pd.Grouper(freq='M')).mean()
                 if len(Pump_Load.index) > 12:
                     Pump_Load = Pump_Load[:-1]
-                Pump_Load.index = months
+                Pump_Load.reset_index(drop=False, inplace=True)
+                Pump_Load['timestamp'] = Pump_Load['timestamp'].dt.month.apply(lambda x: self.MONTHS[x])
+                Pump_Load.set_index('timestamp', inplace=True)
                 
                 Total_Demand = Total_Load - Pump_Load
                 
@@ -834,6 +855,7 @@ class MPlot(object):
                     self.logger.warning(f"No installed capacity in: {zone_input}")
                     continue
     
+                Total_Gen_Stack = (Total_Gen_Stack.loc[(slice(None), self.vre_gen_cat),:])
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
                 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
@@ -847,9 +869,7 @@ class MPlot(object):
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
-    
-                
-                months = ["January","February","March","April","May","June","July","August","September","October","November","December"]
+
                 monthly_gen_stack = Total_Gen_Stack
                 
                 monthly_gen_stack = monthly_gen_stack.groupby(pd.Grouper(freq='M')).mean()
@@ -857,20 +877,21 @@ class MPlot(object):
                 if len(monthly_gen_stack.index) > 12:
                     monthly_gen_stack = monthly_gen_stack[:-1]
                 
-                monthly_gen_stack.index = months
-                
-                wind_solar = pd.DataFrame(monthly_gen_stack[["Wind","PV"]])
-                wind_solar.columns = wind_solar.columns.add_categories('scenario')
-                wind_solar["scenario"] = scenario
-                
+                monthly_gen_stack.columns = monthly_gen_stack.columns.add_categories('timestamp')
+                monthly_gen_stack.reset_index(drop=False, inplace=True)
+                monthly_gen_stack['timestamp'] = monthly_gen_stack['timestamp'].dt.month.apply(lambda x: self.MONTHS[x])
+                monthly_gen_stack.set_index('timestamp', inplace=True)
+                                
+                wind_solar = monthly_gen_stack.copy()
                 monthly_total_gen = pd.DataFrame(monthly_gen_stack.T.sum(),columns=['Total Generation'])
                 
-                
                 if percentage:
-                    wind_solar['Wind'] = (wind_solar['Wind'] / monthly_total_gen['Total Generation']) * 100
-                    wind_solar['PV'] = (wind_solar['PV'] / monthly_total_gen['Total Generation']) * 100
+                    for vre_col in wind_solar.columns:
+                        wind_solar[vre_col] = (wind_solar[vre_col] / monthly_total_gen['Total Generation']) * 100
                     
-                
+                wind_solar.columns = wind_solar.columns.add_categories('scenario')
+                wind_solar["scenario"] = scenario
+
                 Wind_Solar_Out = pd.concat([Wind_Solar_Out,wind_solar],axis=0,sort=False)
                 
             Wind_Solar_Out = Wind_Solar_Out.loc[:, (Wind_Solar_Out != 0).any(axis=0)]

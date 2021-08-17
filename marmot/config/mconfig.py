@@ -55,6 +55,11 @@ def createConfig(configfile_path):
             rotate_at_num_labels = 7,
             rotation_angle = 45),
         
+        plot_data = dict(
+            curtailment_property = 'Capacity_Curtailed',
+            include_total_pumped_load_line = True,
+            include_timeseries_pumped_load_line = True),
+
         figure_file_format = 'svg',
         
         shift_leapday = False,

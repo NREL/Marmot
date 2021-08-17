@@ -28,6 +28,7 @@ class MPlot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
         
         self.mplot_data_dict = {}
 
@@ -43,7 +44,7 @@ class MPlot(object):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Capacity_Curtailed",self.Scenarios)]
+        properties = [(True,f"generator_{self.curtailment_prop}",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -60,7 +61,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                re_curt = self.mplot_data_dict["generator_Capacity_Curtailed"].get(scenario)
+                re_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
 
                 # Timeseries [MW] RE curtailment [MWh]
                 try: #Check for regions missing all generation.
