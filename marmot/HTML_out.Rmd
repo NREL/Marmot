@@ -1,3 +1,4 @@
+
 ---
 author: "Created by: National Renewable Energy Laboratory (NREL)"
 date: "`r format(Sys.time(), '%d %B %Y')`"
@@ -29,11 +30,13 @@ pacman::p_load(ggplot2, data.table, maptools, mapproj, RColorBrewer,tidyverse,ma
 #Read in file locations
 inputs = fread('Marmot_user_defined_inputs.csv', header = T)
 parent_dir = as.character(inputs[Input == 'Marmot_Solutions_folder']$User_defined_value)
-scenario_dir = as.character(inputs[Input == 'Main_scenario_plot']$User_defined_value)
-Multi_Scenario = as.character(inputs[Input == 'Multi_Scenario']$User_defined_value)
+#scenario_dir = as.character(inputs[Input == 'Main_scenario_plot']$User_defined_value)
+scenario_dir = as.character(inputs[Input == 'Scenarios']$User_defined_value)
+#Multi_Scenario = as.character(inputs[Input == 'Multi_Scenario']$User_defined_value)
 agg_level = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
-plot_dev = as.character(inputs[Input == 'Figure_Format']$User_defined_value)
+plot_dev = "svg"#as.character(inputs[Input == 'Figure_Format']$User_defined_value)
 
+# agg_levels = c('Usual_and_RTOZone_AUG')
 agg_levels = c('Summary','Usual')
 
 sections = c('_total_generation',
@@ -55,7 +58,6 @@ names(sections) = c('Total Generation',
 
 # set up default options for chunks, turn off error or warning messages
 knitr::opts_chunk$set(echo=F, comment=NA, warning=F, message=F, include=T,dev='svg', cache = F, fig.width = 20,results = 'asis',out.width = "100%", fig.asp = 0.675)
-
 ```
 
 
@@ -64,11 +66,11 @@ for (section_name in names(sections)){
   pandoc.header(section_name)
   all.plots = c()
   for (agg_level in agg_levels){
-  all.plots = c(all.plots,list.files(file.path(parent_dir,scenario_dir,'Figures_Output',paste0(agg_level,sections[section_name])),
+  all.plots = c(all.plots,list.files(file.path(parent_dir,'Figures_Output',paste0(agg_level,sections[section_name])),
                    pattern = plot_dev,full.name = T,recursive = T,all.files = T))
   }
   diff.plots = all.plots[grepl('Diff',all.plots)]
-  if(!is_empty(diff.plots)){
+  if(!is_empty(diff.plots)){-
   abs.plots = all.plots[-which(all.plots == diff.plots)]
   } else {
     abs.plots = all.plots
@@ -78,8 +80,8 @@ for (section_name in names(sections)){
     region_name = unlist(strsplit(end_of_string,'_'))[1]
   
     #Print plot
-    print(ggdraw() + draw_image(plot) + draw_label(region_name, y = 0.975, fontfamily = "serif", size = 48))
-  
+    print(ggdraw() + draw_image(plot))
+    #  + draw_label(region_name, y = 0.975, fontfamily = "serif", size = 48)
     #Print data
     data = str_replace(plot,plot_dev,'csv')
     if (section_name != 'Generation Stack' & section_name != 'Transmission'){
