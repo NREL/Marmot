@@ -3,7 +3,7 @@ PLEXOS_Solutions_folder,folder,required,/lustre/eaglefs/projects/continental/pcm
 Marmot_Solutions_folder,folder,optional,/lustre/eaglefs/projects/continental/pcm_110819/Marmot_plots,,,,,,,,,
 Scenario_process_list,List,required,test,,,,,,,"2024_base, 2050_policy, 2050_no_fossil, 2050_low_RECT",EI_Duke_Model_2030,"2050_no_fossil, 2050_low_RECT, 2050_high_RECT, 2050_policy"
 VoLL,int,required,10000,,,,,,,,,
-Region_Mapping.csv_name,string,optional(default),Regions_Zones_Mapping_Full.csv,,,,,,,Region_Mapping_Duke.csv,Region_mapping_nodal.csv,
+Region_Mapping.csv_name,string,optional(default),Regions_Zones_Mapping_Full_short.csv,,,,,,,Region_Mapping_Duke.csv,Region_mapping_nodal.csv,
 gen_names.csv_name,string,required(default),gen_names.csv,,,,,,,gen_names_duke.csv,gen_names_nodal.csv,
 emit_names.csv_name,string,required(default),emit_names.csv,,,,,,,,,
 Scenarios,string or List,required,test,,"2024_base, 2050_policy",2024_base,2050_policy,,,,,

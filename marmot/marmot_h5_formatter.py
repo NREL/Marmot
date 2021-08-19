@@ -922,6 +922,8 @@ class MarmotFormat(SetupLogger):
                     
                     db = hdf5_collection.get(model)
                     processed_data = self._get_data(row["group"], row["data_set"], row["data_type"], db, meta)
+                    # print(processed_data)
+                    # print(type(processed_data))
 
                     if processed_data.empty is True:
                         break
@@ -947,10 +949,49 @@ class MarmotFormat(SetupLogger):
                         break
                     else:
                         data_chunks.append(processed_data*row["unit_multiplier"])
+                    
+                    #try HDF5 save method
+                    def byHDF(dfs):
+                        store=pd.HDFStore('df_all.h5')
+                        for df in dfs:
+                            store.append('df',df,data_columns=list('0123'))
+                        #del dfs
+                        df=store.select('df')
+                        store.close()
+                        os.remove('df_all.h5')
+                        return df
 
-                if data_chunks:
-                    Processed_Data_Out = pd.concat(data_chunks, copy=False)
+                    # try a third thing
+                    ### ###
+                    # import datetime
+                    import pyarrow as pa
+                    import pyarrow.parquet as pq
 
+                    def csv_to_parquet(files):
+                        # chunksize = 1000000  # this is the number of lines
+                        # t1 = datetime.now()
+                        pqwriter = None
+                        for i,df in enumerate(files):
+                        # for i, df in enumerate(pd.read_csv(file, chunksize=chunksize)):
+                            table = pa.Table.from_pandas(df)
+                            # for the first chunk of records
+                            if i == 0:
+                                # create a parquet write object giving it an output file
+                                pqwriter = pq.ParquetWriter('combined.parquet', table.schema)
+                            pqwriter.write_table(table)
+                        if pqwriter:
+                            pqwriter.close()
+                    ### ###
+                    # from guppy import hpy
+                    # h = hpy()
+                    # print(h.heap())
+                    csv_to_parquet(data_chunks)
+                    Processed_Data_Out = pd.read_parquet('combined.parquet')
+                
+                    # Processed_Data_Out = pd.concat(data_chunks, copy=False)
+                    # Processed_Data_Out = byHDF(data_chunks)
+                    # print(Processed_Data_Out)
+                    
                 if Processed_Data_Out.empty is False:
                     if (row["data_type"] == "year"):
                         self.logger.info("Please Note: Year properties can not be checked for duplicates.\n\
