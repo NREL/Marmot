@@ -224,7 +224,10 @@ def set_x_y_dimension(region_number):
     return xdimension,ydimension
 
 
-def setup_plot(xdimension=1,ydimension=1,sharey=True):
+def setup_plot(xdimension=1,ydimension=1, 
+                figsize=(mconfig.parser("figure_size","xdimension"), 
+                        mconfig.parser("figure_size","ydimension")),
+                sharey=True):
     """
     Setup matplotlib plot
     Parameters
@@ -233,6 +236,8 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
         facet plot x dimension. The default is 1.
     ydimension : int, optional
         facet plot y dimension. The default is 1.
+    figsize : tuple, optional. Default set in config.yml
+        The dimensions of each subplot in inches
     sharey : bool, optional
         Share y axes labels. The default is True.
     Returns
@@ -242,15 +247,18 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     axs : matplotlib.axes
         matplotlib axes.
     """
-    x = mconfig.parser("figure_size","xdimension")
-    y = mconfig.parser("figure_size","ydimension")
+
+    x=figsize[0]
+    y=figsize[1]
     
-    fig, axs = plt.subplots(ydimension,xdimension, figsize=((x*xdimension),(y*ydimension)), sharey=sharey, squeeze=False)
+    fig, axs = plt.subplots(ydimension, xdimension, 
+                            figsize=((x*xdimension),(y*ydimension)), 
+                            sharey=sharey, squeeze=False)
     axs = axs.ravel()
     return fig,axs
 
 
-def create_bar_plot(df, axs, colour, angle,stacked=False):
+def create_bar_plot(df, axs, colour, angle, stacked=False):
     """
     Creates a bar plot
     Parameters

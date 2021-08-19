@@ -106,7 +106,10 @@ class MPlot(object):
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
 
-            fig2, ax = plt.subplots(figsize=(self.x*1.5,self.y))
+            # fig2, axs = mfunc.setup_plot(figsize=(self.x*1.5,self.y))
+            fig2, axs = mfunc.setup_plot()
+            # flatten object
+            ax = axs[0]
 
             unitconversion = mfunc.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
             RE_Curtailment_DC = RE_Curtailment_DC / unitconversion['divisor']
@@ -127,6 +130,7 @@ class MPlot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
+            mfunc.set_plot_timeseries_format(axs)
 
             
             ax.set_ylim(bottom=0)
@@ -211,7 +215,10 @@ class MPlot(object):
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(Unserved_Energy_Out.columns, self.color_list))
 
-            fig2, ax = plt.subplots(figsize=(self.x*1.5,self.y))
+            # fig2, axs = mfunc.setup_plot(figsize=(self.x*1.5,self.y))
+            fig2, axs = mfunc.setup_plot()
+            # flatten object
+            ax = axs[0]
 
             unitconversion = mfunc.capacity_energy_unitconversion(Unserved_Energy_Out.values.max())
             Unserved_Energy_Out = Unserved_Energy_Out / unitconversion['divisor']
@@ -231,6 +238,8 @@ class MPlot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
+            mfunc.set_plot_timeseries_format(axs)
+
 
             
             ax.set_ylim(bottom=0)
