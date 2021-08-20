@@ -802,3 +802,100 @@ class MPlot(object):
         fig1.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
         outputs = mfunc.DataSavedInModule()
         return outputs
+
+
+    def average_diurnal_curt(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+        """Average diurnal renewable curtailment plot
+           Plotting total curtailment of all vre technologies
+        """
+        
+        outputs = {}
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,f"generator_{self.curtailment_prop}",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
+        if 1 in check_input_data:
+            return mfunc.MissingInputData()
+
+        for zone_input in self.Zones:
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            
+            RE_Curtailment_DC = pd.DataFrame()
+            
+            for scenario in self.Scenarios:
+                self.logger.info(f"Scenario = {scenario}")
+
+                re_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
+
+                # Timeseries [MW] RE curtailment [MWh]
+                try: #Check for regions missing all generation.
+                    re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                        self.logger.info(f'No curtailment in {zone_input}')
+                        continue
+
+                re_curt = re_curt.groupby(["timestamp"]).sum()
+                re_curt = re_curt.squeeze() #Convert to Series
+                
+                if pd.isna(start_date_range) == False:
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    re_curt = re_curt[start_date_range : end_date_range]
+                    
+                    if re_curt.empty is True: 
+                        self.logger.warning('No data in selected Date Range')
+                        continue
+                    
+                re_curt = re_curt.groupby([re_curt.index.floor('d')]).sum()
+                interval_count = mfunc.get_sub_hour_interval_count(re_curt)
+                re_curt = re_curt*interval_count
+                
+                re_curt.rename(scenario, inplace=True)
+
+                RE_Curtailment_DC = pd.concat([RE_Curtailment_DC, re_curt], axis=1, sort=False)
+
+            # Remove columns that have values less than 1
+            #RE_Curtailment_DC = RE_Curtailment_DC.loc[:, (RE_Curtailment_DC >= 1).any(axis=0)]
+
+            # Replace _ with white space
+            RE_Curtailment_DC.columns = RE_Curtailment_DC.columns.str.replace('_',' ')
+
+            # Create Dictionary from scenario names and color list
+            colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
+
+            fig, axs = mfunc.setup_plot()
+            # flatten object
+            ax = axs[0]
+
+            unitconversion = mfunc.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
+            RE_Curtailment_DC = RE_Curtailment_DC / unitconversion['divisor']
+            Data_Table_Out = RE_Curtailment_DC
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
+            
+            for column in RE_Curtailment_DC:
+                ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
+                        label=column)
+                ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
+                ax.set_ylabel(f"RE Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
+            
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.margins(x=0.01)
+            mfunc.set_plot_timeseries_format(axs)
+        
+            ax.set_ylim(bottom=0)
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
+
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+        return outputs
+

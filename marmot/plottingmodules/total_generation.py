@@ -103,7 +103,7 @@ class MPlot(object):
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = mfunc.get_interval_count(Total_Gen_Stack)
+                interval_count = mfunc.get_sub_hour_interval_count(Total_Gen_Stack)
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
@@ -312,7 +312,7 @@ class MPlot(object):
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = mfunc.get_interval_count(Total_Gen_Stack)
+                interval_count = mfunc.get_sub_hour_interval_count(Total_Gen_Stack)
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
@@ -564,10 +564,11 @@ class MPlot(object):
 
 #################################################################################
 
-# Monthly generation plots for Philippines project
     
     def total_gen_monthly(self, figure_name=None, prop=None, start=None, end=None,
                   timezone=None, start_date_range=None, end_date_range=None):
+        """ Total generation by Month"""
+        
         # Create Dictionary to hold Datframes for each scenario
         
         outputs = {}
@@ -630,6 +631,10 @@ class MPlot(object):
                     continue
     
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+
+                # Calculates interval step to correct for MWh of generation if data is subhourly
+                interval_count = mfunc.get_sub_hour_interval_count(Total_Gen_Stack)
+
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
     
                 # Insert Curtailmnet into gen stack if it exhists in database
@@ -643,10 +648,9 @@ class MPlot(object):
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
     
                 
-                monthly_gen_stack = Total_Gen_Stack
-                
-                monthly_gen_stack = monthly_gen_stack.groupby(pd.Grouper(freq='M')).mean()
-                
+                monthly_gen_stack = Total_Gen_Stack/interval_count
+                monthly_gen_stack = monthly_gen_stack.groupby(pd.Grouper(freq='M')).sum()
+
                 if len(monthly_gen_stack.index) > 12:
                     monthly_gen_stack = monthly_gen_stack[:-1]
                 
@@ -661,7 +665,8 @@ class MPlot(object):
                 Total_Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
-                Total_Load = Total_Load.groupby(pd.Grouper(freq='M')).mean()
+                Total_Load = Total_Load/interval_count
+                Total_Load = Total_Load.groupby(pd.Grouper(freq='M')).sum()
                 if len(Total_Load.index) > 12:
                     Total_Load = Total_Load[:-1]
                 
@@ -678,7 +683,8 @@ class MPlot(object):
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
-                Unserved_Energy = Unserved_Energy.groupby(pd.Grouper(freq='M')).mean()
+                Unserved_Energy = Unserved_Energy/interval_count
+                Unserved_Energy = Unserved_Energy.groupby(pd.Grouper(freq='M')).sum()
                 if len(Unserved_Energy.index) > 12:
                     Unserved_Energy = Unserved_Energy[:-1]
                 
@@ -696,7 +702,8 @@ class MPlot(object):
                     Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
-                Pump_Load = Pump_Load.groupby(pd.Grouper(freq='M')).mean()
+                Pump_Load = Pump_Load/interval_count
+                Pump_Load = Pump_Load.groupby(pd.Grouper(freq='M')).sum()
                 if len(Pump_Load.index) > 12:
                     Pump_Load = Pump_Load[:-1]
                 Pump_Load.reset_index(drop=False, inplace=True)
@@ -798,17 +805,35 @@ class MPlot(object):
 
         return outputs
     
+
+    def monthly_vre_percentage_generation(self, **kwargs):
+        """Monthly Total Variable Renewable Generation by technology percentage,
+           Each vre technology is plotted as a bar, the total of all bars add to 100%
+           Each sceanrio is plotted on a seperate facet plot 
+           Technologies that belong to VRE can be set in the vre_gen_cat.csv file 
+           in the Mapping folder
+        """
+        outputs = self._monthly_vre_gen(plot_as_percnt=True, **kwargs)
+        return outputs
     
-    
-    def monthly_wind_solar(self, figure_name=None, prop=None, start=None, end=None,
+    def monthly_vre_generation(self, **kwargs):
+        """Monthly Total Variable Renewable Generation
+            Each vre technology is plotted as a bar
+            Each sceanrio is plotted on a seperate facet plot 
+           Technologies that belong to VRE can be set in the vre_gen_cat.csv file 
+           in the Mapping folder
+        """
+        outputs = self._monthly_vre_gen(**kwargs)
+        return outputs
+
+    def _monthly_vre_gen(self, plot_as_percnt=False, figure_name=None, prop=None, start=None, end=None,
                   timezone=None, start_date_range=None, end_date_range=None):
+        """ Creates monthly generation plot, internal method called from 
+            monthly_vre_percentage_generation or monthly_vre_generation
+        """
+        
         # Create Dictionary to hold Datframes for each scenario
-        
         outputs = {}
-        
-        percentage = False
-        if 'Percentage' in figure_name:
-            percentage = True
             
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -857,7 +882,10 @@ class MPlot(object):
     
                 Total_Gen_Stack = (Total_Gen_Stack.loc[(slice(None), self.vre_gen_cat),:])
                 Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
-                
+    
+                # Calculates interval step to correct for MWh of generation if data is subhourly
+                interval_count = mfunc.get_sub_hour_interval_count(Total_Gen_Stack)
+
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
     
                 #Insert Curtailmnet into gen stack if it exhists in database
@@ -870,9 +898,9 @@ class MPlot(object):
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
-                monthly_gen_stack = Total_Gen_Stack
+                monthly_gen_stack = Total_Gen_Stack/interval_count
                 
-                monthly_gen_stack = monthly_gen_stack.groupby(pd.Grouper(freq='M')).mean()
+                monthly_gen_stack = monthly_gen_stack.groupby(pd.Grouper(freq='M')).sum()
                 
                 if len(monthly_gen_stack.index) > 12:
                     monthly_gen_stack = monthly_gen_stack[:-1]
@@ -885,7 +913,7 @@ class MPlot(object):
                 wind_solar = monthly_gen_stack.copy()
                 monthly_total_gen = pd.DataFrame(monthly_gen_stack.T.sum(),columns=['Total Generation'])
                 
-                if percentage:
+                if plot_as_percnt:
                     for vre_col in wind_solar.columns:
                         wind_solar[vre_col] = (wind_solar[vre_col] / monthly_total_gen['Total Generation']) * 100
                     
@@ -906,15 +934,15 @@ class MPlot(object):
             Wind_Solar_Out = Wind_Solar_Out.T
             
             # unit conversion return divisor and energy units
-            if not percentage:
-                unitconversion = mfunc.capacity_energy_unitconversion(max(Wind_Solar_Out.sum()))
+            if not plot_as_percnt:
+                unitconversion = mfunc.capacity_energy_unitconversion(Wind_Solar_Out.to_numpy().max())
                 Wind_Solar_Out = Wind_Solar_Out/unitconversion['divisor']
     
             #Data table of values to return to main program
             Data_Table_Out = pd.concat([scenario_data.T,
                                         Wind_Solar_Out],  axis=0, sort=False)
 
-            if not percentage:
+            if not plot_as_percnt:
                 Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
             
             
@@ -949,7 +977,7 @@ class MPlot(object):
 
             xlabels = [x.replace('_',' ') for x in self.xlabels]
             if self.ylabels == ['']:
-                if percentage:
+                if plot_as_percnt:
                     ylabels = ["% of Generation"]
                 else:
                     ylabels = [f"Generation ({unitconversion['units']}h)"]
@@ -969,12 +997,11 @@ class MPlot(object):
 
         return outputs
     
-    
-    
-# Total Generation Pie Chart
 
     def total_gen_pie(self, figure_name=None, prop=None, start=None, end=None,
                   timezone=None, start_date_range=None, end_date_range=None):
+        """Total Generation Pie Chart """
+        
         # Create Dictionary to hold Datframes for each scenario
         
         outputs = {}

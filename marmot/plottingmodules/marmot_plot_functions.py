@@ -706,7 +706,7 @@ def merge_new_agg(df,Region_Mapping,AGG_BY):
     df = df.merge(agg_new,left_on = 'region', right_index = True)
     return(df)
 
-def get_interval_count(df):
+def get_sub_hour_interval_count(df) -> int:
     """
     Detects the interval spacing; used to adjust sums of certain for variables for sub-hourly runs
     Parameters
@@ -719,7 +719,9 @@ def get_interval_count(df):
     time_delta = df.index[1]- df.index[0]
     # Finds intervals in 60 minute period
     interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
-    return(interval_count)
+    # If interals are greater than 1 hour, returns 1
+    return max(1, interval_count)
+
 
 def sort_duration(df,col):
     
