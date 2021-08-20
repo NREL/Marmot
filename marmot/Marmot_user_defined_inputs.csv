@@ -1,6 +1,6 @@
 Input,Input_type,Importance,User_defined_value,,,,,,,,,
-PLEXOS_Solutions_folder,folder,required,/lustre/eaglefs/shared_projects/gridtools/pcm_110819/PLEXOS_Solutions_folder,,,,,,,,,
-Marmot_Solutions_folder,folder,optional,/lustre/eaglefs/shared_projects/gridtools/pcm_110819/Marmot_plots,,,,,,,,,
+PLEXOS_Solutions_folder,folder,required,/lustre/eaglefs/shared-projects/gridtools/pcm_110819/PLEXOS_Solutions_folder,,,,,,,,,
+Marmot_Solutions_folder,folder,optional,/lustre/eaglefs/shared-projects/gridtools/pcm_110819/Marmot_plots,,,,,,,,,
 Scenario_process_list,List,required,test,,,,,,,"2024_base, 2050_policy, 2050_no_fossil, 2050_low_RECT",EI_Duke_Model_2030,"2050_no_fossil, 2050_low_RECT, 2050_high_RECT, 2050_policy"
 VoLL,int,required,10000,,,,,,,,,
 Region_Mapping.csv_name,string,optional(default),Regions_Zones_Mapping_Full_short.csv,,,,,,,Region_Mapping_Duke.csv,Region_mapping_nodal.csv,
