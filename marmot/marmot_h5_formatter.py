@@ -949,71 +949,16 @@ class MarmotFormat(SetupLogger):
                         break
                     else:
                         data_chunks.append(processed_data*row["unit_multiplier"])
-                    
-                    #try HDF5 save method
-                    def byHDF(dfs):
-                        store=pd.HDFStore('df_all.h5')
-                        for df in dfs:
-                            store.append('df',df,data_columns=list('0123'))
-                        #del dfs
-                        df=store.select('df')
-                        store.close()
-                        os.remove('df_all.h5')
-                        return df
 
-                    # try a third thing
-                    ### ###
-                    # import datetime
-                    import pyarrow as pa
-                    import pyarrow.parquet as pq
-
-                    def csv_to_parquet(files):
-                        # chunksize = 1000000  # this is the number of lines
-                        # t1 = datetime.now()
-                        pqwriter = None
-                        for i,df in enumerate(files):
-                        # for i, df in enumerate(pd.read_csv(file, chunksize=chunksize)):
-                            table = pa.Table.from_pandas(df)
-                            # for the first chunk of records
-                            if i == 0:
-                                # create a parquet write object giving it an output file
-                                pqwriter = pq.ParquetWriter('combined.parquet', table.schema)
-                            pqwriter.write_table(table)
-                        if pqwriter:
-                            pqwriter.close()
-
-                    def pdconcat(files):
-                        return pd.concat(files, copy=False)
-                    ### ###
-                    # from guppy import hpy
-                    # h = hpy()
-                    # print(h.heap())
-                    import tracemalloc
-                    # if idx%500==499:
-                    #     print(idx)
-                    #     s = time.time()
-                    #     tracemalloc.start()
-                    #     csv_to_parquet(data_chunks)
-                    #     # displaying the memory
-                    #     print(tracemalloc.get_traced_memory())
-                    #     # stopping the library
-                    #     tracemalloc.stop()
-                    #     Processed_Data_Out = pd.read_parquet('combined.parquet')
-                    #     e = time.time()
-                    #     print(f'this took {round(e-s)} secs')
-                    #     # print('completed new method, starting old method')
-                    # else:
+                import tracemalloc    
+                if data_chunks:
                     start = time.time()
                     tracemalloc.start()
-                
-                    Processed_Data_Out = pdconcat(data_chunks) # pd.concat(data_chunks, copy=False)
+                    Processed_Data_Out = pd.concat(data_chunks,copy=False)
                     print(tracemalloc.get_traced_memory())
                     tracemalloc.stop()
                     end = time.time()
-                    print(f'this took {round(end-start)} secs')
-                    # print('completed loop')
-                    # Processed_Data_Out = byHDF(data_chunks)
-                    # print(Processed_Data_Out)
+                    
                     
                 if Processed_Data_Out.empty is False:
                     if (row["data_type"] == "year"):
