@@ -914,7 +914,7 @@ class MarmotFormat(SetupLogger):
             key_path = row["group"] + "_" + prop_underscore
             if key_path not in existing_keys:
 
-                for model in files_list:
+                for idx, model in enumerate(files_list):
                     self.logger.info(f"      {model}")
 
                     # Create an instance of metadata, and pass that as a variable to get data.
@@ -981,14 +981,37 @@ class MarmotFormat(SetupLogger):
                             pqwriter.write_table(table)
                         if pqwriter:
                             pqwriter.close()
+
+                    def pdconcat(files):
+                        return pd.concat(files, copy=False)
                     ### ###
                     # from guppy import hpy
                     # h = hpy()
                     # print(h.heap())
-                    csv_to_parquet(data_chunks)
-                    Processed_Data_Out = pd.read_parquet('combined.parquet')
+                    import tracemalloc
+                    # if idx%500==499:
+                    #     print(idx)
+                    #     s = time.time()
+                    #     tracemalloc.start()
+                    #     csv_to_parquet(data_chunks)
+                    #     # displaying the memory
+                    #     print(tracemalloc.get_traced_memory())
+                    #     # stopping the library
+                    #     tracemalloc.stop()
+                    #     Processed_Data_Out = pd.read_parquet('combined.parquet')
+                    #     e = time.time()
+                    #     print(f'this took {round(e-s)} secs')
+                    #     # print('completed new method, starting old method')
+                    # else:
+                    start = time.time()
+                    tracemalloc.start()
                 
-                    # Processed_Data_Out = pd.concat(data_chunks, copy=False)
+                    Processed_Data_Out = pdconcat(data_chunks) # pd.concat(data_chunks, copy=False)
+                    print(tracemalloc.get_traced_memory())
+                    tracemalloc.stop()
+                    end = time.time()
+                    print(f'this took {round(end-start)} secs')
+                    # print('completed loop')
                     # Processed_Data_Out = byHDF(data_chunks)
                     # print(Processed_Data_Out)
                     
