@@ -1399,6 +1399,7 @@ class MPlot(object):
                 else:
                     lookup_label = f'generator_{prop[0]}'
 
+                print(lookup_label,scenario)
                 if "generator" in lookup_label:
                     Load = self.mplot_data_dict[lookup_label].get(scenario).copy()
                     Load.reset_index(inplace=True)
@@ -1729,6 +1730,10 @@ class MPlot(object):
             agg = 'zone'
         else:
             agg = 'region'
+
+        duration_curve = False
+        if 'duration_curve' in figure_name:
+            duration_curve=True
             
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -1812,20 +1817,35 @@ class MPlot(object):
                         df_dontagg.insert(len(df_dontagg.columns),'Other',agged)
                         single_parent = df_dontagg.copy()
 
+
+
                     #Convert units
                     if n == 0:
                         unitconversion = mfunc.capacity_energy_unitconversion(single_parent.abs().values.max())
                     single_parent = single_parent / unitconversion['divisor']
 
                     for column in single_parent.columns:
-
-                        mfunc.create_line_plot(axs,single_parent,column,label=column,n=n)
-                        axs[n].set_title(parent)
-                        axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                        axs[n].margins(x=0.01)
-                        mfunc.set_plot_timeseries_format(axs,n)
-                        axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
-                        axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+                        # if duration curve, then for each resulting column, order greatest to least and re-index by rank
+                        if duration_curve:
+                            net_export_duration_curve = mfunc.sort_duration(single_parent,column)
+                            mfunc.create_line_plot(axs,net_export_duration_curve,column,label=column,n=n)
+                            axs[n].set_title(parent+" duration curves")
+                            axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                            axs[n].margins(x=0.01)
+                            axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
+                            axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+                            # ax.set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
+                            # ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                            # ax.margins(x=0.01)
+                            # ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
+                        else:
+                            mfunc.create_line_plot(axs,single_parent,column,label=column,n=n)
+                            axs[n].set_title(parent)
+                            axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                            axs[n].margins(x=0.01)
+                            mfunc.set_plot_timeseries_format(axs,n)
+                            axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
+                            axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
 
                     n+=1
                 # Create data table for each scenario
@@ -1835,8 +1855,7 @@ class MPlot(object):
                 data_table_chunks.append(data_table)
 
             # if plotting all scenarios add facet labels
-            if plot_scenario == True:
-                mfunc.add_facet_labels(fig3, self.xlabels, self.ylabels)
+            mfunc.add_facet_labels(fig3, self.xlabels, self.ylabels)
 
             #Remove extra axes
             if excess_axs != 0:
@@ -1844,7 +1863,10 @@ class MPlot(object):
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.xlabel(f"Date {(timezone)}",  color='black', rotation='horizontal',labelpad = 30)
+            if duration_curve:
+                plt.xlabel(f"Tmp Rank",  color='black', rotation='horizontal',labelpad = 30)
+            else:
+                plt.xlabel(f"Date {(timezone)}",  color='black', rotation='horizontal',labelpad = 30)
             plt.ylabel(f"Net Interchange ({unitconversion['units']})",  color='black', rotation='vertical', labelpad = 40)
 
             # If plotting all regions save output and return none plot_main

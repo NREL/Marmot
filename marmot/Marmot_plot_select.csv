@@ -77,7 +77,7 @@ Individual_Line_Flow,FALSE,p70_p80_1,,,EST,,,transmission,line_flow_ind
 Individual_coastalline_Flow_duration_curve,FALSE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI",,,EST,,,transmission,line_flow_ind
 Individual_coastalline_Flow_diff_duration_curve,FALSE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI",,,EST,,,transmission,line_flow_ind_diff
 Individual_Line_Flow_duration_curve_seasonal,FALSE,300030_338187_500kV_Z1,,,EST,12/29/2024,12/31/2024,transmission,line_flow_ind_seasonal
-Tx_Capacity,TRUE,,,,,,,transmission,extract_tx_cap
+Tx_Capacity,FALSE,,,,,,,transmission,extract_tx_cap
 Line_Flow_v_PV_scatter,FALSE,"Generation, PV",,,EST,,,transmission,line_scatter
 Line_Flow_v_Wind_scatter,FALSE,"Generation, Wind",,,EST,,,transmission,line_scatter
 Line_Flow_v_CurtailmentWind_scatter,FALSE,"Curtailment, Wind",,,EST,,,transmission,line_scatter
@@ -87,15 +87,16 @@ Line_Flow_v_USE_scatter,FALSE,Unserved_Energy,,,EST,,,transmission,line_scatter
 Line_Utilization_Histogram,FALSE,,,,,,,transmission,line_hist
 Line_Utilization_Histogram_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_hist
 Line_Utilization_Duration,FALSE,,,,,,,transmission,line_util
-Line_Utilization_Duration_Category,TRUE,ReEDS_Expansion,,,,,,transmission,line_util
+Line_Utilization_Duration_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_util
 Line_Violations_Time_Series,FALSE,,,,EST,,,transmission,line_violations_timeseries
 Line_Violations_Totals,FALSE,,,,,,,transmission,line_violations_totals
 Net_Export_Date_Range,FALSE,Date Range,,,EST,12/29/2024,12/31/2024,transmission,net_export
-Net_Export,TRUE,,,,EST,,,transmission,net_export
-Net_Export_duration_curve,TRUE,,,,,,,transmission,net_export
+Net_Export,FALSE,,,,EST,,,transmission,net_export
+Net_Export_duration_curve,FALSE,,,,,,,transmission,net_export
 Region-Region_Net_Interchange_Checkerboard,FALSE,,,,,,,transmission,region_region_checkerboard
-All_Region-Region_Net_Interchange,TRUE,,,,EST,,,transmission,region_region_interchange_all_regions
-Region-Region_Net_Interchange,TRUE,,,,EST,,,transmission,region_region_interchange_all_scenarios
+All_Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_regions
+Region-Region_Net_Interchange_duration_curve,TRUE,,,,EST,,,transmission,region_region_interchange_all_scenarios
+Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_scenarios
 P05_total_flow,FALSE,,,,,,,transmission,total_int_flow_ind
 Zonal_Interchange,FALSE,,,,,12/29/2024,12/31/2024,transmission,zonal_interchange
 Zonal_Interchange_Total,FALSE,,,,,,,transmission,zonal_interchange_total
