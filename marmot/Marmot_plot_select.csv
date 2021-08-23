@@ -16,7 +16,7 @@ Total_Emissions_By_Gen_Type_SO2,FALSE,SO2,,,,,,emissions,total_emissions_by_type
 Committed_Capacity_Stack,FALSE,,,,PST,5/7/2024,5/11/2024,generation_stack,committed_stack
 Generation_Timeseries_Diff,FALSE,,,,EST,,,generation_stack,gen_diff
 Generation_Timeseries_Diff_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_diff
-Stacked_Gen,TRUE,,,,PST,,,generation_stack,gen_stack
+Stacked_Gen,FALSE,,,,PST,,,generation_stack,gen_stack
 Stacked_Gen_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Date_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_stack
 Stacked_Gen_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
@@ -78,11 +78,11 @@ Individual_coastalline_Flow_duration_curve,FALSE,"40181_CARLTON To 41075_TILLAMO
 Individual_coastalline_Flow_diff_duration_curve,FALSE,"40181_CARLTON To 41075_TILLAMOK_1_WI, 40243_CLATSOP To 40357_DRISCOLT_1_WI, 40409_FAIRVIEW To 40881_RESTN TP_1_WI, 40410_FAIRVEW2 To 40883_RESTON_2_WI, 41083_TOLEDO To 41165_WREN_1_WI, 40627_LANE To 41141_WENDSON_2_WI, 40410_FAIRVEW2 To 45153_ISTHMUS_1_WI, 41083_TOLEDO To 41141_WENDSON_1_WI",,,EST,,,transmission,line_flow_ind_diff
 Individual_Line_Flow_duration_curve_seasonal,FALSE,300030_338187_500kV_Z1,,,EST,12/29/2024,12/31/2024,transmission,line_flow_ind_seasonal
 Tx_Capacity,TRUE,,,,,,,transmission,extract_tx_cap
-Line_Flow_v_PV_scatter,TRUE,"Generation, PV",,,EST,,,transmission,line_scatter
-Line_Flow_v_Wind_scatter,TRUE,"Generation, Wind",,,EST,,,transmission,line_scatter
+Line_Flow_v_PV_scatter,FALSE,"Generation, PV",,,EST,,,transmission,line_scatter
+Line_Flow_v_Wind_scatter,FALSE,"Generation, Wind",,,EST,,,transmission,line_scatter
 Line_Flow_v_CurtailmentWind_scatter,FALSE,"Curtailment, Wind",,,EST,,,transmission,line_scatter
-Line_Flow_v_Load_scatter,TRUE,Load,,,EST,,,transmission,line_scatter
-Line_Flow_v_Net_Interchange_scatter,TRUE,Net_Interchange,,,EST,,,transmission,line_scatter
+Line_Flow_v_Load_scatter,FALSE,Load,,,EST,,,transmission,line_scatter
+Line_Flow_v_Net_Interchange_scatter,FALSE,Net_Interchange,,,EST,,,transmission,line_scatter
 Line_Flow_v_USE_scatter,FALSE,Unserved_Energy,,,EST,,,transmission,line_scatter
 Line_Utilization_Histogram,FALSE,,,,,,,transmission,line_hist
 Line_Utilization_Histogram_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_hist
@@ -94,8 +94,8 @@ Net_Export_Date_Range,FALSE,Date Range,,,EST,12/29/2024,12/31/2024,transmission,
 Net_Export,TRUE,,,,EST,,,transmission,net_export
 Net_Export_duration_curve,TRUE,,,,,,,transmission,net_export
 Region-Region_Net_Interchange_Checkerboard,FALSE,,,,,,,transmission,region_region_checkerboard
-All_Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_regions
-Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_scenarios
+All_Region-Region_Net_Interchange,TRUE,,,,EST,,,transmission,region_region_interchange_all_regions
+Region-Region_Net_Interchange,TRUE,,,,EST,,,transmission,region_region_interchange_all_scenarios
 P05_total_flow,FALSE,,,,,,,transmission,total_int_flow_ind
 Zonal_Interchange,FALSE,,,,,12/29/2024,12/31/2024,transmission,zonal_interchange
 Zonal_Interchange_Total,FALSE,,,,,,,transmission,zonal_interchange_total
