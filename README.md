@@ -6,8 +6,8 @@ Marmot is a data formatting and visualization tool for production cost modelling
 Click the following to quickly navigate to the main sections of the ReadME:
 - [Main Python Scripts](https://github.nrel.gov/PCM/Marmot#main-python-scripts)
 - [Initial Setup](https://github.nrel.gov/PCM/Marmot#initial-setup)
-- [Marmot Formatter](https://github.nrel.gov/PCM/Marmot#marmot_h5_formatter)
-- [Marmot Plotter](https://github.nrel.gov/PCM/Marmot#marmot_plot_main)
+- [Marmot Formatter](https://github.nrel.gov/PCM/Marmot#marmot-formatter)
+- [Marmot Plotter](https://github.nrel.gov/PCM/Marmot#marmot-plotter)
 - [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files)
 - [Additional Configuration Settings ](https://github.nrel.gov/PCM/Marmot#Additional-Configuration-Settings)
 
