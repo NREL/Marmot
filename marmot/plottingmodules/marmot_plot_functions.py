@@ -584,14 +584,14 @@ def add_facet_labels(fig, xlabels, ylabels):
     j=0
     k=0
     for ax in all_axes:
-        if ax.is_last_row():
+        if ax.get_subplotspec().is_last_row():
             try:
                 ax.set_xlabel(xlabel=(xlabels[j]),  color='black', fontsize=font_defaults['axes_label_size']-2)
             except IndexError:
                 logger.warning(f"Warning: xlabel missing for subplot x{j}")
                 continue
             j=j+1
-        if ax.is_first_col():
+        if ax.get_subplotspec().is_first_col():
             try:
                 ax.set_ylabel(ylabel=(ylabels[k]),  color='black', rotation='vertical', fontsize=font_defaults['axes_label_size']-2)
             except IndexError:
