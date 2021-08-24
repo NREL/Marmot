@@ -525,7 +525,7 @@ class MPlot(object):
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            # plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
+            # plt.xlabel('Date ' + '(' + timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
             plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 40)
             
             if mconfig.parser("plot_title_as_region"):
