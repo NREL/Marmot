@@ -40,7 +40,7 @@ class MPlot(object):
 
 
     def committed_stack(self, figure_name=None, prop=None, start=None, end=None,
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -169,7 +169,7 @@ class MPlot(object):
 
 
     def gen_stack(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         facet=False
         if 'Facet' in figure_name:
@@ -576,7 +576,7 @@ class MPlot(object):
 
 
     def gen_diff(self, figure_name=None, prop=None, start=None, end=None,
-                 timezone=None, start_date_range=None, end_date_range=None):
+                 timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -674,7 +674,7 @@ class MPlot(object):
 
 
     def gen_stack_all_periods(self, figure_name=None, prop=None, start=None, end=None,
-                              timezone=None, start_date_range=None, end_date_range=None):
+                              timezone="", start_date_range=None, end_date_range=None):
         '''
         DEPRCIATED FOR NOW
 

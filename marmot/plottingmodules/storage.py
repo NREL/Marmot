@@ -34,7 +34,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def storage_volume(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
 
         """

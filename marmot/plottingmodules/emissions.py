@@ -34,7 +34,7 @@ class MPlot(object):
 
     # function to collect total emissions by fuel type
     def total_emissions_by_type(self, figure_name=None, prop=None, start=None,
-                             end=None, timezone=None, start_date_range=None,
+                             end=None, timezone="", start_date_range=None,
                              end_date_range=None):
 
         # Create Dictionary to hold Datframes for each scenario

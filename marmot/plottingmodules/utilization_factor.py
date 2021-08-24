@@ -43,7 +43,7 @@ class MPlot(object):
 
 
     def uf_fleet(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
         return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
@@ -147,7 +147,7 @@ class MPlot(object):
         return outputs
 
     def uf_gen(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
         return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
@@ -247,7 +247,7 @@ class MPlot(object):
         return outputs
 
     def uf_fleet_by_type(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
         return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
@@ -346,7 +346,7 @@ class MPlot(object):
         return outputs
 
     def GW_fleet(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
         return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 

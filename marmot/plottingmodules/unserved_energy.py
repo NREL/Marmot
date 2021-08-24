@@ -28,7 +28,7 @@ class MPlot(object):
 
 
     def unserved_energy_timeseries(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         outputs = {}
         
@@ -116,7 +116,7 @@ class MPlot(object):
 
 
     def tot_unserved_energy(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
         
         if self.AGG_BY == 'zone':

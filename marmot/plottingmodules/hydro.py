@@ -37,7 +37,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def hydro_continent_net_load(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
         outputs = {}
@@ -123,7 +123,7 @@ class MPlot(object):
         return outputs
 
     def hydro_net_load(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
         outputs = {}

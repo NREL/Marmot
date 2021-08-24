@@ -35,7 +35,7 @@ class MPlot(object):
         return(oz)
 
     def sensitivities_gas(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
 
         """

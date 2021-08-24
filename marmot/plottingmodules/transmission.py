@@ -61,7 +61,7 @@ class MPlot(object):
         return outputs
 
     def _util(self,hist=None, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
       
         outputs = {}
         
@@ -190,7 +190,7 @@ class MPlot(object):
         return outputs
 
     def int_flow_ind(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method plots flow, import and export limit, for individual transmission interchanges, with a facet for each interchange.
@@ -386,7 +386,7 @@ class MPlot(object):
         return outputs 
 
     def int_flow_ind_seasonal(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method plots flow, import and export limit, for individual transmission interchanges, with a facet for each interchange.
@@ -597,7 +597,7 @@ class MPlot(object):
 
     #TODO: re-organize parameters (self vs. not self)
     def int_flow_ind_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method plots the hourly difference in interface flow between two scenarios for individual interfaces, with a facet for each interface.
@@ -803,7 +803,7 @@ class MPlot(object):
 
 
     def line_flow_ind(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
         """
         This method plots flow, import and export limit, for individual transmission lines, with a facet for each line.
         The lines are specified in the plot properties field of Marmot_plot_select.csv (column 4).
@@ -979,7 +979,7 @@ class MPlot(object):
         return outputs
 
     def line_flow_ind_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method plots the flow difference for individual transmission lines, with a facet for each line.
@@ -1009,7 +1009,7 @@ class MPlot(object):
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = prop.split(",")
         if select_lines == None:
-            outpus = mfunc.InputSheetError()
+            outputs = mfunc.InputSheetError()
             return outputs
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
@@ -1085,7 +1085,7 @@ class MPlot(object):
         return outputs
 
     def line_flow_ind_seasonal(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method differs from the previous method, in that it plots seasonal line limits.
@@ -1267,7 +1267,7 @@ class MPlot(object):
         return outputs
 
     def extract_tx_cap(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
      
         return mfunc.UnderDevelopment() #TODO: Needs finishing
         
@@ -1375,7 +1375,7 @@ class MPlot(object):
 
     def _region_region_interchange(self,scenario_type,plot_scenario=True, 
                                    figure_name=None, prop=None, start=None, end=None,
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         outputs = {}
         
@@ -1518,7 +1518,7 @@ class MPlot(object):
         return outputs
 
     def region_region_checkerboard(self,figure_name=None, prop=None, start=None,
-                                   end=None, timezone=None, start_date_range=None,
+                                   end=None, timezone="", start_date_range=None,
                                    end_date_range=None):
         """
         This method creates a checkerboard/heatmap figure showing total interchanges between regions
@@ -1647,7 +1647,7 @@ class MPlot(object):
 
     def _violations(self,total_violations=None,
                     figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
 
         outputs = {}
@@ -1739,7 +1739,7 @@ class MPlot(object):
 
 
     def net_export(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
 
         """
@@ -1832,7 +1832,7 @@ class MPlot(object):
         return outputs
 
     def zonal_interchange(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
 
         """
@@ -2000,7 +2000,7 @@ class MPlot(object):
         return outputs
 
     def zonal_interchange_total(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
 
         """
@@ -2137,7 +2137,7 @@ class MPlot(object):
         return outputs
 
     def total_int_flow_ind(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
         
         """
