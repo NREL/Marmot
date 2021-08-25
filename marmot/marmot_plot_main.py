@@ -515,7 +515,7 @@ class MarmotPlot(SetupLogger):
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
                 if pd.isnull(row.iloc[5]):
-                    row.iloc[5] == ""
+                    row.iloc[5] = ""
                     
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
