@@ -197,7 +197,7 @@ class MPlot(object):
 
 
                 ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-                ax.set_xlabel(timezone',  color='black', rotation='horizontal')
+                ax.set_xlabel(timezone,  color='black', rotation='horizontal')
                 ax.spines['right'].set_visible(False)
                 ax.spines['top'].set_visible(False)
                 ax.tick_params(axis='y', which='major', length=5, width=1)
