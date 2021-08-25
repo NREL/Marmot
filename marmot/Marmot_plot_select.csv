@@ -9,20 +9,20 @@ RE_Curtailment_Duration_Curve,FALSE,PV+Wind,,,,,,curtailment,curt_duration_curve
 Total_Curtailment_Individual,FALSE,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
 PV_Curtailment_vs_Penetration,FALSE,PV,,,,,,curtailment,curt_pen
 RE_Curtailment_vs_Penetration,FALSE,PV+Wind,,,,,,curtailment,curt_pen
-Total_Curtailment,TRUE,,,,,,,curtailment,curt_total
+Total_Curtailment,FALSE,,,,,,,curtailment,curt_total
 Total_Curtailment_diff,FALSE,,,,,,,curtailment,curt_total_diff
 Total_Emissions_By_Gen_Type_CO2,FALSE,CO2,,,,,,emissions,total_emissions_by_type
 Total_Emissions_By_Gen_Type_SO2,FALSE,SO2,,,,,,emissions,total_emissions_by_type
 Committed_Capacity_Stack,FALSE,,,,PST,5/7/24,5/11/24,generation_stack,committed_stack
 Generation_Timeseries_Diff,FALSE,,,,EST,,,generation_stack,gen_diff
 Generation_Timeseries_Diff_Range,FALSE,Date Range,,,EST,5/20/24,5/23/24,generation_stack,gen_diff
-Stacked_Gen,FALSE,,,,PST,,,generation_stack,gen_stack
-Stacked_Gen_Min_Net_Load,TRUE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Stacked_Gen_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,generation_stack,gen_stack
+Stacked_Gen,TRUE,,,,,,,generation_stack,gen_stack
+Stacked_Gen_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
+Stacked_Gen_Date_Range,FALSE,Date Range,,,EST,5/20/24,5/23/24,generation_stack,gen_stack
 Stacked_Gen_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
-Stacked_Gen_Facet_Grid,TRUE,,,,PST,,,generation_stack,gen_stack
+Stacked_Gen_Facet_Grid,FALSE,,,,PST,,,generation_stack,gen_stack
 Stacked_Gen_Facet_Grid_Range,FALSE,Date Range,,,PST,9/19/24,9/20/24,generation_stack,gen_stack
 Stacked_Gen_All_Periods,FALSE,,,,EST,,,generation_stack,gen_stack_all_periods
 Stacked_Gen_All_Periods,FALSE,,,,,,,generation_stack,gen_stack_all_periods
@@ -36,11 +36,11 @@ Hydro_Versus_Continent_Net_Load,FALSE,,,,,5/20/24,5/23/24,hydro,hydro_continent_
 Hydro_Versus_Net_Load,FALSE,,,7,EST,,,hydro,hydro_net_load
 All_Regions_Price_Duration_Curve,FALSE,150,,,,,,prices,pdc_all_regions
 Region_Price_Duration,FALSE,,,,,,,prices,region_pdc
-Region_Price_Duration_Threshold,TRUE,150,,,,,,prices,region_pdc
-Region_Price_Timeseries,FALSE,,,,,,,prices,region_timeseries_price
+Region_Price_Duration_Threshold,FALSE,150,,,,,,prices,region_pdc
+Region_Price_Timeseries,TRUE,,,,,,,prices,region_timeseries_price
 Region_Price_Timeseries_Threshold,FALSE,150,,,,,,prices,region_timeseries_price
 All_Regions_Price_Timeseries,FALSE,,,,,,,prices,timeseries_price_all_regions
-Detailed_Total_Generation_Cost,TRUE,,,,,,,production_cost,detailed_gen_cost
+Detailed_Total_Generation_Cost,FALSE,,,,,,,production_cost,detailed_gen_cost
 Detailed_Total_Generation_Cost_Diff,FALSE,,,,,,,production_cost,detailed_gen_cost_diff
 Production_Cost,FALSE,,,,,,,production_cost,prod_cost
 Total_System_Cost,FALSE,,,,,,,production_cost,sys_cost
@@ -69,7 +69,7 @@ Total_Generation,FALSE,,,,,5/8/24,5/10/24,total_generation,total_gen
 Total_Generation_Diff,FALSE,,,,,3/1/24,3/15/24,total_generation,total_gen_diff
 Total_Generation_Facet_Grid,FALSE,,,,,,,total_generation,total_gen_facet
 Total_Installed_Capacity,FALSE,,,,,,,total_installed_capacity,total_cap
-Total_Installed_Capacity_and_Generation_Facet,TRUE,,,,,,,total_installed_capacity,total_cap_and_gen_facet
+Total_Installed_Capacity_and_Generation_Facet,FALSE,,,,,,,total_installed_capacity,total_cap_and_gen_facet
 Individual_Interface_Flow,FALSE,"P05 West of Cascades-South_WI, P14 Idaho to Northwest_WI, P66 COI_WI, z  OR/WA West of John Day_WI, P65 Pacific DC Intertie (PDCI)_WI, P71 South of Allston_WI",,,EST,,,transmission,int_flow_ind
 P5_flow,FALSE,P05 West of Cascades-South_WI,,,EST,,,transmission,int_flow_ind
 Cross-Cascade_Flow_duration_curve_sesonal,FALSE,P05 West of Cascades-South_WI,,,PST,6/1/24,9/30/24,transmission,int_flow_ind_seasonal
@@ -83,13 +83,13 @@ Line_Utilization_Duration,FALSE,,,,,,,transmission,line_util
 Line_Utilization_Duration_Category,FALSE,ReEDS_Expansion,,,,,,transmission,line_util
 Line_Violations_Time_Series,FALSE,,,,EST,,,transmission,line_violations_timeseries
 Line_Violations_Totals,FALSE,,,,,,,transmission,line_violations_totals
-Net_Export_Date_Range,TRUE,Date Range,,,EST,5/20/24,5/23/24,transmission,net_export
-Net_Export,FALSE,,,,EST,,,transmission,net_export
+Net_Export_Date_Range,FALSE,Date Range,,,EST,5/20/24,5/23/24,transmission,net_export
+Net_Export,TRUE,,,,,,,transmission,net_export
 Region-Region_Net_Interchange_Checkerboard,FALSE,,,,,,,transmission,region_region_checkerboard
 All_Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_regions
 Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_scenarios
 P05_total_flow,FALSE,P05 West of Cascades-South_WI,,,,,,transmission,total_int_flow_ind
-Zonal_Interchange,TRUE,,,,,5/7/24,5/11/24,transmission,zonal_interchange
+Zonal_Interchange,FALSE,,,,,5/7/24,5/11/24,transmission,zonal_interchange
 Zonal_Interchange_Total,FALSE,,,,,,,transmission,zonal_interchange_total
 Total_Unserved_Energy,FALSE,,,,,,,unserved_energy,tot_unserved_energy
 Unserved_Energy_Timeseries,FALSE,,,,EST,,,unserved_energy,unserved_energy_timeseries

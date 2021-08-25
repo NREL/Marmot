@@ -1498,7 +1498,7 @@ class MPlot(object):
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.xlabel(f"Date {(timezone)}",  color='black', rotation='horizontal',labelpad = 30)
+            plt.xlabel(timezone,  color='black', rotation='horizontal',labelpad = 30)
             plt.ylabel(f"Net Interchange ({unitconversion['units']})",  color='black', rotation='vertical', labelpad = 40)
 
             # If plotting all regions save output and return none plot_main
@@ -1725,7 +1725,7 @@ class MPlot(object):
                 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
-                ax.set_xlabel(f"Date {(timezone)}",  color='black', rotation='horizontal')
+                ax.set_xlabel(timezone,  color='black', rotation='horizontal')
                 handles, labels = ax.get_legend_handles_labels()
                 ax.legend(handles, labels, loc='best',facecolor='inherit', frameon=True)
 
@@ -1810,7 +1810,7 @@ class MPlot(object):
             for column in net_export_all_scenarios:
                 mfunc.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
                 ax.set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
-                ax.set_xlabel(f'Date ({timezone})',  color='black', rotation='horizontal')
+                ax.set_xlabel(timezone,  color='black', rotation='horizontal')
                 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
                 ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
@@ -2356,7 +2356,7 @@ class MPlot(object):
     #             ax.plot(all_scenarios.index.values,all_scenarios[column], linewidth=2, color = scenario_color_dict.get(column,'#333333'),label=column)
 
     #         ax.set_ylabel('Transmission utilization (%)',  color='black', rotation='vertical')
-    #         ax.set_xlabel('Date ' + '(' + timezone + ')',  color='black', rotation='horizontal')
+    #         ax.set_xlabel(timezone,  color='black', rotation='horizontal')
     #         ax.spines['right'].set_visible(False)
     #         ax.spines['top'].set_visible(False)
     #         ax.tick_params(axis='y', which='major', length=5, width=1)

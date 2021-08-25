@@ -514,9 +514,12 @@ class MarmotPlot(SetupLogger):
                 print("\n\n\n")
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
+                # Modifes timezone string before plotting
                 if pd.isnull(row.iloc[5]):
-                    row.iloc[5] = ""
-                    
+                    row.iloc[5] = "Date"
+                else:
+                    row.iloc[5] = f"Date ({row.iloc[5]})"
+
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
                 Figure_Out = figure_method(figure_name = row.iloc[0], 

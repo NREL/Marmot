@@ -259,7 +259,7 @@ class MPlot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.xlabel('Date ' + '(' + timezone + ')',  color='black', rotation='horizontal', labelpad = 40)
+            plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad = 40)
             plt.ylabel('Capacity out (MW)',  color='black', rotation='vertical', labelpad = 60)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
