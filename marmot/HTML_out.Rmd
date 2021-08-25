@@ -37,7 +37,7 @@ agg_level = as.character(inputs[Input == 'AGG_BY']$User_defined_value)
 plot_dev = "svg"#as.character(inputs[Input == 'Figure_Format']$User_defined_value)
 
 # agg_levels = c('Usual_and_RTOZone_AUG')
-agg_levels = c('Summary','Usual')
+agg_levels = c('region')
 
 sections = c('_total_generation',
              #'_total_generation',
