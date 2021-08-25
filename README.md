@@ -1,5 +1,5 @@
 # Marmot
-Marmot is a data formatting and visualization tool for production cost modelling results. It provides an efficient way to view PLEXOS production cost modeling results, while also creating publication ready figures and data tables. 
+Marmot is a data formatting and visualization tool for PLEXOS production cost modelling results. It provides an efficient way to view PLEXOS results, while also creating publication ready figures and data tables. 
 
 ![Yellow-bellied marmot](https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg)
 
@@ -46,7 +46,7 @@ Once the environment has been created it can be activated by typing `conda activ
 #### requirements txt file
 - A [requirements.txt](https://github.nrel.gov/PCM/Marmot/blob/master/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`. If installing on a machine with restricted user rights adding `--user` to the command may be required. 
 
-After all required prerequisites are installed, you are ready to install and run Marmot. There are two ways to run Marmot, directly or as a module. Most users probably want to run Marmot directly however some users may want to import Marmot directly to use its functionality in their own code. Both are explained below.
+After all required prerequisites are installed, you are ready to install and run Marmot. There are two ways to run Marmot, directly or as a module. Most users will probably want to run Marmot directly, however some users may want to import Marmot into their own code. Both are explained below.
 
 ### Downloading, installing, and running Marmot Directly 
 
@@ -97,12 +97,13 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 
 - `gen_names.csv_name` **Required** The name of the gen_names.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) below.
 
-Finally adjust the PLEXOS properties to process in the **plexos_properties.csv**. This csv file determines which PLEXOS properties to pull from the h5plexos results and process. Under the *"collect_data"* column adjust the property to be TRUE or FALSE to change if the data is processed. If your property is not here, add it as a new line with the same format. 
+Finally adjust the PLEXOS properties to process in the **plexos_properties.csv**. This csv file determines which PLEXOS properties to pull from the h5plexos results and process. Under the *"collect_data"* column adjust the property to be TRUE or FALSE set whether that particular property will be processed. If a property you would like to process is not in this list, add it as a new line with the same format. 
 
 ## Marmot Plotter
 
-**marmot_plot_main.py** is the main plotting script within Marmot which calls on supporting files to read in data that has been processed by the Marmot Formatter, create the plot, and then save the figures and data. These figures can be saved to any format specified by the user including both raster and vector formats. An associated csv data file will also be created with each figure allowing users to view the plot data in a tabular format. 
-The supporting plotting modules can be viewed within the repo [plottingmodules](https://github.nrel.gov/PCM/Marmot/tree/master/marmot/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc. 
+**marmot_plot_main.py** is the main plotting script within Marmot. It reads in data that has been processed by the Marmot Formatter, creates plots, and then save the figures and data. These figures can be saved to any format specified by the user including both raster and vector formats. An associated csv data file will also be created with each figure allowing users to view the plot data in a tabular format. 
+
+The main plotting script works by calling on individual plotting modules. These can be viewed within the repo [plottingmodules](https://github.nrel.gov/PCM/Marmot/tree/master/marmot/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc. 
 
 As with the Marmot Formatter, users will need to adjust the input settings in the **Marmot_user_defined_inputs.csv** and set which plots to create in **Marmot_plot_select.csv**. 
 **Marmot_plot_select.csv** is a csv file which determines which figures to plot. This file is in the repo. Under the *"Plot Graph"* (column *D*) adjust the property to be TRUE or FALSE to decide whether to plot the figure. Column *C* allows the user to adjust certain properties within the plot (examples given). Columns *D* and *E* adjust the range of days to plot either side of the specified property in *D*. Column *F* adjusts the time zone to plot on the figure. Column *G* and *H* allow adjustment of the date range of the data to be plotted, if left blank data from the entire date range is plotted. The user is free to change the values within the *"Figure Output Name"* column (column *A*) to whatever they like as this will be the name given to the output files. The rightmost columns (columns *I* and *J*) should not be edited as these inform Marmot which plotting module and method to use to create the corresponding figure. 
