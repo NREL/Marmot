@@ -89,6 +89,10 @@ class MPlot(object):
                     self.logger.info(f"No reserves deployed in: {scenario}")
                     continue
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
+
+                if reserve_provision_timeseries.empty is True:
+                    self.logger.info(f"No reserves deployed in: {scenario}")
+                    continue
                 # unitconversion based off peak generation hour, only checked once 
                 if n == 0:
                     unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
@@ -211,10 +215,12 @@ class MPlot(object):
                     continue
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
 
+                if reserve_provision_timeseries.empty is True:
+                    self.logger.info(f"No reserves deployed in: {scenario}")
+                    continue
+
                 # Calculates interval step to correct for MWh of generation
-                time_delta = reserve_provision_timeseries.index[1]- reserve_provision_timeseries.index[0]
-                # Finds intervals in 60 minute period
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                interval_count = mfunc.get_interval_count(reserve_provision_timeseries)
 
                 # sum totals by fuel types
                 reserve_provision_timeseries = reserve_provision_timeseries/interval_count
