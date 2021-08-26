@@ -80,13 +80,10 @@ class MPlot(object):
                 avail_cap.reset_index(inplace = True)
                 
                 cap_out = avail_cap.merge(install_cap,left_on = ['gen_name'],right_on = ['gen_name'])
-                cap_out['Capacity out'] = cap_out['cap'] - cap_out['avail']
+                cap_out[0] = cap_out['cap'] - cap_out['avail']
                 
-                cap_out = cap_out.groupby(["timestamp", "tech"], as_index=False).sum()
-                cap_out.tech = cap_out.tech.astype("category")
-                cap_out.tech.cat.set_categories(self.ordered_gen, inplace=True)
-                cap_out = cap_out.sort_values(["tech"])
-                cap_out = cap_out.pivot(index = 'timestamp', columns = 'tech', values = 'Capacity out')
+                cap_out = mfunc.df_process_gen_inputs(cap_out, self.ordered_gen)
+
                 #Subset only thermal gen categories
                 thermal_gens = [therm for therm in self.thermal_gen_cat if therm in cap_out.columns]
                 cap_out = cap_out[thermal_gens]
