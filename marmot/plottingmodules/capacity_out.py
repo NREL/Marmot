@@ -26,7 +26,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def capacity_out_stack(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="",start_date_range=None, 
                              end_date_range=None):
         
         outputs = {}
@@ -132,7 +132,7 @@ class MPlot(object):
 
 
     def capacity_out_stack_PASA(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
         outputs = mfunc.UnderDevelopment()
@@ -259,7 +259,7 @@ class MPlot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal', labelpad = 40)
+            plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad = 40)
             plt.ylabel('Capacity out (MW)',  color='black', rotation='vertical', labelpad = 60)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)

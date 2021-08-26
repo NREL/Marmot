@@ -1084,8 +1084,7 @@ class MarmotFormat(SetupLogger):
         self.logger.info(f'Formatting COMPLETED for {self.Scenario_name}')
 
 
-if __name__ == '__main__':
-
+def main():
     '''
     The following code is run if the formatter is run directly,
     it does not run if the formatter is imported as a module.
@@ -1099,13 +1098,13 @@ if __name__ == '__main__':
     os.chdir(FILE_DIR)
 
     Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"),
-                                             usecols=['Input', 'User_defined_value'],
-                                             index_col='Input',
-                                             skipinitialspace=True)
+                                            usecols=['Input', 'User_defined_value'],
+                                            index_col='Input',
+                                            skipinitialspace=True)
 
     # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
-    Plexos_Properties = pd.read_csv('plexos_properties.csv')
-
+    Plexos_Properties = pd.read_csv(mconfig.parser('plexos_properties_file'))
+    
     # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
     Scenario_List = pd.Series(Marmot_user_defined_inputs.loc['Scenario_process_list'].squeeze().split(",")).str.strip().tolist()
     # The folder that contains all PLEXOS h5plexos outputs - the h5 files should be contained in another folder with the Scenario_name
@@ -1156,39 +1155,43 @@ if __name__ == '__main__':
 
         initiate.run_formatter()
 
+
+if __name__ == '__main__':
+    main()
+
 #===============================================================================
 # Code that can be used to test PLEXOS_H5_results_formatter
 #===============================================================================
-    # test = pd.read_hdf(file, 'generator_Generation')
-    # test = test.xs("p60",level='region')
-    # test = test.xs("gas-ct",level='tech')
-    # test = test.reset_index(['timestamp','node'])
-    # test = test.groupby(["timestamp", "node"], as_index=False).sum()
-    # test = test.pivot(index='timestamp', columns='node', values=0)
+# test = pd.read_hdf(file, 'generator_Generation')
+# test = test.xs("p60",level='region')
+# test = test.xs("gas-ct",level='tech')
+# test = test.reset_index(['timestamp','node'])
+# test = test.groupby(["timestamp", "node"], as_index=False).sum()
+# test = test.pivot(index='timestamp', columns='node', values=0)
 
-    # test = test[['600003_PR IS31G_20','600005_MNTCE31G_22']]
-    # test = test.reset_index()
+# test = test[['600003_PR IS31G_20','600005_MNTCE31G_22']]
+# test = test.reset_index()
 
-    # test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")
+# test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")
 
-    # test['timestamp'] = test['timestamp'].astype("category")
+# test['timestamp'] = test['timestamp'].astype("category")
 
-    # test.index = test.index.set_levels(test.index.levels[-1].astype('category'), level=-1)
+# test.index = test.index.set_levels(test.index.levels[-1].astype('category'), level=-1)
 
-    # test.memory_usage(deep=True)
-    # test[0] = pd.to_numeric(test[0], downcast='float')
+# test.memory_usage(deep=True)
+# test[0] = pd.to_numeric(test[0], downcast='float')
 
-    # test.memory_usage(deep=False)
+# test.memory_usage(deep=False)
 
-    # Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
-    # Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
-    #         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1)
-        # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
-        #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
+# Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
+# Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
+#         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1)
+    # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
+    #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
 
-        #storage = db.storage("Generation")
-        #storage = df_process_storage(storage, overlap)
+    #storage = db.storage("Generation")
+    #storage = df_process_storage(storage, overlap)
 
-    # df_old = df
-    # t =df.loc[~df.index.duplicated()]
-    # df_old.equals(df)
+# df_old = df
+# t =df.loc[~df.index.duplicated()]
+# df_old.equals(df)

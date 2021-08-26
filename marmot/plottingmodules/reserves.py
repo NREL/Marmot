@@ -34,7 +34,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def reserve_gen_timeseries(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         """
         This method creates a generation stackplot of reserve provision for each region.
@@ -173,7 +173,7 @@ class MPlot(object):
         return outputs
 
     def total_reserves_by_gen(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         """
         This method creates a generation barplot of total reserve provision by generator for each region.
@@ -309,7 +309,7 @@ class MPlot(object):
         return outputs
 
     def _reserve_bar_plots(self, data_set, count_hours=False, figure_name=None, 
-                           prop=None, start=None, end=None, timezone=None, 
+                           prop=None, start=None, end=None, timezone="", 
                            start_date_range=None, end_date_range=None):
         
         outputs = {}
@@ -404,7 +404,7 @@ class MPlot(object):
 
 
     def reg_reserve_shortage_timeseries(self,figure_name=None, 
-                           prop=None, start=None, end=None, timezone=None, 
+                           prop=None, start=None, end=None, timezone="", 
                            start_date_range=None, end_date_range=None):
         """
         This method creates a timeseries line plot of reserve shortage for each region.
@@ -525,7 +525,7 @@ class MPlot(object):
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            # plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
+            # plt.xlabel(timezone,  color='black', rotation='horizontal',labelpad = 30)
             plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 40)
             
             if mconfig.parser("plot_title_as_region"):
