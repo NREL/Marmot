@@ -343,7 +343,9 @@ class MarmotPlot(SetupLogger):
         
         
         if set(self.gen_names["New"].unique()).issubset(ordered_gen) == False:
-                            self.logger.warning(f"The new categories from the gen_names csv do not exist in ordered_gen!:{set(self.gen_names.New.unique()) - (set(ordered_gen))}")
+                            self.logger.warning(f"The new categories from the gen_names csv do not exist in ordered_gen! \
+                               (Ignore this message if you are downselecting technology types on purpose.) \
+                          {set(self.gen_names.New.unique()) - (set(ordered_gen))}")
         
         try:
             PLEXOS_color_dict = pd.read_csv(os.path.join(self.mapping_folder,
