@@ -257,3 +257,9 @@ The **config.yml** settings and their defaults are as follows:
 - **ordered_gen_file:** ordered_gen.csv
 
   *Change the default ordered_gen file that lives within the Mapping Folder, file must be created first*  
+
+## Tips and tricks
+
+- Some modifications to the structure of the PLEXOS model before running can facilitate analysis in Marmot, such as placing generators in meaningful categories for later mapping in Marmot and making sure any desired properties are enabled in the report.
+- In most cases Marmot assumes standard units for output properties; check the plexos_properties.csv file to verify that units are as you expect. For some properties (such as CO2 emissions), you can set the input units for the PLEXOS results and Marmot will convert.   
+- When running the Marmot formatter, it is often convenient process all properties at once by setting all values in the plexos_properties.csv file to TRUE. Marmot will skip properties that are not available in a PLEXOS solution.
