@@ -10,6 +10,7 @@ Click the following to quickly navigate to the main sections of the ReadME:
 - [Marmot Plotter](https://github.nrel.gov/PCM/Marmot#marmot-plotter)
 - [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files)
 - [Additional Configuration Settings ](https://github.nrel.gov/PCM/Marmot#Additional-Configuration-Settings)
+- [Tips and tricks](https://github.nrel.gov/PCM/Marmot#Tips-and-tricks)
 
 
 ## Main Python Scripts
@@ -149,15 +150,7 @@ These csv files are:
   | PV                 |
   | dPV                |
   | Offshore Wind      |
-
-### View formatted contents
-In order to check the contents of an existing processed HDF5 folder, use the following:
-
-```python
-temp=pd.HDFStore("path to formatted hdf5 file")
-temp.keys()
-temp.close()
-```
+  
 
 ## Additional Configuration Settings
 
@@ -263,3 +256,11 @@ The **config.yml** settings and their defaults are as follows:
 - Some modifications to the structure of the PLEXOS model before running can facilitate analysis in Marmot, such as placing generators in meaningful categories for later mapping in Marmot and making sure any desired properties are enabled in the report.
 - In most cases Marmot assumes standard units for output properties; check the plexos_properties.csv file to verify that units are as you expect. For some properties (such as CO2 emissions), you can set the input units for the PLEXOS results and Marmot will convert.   
 - When running the Marmot formatter, it is often convenient process all properties at once by setting all values in the plexos_properties.csv file to TRUE. Marmot will skip properties that are not available in a PLEXOS solution.
+- **View formatted contents:** In order to check the contents of an existing processed HDF5 file, type the following in a Python terminal or workspace:
+
+  ```python
+  import pandas as pd
+  temp=pd.HDFStore("path to formatted hdf5 file")
+  temp.keys()
+  temp.close()
+  ```
