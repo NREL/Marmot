@@ -136,7 +136,9 @@ These csv files are:
 
 - **gen_names.csv** This file allows you to change the name of the PLEXOS generator technology categories to be consistent. For example, change all the possible gas cc generator names to just be called "Gas-CC". The csv file has two columns *"Original"*, which contains the name of all the PLEXOS generator categories and *"New"*, which is the new name you want to give the categories. The *"Original"* column needs to include every generation category present in your PLEXOS database. The Marmot Formatter will warn the user if they are missing a category.
 
-- **ordered_gen** Ordered list of generators which determines how they appear in a stack plot; generator names should equal those in the gen_names.csv *"New"* column
+- **ordered_gen** Ordered list of generators which determines how they appear in a stack plot; generator names should equal those in the gen_names.csv *"New"* column. 
+
+  ***New in v0.8.0*** - A reduced list of generators can be included to limit the technologies that are plotted e.g (Only plot Gas or Hydro). Marmot will print a warning    message if there are generators missing from the ordered list that are in the gen_names.csv *"New"* column. This message can be ignored if you are you are down-selecting  technology types on purpose. 
 
 - **Region_mapping.csv** This file allows you to group PLEXOS regions together to create aggregated regions. The first column in the file should always be called *"region"* and should contain the name of all the regions in your PLEXOS database. The names given to all other columns is up to you. In the example given in the repo, we aggregated NARIS regions to the country and interconnect level. The use of Region_mapping is entirely optional, if not needed its entry in the **Marmot_user_defined_inputs.csv** can be left blank.
 
