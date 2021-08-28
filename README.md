@@ -47,9 +47,9 @@ Once the environment has been created it can be activated by typing `conda activ
 #### requirements txt file
 - A [requirements.txt](https://github.nrel.gov/PCM/Marmot/blob/master/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`. If installing on a machine with restricted user rights adding `--user` to the command may be required.
 
-After all required prerequisites are installed, you are ready to install and run Marmot. There are two ways to run Marmot, directly or as a module. Most users will probably want to run Marmot directly, however some users may want to import Marmot into their own code. Both are explained below.
+After all required prerequisites are installed, you are ready to install and run Marmot. There are **Two ways** to run Marmot, **Running Directly (A)** or **Importing as a Module (B)**. Most users will probably want to run Marmot directly, however some users may want to import Marmot into their own code. Both are explained below.
 
-### Downloading, installing, and running Marmot Directly
+### A: Downloading, installing, and running Marmot Directly
 
 *The following command will clone the most recent commit to the master branch of Marmot which may not be production ready, to get the most recent stable release see the [Releases](https://github.nrel.gov/PCM/Marmot/releases) section of the repo.*
 
@@ -59,7 +59,7 @@ After all required prerequisites are installed, you are ready to install and run
 
 - Follow the **Marmot Formatter** and **Marmot Plotter** steps below to run Marmot.
 
-### Importing and running Marmot as a Module
+### B: Importing and running Marmot as a Module
 
 - To use Marmot as a Python Module that can be imported, it first needs to be made visible to the Python package directory. This can be done two ways, pip installing Marmot (preferred method) or adding the Marmot directory folder to the system path.
 - To pip install Marmot:
@@ -82,7 +82,9 @@ The **marmot_h5_formatter** reads in PLEXOS hdf5 files created with the h5plexos
 
 Before you use the **marmot_h5_formatter** you will need to adjust and set the input settings in the **Marmot_user_defined_inputs.csv** and set which PLEXOS properties to process in the **plexos_properties.csv**. You may also want to edit the Mapping Files described [here](https://github.nrel.gov/PCM/Marmot#mapping-files). These files are located in the repo and are available to be edited once you clone the repo.
 
-Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the plotting code include:
+### 1. Adjusting User Defined Inputs CSV
+
+Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the formatter include:
 
 - `PLEXOS_Solutions_folder` **Required** The folder that contains all h5plexos files that have come from PLEXOS. This folder should contain the Scenario_process_list sub-folders in which the h5plexos files are contained. Here's an example of how that would look:
 
@@ -100,7 +102,15 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 
 - `gen_names.csv_name` **Required** The name of the gen_names.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) below.
 
-Finally adjust the PLEXOS properties to process in the **plexos_properties.csv**. This csv file determines which PLEXOS properties to pull from the h5plexos results and process. Under the *"collect_data"* column adjust the property to be TRUE or FALSE set whether that particular property will be processed. If a property you would like to process is not in this list, add it as a new line with the same format.
+### 2. Selecting Properties to Process
+The **plexos_properties.csv** file determines which PLEXOS properties to pull from the h5plexos results and process. Under the *"collect_data"* column adjust the property to be TRUE or FALSE set whether that particular property will be processed. If a property you would like to process is not in this list, add it as a new line with the same format.
+
+### 3. Running the Formatter
+To run the Marmot Formatter open a terminal that is setup with Python and go to the marmot folder containg the marmot_h5_formatter.py file, see example image (**cd C:\Users\DLEVIE\Documents\Marmot\marmot**) and run the following command:
+`python marmot_h5_formatter.py`
+
+![Run Formatter](https://github.nrel.gov/storage/user/1084/files/9cd43400-0819-11ec-8792-449d16af0462)
+  
 
 ## Marmot Plotter
 
@@ -109,7 +119,8 @@ Finally adjust the PLEXOS properties to process in the **plexos_properties.csv**
 The main plotting script works by calling on individual plotting modules. These can be viewed within the repo [plottingmodules](https://github.nrel.gov/PCM/Marmot/tree/master/marmot/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc.
 
 As with the Marmot Formatter, users will need to adjust the input settings in the **Marmot_user_defined_inputs.csv** and set which plots to create in **Marmot_plot_select.csv**.
-**Marmot_plot_select.csv** is a csv file which determines which figures to plot. This file is in the repo. Under the *"Plot Graph"* (column *D*) adjust the property to be TRUE or FALSE to decide whether to plot the figure. Column *C* allows the user to adjust certain properties within the plot (examples given). Columns *D* and *E* adjust the range of days to plot either side of the specified property in *D*. Column *F* adjusts the time zone to plot on the figure. Column *G* and *H* allow adjustment of the date range of the data to be plotted, if left blank data from the entire date range is plotted. The user is free to change the values within the *"Figure Output Name"* column (column *A*) to whatever they like as this will be the name given to the output files. The rightmost columns (columns *I* and *J*) should not be edited as these inform Marmot which plotting module and method to use to create the corresponding figure.
+
+### 1. Adjusting User Defined Inputs CSV
 
 Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the plotting code include:
 
@@ -128,6 +139,16 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 - `Facet_ylabels` & `Facet_xlabels` **Optional** If you wish to create a Facet plot, these labels will be applied to the axis. The number of entries given to each label will determine the dimensions of the Facet plot.  For example, if you have 6 scenarios your Facet Grid dimensions in x,y coordinates may be [2,3], [3,2] or [1,6] etc. This is an optional field and can be left empty if not needed. Facet plots can still be created without labels if desired, the facet layout will default to max 3 plots wide, with no maximum to the length.
 
 - `Tick_labels` **Optional** List of custom tick labels, allows adjustment of scenario names on certain plots. Not setup for every plot.
+
+### 2. Selecting which Figures to Plot
+**Marmot_plot_select.csv** is a csv file which determines which figures to plot. This file is in the repo. Under the *"Plot Graph"* (column *D*) adjust the property to be TRUE or FALSE to decide whether to plot the figure. Column *C* allows the user to adjust certain properties within the plot (examples given). Columns *D* and *E* adjust the range of days to plot either side of the specified property in *D*. Column *F* adjusts the time zone to plot on the figure. Column *G* and *H* allow adjustment of the date range of the data to be plotted, if left blank data from the entire date range is plotted. The user is free to change the values within the *"Figure Output Name"* column (column *A*) to whatever they like as this will be the name given to the output files. The rightmost columns (columns *I* and *J*) should not be edited as these inform Marmot which plotting module and method to use to create the corresponding figure.
+
+
+### 3. Running the Plotter
+To run the Marmot Plotter open a terminal that is setup with Python and go to the marmot folder containg the marmot_plot_main.py file, see example image (**cd C:\Users\DLEVIE\Documents\Marmot\marmot**) and run the following command:
+`python marmot_plot_main.py`
+
+![Run Plotter](https://github.nrel.gov/storage/user/1084/files/c1301080-0819-11ec-98f0-36f70be1dffa)
 
 ## Mapping Files
 Marmot gives the user the ability to map in extra regions to your data, rename generators, adjust generator technology colors using a set of csv files and group different technologies together. Adjusting these values to your specific PLEXOS database is not required for Marmot to run but recommended for best results.
