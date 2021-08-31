@@ -57,7 +57,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def total_gen(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
 
@@ -161,7 +161,7 @@ class MPlot(object):
                 if (Unserved_Energy == 0).all() == False:
                     Unserved_Energy = Total_Load - Unserved_Energy
 
-                if self.mplot_data_dict["generator_Pump_Load"] == {}:
+                if self.mplot_data_dict["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_total_pumped_load_line"):
                     Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
                 else:
@@ -275,7 +275,7 @@ class MPlot(object):
         return outputs
 
     def total_gen_diff(self, figure_name=None, prop=None, start=None, end=None,
-                       timezone=None, start_date_range=None, end_date_range=None):
+                       timezone="", start_date_range=None, end_date_range=None):
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
 
@@ -419,7 +419,7 @@ class MPlot(object):
     #===============================================================================
 
     def total_gen_facet(self, figure_name=None, prop=None, start=None, end=None,
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
         outputs = mfunc.UnderDevelopment()
         self.logger.warning('total_gen_facet is under development')
         return outputs

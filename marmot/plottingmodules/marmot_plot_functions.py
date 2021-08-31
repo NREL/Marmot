@@ -132,8 +132,10 @@ def df_process_gen_inputs(df,ordered_gen):
     df : DataFrame
         Proceessed DataFrame
     """
-    df = df.reset_index(['timestamp','tech'])
+    if set(['timestamp','tech']).issubset(df.index.names):
+        df = df.reset_index(['timestamp','tech'])
     df = df.groupby(["timestamp", "tech"], as_index=False).sum()
+    df = df[df.tech.isin(ordered_gen)]
     df.tech = df.tech.astype("category")
     df.tech.cat.set_categories(ordered_gen, inplace=True)
     df = df.sort_values(["tech"])

@@ -34,7 +34,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def storage_volume(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
 
         """
@@ -161,7 +161,7 @@ class MPlot(object):
 
                 mfunc.create_line_plot(axs,use_all_scenarios,column,color_dict,label = column + ' Unserved Energy', n = 1)
                 axs[1].set_ylabel('Unserved Energy (GWh)',  color='black', rotation='vertical')
-                axs[1].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
+                axs[1].set_xlabel(timezone,  color='black', rotation='horizontal')
                 axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[1].margins(x=0.01)
 

@@ -41,7 +41,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def total_cap(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         outputs = {}
 
@@ -121,6 +121,12 @@ class MPlot(object):
                 tick_length = 8
             else:
                 tick_length = 5
+
+            # replace x-axis with custom labels
+            if len(self.ticklabels) > 1:
+                ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.ticklabels]
+                ax.set_xticklabels(ticklabels)
+
             ax.tick_params(axis='y', which='major', length=tick_length, width=1)
             ax.tick_params(axis='x', which='major', length=tick_length, width=1)
             handles, labels = ax.get_legend_handles_labels()
@@ -133,7 +139,7 @@ class MPlot(object):
         return outputs
 
     def total_cap_diff(self, figure_name=None, prop=None, start=None, end=None,
-                       timezone=None, start_date_range=None, end_date_range=None):
+                       timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -240,7 +246,7 @@ class MPlot(object):
 
 
     def total_cap_and_gen_facet(self, figure_name=None, prop=None, start=None, end=None,
-                                timezone=None, start_date_range=None, end_date_range=None):
+                                timezone="", start_date_range=None, end_date_range=None):
 
         # generation figure
         self.logger.info("Generation data")

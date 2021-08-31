@@ -36,7 +36,7 @@ class MPlot(object):
 
 
     def curt_duration_curve(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -174,7 +174,7 @@ class MPlot(object):
 
 
     def curt_pen(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -359,7 +359,7 @@ class MPlot(object):
         return outputs
 
     def curt_total(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         """
         This module calculates the total curtailment, broken down by technology. 
@@ -513,7 +513,7 @@ class MPlot(object):
         return outputs
 
     def curt_total_diff(self,figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         """
         This module calculates the total curtailment, broken down by technology. 
@@ -653,7 +653,7 @@ class MPlot(object):
         return outputs
 
     def curt_ind(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         """
         This module calculates the curtailment, as a percentage of total generation, of individual generators.

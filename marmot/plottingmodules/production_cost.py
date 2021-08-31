@@ -29,7 +29,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def prod_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -155,7 +155,7 @@ class MPlot(object):
 
 
     def sys_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -286,7 +286,7 @@ class MPlot(object):
 
 
     def detailed_gen_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -321,6 +321,7 @@ class MPlot(object):
                     continue
 
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
+                Fuel_Cost.rename("Fuel_Cost", inplace=True)
                 
                 VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY) 
@@ -429,7 +430,7 @@ class MPlot(object):
 
 
     def sys_cost_type(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
@@ -518,7 +519,7 @@ class MPlot(object):
 
 
     def sys_cost_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         if self.AGG_BY == 'zone':
             agg = 'zone'
@@ -634,7 +635,7 @@ class MPlot(object):
 
 
     def sys_cost_type_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
@@ -738,7 +739,7 @@ class MPlot(object):
 
 
     def detailed_gen_cost_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         

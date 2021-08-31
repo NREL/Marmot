@@ -36,7 +36,7 @@ class MPlot(object):
         return(oz)
 
     def sensitivities_gas(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
 
         """
@@ -206,7 +206,7 @@ class MPlot(object):
                 axs[0].tick_params(axis='y', which='major', length=5, width=1)
                 axs[0].tick_params(axis='x', which='major', length=5, width=1)
                 axs[0].set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-                axs[0].set_xlabel('Date ' + '(' + timezone + ')',  color='black', rotation='horizontal')
+                axs[0].set_xlabel(timezone,  color='black', rotation='horizontal')
                 axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs)
