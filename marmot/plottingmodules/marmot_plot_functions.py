@@ -7,6 +7,7 @@ Functions required to create Marmot plots
 
 import os
 import math
+import textwrap
 import logging
 import datetime as dt
 import pandas as pd
@@ -250,7 +251,7 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     return fig,axs
 
 
-def create_bar_plot(df, axs, colour, angle,stacked=False):
+def create_bar_plot(df, axs, colour, angle=0,stacked=False):
     """
     Creates a bar plot
     Parameters
@@ -279,7 +280,7 @@ def create_bar_plot(df, axs, colour, angle,stacked=False):
     return fig
 
 
-def create_grouped_bar_plot(df, colour,angle):
+def create_grouped_bar_plot(df, colour, angle=0, custom_tick_labels=None):
     """
     Creates a grouped bar plot
     Parameters
@@ -288,6 +289,8 @@ def create_grouped_bar_plot(df, colour,angle):
         DataFrame of data to plot.
     colour : dictionary
         colour dictionary.
+    custom_tick_labels : list
+        Custom tick labels, default None
     Returns
     -------
     fig : matplotlib fig
@@ -299,16 +302,18 @@ def create_grouped_bar_plot(df, colour,angle):
                                       color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
-    if angle > 0:
-        axs.set_xticklabels(df.index, ha="right")
-        tick_length = 8
+    # Set x-tick labels 
+    if custom_tick_labels and len(custom_tick_labels) > 1:
+        tick_labels = custom_tick_labels
     else:
-        tick_length = 5
-    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
-    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
+        tick_labels = df.index
+    set_barplot_xticklabels(tick_labels, ax=axs)
+
+    axs.tick_params(axis='y', which='major', length=5, width=1)
+    axs.tick_params(axis='x', which='major', length=5, width=1)
     return fig,axs
 
-def create_stacked_bar_plot(df, colour,angle):
+def create_stacked_bar_plot(df, colour, angle=0, custom_tick_labels=None):
     """
     Creates a stacked bar plot
     Parameters
@@ -317,6 +322,8 @@ def create_stacked_bar_plot(df, colour,angle):
         DataFrame of data to plot.
     colour : dictionary
         colour dictionary.
+    custom_tick_labels : list
+        Custom tick labels, default None
     Returns
     -------
     fig : matplotlib fig
@@ -332,13 +339,16 @@ def create_stacked_bar_plot(df, colour,angle):
     axs.spines['top'].set_visible(False)
     #adds comma to y axis data
     axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
-    if angle > 0:
-        axs.set_xticklabels(df.index, ha="right")
-        tick_length = 8
+    
+    # Set x-tick labels 
+    if custom_tick_labels and len(custom_tick_labels) > 1:
+        tick_labels = custom_tick_labels
     else:
-        tick_length = 5
-    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
-    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
+        tick_labels = df.index
+    set_barplot_xticklabels(tick_labels, ax=axs)
+    
+    axs.tick_params(axis='y', which='major', length=5, width=1)
+    axs.tick_params(axis='x', which='major', length=5, width=1)
     return fig, axs
 
 def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",  H="//", **kwargs):
@@ -630,7 +640,7 @@ def shift_leapday(df, Marmot_Solutions_folder):
 
     return(df)
 
-def check_label_angle(data_to_plot,dot_T):
+def check_label_angle(data_to_plot, dot_T):
     """
     Checks to see if the number of labels is greater than or equal to the default
     number set in mconfig.py.  If this is the case, other values in mconfig.py
@@ -674,6 +684,43 @@ def check_label_angle(data_to_plot,dot_T):
         else:
             data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
         return data_to_plot, 0
+
+
+def set_barplot_xticklabels(labels, ax, **kwargs) -> None:
+    """
+    Set the xticklabels on bar plots and determine whether they will be rotated.
+    Wrapper around matplotlib set_xticklabels
+    
+    Checks to see if the number of labels is greater than or equal to the default
+    number set in mconfig.py.  If this is the case, other values in mconfig.py
+    specify whether or not to rotate the labels and what angle they should 
+    be rotated to.
+    ----------
+    labels : (list) labels to apply to xticks
+    ax : matplotlib.axes
+        matplotlib.axes.
+    as columns or rows within data_to_plot.
+    **kwargs : optional set_xticklabels keywords
+    
+    Returns
+    -------
+    None, sets xticklabels inplace
+    
+    """    
+    rotate = mconfig.parser("axes_label_options", "rotate_x_labels")
+    num_labels = mconfig.parser("axes_label_options", "rotate_at_num_labels")
+    angle = mconfig.parser("axes_label_options", "rotation_angle")
+
+    if rotate:
+        if (len(labels)) >= num_labels:
+            ax.set_xticklabels(labels, rotation=angle, ha="right", **kwargs)
+        else:
+             labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
+             ax.set_xticklabels(labels, rotation=0, **kwargs)
+    else:
+        labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
+        ax.set_xticklabels(labels, rotation=0, **kwargs)
+
 
 def merge_new_agg(df,Region_Mapping,AGG_BY):
 
