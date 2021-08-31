@@ -8,3 +8,5 @@ System Emission_NOx_WI,NOx
 System Emission_NOx_EI,NOx
 System Emission_SO2_WI,SO2
 System Emission_SO2_EI,SO2
+CH4,CH4
+N2O,N2O

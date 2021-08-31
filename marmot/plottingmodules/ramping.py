@@ -33,7 +33,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
     
     def capacity_started(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
        
         outputs = {}
         
@@ -172,7 +172,7 @@ class MPlot(object):
 
 
     def count_ramps(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         

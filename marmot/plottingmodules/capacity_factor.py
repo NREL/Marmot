@@ -31,7 +31,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
         
     def avg_output_when_committed(self, figure_name=None, prop=None, start=None, 
-                                  end=None, timezone=None, start_date_range=None, 
+                                  end=None, timezone="", start_date_range=None, 
                                   end_date_range=None):
         outputs = {}
         
@@ -152,7 +152,7 @@ class MPlot(object):
 
 
     def cf(self, figure_name=None, prop=None, start=None, 
-           end=None, timezone=None, start_date_range=None, 
+           end=None, timezone="", start_date_range=None, 
            end_date_range=None):
         
         outputs = {}
@@ -262,7 +262,7 @@ class MPlot(object):
 
 
     def time_at_min_gen(self, figure_name=None, prop=None, start=None, 
-           end=None, timezone=None, start_date_range=None, 
+           end=None, timezone="", start_date_range=None, 
            end_date_range=None):
         
         outputs = {}

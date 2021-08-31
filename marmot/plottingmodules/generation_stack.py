@@ -40,7 +40,7 @@ class MPlot(object):
 
 
     def committed_stack(self, figure_name=None, prop=None, start=None, end=None,
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -169,7 +169,7 @@ class MPlot(object):
 
 
     def gen_stack(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         facet=False
         if 'Facet' in figure_name:
@@ -247,12 +247,12 @@ class MPlot(object):
             ###DO NOT COMMIT
             #######################
 
-
-            try:
-                Pump_Load = self.mplot_data_dict['generator_Pump_Load'][scenario].copy()
-            except KeyError:
+            if self.mplot_data_dict["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_timeseries_pumped_load_line"):
                 Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
                 Pump_Load.iloc[:,0] = 0
+            else:
+                Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
+
             if self.shift_leapday == True:
                 Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
@@ -576,7 +576,7 @@ class MPlot(object):
 
 
     def gen_diff(self, figure_name=None, prop=None, start=None, end=None,
-                 timezone=None, start_date_range=None, end_date_range=None):
+                 timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -660,7 +660,7 @@ class MPlot(object):
 
             ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
             ax.set_ylabel(f"Generation Difference ({unitconversion['units']})",  color='black', rotation='vertical')
-            ax.set_xlabel(f'Date ({timezone})',  color='black', rotation='horizontal')
+            ax.set_xlabel(timezone,  color='black', rotation='horizontal')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.tick_params(axis='y', which='major', length=5, width=1)
@@ -674,7 +674,7 @@ class MPlot(object):
 
 
     def gen_stack_all_periods(self, figure_name=None, prop=None, start=None, end=None,
-                              timezone=None, start_date_range=None, end_date_range=None):
+                              timezone="", start_date_range=None, end_date_range=None):
         '''
         DEPRCIATED FOR NOW
 
@@ -805,7 +805,7 @@ class MPlot(object):
 
 
     #             ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-    #             ax.set_xlabel('Date ' + '(' + str(timezone) + ')',  color='black', rotation='horizontal')
+    #             ax.set_xlabel(timezone,  color='black', rotation='horizontal')
     #             ax.spines['right'].set_visible(False)
     #             ax.spines['top'].set_visible(False)
     #             ax.tick_params(axis='y', which='major', length=5, width=1)
