@@ -132,10 +132,6 @@ class MPlot(object):
                 ax.add_artist(leg1)
                 if mconfig.parser("plot_title_as_region"):
                     ax.set_title(zone_input)
-                # replace x-axis with custom labels
-                if len(self.custom_xticklabels) > 1:
-                    ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.custom_xticklabels]
-                    ax.set_xticklabels(ticklabels)
 
                 outputs[zone_input] = {'fig': fig1, 'data_table': dataOut}
 

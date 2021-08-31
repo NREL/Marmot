@@ -492,7 +492,8 @@ class MPlot(object):
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
             Total_Generation_Stack_Out.plot.bar(stacked=True,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
+                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], 
+                             edgecolor='black', linewidth='0.1', ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)

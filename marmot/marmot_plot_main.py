@@ -472,7 +472,7 @@ class MarmotPlot(SetupLogger):
                 "Marmot_Solutions_folder": self.Marmot_Solutions_folder,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
-                "ticklabels": self.custom_xticklabels,
+                "custom_xticklabels": self.custom_xticklabels,
                 "minticks": minticks,
                 "maxticks": maxticks,
                 "color_list": color_list,

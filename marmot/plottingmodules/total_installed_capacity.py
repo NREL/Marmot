@@ -294,11 +294,6 @@ class MPlot(object):
             axs[0].tick_params(axis='x', which='major', length=5, width=1)
             axs[0].get_legend().remove()
 
-            # replace x-axis with custom labels
-            # if len(self.custom_xticklabels) > 1:
-            #     ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.custom_xticklabels]
-            #     axs[0].set_xticklabels(ticklabels)
-
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
 
@@ -362,11 +357,6 @@ class MPlot(object):
                                         alpha=0.5)
 
                 data_tables = pd.DataFrame() #TODO pass output data back to plot main 
-
-            # replace x-axis with custom labels
-            if len(self.custom_xticklabels) > 1:
-                ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.custom_xticklabels]
-                axs[1].set_xticklabels(ticklabels)
 
             # get names of generator to create custom legend
             l1 = Total_Installed_Capacity_Out.columns.tolist()

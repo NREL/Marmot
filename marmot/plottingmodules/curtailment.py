@@ -472,7 +472,7 @@ class MPlot(object):
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
             Total_Curtailment_out.plot.bar(stacked=True, 
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
-                             edgecolor='black', linewidth='0.1',ax=ax)
+                             edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)",  color='black', rotation='vertical')
