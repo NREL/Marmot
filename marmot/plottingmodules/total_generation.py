@@ -203,8 +203,8 @@ class MPlot(object):
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             # Set x-tick labels 
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
@@ -215,8 +215,8 @@ class MPlot(object):
                 ax.set_title(zone_input)
             
             # replace x-axis with custom labels if present 
-            if len(self.ticklabels) > 1:
-                ticklabels = [textwrap.fill(x.replace('_', ' '), 8) for x in self.ticklabels]
+            if len(self.custom_xticklabels) > 1:
+                ticklabels = [textwrap.fill(x.replace('_', ' '), 8) for x in self.custom_xticklabels]
                 ax.set_xticklabels(ticklabels)
             
             

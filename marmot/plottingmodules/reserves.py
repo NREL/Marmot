@@ -249,7 +249,7 @@ class MPlot(object):
             
             # create figure
             fig1, axs = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, 
-                                                        custom_tick_labels=self.ticklabels)
+                                                        custom_tick_labels=self.custom_xticklabels)
 
             # additional figure formatting
             #fig1.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')

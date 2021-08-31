@@ -191,8 +191,8 @@ class MPlot(object):
             ax.xaxis.set_visible(False)
             ax.margins(x=0.01)
             
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Unserved_Energy_Out.columns
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)

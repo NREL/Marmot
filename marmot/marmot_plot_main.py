@@ -227,10 +227,10 @@ class MarmotPlot(SetupLogger):
         if self.ylabels == ['nan'] or self.ylabels is None : self.ylabels = [""]
         
         if isinstance(ticklabels, str):
-            self.ticklabels = pd.Series(ticklabels.split(",")).str.strip().tolist()
+            self.custom_xticklabels = pd.Series(ticklabels.split(",")).str.strip().tolist()
         elif isinstance(ticklabels, list):
-            self.ticklabels = ticklabels
-        if self.ticklabels == ['nan'] or self.ticklabels is None : self.ticklabels = [""]
+            self.custom_xticklabels = ticklabels
+        if self.custom_xticklabels == ['nan'] or self.custom_xticklabels is None : self.custom_xticklabels = [""]
         
         if isinstance(Region_Mapping, str):
             try:
@@ -472,7 +472,7 @@ class MarmotPlot(SetupLogger):
                 "Marmot_Solutions_folder": self.Marmot_Solutions_folder,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
-                "ticklabels": self.ticklabels,
+                "ticklabels": self.custom_xticklabels,
                 "minticks": minticks,
                 "maxticks": maxticks,
                 "color_list": color_list,

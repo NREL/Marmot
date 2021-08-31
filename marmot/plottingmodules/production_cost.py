@@ -122,8 +122,8 @@ class MPlot(object):
             ax.set_ylabel('Total System Net Rev, Rev, & Cost ($/KW-yr)',  color='black', rotation='vertical')
             
             # Set x-tick labels
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Systems_Cost_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
@@ -236,8 +236,8 @@ class MPlot(object):
             ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
             
             # Set x-tick labels
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Systems_Cost_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
@@ -383,8 +383,8 @@ class MPlot(object):
             ax.set_ylabel('Total Generation Cost (Million $)',  color='black', rotation='vertical')
             
             # Set x-tick labels
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Detailed_Gen_Cost_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
@@ -500,8 +500,8 @@ class MPlot(object):
             ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
             
             # Set x-tick labels
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)

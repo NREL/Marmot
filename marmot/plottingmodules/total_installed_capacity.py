@@ -117,8 +117,8 @@ class MPlot(object):
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             # Set x-tick labels
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
@@ -284,8 +284,8 @@ class MPlot(object):
             axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})",  color='black', rotation='vertical')
             axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=axs[0])
@@ -295,8 +295,8 @@ class MPlot(object):
             axs[0].get_legend().remove()
 
             # replace x-axis with custom labels
-            # if len(self.ticklabels) > 1:
-            #     ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.ticklabels]
+            # if len(self.custom_xticklabels) > 1:
+            #     ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.custom_xticklabels]
             #     axs[0].set_xticklabels(ticklabels)
 
             # right panel: annual generation
@@ -337,8 +337,8 @@ class MPlot(object):
             axs[1].set_ylabel(f"Total Generation ({energy_units})",  color='black', rotation='vertical')
             axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=axs[1])
@@ -364,8 +364,8 @@ class MPlot(object):
                 data_tables = pd.DataFrame() #TODO pass output data back to plot main 
 
             # replace x-axis with custom labels
-            if len(self.ticklabels) > 1:
-                ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.ticklabels]
+            if len(self.custom_xticklabels) > 1:
+                ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.custom_xticklabels]
                 axs[1].set_xticklabels(ticklabels)
 
             # get names of generator to create custom legend
