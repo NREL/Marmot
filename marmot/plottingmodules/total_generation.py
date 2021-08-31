@@ -361,10 +361,7 @@ class MPlot(object):
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             # Set x-tick labels 
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
-            else:
-                tick_labels = Total_Generation_Stack_Out.index
+            tick_labels = Total_Generation_Stack_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
@@ -376,15 +373,8 @@ class MPlot(object):
                 y_net = [net_diff.loc[scenario]] * 2
                 net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
 
-            locs,labels=plt.xticks()
-
             ax.set_ylabel(f"Generation Change ({format(unitconversion['units'])}h) \n relative to {self.Scenarios[0].replace('_',' ')}",  color='black', rotation='vertical')
             
-            # xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-
-            # plt.xticks(ticks=locs,labels=xlabels[1:])
-            # ax.margins(x=0.01)
-
             plt.axhline(linewidth=0.5,linestyle='--',color='grey')
 
             handles, labels = ax.get_legend_handles_labels()

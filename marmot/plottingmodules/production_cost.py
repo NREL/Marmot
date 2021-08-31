@@ -132,7 +132,6 @@ class MPlot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            plt.xticks(rotation=90)
 
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='upper center',bbox_to_anchor=(0.5,-0.15),

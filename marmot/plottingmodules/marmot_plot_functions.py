@@ -404,8 +404,9 @@ def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",
                 rect.set_width(1 / float(n_df + 1))
     
     ax.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
+    
     x_labels = df.index.get_level_values(0)
-    ax.set_xticklabels(x_labels, rotation = 90)
+    set_barplot_xticklabels(x_labels, ax=ax, **kwargs)
     ax.set_title(title)
     
     def custom_legend_elements(label):

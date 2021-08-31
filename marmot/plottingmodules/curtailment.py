@@ -773,10 +773,7 @@ class MPlot(object):
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
         
         # Set x-tick labels 
-        if len(self.ticklabels) > 1:
-            tick_labels = self.ticklabels
-        else:
-            tick_labels = Total_Curtailment_Out_perc.index
+        tick_labels = Total_Curtailment_Out_perc.index
         mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
 
         ax.tick_params(axis='y', which='major', length=5, width=1)

@@ -222,10 +222,7 @@ class MPlot(object):
             ax.set_ylabel(f"Capacity Change ({unitconversion['units']}) \n relative to {self.Scenarios[0]}", color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
-            if len(self.ticklabels) > 1:
-                tick_labels = self.ticklabels
-            else:
-                tick_labels = Total_Installed_Capacity_Out.index
+            tick_labels = Total_Installed_Capacity_Out.index
             mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
