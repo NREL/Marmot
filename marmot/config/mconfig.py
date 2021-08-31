@@ -54,10 +54,6 @@ def createConfig(configfile_path):
             rotate_x_labels = True,
             rotate_at_num_labels = 7,
             rotation_angle = 45),
-
-        plot_data = dict(
-            include_total_pumped_load_line = True,
-            include_timeseries_pumped_load_line = True),
         
         plot_data = dict(
             curtailment_property = 'Curtailment',
