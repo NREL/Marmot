@@ -806,7 +806,7 @@ class MPlot(object):
         return outputs
     
 
-    def monthly_vre_percentage_generation(self, **kwargs):
+    def monthly_vre_generation_percentage(self, **kwargs):
         """Monthly Total Variable Renewable Generation by technology percentage,
            Each vre technology is plotted as a bar, the total of all bars add to 100%
            Each sceanrio is plotted on a seperate facet plot 
