@@ -459,7 +459,6 @@ class MPlot(object):
             vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
             
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
-            Total_Curtailment_out, angle = mfunc.check_label_angle(Total_Curtailment_out, False)
             
             if Total_Curtailment_out.empty == True:
                 outputs[zone_input] = mfunc.MissingZoneData()
@@ -475,20 +474,23 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
             
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Curtailment_out.plot.bar(stacked=True, rot=angle,
+            Total_Curtailment_out.plot.bar(stacked=True, 
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
-                             edgecolor='black', linewidth='0.1',ax=ax)
+                             edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            if angle > 0:
-                ax.set_xticklabels(Total_Curtailment_out.index, ha="right")
-                tick_length = 8
+            
+            # Set x-tick labels 
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Curtailment_out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
@@ -598,7 +600,6 @@ class MPlot(object):
             Total_Curtailment_out.drop(self.Scenarios[0],inplace=True) #Drop base entry
             
             Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
-            Total_Curtailment_out, angle = mfunc.check_label_angle(Total_Curtailment_out, False)
             
             # Data table of values to return to main program
             Data_Table_Out = Total_Curtailment_out
@@ -612,20 +613,23 @@ class MPlot(object):
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
             
             fig3, ax= plt.subplots(figsize=(self.x,self.y))
-            Total_Curtailment_out.plot.bar(stacked=True, rot=angle,
+            Total_Curtailment_out.plot.bar(stacked=True,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            if angle > 0:
-                ax.set_xticklabels(Total_Curtailment_out.index, ha="right")
-                tick_length = 8
+            
+            # Set x-tick labels 
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Curtailment_out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
@@ -764,22 +768,20 @@ class MPlot(object):
         Total_Gen = Total_Gen / 1000000
         Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.csv'))
         Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
-        
-        Total_Curtailment_Out_perc, angle = mfunc.check_label_angle(Total_Curtailment_Out_perc, False)
-        
+                
         fig1, ax = plt.subplots(figsize=(9,6))
-        Total_Curtailment_Out_perc.plot.bar(stacked = False, rot=angle, edgecolor='black', linewidth='0.1',ax=ax)
+        Total_Curtailment_Out_perc.plot.bar(stacked = False, edgecolor='black', linewidth='0.1',ax=ax)
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
-        if angle > 0:
-            ax.set_xticklabels(Total_Curtailment_Out_perc.index, ha="right")
-            tick_length = 8
-        else:
-            tick_length = 5
-        ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-        ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+        
+        # Set x-tick labels 
+        tick_labels = Total_Curtailment_Out_perc.index
+        mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+        ax.tick_params(axis='y', which='major', length=5, width=1)
+        ax.tick_params(axis='x', which='major', length=5, width=1)
         
         unitconversion = mfunc.capacity_energy_unitconversion(Total_Curt.values.max())
         Total_Curt = Total_Curt/unitconversion['divisor'] 
