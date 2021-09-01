@@ -626,15 +626,13 @@ class MPlot(object):
                 month_total_load = Total_Load_Out.xs(scenario, level="Scenario")
                 month_pumped_load = Pump_Load_Out.xs(scenario, level="Scenario")
                 month_total_demand = Total_Demand_Out.xs(scenario, level="Scenario")
-
-                month_gen, angle = mfunc.check_label_angle(month_gen, False)
                 
                 if vre_only:
                     stack = False
                 else:
                     stack = True
 
-                month_gen.plot.bar(stacked=stack, rot=angle, ax=axs[i],
+                month_gen.plot.bar(stacked=stack, ax=axs[i],
                                   color=[self.PLEXOS_color_dict.get(x, '#333333') for x in month_gen.columns], 
                                   edgecolor='black', linewidth='0.1', legend=False)
                 axs[i].spines['right'].set_visible(False)
@@ -647,8 +645,9 @@ class MPlot(object):
                 else:
                     axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 
-                if angle > 0:
-                    axs[i].set_xticklabels(month_gen.index, ha="right")
+                # Set x-tick labels 
+                tick_labels = month_gen.index
+                mfunc.set_barplot_xticklabels(tick_labels, ax=axs[i])
 
                 axs[i].tick_params(axis='y', which='major', length=5, width=1)
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
