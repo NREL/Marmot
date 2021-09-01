@@ -229,7 +229,8 @@ def set_x_y_dimension(region_number):
 def setup_plot(xdimension=1,ydimension=1, 
                 figsize=(mconfig.parser("figure_size","xdimension"), 
                         mconfig.parser("figure_size","ydimension")),
-                sharey=True):
+                sharey=True, 
+                squeeze=False, **kwargs):
     """
     Setup matplotlib plot
     Parameters
@@ -255,7 +256,7 @@ def setup_plot(xdimension=1,ydimension=1,
     
     fig, axs = plt.subplots(ydimension, xdimension, 
                             figsize=((x*xdimension),(y*ydimension)), 
-                            sharey=sharey, squeeze=False)
+                            sharey=sharey, squeeze=squeeze, **kwargs)
     axs = axs.ravel()
     return fig,axs
 
@@ -720,9 +721,9 @@ def get_sub_hour_interval_count(df) -> int:
     """
     time_delta = df.index[1]- df.index[0]
     # Finds intervals in 60 minute period
-    interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+    intervals_per_hour = 60/(time_delta/np.timedelta64(1, 'm'))
     # If interals are greater than 1 hour, returns 1
-    return max(1, interval_count)
+    return max(1, intervals_per_hour)
 
 
 def sort_duration(df,col):

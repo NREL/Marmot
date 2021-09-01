@@ -853,7 +853,7 @@ class MPlot(object):
                     
                 re_curt = re_curt.groupby([re_curt.index.floor('d')]).sum()
                 interval_count = mfunc.get_sub_hour_interval_count(re_curt)
-                re_curt = re_curt*interval_count
+                re_curt = re_curt/interval_count
                 
                 re_curt.rename(scenario, inplace=True)
 
@@ -868,7 +868,7 @@ class MPlot(object):
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
 
-            fig, axs = mfunc.setup_plot()
+            fig, axs = mfunc.setup_plot(squeeze=False)
             # flatten object
             ax = axs[0]
 
