@@ -247,19 +247,13 @@ class MPlot(object):
             
             data_table_out = Total_Reserves_Out.add_suffix(f" ({unitconversion['units']}h)")
             
-            Total_Reserves_Out, angle = mfunc.check_label_angle(Total_Reserves_Out, False)
             # create figure
-            #fig1 = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict)
-            fig1, axs = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, angle)
+            fig1, axs = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, 
+                                                        custom_tick_labels=self.custom_xticklabels)
 
             # additional figure formatting
             #fig1.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
             axs.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
-
-            # replace x-axis with custom labels
-            if len(self.ticklabels) > 1:
-                ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
-                axs.set_xticklabels(ticklabels)
 
             # create list of gen technologies
             l1 = Total_Reserves_Out.columns.tolist()
@@ -393,8 +387,7 @@ class MPlot(object):
             # create color dictionary
             color_dict = dict(zip(reserve_out.columns,self.color_list))
             
-            reserve_out, angle = mfunc.check_label_angle(reserve_out, False)
-            fig2,axs = mfunc.create_grouped_bar_plot(reserve_out,color_dict,angle)
+            fig2,axs = mfunc.create_grouped_bar_plot(reserve_out, color_dict)
             if count_hours == False:
                 axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs.set_ylabel(f"Reserve {data_set} [{unitconversion['units']}h]",  color='black', rotation='vertical')

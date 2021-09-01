@@ -193,30 +193,26 @@ class MPlot(object):
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             
-            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle, ax=ax,
+            Total_Generation_Stack_Out.plot.bar(stacked=True, ax=ax,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            if angle > 0:
-                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
-                tick_length = 8
+            
+            # Set x-tick labels 
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Generation_Stack_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
-            
-            # replace x-axis with custom labels if present 
-            if len(self.ticklabels) > 1:
-                ticklabels = [textwrap.fill(x.replace('_', ' '), 8) for x in self.ticklabels]
-                ax.set_xticklabels(ticklabels)
-            
             
             for n, scenario in enumerate(self.Scenarios):
 
@@ -350,22 +346,20 @@ class MPlot(object):
             net_diff = net_diff.sum(axis = 1)
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-
-            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle,
+            Total_Generation_Stack_Out.plot.bar(stacked=True,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            if angle > 0:
-                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
-                tick_length = 8
-            else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+            
+            # Set x-tick labels 
+            tick_labels = Total_Generation_Stack_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
             #Add net gen difference line.
             for n, scenario in enumerate(self.Scenarios[1:]):
@@ -373,15 +367,8 @@ class MPlot(object):
                 y_net = [net_diff.loc[scenario]] * 2
                 net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
 
-            locs,labels=plt.xticks()
-
             ax.set_ylabel(f"Generation Change ({format(unitconversion['units'])}h) \n relative to {self.Scenarios[0].replace('_',' ')}",  color='black', rotation='vertical')
             
-            # xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-
-            # plt.xticks(ticks=locs,labels=xlabels[1:])
-            # ax.margins(x=0.01)
-
             plt.axhline(linewidth=0.5,linestyle='--',color='grey')
 
             handles, labels = ax.get_legend_handles_labels()
@@ -467,8 +454,6 @@ class MPlot(object):
 
     #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
     
-    #     Total_Generation_Stack_Out.index = mfunc.check_label_angle(Total_Generation_Stack_Out,False)
-
     #     Total_Load_Out.index = Total_Load_Out.index.str.replace('_',' ')
     #     Total_Load_Out.index = Total_Load_Out.index.str.wrap(10, break_long_words=False)
     #     

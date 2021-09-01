@@ -7,6 +7,7 @@ Functions required to create Marmot plots
 
 import os
 import math
+import textwrap
 import logging
 import datetime as dt
 import pandas as pd
@@ -73,9 +74,7 @@ class UnsupportedAggregation:
     def __init__(self):
         return
     
-# def days_in_date_range()    
-
-def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
+def get_data(mplot_data_dict, properties, Marmot_Solutions_folder):
     """
     Used to get data from formatted h5 file
     Adds data to dictionary with scenario name as key
@@ -116,7 +115,7 @@ def get_data(mplot_data_dict,properties,Marmot_Solutions_folder):
     return check_input_data
 
 
-def df_process_gen_inputs(df,ordered_gen):
+def df_process_gen_inputs(df, ordered_gen):
     """
     Processes generation data into a pivot
     Technology names as columns,
@@ -162,9 +161,10 @@ def df_process_categorical_index(df, ordered_gen):
     df = df.sort_index()
     return df
 
-def setup_facet_xy_dimensions(xlabels,ylabels,facet=True,multi_scenario=None):
+def setup_facet_xy_dimensions(xlabels, ylabels, facet=True, 
+                                multi_scenario=None):
     """
-    Sets facet plot x,y dimensions baded on provided labeles
+    Sets facet plot x,y dimensions based on provided labeles
     Parameters
     ----------
     xlabels : list
@@ -252,7 +252,7 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     return fig,axs
 
 
-def create_bar_plot(df, axs, colour, angle,stacked=False):
+def create_bar_plot(df, axs, colour, angle=0, stacked=False):
     """
     Creates a bar plot
     Parameters
@@ -281,7 +281,7 @@ def create_bar_plot(df, axs, colour, angle,stacked=False):
     return fig
 
 
-def create_grouped_bar_plot(df, colour,angle):
+def create_grouped_bar_plot(df, colour, angle=0, custom_tick_labels=None):
     """
     Creates a grouped bar plot
     Parameters
@@ -290,6 +290,8 @@ def create_grouped_bar_plot(df, colour,angle):
         DataFrame of data to plot.
     colour : dictionary
         colour dictionary.
+    custom_tick_labels : list
+        Custom tick labels, default None
     Returns
     -------
     fig : matplotlib fig
@@ -301,16 +303,18 @@ def create_grouped_bar_plot(df, colour,angle):
                                       color=[colour.get(x, '#333333') for x in df.columns],ax=axs)
     axs.spines['right'].set_visible(False)
     axs.spines['top'].set_visible(False)
-    if angle > 0:
-        axs.set_xticklabels(df.index, ha="right")
-        tick_length = 8
+    # Set x-tick labels 
+    if custom_tick_labels and len(custom_tick_labels) > 1:
+        tick_labels = custom_tick_labels
     else:
-        tick_length = 5
-    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
-    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
+        tick_labels = df.index
+    set_barplot_xticklabels(tick_labels, ax=axs)
+
+    axs.tick_params(axis='y', which='major', length=5, width=1)
+    axs.tick_params(axis='x', which='major', length=5, width=1)
     return fig,axs
 
-def create_stacked_bar_plot(df, colour,angle):
+def create_stacked_bar_plot(df, colour, angle=0, custom_tick_labels=None):
     """
     Creates a stacked bar plot
     Parameters
@@ -319,6 +323,8 @@ def create_stacked_bar_plot(df, colour,angle):
         DataFrame of data to plot.
     colour : dictionary
         colour dictionary.
+    custom_tick_labels : list
+        Custom tick labels, default None
     Returns
     -------
     fig : matplotlib fig
@@ -334,13 +340,16 @@ def create_stacked_bar_plot(df, colour,angle):
     axs.spines['top'].set_visible(False)
     #adds comma to y axis data
     axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
-    if angle > 0:
-        axs.set_xticklabels(df.index, ha="right")
-        tick_length = 8
+    
+    # Set x-tick labels 
+    if custom_tick_labels and len(custom_tick_labels) > 1:
+        tick_labels = custom_tick_labels
     else:
-        tick_length = 5
-    axs.tick_params(axis='y', which='major', length=tick_length, width=1)
-    axs.tick_params(axis='x', which='major', length=tick_length, width=1)
+        tick_labels = df.index
+    set_barplot_xticklabels(tick_labels, ax=axs)
+    
+    axs.tick_params(axis='y', which='major', length=5, width=1)
+    axs.tick_params(axis='x', which='major', length=5, width=1)
     return fig, axs
 
 def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",  H="//", **kwargs):
@@ -394,8 +403,9 @@ def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",
                 rect.set_width(1 / float(n_df + 1))
     
     ax.set_xticks((np.arange(0, 2 * n_ind, 2) + 1 / float(n_df + 1)) / 2.)
+    
     x_labels = df.index.get_level_values(0)
-    ax.set_xticklabels(x_labels, rotation = 90)
+    set_barplot_xticklabels(x_labels, ax=ax, **kwargs)
     ax.set_title(title)
     
     def custom_legend_elements(label):
@@ -411,7 +421,8 @@ def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",
         handles.append(Patch(facecolor='gray', hatch=H*i))
         label_list.append(c_name)
         
-    ax.legend(handles,label_list,loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
+    ax.legend(handles, label_list, loc='lower left', bbox_to_anchor=(1.05,0), 
+                facecolor='inherit', frameon=True)
 
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
@@ -419,7 +430,9 @@ def create_clustered_stacked_bar_plot(df_list, ax, labels, color_dict, title="",
     ax.tick_params(axis='x', which='major', length=5, width=1)
 
 
-def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'solid',n=0,alpha = 1):
+def create_line_plot(axs, data, column, color_dict=None,
+                        label=None, linestyle='solid',
+                        n=0, alpha=1):
     """
     Creates a line plot
     Parameters
@@ -441,16 +454,20 @@ def create_line_plot(axs,data,column,color_dict=None,label=None,linestyle = 'sol
     None.
     """
     if color_dict==None:
-        axs[n].plot(data[column], linewidth=1,linestyle = linestyle,label=label,alpha = alpha)
+        axs[n].plot(data[column], linewidth=1, linestyle=linestyle, 
+                        label=label, alpha=alpha)
     else:
-        axs[n].plot(data[column], linewidth=1,linestyle = linestyle, color=color_dict[column],label=label,alpha = alpha)
+        axs[n].plot(data[column], linewidth=1, linestyle=linestyle,
+                         color=color_dict[column],
+                         label=label, alpha=alpha)
     axs[n].spines['right'].set_visible(False)
     axs[n].spines['top'].set_visible(False)
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
     axs[n].tick_params(axis='x', which='major', length=5, width=1)
 
 
-def create_hist_plot(axs,data,color_dict,label=None,n=0):
+def create_hist_plot(axs, data, color_dict, 
+                        label=None, n=0):
     """
     Creates a histogram plot
     Parameters
@@ -475,7 +492,8 @@ def create_hist_plot(axs,data,color_dict,label=None,n=0):
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
 
 
-def create_stackplot(axs,data,color_dict,label=None,n=0):
+def create_stackplot(axs, data, color_dict, 
+                        label=None, n=0):
     """
     Creates a stacked area plot
     Parameters
@@ -506,8 +524,7 @@ def create_stackplot(axs,data,color_dict,label=None,n=0):
     axs[n].margins(x=0.01)
 
 
-def set_plot_timeseries_format(axs,
-                               n=0,
+def set_plot_timeseries_format(axs, n=0,
                                minticks=mconfig.parser("axes_options","x_axes_minticks"),
                                maxticks=mconfig.parser("axes_options","x_axes_maxticks")
                                ):
@@ -632,7 +649,7 @@ def shift_leapday(df, Marmot_Solutions_folder):
 
     return(df)
 
-def check_label_angle(data_to_plot,dot_T):
+def check_label_angle(data_to_plot, dot_T):
     """
     Checks to see if the number of labels is greater than or equal to the default
     number set in mconfig.py.  If this is the case, other values in mconfig.py
@@ -677,7 +694,54 @@ def check_label_angle(data_to_plot,dot_T):
             data_to_plot.index = data_to_plot.index.str.wrap(10, break_long_words = False)
         return data_to_plot, 0
 
-def merge_new_agg(df,Region_Mapping,AGG_BY):
+
+def set_barplot_xticklabels(labels, ax, 
+                            rotate=mconfig.parser("axes_label_options", "rotate_x_labels"),
+                            num_labels=mconfig.parser("axes_label_options", "rotate_at_num_labels"),
+                            angle=mconfig.parser("axes_label_options", "rotation_angle"),
+                            **kwargs) -> None:
+    """
+    Set the xticklabels on bar plots and determine whether they will be rotated.
+    Wrapper around matplotlib set_xticklabels
+    
+    Checks to see if the number of labels is greater than or equal to the default
+    number set in config.yml.  If this is the case, rotate
+    specify whether or not to rotate the labels and angle specifies what angle they should 
+    be rotated to.
+    ----------
+
+    labels : (list) labels to apply to xticks
+    ax : matplotlib.axes
+        matplotlib.axes.
+    rotate : (bool)
+        rotate labels True/False, Optional
+        default set in config.yml
+    num_labels : (int)
+        number of labels to rotate at, Optional
+        default set in config.yml
+    angle : (int/float)
+        angle of rotation, Optional
+        default set in config.yml
+    **kwargs : set_xticklabels keywords, Optional 
+    
+    Returns
+    -------
+    None, sets xticklabels inplace
+    
+    """  
+
+    if rotate:
+        if (len(labels)) >= num_labels:
+            ax.set_xticklabels(labels, rotation=angle, ha="right", **kwargs)
+        else:
+             labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
+             ax.set_xticklabels(labels, rotation=0, **kwargs)
+    else:
+        labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
+        ax.set_xticklabels(labels, rotation=0, **kwargs)
+
+
+def merge_new_agg(df, Region_Mapping, AGG_BY):
 
     """
     Adds new region aggregation in the plotting step. This allows one to create a new aggregation without re-formatting the .h5 file.
@@ -710,12 +774,12 @@ def get_interval_count(df):
     -------
     interval_count : number of intervals per 60 minutes
     """
-    time_delta = df.index[1]- df.index[0]
+    time_delta = df.index[1] - df.index[0]
     # Finds intervals in 60 minute period
     interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
     return(interval_count)
 
-def sort_duration(df,col):
+def sort_duration(df, col):
     
     """
     Converts a dataframe time series into a duration curve.

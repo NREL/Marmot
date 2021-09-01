@@ -102,12 +102,10 @@ class MPlot(object):
 
                 # formatting for plot
                 emitPlot.index = emitPlot.index.str.replace('_',' ')
-                emitPlot, angle = mfunc.check_label_angle(emitPlot, False)
                 
                 # single pollutant plot
-                
                 fig1, ax = plt.subplots(figsize=(self.x,self.y))
-                emitPlot.plot.bar(stacked=True, rot=angle,
+                emitPlot.plot.bar(stacked=True,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in emitPlot.columns.values], edgecolor='black', linewidth='0.1',ax=ax)
 
                 # plot formatting
@@ -116,13 +114,16 @@ class MPlot(object):
                 ax.set_ylabel('Annual ' + prop + ' Emissions\n(million metric tons)',  color='black', rotation='vertical')
                 #adds comma to y axis data
                 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                if angle > 0:
-                    ax.set_xticklabels(emitPlot.index, ha="right")
-                    tick_length = 8
+                
+                # Set x-tick labels 
+                if len(self.custom_xticklabels) > 1:
+                    tick_labels = self.custom_xticklabels
                 else:
-                    tick_length = 5
-                ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-                ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                    tick_labels = emitPlot.index
+                mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+                
+                ax.tick_params(axis='y', which='major', length=5, width=1)
+                ax.tick_params(axis='x', which='major', length=5, width=1)
 
                 # legend formatting
                 handles, labels = ax.get_legend_handles_labels()
@@ -131,10 +132,6 @@ class MPlot(object):
                 ax.add_artist(leg1)
                 if mconfig.parser("plot_title_as_region"):
                     ax.set_title(zone_input)
-                # replace x-axis with custom labels
-                if len(self.ticklabels) > 1:
-                    ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
-                    ax.set_xticklabels(ticklabels)
 
                 outputs[zone_input] = {'fig': fig1, 'data_table': dataOut}
 

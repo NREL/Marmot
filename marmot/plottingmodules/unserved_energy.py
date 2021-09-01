@@ -164,8 +164,6 @@ class MPlot(object):
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/interval_count
 
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.replace('_',' ')
-            Total_Unserved_Energy_Out, angle = mfunc.check_label_angle(Total_Unserved_Energy_Out, True)
-            Total_Unserved_Energy_Out = Unserved_Energy_Timeseries_Out.sum(axis=0)
             Total_Unserved_Energy_Out = pd.DataFrame(Total_Unserved_Energy_Out.T)
 
             if Total_Unserved_Energy_Out.values.sum() == 0:
@@ -187,18 +185,20 @@ class MPlot(object):
             #flatten object
             ax=axs[0]
             
-            mfunc.create_bar_plot(Total_Unserved_Energy_Out.T,ax,color_dict,angle)
+            mfunc.create_bar_plot(Total_Unserved_Energy_Out.T, ax, color_dict)
             ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.xaxis.set_visible(False)
             ax.margins(x=0.01)
-            if angle > 0:
-                ax.set_xticklabels(Total_Unserved_Energy_Out.columns, ha="right")
-                tick_length = 8
+            
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Unserved_Energy_Out.columns
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
