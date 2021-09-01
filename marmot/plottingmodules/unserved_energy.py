@@ -9,6 +9,8 @@ This module creates unserved energy timeseries line plots and total bat plots an
 
 import pandas as pd
 import matplotlib as mpl
+import matplotlib.dates as mdates
+
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
@@ -243,63 +245,61 @@ class MPlot(object):
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
             
-            Unserved_Energy_Out = pd.DataFrame()
-            #PV_Curtailment_DC = pd.DataFrame()
-            
+            chunks =[]
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
                 
-                Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
+                unserved_energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
                 try:
-                    Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
+                    unserved_energy = unserved_energy.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     self.logger.info(f'No unserved energy in {zone_input}')
                 
-                Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
-                Unserved_Energy = Unserved_Energy.squeeze()
+                unserved_energy = unserved_energy.groupby(["timestamp"]).sum()
+                unserved_energy = unserved_energy.squeeze()
 
                 if pd.isna(start_date_range) == False:
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
-                    Unserved_Energy = Unserved_Energy[start_date_range : end_date_range]
-                    #pv_curt = pv_curt[start_date_range : end_date_range]
+                    unserved_energy = unserved_energy[start_date_range : end_date_range]
                     
-                    if Unserved_Energy.empty is True: 
+                    if unserved_energy.empty is True: 
                         self.logger.warning('No data in selected Date Range')
                         continue
-                    
-                Unserved_Energy = Unserved_Energy.groupby([Unserved_Energy.index.floor('d')]).sum()
-                interval_count = mfunc.get_sub_hour_interval_count(Unserved_Energy)
-                Unserved_Energy = Unserved_Energy*interval_count
-            
-                Unserved_Energy.rename(scenario, inplace=True)
+                
+                interval_count = mfunc.get_sub_hour_interval_count(unserved_energy)
+                unserved_energy = unserved_energy/interval_count
+                # Group data by hours and find mean across entire range 
+                unserved_energy = unserved_energy.groupby([unserved_energy.index.hour]).mean()
+                
+                # reset index to datetime 
+                unserved_energy.index = pd.date_range("2024-01-01", periods=24, freq="H")
+                unserved_energy.rename(scenario, inplace=True)
+                chunks.append(unserved_energy)
 
-                Unserved_Energy_Out = pd.concat([Unserved_Energy_Out, Unserved_Energy], axis=1, sort=False)
-
-            # Remove columns that have values less than 1
-            #Unserved_Energy_Out = Unserved_Energy_Out.loc[:, (Unserved_Energy_Out >= 1).any(axis=0)]
+            unserved_energy_out = pd.concat(chunks, axis=1, sort=False)
 
             # Replace _ with white space
-            Unserved_Energy_Out.columns = Unserved_Energy_Out.columns.str.replace('_',' ')
+            unserved_energy_out.columns = unserved_energy_out.columns.str.replace('_',' ')
 
             # Create Dictionary from scenario names and color list
-            colour_dict = dict(zip(Unserved_Energy_Out.columns, self.color_list))
+            colour_dict = dict(zip(unserved_energy_out.columns, self.color_list))
 
             fig, axs = mfunc.setup_plot()
             # flatten object
             ax = axs[0]
 
-            unitconversion = mfunc.capacity_energy_unitconversion(Unserved_Energy_Out.values.max())
-            Unserved_Energy_Out = Unserved_Energy_Out / unitconversion['divisor']
-            Data_Table_Out = Unserved_Energy_Out
+            unitconversion = mfunc.capacity_energy_unitconversion(unserved_energy_out.values.max())
+            unserved_energy_out = unserved_energy_out / unitconversion['divisor']
+            Data_Table_Out = unserved_energy_out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
             
-            for column in Unserved_Energy_Out:
-                ax.plot(Unserved_Energy_Out[column], linewidth=3, color=colour_dict[column],
+            for column in unserved_energy_out:
+                ax.plot(unserved_energy_out[column], linewidth=3, color=colour_dict[column],
                         label=column)
-                ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-                ax.set_ylabel(f"Unserved Energy ({unitconversion['units']})",  color='black', rotation='vertical')
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                    facecolor='inherit', frameon=True)
+            ax.set_ylabel(f"Average Diurnal Unserved Energy ({unitconversion['units']})",  color='black', rotation='vertical')
             
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
@@ -307,8 +307,17 @@ class MPlot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            mfunc.set_plot_timeseries_format(axs)
+            
+            # Set time ticks
+            locator = mdates.AutoDateLocator(minticks=8, maxticks=12)
+            formatter = mdates.ConciseDateFormatter(locator)
+            formatter.zero_formats[3] = '%H:%M'
+            formatter.show_offset = False
+            ax.xaxis.set_major_locator(locator)
+            ax.xaxis.set_major_formatter(formatter)
+            
             ax.set_ylim(bottom=0)
+
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
 

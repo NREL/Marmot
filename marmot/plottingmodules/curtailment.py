@@ -9,10 +9,13 @@ This module creates plots that show curtailment
 """
 
 import os
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
+import matplotlib.dates as mdates
+
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
@@ -807,7 +810,6 @@ class MPlot(object):
     def average_diurnal_curt(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone=None, start_date_range=None, end_date_range=None):
         """Average diurnal renewable curtailment plot
-           Plotting total curtailment of all vre technologies
         """
         
         outputs = {}
@@ -824,9 +826,8 @@ class MPlot(object):
 
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
-            
-            RE_Curtailment_DC = pd.DataFrame()
-            
+                        
+            chunks = []
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
@@ -850,17 +851,18 @@ class MPlot(object):
                     if re_curt.empty is True: 
                         self.logger.warning('No data in selected Date Range')
                         continue
-                    
-                re_curt = re_curt.groupby([re_curt.index.floor('d')]).sum()
+                
                 interval_count = mfunc.get_sub_hour_interval_count(re_curt)
                 re_curt = re_curt/interval_count
+                # Group data by hours and find mean across entire range 
+                re_curt = re_curt.groupby([re_curt.index.hour]).mean()
                 
+                # reset index to datetime 
+                re_curt.index = pd.date_range("2024-01-01", periods=24, freq="H")
                 re_curt.rename(scenario, inplace=True)
+                chunks.append(re_curt)
 
-                RE_Curtailment_DC = pd.concat([RE_Curtailment_DC, re_curt], axis=1, sort=False)
-
-            # Remove columns that have values less than 1
-            #RE_Curtailment_DC = RE_Curtailment_DC.loc[:, (RE_Curtailment_DC >= 1).any(axis=0)]
+            RE_Curtailment_DC = pd.concat(chunks, axis=1, sort=False)
 
             # Replace _ with white space
             RE_Curtailment_DC.columns = RE_Curtailment_DC.columns.str.replace('_',' ')
@@ -874,15 +876,17 @@ class MPlot(object):
 
             unitconversion = mfunc.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
             RE_Curtailment_DC = RE_Curtailment_DC / unitconversion['divisor']
-            Data_Table_Out = RE_Curtailment_DC
+            Data_Table_Out = RE_Curtailment_DC.copy()
+            Data_Table_Out.index = pd.date_range("2024-01-01", periods=24, freq="H").time
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
             
             for column in RE_Curtailment_DC:
-                ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
+                ax.plot(RE_Curtailment_DC[column], linewidth=2, color=colour_dict[column],
                         label=column)
-                ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-                ax.set_ylabel(f"RE Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
+            ax.set_ylabel(f"Average Diurnal Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
             
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
@@ -890,7 +894,14 @@ class MPlot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            mfunc.set_plot_timeseries_format(axs)
+            
+            # Set time ticks
+            locator = mdates.AutoDateLocator(minticks=8, maxticks=12)
+            formatter = mdates.ConciseDateFormatter(locator)
+            formatter.zero_formats[3] = '%H:%M'
+            formatter.show_offset = False
+            ax.xaxis.set_major_locator(locator)
+            ax.xaxis.set_major_formatter(formatter)
         
             ax.set_ylim(bottom=0)
             if mconfig.parser("plot_title_as_region"):
