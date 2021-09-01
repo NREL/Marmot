@@ -205,7 +205,8 @@ class MarmotPlot(SetupLogger):
             self.Scenario_Diff = pd.Series(Scenario_Diff.split(",")).str.strip().tolist() 
         elif isinstance(Scenario_Diff, list):
             self.Scenario_Diff = Scenario_Diff
-        if self.Scenario_Diff == ['nan'] or self.Scenario_Diff is None : self.Scenario_Diff = [""]
+        if Scenario_Diff == ['nan'] or Scenario_Diff is None: 
+            self.Scenario_Diff = [""]
         
         if isinstance(zone_region_sublist, str):
             self.zone_region_sublist = pd.Series(zone_region_sublist.split(",")).str.strip().tolist()
@@ -218,19 +219,22 @@ class MarmotPlot(SetupLogger):
             self.xlabels = pd.Series(xlabels.split(",")).str.strip().tolist()
         elif isinstance(xlabels, list):
             self.xlabels = xlabels
-        if self.xlabels == ['nan'] or self.xlabels is None : self.xlabels = [""]
+        if xlabels == ['nan'] or xlabels is None: 
+            self.xlabels = [""]
         
         if isinstance(ylabels, str):
             self.ylabels = pd.Series(ylabels.split(",")).str.strip().tolist()
         elif isinstance(ylabels, list):
             self.ylabels = ylabels
-        if self.ylabels == ['nan'] or self.ylabels is None : self.ylabels = [""]
+        if ylabels == ['nan'] or ylabels is None:
+            self.ylabels = [""]
         
         if isinstance(ticklabels, str):
             self.ticklabels = pd.Series(ticklabels.split(",")).str.strip().tolist()
         elif isinstance(ticklabels, list):
             self.ticklabels = ticklabels
-        if self.ticklabels == ['nan'] or self.ticklabels is None : self.ticklabels = [""]
+        if ticklabels == ['nan'] or ticklabels is None:
+            self.ticklabels = [""]
         
         if isinstance(Region_Mapping, str):
             try:
