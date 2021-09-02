@@ -236,12 +236,12 @@ class MarmotPlot(SetupLogger):
             self.ylabels = [""]
         
         if isinstance(ticklabels, str):
-            self.ticklabels = pd.Series(ticklabels.split(",")).str.strip().tolist()
+            self.custom_xticklabels = pd.Series(ticklabels.split(",")).str.strip().tolist()
         elif isinstance(ticklabels, list):
-            self.ticklabels = ticklabels
+            self.custom_xticklabels = ticklabels
         if ticklabels == ['nan'] or ticklabels is None:
-            self.ticklabels = [""]
-        
+            self.custom_xticklabels = [""]
+
         if isinstance(Region_Mapping, str):
             try:
                 self.Region_Mapping = pd.read_csv(Region_Mapping)
@@ -353,7 +353,9 @@ class MarmotPlot(SetupLogger):
         
         
         if set(self.gen_names["New"].unique()).issubset(ordered_gen) == False:
-                            self.logger.warning(f"The new categories from the gen_names csv do not exist in ordered_gen!:{set(self.gen_names.New.unique()) - (set(ordered_gen))}")
+                            self.logger.warning(f"The new categories from the gen_names csv do not exist in ordered_gen! \
+                               (Ignore this message if you are downselecting technology types on purpose.) \
+                          {set(self.gen_names.New.unique()) - (set(ordered_gen))}")
         
         try:
             PLEXOS_color_dict = pd.read_csv(os.path.join(self.mapping_folder,
@@ -480,7 +482,7 @@ class MarmotPlot(SetupLogger):
                 "Marmot_Solutions_folder": self.Marmot_Solutions_folder,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
-                "ticklabels": self.ticklabels,
+                "custom_xticklabels": self.custom_xticklabels,
                 "minticks": minticks,
                 "maxticks": maxticks,
                 "color_list": color_list,
@@ -524,6 +526,12 @@ class MarmotPlot(SetupLogger):
                 print("\n\n\n")
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
+                # Modifes timezone string before plotting
+                if pd.isnull(row.iloc[5]):
+                    row.iloc[5] = "Date"
+                else:
+                    row.iloc[5] = f"Date ({row.iloc[5]})"
+
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
@@ -588,9 +596,8 @@ class MarmotPlot(SetupLogger):
         self.logger.info('All Plotting COMPLETED')
         meta.close_file()
 
-                            
-if __name__ == '__main__':
-    
+
+def main():
     '''
     The following code is run if the formatter is run directly,
     it does not run if the formatter is imported as a module. 
@@ -605,7 +612,7 @@ if __name__ == '__main__':
     Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
 
-    Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
+    Marmot_plot_select = pd.read_csv(mconfig.parser("plot_select_file"))
     
     # Folder to save your processed solutions
     if pd.isna(Marmot_user_defined_inputs.loc['Marmot_Solutions_folder','User_defined_value']):
@@ -651,4 +658,8 @@ if __name__ == '__main__':
                           xlabels,ylabels,ticklabels,Region_Mapping)
     
     initiate.run_plotter()
+
+
+if __name__ == '__main__':
+    main()
     

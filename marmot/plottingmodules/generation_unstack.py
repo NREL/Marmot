@@ -31,7 +31,7 @@ class MPlot(object):
 
 
     def gen_unstack(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
         outputs = {}  
         
         facet=False

@@ -29,7 +29,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def prod_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -99,9 +99,7 @@ class MPlot(object):
 
             Total_Systems_Cost_Out = Total_Systems_Cost_Out.T
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
-            
-            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
-            
+                        
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000 #Change to $/kW-year
             Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
 
@@ -117,22 +115,23 @@ class MPlot(object):
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
             
             net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', linestyle='None', marker='o')
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total System Net Rev, Rev, & Cost ($/KW-yr)',  color='black', rotation='vertical')
-            # ax.set_xticklabels(rotation='vertical')
-            if angle > 0:
-                ax.set_xticklabels(Total_Systems_Cost_Out.index, ha="right")
-                tick_length = 8
+            
+            # Set x-tick labels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Systems_Cost_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            plt.xticks(rotation=90)
 
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='upper center',bbox_to_anchor=(0.5,-0.15),
@@ -155,7 +154,7 @@ class MPlot(object):
 
 
     def sys_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -220,7 +219,6 @@ class MPlot(object):
             Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000000 #Convert cost to millions
 
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
-            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
             
              #Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
@@ -232,17 +230,20 @@ class MPlot(object):
             
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
-            if angle > 0:
-                ax.set_xticklabels(Total_Systems_Cost_Out.index, ha="right")
-                tick_length = 8
+            
+            # Set x-tick labels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Systems_Cost_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
 
@@ -286,7 +287,7 @@ class MPlot(object):
 
 
     def detailed_gen_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -321,6 +322,7 @@ class MPlot(object):
                     continue
 
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
+                Fuel_Cost.rename("Fuel_Cost", inplace=True)
                 
                 VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY) 
@@ -360,7 +362,6 @@ class MPlot(object):
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.T/1000000 #Convert cost to millions
             
             Detailed_Gen_Cost_Out.index = Detailed_Gen_Cost_Out.index.str.replace('_',' ')
-            Detailed_Gen_Cost_Out, angle = mfunc.check_label_angle(Detailed_Gen_Cost_Out, False)
          
             # Deletes columns that are all 0
             Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out.loc[:, (Detailed_Gen_Cost_Out != 0).any(axis=0)]
@@ -375,18 +376,21 @@ class MPlot(object):
             
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
+            Detailed_Gen_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y = 0)
             ax.set_ylabel('Total Generation Cost (Million $)',  color='black', rotation='vertical')
-            if angle > 0:
-                ax.set_xticklabels(Detailed_Gen_Cost_Out.index, ha="right")
-                tick_length = 8
+            
+            # Set x-tick labels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Detailed_Gen_Cost_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
 
@@ -429,7 +433,7 @@ class MPlot(object):
 
 
     def sys_cost_type(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
@@ -484,24 +488,27 @@ class MPlot(object):
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(self.x,self.y), rot=angle,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
+            Total_Generation_Stack_Out.plot.bar(stacked=True,
+                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], 
+                             edgecolor='black', linewidth='0.1', ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
             ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
-            if angle > 0:
-                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
-                tick_length = 8
+            
+            # Set x-tick labels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Generation_Stack_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
 
             ax.margins(x=0.01)
@@ -518,7 +525,7 @@ class MPlot(object):
 
 
     def sys_cost_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         if self.AGG_BY == 'zone':
             agg = 'zone'
@@ -592,32 +599,26 @@ class MPlot(object):
             if Total_Systems_Cost_Out.empty:
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
-            
-            Total_Systems_Cost_Out, angle = mfunc.check_label_angle(Total_Systems_Cost_Out, False)
-            
+                        
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
             Data_Table_Out = Data_Table_Out.add_suffix(" (Million $)")
 
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
-            if angle > 0:
-                ax.set_xticklabels(Total_Systems_Cost_Out.index, ha="right")
-                tick_length = 8
-            else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
-            locs,labels=plt.xticks()
+            # Set x-tick labels
+            tick_labels = Total_Systems_Cost_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            # locs,labels=plt.xticks()
             ax.axhline(y = 0, color = 'black')
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-            if angle == 0:
-                xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-                plt.xticks(ticks=locs,labels=xlabels[1:])
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
@@ -634,7 +635,7 @@ class MPlot(object):
 
 
     def sys_cost_type_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
@@ -696,31 +697,25 @@ class MPlot(object):
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-            Total_Generation_Stack_Out, angle = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, figsize=(9,6), rot=angle,
+            Total_Generation_Stack_Out.plot.bar(stacked=True,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
 
-            if angle > 0:
-                ax.set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
-                tick_length = 8
-            else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            # Set x-tick labels
+            tick_labels = Total_Generation_Stack_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
 
-            locs,labels=plt.xticks()
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.axhline(y = 0)
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-            if angle == 0:
-                xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-                plt.xticks(ticks=locs,labels=xlabels[1:])
+
 
             ax.margins(x=0.01)
             # plt.ylim((0,600))
@@ -738,7 +733,7 @@ class MPlot(object):
 
 
     def detailed_gen_cost_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -833,30 +828,24 @@ class MPlot(object):
                 outputs[zone_input] = mfunc.MissingZoneData()
                 continue
             
-            Detailed_Gen_Cost_Out, angle = mfunc.check_label_angle(Detailed_Gen_Cost_Out, False)
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
 
-            
             fig3, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Detailed_Gen_Cost_Out.plot.bar(stacked=True, rot=angle, edgecolor='black', linewidth='0.1', ax=ax)
+            Detailed_Gen_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.axhline(y= 0 ,linewidth=0.5,linestyle='--',color='grey')
             # ax.axhline(y = 65.4, linewidth = 1, linestyle = ':',color = 'orange',label = 'Avg 2032 LCOE')
-            if angle > 0:
-                ax.set_xticklabels(Detailed_Gen_Cost_Out.index, ha="right")
-                tick_length = 8
-            else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
-            locs,labels=plt.xticks()
+            
+            # Set x-tick labels
+            tick_labels = Detailed_Gen_Cost_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.set_ylabel('Generation Cost Change \n relative to '+ self.Scenarios[0] + ' (Million $)',  color='black', rotation='vertical') #TODO: Add $ unit conversion.
-            if angle == 0:
-                xlabels = pd.Series(self.Scenarios).str.replace('_',' ').str.wrap(10, break_long_words=False)
-                plt.xticks(ticks=locs,labels=xlabels[1:])
 
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)

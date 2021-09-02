@@ -54,6 +54,10 @@ def createConfig(configfile_path):
             rotate_x_labels = True,
             rotate_at_num_labels = 7,
             rotation_angle = 45),
+
+        plot_data = dict(
+            include_total_pumped_load_line = True,
+            include_timeseries_pumped_load_line = True),
         
         figure_file_format = 'svg',
         
@@ -63,6 +67,10 @@ def createConfig(configfile_path):
         plot_title_as_region = True,
         
         user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
+
+        plot_select_file = 'Marmot_plot_select.csv',
+
+        plexos_properties_file = 'plexos_properties.csv',
         
         category_file_names = dict(
             pv_gen_cat = 'pv_gen_cat.csv',
