@@ -89,6 +89,12 @@ class SetupLogger():
                  
         current_dir = os.getcwd()
         os.chdir(FILE_DIR)
+
+        try:
+            os.makedirs(log_directory)
+        except FileExistsError:
+            # log directory already exists
+            pass
         
         with open('config/marmot_logging_config.yml', 'rt') as f:
             conf = yaml.safe_load(f.read())
