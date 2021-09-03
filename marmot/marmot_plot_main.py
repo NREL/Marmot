@@ -527,7 +527,7 @@ class MarmotPlot(SetupLogger):
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
                 # Modifes timezone string before plotting
-                if pd.isnull(row.iloc[5]):
+                if pd.isna(row.iloc[5]):
                     row.iloc[5] = "Date"
                 else:
                     row.iloc[5] = f"Date ({row.iloc[5]})"

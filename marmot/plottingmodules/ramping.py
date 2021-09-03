@@ -5,7 +5,7 @@ Created on Mon Dec  9 13:20:56 2019
 This module creates bar plot of the total volume of generator starts in MW,GW,etc.
 
 
-@author: dlevie
+@author: Daniel Levie
 """
 
 import pandas as pd
@@ -79,7 +79,7 @@ class MPlot(object):
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
                 
-                if prop == 'Date Range':
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
@@ -216,7 +216,7 @@ class MPlot(object):
                 # Min = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
                 # Min = Min.xs(zone_input, level = AGG_BY)
 
-                if prop == 'Date Range':
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     Gen = Gen[start_date_range : end_date_range]

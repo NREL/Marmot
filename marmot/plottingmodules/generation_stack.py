@@ -598,7 +598,7 @@ class MPlot(object):
             self.logger.info(f'Scenario 2 = {self.Scenario_Diff[1]}')
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
 
-            if prop == 'Date Range':
+            if pd.notna(start_date_range):
                 self.logger.info(f"Plotting specific date range: \
                 {str(start_date_range)} to {str(end_date_range)}")
                 Gen_Stack_Out = Gen_Stack_Out[start_date_range : end_date_range]

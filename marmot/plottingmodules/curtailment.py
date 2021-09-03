@@ -77,7 +77,7 @@ class MPlot(object):
                 pv_curt = pv_curt.squeeze() #Convert to Series
                 
                 
-                if pd.isna(start_date_range) == False:
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     re_curt = re_curt[start_date_range : end_date_range]
@@ -412,7 +412,7 @@ class MPlot(object):
                 avail_gen = avail_gen[avail_gen.index.isin(self.vre_gen_cat,level='tech')]
                 
                 all_empty = True
-                if pd.isna(start_date_range) == False:
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                 for vre_type in self.vre_gen_cat:
@@ -425,7 +425,7 @@ class MPlot(object):
                     avail_gen_type = avail_gen.xs(vre_type,level='tech')
                     
                     # Code to index data by date range, if a date range is listed in marmot_plot_select.csv
-                    if pd.isna(start_date_range) == False:
+                    if pd.notna(start_date_range):
                         avail_gen_type = avail_gen_type.groupby(['timestamp']).sum()
                         vre_curt_type = vre_curt_type.groupby(['timestamp']).sum()
                         vre_curt_type = vre_curt_type[start_date_range : end_date_range]

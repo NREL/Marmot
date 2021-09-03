@@ -2,7 +2,9 @@
 """
 Created on Tue Dec 10 08:51:15 2019
 
-@author: dlevie
+This module plots figures of the total installed capacity of the system
+
+@author: Daniel Levie
 """
 
 import os

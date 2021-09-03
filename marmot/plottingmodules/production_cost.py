@@ -2,7 +2,10 @@
 """
 Created on Tue Dec 17 16:24:40 2019
 
-@author: dlevie
+This module plots figures related to the cost of opertaing the power system.
+Plots can be broken down by cost categories, genertaor types etc. 
+
+@author: Daniel Levie
 """
 
 import pandas as pd
