@@ -2,7 +2,7 @@
 """
 Created on Wed Dec 11 15:23:06 2019
 
-@author: dlevie
+@author: Daniel Levie
 
 This module creates plots that show curtailment
 
