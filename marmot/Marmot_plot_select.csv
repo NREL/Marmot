@@ -5,18 +5,18 @@ Time_at_Min_Gen,FALSE,,,,,,,capacity_factor,time_at_min_gen
 Capacity_Out_Stacked,FALSE,,,,PST,,,capacity_out,capacity_out_stack
 Capacity_Out_Stacked_PASA,FALSE,,,,PST,,,capacity_out,capacity_out_stack_PASA
 PV_Curtailment_Duration_Curve,FALSE,PV,,,,,,curtailment,curt_duration_curve
-RE_Curtailment_Duration_Curve,FALSE,PV+Wind,,,,,,curtailment,curt_duration_curve
+RE_Curtailment_Duration_Curve,TRUE,PV+Wind,,,,,,curtailment,curt_duration_curve
 Total_Curtailment_Individual,FALSE,"1_Astoria, 2_PacificCity, 3_Florence, 4_CoosBay, 5_PortOrford",,,,,,curtailment,curt_ind
 PV_Curtailment_vs_Penetration,FALSE,PV,,,,,,curtailment,curt_pen
 RE_Curtailment_vs_Penetration,FALSE,PV+Wind,,,,,,curtailment,curt_pen
-Total_Curtailment,FALSE,,,,,,,curtailment,curt_total
+Total_Curtailment,TRUE,,,,,,,curtailment,curt_total
 Total_Curtailment_diff,FALSE,,,,,,,curtailment,curt_total_diff
 Total_Emissions_By_Gen_Type_CO2,FALSE,CO2,,,,,,emissions,total_emissions_by_type
 Total_Emissions_By_Gen_Type_SO2,FALSE,SO2,,,,,,emissions,total_emissions_by_type
 Committed_Capacity_Stack,FALSE,,,,PST,5/7/2024,5/11/2024,generation_stack,committed_stack
 Generation_Timeseries_Diff,FALSE,,,,EST,,,generation_stack,gen_diff
 Generation_Timeseries_Diff_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_diff
-Stacked_Gen,FALSE,,,,PST,,,generation_stack,gen_stack
+Stacked_Gen,TRUE,,,,PST,,,generation_stack,gen_stack
 Stacked_Gen_Min_Net_Load,FALSE,Min Net Load,3,3,EST,,,generation_stack,gen_stack
 Stacked_Gen_Date_Range,FALSE,Date Range,,,EST,5/20/2024,5/23/2024,generation_stack,gen_stack
 Stacked_Gen_Peak_Demand,FALSE,Peak Demand,3,3,EST,,,generation_stack,gen_stack
@@ -95,7 +95,7 @@ Net_Export,FALSE,,,,EST,,,transmission,net_export
 Net_Export_duration_curve,FALSE,,,,,,,transmission,net_export
 Region-Region_Net_Interchange_Checkerboard,FALSE,,,,,,,transmission,region_region_checkerboard
 All_Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_regions
-Region-Region_Net_Interchange_duration_curve,TRUE,,,,EST,,,transmission,region_region_interchange_all_scenarios
+Region-Region_Net_Interchange_duration_curve,FALSE,,,,EST,,,transmission,region_region_interchange_all_scenarios
 Region-Region_Net_Interchange,FALSE,,,,EST,,,transmission,region_region_interchange_all_scenarios
 P05_total_flow,FALSE,,,,,,,transmission,total_int_flow_ind
 Zonal_Interchange,FALSE,,,,,12/29/2024,12/31/2024,transmission,zonal_interchange
