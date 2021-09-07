@@ -9,10 +9,13 @@ This module creates plots that show curtailment
 """
 
 import os
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import matplotlib as mpl
+import matplotlib.dates as mdates
+
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
@@ -30,6 +33,7 @@ class MPlot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
         
         self.mplot_data_dict = {}
 
@@ -41,7 +45,7 @@ class MPlot(object):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Curtailment",self.Scenarios)]
+        properties = [(True,f"generator_{self.curtailment_prop}",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -58,7 +62,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                re_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                re_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
 
                 # Timeseries [MW] RE curtailment [MWh]
                 try: #Check for regions missing all generation.
@@ -181,7 +185,7 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios),
-                      (True, "generator_Curtailment", self.Scenarios),
+                      (True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Total_Generation_Cost", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
@@ -208,7 +212,7 @@ class MPlot(object):
                 avail_gen = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
                 avail_gen = avail_gen.xs(zone_input,level=self.AGG_BY)
                 
-                re_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                re_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                 try:
                     re_curt = re_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -369,7 +373,7 @@ class MPlot(object):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True, "generator_Curtailment", self.Scenarios),
+        properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
@@ -390,12 +394,12 @@ class MPlot(object):
 
                 self.logger.info(f"Scenario = {scenario}")
                 # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in self.mplot_data_dict["generator_Curtailment"].get(scenario).index.unique(level="tech")]
+                #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario).index.unique(level="tech")]
 
                 vre_collection = {}
                 avail_vre_collection = {}
 
-                vre_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                vre_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -524,7 +528,7 @@ class MPlot(object):
         return mfunc.UnderDevelopment()
 
         outputs = {}
-        properties = [(True, "generator_Curtailment", self.Scenarios),
+        properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
@@ -552,7 +556,7 @@ class MPlot(object):
                 vre_collection = {}
                 avail_vre_collection = {}
 
-                vre_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+                vre_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -673,7 +677,7 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios),
-                      (True, "generator_Curtailment", self.Scenarios)]
+                      (True, f"generator_{self.curtailment_prop}", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
         check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -693,7 +697,7 @@ class MPlot(object):
             scen_idx += 1
             self.logger.info(f"Scenario = {scenario}")
 
-            vre_curt = self.mplot_data_dict["generator_Curtailment"].get(scenario)
+            vre_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
             gen = self.mplot_data_dict["generator_Generation"].get(scenario)
             cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
             
@@ -803,3 +807,108 @@ class MPlot(object):
         fig1.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
         outputs = mfunc.DataSavedInModule()
         return outputs
+
+
+    def average_diurnal_curt(self, figure_name=None, prop=None, start=None, end=None, 
+                  timezone=None, start_date_range=None, end_date_range=None):
+        """Average diurnal renewable curtailment plot
+        """
+        
+        outputs = {}
+        
+        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, scenarios must be a list.
+        properties = [(True,f"generator_{self.curtailment_prop}",self.Scenarios)]
+        
+        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
+        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+
+        if 1 in check_input_data:
+            return mfunc.MissingInputData()
+
+        for zone_input in self.Zones:
+            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+                        
+            chunks = []
+            for scenario in self.Scenarios:
+                self.logger.info(f"Scenario = {scenario}")
+
+                re_curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
+
+                # Timeseries [MW] RE curtailment [MWh]
+                try: #Check for regions missing all generation.
+                    re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
+                except KeyError:
+                        self.logger.info(f'No curtailment in {zone_input}')
+                        continue
+
+                re_curt = re_curt.groupby(["timestamp"]).sum()
+                re_curt = re_curt.squeeze() #Convert to Series
+                
+                if pd.isna(start_date_range) == False:
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    re_curt = re_curt[start_date_range : end_date_range]
+                    
+                    if re_curt.empty is True: 
+                        self.logger.warning('No data in selected Date Range')
+                        continue
+                
+                interval_count = mfunc.get_sub_hour_interval_count(re_curt)
+                re_curt = re_curt/interval_count
+                # Group data by hours and find mean across entire range 
+                re_curt = re_curt.groupby([re_curt.index.hour]).mean()
+                
+                # reset index to datetime 
+                re_curt.index = pd.date_range("2024-01-01", periods=24, freq="H")
+                re_curt.rename(scenario, inplace=True)
+                chunks.append(re_curt)
+
+            RE_Curtailment_DC = pd.concat(chunks, axis=1, sort=False)
+
+            # Replace _ with white space
+            RE_Curtailment_DC.columns = RE_Curtailment_DC.columns.str.replace('_',' ')
+
+            # Create Dictionary from scenario names and color list
+            colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
+
+            fig, axs = mfunc.setup_plot(squeeze=False)
+            # flatten object
+            ax = axs[0]
+
+            unitconversion = mfunc.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
+            RE_Curtailment_DC = RE_Curtailment_DC / unitconversion['divisor']
+            Data_Table_Out = RE_Curtailment_DC.copy()
+            Data_Table_Out.index = pd.date_range("2024-01-01", periods=24, freq="H").time
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
+            
+            for column in RE_Curtailment_DC:
+                ax.plot(RE_Curtailment_DC[column], linewidth=2, color=colour_dict[column],
+                        label=column)
+                
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
+            ax.set_ylabel(f"Average Diurnal Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
+            
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.margins(x=0.01)
+            
+            # Set time ticks
+            locator = mdates.AutoDateLocator(minticks=8, maxticks=12)
+            formatter = mdates.ConciseDateFormatter(locator)
+            formatter.zero_formats[3] = '%H:%M'
+            formatter.show_offset = False
+            ax.xaxis.set_major_locator(locator)
+            ax.xaxis.set_major_formatter(formatter)
+        
+            ax.set_ylim(bottom=0)
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
+
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+        return outputs
+
