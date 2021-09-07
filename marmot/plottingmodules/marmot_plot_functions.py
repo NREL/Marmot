@@ -18,10 +18,6 @@ import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 import marmot.config.mconfig as mconfig
 
-# curpath = os.getcwd()
-# os.chdir('..')
-# import config.mconfig as mconfig
-# os.chdir(curpath)
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 #===============================================================================

@@ -72,7 +72,7 @@ class MPlot(object):
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
                 
-                if pd.isna(start_date_range) == False:
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
@@ -183,7 +183,7 @@ class MPlot(object):
                         continue
                 Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
                 
-                if pd.isna(start_date_range) == False:
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     Gen = Gen[start_date_range : end_date_range]

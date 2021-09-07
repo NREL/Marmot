@@ -2,9 +2,9 @@
 """
 Created on Mon Dec  9 13:20:56 2019
 
-This code creates total generation stacked bar plots and is called from Marmot_plot_main.py
+This module plots figures of total generation for a year, month etc.
 
-@author: dlevie
+@author: Daniel Levie 
 """
 
 import numpy as np
@@ -124,7 +124,7 @@ class MPlot(object):
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     Total_Gen_Stack = Total_Gen_Stack[start_date_range:end_date_range]
@@ -136,7 +136,7 @@ class MPlot(object):
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     Total_Load = Total_Load[start_date_range:end_date_range]
 
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
@@ -150,7 +150,8 @@ class MPlot(object):
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
+
                     Unserved_Energy = Unserved_Energy[start_date_range:end_date_range]
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
                 Unserved_Energy = Unserved_Energy/interval_count
@@ -166,7 +167,7 @@ class MPlot(object):
                     Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     Pump_Load = Pump_Load[start_date_range:end_date_range]
                 
                 Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
@@ -330,7 +331,7 @@ class MPlot(object):
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                      {str(start_date_range)} to {str(end_date_range)}")
                     Total_Gen_Stack = Total_Gen_Stack[start_date_range:end_date_range]

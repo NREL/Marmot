@@ -1,7 +1,7 @@
 """
 Created on Mon Dec  9 10:34:48 2019
 This code creates generation stack plots and is called from Marmot_plot_main.py
-@author: dlevie
+@author: Daniel Levie
 """
 
 import pandas as pd
@@ -232,19 +232,6 @@ class MPlot(object):
             Load = Load.xs(zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
-            #######################
-            ###DO NOT COMMIT
-            #Use input load instead of zonal load.
-            # Total_Demand = pd.read_csv('/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Load/load_2028_2011_EST.csv',index_col = 'DATETIME')
-            # Total_Demand = Total_Demand['PSCO_WI']
-            # Total_Demand.index = pd.to_datetime(Total_Demand.index)
-            # Total_Demand.index = Total_Demand.index.shift(1,freq = 'D')
-            # Total_Demand.index = Total_Demand.index.shift(-2,freq = 'H')
-            # Total_Demand = Total_Demand.loc[Stacked_Gen.index]
-            # Total_Demand = Total_Demand.squeeze()
-
-            ###DO NOT COMMIT
-            #######################
 
             if self.mplot_data_dict["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_timeseries_pumped_load_line"):
                 Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
@@ -516,18 +503,6 @@ class MPlot(object):
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
                 data_tables.append(single_scen_out)
 
-                ##DO NOT COMMIT
-                #Pull P05 hourly flow
-                # interface_Flow_collection = {}
-                # mfunc.get_data(interface_Flow_collection,"interface_Flow", self.Marmot_Solutions_folder, self.Scenarios)
-                # int_flow = interface_Flow_collection[scenario]
-                # int_flow = int_flow.xs('P05 West of Cascades-South_WI',level = 'interface_name')
-                # int_flow = mfunc.shift_leapday(int_flow,self.Marmot_Solutions_folder)
-                # int_flow = int_flow.droplevel('interface_category')
-                # int_flow = int_flow[self.start_date : self.end_date]
-                # int_flow = int_flow /unitconversion['divisor']
-                # int_flow.columns = ['P05 flow']
-
                 # # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
                       colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen.T.index])
@@ -734,7 +709,7 @@ class MPlot(object):
             self.logger.info(f'Scenario 2 = {self.Scenario_Diff[1]}')
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
 
-            if prop == 'Date Range':
+            if pd.notna(start_date_range):
                 self.logger.info(f"Plotting specific date range: \
                 {str(start_date_range)} to {str(end_date_range)}")
                 Gen_Stack_Out = Gen_Stack_Out[start_date_range : end_date_range]

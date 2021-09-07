@@ -54,25 +54,25 @@ pd.set_option("display.max_colwidth", 1000)
 
 class SetupLogger():
     """Sets up the python logger.
-    
+
     Allows an optional suffix to be included which will be appended to the
-    end of the log file name, this is useful when running multiple 
+    end of the log file name, this is useful when running multiple
     processes in parallel to allow logging to seperate files.
-    
+
     Allows log_directory to be changed from default
-    
-    SetupLogger is a subclass of all other module classes 
+
+    SetupLogger is a subclass of all other module classes
     """
-    
+
     def __init__(self, log_directory='logs', log_suffix=None):
         """Setuplogger __init__ method.
-        
-        Formats log filename, 
+
+        Formats log filename,
         configures logger from marmot_logging_config.yml file,
         handles rollover of log file on each instantiation.
-        
+
         Allows log_directory to be changed from default
-        
+
         Parameters
         ----------
         log_directory : string, optional
@@ -89,10 +89,16 @@ class SetupLogger():
             self.log_suffix = ''
         else:
              self.log_suffix = f'_{log_suffix}'
-                 
+
         current_dir = os.getcwd()
         os.chdir(FILE_DIR)
-        
+
+        try:
+            os.makedirs(log_directory)
+        except FileExistsError:
+            # log directory already exists
+            pass
+
         with open('config/marmot_logging_config.yml', 'rt') as f:
             conf = yaml.safe_load(f.read())
             conf['handlers']['warning_handler']['filename'] = \
@@ -101,27 +107,27 @@ class SetupLogger():
             conf['handlers']['info_handler']['filename'] = \
                 (conf['handlers']['info_handler']['filename']
                 .format(log_directory, 'formatter', self.log_suffix))
-            
+
             logging.config.dictConfig(conf)
-        
+
         self.logger = logging.getLogger('marmot_format')
-        # Creates a new log file for next run 
+        # Creates a new log file for next run
         self.logger.handlers[1].doRollover()
         self.logger.handlers[2].doRollover()
-        
+
         os.chdir(current_dir)
-        
-        
+
+
 class Process(SetupLogger):
     """Conatins methods for processing h5plexos query data.
-    
+
     All methods are PLEXOS Class specific
     e.g generator, region, zone, line etc.
     """
 
     def __init__(self, df, metadata, Region_Mapping, gen_names, emit_names, logger):
         """Process __init__ method.
-        
+
         Parameters
         ----------
         df : pd.DataFrame
@@ -228,7 +234,7 @@ class Process(SetupLogger):
 
     def df_process_region(self):
         """Format data which comes from the PLEXOS Region Class.
-         
+
         Returns
         -------
         df : pd.DataFrame
@@ -691,7 +697,7 @@ class MarmotFormat(SetupLogger):
                 self.emit_names = pd.read_csv(emit_names)
                 if not self.emit_names.empty:
                     self.emit_names.rename(columns={self.emit_names.columns[0]: 'Original',
-                                                    self.emit_names.columns[1]: 'New'}, 
+                                                    self.emit_names.columns[1]: 'New'},
                                            inplace=True)
             except FileNotFoundError:
                 self.logger.warning('Could not find specified emissions mapping file; check file name\n')
@@ -699,21 +705,21 @@ class MarmotFormat(SetupLogger):
         elif isinstance(emit_names, pd.DataFrame):
             self.emit_names = emit_names
             if not self.emit_names.empty:
-                self.emit_names.rename(columns={self.emit_names.columns[0]: 'Original', 
+                self.emit_names.rename(columns={self.emit_names.columns[0]: 'Original',
                                                 self.emit_names.columns[1]: 'New'},
                                        inplace=True)
-                
-                
+
+
     def output_metadata(self, files_list, hdf_out_folder, HDF5_output, HDF5_folder_in):
         """ This function is used to output metadata from the original PLEXOS solutions
         file to the processed HDF5 file.  For each partition in a given scenario,
         the metadata from that partition is copied over and saved in the processed output file.
         This function is called within the run_formatter method of this class."""
-        
+
         for partition in files_list:
             f = h5py.File(os.path.join(HDF5_folder_in, partition),'r')
             meta_keys = [key for key in f['metadata'].keys()]
-            
+
             group_dict = {}
             for key in meta_keys:
                 sub_dict = {}
@@ -722,7 +728,7 @@ class MarmotFormat(SetupLogger):
                     dset = f['metadata'][key][sub]
                     sub_dict[sub] = dset
                 group_dict[key] = sub_dict
-                
+
             with h5py.File(os.path.join(hdf_out_folder, HDF5_output),"a") as g:
                 # check if metadata group already exists
                 existing_groups = [key for key in g.keys()]
@@ -730,7 +736,7 @@ class MarmotFormat(SetupLogger):
                     grp = g.create_group('metadata')
                 else:
                     grp = g['metadata']
-                
+
                 partition_group = grp.create_group(partition)
                 for key in list(group_dict.keys()):
                     subgrp = partition_group.create_group(key)
@@ -738,10 +744,10 @@ class MarmotFormat(SetupLogger):
                     for key2 in list(s_dict.keys()):
                         dset = s_dict[key2]
                         subgrp.create_dataset(name=key2,data=dset)
-            f.close()    
+            f.close()
         return
-    
-    
+
+
     def _get_data(self, plexos_class, plexos_prop, timescale, db, metadata):
         """
         This method handles the pulling of the data from the H5plexos hdf5
@@ -813,7 +819,7 @@ class MarmotFormat(SetupLogger):
     def run_formatter(self):
         '''
 
-        Main method to call to begin processing h5plexos files, this method takes 
+        Main method to call to begin processing h5plexos files, this method takes
         no input variables, all required varibales are passed in via the __init__ method.
 
         Returns
@@ -851,12 +857,12 @@ class MarmotFormat(SetupLogger):
         for names in os.listdir():
             if names.endswith(".h5"):
                 files.append(names)  # Creates a list of only the hdf5 files
-        
+
         # List of all hf files in hdf5 folder in alpha numeric order
         files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
-        
+
         os.chdir(startdir)
-        
+
         #self.output_metadata(files_list[0], hdf_out_folder, HDF5_output, HDF5_folder_in)
 
         # Read in all HDF5 files into dictionary
@@ -875,13 +881,13 @@ class MarmotFormat(SetupLogger):
             # Skip properties that already exist in *formatted.h5 file.
             with h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') as f:
                 existing_keys = [key for key in f.keys()]
-            
+
 # The processed HDF5 output file already exists.  If metadata is already in
-# this file, leave as is.  Otherwise, append it to the file.           
+# this file, leave as is.  Otherwise, append it to the file.
             if 'metadata' not in existing_keys:
                 self.logger.info('Adding metadata to processed HDF5 file.')
                 self.output_metadata(files_list, hdf_out_folder, HDF5_output, HDF5_folder_in)
-            
+
             if not mconfig.parser('skip_existing_properties'):
                 existing_keys = []
 
@@ -894,7 +900,7 @@ class MarmotFormat(SetupLogger):
                                       complevel=9,
                                       complib='blosc:zlib')
             self.output_metadata(files_list, hdf_out_folder, HDF5_output, HDF5_folder_in)
-            
+
         process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
         start = time.time()
 
@@ -919,7 +925,7 @@ class MarmotFormat(SetupLogger):
 
                     # Create an instance of metadata, and pass that as a variable to get data.
                     meta = MetaData(HDF5_folder_in, False, self.Region_Mapping, model)
-                    
+
                     db = hdf5_collection.get(model)
                     processed_data = self._get_data(row["group"], row["data_set"], row["data_type"], db, meta)
 
@@ -963,7 +969,7 @@ class MarmotFormat(SetupLogger):
                         Processed_Data_Out = Processed_Data_Out.loc[~Processed_Data_Out.index.duplicated(keep='first')]  # Remove duplicates; keep first entry
                         if (oldsize - Processed_Data_Out.size) > 0:
                             self.logger.info(f'Drop duplicates removed {oldsize-Processed_Data_Out.size} rows')
-        
+
                     row["data_set"] = row["data_set"].replace(' ', '_')
                     try:
                         self.logger.info("Saving data to h5 file...")
@@ -1006,7 +1012,7 @@ class MarmotFormat(SetupLogger):
         # ===================================================================================
         # Calculate Extra Ouputs
         # ===================================================================================
-        if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r'):
+        if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') or not mconfig.parser('skip_existing_properties'):
             try:
                 self.logger.info("Processing generator Curtailment")
                 try:
@@ -1046,7 +1052,7 @@ class MarmotFormat(SetupLogger):
             except Exception:
                 self.logger.warning("NOTE!! Curtailment not calculated, processing skipped\n")
 
-        if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r'):
+        if "region_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') or not mconfig.parser('skip_existing_properties'):
             try:
                 self.logger.info("Calculating Cost Unserved Energy: Regions")
                 Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder,
@@ -1062,7 +1068,7 @@ class MarmotFormat(SetupLogger):
                 self.logger.warning("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
                 pass
 
-        if "zone_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r'):
+        if "zone_Cost_Unserved_Energy" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') or not mconfig.parser('skip_existing_properties'):
             try:
                 self.logger.info("Calculating Cost Unserved Energy: Zones")
                 Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder,
@@ -1115,11 +1121,11 @@ def main():
         Marmot_Solutions_folder = None
     else:
         Marmot_Solutions_folder = Marmot_user_defined_inputs.loc['Marmot_Solutions_folder'].to_string(index=False).strip()
-    
+
     # This folder contains all the csv required for mapping and selecting outputs to process
     # Examples of these mapping files are within the Marmot repo, you may need to alter these to fit your needs
     Mapping_folder = 'mapping_folder'
-    
+
     if pd.isna(Marmot_user_defined_inputs.loc['Region_Mapping.csv_name', 'User_defined_value']) is True:
         Region_Mapping = pd.DataFrame()
     else:

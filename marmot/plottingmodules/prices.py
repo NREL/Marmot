@@ -76,7 +76,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[start_date_range:end_date_range]
@@ -161,7 +161,7 @@ class MPlot(object):
 
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[start_date_range:end_date_range]
@@ -252,7 +252,7 @@ class MPlot(object):
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[start_date_range:end_date_range]
@@ -355,7 +355,7 @@ class MPlot(object):
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[start_date_range:end_date_range]
@@ -474,7 +474,7 @@ class MPlot(object):
             price = price.groupby(["timestamp","node"]).sum()
             price.rename(columns={0:scenario}, inplace=True)
             
-            if not pd.isnull(start_date_range):
+            if pd.notna(start_date_range):
                 self.logger.info(f"Plotting specific date range: \
                                   {str(start_date_range)} to {str(end_date_range)}")
                 price = price[pd.to_datetime(start_date_range):pd.to_datetime(end_date_range)]
@@ -619,7 +619,7 @@ class MPlot(object):
                 price = price.groupby(["timestamp"]).sum()
                 price.rename(columns={0:scenario}, inplace=True)
                 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[pd.to_datetime(start_date_range):pd.to_datetime(end_date_range)]

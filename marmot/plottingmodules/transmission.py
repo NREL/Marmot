@@ -4,7 +4,7 @@ Created April 2020, updated August 2020
 
 This code creates transmission line and interface plots and is called from Marmot_plot_main.py
 
-@author: dlevie
+@author: Daniel Levie, Marty Schwarz
 """
 
 import os
@@ -217,7 +217,7 @@ class MPlot(object):
 
         outputs = {}
 
-        if not pd.isnull(start_date_range):
+        if pd.notna(start_date_range):
             self.logger.info(f"Plotting specific date range: \
                 {str(start_date_range)} to {str(end_date_range)}")
 
@@ -320,7 +320,7 @@ class MPlot(object):
 
                         if self.shift_leapday == True:
                             single_int = mfunc.shift_leapday(single_int,self.Marmot_Solutions_folder)
-                        if not pd.isnull(start_date_range):
+                        if pd.notna(start_date_range):
                             single_int = single_int[start_date_range : end_date_range]
                             limits = limits[start_date_range : end_date_range]
                         if duration_curve:
@@ -1430,9 +1430,6 @@ class MPlot(object):
                 rr_int_agg.rename(columns = {0:'flow (MW)'}, inplace = True)
                 rr_int_agg = rr_int_agg.reset_index()
 
-                # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and rr_int_agg.index[0] > dt.datetime(2024,2,28,0,0):
-                #     rr_int_agg.index = rr_int_agg.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
-
                 # If plotting all regions update plot setup
                 if plot_scenario == False:
                     #Make a facet plot, one panel for each parent zone.
@@ -1781,7 +1778,7 @@ class MPlot(object):
                 net_export = net_export.groupby("timestamp").sum()
                 net_export.columns = [scenario]
 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     net_export = net_export[start_date_range : end_date_range]
@@ -1932,7 +1929,7 @@ class MPlot(object):
                         net_export = export - imports
                     net_export.columns = [other_zone]
 
-                    if not pd.isnull(start_date_range):
+                    if pd.notna(start_date_range):
                         if other_zone == [other_zones[0]]:
                             self.logger.info(f"Plotting specific date range: \
                             {str(start_date_range)} to {str(end_date_range)}")
@@ -2087,7 +2084,7 @@ class MPlot(object):
                         net_export = export - imports
                     net_export.columns = [other_zone]
 
-                    if not pd.isnull(start_date_range):
+                    if pd.notna(start_date_range):
                         if other_zone == other_zones[0]:
                             self.logger.info(f"Plotting specific date range: \
                             {str(start_date_range)} to {str(end_date_range)}")
@@ -2195,7 +2192,7 @@ class MPlot(object):
                 flow = flow_all.xs(inter,level = 'interface_name')
                 flow = flow.reset_index()
                  
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(start_date_range),str(end_date_range)))
                     flow = flow[start_date_range : end_date_range]
@@ -2348,8 +2345,6 @@ class MPlot(object):
     #             scenario_color_dict.update(dictionary)
 
     #         all_scenarios.index = pd.to_datetime(all_scenarios.index)
-    #         if all_scenarios.empty == False and '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
-    #             all_scenarios.index = all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
     #         fig5, ax = plt.subplots(figsize=(9,6))
     #         for idx,column in enumerate(all_scenarios.columns):

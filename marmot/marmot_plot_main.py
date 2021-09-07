@@ -89,6 +89,12 @@ class SetupLogger():
                  
         current_dir = os.getcwd()
         os.chdir(FILE_DIR)
+
+        try:
+            os.makedirs(log_directory)
+        except FileExistsError:
+            # log directory already exists
+            pass
         
         with open('config/marmot_logging_config.yml', 'rt') as f:
             conf = yaml.safe_load(f.read())
@@ -205,7 +211,8 @@ class MarmotPlot(SetupLogger):
             self.Scenario_Diff = pd.Series(Scenario_Diff.split(",")).str.strip().tolist() 
         elif isinstance(Scenario_Diff, list):
             self.Scenario_Diff = Scenario_Diff
-        if self.Scenario_Diff == ['nan'] or self.Scenario_Diff is None : self.Scenario_Diff = [""]
+        if Scenario_Diff == ['nan'] or Scenario_Diff is None: 
+            self.Scenario_Diff = [""]
         
         if isinstance(zone_region_sublist, str):
             self.zone_region_sublist = pd.Series(zone_region_sublist.split(",")).str.strip().tolist()
@@ -218,20 +225,23 @@ class MarmotPlot(SetupLogger):
             self.xlabels = pd.Series(xlabels.split(",")).str.strip().tolist()
         elif isinstance(xlabels, list):
             self.xlabels = xlabels
-        if self.xlabels == ['nan'] or self.xlabels is None : self.xlabels = [""]
+        if xlabels == ['nan'] or xlabels is None: 
+            self.xlabels = [""]
         
         if isinstance(ylabels, str):
             self.ylabels = pd.Series(ylabels.split(",")).str.strip().tolist()
         elif isinstance(ylabels, list):
             self.ylabels = ylabels
-        if self.ylabels == ['nan'] or self.ylabels is None : self.ylabels = [""]
+        if ylabels == ['nan'] or ylabels is None:
+            self.ylabels = [""]
         
         if isinstance(ticklabels, str):
             self.custom_xticklabels = pd.Series(ticklabels.split(",")).str.strip().tolist()
         elif isinstance(ticklabels, list):
             self.custom_xticklabels = ticklabels
-        if self.custom_xticklabels == ['nan'] or self.custom_xticklabels is None : self.custom_xticklabels = [""]
-        
+        if ticklabels == ['nan'] or ticklabels is None:
+            self.custom_xticklabels = [""]
+
         if isinstance(Region_Mapping, str):
             try:
                 self.Region_Mapping = pd.read_csv(Region_Mapping)
@@ -517,7 +527,7 @@ class MarmotPlot(SetupLogger):
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
                 # Modifes timezone string before plotting
-                if pd.isnull(row.iloc[5]):
+                if pd.isna(row.iloc[5]):
                     row.iloc[5] = "Date"
                 else:
                     row.iloc[5] = f"Date ({row.iloc[5]})"

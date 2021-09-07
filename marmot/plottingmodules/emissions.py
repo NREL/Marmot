@@ -2,6 +2,8 @@
 """
 Created on Mon Nov 2 8:41:40 2020
 
+This module plots figures related to emissions 
+
 @author: Brian Sergi
 
 TO DO:

@@ -466,7 +466,7 @@ class MPlot(object):
                 reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', reserve_timeseries['parent'])
                 reserve_timeseries = reserve_timeseries.pivot(index='timestamp', columns='Type', values=0)
 
-                if prop == 'Date Range':
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     reserve_timeseries = reserve_timeseries[start_date_range : end_date_range]
