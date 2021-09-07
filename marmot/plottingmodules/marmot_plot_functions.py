@@ -222,7 +222,11 @@ def set_x_y_dimension(region_number):
     return xdimension,ydimension
 
 
-def setup_plot(xdimension=1,ydimension=1,sharey=True):
+def setup_plot(xdimension=1,ydimension=1, 
+                figsize=(mconfig.parser("figure_size","xdimension"), 
+                        mconfig.parser("figure_size","ydimension")),
+                sharey=True, 
+                squeeze=False, **kwargs):
     """
     Setup matplotlib plot
     Parameters
@@ -231,6 +235,8 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
         facet plot x dimension. The default is 1.
     ydimension : int, optional
         facet plot y dimension. The default is 1.
+    figsize : tuple, optional. Default set in config.yml
+        The dimensions of each subplot in inches
     sharey : bool, optional
         Share y axes labels. The default is True.
     Returns
@@ -240,10 +246,13 @@ def setup_plot(xdimension=1,ydimension=1,sharey=True):
     axs : matplotlib.axes
         matplotlib axes.
     """
-    x = mconfig.parser("figure_size","xdimension")
-    y = mconfig.parser("figure_size","ydimension")
+
+    x=figsize[0]
+    y=figsize[1]
     
-    fig, axs = plt.subplots(ydimension,xdimension, figsize=((x*xdimension),(y*ydimension)), sharey=sharey, squeeze=False)
+    fig, axs = plt.subplots(ydimension, xdimension, 
+                            figsize=((x*xdimension),(y*ydimension)), 
+                            sharey=sharey, squeeze=squeeze, **kwargs)
     axs = axs.ravel()
     return fig,axs
 
@@ -760,7 +769,7 @@ def merge_new_agg(df, Region_Mapping, AGG_BY):
     df = df.merge(agg_new,left_on = 'region', right_index = True)
     return(df)
 
-def get_interval_count(df):
+def get_sub_hour_interval_count(df) -> int:
     """
     Detects the interval spacing; used to adjust sums of certain for variables for sub-hourly runs
     Parameters
@@ -772,8 +781,10 @@ def get_interval_count(df):
     """
     time_delta = df.index[1] - df.index[0]
     # Finds intervals in 60 minute period
-    interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
-    return(interval_count)
+    intervals_per_hour = 60/(time_delta/np.timedelta64(1, 'm'))
+    # If interals are greater than 1 hour, returns 1
+    return max(1, intervals_per_hour)
+
 
 def sort_duration(df, col):
     

@@ -188,7 +188,6 @@ class MPlot(object):
                 Total_Installed_Capacity.rename(index={0: scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
 
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             try:
                 Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Scenarios[0])  # Change to a diff on first scenario
@@ -197,6 +196,8 @@ class MPlot(object):
                 outputs[zone_input] = out
                 continue
             Total_Installed_Capacity_Out.drop(self.Scenarios[0], inplace=True)  # Drop base entry
+
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
             if Total_Installed_Capacity_Out.empty:
