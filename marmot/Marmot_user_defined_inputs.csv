@@ -7,6 +7,7 @@ Region_Mapping.csv_name,string,optional(default),Regions_Zones_Mapping_Full.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 emit_names.csv_name,string,required(default),emit_names.csv
 Scenarios,string or List,required,"Scenario1, Scenario2, Scenario3"
+Scenario_Diff_plot,List,optional,"Scenario1, Scenario2"
 AGG_BY,string,required,zone
 zone_region_sublist,List,optional,"PJM_EI, MISO_EI"
 Facet_ylabels,List,optional,ylabel1
