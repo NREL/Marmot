@@ -108,8 +108,8 @@ class MPlot(object):
                     Peak_Reserve = total_reserve[peak_reserve_t]
 
                 elif prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {str(start_date_range} to {str(end_date_range)}")
+                    self.logger.info(f"Plotting specific date range: \
+                        {str(start_date_range)} to {str(end_date_range)}")
                     reserve_provision_timeseries = reserve_provision_timeseries[start_date_range : end_date_range]
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
@@ -220,7 +220,7 @@ class MPlot(object):
                     continue
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = mfunc.get_interval_count(reserve_provision_timeseries)
+                interval_count = mfunc.get_sub_hour_interval_count(reserve_provision_timeseries)
 
                 # sum totals by fuel types
                 reserve_provision_timeseries = reserve_provision_timeseries/interval_count

@@ -800,7 +800,7 @@ class MPlot(object):
                 width = patch.get_width()
                 x, y = patch.get_xy()
                 ax.text(x+width/2,y + height + 0.05*max(ax.get_ylim()),
-                    str(Total_Curt.iloc[k][1]) + f" {unitconversion['units']}h",
+                    str(format(Total_Curt.iloc[k][1], '.2f')) + f" {unitconversion['units']}h",
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11)
 
