@@ -4,21 +4,21 @@ Marmot is a data formatting and visualization tool for PLEXOS production cost mo
 ![Yellow-bellied marmot](https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg)
 
 Click the following to quickly navigate to the main sections of the ReadME:
-- [Main Python Scripts](https://github.nrel.gov/PCM/Marmot#main-python-scripts)
-- [Initial Setup](https://github.nrel.gov/PCM/Marmot#initial-setup)
-- [Marmot Formatter](https://github.nrel.gov/PCM/Marmot#marmot-formatter)
-- [Marmot Plotter](https://github.nrel.gov/PCM/Marmot#marmot-plotter)
-- [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files)
-- [Additional Configuration Settings ](https://github.nrel.gov/PCM/Marmot#Additional-Configuration-Settings)
-- [Tips and tricks](https://github.nrel.gov/PCM/Marmot#Tips-and-tricks)
+- [Main Python Scripts](https://github.com/NREL/Marmot#main-python-scripts)
+- [Initial Setup](https://github.com/NREL/Marmot#initial-setup)
+- [Marmot Formatter](https://github.com/NREL/Marmot#marmot-formatter)
+- [Marmot Plotter](https://github.com/NREL/Marmot#marmot-plotter)
+- [Mapping Files](https://github.com/NREL/Marmot#mapping-files)
+- [Additional Configuration Settings ](https://github.com/NREL/Marmot#Additional-Configuration-Settings)
+- [Tips and tricks](https://github.com/NREL/Marmot#Tips-and-tricks)
 
 
 ## Main Python Scripts
 Marmot is written in Python 3 and has two main programs:
 
-* [**Marmot Formatter**](https://github.nrel.gov/PCM/Marmot/blob/master/marmot/marmot_h5_formatter.py): Formatting Data using marmot_h5_formatter.py
+* [**Marmot Formatter**](https://github.com/NREL/Marmot/blob/master/marmot/marmot_h5_formatter.py): Formatting Data using marmot_h5_formatter.py
 
-* [**Marmot Plotter**](https://github.nrel.gov/PCM/Marmot/blob/master/marmot/marmot_plot_main.py): Plotting Figures using marmot_plot_main.py
+* [**Marmot Plotter**](https://github.com/NREL/Marmot/blob/master/marmot/marmot_plot_main.py): Plotting Figures using marmot_plot_main.py
 
 
 A high-level explanation of what these files do and suggested settings to change are described in this readme. Code specifics are described in more detail in the code docstrings.
@@ -32,28 +32,28 @@ A high-level explanation of what these files do and suggested settings to change
   - PyYAML
   - h5py==2.10.0
   - matplotlib>=3.1.0
-  - [h5plexos](https://github.com/NREL/h5plexos)>=0.6 *(See more details [below](https://github.nrel.gov/PCM/Marmot#marmot_h5_formatter))*
+  - [h5plexos](https://github.com/NREL/h5plexos)>=0.6 *(See more details [below](https://github.com/NREL/Marmot#marmot_h5_formatter))*
   - tables
 
 
 - These prerequisites can be installed manually with conda or pip, but it is recommended to install all requirements with the provided conda environment or requirements.txt file.
-Each are explained [below](https://github.nrel.gov/PCM/Marmot#conda-environment):
+Each are explained [below](https://github.com/NREL/Marmot#conda-environment):
 
 #### Conda Environment
 - Setting up a new conda environment is the recommended route for running Marmot. Users will need certain user admin/rights to setup conda environments so this may not be possible on all systems.
-To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.nrel.gov/PCM/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
+To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.com/NREL/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
 Once the environment has been created it can be activated by typing `conda activate marmot-env `
 
 #### requirements txt file
-- A [requirements.txt](https://github.nrel.gov/PCM/Marmot/blob/master/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`. If installing on a machine with restricted user rights adding `--user` to the command may be required.
+- A [requirements.txt](https://github.com/NREL/Marmot/blob/master/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`. If installing on a machine with restricted user rights adding `--user` to the command may be required.
 
 After all required prerequisites are installed, you are ready to install and run Marmot. There are **Two ways** to run Marmot, **Running Directly (A)** or **Importing as a Module (B)**. Most users will probably want to run Marmot directly, however some users may want to import Marmot into their own code. Both are explained below.
 
 ### A: Downloading, installing, and running Marmot Directly
 
-*The following command will clone the most recent commit to the master branch of Marmot which may not be production ready, to get the most recent stable release see the [Releases](https://github.nrel.gov/PCM/Marmot/releases) section of the repo.*
+*The following command will clone the most recent commit to the master branch of Marmot which may not be production ready, to get the most recent stable release see the [Releases](https://github.com/NREL/Marmot/releases) section of the repo.*
 
-- First `git clone --recurse-submodules https://github.nrel.gov/PCM/Marmot.git` to any location you like, make sure to include `--recurse-submodules` else h5plexos will not be included correctly.
+- First `git clone --recurse-submodules https://git@github.com:NREL/Marmot.git` to any location you like, make sure to include `--recurse-submodules` else h5plexos will not be included correctly.
 
 - The Marmot formatter imports h5plexos. To avoid import and version errors, h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot `--recurse-submodules`, you can combine the git submodule init and git submodule update steps by running `git submodule update --init`.
 
@@ -64,8 +64,8 @@ After all required prerequisites are installed, you are ready to install and run
 - To use Marmot as a Python Module that can be imported, it first needs to be made visible to the Python package directory. This can be done two ways, either by pip installing Marmot (preferred method) or by adding the Marmot directory folder to the system path.
 - To pip install Marmot:
   1. Open a cmd window that is setup with Python and change directory to your desired install location.
-  2. Type the following `pip3 install --user -e git+https://github.nrel.gov/PCM/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit or tagged release if desired by adding **@comit_id** after Marmot.git and before the **#** symbol.
-For example, the following can be used to install Marmot release v0.7.0 `git+https://github.nrel.gov/PCM/Marmot.git@v0.7.0#egg=marmot`  
+  2. Type the following `pip3 install --user -e git+https://github.com:NREL/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit or tagged release if desired by adding **@comit_id** after Marmot.git and before the **#** symbol.
+For example, the following can be used to install Marmot release v0.7.0 `git+https://github.com:NREL/Marmot.git@v0.7.0#egg=marmot`  
   3. If no error messages appeared Marmot has been installed correctly. To import the formatter or plotter, use the following import commands:
 
  ```python
@@ -80,7 +80,7 @@ from marmot.marmot_plot_main import MarmotPlot
 ## Marmot Formatter
 The **marmot_h5_formatter** reads in PLEXOS hdf5 files created with the h5plexos library (the repo for which can be found [here](https://github.com/NREL/h5plexos)) and processes the output results to ready them for plotting. Once the outputs have been processed, they are saved to an intermediary hdf5 file which can then be read into the Marmot plotting code. From the h5plexos ReadMe: "This package provides a Python interface for reading HDF5 files with H5PLEXOS v0.5 and v0.6 formatting. To create v0.5 files, use a version of this package in the 0.5 series. To create v0.6 files, use H5PLEXOS.jl."
 
-Before you use the **marmot_h5_formatter** you will need to adjust and set the input settings in the **Marmot_user_defined_inputs.csv** and select PLEXOS properties to process in the **plexos_properties.csv**. You may also want to edit the Mapping Files described [here](https://github.nrel.gov/PCM/Marmot#mapping-files). These files can be edited once you clone the repo.
+Before you use the **marmot_h5_formatter** you will need to adjust and set the input settings in the **Marmot_user_defined_inputs.csv** and select PLEXOS properties to process in the **plexos_properties.csv**. You may also want to edit the Mapping Files described [here](https://github.com/NREL/Marmot#mapping-files). These files can be edited once you clone the repo.
 
 ### 1. Adjusting User Defined Inputs CSV
 
@@ -88,7 +88,7 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 
 - `PLEXOS_Solutions_folder` **Required** The directory that contains all h5plexos files that have come from PLEXOS. This directory should include a sub-folder for each scenario in the `Scenarios`, each of which holds the individual h5plexos solution files. Here's an example of how that would look:
 
-  ![marmot folder structure](https://github.nrel.gov/storage/user/1084/files/bf9d1670-1254-11eb-8e62-c06455591fb2)
+  ![marmot folder structure](https://user-images.githubusercontent.com/43964549/132605149-fd088a10-8c4a-49f1-b8b7-d3d31e3f5a30.png)
 
    Multiple h5plexos files within a single scenario sub-folder will be combined to form a single timeseries, with any overlapping periods trimmed.
 
@@ -98,9 +98,9 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 
 - `VoLL` **Required** Value of lost load for calculating the Cost of Unserved Energy, default is 10,000 $/MWh
 
-- `Region_Mapping.csv_name` **Optional** The name of the Region_Mapping.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) below.
+- `Region_Mapping.csv_name` **Optional** The name of the Region_Mapping.csv described in more detail in [Mapping Files](https://github.com/NREL/Marmot#mapping-files) below.
 
-- `gen_names.csv_name` **Required** The name of the gen_names.csv described in more detail in [Mapping Files](https://github.nrel.gov/PCM/Marmot#mapping-files) below.
+- `gen_names.csv_name` **Required** The name of the gen_names.csv described in more detail in [Mapping Files](https://github.com/NREL/Marmot#mapping-files) below.
 
 ### 2. Selecting Properties to Process
 The **plexos_properties.csv** file determines which PLEXOS properties to pull from the h5plexos results. Under the *"collect_data"* column, adjust the property to be TRUE or FALSE to set whether that particular property will be processed. If a property you would like to process is not in this list, add it as a new line with the same format.
@@ -109,14 +109,14 @@ The **plexos_properties.csv** file determines which PLEXOS properties to pull fr
 To run the Marmot Formatter open a terminal that is setup with Python, go to the Marmot folder containg the marmot_h5_formatter.py file (see example image, **cd C:\Users\DLEVIE\Documents\Marmot\marmot**), and run the following command:
 `python marmot_h5_formatter.py`
 
-![Run Formatter](https://github.nrel.gov/storage/user/1084/files/9cd43400-0819-11ec-8792-449d16af0462)
+![Run Formatter](https://user-images.githubusercontent.com/43964549/132605182-1d2f3d48-355e-4877-80b6-ea5ec398faa5.png)
   
 
 ## Marmot Plotter
 
 **marmot_plot_main.py** is the main plotting script within Marmot. It reads in data that has been processed by the Marmot Formatter, creates plots, and then save the figures and data. These figures can be saved to any format specified by the user including both raster and vector formats. An associated .csv data file will also be created with each figure allowing users to view the plot data in a tabular format.
 
-The main plotting script works by calling on individual plotting modules. These can be viewed within the repo [plottingmodules](https://github.nrel.gov/PCM/Marmot/tree/master/marmot/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc.
+The main plotting script works by calling on individual plotting modules. These can be viewed within the repo [plottingmodules](https://github.com/NREL/Marmot/tree/master/marmot/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc.
 
 As with the Marmot Formatter, users will need to adjust the input settings in the **Marmot_user_defined_inputs.csv** and set which plots to create in **Marmot_plot_select.csv**.
 
@@ -124,13 +124,13 @@ As with the Marmot Formatter, users will need to adjust the input settings in th
 
 Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the plotting code include:
 
-- `PLEXOS_Solutions_folder` **Required** Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
+- `PLEXOS_Solutions_folder` **Required** Same as described [above](https://github.com/NREL/Marmot#marmot-formatter)
 
-- `Marmot_Solutions_folder` **Optional** Same as described [above](https://github.nrel.gov/PCM/Marmot#plexos_h5_results_formatter)
+- `Marmot_Solutions_folder` **Optional** Same as described [above](https://github.com/NREL/Marmot#marmot-formatter)
 
 - `Scenarios` **Required** This is the name of the scenario(s) to plot. The order of the scenarios will determine the order of the scenarios in the plot. Resulting outputs will be saved in the "*Figures_Output*" folder contained with the `Marmot_Solutions_folder`. "*Figures_Output*" is created automatically when **marmot_plot_main.py** is run. If you are making difference plots, the second scenario in this list will be subtracted from the first.
 
-- `AGG_BY` **Required** A string that determines the region type by which to aggregate when creating plots. The default options are *”regions”* and *“zones”*. Other options can be added based on how the user sets up **Region_mapping.csv**, described [above](https://github.nrel.gov/PCM/Marmot#mapping-files)
+- `AGG_BY` **Required** A string that determines the region type by which to aggregate when creating plots. The default options are *”regions”* and *“zones”*. Other options can be added based on how the user sets up **Region_mapping.csv**, described [below](https://github.com/NREL/Marmot#mapping-files)
 
 - `zone_region_sublist` **Optional** List of *"regions/zones”* to plot if results are not required for all regions. The list of *"regions/zones”* should be contained within the `AGG_BY` aggregation. This is an optional field and can be left empty if not needed.
 
@@ -146,11 +146,11 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 To run the Marmot Plotter open a terminal that is setup with Python, go to the marmot folder containg the marmot_plot_main.py file (see example image **cd C:\Users\DLEVIE\Documents\Marmot\marmot**), and run the following command:
 `python marmot_plot_main.py`
 
-![Run Plotter](https://github.nrel.gov/storage/user/1084/files/c1301080-0819-11ec-98f0-36f70be1dffa)
+![Run Plotter](https://user-images.githubusercontent.com/43964549/132605191-b1c5aa81-6f1d-42a5-ac7a-c0ac47b745d9.png)
 
 ## Mapping Files
 Marmot gives the user the ability to map extra regions to your data, rename generators, adjust generator technology colors, and group different technologies together using a set of csv files. Adjusting these values to your specific PLEXOS database is not required for Marmot to run but is recommended for the best results.
-Examples of these files can be found within in the repo in the [mapping_folder](https://github.nrel.gov/PCM/Marmot/tree/master/mapping_folder).
+Examples of these files can be found within in the repo in the [mapping_folder](https://github.com/NREL/Marmot/tree/master/mapping_folder).
 
 These csv files are:
 
@@ -178,7 +178,7 @@ These csv files are:
 
 **The adjustment of the following settings are all optional** and are setup with default values. Users who would like to further customize how Marmot works can change these values in a standard text editor.
 
-These additional configuration settings live within the [Marmot/marmot/config](https://github.nrel.gov/PCM/Marmot/tree/master/marmot/config) folder of the repo. A **config.yml** file will be created the first time the **marmot_h5_formatter** or **marmot_plot_main** is run. After the yml file has been created users will be able to change any settings they like within the file. Once created, this file is never overwritten by Marmot. To revert to default settings, delete the config.yml file and Marmot will create it again at runtime.
+These additional configuration settings live within the [Marmot/marmot/config](https://github.com/NREL/Marmot/tree/master/marmot/config) folder of the repo. A **config.yml** file will be created the first time the **marmot_h5_formatter** or **marmot_plot_main** is run. After the yml file has been created users will be able to change any settings they like within the file. Once created, this file is never overwritten by Marmot. To revert to default settings, delete the config.yml file and Marmot will create it again at runtime.
 The config.yml file is not to be confused with the marmot_logging_config.yml file which is used to set the logging defaults used by Marmot and also exists in the same folder.
 
 The **config.yml** settings and their defaults are as follows:
