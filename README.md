@@ -53,7 +53,7 @@ After all required prerequisites are installed, you are ready to install and run
 
 *The following command will clone the most recent commit to the master branch of Marmot which may not be production ready, to get the most recent stable release see the [Releases](https://github.com/NREL/Marmot/releases) section of the repo.*
 
-- First `git clone --recurse-submodules https://git@github.com:NREL/Marmot.git` to any location you like, make sure to include `--recurse-submodules` else h5plexos will not be included correctly.
+- First `git clone --recurse-submodules https://github.com/NREL/Marmot.git` to any location you like, make sure to include `--recurse-submodules` else h5plexos will not be included correctly.
 
 - The Marmot formatter imports h5plexos. To avoid import and version errors, h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot `--recurse-submodules`, you can combine the git submodule init and git submodule update steps by running `git submodule update --init`.
 
@@ -64,8 +64,8 @@ After all required prerequisites are installed, you are ready to install and run
 - To use Marmot as a Python Module that can be imported, it first needs to be made visible to the Python package directory. This can be done two ways, either by pip installing Marmot (preferred method) or by adding the Marmot directory folder to the system path.
 - To pip install Marmot:
   1. Open a cmd window that is setup with Python and change directory to your desired install location.
-  2. Type the following `pip3 install --user -e git+https://github.com:NREL/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit or tagged release if desired by adding **@comit_id** after Marmot.git and before the **#** symbol.
-For example, the following can be used to install Marmot release v0.7.0 `git+https://github.com:NREL/Marmot.git@v0.7.0#egg=marmot`  
+  2. Type the following `pip3 install --user -e git+https://github.com/NREL/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit or tagged release if desired by adding **@comit_id** after Marmot.git and before the **#** symbol.
+For example, the following can be used to install Marmot release v0.7.0 `git+https://github.com/NREL/Marmot.git@v0.7.0#egg=marmot`  
   3. If no error messages appeared Marmot has been installed correctly. To import the formatter or plotter, use the following import commands:
 
  ```python
