@@ -1,23 +1,30 @@
 import os
+import logging
+import numpy as np
 import pandas as pd
-import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-import numpy as np
-import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+import marmot.plottingmodules.plotutils.plot_library as plotlib
+
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
+            UnderDevelopment, MissingZoneData)
 
 
-#===============================================================================
-
-class MPlot(object):
+class MPlot(PlotDataHelper):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
@@ -37,13 +44,14 @@ class MPlot(object):
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
+
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         # sets up x, y dimensions of plot
-        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
+        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
 
         grid_size = xdimension*ydimension
 
@@ -68,12 +76,12 @@ class MPlot(object):
                 install_cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario).copy()
                 avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
                 if self.shift_leapday == True:
-                    avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)
+                    avail_cap = self.adjust_for_leapday(avail_cap)
                 if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():
                     avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
                 else:
                     self.logger.warning(f"No Generation in: {zone_input}")
-                    outputs[zone_input] = mfunc.MissingZoneData()
+                    outputs[zone_input] = MissingZoneData()
                     continue
                 avail_cap.columns = ['avail']
                 install_cap.columns = ['cap']
@@ -82,7 +90,7 @@ class MPlot(object):
                 cap_out = avail_cap.merge(install_cap,left_on = ['gen_name'],right_on = ['gen_name'])
                 cap_out[0] = cap_out['cap'] - cap_out['avail']
                 
-                cap_out = mfunc.df_process_gen_inputs(cap_out, self.ordered_gen)
+                cap_out = self.df_process_gen_inputs(cap_out)
 
                 #Subset only thermal gen categories
                 thermal_gens = [therm for therm in self.thermal_gen_cat if therm in cap_out.columns]
@@ -94,7 +102,7 @@ class MPlot(object):
 
                 # unitconversion based off peak outage hour, only checked once 
                 if i == 0:
-                    unitconversion = mfunc.capacity_energy_unitconversion(max(cap_out.sum(axis=1)))
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(cap_out.sum(axis=1)))
                
                 cap_out = cap_out / unitconversion['divisor']
 
@@ -102,12 +110,12 @@ class MPlot(object):
                 single_scen_out = cap_out.set_index([scenario_names],append = True)
                 chunks.append(single_scen_out)
                 
-                mfunc.create_stackplot(axs = axs, data = cap_out,color_dict = self.PLEXOS_color_dict, label = cap_out.columns, n = i)
-                mfunc.set_plot_timeseries_format(axs, n = i, minticks = self.minticks, maxticks = self.maxticks)
-                axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
+                plotlib.create_stackplot(axs=axs, data=cap_out, color_dict=self.PLEXOS_color_dict, labels=cap_out.columns, n=i)
+                PlotDataHelper.set_plot_timeseries_format(axs, n=i, minticks=self.minticks, maxticks=self.maxticks)
+                axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0), facecolor='inherit', frameon=True)
             
             if not chunks:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
                 
             Data_Table_Out = pd.concat(chunks,axis = 0)
@@ -132,7 +140,7 @@ class MPlot(object):
                              end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
-        outputs = mfunc.UnderDevelopment()
+        outputs = UnderDevelopment()
         self.logger.warning('capacity_out_stack_PASA requires PASA files, and is under development. Skipping plot.')
         return outputs 
     

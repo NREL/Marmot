@@ -1,26 +1,35 @@
 """
 Created on Mon Dec  9 10:34:48 2019
+
 This code creates generation UNstacked plots and is called from Marmot_plot_main.py
 @author: Daniel Levie
 """
+import logging
+import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
-import numpy as np
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
-import logging
-import textwrap
 
-class MPlot(object):
+import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
+
+
+class MPlot(PlotDataHelper):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
         self.x = mconfig.parser("figure_size","xdimension")
@@ -55,7 +64,7 @@ class MPlot(object):
                           (False,f"{agg}_Unserved_Energy",scenario_list)]
             
             # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-            return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+            return self.get_data(self.mplot_data_dict, properties)
         
         if facet:
             check_input_data = getdata(self.Scenarios)
@@ -66,11 +75,11 @@ class MPlot(object):
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
             
         # sets up x, y dimensions of plot
-        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=all_scenarios)
+        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=all_scenarios)
 
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
@@ -110,7 +119,7 @@ class MPlot(object):
 
                     Stacked_Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
                     if self.shift_leapday == True:
-                        Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
+                        Stacked_Gen = self.adjust_for_leapday(Stacked_Gen)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
                     # self.logger.info('No generation in %s',zone_input)
@@ -119,7 +128,7 @@ class MPlot(object):
                 if Stacked_Gen.empty == True:
                     continue
 
-                Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
+                Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen)
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
             
@@ -128,10 +137,10 @@ class MPlot(object):
                 if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
                     Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario).copy()
                     if self.shift_leapday == True:
-                        Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
+                        Stacked_Curt = self.adjust_for_leapday(Stacked_Curt)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                         Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
@@ -152,7 +161,7 @@ class MPlot(object):
 
                 Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario).copy()
                 if self.shift_leapday == True:
-                    Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)     
+                    Load = self.adjust_for_leapday(Load)     
                 Load = Load.xs(zone_input,level=self.AGG_BY)
                 Load = Load.groupby(["timestamp"]).sum()
                 Load = Load.squeeze() #Convert to Series
@@ -163,7 +172,7 @@ class MPlot(object):
                 else:
                     Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
                 if self.shift_leapday == True:
-                    Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)                                
+                    Pump_Load = self.adjust_for_leapday(Pump_Load)                                
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
                 Pump_Load = Pump_Load.squeeze() #Convert to Series
@@ -178,7 +187,7 @@ class MPlot(object):
                 else:
                     Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario].copy()                
                 if self.shift_leapday == True:
-                    Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)                    
+                    Unserved_Energy = self.adjust_for_leapday(Unserved_Energy)                    
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
@@ -216,7 +225,7 @@ class MPlot(object):
                 
                 # unitconversion based off peak generation hour, only checked once 
                 if i == 0:
-                    unitconversion = mfunc.capacity_energy_unitconversion(max(Stacked_Gen.max()))
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Stacked_Gen.max()))
                 Stacked_Gen = Stacked_Gen/unitconversion['divisor']
                 Unserved_Energy = Unserved_Energy/unitconversion['divisor']
                 
@@ -238,7 +247,7 @@ class MPlot(object):
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
                 axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[i].margins(x=0.01)
-                mfunc.set_plot_timeseries_format(axs,i)
+                PlotDataHelper.set_plot_timeseries_format(axs,i)
 
                 # create list of gen technologies
                 l1 = Stacked_Gen.columns.tolist()
@@ -246,7 +255,7 @@ class MPlot(object):
             
             if not data_tables:
                 self.logger.warning(f'No generation in {zone_input}')
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
@@ -270,11 +279,8 @@ class MPlot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
             
-            xlabels = [x.replace('_',' ') for x in self.xlabels]
-            ylabels = [y.replace('_',' ') for y in self.ylabels]
-            
             # add facet labels
-            mfunc.add_facet_labels(fig1, xlabels, ylabels)
+            self.add_facet_labels(fig1)
                         
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -285,7 +291,7 @@ class MPlot(object):
             
              #Remove extra axis
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
 
             data_table_out = pd.concat(data_tables)
                 

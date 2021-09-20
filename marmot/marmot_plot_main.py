@@ -24,12 +24,13 @@ if __name__ == '__main__': # Add Marmot directory to sys path if running from __
         os.chdir(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import importlib
 import time
-import pandas as pd
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 import logging 
 import logging.config
 import yaml
+import pandas as pd
+import matplotlib as mpl
+import matplotlib.pyplot as plt
+
 try:
     from marmot.meta_data import MetaData
 except ModuleNotFoundError:
@@ -39,11 +40,10 @@ except ModuleNotFoundError:
     print("or add the Marmot directory to you sys path. See ReadME for details.\n")
     print("System will now exit")
     sys.exit()
-import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
-
-#===============================================================================
-
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
+            UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
+                        
 #A bug in pandas requires this to be included, otherwise df.to_string truncates long strings
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
@@ -131,6 +131,7 @@ class MarmotPlot(SetupLogger):
                  ylabels=None,
                  ticklabels=None,
                  Region_Mapping=pd.DataFrame(),
+                 TECH_SUBSET=None,
                  **kwargs):
         """Marmotplot class __init__ method.
 
@@ -164,6 +165,10 @@ class MarmotPlot(SetupLogger):
             Mapping file to map custom regions/zones to create custom aggregations. 
             Aggregations are created by grouping PLEXOS regions.
             The default is pd.DataFrame().
+        TECH_SUBSET : str, optional
+            tech subset to plot (eg. vre, thermal, re)
+            The TECH_SUBSET value should be a column in the ordered_gen_categories.csv.
+            The default is None.
 
         Returns
         -------
@@ -177,8 +182,8 @@ class MarmotPlot(SetupLogger):
         elif isinstance(Scenarios, list):
             self.Scenarios = Scenarios
         
-        
         self.AGG_BY = AGG_BY
+        self.TECH_SUBSET = TECH_SUBSET
         self.PLEXOS_Solutions_folder = PLEXOS_Solutions_folder
         
         if isinstance(gen_names, str):
@@ -271,7 +276,7 @@ class MarmotPlot(SetupLogger):
 
         '''
         
-        self.logger.info(f"Aggregation selected: {self.AGG_BY}")
+        self.logger.info(f"Area Aggregation selected: {self.AGG_BY}")
         
         if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
             self.logger.info(f"Only plotting {self.AGG_BY}: {self.zone_region_sublist}")
@@ -312,50 +317,66 @@ class MarmotPlot(SetupLogger):
         #===============================================================================
         
         try:
-            ordered_gen = pd.read_csv(os.path.join(self.mapping_folder,
-                                                   mconfig.parser('ordered_gen_file')),
-                                      squeeze=True).str.strip().tolist()
+            ordered_gen_categories = pd.read_csv(os.path.join(self.mapping_folder,
+                                                   mconfig.parser('ordered_gen_categories')))
         except FileNotFoundError:
-            self.logger.warning((f'Could not find "{os.path.join(self.mapping_folder, "ordered_gen.csv")}"; Check file name in config file. This is required to run Marmot, system will now exit'))
+            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "ordered_gen.csv")}"; '
+                            'Check file name in config file. This is required to run Marmot, system will now exit')
             sys.exit()
         
-        try:
-            pv_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
-                                                  mconfig.parser('category_file_names','pv_gen_cat')),
-                                     squeeze=True).str.strip().tolist()
-        except FileNotFoundError:
-            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "pv_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
+
+        if set(self.gen_names["New"].unique()).issubset(ordered_gen_categories['Ordered_Gen'].str.strip().tolist()) == False:
+                            self.logger.warning("The following tech categories from the gen_names csv do not exist in ordered_gen_categories.csv! " 
+                          f"{set(self.gen_names.New.unique()) - (set(ordered_gen_categories['Ordered_Gen'].str.strip().tolist()))}")
+
+        # Subset ordered_gen to user desired generation
+        if self.TECH_SUBSET:
+            if self.TECH_SUBSET not in ordered_gen_categories.columns:
+                self.logger.warning(f"{self.TECH_SUBSET} column was not found in the ordered_gen_categories.csv "
+                                "All generator technologies will be plotted")
+                ordered_gen = ordered_gen_categories['Ordered_Gen'].str.strip().tolist()  
+            else:
+                ordered_gen = ordered_gen_categories.loc[ordered_gen_categories[self.TECH_SUBSET] == True]
+                ordered_gen = ordered_gen['Ordered_Gen'].str.strip().tolist()
+                self.logger.info(f"Tech Aggregation selected: {self.TECH_SUBSET}")
+        else:
+            ordered_gen = ordered_gen_categories['Ordered_Gen'].str.strip().tolist()
+        
+        # If Other category does not exhist in ordered_gen, create entry 
+        if 'Other' not in ordered_gen:
+            ordered_gen.append('Other')
+
+        if 'pv' not in ordered_gen_categories.columns:
             pv_gen_cat = []
-        
-        try:
-            re_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
-                                                  mconfig.parser('category_file_names','re_gen_cat')),
-                                     squeeze=True).str.strip().tolist()
-        except FileNotFoundError:
-            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "re_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
+            self.logger.warning('"pv" column was not found in the ordered_gen_categories.csv '
+                'Check if the column exists in the csv file. This is required for certain plots to display correctly')
+        else:
+            pv_gen_cat = ordered_gen_categories.loc[ordered_gen_categories['pv'] == True]
+            pv_gen_cat = pv_gen_cat['Ordered_Gen'].str.strip().tolist()
+            
+        if 're' not in ordered_gen_categories.columns:
             re_gen_cat = []
-        
-        try:
-            vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
-                                                   mconfig.parser('category_file_names','vre_gen_cat')),
-                                      squeeze=True).str.strip().tolist()
-        except FileNotFoundError:
-            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
+            self.logger.warning('"re" column was not found in the ordered_gen_categories.csv '
+                'Check if the column exists in the csv file. This is required for certain plots to display correctly')
+        else:
+            re_gen_cat = ordered_gen_categories.loc[ordered_gen_categories['re'] == True]
+            re_gen_cat = re_gen_cat['Ordered_Gen'].str.strip().tolist()
+
+        if 'vre' not in ordered_gen_categories.columns:
             vre_gen_cat = []
-        
-        try:
-            thermal_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
-                                                       mconfig.parser('category_file_names','thermal_gen_cat')),
-                                          squeeze = True).str.strip().tolist()
-        except FileNotFoundError:
-            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "thermal_gen_cat.csv")}"; Check file name in config file. This is required for certain plots to display correctly')
+            self.logger.warning('"vre" column was not found in the ordered_gen_categories.csv '
+                'Check if the column exists in the csv file. This is required for certain plots to display correctly')
+        else:
+            vre_gen_cat = ordered_gen_categories.loc[ordered_gen_categories['vre'] == True]
+            vre_gen_cat = vre_gen_cat['Ordered_Gen'].str.strip().tolist()
+
+        if 'thermal' not in ordered_gen_categories.columns:
             thermal_gen_cat = []
-        
-        
-        if set(self.gen_names["New"].unique()).issubset(ordered_gen) == False:
-                            self.logger.warning(f"The new categories from the gen_names csv do not exist in ordered_gen! \
-                               (Ignore this message if you are downselecting technology types on purpose.) \
-                          {set(self.gen_names.New.unique()) - (set(ordered_gen))}")
+            self.logger.warning('"thermal" column was not found in the ordered_gen_categories.csv '
+                'Check if the column exists in the csv file. This is required for certain plots to display correctly')
+        else:
+            thermal_gen_cat = ordered_gen_categories.loc[ordered_gen_categories['thermal'] == True]
+            thermal_gen_cat = thermal_gen_cat['Ordered_Gen'].str.strip().tolist()
         
         try:
             PLEXOS_color_dict = pd.read_csv(os.path.join(self.mapping_folder,
@@ -377,7 +398,12 @@ class MarmotPlot(SetupLogger):
         marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
         
         gen_names_dict=self.gen_names[['Original','New']].set_index("Original").to_dict()["New"]
-        
+
+        # If curtailment category does not exhist in ordered_gen, create entry 
+        curtailment_name = gen_names_dict.get('Curtailment','Curtailment')
+        if curtailment_name not in ordered_gen:
+            ordered_gen.append(curtailment_name)
+
         #===============================================================================
         # Set aggregation
         #===============================================================================
@@ -542,33 +568,33 @@ class MarmotPlot(SetupLogger):
                                            start_date_range = row.iloc[6],
                                            end_date_range = row.iloc[7])
                 
-                if isinstance(Figure_Out, mfunc.MissingInputData):
+                if isinstance(Figure_Out, MissingInputData):
                     self.logger.info("Add Inputs With Formatter Before Attempting to Plot!\n")
                     continue
                 
-                if isinstance(Figure_Out, mfunc.DataSavedInModule):
+                if isinstance(Figure_Out, DataSavedInModule):
                     self.logger.info(f'Plotting Completed for {row["Figure Output Name"]}\n')
                     self.logger.info("Plots & Data Saved Within Module!\n")
                     continue
                 
-                if isinstance(Figure_Out, mfunc.UnderDevelopment):
+                if isinstance(Figure_Out, UnderDevelopment):
                     self.logger.info("Plot is Under Development, Plotting Skipped!\n")
                     continue
                 
-                if isinstance(Figure_Out, mfunc.InputSheetError):
+                if isinstance(Figure_Out, InputSheetError):
                     self.logger.info("Input Sheet Data Incorrect!\n")
                     continue
                 
-                if isinstance(Figure_Out, mfunc.MissingMetaData):
+                if isinstance(Figure_Out, MissingMetaData):
                     self.logger.info("Required Meta Data Not Available For This Plot!\n")
                     continue
                 
-                if isinstance(Figure_Out, mfunc.UnsupportedAggregation):
+                if isinstance(Figure_Out, UnsupportedAggregation):
                     self.logger.info(f"Aggregation Type: '{self.AGG_BY}' not supported for This plot!\n")
                     continue
                 
                 for zone_input in Zones:
-                    if isinstance(Figure_Out[zone_input], mfunc.MissingZoneData):
+                    if isinstance(Figure_Out[zone_input], MissingZoneData):
 
                         self.logger.info(f"No Data to Plot in {zone_input}")
 
@@ -641,6 +667,12 @@ def main():
     gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
     
     AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
+
+    if pd.notna(Marmot_user_defined_inputs.loc['TECH_SUBSET', 'User_defined_value']):
+        TECH_SUBSET = Marmot_user_defined_inputs.loc['TECH_SUBSET'].squeeze().strip()
+    else:
+        TECH_SUBSET = None
+
     # Facet Grid Labels (Based on Scenarios)
     zone_region_sublist = pd.Series(str(Marmot_user_defined_inputs.loc['zone_region_sublist'].squeeze()).split(",")).str.strip().tolist()
 
@@ -653,9 +685,16 @@ def main():
     ticklabels = pd.Series(str(Marmot_user_defined_inputs.loc['Tick_labels'].squeeze()).split(",")).str.strip().tolist()
     if ticklabels == ['nan']: ticklabels = [""]
     
-    initiate = MarmotPlot(Scenarios,AGG_BY,PLEXOS_Solutions_folder,gen_names,Marmot_plot_select,
-                          Marmot_Solutions_folder,Mapping_folder,Scenario_Diff,zone_region_sublist,
-                          xlabels,ylabels,ticklabels,Region_Mapping)
+    initiate = MarmotPlot(Scenarios, AGG_BY, PLEXOS_Solutions_folder, gen_names, Marmot_plot_select,
+                          Marmot_Solutions_folder=Marmot_Solutions_folder,
+                          mapping_folder=Mapping_folder,
+                          Scenario_Diff=Scenario_Diff,
+                          zone_region_sublist=zone_region_sublist,
+                          xlabels=xlabels,
+                          ylabels=ylabels,
+                          ticklabels=ticklabels,
+                          Region_Mapping=Region_Mapping,
+                          TECH_SUBSET=TECH_SUBSET)
     
     initiate.run_plotter()
 

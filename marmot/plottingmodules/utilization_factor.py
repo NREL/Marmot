@@ -5,19 +5,19 @@ Created on Mon Dec  9 13:20:56 2019
 This code creates plots of generator utilization factor 
 (similiar to capacity factor but based on Available Capacity instead of Installed Capacity) 
 and is called from Marmot_plot_main.py
-
-
 @author: adyreson
 """
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
 
-#===============================================================================
+import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
+            UnderDevelopment, MissingZoneData)
+
 
 def df_process_gen_ind_inputs(df,self):
     df = df.reset_index(['timestamp','tech','gen_name'])
@@ -31,13 +31,19 @@ def df_process_gen_ind_inputs(df,self):
 
     return df
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.mplot_data_dict = {}
 
@@ -46,7 +52,7 @@ class MPlot(object):
                              end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
-        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
+        return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -55,10 +61,10 @@ class MPlot(object):
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -128,7 +134,7 @@ class MPlot(object):
             
             if not cf_chunk:
                 self.logger.warning("No generation in %s",zone_input)
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             CF_all_scenarios = pd.concat(cf_chunk, axis=1, sort=False)
@@ -137,7 +143,7 @@ class MPlot(object):
 
             # If CF_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
@@ -150,7 +156,7 @@ class MPlot(object):
                              end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
-        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
+        return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -159,10 +165,10 @@ class MPlot(object):
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties, self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(self.AGG_BY + " = " + zone_input)
@@ -227,7 +233,7 @@ class MPlot(object):
                 
             if not th_gen_chunk:
                 self.logger.warning("No generation in %s",zone_input)
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             CF_all_scenarios=pd.concat(th_gen_chunk, axis=1, sort=False)
@@ -239,7 +245,7 @@ class MPlot(object):
 
             # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
@@ -250,7 +256,7 @@ class MPlot(object):
                              end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
-        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
+        return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -259,10 +265,10 @@ class MPlot(object):
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -327,7 +333,7 @@ class MPlot(object):
             
             if not cf_chunk:
                 self.logger.warning("No generation in %s",zone_input)
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             if mconfig.parser("plot_title_as_region"):
                 ax3.set_title(zone_input)
@@ -338,7 +344,7 @@ class MPlot(object):
 
             # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
@@ -349,7 +355,7 @@ class MPlot(object):
                              end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
-        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
+        return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -357,10 +363,10 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             GW_all_scenarios = pd.DataFrame()
@@ -415,7 +421,7 @@ class MPlot(object):
             
             if not total_gen_chunks:
                 self.logger.warning("No generation in %s",zone_input)
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             if mconfig.parser("plot_title_as_region"):
                 ax3.set_title(zone_input)

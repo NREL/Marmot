@@ -3,22 +3,23 @@
 Created on Mon Dec  9 13:20:56 2019
 
 This module plots figures of total generation for a year, month etc.
-
 @author: Daniel Levie 
 """
 
+import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
 import matplotlib.ticker as mtick
-import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
-import textwrap
 
-#===============================================================================
+import marmot.config.mconfig as mconfig
+import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
+            UnderDevelopment, MissingZoneData)
+
 
 custom_legend_elements = Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
@@ -27,7 +28,7 @@ custom_legend_elements = Patch(facecolor='#DD0200',
 custom_legend_elements_month = Patch(facecolor='#DD0200',alpha=0.7,edgecolor='#DD0200',
                                      label='Unserved_Energy')
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
 
     MONTHS = {  1 : "January",
                 2 : "February",
@@ -49,6 +50,12 @@ class MPlot(object):
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
         self.x = mconfig.parser("figure_size","xdimension")
@@ -76,10 +83,10 @@ class MPlot(object):
                       (False,f"{agg}_Unserved_Energy",self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         for zone_input in self.Zones:
@@ -105,10 +112,10 @@ class MPlot(object):
                     self.logger.warning(f"No installed capacity in: {zone_input}")
                     continue
 
-                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = mfunc.get_sub_hour_interval_count(Total_Gen_Stack)
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
@@ -117,7 +124,7 @@ class MPlot(object):
                     Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -193,17 +200,17 @@ class MPlot(object):
             Total_Demand_Out = Total_Demand_Out.rename('Total Demand')
             Unserved_Energy_Out = Unserved_Energy_Out.rename('Unserved Energy')
 
-            Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
+            Total_Generation_Stack_Out = self.create_categorical_tech_index(Total_Generation_Stack_Out)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             if Total_Generation_Stack_Out.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
             # unit conversion return divisor and energy units
-            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum(axis=1)))
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum(axis=1)))
 
             Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
             Total_Load_Out = Total_Load_Out.T/unitconversion['divisor']
@@ -234,7 +241,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -289,10 +296,10 @@ class MPlot(object):
                       (False,f"generator_{self.curtailment_prop}",self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         for zone_input in self.Zones:
@@ -313,10 +320,10 @@ class MPlot(object):
                     self.logger.warning(f"No installed capacity in : {zone_input}")
                     break
 
-                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = mfunc.get_sub_hour_interval_count(Total_Gen_Stack)
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
@@ -325,7 +332,7 @@ class MPlot(object):
                     Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -343,7 +350,7 @@ class MPlot(object):
             
             Total_Generation_Stack_Out = pd.concat(gen_chunks, axis=1, sort=False).fillna(0)
 
-            Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
+            Total_Generation_Stack_Out = self.create_categorical_tech_index(Total_Generation_Stack_Out)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
@@ -351,18 +358,18 @@ class MPlot(object):
             try:
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
             Total_Generation_Stack_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             if Total_Generation_Stack_Out.empty == True:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
-            unitconversion = mfunc.capacity_energy_unitconversion(max(abs(Total_Generation_Stack_Out.sum(axis=1))))
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(abs(Total_Generation_Stack_Out.sum(axis=1))))
             Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
 
             # Data table of values to return to main program
@@ -386,7 +393,7 @@ class MPlot(object):
             
             # Set x-tick labels 
             tick_labels = Total_Generation_Stack_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -462,13 +469,13 @@ class MPlot(object):
                       (True,f"{agg}_Load",self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties, self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
         
-        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels, self.ylabels, 
+        xdimension, ydimension = self.setup_facet_xy_dimensions( 
                                                                     multi_scenario=self.Scenarios)
         grid_size = xdimension*ydimension
 
@@ -510,11 +517,18 @@ class MPlot(object):
                 if vre_only:
                     Total_Gen_Stack = (Total_Gen_Stack.loc[(slice(None), self.vre_gen_cat),:])
                 
-                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
+
+                if Total_Gen_Stack.empty:
+                    if vre_only:
+                        self.logger.warning(f"No vre in current selection: {zone_input}")
+                    gen_chunks.append(pd.DataFrame())
+                    continue
+
                 Total_Gen_Stack.columns = Total_Gen_Stack.columns.add_categories('timestamp')
     
                 # Calculates interval step to correct for MWh of generation if data is subhourly
-                interval_count = mfunc.get_sub_hour_interval_count(Total_Gen_Stack)
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
     
                 #Insert Curtailment into gen stack if it exhists in database
                 if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
@@ -522,7 +536,7 @@ class MPlot(object):
                     Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
-                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns), column=curtailment_name, value=Stacked_Curt) 
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -581,6 +595,14 @@ class MPlot(object):
 
             # Concat all data into single data-frames
             Gen_Out = pd.concat(gen_chunks,axis=0, sort=False)
+            # Drop any technologies with 0 Gen
+            Gen_Out = Gen_Out.loc[:, (Gen_Out != 0).any(axis=0)]
+
+            if Gen_Out.empty:
+                outputs[zone_input] = MissingZoneData()
+                continue
+            
+            # Concat all data into single data-frames
             Pump_Load_Out = pd.concat(pumped_load_chunk, axis=0, sort=False)
             Total_Demand_Out = pd.concat(total_demand_chunk, axis=0, sort=False)
             Total_Load_Out = pd.concat(load_chunk, axis=0, sort=False)
@@ -590,14 +612,6 @@ class MPlot(object):
             Total_Demand_Out.rename(columns={0:'Total Demand'}, inplace=True)
             Total_Load_Out.rename(columns={0:'Total Load (Demand + \n Storage Charging)'}, inplace=True)
             
-            # Drop any technologies with 0 Gen
-            Gen_Out = Gen_Out.loc[:, (Gen_Out != 0).any(axis=0)]
-
-            if Gen_Out.empty:
-                out = mfunc.MissingZoneData()
-                outputs[zone_input] = out
-                continue
-            
             # Determine max value of data-frame 
             if vre_only:
                 max_value = Gen_Out.to_numpy().max()
@@ -606,7 +620,7 @@ class MPlot(object):
             
             if not plot_as_percnt:
                 # unit conversion return divisor and energy units
-                unitconversion = mfunc.capacity_energy_unitconversion(max_value)
+                unitconversion = PlotDataHelper.capacity_energy_unitconversion(max_value)
                 Gen_Out = Gen_Out/unitconversion['divisor']
                 Total_Demand_Out = Total_Demand_Out/unitconversion['divisor']
                 Total_Load_Out = Total_Load_Out/unitconversion['divisor']
@@ -617,7 +631,7 @@ class MPlot(object):
             else:
                 Data_Table_Out = Gen_Out.add_suffix(f" (%-Gen)") * 100
 
-            fig, axs = mfunc.setup_plot(xdimension, ydimension, sharey=True)
+            fig, axs = plotlib.setup_plot(xdimension, ydimension, sharey=True)
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
 
             unique_tech_names = []
@@ -648,7 +662,7 @@ class MPlot(object):
                 
                 # Set x-tick labels 
                 tick_labels = month_gen.index
-                mfunc.set_barplot_xticklabels(tick_labels, ax=axs[i])
+                PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=axs[i])
 
                 axs[i].tick_params(axis='y', which='major', length=5, width=1)
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
@@ -692,7 +706,7 @@ class MPlot(object):
                                     facecolor='inherit', frameon=True)
 
             # add facet labels
-            mfunc.add_facet_labels(fig, self.xlabels, self.ylabels)
+            self.add_facet_labels(fig)
             
             fig.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -709,7 +723,7 @@ class MPlot(object):
 
             #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs, excess_axs, grid_size)
+                PlotDataHelper.remove_excess_axs(axs, excess_axs, grid_size)
             
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
@@ -731,13 +745,13 @@ class MPlot(object):
 
 
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
         
-        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
+        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
         grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
@@ -748,7 +762,7 @@ class MPlot(object):
             Total_Gen_Out = pd.DataFrame()
             self.logger.info(f"Zone = {zone_input}")
 
-            fig, axs = mfunc.setup_plot(xdimension, ydimension)
+            fig, axs = plotlib.setup_plot(xdimension, ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
             axs = axs.ravel()
             
@@ -765,7 +779,7 @@ class MPlot(object):
                     self.logger.warning(f"No installed capacity in: {zone_input}")
                     continue
     
-                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
                 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
     
@@ -774,7 +788,7 @@ class MPlot(object):
                     Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
-                        Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -789,7 +803,7 @@ class MPlot(object):
             Total_Gen_Out = Total_Gen_Out.loc[:, (Total_Gen_Out != 0).any(axis=0)]
             
             if Total_Gen_Out.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
@@ -825,7 +839,7 @@ class MPlot(object):
                                     facecolor='inherit', frameon=True)
 
             # add facet labels
-            mfunc.add_facet_labels(fig, self.xlabels, self.ylabels)
+            self.add_facet_labels(fig)
             
             fig.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -835,7 +849,7 @@ class MPlot(object):
 
             #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs, excess_axs, grid_size)
+                PlotDataHelper.remove_excess_axs(axs, excess_axs, grid_size)
             
             outputs[zone_input] = {'fig': fig, 'data_table': Total_Gen_Out}
 
@@ -848,7 +862,7 @@ class MPlot(object):
 
     def total_gen_facet(self, figure_name=None, prop=None, start=None, end=None,
                         timezone="", start_date_range=None, end_date_range=None):
-        outputs = mfunc.UnderDevelopment()
+        outputs = UnderDevelopment()
         self.logger.warning('total_gen_facet is under development')
         return outputs
 
@@ -904,7 +918,7 @@ class MPlot(object):
 
     #     Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load'})
 
-    #     Total_Generation_Stack_Out = df_process_categorical_index(Total_Generation_Stack_Out, self)
+    #     Total_Generation_Stack_Out = create_categorical_tech_index(Total_Generation_Stack_Out, self)
     #     Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000
     #     Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 

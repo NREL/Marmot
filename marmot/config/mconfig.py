@@ -73,14 +73,8 @@ def createConfig(configfile_path):
 
         plexos_properties_file = 'plexos_properties.csv',
         
-        category_file_names = dict(
-            pv_gen_cat = 'pv_gen_cat.csv',
-            re_gen_cat = 're_gen_cat.csv',
-            vre_gen_cat = 'vre_gen_cat.csv',
-            thermal_gen_cat = 'thermal_gen_cat.csv'
-            ),
         color_dictionary_file = 'colour_dictionary.csv',
-        ordered_gen_file = 'ordered_gen.csv'
+        ordered_gen_categories = 'ordered_gen_categories.csv'
         )
 
     with open(configfile_path, "w") as cfgfile:

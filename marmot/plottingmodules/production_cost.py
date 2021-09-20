@@ -4,25 +4,31 @@ Created on Tue Dec 17 16:24:40 2019
 
 This module plots figures related to the cost of opertaing the power system.
 Plots can be broken down by cost categories, genertaor types etc. 
-
 @author: Daniel Levie
 """
 
+import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import logging
+
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
-#===============================================================================
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
         self.x = mconfig.parser("figure_size","xdimension")
@@ -44,11 +50,11 @@ class MPlot(object):
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             total_cost_chunk = []
@@ -64,20 +70,20 @@ class MPlot(object):
                 except KeyError:
                     self.logger.warning(f"No installed capacity in : {zone_input}")
                     continue
-                Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
+                Total_Installed_Capacity = self.df_process_gen_inputs(Total_Installed_Capacity)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity = Total_Installed_Capacity.iloc[0]
 
                 Total_Gen_Cost = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
-                Total_Gen_Cost = mfunc.df_process_gen_inputs(Total_Gen_Cost, self.ordered_gen)
+                Total_Gen_Cost = self.df_process_gen_inputs(Total_Gen_Cost)
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)*-1
                 Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/MW-year
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
 
                 Pool_Revenues = self.mplot_data_dict["generator_Pool_Revenue"].get(scenario)
                 Pool_Revenues = Pool_Revenues.xs(zone_input,level=self.AGG_BY)
-                Pool_Revenues = mfunc.df_process_gen_inputs(Pool_Revenues, self.ordered_gen)
+                Pool_Revenues = self.df_process_gen_inputs(Pool_Revenues)
                 Pool_Revenues = Pool_Revenues.sum(axis=0)
                 Pool_Revenues = Pool_Revenues/Total_Installed_Capacity #Change to $/MW-year
                 Pool_Revenues.rename("Energy_Revenues", inplace=True)
@@ -85,7 +91,7 @@ class MPlot(object):
                 ### Might cvhnage to Net Reserve Revenue at later date
                 Reserve_Revenues = self.mplot_data_dict["generator_Reserves_Revenue"].get(scenario)
                 Reserve_Revenues = Reserve_Revenues.xs(zone_input,level=self.AGG_BY)
-                Reserve_Revenues = mfunc.df_process_gen_inputs(Reserve_Revenues, self.ordered_gen)
+                Reserve_Revenues = self.df_process_gen_inputs(Reserve_Revenues)
                 Reserve_Revenues = Reserve_Revenues.sum(axis=0)
                 Reserve_Revenues = Reserve_Revenues/Total_Installed_Capacity #Change to $/MW-year
                 Reserve_Revenues.rename("Reserve_Revenues", inplace=True)
@@ -108,7 +114,7 @@ class MPlot(object):
 
             #Checks if Net_Revenue contains data, if not skips zone and does not return a plot
             if Net_Revenue.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
@@ -129,7 +135,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Systems_Cost_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -172,11 +178,11 @@ class MPlot(object):
                       (False,f"{agg}_Cost_Unserved_Energy",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             total_cost_chunk = []
@@ -215,7 +221,7 @@ class MPlot(object):
             
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
             if not total_cost_chunk:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Total_Systems_Cost_Out = pd.concat(total_cost_chunk, axis=0, sort=False)
@@ -225,7 +231,7 @@ class MPlot(object):
             
              #Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
 
             # Data table of values to return to main program
@@ -243,7 +249,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Systems_Cost_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -303,11 +309,11 @@ class MPlot(object):
                       (False,"generator_Emissions_Cost",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
     
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
@@ -358,7 +364,7 @@ class MPlot(object):
             
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
             if not gen_cost_out_chunks:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Detailed_Gen_Cost_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False)
@@ -371,7 +377,7 @@ class MPlot(object):
             
             # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
             if Detailed_Gen_Cost_Out.empty:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             # Data table of values to return to main program
@@ -390,7 +396,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Detailed_Gen_Cost_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -446,11 +452,11 @@ class MPlot(object):
         properties = [(True,"generator_Total_Generation_Cost",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             gen_cost_out_chunks = []
@@ -466,7 +472,7 @@ class MPlot(object):
                 except KeyError:
                     self.logger.warning(f"No Generators found for : {zone_input}")
                     continue
-                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
 
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
@@ -474,17 +480,17 @@ class MPlot(object):
             
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
             if not gen_cost_out_chunks:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Total_Generation_Stack_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False).fillna(0)
-            Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
+            Total_Generation_Stack_Out = self.create_categorical_tech_index(Total_Generation_Stack_Out)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
             if Total_Generation_Stack_Out.empty:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
 
             # Data table of values to return to main program
@@ -508,7 +514,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -543,11 +549,11 @@ class MPlot(object):
                       (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-        
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
+
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             total_cost_chunk = []
@@ -585,7 +591,7 @@ class MPlot(object):
             
             # Checks if total_cost_chunk contains data, if not skips zone and does not return a plot
             if not total_cost_chunk:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Total_Systems_Cost_Out = pd.concat(total_cost_chunk, axis=0, sort=False)
@@ -594,13 +600,13 @@ class MPlot(object):
             try:
                 Total_Systems_Cost_Out = Total_Systems_Cost_Out-Total_Systems_Cost_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             Total_Systems_Cost_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             # Checks if Total_Systems_Cost_Out contains data, if not skips zone and does not return a plot
             if Total_Systems_Cost_Out.empty:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
                         
             # Data table of values to return to main program
@@ -615,7 +621,7 @@ class MPlot(object):
 
             # Set x-tick labels
             tick_labels = Total_Systems_Cost_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -648,11 +654,10 @@ class MPlot(object):
         properties = [(True, "generator_Total_Generation_Cost" ,self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-        
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             gen_cost_out_chunks = []
@@ -669,31 +674,31 @@ class MPlot(object):
                     self.logger.warning(f"No Generators found for : {zone_input}")
                     continue
                 
-                Total_Gen_Stack = mfunc.df_process_gen_inputs(Total_Gen_Stack, self.ordered_gen)
+                Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 gen_cost_out_chunks.append(Total_Gen_Stack)
             
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
             if not gen_cost_out_chunks:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Total_Generation_Stack_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False).fillna(0)
-            Total_Generation_Stack_Out = mfunc.df_process_categorical_index(Total_Generation_Stack_Out, self.ordered_gen)
+            Total_Generation_Stack_Out = self.create_categorical_tech_index(Total_Generation_Stack_Out)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000000 #Convert to millions
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
             #Ensures region has generation, else skips
             try:
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
             except KeyError:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             Total_Generation_Stack_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             # Checks if Total_Generation_Stack_Out contains data, if not skips zone and does not return a plot
             if Total_Generation_Stack_Out.empty == True:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             # Data table of values to return to main program
@@ -711,7 +716,7 @@ class MPlot(object):
 
             # Set x-tick labels
             tick_labels = Total_Generation_Stack_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -749,11 +754,12 @@ class MPlot(object):
                       (False,"generator_Emissions_Cost",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
+
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
@@ -802,7 +808,7 @@ class MPlot(object):
             
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
             if not gen_cost_out_chunks:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Detailed_Gen_Cost_Out = pd.concat(gen_cost_out_chunks, axis=1, sort=False)
@@ -814,7 +820,7 @@ class MPlot(object):
                 Detailed_Gen_Cost_Out = Detailed_Gen_Cost_Out-Detailed_Gen_Cost_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
 
             except KeyError:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
 
             Detailed_Gen_Cost_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
@@ -828,7 +834,7 @@ class MPlot(object):
 
             # Checks if Detailed_Gen_Cost_Out contains data, if not skips zone and does not return a plot
             if Detailed_Gen_Cost_Out.empty == True:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             # Data table of values to return to main program
@@ -844,7 +850,7 @@ class MPlot(object):
             
             # Set x-tick labels
             tick_labels = Detailed_Gen_Cost_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
             
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)

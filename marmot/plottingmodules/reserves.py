@@ -2,32 +2,38 @@
 """
 Created on Tue Jan 21 15:59:45 2020
 Updated on Monday 21 Sep 2020
+
 This module creates plots of reserve provision and shortage at the generation and region level
 @author: Daniel Levie
 """
 
+import logging
+import numpy as np
 import pandas as pd
 import datetime as dt
-import textwrap
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import numpy as np
 from matplotlib.patches import Patch
 from matplotlib.lines import Line2D
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+
 import marmot.config.mconfig as mconfig
-import logging
+import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 
-#===============================================================================
-
-
-class MPlot(object):
+class MPlot(PlotDataHelper):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
@@ -59,20 +65,20 @@ class MPlot(object):
         properties = [(True,"reserves_generators_Provision",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
 
-            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,facet,multi_scenario=Scenarios)
+            xdimension, ydimension = self.setup_facet_xy_dimensions(facet,multi_scenario=Scenarios)
             grid_size = xdimension*ydimension
             excess_axs = grid_size - len(Scenarios)
 
-            fig1, axs = mfunc.setup_plot(xdimension,ydimension)
+            fig1, axs = plotlib.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             data_tables = []
@@ -88,14 +94,14 @@ class MPlot(object):
                 except KeyError:
                     self.logger.info(f"No reserves deployed in: {scenario}")
                     continue
-                reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
+                reserve_provision_timeseries = self.df_process_gen_inputs(reserve_provision_timeseries)
 
                 if reserve_provision_timeseries.empty is True:
                     self.logger.info(f"No reserves deployed in: {scenario}")
                     continue
                 # unitconversion based off peak generation hour, only checked once 
                 if n == 0:
-                    unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
 
                 if prop == "Peak Demand":
                     self.logger.info("Plotting Peak Demand period")
@@ -121,8 +127,8 @@ class MPlot(object):
                 data_table = data_table.set_index([scenario_names],append = True)
                 data_tables.append(data_table)
                 
-                mfunc.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, label=reserve_provision_timeseries.columns,n=n)
-                mfunc.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
+                plotlib.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, labels=reserve_provision_timeseries.columns,n=n)
+                PlotDataHelper.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
 
                 if prop == "Peak Demand":
                     axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), '.2f')) + ' {}'.format(unitconversion['units']), 
@@ -136,7 +142,7 @@ class MPlot(object):
             
             if not data_tables:
                 self.logger.warning(f'No reserves in {region}')
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[region] = out
                 continue
                 
@@ -159,11 +165,10 @@ class MPlot(object):
 
             #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            xlabels = [x.replace('_',' ') for x in self.xlabels]
-            mfunc.add_facet_labels(fig1, xlabels, self.ylabels)
+            self.add_facet_labels(fig1)
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -192,11 +197,11 @@ class MPlot(object):
         properties = [(True,"reserves_generators_Provision",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
@@ -213,14 +218,14 @@ class MPlot(object):
                 except KeyError:
                     self.logger.info(f"No reserves deployed in {scenario}")
                     continue
-                reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
+                reserve_provision_timeseries = self.df_process_gen_inputs(reserve_provision_timeseries)
 
                 if reserve_provision_timeseries.empty is True:
                     self.logger.info(f"No reserves deployed in: {scenario}")
                     continue
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = mfunc.get_sub_hour_interval_count(reserve_provision_timeseries)
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(reserve_provision_timeseries)
 
                 # sum totals by fuel types
                 reserve_provision_timeseries = reserve_provision_timeseries/interval_count
@@ -229,12 +234,12 @@ class MPlot(object):
                 Total_Reserves_Out = pd.concat([Total_Reserves_Out, reserve_provision], axis=1, sort=False).fillna(0)
 
 
-            Total_Reserves_Out = mfunc.df_process_categorical_index(Total_Reserves_Out, self.ordered_gen)
+            Total_Reserves_Out = self.create_categorical_tech_index(Total_Reserves_Out)
             Total_Reserves_Out = Total_Reserves_Out.T
             Total_Reserves_Out = Total_Reserves_Out.loc[:, (Total_Reserves_Out != 0).any(axis=0)]
             
             if Total_Reserves_Out.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[region] = out
                 continue
             
@@ -242,13 +247,13 @@ class MPlot(object):
             Total_Reserves_Out.index = Total_Reserves_Out.index.str.wrap(5, break_long_words=False)
             
             # Convert units
-            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Reserves_Out.sum()))
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Reserves_Out.sum()))
             Total_Reserves_Out = Total_Reserves_Out/unitconversion['divisor']
             
             data_table_out = Total_Reserves_Out.add_suffix(f" ({unitconversion['units']}h)")
             
             # create figure
-            fig1, axs = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, 
+            fig1, axs = plotlib.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, 
                                                         custom_tick_labels=self.custom_xticklabels)
 
             # additional figure formatting
@@ -319,11 +324,11 @@ class MPlot(object):
         properties = [(True, f"reserve_{data_set}", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
@@ -372,13 +377,13 @@ class MPlot(object):
                 reserve_out=pd.DataFrame()
             # If no reserves return nothing
             if reserve_out.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[region] = out
                 continue
             
             if count_hours == False:
                 # Convert units
-                unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_out.sum()))
+                unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(reserve_out.sum()))
                 reserve_out = reserve_out/unitconversion['divisor'] 
                 Data_Table_Out = reserve_out.add_suffix(f" ({unitconversion['units']}h)")
             else:
@@ -387,7 +392,7 @@ class MPlot(object):
             # create color dictionary
             color_dict = dict(zip(reserve_out.columns,self.color_list))
             
-            fig2,axs = mfunc.create_grouped_bar_plot(reserve_out, color_dict)
+            fig2,axs = plotlib.create_grouped_bar_plot(reserve_out, color_dict)
             if count_hours == False:
                 axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs.set_ylabel(f"Reserve {data_set} [{unitconversion['units']}h]",  color='black', rotation='vertical')
@@ -428,21 +433,21 @@ class MPlot(object):
         properties = [(True, "reserve_Shortage", Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
 
-            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,facet,multi_scenario = Scenarios)
+            xdimension, ydimension = self.setup_facet_xy_dimensions(facet,multi_scenario = Scenarios)
 
             grid_size = xdimension*ydimension
             excess_axs = grid_size - len(Scenarios)
 
-            fig3, axs = mfunc.setup_plot(xdimension,ydimension)
+            fig3, axs = plotlib.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             data_tables = []
@@ -482,10 +487,10 @@ class MPlot(object):
                 data_tables.append(data_table)
 
                 for column in reserve_timeseries:
-                    mfunc.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
+                    plotlib.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
                 axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
-                mfunc.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
+                PlotDataHelper.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
 
                 # scenario_names = pd.Series([scenario]*len(reserve_timeseries),name='Scenario')
                 # reserve_timeseries = reserve_timeseries.set_index([scenario_names],append=True)
@@ -496,7 +501,7 @@ class MPlot(object):
                 unique_reserve_types.extend(l1)
             
             if not data_tables:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[region] = out
                 continue
                 
@@ -516,11 +521,10 @@ class MPlot(object):
 
             #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            xlabels = [x.replace('_',' ') for x in self.xlabels]
-            mfunc.add_facet_labels(fig3, xlabels, self.ylabels)
+            self.add_facet_labels(fig3)
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)

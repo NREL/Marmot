@@ -2,27 +2,33 @@
 """
 Created on Tue Jan 14 07:42:06 2020
 
-This module creates unserved energy timeseries line plots and total bat plots and is called from marmot_plot_main.py
-
+This module creates unserved energy timeseries line plots and total bar
+plots and is called from marmot_plot_main.py
 @author: Daniel Levie 
 """
 
+import logging
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.dates as mdates
 
-import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
+import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
-#===============================================================================
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
@@ -44,10 +50,10 @@ class MPlot(object):
         properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {zone_input}')
@@ -73,23 +79,23 @@ class MPlot(object):
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out.loc[:, (Unserved_Energy_Timeseries_Out >= 1).any(axis=0)]
 
             # correct sum for non-hourly runs
-            interval_count = mfunc.get_sub_hour_interval_count(Unserved_Energy_Timeseries_Out)
+            interval_count = PlotDataHelper.get_sub_hour_interval_count(Unserved_Energy_Timeseries_Out)
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/interval_count
 
             if Unserved_Energy_Timeseries_Out.empty==True:
                 self.logger.info(f'No Unserved Energy in {zone_input}')
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
             # Determine auto unit coversion
-            unitconversion = mfunc.capacity_energy_unitconversion(Unserved_Energy_Timeseries_Out.values.max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(Unserved_Energy_Timeseries_Out.values.max())
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/unitconversion['divisor'] 
             
             # Data table of values to return to main program
             Data_Table_Out = Unserved_Energy_Timeseries_Out.add_suffix(f" ({unitconversion['units']})")
             
-            fig1, axs = mfunc.setup_plot()
+            fig1, axs = plotlib.setup_plot()
             #flatten object
             ax = axs[0]
             # Converts color_list into an iterable list for use in a loop
@@ -108,7 +114,7 @@ class MPlot(object):
             ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            mfunc.set_plot_timeseries_format(axs)
+            PlotDataHelper.set_plot_timeseries_format(axs)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
@@ -130,10 +136,10 @@ class MPlot(object):
         properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         for zone_input in self.Zones:
             Unserved_Energy_Timeseries_Out = pd.DataFrame()
@@ -160,7 +166,7 @@ class MPlot(object):
             Unserved_Energy_Timeseries_Out.columns = Unserved_Energy_Timeseries_Out.columns.str.replace('_',' ')
 
             # correct sum for non-hourly runs
-            interval_count = mfunc.get_sub_hour_interval_count(Unserved_Energy_Timeseries_Out)
+            interval_count = PlotDataHelper.get_sub_hour_interval_count(Unserved_Energy_Timeseries_Out)
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/interval_count
 
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.replace('_',' ')
@@ -168,12 +174,12 @@ class MPlot(object):
 
             if Total_Unserved_Energy_Out.values.sum() == 0:
                 self.logger.info(f'No Unserved Energy in {zone_input}')
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
             # Determine auto unit coversion
-            unitconversion = mfunc.capacity_energy_unitconversion(Total_Unserved_Energy_Out.values.max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(Total_Unserved_Energy_Out.values.max())
             Total_Unserved_Energy_Out = Total_Unserved_Energy_Out/unitconversion['divisor']
             
             # Data table of values to return to main program
@@ -181,11 +187,11 @@ class MPlot(object):
             
             # create color dictionary
             color_dict = dict(zip(Total_Unserved_Energy_Out.index,self.color_list))
-            fig2, axs = mfunc.setup_plot()
+            fig2, axs = plotlib.setup_plot()
             #flatten object
             ax=axs[0]
             
-            mfunc.create_bar_plot(Total_Unserved_Energy_Out.T, ax, color_dict)
+            plotlib.create_bar_plot(Total_Unserved_Energy_Out.T, ax, color_dict)
             ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)",  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.xaxis.set_visible(False)
@@ -195,7 +201,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Unserved_Energy_Out.columns
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -235,10 +241,10 @@ class MPlot(object):
         properties = [(True,f"{agg}_Unserved_Energy",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -265,7 +271,7 @@ class MPlot(object):
                         self.logger.warning('No data in selected Date Range')
                         continue
                 
-                interval_count = mfunc.get_sub_hour_interval_count(unserved_energy)
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(unserved_energy)
                 unserved_energy = unserved_energy/interval_count
                 # Group data by hours and find mean across entire range 
                 unserved_energy = unserved_energy.groupby([unserved_energy.index.hour]).mean()
@@ -283,11 +289,11 @@ class MPlot(object):
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(unserved_energy_out.columns, self.color_list))
 
-            fig, axs = mfunc.setup_plot()
+            fig, axs = plotlib.setup_plot()
             # flatten object
             ax = axs[0]
 
-            unitconversion = mfunc.capacity_energy_unitconversion(unserved_energy_out.values.max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(unserved_energy_out.values.max())
             unserved_energy_out = unserved_energy_out / unitconversion['divisor']
             Data_Table_Out = unserved_energy_out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")

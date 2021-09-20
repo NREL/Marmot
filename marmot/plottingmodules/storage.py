@@ -3,32 +3,33 @@
 Created April 2020, updated August 2020
 
 This code creates energy storage plots and is called from Marmot_plot_main.py
-
 @author: 
 """
 
-import os
-import datetime as dt
+import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.dates as mdates
-import numpy as np
-import math
-import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+
 import marmot.config.mconfig as mconfig
+import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 
-#===============================================================================
-
-class MPlot(object):
+class MPlot(PlotDataHelper):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.mplot_data_dict = {}
@@ -58,10 +59,10 @@ class MPlot(object):
                       (True, "storage_Max_Volume", [self.Scenarios[0]])]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -78,7 +79,7 @@ class MPlot(object):
                     storage_volume = storage_volume_read.xs(zone_input, level = self.AGG_BY)
                 except KeyError:
                     self.logger.warning(f'No storage resources in {zone_input}')
-                    outputs[zone_input] = mfunc.MissingZoneData()
+                    outputs[zone_input] = MissingZoneData()
                     continue
 
                 #Isolate only head storage objects (not tail).
@@ -138,16 +139,16 @@ class MPlot(object):
             #Make scenario/color dictionary.
             color_dict = dict(zip(storage_volume_all_scenarios.columns,self.color_list))
 
-            fig1, axs = mfunc.setup_plot(ydimension = 2,sharey = False)
+            fig1, axs = plotlib.setup_plot(ydimension = 2,sharey = False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             
             if storage_volume_all_scenarios.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
             for column in storage_volume_all_scenarios:
-                mfunc.create_line_plot(axs,storage_volume_all_scenarios,column,color_dict,label = column,n = 0)      
+                plotlib.create_line_plot(axs,storage_volume_all_scenarios,column,color_dict,label = column,n = 0)      
                 axs[0].set_ylabel('Head Storage Volume (GWh)',  color='black', rotation='vertical')
                 axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].margins(x=0.01)
@@ -156,13 +157,13 @@ class MPlot(object):
                 axs[0].set_title(zone_input)
                 #axs[0].xaxis.set_visible(False)
 
-                mfunc.create_line_plot(axs,use_all_scenarios,column,color_dict,label = column + ' Unserved Energy', n = 1)
+                plotlib.create_line_plot(axs,use_all_scenarios,column,color_dict,label = column + ' Unserved Energy', n = 1)
                 axs[1].set_ylabel('Unserved Energy (GWh)',  color='black', rotation='vertical')
                 axs[1].set_xlabel(timezone,  color='black', rotation='horizontal')
                 axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[1].margins(x=0.01)
 
-                [mfunc.set_plot_timeseries_format(axs,n) for n in range(0,2)]
+                [PlotDataHelper.set_plot_timeseries_format(axs,n) for n in range(0,2)]
             
             axs[0].axhline(y = max_volume, linestyle = ':',label = 'Max Volume')
             axs[0].legend(loc = 'lower left',bbox_to_anchor = (1.15,0),facecolor = 'inherit',frameon = True)

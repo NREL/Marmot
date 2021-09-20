@@ -3,7 +3,6 @@
 Created on Mon Nov 2 8:41:40 2020
 
 This module plots figures related to emissions 
-
 @author: Brian Sergi
 
 TO DO:
@@ -11,22 +10,29 @@ TO DO:
     - units formatting
 """
 
+import logging
 import pandas as pd
-import textwrap
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import logging
+
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, InputSheetError,
+                MissingZoneData)
 
-#===============================================================================
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
         self.x = mconfig.parser("figure_size","xdimension")
@@ -47,10 +53,10 @@ class MPlot(object):
         properties = [(True,"emissions_generators_Production",self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         for zone_input in self.Zones:
             emitList = []
@@ -82,7 +88,7 @@ class MPlot(object):
                 emitOut = pd.concat(emitList, axis=1)
             except ValueError:
                 self.logger.warning(f"No emissions found for : {zone_input}")
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
@@ -93,7 +99,7 @@ class MPlot(object):
 
             # Checks if emitOut contains data, if not skips zone and does not return a plot
             if emitOut.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
@@ -122,7 +128,7 @@ class MPlot(object):
                     tick_labels = self.custom_xticklabels
                 else:
                     tick_labels = emitPlot.index
-                mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+                PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
                 
                 ax.tick_params(axis='y', which='major', length=5, width=1)
                 ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -139,7 +145,7 @@ class MPlot(object):
 
             except KeyError:
                 self.logger.warning(self.prop+ " emissions not found")
-                outputs = mfunc.InputSheetError()
+                outputs = InputSheetError()
                 return outputs
 
         return outputs

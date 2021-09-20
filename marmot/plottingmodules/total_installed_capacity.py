@@ -3,36 +3,39 @@
 Created on Tue Dec 10 08:51:15 2019
 
 This module plots figures of the total installed capacity of the system
-
 @author: Daniel Levie
 """
 
 import os
 import re
-import textwrap
-import pandas as pd
+import logging
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
-import logging
-import marmot.plottingmodules.total_generation as gen
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
 
-# =============================================================================
+import marmot.plottingmodules.total_generation as gen
+import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
+
 
 custom_legend_elements = Patch(facecolor='#DD0200',
                                alpha=0.5, edgecolor='#DD0200')
 
-
-class MPlot(object):
+class MPlot(PlotDataHelper):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
 
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
@@ -53,11 +56,11 @@ class MPlot(object):
 
         # Runs get_data to populate mplot_data_dict with all required properties,
         # returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties, self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         for zone_input in self.Zones:
@@ -79,10 +82,10 @@ class MPlot(object):
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input_adj, level=self.AGG_BY)
                 else:
                     self.logger.warning(f"No installed capacity in {zone_input}")
-                    outputs[zone_input] = mfunc.MissingZoneData()
+                    outputs[zone_input] = MissingZoneData()
                     continue
 
-                Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
+                Total_Installed_Capacity = self.df_process_gen_inputs(Total_Installed_Capacity)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0: scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out,
@@ -94,11 +97,11 @@ class MPlot(object):
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
             if Total_Installed_Capacity_Out.empty:
                 self.logger.warning(f"No installed capacity in {zone_input}")
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor']
 
             Data_Table_Out = Total_Installed_Capacity_Out
@@ -123,7 +126,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -145,11 +148,11 @@ class MPlot(object):
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties, self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         for zone_input in self.Zones:
@@ -172,7 +175,7 @@ class MPlot(object):
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input_adj, level=self.AGG_BY)
                 else:
                     self.logger.warning(f"No installed capacity in {zone_input}")
-                    outputs[zone_input] = mfunc.MissingZoneData()
+                    outputs[zone_input] = MissingZoneData()
                     continue
 
                 # print(Total_Installed_Capacity.index.get_level_values('tech').unique())
@@ -183,16 +186,15 @@ class MPlot(object):
 
                 Total_Installed_Capacity.reset_index().to_csv(fn)
 
-                Total_Installed_Capacity = mfunc.df_process_gen_inputs(Total_Installed_Capacity, self.ordered_gen)
+                Total_Installed_Capacity = self.df_process_gen_inputs(Total_Installed_Capacity)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0: scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
 
-
             try:
                 Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Scenarios[0])  # Change to a diff on first scenario
             except KeyError:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             Total_Installed_Capacity_Out.drop(self.Scenarios[0], inplace=True)  # Drop base entry
@@ -202,11 +204,11 @@ class MPlot(object):
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
             if Total_Installed_Capacity_Out.empty:
                 self.logger.warning(f"No installed capacity in {zone_input}")
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = mfunc.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor']
 
             Data_Table_Out = Total_Installed_Capacity_Out
@@ -226,7 +228,7 @@ class MPlot(object):
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             tick_labels = Total_Installed_Capacity_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -265,7 +267,7 @@ class MPlot(object):
             try:
                 Total_Installed_Capacity_Out = cap_outputs[zone_input]["data_table"]
             except TypeError:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
@@ -291,7 +293,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=axs[0])
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=axs[0])
             
             axs[0].tick_params(axis='y', which='major', length=5, width=1)
             axs[0].tick_params(axis='x', which='major', length=5, width=1)
@@ -339,7 +341,7 @@ class MPlot(object):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=axs[1])
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=axs[1])
             
             axs[1].tick_params(axis='y', which='major', length=5, width=1)
             axs[1].tick_params(axis='x', which='major', length=5, width=1)

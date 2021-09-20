@@ -3,34 +3,41 @@
 Created on Mon Dec  9 10:34:48 2019
 
 This code creates hydro analysis and is called from Marmot_plot_main.py
-
 @author: adyreson
 """
 
+import os
+import logging
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-import os
 from matplotlib.patches import Patch
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
-import logging
 
-#===============================================================================
+import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
+            MissingZoneData)
+
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
                          label='Unserved Energy')]
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
@@ -47,10 +54,10 @@ class MPlot(object):
         properties = [(True, "generator_Generation", [self.Scenarios[0]])]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             #Location to save to
@@ -61,7 +68,7 @@ class MPlot(object):
             self.logger.info("Zone = "+ zone_input)
             self.logger.info("Winter is defined as date range: \
             {} to {}".format(str(start_date_range),str(end_date_range)))
-            Net_Load = mfunc.df_process_gen_inputs(Stacked_Gen_read, self.ordered_gen)
+            Net_Load = self.df_process_gen_inputs(Stacked_Gen_read)
 
             # Calculates Net Load by removing variable gen
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
@@ -75,7 +82,7 @@ class MPlot(object):
                 self.logger.warning("No Generation in %s",zone_input)
                 continue
             del Stacked_Gen_read
-            Stacked_Gen= mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
+            Stacked_Gen= self.df_process_gen_inputs(Stacked_Gen)
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)] #Removes columns only containing 0
 
         #end weekly loop
@@ -84,7 +91,7 @@ class MPlot(object):
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
                 self.logger.warning("No Hydro Generation in %s", zone_input)
-                Hydro_Gen=mfunc.MissingZoneData()
+                Hydro_Gen=MissingZoneData()
                 continue
 
             del Stacked_Gen
@@ -119,7 +126,7 @@ class MPlot(object):
             
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Continent_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
         
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
 
     def hydro_net_load(self, figure_name=None, prop=None, start=None, 
@@ -133,10 +140,10 @@ class MPlot(object):
         properties = [(True, "generator_Generation", [self.Scenarios[0]])]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info("Zone = "+ zone_input)
@@ -154,7 +161,7 @@ class MPlot(object):
                 continue
 
             del Stacked_Gen_read
-            Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
+            Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen)
 
             # Calculates Net Load by removing variable gen
             # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
@@ -168,7 +175,7 @@ class MPlot(object):
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
                 self.logger.warning("No Hydro Generation in %s", zone_input)
-                Hydro_Gen=mfunc.MissingZoneData()
+                Hydro_Gen=MissingZoneData()
                 continue
 
             del Stacked_Gen
@@ -267,6 +274,6 @@ class MPlot(object):
                 ax2.set_title(zone_input)
             fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
         
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
 

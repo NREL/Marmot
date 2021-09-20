@@ -3,27 +3,31 @@
 Created on Mon Dec  9 13:20:56 2019
 
 This module creates bar plot of the total volume of generator starts in MW,GW,etc.
-
-
 @author: Daniel Levie
 """
 
-import pandas as pd
 import logging
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 
-#===============================================================================
-class MPlot(object):
+class MPlot(PlotDataHelper):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+               
+         # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.x = mconfig.parser("figure_size","xdimension")
@@ -43,10 +47,11 @@ class MPlot(object):
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
+
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -137,11 +142,11 @@ class MPlot(object):
                 # print('Method 2 (first making a data frame with only 0s, then checking if timestamps > 1 hour) took ' + str(elapsed) + ' seconds')
 
             if cap_started_all_scenarios.empty == True:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
@@ -157,7 +162,7 @@ class MPlot(object):
             ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
             
             tick_labels = cap_started_all_scenarios.columns
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -182,10 +187,11 @@ class MPlot(object):
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
+
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone =  {zone_input}")
@@ -249,13 +255,13 @@ class MPlot(object):
             cap_started_all_scenarios = pd.concat(cap_started_chunk)
             
             if cap_started_all_scenarios.empty == True:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
             cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
 
-            unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
@@ -270,7 +276,7 @@ class MPlot(object):
             
             # Set x-tick labels 
             tick_labels = cap_started_all_scenarios.columns
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
             
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)

@@ -1,29 +1,34 @@
 # -*- coding: utf-8 -*-
 """
-
 price analysis plots, price duration curves = timeseries plots
-
 @author: adyreson and Daniel Levie
 """
 
 import os
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
 import marmot.config.mconfig as mconfig
-import math
+import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
+           InputSheetError)
 
 
-#===============================================================================
-
-class MPlot(object):
+class MPlot(PlotDataHelper):
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
+                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
         self.mplot_data_dict = {}
@@ -49,24 +54,24 @@ class MPlot(object):
         properties = [(True, f"{agg}_Price", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         #Location to save to
         save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
 
         region_number = len(self.Zones)
         # determine x,y length for plot
-        xdimension, ydimension =  mfunc.set_x_y_dimension(region_number)
+        xdimension, ydimension =  self.set_x_y_dimension(region_number)
         
         grid_size = xdimension*ydimension
         # Used to calculate any excess axis to delete
         excess_axs = grid_size - region_number
 
         #setup plot
-        fig2, axs = mfunc.setup_plot(xdimension,ydimension)
+        fig2, axs = plotlib.setup_plot(xdimension,ydimension)
         plt.subplots_adjust(wspace=0.1, hspace=0.50)
         
         data_table = []
@@ -94,7 +99,7 @@ class MPlot(object):
             color_dict = dict(zip(duration_curve.columns,self.color_list))
 
             for column in duration_curve:
-                mfunc.create_line_plot(axs,duration_curve,column,color_dict,n=n,label=column)
+                plotlib.create_line_plot(axs,duration_curve,column,color_dict,n=n,label=column)
                 if (prop!=prop)==False:
                     axs[n].set_ylim(bottom=0,top=int(prop))
                 axs[n].set_xlim(0,len(duration_curve))
@@ -107,7 +112,7 @@ class MPlot(object):
         
         # Remove extra axes
         if excess_axs != 0:
-            mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+            PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
         
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -120,7 +125,7 @@ class MPlot(object):
 
         fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
     
     def region_pdc(self, figure_name=None, prop=None, start=None, end=None, 
@@ -148,10 +153,10 @@ class MPlot(object):
         properties = [(True, f"{agg}_Price", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -190,12 +195,12 @@ class MPlot(object):
             color_dict = dict(zip(duration_curve.columns,self.color_list))
 
             #setup plot
-            fig1, axs = mfunc.setup_plot(xdimension,ydimension)
+            fig1, axs = plotlib.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             n=0
             for column in duration_curve:
-                mfunc.create_line_plot(axs,duration_curve,column,color_dict,n=n,label=column)
+                plotlib.create_line_plot(axs,duration_curve,column,color_dict,n=n,label=column)
                 if (prop!=prop)==False:
                     axs[n].set_ylim(bottom=0,top=int(prop))
                 axs[n].set_xlim(0,len(duration_curve))
@@ -239,10 +244,10 @@ class MPlot(object):
         properties = [(True, f"{agg}_Price", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -279,18 +284,18 @@ class MPlot(object):
             color_dict = dict(zip(timeseries.columns,self.color_list))
 
             #setup plot
-            fig3, axs = mfunc.setup_plot(xdimension,ydimension)
+            fig3, axs = plotlib.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             n=0 #Counter for scenario subplots
             for column in timeseries:
-                mfunc.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
+                plotlib.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
                 if (prop!=prop)==False:
                     axs[n].set_ylim(bottom=0,top=int(prop))
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
                 
-                mfunc.set_plot_timeseries_format(axs,n)
+                PlotDataHelper.set_plot_timeseries_format(axs,n)
                 if facet:
                     n+=1
 
@@ -325,10 +330,10 @@ class MPlot(object):
         properties = [(True, f"{agg}_Price", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         #Location to save to
         save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
@@ -336,14 +341,14 @@ class MPlot(object):
         outputs = {}
 
         region_number = len(self.Zones)
-        xdimension, ydimension =  mfunc.set_x_y_dimension(region_number)
+        xdimension, ydimension =  self.set_x_y_dimension(region_number)
         
         grid_size = xdimension*ydimension
         # Used to calculate any excess axis to delete
         excess_axs = grid_size - region_number
 
         #setup plot
-        fig4, axs = mfunc.setup_plot(xdimension,ydimension)
+        fig4, axs = plotlib.setup_plot(xdimension,ydimension)
         plt.subplots_adjust(wspace=0.1, hspace=0.70)
 
         data_table = []
@@ -371,11 +376,11 @@ class MPlot(object):
             color_dict = dict(zip(timeseries.columns,self.color_list))
 
             for column in timeseries:
-                mfunc.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
+                plotlib.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
                 axs[n].set_title(zone_input.replace('_',' '))
                 if (prop!=prop)==False:
                     axs[n].set_ylim(bottom=0,top=int(prop))
-                mfunc.set_plot_timeseries_format(axs,n)
+                PlotDataHelper.set_plot_timeseries_format(axs,n)
 
                 handles, labels = axs[n].get_legend_handles_labels()
                 #Legend
@@ -384,7 +389,7 @@ class MPlot(object):
         
         # Remove extra axes
         if excess_axs != 0:
-            mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+            PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
         
         fig4.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -397,7 +402,7 @@ class MPlot(object):
 
         fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
     
     
@@ -446,10 +451,10 @@ class MPlot(object):
         properties = [(True, "node_Price", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties, self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         node_figure_folder = os.path.join(self.figure_folder, 'node_prices')
         try:
@@ -461,7 +466,7 @@ class MPlot(object):
         #Select only node specified in Marmot_plot_select.csv.
         select_nodes = prop.split(",")
         if select_nodes == None:
-            return mfunc.InputSheetError()
+            return InputSheetError()
         
         self.logger.info(f'Plotting Prices for {select_nodes}')
         
@@ -490,10 +495,10 @@ class MPlot(object):
 
         Data_Out = pdc.add_suffix(" ($/MWh)")
         
-        xdimension, ydimension =  mfunc.set_x_y_dimension(len(select_nodes))
+        xdimension, ydimension =  self.set_x_y_dimension(len(select_nodes))
         
         #setup plot
-        fig, axs = mfunc.setup_plot(xdimension,ydimension)
+        fig, axs = plotlib.setup_plot(xdimension,ydimension)
         plt.subplots_adjust(wspace=0.1, hspace=0.70)
         
         color_dict = dict(zip(pdc.columns, self.color_list))
@@ -507,13 +512,13 @@ class MPlot(object):
                 node_pdc = pdc.xs(node, level='node')
             
             for column in node_pdc:
-                mfunc.create_line_plot(axs,node_pdc, column, color_dict, 
+                plotlib.create_line_plot(axs,node_pdc, column, color_dict, 
                                        n=n, label=column)
                 # if (prop!=prop)==False:
                 axs[n].set_ylim(bottom=0,top=int(200))
                 
                 if not PDC:
-                    mfunc.set_plot_timeseries_format(axs,n)
+                    PlotDataHelper.set_plot_timeseries_format(axs,n)
                 # axs[n].set_xlim(0,len(node_pdc))
                 
                 handles, labels = axs[n].get_legend_handles_labels()
@@ -540,7 +545,7 @@ class MPlot(object):
         fig.savefig(os.path.join(node_figure_folder, figure_name + ".svg"), 
                     dpi=600, bbox_inches='tight')
         Data_Out.to_csv(os.path.join(node_figure_folder, figure_name + ".csv"))
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
     
     
@@ -589,10 +594,10 @@ class MPlot(object):
         properties = [(True, "node_Price", self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties, self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         node_figure_folder = os.path.join(self.figure_folder, 'node_prices')
         try:
@@ -604,7 +609,7 @@ class MPlot(object):
         #Select only node specified in Marmot_plot_select.csv.
         select_nodes = prop.split(",")
         if select_nodes == None:
-            return mfunc.InputSheetError()
+            return InputSheetError()
         
         for node in select_nodes:
             self.logger.info(f'Plotting Prices for Node: {node}')
@@ -635,16 +640,14 @@ class MPlot(object):
             p_hist.columns = p_hist.columns.str.replace('_',' ')
             data_out = p_hist.add_suffix(" ($/MWh)")
             
-            xdimension, ydimension =  mfunc.setup_facet_xy_dimensions(self.xlabels,
-                                                                      self.ylabels,
-                                                                      multi_scenario=self.Scenarios)
+            xdimension, ydimension =  self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
             grid_size = xdimension*ydimension
              # Used to calculate any excess axis to delete
             plot_number = len(self.Scenarios)
             excess_axs = grid_size - plot_number
         
             #setup plot
-            fig, axs = mfunc.setup_plot(xdimension,ydimension, sharey=True)
+            fig, axs = plotlib.setup_plot(xdimension,ydimension, sharey=True)
             axs = axs.ravel()
             plt.subplots_adjust(wspace=0.1, hspace=0.25)
             
@@ -689,9 +692,9 @@ class MPlot(object):
             
             # Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
             
-            mfunc.add_facet_labels(fig, self.xlabels, self.ylabels)
+            self.add_facet_labels(fig)
             fig.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, 
                             left=False, right=False)
@@ -711,7 +714,7 @@ class MPlot(object):
             data_out.to_csv(os.path.join(node_figure_folder, 
                                          f"{figure_name}_{node}.csv"))
             
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
     
     

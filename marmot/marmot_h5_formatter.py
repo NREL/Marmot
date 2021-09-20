@@ -16,6 +16,7 @@ it can be read into the marmot_plot_main.py file
 import os
 import sys
 import pathlib
+
 FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 if __name__ == '__main__':  # Add Marmot directory to sys path if running from __main__
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
@@ -23,11 +24,12 @@ if __name__ == '__main__':  # Add Marmot directory to sys path if running from _
         os.chdir(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import time
 import re
-import pandas as pd
-import h5py
 import logging
 import logging.config
+import pandas as pd
+import h5py
 import yaml
+
 try:
     from marmot.meta_data import MetaData
 except ModuleNotFoundError:
@@ -45,7 +47,6 @@ try:
 except ModuleNotFoundError:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 
-# ============================================================================
 
 # A bug in pandas requires this to be included,
 # otherwise df.to_string truncates long strings. Fix available in Pandas 1.0
@@ -125,7 +126,7 @@ class Process(SetupLogger):
     e.g generator, region, zone, line etc.
     """
 
-    def __init__(self, df, metadata, Region_Mapping, gen_names, emit_names, logger):
+    def __init__(self, df, metadata, Region_Mapping, emit_names, logger):
         """Process __init__ method.
 
         Parameters
@@ -137,8 +138,6 @@ class Process(SetupLogger):
             Instantiation of MetaData for specific h5plexos file.
         Region_Mapping : pd.DataFrame
             DataFrame to map custom regions/zones to create custom aggregations.
-        gen_names : pd.DataFrame
-            DataFrame with 2 columns to rename generator technologies.
         emit_names : pd.DataFrame
             DataFrame with 2 columns to rename emmission names.
         logger : logger object.
@@ -154,16 +153,13 @@ class Process(SetupLogger):
         self.df = df
         self.metadata = metadata
         self.Region_Mapping = Region_Mapping
-        self.gen_names = gen_names
         self.emit_names = emit_names
         self.logger = logger
 
         if not self.emit_names.empty:
             self.emit_names_dict = self.emit_names[['Original', 'New']].set_index("Original").to_dict()["New"]
 
-        self.gen_names_dict = self.gen_names[['Original', 'New']].set_index("Original").to_dict()["New"]
-
-    def df_process_generator(self):
+    def df_process_generator(self) -> pd.DataFrame:
         """Format data which comes form the PLEXOS Generator Class.
 
         Returns
@@ -211,28 +207,15 @@ class Process(SetupLogger):
         else:
             idx_map = idx_zone
 
-        idx_map = idx_map.droplevel(level=["tech"])
-        df_tech = pd.CategoricalIndex(df.index.get_level_values('tech')
-                                      .map(lambda x: self.gen_names_dict.get(x, x))
-                                      )
-
-        idx = pd.MultiIndex(levels=[df_tech.categories] + idx_map.levels,
-                            codes=[df_tech.codes] + idx_map.codes,
-                            names=df_tech.names + idx_map.names)
-
-        df = pd.DataFrame(data=df.values.reshape(-1), index=idx)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
         df_col = list(df.index.names)  # Gets names of all columns in df and places in list
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
 
-        # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
-        if set(df.index.unique(level="tech")).issubset(self.gen_names["New"].unique()) is False:
-            missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(self.gen_names["New"].unique())))
-            self.logger.warning(f"The Following Generators do not have a correct category mapping: {missing_gen_cat}\n", )
         return df
 
-    def df_process_region(self):
+    def df_process_region(self) -> pd.DataFrame:
         """Format data which comes from the PLEXOS Region Class.
 
         Returns
@@ -264,7 +247,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_zone(self):
+    def df_process_zone(self) -> pd.DataFrame:
         """
         Method for formating data which comes from the PLEXOS Zone Class
 
@@ -283,7 +266,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_line(self):
+    def df_process_line(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Line Class
 
@@ -302,7 +285,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_interface(self):
+    def df_process_interface(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Interface Class
 
@@ -321,7 +304,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_reserve(self):
+    def df_process_reserve(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Reserve Class
 
@@ -345,7 +328,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_reserves_generators(self):
+    def df_process_reserves_generators(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Reserve_Generators Relational Class
 
@@ -372,7 +355,6 @@ class Process(SetupLogger):
         if self.metadata.reserves_zones().empty is False:
             df = df.merge(self.metadata.reserves_zones(), how='left', on=['parent', 'zone'])  # Merges in zones where reserves are located
 
-        df['tech'] = df['tech'].map(lambda x: self.gen_names_dict.get(x, x))
         df_col = list(df.columns)  # Gets names of all columns in df and places in list
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
@@ -380,7 +362,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_fuel(self):
+    def df_process_fuel(self) -> pd.DataFrame:
         """
         Methodfor formatting data which comes form the PLEXOS Fuel Class
 
@@ -399,7 +381,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_constraint(self):
+    def df_process_constraint(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Constraint Class
 
@@ -418,7 +400,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_emission(self):
+    def df_process_emission(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Emission Class
 
@@ -437,7 +419,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_emissions_generators(self):
+    def df_process_emissions_generators(self) -> pd.DataFrame:
         """
         Method for formatting data which comes from the PLEXOS Emissions_Generators Relational Class
 
@@ -464,9 +446,6 @@ class Process(SetupLogger):
         if not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
 
-        # reclassify gen tech categories
-        df['tech'] = pd.Categorical(df['tech'].map(lambda x: self.gen_names_dict.get(x, x)))
-
         if not self.emit_names.empty:
             # reclassify emissions as specified by user in mapping
             df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: self.emit_names_dict.get(x, x)))
@@ -490,7 +469,7 @@ class Process(SetupLogger):
         df.columns = pd.RangeIndex(0, 1, step=1)
         return df
 
-    def df_process_storage(self):
+    def df_process_storage(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Storage Class
 
@@ -517,7 +496,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_region_regions(self):
+    def df_process_region_regions(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Region_Regions Relational Class
 
@@ -535,7 +514,7 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_node(self):
+    def df_process_node(self) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Node Class
 
@@ -596,7 +575,7 @@ class MarmotFormat(SetupLogger):
     which can then be read into the Marmot plotting code
     """
 
-    def __init__(self, Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
+    def __init__(self, Scenario_name, PLEXOS_Solutions_folder, Plexos_Properties,
                  Marmot_Solutions_folder=None,
                  mapping_folder='mapping_folder',
                  Region_Mapping=pd.DataFrame(),
@@ -611,8 +590,6 @@ class MarmotFormat(SetupLogger):
             Name of sceanrio to process.
         PLEXOS_Solutions_folder : string directory
             Folder containing h5plexos results files.
-        gen_names : string directory/pd.DataFrame
-            Mapping file to rename generator technologies.
         Plexos_Properties : string directory/pd.DataFrame
             PLEXOS properties to process, must follow format seen in Marmot directory.
         Marmot_Solutions_folder : string directory, optional
@@ -646,18 +623,6 @@ class MarmotFormat(SetupLogger):
         if self.Marmot_Solutions_folder is None:
             self.Marmot_Solutions_folder = self.PLEXOS_Solutions_folder
 
-        if isinstance(gen_names, str):
-            try:
-                gen_names = pd.read_csv(gen_names)
-                self.gen_names = gen_names.rename(columns={gen_names.columns[0]: 'Original',
-                                                           gen_names.columns[1]: 'New'})
-            except FileNotFoundError:
-                self.logger.warning('Could not find specified gen_names file; check file name. This is required to run Marmot, system will now exit')
-                sys.exit()
-        elif isinstance(gen_names, pd.DataFrame):
-            self.gen_names = gen_names.rename(columns={gen_names.columns[0]: 'Original',
-                                                       gen_names.columns[1]: 'New'})
-
         if isinstance(Plexos_Properties, str):
             try:
                 self.Plexos_Properties = pd.read_csv(Plexos_Properties)
@@ -666,14 +631,6 @@ class MarmotFormat(SetupLogger):
                 sys.exit()
         elif isinstance(Plexos_Properties, pd.DataFrame):
             self.Plexos_Properties = Plexos_Properties
-
-        try:
-            self.vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
-                                                        mconfig.parser('category_file_names', 'vre_gen_cat')),
-                                           squeeze=True).str.strip().tolist()
-        except FileNotFoundError:
-            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required to calculate Curtailment')
-            self.vre_gen_cat = []
 
         if isinstance(Region_Mapping, str):
             try:
@@ -710,11 +667,13 @@ class MarmotFormat(SetupLogger):
                                        inplace=True)
 
 
-    def output_metadata(self, files_list, hdf_out_folder, HDF5_output, HDF5_folder_in):
-        """ This function is used to output metadata from the original PLEXOS solutions
+    def output_metadata(self, files_list, hdf_out_folder, HDF5_output, HDF5_folder_in) -> None:
+        """ 
+        This function is used to output metadata from the original PLEXOS solutions
         file to the processed HDF5 file.  For each partition in a given scenario,
         the metadata from that partition is copied over and saved in the processed output file.
-        This function is called within the run_formatter method of this class."""
+        This function is called within the run_formatter method of this class.
+        """
 
         for partition in files_list:
             f = h5py.File(os.path.join(HDF5_folder_in, partition),'r')
@@ -745,10 +704,9 @@ class MarmotFormat(SetupLogger):
                         dset = s_dict[key2]
                         subgrp.create_dataset(name=key2,data=dset)
             f.close()
-        return
 
 
-    def _get_data(self, plexos_class, plexos_prop, timescale, db, metadata):
+    def _get_data(self, plexos_class, plexos_prop, timescale, db, metadata) -> pd.DataFrame:
         """
         This method handles the pulling of the data from the H5plexos hdf5
         file and then passes the data to one of the formating functions
@@ -784,7 +742,7 @@ class MarmotFormat(SetupLogger):
 
         # Instantiate instance of Process Class
         # metadata is used as a paramter to initialize process_cl
-        process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.emit_names, self.logger)
+        process_cl = Process(df, metadata, self.Region_Mapping, self.emit_names, self.logger)
         # Instantiate Method of Process Class
         process_att = getattr(process_cl, f'df_process_{plexos_class}')
         # Process attribute and return to df
@@ -793,8 +751,8 @@ class MarmotFormat(SetupLogger):
             self.logger.warning(f"Scenario contains Unserved Energy: {int(df.sum(axis=0))} MW\n")
         return df
 
-    def _report_prop_error(self, plexos_prop, plexos_class):
-        '''
+    def _report_prop_error(self, plexos_prop, plexos_class) -> pd.DataFrame:
+        """
         This method prints a warning message when the _get_data method
         cannot find the specified PLEXOS property in the h5plexos hdf5 file
 
@@ -810,15 +768,25 @@ class MarmotFormat(SetupLogger):
         df : pd.DataFrame
             Empty DataFrame.
 
-        '''
+        """
         self.logger.warning(f'CAN NOT FIND "{plexos_class} {plexos_prop}". "{plexos_prop}" DOES NOT EXIST')
         self.logger.info('SKIPPING PROPERTY\n')
         df = pd.DataFrame()
         return df
 
-    def run_formatter(self):
-        '''
+    @staticmethod
+    def _save_to_h5(df, file_name, key, 
+                    mode="a", complevel=9, 
+                    complib='blosc:zlib', **kwargs) -> None:
+        """Method to save data to hdf5 file """
 
+        df.to_hdf(file_name, key=key, mode=mode,
+                    complevel=complevel,
+                    complib=complib,
+                    **kwargs)
+
+    def run_formatter(self) -> None:
+        """
         Main method to call to begin processing h5plexos files, this method takes
         no input variables, all required varibales are passed in via the __init__ method.
 
@@ -826,7 +794,7 @@ class MarmotFormat(SetupLogger):
         -------
         None.
 
-        '''
+        """
 
         self.logger.info(f"#### Processing {self.Scenario_name} PLEXOS Results ####")
 
@@ -863,13 +831,12 @@ class MarmotFormat(SetupLogger):
 
         os.chdir(startdir)
 
-        #self.output_metadata(files_list[0], hdf_out_folder, HDF5_output, HDF5_folder_in)
-
         # Read in all HDF5 files into dictionary
         self.logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
         for file in files_list:
             hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
+
         # ===================================================================================
         # Process the Outputs
         # ===================================================================================
@@ -882,8 +849,8 @@ class MarmotFormat(SetupLogger):
             with h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') as f:
                 existing_keys = [key for key in f.keys()]
 
-# The processed HDF5 output file already exists.  If metadata is already in
-# this file, leave as is.  Otherwise, append it to the file.
+            # The processed HDF5 output file already exists.  If metadata is already in
+            # this file, leave as is.  Otherwise, append it to the file.
             if 'metadata' not in existing_keys:
                 self.logger.info('Adding metadata to processed HDF5 file.')
                 self.output_metadata(files_list, hdf_out_folder, HDF5_output, HDF5_folder_in)
@@ -891,25 +858,25 @@ class MarmotFormat(SetupLogger):
             if not mconfig.parser('skip_existing_properties'):
                 existing_keys = []
 
-# The processed HDF5 file does not exist.  Create the file and add metadata to it.
+        # The processed HDF5 file does not exist.  Create the file and add metadata to it.
         else:
             existing_keys = []
-            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                      key="generator_Generation",
-                                      mode="w",
-                                      complevel=9,
-                                      complib='blosc:zlib')
+            
+            # Create empty hdf5 file 
+            f = h5py.File(os.path.join(hdf_out_folder, HDF5_output), "w")
+            f.close()
+
             self.output_metadata(files_list, hdf_out_folder, HDF5_output, HDF5_folder_in)
 
         process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
-        start = time.time()
-
+        
         if not self.Region_Mapping.empty:
             # if any(meta.regions()['region'] not in Region_Mapping['region']):
             if set(MetaData(HDF5_folder_in, False, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) is False:
                 missing_regions = list(set(MetaData(HDF5_folder_in, False, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
                 self.logger.warning(f'The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: {missing_regions}\n',)
 
+        start = time.time()
         # Main loop to process each ouput and pass data to functions
         for index, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
@@ -971,37 +938,21 @@ class MarmotFormat(SetupLogger):
                             self.logger.info(f'Drop duplicates removed {oldsize-Processed_Data_Out.size} rows')
 
                     row["data_set"] = row["data_set"].replace(' ', '_')
-                    try:
-                        self.logger.info("Saving data to h5 file...")
-                        Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                                  key=f'{row["group"]}_{row["data_set"]}',
-                                                  mode="a",
-                                                  complevel=9,
-                                                  complib='blosc:zlib')
-                        self.logger.info("Data saved to h5 file successfully\n")
-                    except:
-                        self.logger.warning("h5 File is probably in use, waiting to attempt save for a second time")
-                        time.sleep(120)
+                    
+                    save_attempt=1
+                    while save_attempt<=3:
                         try:
-                            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                                      key=f'{row["group"]}_{row["data_set"]}',
-                                                      mode="a",
-                                                      complevel=9,
-                                                      complib='blosc:zlib')
-                            self.logger.info("h5 File save succeded on second attempt")
+                            self.logger.info("Saving data to h5 file...")
+                            MarmotFormat._save_to_h5(Processed_Data_Out,
+                                        os.path.join(hdf_out_folder, HDF5_output), 
+                                        key=f'{row["group"]}_{row["data_set"]}')
+
+                            self.logger.info("Data saved to h5 file successfully\n")
+                            save_attempt=4
                         except:
-                            self.logger.warning("h5 File is probably in use, waiting to attempt save for a third time")
-                            time.sleep(240)
-                            try:
-                                Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                                          key=f'{row["group"]}_{row["data_set"]}',
-                                                          mode="a",
-                                                          complevel=9,
-                                                          complib='blosc:zlib')
-                                self.logger.info("h5 File save succeded on third attempt")
-                            except:
-                                self.logger.warning("h5 Save failed on third try; will not attempt again\n")
-                    # del Processed_Data_Out
+                            self.logger.warning("h5 File is probably in use, waiting to attempt to save again")
+                            time.sleep(60)
+                            save_attempt+=1
                 else:
                     continue
             else:
@@ -1027,23 +978,18 @@ class MarmotFormat(SetupLogger):
                 except KeyError:
                     self.logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
 
-                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+                Curtailment_Out = Avail_Gen_Out - Total_Gen_Out
 
-                if not adjusted_vre_gen_list:
-                    self.logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
-                    self.logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
-                    For more information see Marmot Readme under 'Mapping Files'")
+                Upward_Available_Capacity = Curtailment_Out
 
-                # Output Curtailment#
-                Curtailment_Out = ((Avail_Gen_Out.loc[(slice(None), adjusted_vre_gen_list), :])
-                                   - (Total_Gen_Out.loc[(slice(None), adjusted_vre_gen_list), :]))
+                MarmotFormat._save_to_h5(Curtailment_Out,
+                                    os.path.join(hdf_out_folder, HDF5_output), 
+                                    key="generator_Curtailment")
 
-                Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                       key="generator_Curtailment",
-                                       mode="a",
-                                       complevel=9,
-                                       complib='blosc:zlib')
+                MarmotFormat._save_to_h5(Upward_Available_Capacity,
+                                    os.path.join(hdf_out_folder, HDF5_output), 
+                                    key="generator_Upward_Available_Capacity")
+
                 self.logger.info("Data saved to h5 file successfully\n")
                 # Clear Some Memory
                 del Total_Gen_Out
@@ -1058,12 +1004,12 @@ class MarmotFormat(SetupLogger):
                 Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder,
                                                                 HDF5_output),
                                                    'region_Unserved_Energy')
+                                                   
                 Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
-                Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                            key="region_Cost_Unserved_Energy",
-                                            mode="a",
-                                            complevel=9,
-                                            complib='blosc:zlib')
+
+                MarmotFormat._save_to_h5(Cost_Unserved_Energy,
+                                    os.path.join(hdf_out_folder, HDF5_output), 
+                                    key="region_Cost_Unserved_Energy")
             except KeyError:
                 self.logger.warning("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
                 pass
@@ -1075,11 +1021,10 @@ class MarmotFormat(SetupLogger):
                                                                 HDF5_output),
                                                    'zone_Unserved_Energy')
                 Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
-                Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                            key="zone_Cost_Unserved_Energy",
-                                            mode="a",
-                                            complevel=9,
-                                            complib='blosc:zlib')
+
+                MarmotFormat._save_to_h5(Cost_Unserved_Energy,
+                                    os.path.join(hdf_out_folder, HDF5_output), 
+                                    key="zone_Cost_Unserved_Energy")
             except KeyError:
                 self.logger.warning("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
                 pass
@@ -1135,12 +1080,6 @@ def main():
     VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))
 
     # ===============================================================================
-    # Standard Naming of Generation Data
-    # ===============================================================================
-
-    gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
-
-    # ===============================================================================
     # Standard Naming of Emissions types (optional)
     # ===============================================================================
 
@@ -1152,9 +1091,9 @@ def main():
 
     for Scenario_name in Scenario_List:
 
-        initiate = MarmotFormat(Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
+        initiate = MarmotFormat(Scenario_name, PLEXOS_Solutions_folder, Plexos_Properties,
                                 Marmot_Solutions_folder=Marmot_Solutions_folder,
-                                mapping_folder='mapping_folder',
+                                mapping_folder=Mapping_folder,
                                 Region_Mapping=Region_Mapping,
                                 emit_names=emit_names,
                                 VoLL=VoLL)
@@ -1168,7 +1107,6 @@ if __name__ == '__main__':
 #===============================================================================
 # Code that can be used to test PLEXOS_H5_results_formatter
 #===============================================================================
-# test = pd.read_hdf(file, 'generator_Generation')
 # test = test.xs("p60",level='region')
 # test = test.xs("gas-ct",level='tech')
 # test = test.reset_index(['timestamp','node'])
