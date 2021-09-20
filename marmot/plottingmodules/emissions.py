@@ -29,16 +29,16 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
 
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        self.mplot_data_dict = {}
+        
 
     # function to collect total emissions by fuel type
     def total_emissions_by_type(self, figure_name=None, prop=None, start=None,
@@ -52,8 +52,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"emissions_generators_Production",self.Scenarios)]
 
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -67,7 +68,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                emit = self.mplot_data_dict["emissions_generators_Production"].get(scenario)
+                emit = self["emissions_generators_Production"].get(scenario)
 
                 # Check if Total_Gen_Stack contains zone_input, skips if not
                 try:

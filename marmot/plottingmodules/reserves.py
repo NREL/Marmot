@@ -30,14 +30,14 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
         
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        self.mplot_data_dict = {}
+        
 
     def reserve_gen_timeseries(self, figure_name=None, prop=None, start=None, 
                              end=None, timezone="", start_date_range=None, 
@@ -64,8 +64,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"reserves_generators_Provision",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -86,7 +87,7 @@ class MPlot(PlotDataHelper):
             for n, scenario in enumerate(Scenarios):
                 self.logger.info(f"Scenario = {scenario}")
 
-                reserve_provision_timeseries = self.mplot_data_dict["reserves_generators_Provision"].get(scenario)
+                reserve_provision_timeseries = self["reserves_generators_Provision"].get(scenario)
                 
                 #Check if zone has reserves, if not skips
                 try:
@@ -196,8 +197,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"reserves_generators_Provision",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -211,7 +213,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                reserve_provision_timeseries = self.mplot_data_dict["reserves_generators_Provision"].get(scenario)
+                reserve_provision_timeseries = self["reserves_generators_Provision"].get(scenario)
                 #Check if zone has reserves, if not skips
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
@@ -323,8 +325,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, f"reserve_{data_set}", self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -339,7 +342,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f'Scenario = {scenario}')
 
-                reserve_timeseries = self.mplot_data_dict[f"reserve_{data_set}"].get(scenario)
+                reserve_timeseries = self[f"reserve_{data_set}"].get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
@@ -432,8 +435,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "reserve_Shortage", Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -457,7 +461,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f'Scenario = {scenario}')
 
-                reserve_timeseries = self.mplot_data_dict["reserve_Shortage"].get(scenario)
+                reserve_timeseries = self["reserve_Shortage"].get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)

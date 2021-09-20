@@ -15,6 +15,7 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import matplotlib.lines as mlines
 
+from marmot.meta_data import MetaData
 import marmot.config.mconfig as mconfig
 import marmot.plottingmodules.plotutils.plot_library as plotlib
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
@@ -22,7 +23,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
 
-class MPlot(PlotDataHelper):
+class MPlot(PlotDataHelper, MetaData):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
@@ -31,14 +32,14 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
         
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.font_defaults = mconfig.parser("font_settings")
-        self.mplot_data_dict = {}
+        
 
 
     #Duration curve of individual line utilization for all hours
@@ -77,8 +78,9 @@ class MPlot(PlotDataHelper):
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -120,12 +122,12 @@ class MPlot(PlotDataHelper):
                     outputs[zone_input] = MissingZoneData()
                     continue
 
-                flow = self.mplot_data_dict["line_Flow"].get(scenario).copy()
+                flow = self["line_Flow"].get(scenario).copy()
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] #Limit to only lines touching to this zone
 
                 if self.shift_leapday == True:
                     flow = self.adjust_for_leapday(flow)
-                limits = self.mplot_data_dict["line_Import_Limit"].get(scenario).copy()
+                limits = self["line_Import_Limit"].get(scenario).copy()
                 limits = limits.droplevel('timestamp').drop_duplicates()
 
                 limits.mask(limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
@@ -212,8 +214,9 @@ class MPlot(PlotDataHelper):
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -253,7 +256,7 @@ class MPlot(PlotDataHelper):
             #flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
             #flow = flow.droplevel('interface_category')
 
-            export_limits = self.mplot_data_dict["interface_Export_Limit"].get(scenario).droplevel('timestamp')
+            export_limits = self["interface_Export_Limit"].get(scenario).droplevel('timestamp')
             export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
             export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
@@ -263,7 +266,7 @@ class MPlot(PlotDataHelper):
             export_limits.drop(columns = 'interface_category',inplace = True)
             export_limits.set_index('interface_name',inplace = True)
 
-            import_limits = self.mplot_data_dict["interface_Import_Limit"].get(scenario).droplevel('timestamp')
+            import_limits = self["interface_Import_Limit"].get(scenario).droplevel('timestamp')
             import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
             import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
@@ -275,7 +278,7 @@ class MPlot(PlotDataHelper):
             import_limits.set_index('interface_name',inplace = True)
 
             #Extract time index
-            ti = self.mplot_data_dict["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
+            ti = self["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
 
             if prop != '':
                 interf_list = prop.split(',')
@@ -316,7 +319,7 @@ class MPlot(PlotDataHelper):
                     limits.index = ti
 
                     for scenario in self.Scenarios:
-                        flow = self.mplot_data_dict["interface_Flow"].get(scenario)
+                        flow = self["interface_Flow"].get(scenario)
                         single_int = flow.xs(interf,level = 'interface_name') / 1000
                         single_int.index = single_int.index.droplevel('interface_category')
                         single_int.columns = [interf]
@@ -411,8 +414,9 @@ class MPlot(PlotDataHelper):
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
             return MissingInputData()
@@ -447,7 +451,7 @@ class MPlot(PlotDataHelper):
             #flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
             #flow = flow.droplevel('interface_category')
 
-            export_limits = self.mplot_data_dict["interface_Export_Limit"].get(scenario).droplevel('timestamp')
+            export_limits = self["interface_Export_Limit"].get(scenario).droplevel('timestamp')
             export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
             export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
@@ -457,7 +461,7 @@ class MPlot(PlotDataHelper):
             export_limits.drop(columns = 'interface_category',inplace = True)
             export_limits.set_index('interface_name',inplace = True)
 
-            import_limits = self.mplot_data_dict["interface_Import_Limit"].get(scenario).droplevel('timestamp')
+            import_limits = self["interface_Import_Limit"].get(scenario).droplevel('timestamp')
             import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
             import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
@@ -469,7 +473,7 @@ class MPlot(PlotDataHelper):
             import_limits.set_index('interface_name',inplace = True)
 
             #Extract time index
-            ti = self.mplot_data_dict["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
+            ti = self["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
 
             if prop != '':
                 interf_list = prop.split(',')
@@ -523,7 +527,7 @@ class MPlot(PlotDataHelper):
                 limits.index = ti
 
                 for scenario in self.Scenarios:
-                    flow = self.mplot_data_dict["interface_Flow"].get(scenario)
+                    flow = self["interface_Flow"].get(scenario)
                     single_int = flow.xs(interf,level = 'interface_name') / 1000
                     single_int.index = single_int.index.droplevel('interface_category')
                     single_int.columns = [interf]
@@ -829,8 +833,9 @@ class MPlot(PlotDataHelper):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
             return MissingInputData()
@@ -845,16 +850,16 @@ class MPlot(PlotDataHelper):
 
         scenario = self.Scenarios[0] #Select single scenario for purpose of extracting limits.
 
-        export_limits = self.mplot_data_dict["line_Export_Limit"].get(scenario).droplevel('timestamp')
+        export_limits = self["line_Export_Limit"].get(scenario).droplevel('timestamp')
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 
-        import_limits = self.mplot_data_dict["line_Import_Limit"].get(scenario).droplevel('timestamp')
+        import_limits = self["line_Import_Limit"].get(scenario).droplevel('timestamp')
         import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
 
 
-        flows = self.mplot_data_dict["line_Flow"][scenario]
+        flows = self["line_Flow"][scenario]
 
         # limited_lines = []
         # i = 0
@@ -879,7 +884,7 @@ class MPlot(PlotDataHelper):
         fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
         #plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-        reported_lines = self.mplot_data_dict["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
+        reported_lines = self["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
         n = -1
         missing_lines = 0
         chunks = []
@@ -908,7 +913,7 @@ class MPlot(PlotDataHelper):
                 limits_chunks.append(limits)
 
                 for scenario in self.Scenarios:
-                    flow = self.mplot_data_dict["line_Flow"][scenario]
+                    flow = self["line_Flow"][scenario]
                     single_line = flow.xs(line,level = 'line_name')
                     single_line.columns = [line]
 
@@ -1004,8 +1009,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             outputs = MissingInputData()
@@ -1019,7 +1025,7 @@ class MPlot(PlotDataHelper):
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
-        flow_diff = self.mplot_data_dict["line_Flow"].get(self.Scenario_Diff[1]) - self.mplot_data_dict["line_Flow"].get(self.Scenario_Diff[0])
+        flow_diff = self["line_Flow"].get(self.Scenario_Diff[1]) - self["line_Flow"].get(self.Scenario_Diff[0])
 
         xdim,ydim = self.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
@@ -1027,7 +1033,7 @@ class MPlot(PlotDataHelper):
         fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-        reported_lines = self.mplot_data_dict["line_Flow"].get(self.Scenarios[0]).index.get_level_values('line_name').unique()
+        reported_lines = self["line_Flow"].get(self.Scenarios[0]).index.get_level_values('line_name').unique()
         n = -1
         missing_lines = 0
         chunks = []
@@ -1125,8 +1131,9 @@ class MPlot(PlotDataHelper):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -1143,17 +1150,17 @@ class MPlot(PlotDataHelper):
         scenario = self.Scenarios[0]
 
         #Line limits are seasonal.
-        export_limits = self.mplot_data_dict["line_Export_Limit"].get(scenario).droplevel('timestamp')
+        export_limits = self["line_Export_Limit"].get(scenario).droplevel('timestamp')
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 
-        import_limits = self.mplot_data_dict["line_Import_Limit"].get(scenario).droplevel('timestamp')
+        import_limits = self["line_Import_Limit"].get(scenario).droplevel('timestamp')
         import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
 
         #Extract time index
-        ti = self.mplot_data_dict["line_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
-        reported_lines = self.mplot_data_dict["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
+        ti = self["line_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
+        reported_lines = self["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
 
         self.logger.info('Carving out season from ' + start_date_range + ' to ' + end_date_range)
 
@@ -1201,7 +1208,7 @@ class MPlot(PlotDataHelper):
 
             for scenario in self.Scenarios:
 
-                flow = self.mplot_data_dict["line_Flow"][scenario]
+                flow = self["line_Flow"][scenario]
                 single_line = flow.xs(line,level = 'line_name')
                 single_line_out = single_line.copy()
                 single_line.columns = [line]
@@ -1283,8 +1290,9 @@ class MPlot(PlotDataHelper):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
             return MissingInputData()
@@ -1300,8 +1308,8 @@ class MPlot(PlotDataHelper):
                 #     lines = self.meta_ADS.region_interregionallines()
 
                 # lines = lines[lines['region'] == zone_input]
-                # import_lim = self.mplot_data_dict["line_Import_Limit"][scenario].reset_index()
-                # export_lim = self.mplot_data_dict["line_Export_Limit"][scenario].reset_index()
+                # import_lim = self["line_Import_Limit"][scenario].reset_index()
+                # export_lim = self["line_Export_Limit"][scenario].reset_index()
                 # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
                 # lines = lines[['line_name',0]]
                 # lines.columns = ['line_name','import_limit']
@@ -1317,8 +1325,8 @@ class MPlot(PlotDataHelper):
                 #     lines = self.meta_ADS.region_intraregionallines()
 
                 # lines = lines[lines['region'] == zone_input]
-                # import_lim = self.mplot_data_dict["line_Import_Limit"][scenario].reset_index()
-                # export_lim = self.mplot_data_dict["line_Export_Limit"][scenario].reset_index()
+                # import_lim = self["line_Import_Limit"][scenario].reset_index()
+                # export_lim = self["line_Export_Limit"][scenario].reset_index()
                 # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
                 # lines = lines[['line_name',0]]
                 # lines.columns = ['line_name','import_limit']
@@ -1333,8 +1341,8 @@ class MPlot(PlotDataHelper):
                 #Interfaces
                 PSCo_ints = ['P39 TOT 5_WI','P40 TOT 7_WI']
 
-                int_import_lim = self.mplot_data_dict["interface_Import_Limit"][scenario].reset_index()
-                int_export_lim = self.mplot_data_dict["interface_Export_Limit"][scenario].reset_index()
+                int_import_lim = self["interface_Import_Limit"][scenario].reset_index()
+                int_export_lim = self["interface_Export_Limit"][scenario].reset_index()
                 if scenario == 'NARIS':
                     last_timestamp = int_import_lim['timestamp'].unique()[-1] #Last because ADS uses the last timestamp.
                     int_import_lim = int_import_lim[int_import_lim['timestamp'] == last_timestamp]
@@ -1393,8 +1401,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",scenario_type)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
             return MissingInputData()
@@ -1412,7 +1421,7 @@ class MPlot(PlotDataHelper):
             n=0
             for scenario in scenario_type:
 
-                rr_int = self.mplot_data_dict[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
+                rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
                 if self.shift_leapday == True:
                     rr_int = self.adjust_for_leapday(rr_int)
 
@@ -1539,8 +1548,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
             return MissingInputData()
@@ -1555,7 +1565,7 @@ class MPlot(PlotDataHelper):
         Data_Out = []
         n=0
         for scenario in self.Scenarios:
-            rr_int = self.mplot_data_dict[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
+            rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
             if self.shift_leapday == True:
                 rr_int = self.adjust_for_leapday(rr_int)
 
@@ -1658,8 +1668,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Violation",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
             return MissingInputData()
@@ -1676,7 +1687,7 @@ class MPlot(PlotDataHelper):
                 else:
                     lines = self.meta.region_lines()
 
-                line_v = self.mplot_data_dict["line_Violation"].get(scenario)
+                line_v = self["line_Violation"].get(scenario)
                 line_v = line_v.reset_index()
 
                 viol = line_v.merge(lines,on = 'line_name',how = 'left')
@@ -1759,8 +1770,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_Net_Interchange",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
             return MissingInputData()
@@ -1775,7 +1787,7 @@ class MPlot(PlotDataHelper):
 
 
                 self.logger.info(f"Scenario = {scenario}")
-                net_export_read = self.mplot_data_dict[f"{agg}_Net_Interchange"].get(scenario)
+                net_export_read = self[f"{agg}_Net_Interchange"].get(scenario)
                 if self.shift_leapday == True:
                     net_export_read = self.adjust_for_leapday(net_export_read)                
 
@@ -1855,8 +1867,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -1904,7 +1917,7 @@ class MPlot(PlotDataHelper):
             for n, scenario in enumerate(self.Scenarios):
                 net_exports = []
                 self.logger.info(f"Scenario = {str(scenario)}")
-                flow = self.mplot_data_dict["line_Flow"][scenario].copy()
+                flow = self["line_Flow"][scenario].copy()
                 if self.shift_leapday == True:
                     flow = self.adjust_for_leapday(flow)
                 flow = flow.reset_index()
@@ -2017,8 +2030,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -2060,7 +2074,7 @@ class MPlot(PlotDataHelper):
 
                 net_exports = []
                 self.logger.info(f"Scenario = {str(scenario)}")
-                flow = self.mplot_data_dict["line_Flow"][scenario]
+                flow = self["line_Flow"][scenario]
                 flow = flow.reset_index()
 
                 for other_zone in other_zones:
@@ -2151,8 +2165,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -2177,7 +2192,7 @@ class MPlot(PlotDataHelper):
         for i, scenario in enumerate(self.Scenarios):
             
             self.logger.info(f"Scenario = {str(scenario)}")
-            flow_all = self.mplot_data_dict["interface_Flow"][scenario]
+            flow_all = self["interface_Flow"][scenario]
             pos = pd.Series(name = 'Total Export')
             neg = pd.Series(name = 'Total Import')
             
@@ -2242,13 +2257,13 @@ class MPlot(PlotDataHelper):
 
     # def line_util_agged(self):
 
-    #     self.mplot_data_dict["line_Flow"] = {}
+    #     self["line_Flow"] = {}
     #     interface_flow_collection = {}
     #     line_limit_collection = {}
     #     interface_limit_collection = {}
 
     #     #Load data
-    #     self._getdata(self.mplot_data_dict["line_Flow"],"line_Flow")
+    #     self._getdata(self["line_Flow"],"line_Flow")
     #     self._getdata(interface_flow_collection,"interface_Flow")
     #     self._getdata(line_limit_collection,"line_Export_Limit")
     #     self._getdata(interface_limit_collection,"interface_Export_Limit")
@@ -2263,7 +2278,7 @@ class MPlot(PlotDataHelper):
     #         for scenario in self.Scenarios:
     #             self.logger.info("Scenario = " + str(scenario))
 
-    #             lineflow = self.mplot_data_dict["line_Flow"].get(scenario)
+    #             lineflow = self["line_Flow"].get(scenario)
     #             linelim = line_limit_collection.get(scenario)
     #             linelim = linelim.reset_index().drop('timestamp', axis = 1).set_index('line_name')
 

@@ -25,9 +25,9 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
         
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
@@ -35,7 +35,7 @@ class MPlot(PlotDataHelper):
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
-        self.mplot_data_dict = {}
+        
 
     def prod_cost(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone="", start_date_range=None, end_date_range=None):
@@ -49,8 +49,9 @@ class MPlot(PlotDataHelper):
                       (True,"generator_Reserves_Revenue",self.Scenarios),
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -63,7 +64,7 @@ class MPlot(PlotDataHelper):
                 self.logger.info(f"Scenario = {scenario}")
                 Total_Systems_Cost = pd.DataFrame()
 
-                Total_Installed_Capacity = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Total_Installed_Capacity = self["generator_Installed_Capacity"].get(scenario)
                 #Check if zone has installed generation, if not skips
                 try:
                     Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input,level=self.AGG_BY)
@@ -74,14 +75,14 @@ class MPlot(PlotDataHelper):
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity = Total_Installed_Capacity.iloc[0]
 
-                Total_Gen_Cost = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
+                Total_Gen_Cost = self["generator_Total_Generation_Cost"].get(scenario)
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 Total_Gen_Cost = self.df_process_gen_inputs(Total_Gen_Cost)
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)*-1
                 Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/MW-year
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
 
-                Pool_Revenues = self.mplot_data_dict["generator_Pool_Revenue"].get(scenario)
+                Pool_Revenues = self["generator_Pool_Revenue"].get(scenario)
                 Pool_Revenues = Pool_Revenues.xs(zone_input,level=self.AGG_BY)
                 Pool_Revenues = self.df_process_gen_inputs(Pool_Revenues)
                 Pool_Revenues = Pool_Revenues.sum(axis=0)
@@ -89,7 +90,7 @@ class MPlot(PlotDataHelper):
                 Pool_Revenues.rename("Energy_Revenues", inplace=True)
 
                 ### Might cvhnage to Net Reserve Revenue at later date
-                Reserve_Revenues = self.mplot_data_dict["generator_Reserves_Revenue"].get(scenario)
+                Reserve_Revenues = self["generator_Reserves_Revenue"].get(scenario)
                 Reserve_Revenues = Reserve_Revenues.xs(zone_input,level=self.AGG_BY)
                 Reserve_Revenues = self.df_process_gen_inputs(Reserve_Revenues)
                 Reserve_Revenues = Reserve_Revenues.sum(axis=0)
@@ -177,8 +178,9 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Total_Generation_Cost",self.Scenarios),
                       (False,f"{agg}_Cost_Unserved_Energy",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -192,7 +194,7 @@ class MPlot(PlotDataHelper):
                 self.logger.info(f"Scenario = {scenario}")
                 Total_Systems_Cost = pd.DataFrame()
 
-                Total_Gen_Cost = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
+                Total_Gen_Cost = self["generator_Total_Generation_Cost"].get(scenario)
 
                 try:
                     Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
@@ -203,11 +205,11 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
                 
-                if self.mplot_data_dict[f"{agg}_Cost_Unserved_Energy"] == {}:
-                    Cost_Unserved_Energy = self.mplot_data_dict["generator_Total_Generation_Cost"][scenario].copy()
+                if self[f"{agg}_Cost_Unserved_Energy"] == {}:
+                    Cost_Unserved_Energy = self["generator_Total_Generation_Cost"][scenario].copy()
                     Cost_Unserved_Energy.iloc[:,0] = 0
                 else:
-                    Cost_Unserved_Energy = self.mplot_data_dict[f"{agg}_Cost_Unserved_Energy"][scenario]
+                    Cost_Unserved_Energy = self[f"{agg}_Cost_Unserved_Energy"][scenario]
                 Cost_Unserved_Energy = Cost_Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
@@ -308,8 +310,9 @@ class MPlot(PlotDataHelper):
                       (True,"generator_Start_&_Shutdown_Cost",self.Scenarios),
                       (False,"generator_Emissions_Cost",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
     
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -322,7 +325,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                Fuel_Cost = self.mplot_data_dict["generator_Fuel_Cost"].get(scenario)
+                Fuel_Cost = self["generator_Fuel_Cost"].get(scenario)
                 # Check if Fuel_cost contains zone_input, skips if not
                 try:
                     Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
@@ -333,23 +336,23 @@ class MPlot(PlotDataHelper):
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
                 
-                VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
+                VOM_Cost = self["generator_VO&M_Cost"].get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY) 
                 VOM_Cost[0].values[VOM_Cost[0].values < 0] = 0
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
                 
-                Start_Shutdown_Cost = self.mplot_data_dict["generator_Start_&_Shutdown_Cost"].get(scenario)
+                Start_Shutdown_Cost = self["generator_Start_&_Shutdown_Cost"].get(scenario)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.xs(zone_input,level=self.AGG_BY)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
                 
-                if self.mplot_data_dict["generator_Emissions_Cost"] == {}:
+                if self["generator_Emissions_Cost"] == {}:
                     self.logger.warning(f"generator_Emissions_Cost not included in {scenario} results, Emissions_Cost will not be included in plot")
-                    Emissions_Cost = self.mplot_data_dict["generator_Start_&_Shutdown_Cost"][scenario].copy()
+                    Emissions_Cost = self["generator_Start_&_Shutdown_Cost"][scenario].copy()
                     Emissions_Cost.iloc[:,0] = 0
                 else:
-                    Emissions_Cost = self.mplot_data_dict["generator_Emissions_Cost"][scenario]
+                    Emissions_Cost = self["generator_Emissions_Cost"][scenario]
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)
@@ -451,8 +454,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Total_Generation_Cost",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -465,7 +469,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Gen_Stack = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
+                Total_Gen_Stack = self["generator_Total_Generation_Cost"].get(scenario)
                 # Check if Total_Gen_Stack contains zone_input, skips if not
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
@@ -548,8 +552,9 @@ class MPlot(PlotDataHelper):
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios),
                       (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -563,7 +568,7 @@ class MPlot(PlotDataHelper):
                 self.logger.info(f"Scenario = {scenario}")
                 Total_Systems_Cost = pd.DataFrame()
                 
-                Total_Gen_Cost = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
+                Total_Gen_Cost = self["generator_Total_Generation_Cost"].get(scenario)
 
                 try:
                     Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
@@ -574,11 +579,11 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
                 
-                if self.mplot_data_dict[f"{agg}_Cost_Unserved_Energy"] == {}:
-                    Cost_Unserved_Energy = self.mplot_data_dict["generator_Total_Generation_Cost"][scenario].copy()
+                if self[f"{agg}_Cost_Unserved_Energy"] == {}:
+                    Cost_Unserved_Energy = self["generator_Total_Generation_Cost"][scenario].copy()
                     Cost_Unserved_Energy.iloc[:,0] = 0
                 else:
-                    Cost_Unserved_Energy = self.mplot_data_dict[f"{agg}_Cost_Unserved_Energy"][scenario]
+                    Cost_Unserved_Energy = self[f"{agg}_Cost_Unserved_Energy"][scenario]
                 Cost_Unserved_Energy = Cost_Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
@@ -653,8 +658,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost" ,self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
             return MissingInputData()
@@ -666,7 +672,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Gen_Stack = self.mplot_data_dict["generator_Total_Generation_Cost"].get(scenario)
+                Total_Gen_Stack = self["generator_Total_Generation_Cost"].get(scenario)
 
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input,level=self.AGG_BY)
@@ -753,8 +759,9 @@ class MPlot(PlotDataHelper):
                       (True,"generator_Start_&_Shutdown_Cost",self.Scenarios),
                       (False,"generator_Emissions_Cost",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
@@ -768,7 +775,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
-                Fuel_Cost = self.mplot_data_dict["generator_Fuel_Cost"].get(scenario)
+                Fuel_Cost = self["generator_Fuel_Cost"].get(scenario)
                 try:
                     Fuel_Cost = Fuel_Cost.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -777,23 +784,23 @@ class MPlot(PlotDataHelper):
                 Fuel_Cost = Fuel_Cost.sum(axis=0)
                 Fuel_Cost.rename("Fuel_Cost", inplace=True)
 
-                VOM_Cost = self.mplot_data_dict["generator_VO&M_Cost"].get(scenario)
+                VOM_Cost = self["generator_VO&M_Cost"].get(scenario)
                 VOM_Cost = VOM_Cost.xs(zone_input,level=self.AGG_BY)
                 VOM_Cost[0].values[VOM_Cost[0].values < 0] = 0
                 VOM_Cost = VOM_Cost.sum(axis=0)
                 VOM_Cost.rename("VO&M_Cost", inplace=True)
 
-                Start_Shutdown_Cost = self.mplot_data_dict["generator_Start_&_Shutdown_Cost"].get(scenario)
+                Start_Shutdown_Cost = self["generator_Start_&_Shutdown_Cost"].get(scenario)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.xs(zone_input,level=self.AGG_BY)
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
                 
-                if self.mplot_data_dict["generator_Emissions_Cost"] == {}:
+                if self["generator_Emissions_Cost"] == {}:
                     self.logger.warning(f"generator_Emissions_Cost not included in {scenario} results, Emissions_Cost will not be included in plot")
-                    Emissions_Cost = self.mplot_data_dict["generator_Start_&_Shutdown_Cost"][scenario].copy()
+                    Emissions_Cost = self["generator_Start_&_Shutdown_Cost"][scenario].copy()
                     Emissions_Cost.iloc[:,0] = 0
                 else:
-                    Emissions_Cost = self.mplot_data_dict["generator_Emissions_Cost"][scenario]
+                    Emissions_Cost = self["generator_Emissions_Cost"][scenario]
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)

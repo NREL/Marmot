@@ -21,16 +21,16 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
 
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
-        self.mplot_data_dict = {}
+        
 
     def capacity_out_stack(self, figure_name=None, prop=None, start=None, 
                              end=None, timezone="",start_date_range=None, 
@@ -43,8 +43,9 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Installed_Capacity",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
 
         if 1 in check_input_data:
@@ -73,8 +74,8 @@ class MPlot(PlotDataHelper):
                 i+=1
                 
 
-                install_cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario).copy()
-                avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
+                install_cap = self["generator_Installed_Capacity"].get(scenario).copy()
+                avail_cap = self["generator_Available_Capacity"].get(scenario).copy()
                 if self.shift_leapday == True:
                     avail_cap = self.adjust_for_leapday(avail_cap)
                 if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():

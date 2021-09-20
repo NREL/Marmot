@@ -21,23 +21,29 @@ import marmot.config.mconfig as mconfig
 logger = logging.getLogger('marmot_plot.'+__name__)
 
 
-class PlotDataHelper():
+class PlotDataHelper(dict):
     """ Methods used to assist with the creation of Marmot plots
 
     Collection of Methods to assist with creation of figures,
     including getting and formatting data, setting up plot sizes and adding 
     elements to plots such as labels.
 
+    PlotDataHelper inherits the python class 'dict' so acts like a dictionary and stores the
+    formatted data when retrieved by the get_formatted_data method.
+
+
     """
 
-    def __init__(self, AGG_BY, ordered_gen, PLEXOS_color_dict, Scenarios,
-                    Marmot_Solutions_folder, ylabels, xlabels, gen_names_dict,
-                    Region_Mapping):
+    def __init__(self, Marmot_Solutions_folder, AGG_BY, ordered_gen, PLEXOS_color_dict, 
+                    Scenarios, ylabels, xlabels, gen_names_dict,
+                    Region_Mapping=pd.DataFrame(), **kwargs):
 
         """
         Parameters
         ----------
 
+        Marmot_Solutions_folder : string directory
+            Folder to save Marmot solution files.
         AGG_BY : string
             Informs region type to aggregate by when creating plots.
         ordered_gen : list 
@@ -47,8 +53,6 @@ class PlotDataHelper():
             Dictionary of colors to use for generation technologies
         Scenarios : list
             Name of scenarios to process.
-        Marmot_Solutions_folder : string directory
-            Folder to save Marmot solution files.
         ylabels : list
             y axis labels for facet plots.
         xlabels : list
@@ -60,25 +64,24 @@ class PlotDataHelper():
             Aggregations are created by grouping PLEXOS regions.
         """
         
+        self.Marmot_Solutions_folder = Marmot_Solutions_folder
         self.AGG_BY = AGG_BY
         self.ordered_gen = ordered_gen
         self.PLEXOS_color_dict = PLEXOS_color_dict
         self.Scenarios = Scenarios
-        self.Marmot_Solutions_folder = Marmot_Solutions_folder
         self.ylabels = ylabels
         self.xlabels = xlabels
         self.gen_names_dict = gen_names_dict
         self.Region_Mapping = Region_Mapping
 
 
-    def get_data(self, mplot_data_dict, properties: list):
+    def get_formatted_data(self, properties: list):
         """
         Used to get data from formatted h5 file
         Adds data to dictionary with scenario name as key
         Parameters
         ----------
-        mplot_data_dict : dictionary
-            dictionary of data with scenarios as keys.
+
         properties : list
             list of tuples containg required plexos property information
 
@@ -92,11 +95,11 @@ class PlotDataHelper():
         
         for prop in properties:
             required, plx_prop_name, scenario_list = prop
-            if f"{plx_prop_name}" not in mplot_data_dict:
-                mplot_data_dict[f"{plx_prop_name}"] = {}
+            if f"{plx_prop_name}" not in self:
+                self[f"{plx_prop_name}"] = {}
             
             for scenario in scenario_list:
-                if scenario not in mplot_data_dict[f"{plx_prop_name}"]:
+                if scenario not in self[f"{plx_prop_name}"]:
                     try:
                         df = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,"Processed_HDF5_folder", scenario + "_formatted.h5"),plx_prop_name)
                         # Rename generator techs based on gen_names.csv 
@@ -105,11 +108,11 @@ class PlotDataHelper():
                         # Specific check for Marmot's Curtailment property
                         if plx_prop_name == 'generator_Curtailment':
                             df = self.assign_curtailment_techs(df)
-                        mplot_data_dict[f"{plx_prop_name}"][scenario] = df
+                        self[f"{plx_prop_name}"][scenario] = df
                     except KeyError:
                         break
             
-            if mplot_data_dict[f"{plx_prop_name}"] == {}:
+            if self[f"{plx_prop_name}"] == {}:
                 logger.warning(f"{plx_prop_name} is MISSING from the Marmot formatted h5 files")
                 if required == True:
                     check_input_data.append(1)

@@ -25,13 +25,13 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
 
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
-        self.mplot_data_dict = {}
+        
 
     def pdc_all_regions(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone="", start_date_range=None, end_date_range=None):
@@ -53,8 +53,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -79,7 +80,7 @@ class MPlot(PlotDataHelper):
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
+                price = self._process_data(self[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
@@ -152,8 +153,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -164,7 +166,7 @@ class MPlot(PlotDataHelper):
             all_prices=[]
             for scenario in self.Scenarios:
 
-                price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
+                price = self._process_data(self[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
@@ -243,8 +245,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -254,7 +257,7 @@ class MPlot(PlotDataHelper):
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
+                price = self._process_data(self[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 
                 if pd.notna(start_date_range):
@@ -329,8 +332,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -357,7 +361,7 @@ class MPlot(PlotDataHelper):
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
+                price = self._process_data(self[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 
                 if pd.notna(start_date_range):
@@ -450,8 +454,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -474,7 +479,7 @@ class MPlot(PlotDataHelper):
         for scenario in self.Scenarios:
             self.logger.info(f"Scenario = {scenario}")
 
-            price = self.mplot_data_dict["node_Price"][scenario]
+            price = self["node_Price"][scenario]
             price = price.loc[(slice(None), select_nodes),:]
             price = price.groupby(["timestamp","node"]).sum()
             price.rename(columns={0:scenario}, inplace=True)
@@ -593,8 +598,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -618,7 +624,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
     
-                price = self.mplot_data_dict["node_Price"][scenario]
+                price = self["node_Price"][scenario]
                 price = price.xs(node, level='node')
                 # price = price.loc[(slice(None), select_nodes),:]
                 price = price.groupby(["timestamp"]).sum()

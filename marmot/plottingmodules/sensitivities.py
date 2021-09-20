@@ -26,13 +26,13 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
         
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        self.mplot_data_dict = {}
+        
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
 
@@ -74,14 +74,15 @@ class MPlot(PlotDataHelper):
                       (True,f"generator_{self.curtailment_prop}",self.Scenario_Diff),
                       (True,"region_Net_Interchange",self.Scenario_Diff)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
         
         try:
-            bc = self.adjust_for_leapday(self.mplot_data_dict["generator_Generation"].get(self.Scenario_Diff[0]))
+            bc = self.adjust_for_leapday(self["generator_Generation"].get(self.Scenario_Diff[0]))
         except IndexError:
             self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
             outputs = InputSheetError()
@@ -91,7 +92,7 @@ class MPlot(PlotDataHelper):
         bc_CT = bc.xs('Gas-CT',level = 'tech')
         bc_CC = bc.xs('Gas-CC',level = 'tech')
         try:
-            scen = self.adjust_for_leapday(self.mplot_data_dict["generator_Generation"].get(self.Scenario_Diff[1]))
+            scen = self.adjust_for_leapday(self["generator_Generation"].get(self.Scenario_Diff[1]))
         except IndexError:
             self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
             outputs = InputSheetError()
@@ -101,8 +102,8 @@ class MPlot(PlotDataHelper):
         scen_CT = scen.xs('Gas-CT',level = 'tech')
         scen_CC = scen.xs('Gas-CC',level = 'tech')
 
-        curt_bc = self.adjust_for_leapday(self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[0]))
-        curt_scen = self.adjust_for_leapday(self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[1]))
+        curt_bc = self.adjust_for_leapday(self[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[0]))
+        curt_scen = self.adjust_for_leapday(self[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[1]))
         curt_diff_all = curt_scen - curt_bc
 
         regions = list(bc.index.get_level_values(self.AGG_BY).unique())
@@ -118,8 +119,8 @@ class MPlot(PlotDataHelper):
 
         #Add net interchange difference to icing plot.
         bc_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, "Processed_HDF5_folder", self.Scenario_Diff[0] + "_formatted.h5"),"region_Net_Interchange")
-        bc_int = self.adjust_for_leapday(self.mplot_data_dict["region_Net_Interchange"].get(self.Scenario_Diff[0]))
-        scen_int = self.adjust_for_leapday(self.mplot_data_dict["region_Net_Interchange"].get(self.Scenario_Diff[1]))
+        bc_int = self.adjust_for_leapday(self["region_Net_Interchange"].get(self.Scenario_Diff[0]))
+        scen_int = self.adjust_for_leapday(self["region_Net_Interchange"].get(self.Scenario_Diff[1]))
 
         int_diff_all = scen_int - bc_int
 

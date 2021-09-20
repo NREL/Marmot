@@ -26,15 +26,15 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
 
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         
-        self.mplot_data_dict = {}
+        
         
     def avg_output_when_committed(self, figure_name=None, prop=None, start=None, 
                                   end=None, timezone="", start_date_range=None, 
@@ -46,8 +46,9 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -58,7 +59,7 @@ class MPlot(PlotDataHelper):
 
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -70,7 +71,7 @@ class MPlot(PlotDataHelper):
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 # techs = list(Gen['tech'].unique())
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]
-                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.drop(columns = ['timestamp','tech'])
@@ -168,8 +169,9 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -181,7 +183,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
 
                 self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -209,7 +211,7 @@ class MPlot(PlotDataHelper):
                 Total_Gen = Gen.sum(axis=0)
                 Total_Gen.rename(scenario, inplace = True)
                 
-                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = self.df_process_gen_inputs(Cap)
                 Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
@@ -279,8 +281,9 @@ class MPlot(PlotDataHelper):
                       (True,"generator_Installed_Capacity",self.Scenarios),
                       (True,"generator_Hours_at_Minimum",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -293,7 +296,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {str(scenario)}")
 
-                Min = self.mplot_data_dict["generator_Hours_at_Minimum"].get(scenario)
+                Min = self["generator_Hours_at_Minimum"].get(scenario)
                 try:
                     Min = Min.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -303,7 +306,7 @@ class MPlot(PlotDataHelper):
                 Min = Min.set_index('gen_name')
                 Min = Min.rename(columns = {0:"Hours at Minimum"})
 
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -318,7 +321,7 @@ class MPlot(PlotDataHelper):
                 Gen = Gen[~Gen['tech'].isin(self.vre_gen_cat)]
                 Gen.index = Gen.timestamp
 
-                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Caps = Cap.groupby('gen_name').mean()
                 Caps.reset_index()

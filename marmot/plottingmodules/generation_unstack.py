@@ -26,9 +26,9 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
         
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
@@ -37,7 +37,7 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
-        self.mplot_data_dict = {}
+        
 
 
     def gen_unstack(self, figure_name=None, prop=None, start=None, end=None, 
@@ -63,8 +63,9 @@ class MPlot(PlotDataHelper):
                           (True,f"{agg}_Load",scenario_list),
                           (False,f"{agg}_Unserved_Energy",scenario_list)]
             
-            # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-            return self.get_data(self.mplot_data_dict, properties)
+            # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+            return self.get_formatted_data(properties)
         
         if facet:
             check_input_data = getdata(self.Scenarios)
@@ -117,7 +118,7 @@ class MPlot(PlotDataHelper):
 
                 try:
 
-                    Stacked_Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
+                    Stacked_Gen = self["generator_Generation"].get(scenario).copy()
                     if self.shift_leapday == True:
                         Stacked_Gen = self.adjust_for_leapday(Stacked_Gen)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
@@ -134,8 +135,8 @@ class MPlot(PlotDataHelper):
             
                 # Insert Curtailmnet into gen stack if it exhists in database
 
-                if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
-                    Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario).copy()
+                if self[f"generator_{self.curtailment_prop}"]:
+                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario).copy()
                     if self.shift_leapday == True:
                         Stacked_Curt = self.adjust_for_leapday(Stacked_Curt)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
@@ -159,18 +160,18 @@ class MPlot(PlotDataHelper):
 
                 Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
 
-                Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario).copy()
+                Load = self[f"{agg}_Load"].get(scenario).copy()
                 if self.shift_leapday == True:
                     Load = self.adjust_for_leapday(Load)     
                 Load = Load.xs(zone_input,level=self.AGG_BY)
                 Load = Load.groupby(["timestamp"]).sum()
                 Load = Load.squeeze() #Convert to Series
 
-                if self.mplot_data_dict["generator_Pump_Load"] == {}:
-                    Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
+                if self["generator_Pump_Load"] == {}:
+                    Pump_Load = self['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
                 else:
-                    Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
+                    Pump_Load = self["generator_Pump_Load"][scenario]
                 if self.shift_leapday == True:
                     Pump_Load = self.adjust_for_leapday(Pump_Load)                                
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
@@ -181,11 +182,11 @@ class MPlot(PlotDataHelper):
                 else:
                     Pump_Load = Load
                 
-                if self.mplot_data_dict[f"{agg}_Unserved_Energy"] == {}:
-                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Load"][scenario].copy()
+                if self[f"{agg}_Unserved_Energy"] == {}:
+                    Unserved_Energy = self[f"{agg}_Load"][scenario].copy()
                     Unserved_Energy.iloc[:,0] = 0
                 else:
-                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario].copy()                
+                    Unserved_Energy = self[f"{agg}_Unserved_Energy"][scenario].copy()                
                 if self.shift_leapday == True:
                     Unserved_Energy = self.adjust_for_leapday(Unserved_Energy)                    
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)

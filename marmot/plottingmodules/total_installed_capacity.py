@@ -33,9 +33,9 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
 
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
@@ -43,7 +43,7 @@ class MPlot(PlotDataHelper):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        self.mplot_data_dict = {}
+        
 
     def total_cap(self, figure_name=None, prop=None, start=None, end=None,
                   timezone="", start_date_range=None, end_date_range=None):
@@ -56,7 +56,7 @@ class MPlot(PlotDataHelper):
 
         # Runs get_data to populate mplot_data_dict with all required properties,
         # returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        check_input_data = self.get_formatted_data(properties)
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -71,7 +71,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Installed_Capacity = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Total_Installed_Capacity = self["generator_Installed_Capacity"].get(scenario)
 
                 zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 if scenario == 'ADS':
@@ -147,8 +147,9 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -163,7 +164,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Installed_Capacity = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Total_Installed_Capacity = self["generator_Installed_Capacity"].get(scenario)
                 zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 if scenario == 'ADS':
                     zone_input_adj = zone_input.split('_WI')[0]

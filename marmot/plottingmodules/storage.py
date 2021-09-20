@@ -26,13 +26,13 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
         
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        self.mplot_data_dict = {}
+        
 
     def storage_volume(self, figure_name=None, prop=None, start=None, 
                              end=None, timezone="", start_date_range=None, 
@@ -58,8 +58,9 @@ class MPlot(PlotDataHelper):
                       (True, f"{agg}_Unserved_Energy", self.Scenarios),
                       (True, "storage_Max_Volume", [self.Scenarios[0]])]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -74,7 +75,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {str(scenario)}")
 
-                storage_volume_read = self.mplot_data_dict["storage_Initial_Volume"].get(scenario)
+                storage_volume_read = self["storage_Initial_Volume"].get(scenario)
                 try:
                     storage_volume = storage_volume_read.xs(zone_input, level = self.AGG_BY)
                 except KeyError:
@@ -91,7 +92,7 @@ class MPlot(PlotDataHelper):
 
                 max_volume = storage_volume.max().squeeze()
                 try:
-                    max_volume = self.mplot_data_dict["storage_Max_Volume"].get(scenario)
+                    max_volume = self["storage_Max_Volume"].get(scenario)
                     max_volume = max_volume.xs(zone_input, level = self.AGG_BY)
                     max_volume = max_volume.groupby('timestamp').sum()
                     max_volume = max_volume.squeeze()[0]
@@ -99,7 +100,7 @@ class MPlot(PlotDataHelper):
                     self.logger.warning(f'No storage resources in {zone_input}')
 
                 #Pull unserved energy.
-                use_read = self.mplot_data_dict[f"{agg}_Unserved_Energy"].get(scenario)
+                use_read = self[f"{agg}_Unserved_Energy"].get(scenario)
                 use = use_read.xs(zone_input, level = self.AGG_BY)
                 use = use.groupby("timestamp").sum() / 1000
                 use.columns = [scenario]

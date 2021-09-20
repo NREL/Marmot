@@ -52,9 +52,9 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
         
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.AGG_BY, self.ordered_gen, self.PLEXOS_color_dict, 
-                    self.Scenarios, self.Marmot_Solutions_folder, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.Region_Mapping) 
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
@@ -63,7 +63,7 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
-        self.mplot_data_dict = {}
+        
 
     def total_gen(self, figure_name=None, prop=None, start=None, end=None,
                   timezone="", start_date_range=None, end_date_range=None):
@@ -82,8 +82,9 @@ class MPlot(PlotDataHelper):
                       (True,f"{agg}_Load",self.Scenarios),
                       (False,f"{agg}_Unserved_Energy",self.Scenarios)]
 
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             outputs = MissingInputData()
@@ -103,7 +104,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
 
                 self.logger.info(f"Scenario = {scenario}")
-                Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
+                Total_Gen_Stack = self['generator_Generation'].get(scenario)
 
                 #Check if zone has generation, if not skips
                 try:
@@ -120,8 +121,8 @@ class MPlot(PlotDataHelper):
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
                 # Insert Curtailmnet into gen stack if it exhists in database
-                if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
-                    Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
+                if self[f"generator_{self.curtailment_prop}"]:
+                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
@@ -139,7 +140,7 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 
-                Total_Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario)
+                Total_Load = self[f"{agg}_Load"].get(scenario)
                 Total_Load = Total_Load.xs(zone_input,level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
 
@@ -149,11 +150,11 @@ class MPlot(PlotDataHelper):
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
 
-                if self.mplot_data_dict[f"{agg}_Unserved_Energy"] == {}:
-                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Load"][scenario].copy()
+                if self[f"{agg}_Unserved_Energy"] == {}:
+                    Unserved_Energy = self[f"{agg}_Load"][scenario].copy()
                     Unserved_Energy.iloc[:,0] = 0
                 else:
-                    Unserved_Energy = self.mplot_data_dict[f"{agg}_Unserved_Energy"][scenario]
+                    Unserved_Energy = self[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 
@@ -167,11 +168,11 @@ class MPlot(PlotDataHelper):
                 if (Unserved_Energy == 0).all() == False:
                     Unserved_Energy = Total_Load - Unserved_Energy
 
-                if self.mplot_data_dict["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_total_pumped_load_line"):
-                    Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
+                if self["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_total_pumped_load_line"):
+                    Pump_Load = self['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
                 else:
-                    Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
+                    Pump_Load = self["generator_Pump_Load"][scenario]
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
@@ -295,8 +296,9 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (False,f"generator_{self.curtailment_prop}",self.Scenarios)]
 
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             outputs = MissingInputData()
@@ -311,7 +313,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
+                Total_Gen_Stack = self['generator_Generation'].get(scenario)
 
                 #Check if zone has generation, if not skips and breaks out of Multi_Scenario loop
                 try:
@@ -328,8 +330,8 @@ class MPlot(PlotDataHelper):
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
                 # Insert Curtailmnet into gen stack if it exhists in database
-                if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
-                    Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
+                if self[f"generator_{self.curtailment_prop}"]:
+                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
@@ -468,8 +470,9 @@ class MPlot(PlotDataHelper):
                       (False,"generator_Pump_Load",self.Scenarios),
                       (True,f"{agg}_Load",self.Scenarios)]
 
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             outputs = MissingInputData()
@@ -505,7 +508,7 @@ class MPlot(PlotDataHelper):
             for i, scenario in enumerate(self.Scenarios):
                 
                 self.logger.info(f"Scenario = {scenario}")
-                Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
+                Total_Gen_Stack = self['generator_Generation'].get(scenario)
     
                 #Check if zone has generation, if not skips
                 try:
@@ -531,9 +534,9 @@ class MPlot(PlotDataHelper):
                 interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
     
                 #Insert Curtailment into gen stack if it exhists in database
-                if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
+                if self[f"generator_{self.curtailment_prop}"]:
                     curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
-                    Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
+                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
@@ -542,16 +545,16 @@ class MPlot(PlotDataHelper):
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 # Get Total Load 
-                Total_Load = self.mplot_data_dict[f"{agg}_Load"].get(scenario)
+                Total_Load = self[f"{agg}_Load"].get(scenario)
                 Total_Load = Total_Load.xs(zone_input, level=self.AGG_BY)
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
 
                 # Get Pumped Load 
-                if self.mplot_data_dict["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_total_pumped_load_line"):
-                    Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
+                if self["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_total_pumped_load_line"):
+                    Pump_Load = self['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
                 else:
-                    Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
+                    Pump_Load = self["generator_Pump_Load"][scenario]
                 Pump_Load = Pump_Load.xs(zone_input, level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
 
@@ -744,8 +747,9 @@ class MPlot(PlotDataHelper):
                       (False,f"generator_{self.curtailment_prop}",self.Scenarios)]
 
 
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = self.get_data(self.mplot_data_dict, properties)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             outputs = MissingInputData()
@@ -770,7 +774,7 @@ class MPlot(PlotDataHelper):
             for i, scenario in enumerate(self.Scenarios):
                 
                 self.logger.info(f"Scenario = {scenario}")
-                Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
+                Total_Gen_Stack = self['generator_Generation'].get(scenario)
     
                 #Check if zone has generation, if not skips
                 try:
@@ -784,8 +788,8 @@ class MPlot(PlotDataHelper):
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
     
                 #Insert Curtailmnet into gen stack if it exhists in database
-                if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
-                    Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
+                if self[f"generator_{self.curtailment_prop}"]:
+                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
@@ -866,14 +870,14 @@ class MPlot(PlotDataHelper):
         self.logger.warning('total_gen_facet is under development')
         return outputs
 
-    #     self.mplot_data_dict['generator_Generation'] = {}
+    #     self['generator_Generation'] = {}
     #     self.mplot_data_dictf"{self.AGG_BY}_Load"] = {}
-    #     self.mplot_data_dict[f"generator_{self.curtailment_prop}"] = {}
+    #     self[f"generator_{self.curtailment_prop}"] = {}
 
     #     for scenario in self.Scenarios:
     #         try:
-    #             self.mplot_data_dict['generator_Generation'][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
-    #             self.mplot_data_dict[f"generator_{self.curtailment_prop}"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  f"generator_{self.curtailment_prop}")
+    #             self['generator_Generation'][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
+    #             self[f"generator_{self.curtailment_prop}"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  f"generator_{self.curtailment_prop}")
     #             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
     #             if self.AGG_BY == "zone":
     #                 self.mplot_data_dictf"{self.AGG_BY}_Load"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
@@ -892,10 +896,10 @@ class MPlot(PlotDataHelper):
     #     for scenario in self.Scenarios:
     #         self.logger.info("Scenario = " + scenario)
     #         try:
-    #             Total_Gen_Stack = self.mplot_data_dict['generator_Generation'].get(scenario)
+    #             Total_Gen_Stack = self['generator_Generation'].get(scenario)
     #             Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)
     #             Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
-    #             Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario)
+    #             Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
     #             Stacked_Curt = Stacked_Curt.xs(self.zone_input,level=self.AGG_BY)
     #             Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
     #             Stacked_Curt = Stacked_Curt.sum(axis=1)
