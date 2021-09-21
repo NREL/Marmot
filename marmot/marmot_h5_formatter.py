@@ -765,12 +765,6 @@ class MarmotFormat(SetupLogger):
             f.close()
         return
 
-                 #processed_data = self._get_data(row["group"], row["data_set"], row["data_type"], db, meta)
-                 #plexos_class = abatement
-                 #plexos_prop = abatement
-                 #timescale = interval
-                 #db = h5 file
-
     def _get_data(self, plexos_class, plexos_prop, timescale, db, metadata):
         """
         This method handles the pulling of the data from the H5plexos hdf5
