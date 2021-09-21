@@ -53,6 +53,33 @@ except ModuleNotFoundError:
 # but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
 
+# Conversion units dict, key values is a tuple of new unit name and conversion multiplier
+UNITS_CONVERSION = {
+                    'kW': ('MW', 1e-3),
+                    'MW': ('MW', 1),
+                    'GW': ('MW', 1e3),
+                    'TW': ('MW', 1e6),
+                    'kWh': ('MWh', 1e-3),
+                    'MWh': ('MWh', 1),
+                    'GWh': ('MWh', 1e3),
+                    'TWh': ('MWh', 1e6),
+                    'lb': ('kg', 0.453592),
+                    'ton': ('kg', 907.18474),
+                    'kg': ('kg', 1),
+                    'tonne': ('kg', 1000),
+                    '$': ('$', 1),
+                    '$000': ('$', 1000),
+                    'h': ('h', 1),
+                    'MMBTU': ('MMBTU', 1),
+                    'GBTU': ('MMBTU', 1000),
+                    'GJ"': ('MMBTU', 0.947817),
+                    'TJ': ('MMBTU', 947.817120),
+                    '$/MW': ('$/MW', 1),
+                    'lb/MWh' : ('kg/MWh', 0.453592),
+                    'Kg/MWh': ('Kg/MWh', 1)
+                    }
+
+
 class SetupLogger():
     """Sets up the python logger.
 
@@ -733,12 +760,22 @@ class MarmotFormat(SetupLogger):
         try:
             if "_" in plexos_class:
                 df = db.query_relation_property(plexos_class, plexos_prop, timescale=timescale)
+                object_class = plexos_class
             else:
                 df = db.query_object_property(plexos_class, plexos_prop, timescale=timescale)
-
+                
+                # handles h5plexos naming discrepency 
+                if ((0,6,0) <= db.version and db.version < (0,7,0)):
+                    object_class = f"{plexos_class}s"
+        
         except KeyError:
             df = self._report_prop_error(plexos_prop, plexos_class)
             return df
+        
+        # Get original units from h5plexos file 
+        df_units = db.h5file[f'/data/ST/{timescale}/{object_class}/{plexos_prop}'].attrs['units'].decode('UTF-8')
+        # find unit conversion values
+        converted_units = UNITS_CONVERSION.get(df_units, (df_units, 1))
 
         # Instantiate instance of Process Class
         # metadata is used as a paramter to initialize process_cl
@@ -747,6 +784,12 @@ class MarmotFormat(SetupLogger):
         process_att = getattr(process_cl, f'df_process_{plexos_class}')
         # Process attribute and return to df
         df = process_att()
+        
+        # Convert units and add unit column to index 
+        df = df*converted_units[1]
+        units_index = pd.Index([converted_units[0]] *len(df), name='units')
+        df.set_index(units_index, append=True, inplace=True)
+
         if plexos_class == 'region' and plexos_prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
             self.logger.warning(f"Scenario contains Unserved Energy: {int(df.sum(axis=0))} MW\n")
         return df
@@ -898,28 +941,18 @@ class MarmotFormat(SetupLogger):
 
                     if processed_data.empty is True:
                         break
-
-                    # special units processing for emissions
-                    if row["group"] == "emissions_generators":
-                        if (row["Units"] == "lb") | (row["Units"] == "lbs"):
-                            # convert lbs to kg
-                            kg_per_lb = 0.453592
-                            processed_data = processed_data*kg_per_lb
-                        # convert kg to metric tons
-                        kg_per_metric_ton = 1E3
-                        data_chunks.append(processed_data/kg_per_metric_ton)
-
-                    # other unit multipliers
+                    
+                    # Check if data is for year interval and of type capacity
                     if (row["data_type"] == "year") & (
                             (row["data_set"] == "Installed Capacity")
                             | (row["data_set"] == "Export Limit")
                             | (row["data_set"] == "Import Limit")
                             ):
-                        data_chunks.append(processed_data*row["unit_multiplier"])
+                        data_chunks.append(processed_data)
                         self.logger.info(f"{row['data_set']} Year property reported from only the first partition")
                         break
                     else:
-                        data_chunks.append(processed_data*row["unit_multiplier"])
+                        data_chunks.append(processed_data)
 
                 if data_chunks:
                     Processed_Data_Out = pd.concat(data_chunks, copy=False)
