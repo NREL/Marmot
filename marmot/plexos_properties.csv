@@ -105,3 +105,4 @@ interval,node,Generation,TRUE,1,,
 interval,node,Dump Energy,TRUE,1,,
 interval,line,Export Limit,TRUE,1,MW,Transmission capacity
 interval,line,Import Limit,TRUE,1,MW,Transmission capacity
+interval,abatement,Abatement,TRUE,1,kg,
