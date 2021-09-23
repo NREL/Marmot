@@ -605,6 +605,24 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
+    def df_process_batterie(self):
+        """
+        Method for formatting data which comes form the PLEXOS Batteries Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        """
+        df = self.df.droplevel(level=["band", "property"])
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
+        return df
+
 class MarmotFormat(SetupLogger):
     """Main module class to be instantiated to run the formatter.
 
