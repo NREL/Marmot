@@ -31,7 +31,6 @@ class MPlot(PlotDataHelper):
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
-        
 
     def pdc_all_regions(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone="", start_date_range=None, end_date_range=None):

@@ -11,8 +11,8 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
-
 import marmot.config.mconfig as mconfig
+
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
@@ -38,8 +38,6 @@ class MPlot(PlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         
-
-
     def gen_unstack(self, figure_name=None, prop=None, start=None, end=None, 
                         timezone="", start_date_range=None, end_date_range=None):
         outputs = {}  

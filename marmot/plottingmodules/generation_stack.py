@@ -11,7 +11,6 @@ import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 
 import marmot.config.mconfig as mconfig
@@ -45,8 +44,6 @@ class MPlot(PlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         
-
-
     def committed_stack(self, figure_name=None, prop=None, start=None, end=None,
                         timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
@@ -64,8 +61,7 @@ class MPlot(PlotDataHelper):
 
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
-            outputs = MissingInputData()
-            return outputs
+            return MissingInputData()
 
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {str(zone_input)}')
@@ -76,44 +72,38 @@ class MPlot(PlotDataHelper):
                 gens = gens.xs(zone_input,level=self.AGG_BY)
             except KeyError:
                 self.logger.warning(f"No Generation in: {zone_input}")
-                out = MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = MissingZoneData()
                 continue
 
             tech_list = list(gens.reset_index().tech.unique())
-            tech_list_sort = [tech_type for tech_type in self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
+            tech_list_sort = [tech_type for tech_type in 
+                                self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
 
             if not tech_list_sort:
                 self.logger.info(f'No Thermal Generation in: {zone_input}')
-                out = MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = MissingZoneData()
                 continue
 
             xdimension = len(self.Scenarios)
             ydimension = len(tech_list_sort)
-
-            fig4, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharex = True, sharey='row',squeeze=False)
+            
+            fig, axs = plotlib.setup_plot(xdimension, ydimension, ravel_axs=False, sharex=True, sharey='row')
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
 
             for i, scenario in enumerate(self.Scenarios):
                 self.logger.info(f"Scenario = {scenario}")
 
-                locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
-                formatter = mdates.ConciseDateFormatter(locator)
-                formatter.formats[2] = '%d\n %b'
-                formatter.zero_formats[1] = '%b\n %Y'
-                formatter.zero_formats[2] = '%d\n %b'
-                formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                formatter.offset_formats[3] = '%b %Y'
-                formatter.show_offset = False
-
-                units_gen = self['generator_Units_Generating'].get(scenario)
+                units_gen = self['generator_Units_Generating'].get(scenario).copy()
                 avail_cap = self['generator_Available_Capacity'].get(scenario)
 
+                # Drop units index to allow multiplication  
+                units_gen.reset_index(level='units', drop=True, inplace=True)
+        
                 #Calculate  committed cap (for thermal only).
                 thermal_commit_cap = units_gen * avail_cap
                 thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
                 thermal_commit_cap = self.df_process_gen_inputs(thermal_commit_cap)
+                # Drop all zero columns
                 thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
 
                 # unitconversion based off peak generation hour, only checked once
@@ -129,7 +119,7 @@ class MPlot(PlotDataHelper):
                 gen = gen/unitconversion['divisor']
 
                 #Process available capacity (for VG only).
-                avail_cap = avail_cap.xs(zone_input, level = self.AGG_BY)
+                avail_cap = avail_cap.xs(zone_input, level=self.AGG_BY)
                 avail_cap = self.df_process_gen_inputs(avail_cap)
                 avail_cap = avail_cap.loc[:, (avail_cap !=0).any(axis=0)]
                 avail_cap = avail_cap/unitconversion['divisor']
@@ -146,9 +136,10 @@ class MPlot(PlotDataHelper):
                         gen_one_tech = gen[tech]
                         commit_cap = avail_cap[tech]
 
-                    gen_line = axs[j,i].plot(gen_one_tech,alpha = 0, color = self.PLEXOS_color_dict[tech])[0]
+                    gen_line = axs[j,i].plot(gen_one_tech, alpha=0, color=self.PLEXOS_color_dict[tech])[0]
                     gen_lines.append(gen_line)
-                    gen_fill = axs[j,i].fill_between(gen_one_tech.index,gen_one_tech,0, color = self.PLEXOS_color_dict[tech], alpha = 0.5)
+                    gen_fill = axs[j,i].fill_between(gen_one_tech.index, gen_one_tech, 0, 
+                                                color=self.PLEXOS_color_dict[tech], alpha=0.5)
                     if tech != 'Hydro':
                         cc = axs[j,i].plot(commit_cap, color = self.PLEXOS_color_dict[tech])
 
@@ -158,22 +149,19 @@ class MPlot(PlotDataHelper):
                     axs[j,i].tick_params(axis='x', which='major', length=5, width=1)
                     axs[j,i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                     axs[j,i].margins(x=0.01)
-                    axs[j,i].xaxis.set_major_locator(locator)
-                    axs[j,i].xaxis.set_major_formatter(formatter)
-                    if j == 0:
-                        axs[j,i].set_xlabel(xlabel = scenario, color = 'black')
-                        axs[j,i].xaxis.set_label_position('top')
-                    if i == 0:
-                        axs[j,i].set_ylabel(ylabel = tech, rotation = 'vertical', color = 'black')
+                    PlotDataHelper.set_plot_timeseries_format(axs,(j,i))
 
-            #fig4.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
-            fig4.add_subplot(111, frameon=False)
+            self.add_facet_labels(fig, xlabels_bottom=False, alternative_xlabels=self.Scenarios,
+                                    alternative_ylabels=tech_list_sort)
+
+            #fig.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
+            fig.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=60)
             data_table = pd.DataFrame() #TODO: write actual data out
-            outputs[zone_input] = {'fig':fig4, 'data_table':data_table}
+            outputs[zone_input] = {'fig':fig, 'data_table':data_table}
         return outputs
 
 

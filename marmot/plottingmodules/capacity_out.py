@@ -30,7 +30,6 @@ class MPlot(PlotDataHelper):
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
-        
 
     def capacity_out_stack(self, figure_name=None, prop=None, start=None, 
                              end=None, timezone="",start_date_range=None, 
@@ -112,7 +111,7 @@ class MPlot(PlotDataHelper):
                 chunks.append(single_scen_out)
                 
                 plotlib.create_stackplot(axs=axs, data=cap_out, color_dict=self.PLEXOS_color_dict, labels=cap_out.columns, n=i)
-                PlotDataHelper.set_plot_timeseries_format(axs, n=i, minticks=self.minticks, maxticks=self.maxticks)
+                PlotDataHelper.set_plot_timeseries_format(axs, n=i)
                 axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0), facecolor='inherit', frameon=True)
             
             if not chunks:

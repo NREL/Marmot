@@ -36,7 +36,6 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
         
-
     def prod_cost(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone="", start_date_range=None, end_date_range=None):
         

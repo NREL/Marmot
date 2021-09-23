@@ -153,7 +153,7 @@ class Process(SetupLogger):
     e.g generator, region, zone, line etc.
     """
 
-    def __init__(self, df, metadata, Region_Mapping, emit_names, logger):
+    def __init__(self, df, metadata, model, Region_Mapping, emit_names, logger):
         """Process __init__ method.
 
         Parameters
@@ -179,6 +179,7 @@ class Process(SetupLogger):
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
         self.metadata = metadata
+        self.model = model
         self.Region_Mapping = Region_Mapping
         self.emit_names = emit_names
         self.logger = logger
@@ -198,8 +199,8 @@ class Process(SetupLogger):
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['tech', 'gen_name'], level=['category', 'name'], inplace=True)
 
-        if self.metadata.region_generator_category().empty is False:
-            region_gen_idx = pd.CategoricalIndex(self.metadata.region_generator_category().index.get_level_values(0))
+        if self.metadata.region_generator_category(self.model).empty is False:
+            region_gen_idx = pd.CategoricalIndex(self.metadata.region_generator_category(self.model).index.get_level_values(0))
             region_gen_idx = region_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
             idx_region = pd.MultiIndex(levels=df.index.levels + [region_gen_idx.categories],
@@ -208,8 +209,8 @@ class Process(SetupLogger):
         else:
             idx_region = df.index
 
-        if self.metadata.zone_generator_category().empty is False:
-            zone_gen_idx = pd.CategoricalIndex(self.metadata.zone_generator_category().index.get_level_values(0))
+        if self.metadata.zone_generator_category(self.model).empty is False:
+            zone_gen_idx = pd.CategoricalIndex(self.metadata.zone_generator_category(self.model).index.get_level_values(0))
             zone_gen_idx = zone_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
             idx_zone = pd.MultiIndex(levels=idx_region.levels + [zone_gen_idx.categories],
@@ -219,7 +220,7 @@ class Process(SetupLogger):
             idx_zone = idx_region
 
         if not self.Region_Mapping.empty:
-            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.metadata.region_generator_category()
+            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.metadata.region_generator_category(self.model)
                                                               .merge(self.Region_Mapping,
                                                                      how="left",
                                                                      on='region')
@@ -254,7 +255,7 @@ class Process(SetupLogger):
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
         if not self.Region_Mapping.empty:  # checks if Region_Mapping contains data to merge, skips if empty
-            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions()
+            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions(self.model)
                                                    .merge(self.Region_Mapping,
                                                           how="left",
                                                           on='region')
@@ -344,10 +345,10 @@ class Process(SetupLogger):
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['parent', 'Type'], level=['name', 'category'], inplace=True)
         df = df.reset_index()  # unzip the levels in index
-        if self.metadata.reserves_regions().empty is False:
-            df = df.merge(self.metadata.reserves_regions(), how='left', on='parent')  # Merges in regions where reserves are located
-        if self.metadata.reserves_zones().empty is False:
-            df = df.merge(self.metadata.reserves_zones(), how='left', on='parent')  # Merges in zones where reserves are located
+        if self.metadata.reserves_regions(self.model).empty is False:
+            df = df.merge(self.metadata.reserves_regions(self.model), how='left', on='parent')  # Merges in regions where reserves are located
+        if self.metadata.reserves_zones(self.model).empty is False:
+            df = df.merge(self.metadata.reserves_zones(self.model), how='left', on='parent')  # Merges in zones where reserves are located
         df_col = list(df.columns)  # Gets names of all columns in df and places in list
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
@@ -368,19 +369,19 @@ class Process(SetupLogger):
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df = df.reset_index()  # unzip the levels in index
-        df = df.merge(self.metadata.generator_category(), how='left', on='gen_name')
+        df = df.merge(self.metadata.generator_category(self.model), how='left', on='gen_name')
 
         # merging in generator region/zones first prevents double counting in cases where multiple model regions are within a reserve region
-        if self.metadata.region_generators().empty is False:
-            df = df.merge(self.metadata.region_generators(), how='left', on='gen_name')
-        if self.metadata.zone_generators().empty is False:
-            df = df.merge(self.metadata.zone_generators(), how='left', on='gen_name')
+        if self.metadata.region_generators(self.model).empty is False:
+            df = df.merge(self.metadata.region_generators(self.model), how='left', on='gen_name')
+        if self.metadata.zone_generators(self.model).empty is False:
+            df = df.merge(self.metadata.zone_generators(self.model), how='left', on='gen_name')
 
         # now merge in reserve regions/zones
-        if self.metadata.reserves_regions().empty is False:
-            df = df.merge(self.metadata.reserves_regions(), how='left', on=['parent', 'region'])  # Merges in regions where reserves are located
-        if self.metadata.reserves_zones().empty is False:
-            df = df.merge(self.metadata.reserves_zones(), how='left', on=['parent', 'zone'])  # Merges in zones where reserves are located
+        if self.metadata.reserves_regions(self.model).empty is False:
+            df = df.merge(self.metadata.reserves_regions(self.model), how='left', on=['parent', 'region'])  # Merges in regions where reserves are located
+        if self.metadata.reserves_zones(self.model).empty is False:
+            df = df.merge(self.metadata.reserves_zones(self.model), how='left', on=['parent', 'zone'])  # Merges in zones where reserves are located
 
         df_col = list(df.columns)  # Gets names of all columns in df and places in list
         df_col.remove(0)
@@ -461,14 +462,14 @@ class Process(SetupLogger):
         df.index.rename(['pollutant'], level=['parent'], inplace=True)
 
         df = df.reset_index()  # unzip the levels in index
-        df = df.merge(self.metadata.generator_category(), how='left', on='gen_name') # merge in tech information
+        df = df.merge(self.metadata.generator_category(self.model), how='left', on='gen_name') # merge in tech information
 
         # merge in region and zone information
-        if self.metadata.region_generator_category().empty is False:
+        if self.metadata.region_generator_category(self.model).empty is False:
             # merge in region information
-            df = df.merge(self.metadata.region_generator_category().reset_index(), how='left', on=['gen_name', 'tech'])
-        if self.metadata.zone_generator_category().empty is False:
-            df = df.merge(self.metadata.zone_generator_category().reset_index(), how='left', on=['gen_name', 'tech'])  # Merges in zones where reserves are located
+            df = df.merge(self.metadata.region_generator_category(self.model).reset_index(), how='left', on=['gen_name', 'tech'])
+        if self.metadata.zone_generator_category(self.model).empty is False:
+            df = df.merge(self.metadata.zone_generator_category(self.model).reset_index(), how='left', on=['gen_name', 'tech'])  # Merges in zones where reserves are located
 
         if not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
@@ -508,11 +509,11 @@ class Process(SetupLogger):
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df = df.reset_index()  # unzip the levels in index
-        df = df.merge(self.metadata.generator_storage(), how='left', on='name')
-        if self.metadata.region_generators().empty is False:
-            df = df.merge(self.metadata.region_generators(), how='left', on='gen_name')  # Merges in regions where generators are located
-        if self.metadata.zone_generators().empty is False:
-            df = df.merge(self.metadata.zone_generators(), how='left', on='gen_name')  # Merges in zones where generators are located
+        df = df.merge(self.metadata.generator_storage(self.model), how='left', on='name')
+        if self.metadata.region_generators(self.model).empty is False:
+            df = df.merge(self.metadata.region_generators(self.model), how='left', on='gen_name')  # Merges in regions where generators are located
+        if self.metadata.zone_generators(self.model).empty is False:
+            df = df.merge(self.metadata.zone_generators(self.model), how='left', on='gen_name')  # Merges in zones where generators are located
         if not self.Region_Mapping.empty:  # checks if Region_Maping contains data to merge, skips if empty (Default)
             df = df.merge(self.Region_Mapping, how='left', on='region')  # Merges in all Region Mappings
         df.rename(columns={'name': 'storage_resource'}, inplace=True)
@@ -554,16 +555,16 @@ class Process(SetupLogger):
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('node', level='name', inplace=True)
         df.sort_index(level=['node'], inplace=True)
-        if self.metadata.node_region().empty is False:
-            node_region_idx = pd.CategoricalIndex(self.metadata.node_region().index.get_level_values(0))
+        if self.metadata.node_region(self.model).empty is False:
+            node_region_idx = pd.CategoricalIndex(self.metadata.node_region(self.model).index.get_level_values(0))
             node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
             idx_region = pd.MultiIndex(levels=df.index.levels + [node_region_idx.categories],
                                        codes=df.index.codes + [node_region_idx.codes],
                                        names=df.index.names + node_region_idx.names)
         else:
             idx_region = df.index
-        if self.metadata.node_zone().empty is False:
-            node_zone_idx = pd.CategoricalIndex(self.metadata.node_zone().index.get_level_values(0))
+        if self.metadata.node_zone(self.model).empty is False:
+            node_zone_idx = pd.CategoricalIndex(self.metadata.node_zone(self.model).index.get_level_values(0))
             node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
             idx_zone = pd.MultiIndex(levels=idx_region.levels + [node_zone_idx.categories],
                                      codes=idx_region.codes + [node_zone_idx.codes],
@@ -571,7 +572,7 @@ class Process(SetupLogger):
         else:
             idx_zone = idx_region
         if not self.Region_Mapping.empty:
-            region_mapping_idx = pd.MultiIndex.from_frame(self.metadata.node_region()
+            region_mapping_idx = pd.MultiIndex.from_frame(self.metadata.node_region(self.model)
                                                           .merge(self.Region_Mapping,
                                                                  how="left",
                                                                  on='region')
@@ -777,9 +778,10 @@ class MarmotFormat(SetupLogger):
         # find unit conversion values
         converted_units = UNITS_CONVERSION.get(df_units, (df_units, 1))
 
+
         # Instantiate instance of Process Class
         # metadata is used as a paramter to initialize process_cl
-        process_cl = Process(df, metadata, self.Region_Mapping, self.emit_names, self.logger)
+        process_cl = Process(df, metadata, db.h5file.filename, self.Region_Mapping, self.emit_names, self.logger)
         # Instantiate Method of Process Class
         process_att = getattr(process_cl, f'df_process_{plexos_class}')
         # Process attribute and return to df
@@ -913,10 +915,14 @@ class MarmotFormat(SetupLogger):
 
         process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
         
+        # Create an instance of metadata, and pass that as a variable to get data.
+        meta = MetaData(HDF5_folder_in, read_from_formatted_h5=False, Region_Mapping=self.Region_Mapping)
+                    
         if not self.Region_Mapping.empty:
             # if any(meta.regions()['region'] not in Region_Mapping['region']):
-            if set(MetaData(HDF5_folder_in, False, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) is False:
-                missing_regions = list(set(MetaData(HDF5_folder_in, False, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
+            if set(meta.regions(files_list[0])['region']).issubset(self.Region_Mapping['region']) is False:
+                missing_regions = list(set(meta.regions(files_list[0])['region']) - set(self.Region_Mapping['region']))
+
                 self.logger.warning(f'The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: {missing_regions}\n',)
 
         start = time.time()
@@ -932,9 +938,6 @@ class MarmotFormat(SetupLogger):
 
                 for model in files_list:
                     self.logger.info(f"      {model}")
-
-                    # Create an instance of metadata, and pass that as a variable to get data.
-                    meta = MetaData(HDF5_folder_in, False, self.Region_Mapping, model)
 
                     db = hdf5_collection.get(model)
                     processed_data = self._get_data(row["group"], row["data_set"], row["data_type"], db, meta)

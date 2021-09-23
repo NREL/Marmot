@@ -22,6 +22,7 @@ logger = logging.getLogger('marmot_plot.'+__name__)
 def setup_plot(xdimension=1, ydimension=1, 
                 figsize=(mconfig.parser("figure_size","xdimension"), 
                         mconfig.parser("figure_size","ydimension")),
+                ravel_axs=True,
                 sharey=True, 
                 squeeze=False, **kwargs):
     """
@@ -50,7 +51,8 @@ def setup_plot(xdimension=1, ydimension=1,
     fig, axs = plt.subplots(ydimension, xdimension, 
                             figsize=((x*xdimension),(y*ydimension)), 
                             sharey=sharey, squeeze=squeeze, **kwargs)
-    axs = axs.ravel()
+    if ravel_axs:
+        axs = axs.ravel()
     return fig,axs
 
 

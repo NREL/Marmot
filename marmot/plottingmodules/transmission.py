@@ -15,7 +15,6 @@ import matplotlib as mpl
 import matplotlib.dates as mdates
 import matplotlib.lines as mlines
 
-from marmot.meta_data import MetaData
 import marmot.config.mconfig as mconfig
 import marmot.plottingmodules.plotutils.plot_library as plotlib
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
@@ -23,7 +22,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
 
-class MPlot(PlotDataHelper, MetaData):
+class MPlot(PlotDataHelper):
 
     def __init__(self, argument_dict):
         # iterate over items in argument_dict and set as properties of class
@@ -40,7 +39,6 @@ class MPlot(PlotDataHelper, MetaData):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.font_defaults = mconfig.parser("font_settings")
         
-
 
     #Duration curve of individual line utilization for all hours
     def line_util(self, **kwargs):
@@ -105,9 +103,9 @@ class MPlot(PlotDataHelper, MetaData):
                 self.logger.info(f"Scenario = {str(scenario)}")
                 # gets correct metadata based on area aggregation
                 if self.AGG_BY=='zone':
-                    zone_lines = self.meta.zone_lines()
+                    zone_lines = self.meta.zone_lines(scenario)
                 else:
-                    zone_lines = self.meta.region_lines()
+                    zone_lines = self.meta.region_lines(scenario)
                 try:
                     zone_lines = zone_lines.set_index([self.AGG_BY])
                 except:
@@ -135,7 +133,7 @@ class MPlot(PlotDataHelper, MetaData):
                 # This checks for a nan in string. If no scenario selected, do nothing.
                 if (prop != prop)==False:
                     self.logger.info(f"Line category = {str(prop)}")
-                    line_relations = self.meta.lines().rename(columns={"name":"line_name"}).set_index(["line_name"])
+                    line_relations = self.meta.lines(scenario).rename(columns={"name":"line_name"}).set_index(["line_name"])
                     flow=pd.merge(flow,line_relations,left_index=True,right_index=True)
                     flow=flow[flow["category"] == prop]
                     flow=flow.drop('category',axis=1)
@@ -236,9 +234,9 @@ class MPlot(PlotDataHelper, MetaData):
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
-                zone_lines = self.meta.zone_lines()
+                zone_lines = self.meta.zone_lines(scenario)
             else:
-                zone_lines = self.meta.region_lines()
+                zone_lines = self.meta.region_lines(scenario)
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
@@ -249,24 +247,24 @@ class MPlot(PlotDataHelper, MetaData):
             zone_lines = zone_lines['line_name'].unique()
 
             #Map lines to interfaces
-            all_ints = self.meta.interface_lines() #Map lines to interfaces
+            all_ints = self.meta.interface_lines(scenario) #Map lines to interfaces
             all_ints.index = all_ints.line
             ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
 
             #flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
             #flow = flow.droplevel('interface_category')
 
-            export_limits = self["interface_Export_Limit"].get(scenario).droplevel('timestamp')
+            export_limits = self["interface_Export_Limit"].get(scenario).copy().droplevel('timestamp')
             export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
             export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
 
             #Drop unnecessary columns.
             export_limits.reset_index(inplace = True)
-            export_limits.drop(columns = 'interface_category',inplace = True)
+            export_limits.drop(columns=['interface_category', 'units'], inplace=True)
             export_limits.set_index('interface_name',inplace = True)
 
-            import_limits = self["interface_Import_Limit"].get(scenario).droplevel('timestamp')
+            import_limits = self["interface_Import_Limit"].get(scenario).copy().droplevel('timestamp')
             import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
             import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
@@ -274,7 +272,7 @@ class MPlot(PlotDataHelper, MetaData):
 
             #Drop unnecessary columns.
             import_limits.reset_index(inplace = True)
-            import_limits.drop(columns = 'interface_category',inplace = True)
+            import_limits.drop(columns=['interface_category', 'units'], inplace=True)
             import_limits.set_index('interface_name',inplace = True)
 
             #Extract time index
@@ -321,7 +319,7 @@ class MPlot(PlotDataHelper, MetaData):
                     for scenario in self.Scenarios:
                         flow = self["interface_Flow"].get(scenario)
                         single_int = flow.xs(interf,level = 'interface_name') / 1000
-                        single_int.index = single_int.index.droplevel('interface_category')
+                        single_int.index = single_int.index.droplevel(['interface_category','units'])
                         single_int.columns = [interf]
                         single_int = single_int.reset_index().set_index('timestamp')
                         limits = limits.reset_index().set_index('timestamp')
@@ -431,9 +429,9 @@ class MPlot(PlotDataHelper, MetaData):
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
-                zone_lines = self.meta.zone_lines()
+                zone_lines = self.meta.zone_lines(scenario)
             else:
-                zone_lines = self.meta.region_lines()
+                zone_lines = self.meta.region_lines(scenario)
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
@@ -444,7 +442,7 @@ class MPlot(PlotDataHelper, MetaData):
             zone_lines = zone_lines['line_name'].unique()
 
             #Map lines to interfaces
-            all_ints = self.meta.interface_lines() #Map lines to interfaces
+            all_ints = self.meta.interface_lines(scenario) #Map lines to interfaces
             all_ints.index = all_ints.line
             ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
 
@@ -566,7 +564,7 @@ class MPlot(PlotDataHelper, MetaData):
                 axs[n,1].set_title(interf)
                 handles, labels = axs[n,0].get_legend_handles_labels()
                 if not duration_curve:
-                    locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
+                    locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
                     formatter = mdates.ConciseDateFormatter(locator)
                     formatter.formats[2] = '%d\n %b'
                     formatter.zero_formats[1] = '%b\n %Y'
@@ -649,9 +647,9 @@ class MPlot(PlotDataHelper, MetaData):
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
-                zone_lines = self.meta.zone_lines()
+                zone_lines = self.meta.zone_lines(scenario)
             else:
-                zone_lines = self.meta.region_lines()
+                zone_lines = self.meta.region_lines(scenario)
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
@@ -662,7 +660,7 @@ class MPlot(PlotDataHelper, MetaData):
             zone_lines = zone_lines['line_name'].unique()
 
             #Map lines to interfaces
-            all_ints = self.meta.interface_lines() #Map lines to interfaces
+            all_ints = self.meta.interface_lines(scenario) #Map lines to interfaces
             all_ints.index = all_ints.line
             ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
 
@@ -915,6 +913,7 @@ class MPlot(PlotDataHelper, MetaData):
                 for scenario in self.Scenarios:
                     flow = self["line_Flow"][scenario]
                     single_line = flow.xs(line,level = 'line_name')
+                    single_line = single_line.droplevel('units')
                     single_line.columns = [line]
 
                     if self.shift_leapday == True:
@@ -924,7 +923,7 @@ class MPlot(PlotDataHelper, MetaData):
                     if duration_curve:
                         single_line = PlotDataHelper.sort_duration(single_line,line)
 
-                    plotlib.create_line_plot(axs,single_line,line, label = scenario + '\n line flow', n = n)
+                    plotlib.create_line_plot(axs, single_line, line, label = scenario + '\n line flow', n = n)
 
                     #Add %congested number to plot.
                     if scenario == self.Scenarios[0]:
@@ -1210,6 +1209,7 @@ class MPlot(PlotDataHelper, MetaData):
 
                 flow = self["line_Flow"][scenario]
                 single_line = flow.xs(line,level = 'line_name')
+                single_line = single_line.droplevel('units')
                 single_line_out = single_line.copy()
                 single_line.columns = [line]
                 if self.shift_leapday == True:
@@ -1302,7 +1302,7 @@ class MPlot(PlotDataHelper, MetaData):
             for zone_input in self.Zones:
 
                 #Lines
-                # lines = self.meta.region_interregionallines()
+                # lines = self.meta.region_interregionallines(scenario)
                 # if scenario == 'ADS':
                 #     zone_input = zone_input.split('_WI')[0]
                 #     lines = self.meta_ADS.region_interregionallines()
@@ -1320,7 +1320,7 @@ class MPlot(PlotDataHelper, MetaData):
                 # fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interregional_Line_Limits_' + scenario + '.csv')
                 # lines.to_csv(fn)
 
-                # lines = self.meta.region_intraregionallines()
+                # lines = self.meta.region_intraregionallines(scenario)
                 # if scenario == 'ADS':
                 #     lines = self.meta_ADS.region_intraregionallines()
 
@@ -1349,7 +1349,7 @@ class MPlot(PlotDataHelper, MetaData):
                     int_export_lim = int_export_lim[int_export_lim['timestamp'] == last_timestamp]
                     lines2ints = self.meta_ADS.interface_lines()
                 else:
-                    lines2ints = self.meta.interface_lines()
+                    lines2ints = self.meta.interface_lines(scenario)
 
                 fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')
                 lines2ints.to_csv(fn)
@@ -1683,9 +1683,9 @@ class MPlot(PlotDataHelper, MetaData):
                 self.logger.info(f"Scenario = {str(scenario)}")
 
                 if self.AGG_BY == 'zone':
-                    lines = self.meta.zone_lines()
+                    lines = self.meta.zone_lines(scenario)
                 else:
-                    lines = self.meta.region_lines()
+                    lines = self.meta.region_lines(scenario)
 
                 line_v = self["line_Violation"].get(scenario)
                 line_v = line_v.reset_index()
@@ -1874,16 +1874,6 @@ class MPlot(PlotDataHelper, MetaData):
         if 1 in check_input_data:
             return MissingInputData()
 
-        exp_lines = self.meta.zone_exporting_lines()
-        imp_lines = self.meta.zone_importing_lines()
-
-        if exp_lines.empty or imp_lines.empty:
-            outputs = MissingMetaData()
-            return outputs
-
-        exp_lines.columns = ['region','line_name']
-        imp_lines.columns = ['region','line_name']
-
         outputs = {}
 
         # sets up x, y dimensions of plot
@@ -1898,17 +1888,6 @@ class MPlot(PlotDataHelper, MetaData):
 
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
-            #Find list of lines that connect each region.
-            exp_oz = exp_lines[exp_lines['region'] == zone_input]
-            imp_oz = imp_lines[imp_lines['region'] == zone_input]
-
-            other_zones = self.meta.zones().name.tolist()
-            try:
-                other_zones.remove(zone_input)
-            except:
-                self.logger.warning("Are you sure you set agg_by = zone?")
-
-            #xdimension,ydimension = self.set_x_y_dimension(len(self.Scenarios))
             fig7, axs = plotlib.setup_plot(xdimension,ydimension,sharey = True)
             plt.subplots_adjust(wspace=0.1, hspace=0.5)
 
@@ -1916,6 +1895,26 @@ class MPlot(PlotDataHelper, MetaData):
 
             for n, scenario in enumerate(self.Scenarios):
                 net_exports = []
+
+                exp_lines = self.meta.zone_exporting_lines(scenario)
+                imp_lines = self.meta.zone_importing_lines(scenario)
+
+                if exp_lines.empty or imp_lines.empty:
+                    return MissingMetaData()
+
+                exp_lines.columns = ['region','line_name']
+                imp_lines.columns = ['region','line_name']
+
+                #Find list of lines that connect each region.
+                exp_oz = exp_lines[exp_lines['region'] == zone_input]
+                imp_oz = imp_lines[imp_lines['region'] == zone_input]
+
+                other_zones = self.meta.zones(scenario).name.tolist()
+                try:
+                    other_zones.remove(zone_input)
+                except:
+                    self.logger.warning("Are you sure you set agg_by = zone?")
+
                 self.logger.info(f"Scenario = {str(scenario)}")
                 flow = self["line_Flow"][scenario].copy()
                 if self.shift_leapday == True:
@@ -2037,29 +2036,11 @@ class MPlot(PlotDataHelper, MetaData):
         if 1 in check_input_data:
             return MissingInputData()
 
-        exp_lines = self.meta.zone_exporting_lines()
-        imp_lines = self.meta.zone_importing_lines()
-
-        if exp_lines.empty or imp_lines.empty:
-            outputs = MissingMetaData()
-            return outputs
-
-        exp_lines.columns = ['region','line_name']
-        imp_lines.columns = ['region','line_name']
-
         outputs = {}
 
         for zone_input in self.Zones:
 
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
-
-            #Find list of lines that connect each region.
-            exp_oz = exp_lines[exp_lines['region'] == zone_input]
-            imp_oz = imp_lines[imp_lines['region'] == zone_input]
-
-            other_zones = self.meta.zones().name.tolist()
-            other_zones.remove(zone_input)
-            
             
             fig, axs = plotlib.setup_plot(1,1,sharey = True)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -2071,6 +2052,22 @@ class MPlot(PlotDataHelper, MetaData):
             data_out_chunk = []
 
             for n, scenario in enumerate(self.Scenarios):
+
+                exp_lines = self.meta.zone_exporting_lines(scenario)
+                imp_lines = self.meta.zone_importing_lines(scenario)
+
+                if exp_lines.empty or imp_lines.empty:
+                    return MissingMetaData()
+
+                exp_lines.columns = ['region','line_name']
+                imp_lines.columns = ['region','line_name']
+
+                #Find list of lines that connect each region.
+                exp_oz = exp_lines[exp_lines['region'] == zone_input]
+                imp_oz = imp_lines[imp_lines['region'] == zone_input]
+
+                other_zones = self.meta.zones(scenario).name.tolist()
+                other_zones.remove(zone_input)
 
                 net_exports = []
                 self.logger.info(f"Scenario = {str(scenario)}")

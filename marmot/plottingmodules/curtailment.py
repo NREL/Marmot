@@ -41,8 +41,6 @@ class MPlot(PlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
         
         
-
-
     def curt_duration_curve(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone="", start_date_range=None, end_date_range=None):
         

@@ -36,7 +36,7 @@ class PlotDataHelper(dict):
 
     def __init__(self, Marmot_Solutions_folder, AGG_BY, ordered_gen, PLEXOS_color_dict, 
                     Scenarios, ylabels, xlabels, gen_names_dict,
-                    Region_Mapping=pd.DataFrame(), **kwargs):
+                    Region_Mapping=pd.DataFrame()):
 
         """
         Parameters
@@ -75,7 +75,7 @@ class PlotDataHelper(dict):
         self.Region_Mapping = Region_Mapping
 
 
-    def get_formatted_data(self, properties: list):
+    def get_formatted_data(self, properties:list):
         """
         Used to get data from formatted h5 file
         Adds data to dictionary with scenario name as key
@@ -253,7 +253,10 @@ class PlotDataHelper(dict):
         df: Pandas multiindex dataframe
             same dataframe, with time index shifted
         """
-        if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0):
+        if ('2008' not in self.Marmot_Solutions_folder 
+            and '2012' not in self.Marmot_Solutions_folder 
+            and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0)):
+            
             df.index = df.index.set_levels(
                 df.index.levels[df.index.names.index('timestamp')].shift(1,freq = 'D'),
                 level = 'timestamp')
@@ -266,12 +269,13 @@ class PlotDataHelper(dict):
         return df
 
 
-    def setup_facet_xy_dimensions(self, facet=True, multi_scenario=None):
+    def setup_facet_xy_dimensions(self, facet:bool=True, 
+                                    multi_scenario:list=None) -> tuple:
         """
         Sets facet plot x,y dimensions based on user defined labeles
         ----------
 
-        facet : list
+        facet : bool
             Trigger for plotting facet plots.
         multi_scenario : list, optional
             list of scenarios. The default is None.
@@ -299,7 +303,7 @@ class PlotDataHelper(dict):
             xdimension, ydimension = self.set_x_y_dimension(len(multi_scenario))
         return xdimension, ydimension
 
-    def set_x_y_dimension(self, region_number):
+    def set_x_y_dimension(self, region_number:int) -> tuple:
         """
         Sets X,Y dimension of plots without x,y labels
         Parameters
@@ -324,34 +328,67 @@ class PlotDataHelper(dict):
             ydimension = 2
         return xdimension,ydimension
 
-    def add_facet_labels(self, fig):
+    def add_facet_labels(self, fig, 
+                        xlabels_bottom:bool=True,
+                        alternative_xlabels:list=None ,
+                        alternative_ylabels:list=None,
+                        **kwargs) -> None:
         """
         Adds labels to outside of Facet plot
         Parameters
         ----------
         fig : matplotlib fig
             matplotlib fig.
-
+        xlabels_bottom: bool, optional
+            If True labels are placed under bottom
+            row, else top of top row, default True
+        alternative_xlabels: list, optional
+            alteranative xlabels, default none
+        alternative_ylabels: list, optional
+            alteranative ylabels, default none
         Returns
         -------
         None.
         """
         font_defaults = mconfig.parser("font_settings")
 
+        if alternative_xlabels:
+            xlabel = alternative_xlabels
+        else:
+            xlabel = self.xlabels
+
+        if alternative_ylabels:
+            ylabel = alternative_ylabels
+        else:
+            ylabel = self.ylabels
+
         all_axes = fig.get_axes()
         j=0
         k=0
         for ax in all_axes:
-            if ax.is_last_row():
-                try:
-                    ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black', fontsize=font_defaults['axes_label_size']-2)
-                except IndexError:
-                    logger.warning(f"Warning: xlabel missing for subplot x{j}")
-                    continue
-                j=j+1
+            if xlabels_bottom:
+                if ax.is_last_row():
+                    try:
+                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
+                    except IndexError:
+                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                        continue
+                    j=j+1
+            else:
+                if ax.is_first_row():
+                    try:
+                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
+                        ax.xaxis.set_label_position('top')
+                    except IndexError:
+                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                        continue
+                    j=j+1
             if ax.is_first_col():
                 try:
-                    ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical', fontsize=font_defaults['axes_label_size']-2)
+                    ax.set_ylabel(ylabel=(ylabel[k]), color='black', rotation='vertical', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
                 except IndexError:
                     logger.warning(f"Warning: ylabel missing for subplot y{k}")
                     continue
@@ -361,7 +398,7 @@ class PlotDataHelper(dict):
     def set_plot_timeseries_format(axs, n=0,
                                minticks=mconfig.parser("axes_options","x_axes_minticks"),
                                maxticks=mconfig.parser("axes_options","x_axes_maxticks")
-                               ):
+                               ) -> None:
         """
         Auto sets timeseries format
         Parameters
@@ -484,7 +521,7 @@ class PlotDataHelper(dict):
             return data_to_plot, 0
 
     @staticmethod
-    def remove_excess_axs(axs, excess_axs, grid_size):
+    def remove_excess_axs(axs, excess_axs:int, grid_size:int) -> None:
         """
         Removes excess axes spins + tick marks
         Parameters
@@ -548,7 +585,7 @@ class PlotDataHelper(dict):
         return sorted_duration
 
     @staticmethod
-    def capacity_energy_unitconversion(max_value):
+    def capacity_energy_unitconversion(max_value) -> dict:
         """
         auto unitconversion for capacity and energy figures.
         Parameters

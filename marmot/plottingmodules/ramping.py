@@ -34,7 +34,6 @@ class MPlot(PlotDataHelper):
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
-        
     
     def capacity_started(self, figure_name=None, prop=None, start=None, end=None, 
                   timezone="", start_date_range=None, end_date_range=None):

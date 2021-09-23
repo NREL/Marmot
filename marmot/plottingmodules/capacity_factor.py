@@ -29,11 +29,9 @@ class MPlot(PlotDataHelper):
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
-
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
-        
         
         
     def avg_output_when_committed(self, figure_name=None, prop=None, start=None, 

@@ -291,8 +291,6 @@ class MarmotPlot(SetupLogger):
         shift_leapday = str(mconfig.parser("shift_leapday")).upper()
         font_defaults = mconfig.parser("font_settings")
         text_position = mconfig.parser("text_position")
-        minticks = mconfig.parser("axes_options","x_axes_minticks")
-        maxticks = mconfig.parser("axes_options","x_axes_maxticks")
         
         #===============================================================================
         # Input and Output Directories
@@ -408,13 +406,12 @@ class MarmotPlot(SetupLogger):
         # Set aggregation
         #===============================================================================
         
-        # Create an instance of MetaData, and pass that as a variable to get data.
-        meta_file = self.Scenarios[0] + '_formatted.h5'
-        meta = MetaData(metadata_HDF5_folder_in, True, self.Region_Mapping,file=meta_file)
+        # Create an instance of MetaData.
+        meta = MetaData(metadata_HDF5_folder_in, Region_Mapping=self.Region_Mapping)
         
         if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
             self.AGG_BY = 'zone'
-            zones = meta.zones()
+            zones = pd.concat([meta.zones(scenario) for scenario in self.Scenarios])
             if zones.empty == True:
                 self.logger.warning("Input Sheet Data Incorrect! Your model does not contain Zones, enter a different aggregation")
                 sys.exit()
@@ -434,7 +431,7 @@ class MarmotPlot(SetupLogger):
         
         elif self.AGG_BY in {"region", "regions", "Region", "Regions"}:
             self.AGG_BY = 'region'
-            regions = meta.regions()
+            regions = pd.concat([meta.regions(scenario) for scenario in self.Scenarios])
             if regions.empty == True:
                 self.logger.warning("Input Sheet Data Incorrect! Your model does not contain Regions, enter a different aggregation")
                 sys.exit()
@@ -453,7 +450,7 @@ class MarmotPlot(SetupLogger):
         
         elif not self.Region_Mapping.empty:
             self.logger.info("Plotting Custom region aggregation from Region_Mapping File")
-            regions = meta.regions()
+            regions = pd.concat([meta.regions(scenario) for scenario in self.Scenarios])
             self.Region_Mapping = regions.merge(self.Region_Mapping, how='left', on='region')
             self.Region_Mapping.dropna(axis=1, how='all', inplace=True)
             
@@ -509,8 +506,6 @@ class MarmotPlot(SetupLogger):
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
                 "custom_xticklabels": self.custom_xticklabels,
-                "minticks": minticks,
-                "maxticks": maxticks,
                 "color_list": color_list,
                 "marker_style": marker_style,
                 "gen_names_dict": gen_names_dict,
@@ -620,7 +615,7 @@ class MarmotPlot(SetupLogger):
         time_elapsed = end_timer - start_timer
         self.logger.info(f'Main Plotting loop took {round(time_elapsed/60,2)} minutes')
         self.logger.info('All Plotting COMPLETED')
-        meta.close_file()
+        meta.close_h5()
 
 
 def main():
