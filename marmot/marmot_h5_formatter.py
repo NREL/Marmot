@@ -616,6 +616,7 @@ class Process(SetupLogger):
 
         """
         df = self.df.droplevel(level=["band", "property"])
+        df.index.rename('battery_name', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names)  # Gets names of all columns in df and places in list
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
