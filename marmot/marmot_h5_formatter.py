@@ -613,6 +613,24 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
+    def df_process_abatement(self):
+        """
+        Method for formatting data which comes form the PLEXOS Abatement Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        """
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename('abatement_name', level='name', inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
+        return df
 
 class MarmotFormat(SetupLogger):
     """Main module class to be instantiated to run the formatter.
@@ -774,7 +792,6 @@ class MarmotFormat(SetupLogger):
             f.close()
         return
 
-
     def _get_data(self, plexos_class, plexos_prop, timescale, db, metadata):
         """
         This method handles the pulling of the data from the H5plexos hdf5
@@ -783,7 +800,7 @@ class MarmotFormat(SetupLogger):
         Parameters
         ----------
         plexos_class : string
-            PLEXOS calss e.g Region, Generator, Zone etc.
+            PLEXOS class e.g Region, Generator, Zone etc.
         plexos_prop : string
             PLEXOS property e.g Max Capacity, Generation etc.
         timescale : string
