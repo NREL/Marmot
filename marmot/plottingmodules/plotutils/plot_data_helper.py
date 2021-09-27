@@ -170,7 +170,7 @@ class PlotDataHelper(dict):
             df = df.reorder_levels(index_labels, axis=0)
 
         if unmapped_techs:
-            self.logger.warning(f"The following Generators could not be re-classified, they wil be renamed 'Other': {unmapped_techs}")
+            logger.warning(f"The following Generators could not be re-classified, they wil be renamed 'Other': {unmapped_techs}")
         return df
 
     def assign_curtailment_techs(self, df) -> pd.DataFrame:
@@ -192,7 +192,7 @@ class PlotDataHelper(dict):
         adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in df.columns]
 
         if not adjusted_vre_gen_list:
-            self.logger.warning("Curtailment techs could not be identified correctly for Marmot's Curtailment property. "
+            logger.warning("Curtailment techs could not be identified correctly for Marmot's Curtailment property. "
             "This is likely happening as the 'vre' column was not present in the ordered_gen_categories.csv.")
             return df
         else: 
