@@ -351,12 +351,12 @@ class MPlot(PlotDataHelper):
             for n, scenario in enumerate(self.Scenarios):
 
                 x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + axs[1].patches[n].get_width()]
-                height1 = [int(Total_Load_Out[scenario])]*2
+                height1 = [float(Total_Load_Out[scenario])]*2
                 lp1 = plt.plot(x, height1, c='black', linewidth=1.5)
-                height2 = [int(Total_Demand_Out[scenario])]*2
+                height2 = [float(Total_Demand_Out[scenario])]*2
                 lp2 = plt.plot(x, height2, 'r--', c='black', linewidth=1.5)
                 if Unserved_Energy_Out[scenario].sum() > 0:
-                    height3 = [int(Unserved_Energy_Out[scenario])]*2
+                    height3 = [float(Unserved_Energy_Out[scenario])]*2
                     plt.plot(x, height3, c='#DD0200', linewidth=1.5)
                     axs[1].fill_between(x, height3, height1,
                                         facecolor='#DD0200',

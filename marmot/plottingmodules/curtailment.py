@@ -75,12 +75,17 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                         self.logger.info(f'No curtailment in {zone_input}')
                         continue
+                
+                re_curt = self.df_process_gen_inputs(re_curt)
+                # If using Marmot's curtailment property
+                if self.curtailment_prop == 'Curtailment':
+                    re_curt = self.assign_curtailment_techs(re_curt)
 
                 # Timeseries [MW] PV curtailment [MWh]
-                pv_curt = (re_curt.loc[(slice(None), self.pv_gen_cat),:])
+                pv_curt = re_curt[re_curt.columns.intersection(self.pv_gen_cat)]
 
-                re_curt = re_curt.groupby(["timestamp"]).sum()
-                pv_curt = pv_curt.groupby(["timestamp"]).sum()
+                re_curt = re_curt.sum(axis=1)
+                pv_curt = pv_curt.sum(axis=1)
 
                 re_curt = re_curt.squeeze() #Convert to Series
                 pv_curt = pv_curt.squeeze() #Convert to Series
@@ -99,7 +104,6 @@ class MPlot(PlotDataHelper):
                     if pv_curt.empty is True and prop == "PV":
                         self.logger.warning('No data in selected Date Range')
                         continue
-                
                 
                 # Sort from larget to smallest
                 re_cdc = re_curt.sort_values(ascending=False).reset_index(drop=True)
@@ -226,6 +230,11 @@ class MPlot(PlotDataHelper):
                         self.logger.info(f'No curtailment in {zone_input}')
                         continue
                 
+                re_curt = self.df_process_gen_inputs(re_curt)
+                # If using Marmot's curtailment property
+                if self.curtailment_prop == 'Curtailment':
+                    re_curt = self.assign_curtailment_techs(re_curt)
+
                 # Finds the number of unique hours in the year
                 no_hours_year = len(gen.index.unique(level="timestamp"))
 
@@ -258,11 +267,11 @@ class MPlot(PlotDataHelper):
                 total_pv_avail = float(pv_avail.sum())
 
                 # Total RE curtailment [MWh]
-                total_re_curt = float(re_curt.sum())
+                total_re_curt = float(re_curt.sum().sum())
 
                 # Timeseries [MW] and Total PV curtailment [MWh]
-                pv_curt = (re_curt.loc[(slice(None), self.pv_gen_cat),:])
-                total_pv_curt = float(pv_curt.sum())
+                pv_curt = re_curt[re_curt.columns.intersection(self.pv_gen_cat)]
+                total_pv_curt = float(pv_curt.sum().sum())
 
                 # % of hours with curtailment
                 Prct_hr_RE_curt = (len((re_curt.sum(axis=1)).loc[(re_curt.sum(axis=1))>0])/no_hours_year)*100
@@ -401,8 +410,6 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
 
                 self.logger.info(f"Scenario = {scenario}")
-                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in self[f"generator_{self.curtailment_prop}"].get(scenario).index.unique(level="tech")]
 
                 vre_collection = {}
                 avail_vre_collection = {}
@@ -413,7 +420,11 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                     self.logger.info(f'No curtailment in {zone_input}')
                     continue
-                vre_curt = vre_curt[vre_curt.index.isin(self.vre_gen_cat,level='tech')]
+
+                vre_curt = self.df_process_gen_inputs(vre_curt)
+                # If using Marmot's curtailment property
+                if self.curtailment_prop == 'Curtailment':
+                    vre_curt = self.assign_curtailment_techs(vre_curt)
 
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
                 try: #Check for regions missing all generation.
@@ -421,7 +432,12 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                         self.logger.info(f'No available generation in {zone_input}')
                         continue
-                avail_gen = avail_gen[avail_gen.index.isin(self.vre_gen_cat,level='tech')]
+
+                avail_gen = self.df_process_gen_inputs(avail_gen)
+                # If using Marmot's curtailment property
+                if self.curtailment_prop == 'Curtailment':
+                    avail_gen = self.assign_curtailment_techs(avail_gen)
+
                 
                 all_empty = True
                 if pd.notna(start_date_range):
@@ -429,12 +445,13 @@ class MPlot(PlotDataHelper):
                     {str(start_date_range)} to {str(end_date_range)}")
                 for vre_type in self.vre_gen_cat:
                     try:
-                        vre_curt_type = vre_curt.xs(vre_type,level='tech')
+                        vre_curt_type = vre_curt[vre_type]
+                        # vre_curt_type = vre_curt.xs(vre_type,level='tech')
                     except KeyError:
                         self.logger.info(f'No {vre_type} in {zone_input}')
                         continue
-
-                    avail_gen_type = avail_gen.xs(vre_type,level='tech')
+                    
+                    avail_gen_type = avail_gen[vre_type]
                     
                     # Code to index data by date range, if a date range is listed in marmot_plot_select.csv
                     if pd.notna(start_date_range):
@@ -572,7 +589,10 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                     self.logger.info('No curtailment in ' + zone_input)
                     continue
-                vre_curt = vre_curt[vre_curt.index.isin(self.vre_gen_cat,level='tech')]
+                vre_curt = self.df_process_gen_inputs(vre_curt)
+                # If using Marmot's curtailment property
+                if self.curtailment_prop == 'Curtailment':
+                    vre_curt = self.assign_curtailment_techs(vre_curt)
 
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
                 try: #Check for regions missing all generation.
@@ -580,17 +600,21 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                         self.logger.info('No available generation in ' + zone_input)
                         continue
-                avail_gen = avail_gen[avail_gen.index.isin(self.vre_gen_cat,level='tech')]
-
+                
+                avail_gen = self.df_process_gen_inputs(avail_gen)
+                # If using Marmot's curtailment property
+                if self.curtailment_prop == 'Curtailment':
+                    avail_gen = self.assign_curtailment_techs(avail_gen)
+                
                 for vre_type in self.vre_gen_cat:
                     try:
-                        vre_curt_type = vre_curt.xs(vre_type,level='tech')
+                        vre_curt_type = vre_curt[vre_type]
                     except KeyError:
                         self.logger.info('No ' + vre_type + ' in ' + zone_input)
                         continue
                     vre_collection[vre_type] = float(vre_curt_type.sum())
 
-                    avail_gen_type = avail_gen.xs(vre_type,level='tech')
+                    avail_gen_type = avail_gen[vre_type]
                     avail_vre_collection[vre_type] = float(avail_gen_type.sum())
 
                 vre_table = pd.DataFrame(vre_collection,index=[scenario])
@@ -855,8 +879,13 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                         self.logger.info(f'No curtailment in {zone_input}')
                         continue
+                
+                re_curt = self.df_process_gen_inputs(re_curt)
+                # If using Marmot's curtailment property
+                if self.curtailment_prop == 'Curtailment':
+                    re_curt = self.assign_curtailment_techs(re_curt)
 
-                re_curt = re_curt.groupby(["timestamp"]).sum()
+                re_curt = re_curt.groupby(["timestamp"]).sum().sum(axis=1)
                 re_curt = re_curt.squeeze() #Convert to Series
                 
                 if pd.isna(start_date_range) == False:

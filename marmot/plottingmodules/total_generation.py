@@ -126,6 +126,9 @@ class MPlot(PlotDataHelper):
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
+                        # If using Marmot's curtailment property
+                        if self.curtailment_prop == 'Curtailment':
+                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -335,6 +338,9 @@ class MPlot(PlotDataHelper):
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
+                        # If using Marmot's curtailment property
+                        if self.curtailment_prop == 'Curtailment':
+                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -478,8 +484,7 @@ class MPlot(PlotDataHelper):
             outputs = MissingInputData()
             return outputs
         
-        xdimension, ydimension = self.setup_facet_xy_dimensions( 
-                                                                    multi_scenario=self.Scenarios)
+        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
         grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
@@ -516,11 +521,10 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                     self.logger.warning(f"No installed capacity in: {zone_input}")
                     continue
-                
-                if vre_only:
-                    Total_Gen_Stack = (Total_Gen_Stack.loc[(slice(None), self.vre_gen_cat),:])
-                
+                       
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
+                if vre_only:
+                    Total_Gen_Stack[Total_Gen_Stack.columns.intersection(self.vre_gen_cat)]
 
                 if Total_Gen_Stack.empty:
                     if vre_only:
@@ -540,6 +544,9 @@ class MPlot(PlotDataHelper):
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
+                        # If using Marmot's curtailment property
+                        if self.curtailment_prop == 'Curtailment':
+                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns), column=curtailment_name, value=Stacked_Curt) 
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -793,6 +800,9 @@ class MPlot(PlotDataHelper):
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
+                        # If using Marmot's curtailment property
+                        if self.curtailment_prop == 'Curtailment':
+                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
@@ -902,6 +912,9 @@ class MPlot(PlotDataHelper):
     #             Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
     #             Stacked_Curt = Stacked_Curt.xs(self.zone_input,level=self.AGG_BY)
     #             Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
+                #   If using Marmot's curtailment property
+                #     if self.curtailment_prop == 'Curtailment':
+                #         Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
     #             Stacked_Curt = Stacked_Curt.sum(axis=1)
     #             Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
     #             Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]

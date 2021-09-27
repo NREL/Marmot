@@ -4,6 +4,7 @@ Nuclear_ERCOT,Nuclear
 Nuclear_MX,Nuclear
 Nuclear_WI,Nuclear
 nuclear,Nuclear
+Nuclear,Nuclear
 Coal/Steam,Coal
 Coal_ST_EI,Coal
 Coal_ST_ERCOT,Coal
@@ -71,6 +72,7 @@ RTPV,PV
 2024_UPV,PV
 2024_DUPV,dPV
 pv,PV
+PV,PV
 SynchCond,Storage
 battery,Storage
 PS_EI,Storage
@@ -247,5 +249,11 @@ Battery,Battery
 Solar,PV
 Liquid Fuel,Oil-Gas-Steam
 Natural Gas,Oil-Gas-Steam
+Biopower,Biopower
+Oil-Gas-Steam,Oil-Gas-Steam
+dPV,dPV
+Gas-CC,Gas-CC
+Gas-CT,Gas-CT
+Coal,Coal
 Curtailment,Curtailment
 Curtailment,Curtailment

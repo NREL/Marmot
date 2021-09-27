@@ -140,6 +140,9 @@ class MPlot(PlotDataHelper):
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
+                        # If using Marmot's curtailment property
+                        if self.curtailment_prop == 'Curtailment':
+                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                         Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into

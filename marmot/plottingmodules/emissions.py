@@ -76,7 +76,9 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                     self.logger.warning(f"No emissions in Scenario : {scenario}")
                     continue
-
+                
+                # Rename generator technologies
+                emit = self.rename_gen_techs(emit)
                 # summarize annual emissions by pollutant and tech
                 emit = emit.groupby(['pollutant', 'tech']).sum()
 
@@ -145,7 +147,7 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = {'fig': fig1, 'data_table': dataOut}
 
             except KeyError:
-                self.logger.warning(self.prop+ " emissions not found")
+                self.logger.warning(prop+ " emissions not found")
                 outputs = InputSheetError()
                 return outputs
 

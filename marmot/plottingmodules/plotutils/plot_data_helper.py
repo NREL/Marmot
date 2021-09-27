@@ -14,6 +14,8 @@ import datetime as dt
 import pandas as pd
 import numpy as np
 import matplotlib.dates as mdates
+import functools
+import concurrent.futures
 
 import marmot.config.mconfig as mconfig
 
@@ -77,7 +79,7 @@ class PlotDataHelper(dict):
 
     def get_formatted_data(self, properties:list):
         """
-        Used to get data from formatted h5 file
+        Get data from formatted h5 file
         Adds data to dictionary with scenario name as key
         Parameters
         ----------
@@ -90,7 +92,6 @@ class PlotDataHelper(dict):
         return_value : list
             If 1 in list required data is missing 
         """
-        
         check_input_data = []
         
         for prop in properties:
@@ -98,30 +99,39 @@ class PlotDataHelper(dict):
             if f"{plx_prop_name}" not in self:
                 self[f"{plx_prop_name}"] = {}
             
-            for scenario in scenario_list:
-                if scenario not in self[f"{plx_prop_name}"]:
-                    try:
-                        df = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder,"Processed_HDF5_folder", scenario + "_formatted.h5"),plx_prop_name)
-                        # Rename generator techs based on gen_names.csv 
-                        if 'generator' in plx_prop_name:
-                            df = self.rename_gen_techs(df)
-                        # Specific check for Marmot's Curtailment property
-                        if plx_prop_name == 'generator_Curtailment':
-                            df = self.assign_curtailment_techs(df)
-                        self[f"{plx_prop_name}"][scenario] = df
-                    except KeyError:
-                        break
+            # Create new set of scenarios that are not yet in dictionary
+            scen_list = set(scenario_list) - set(self[f"{plx_prop_name}"].keys())
             
-            if self[f"{plx_prop_name}"] == {}:
+            # If set is not empty add data to dict
+            if scen_list:
+                # Read data in with multi threading
+                executor_func_setup = functools.partial(self.read_processed_h5file, plx_prop_name)
+                with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+                    data_files = executor.map(executor_func_setup, scen_list)
+                # Save data to dict
+                for scenario, df in zip(scen_list, data_files):
+                    self[f"{plx_prop_name}"][scenario] = df
+            # If any of the dataframes are empty for given property log warning
+            if True in [df.empty for df in self[f"{plx_prop_name}"].values()]:
                 logger.warning(f"{plx_prop_name} is MISSING from the Marmot formatted h5 files")
                 if required == True:
                     check_input_data.append(1)
         return check_input_data
 
+    def read_processed_h5file(self, plx_prop_name:str, scenario:str):
+        """Reads Data from processed h5file"""
+        try:
+            with pd.HDFStore(os.path.join(self.Marmot_Solutions_folder, "Processed_HDF5_folder", 
+                                            f"{scenario}_formatted.h5"), 'r') as file:
+                return file[plx_prop_name]
+        except KeyError:
+            return pd.DataFrame()
+        
     def rename_gen_techs(self, df) -> pd.DataFrame:
         """
         Renames generator technologies based on the gen_names.csv file 
 
+        Works for both index and column based values
         Parameters
         ----------
         df : DataFrame
@@ -132,19 +142,33 @@ class PlotDataHelper(dict):
         df : DataFrame
             Proceessed DataFrame
         """
-
-        # Checks if all generator tech categories have been identified and matched. If not, lists categories that need a match
-        unmapped_techs = set(df.index.get_level_values(level='tech')) - set(self.gen_names_dict.keys())
-
-        df.reset_index(level='tech', inplace=True)
-        df['tech'] = pd.CategoricalIndex(df.tech.map(lambda x: self.gen_names_dict.get(x, 'Other')))
-        df.set_index('tech', append=True, inplace=True)
+    
+        # If tech is a column name
+        if 'tech' in df.columns:
+            original_tech_index = df.tech.unique()
+            # Checks if all generator tech categories have been identified and matched. If not, lists categories that need a match
+            unmapped_techs = set(original_tech_index) - set(self.gen_names_dict.keys())
+            df['tech'] = pd.CategoricalIndex(df.tech.map(lambda x: self.gen_names_dict.get(x, 'Other')))
         
-        # Move tech back to position 1
-        index_labels = list(df.index.names)
-        index_labels.insert(1, index_labels.pop(index_labels.index("tech")))
-        df = df.reorder_levels(index_labels, axis=0)
+        # If tech is in the index 
+        elif 'tech' in df.index.names:
+            original_tech_index = df.index.get_level_values(level='tech')
+            # Checks if all generator tech categories have been identified and matched. If not, lists categories that need a match
+            unmapped_techs = set(original_tech_index) - set(self.gen_names_dict.keys())
         
+            tech_index = pd.CategoricalIndex(original_tech_index.map(lambda x: self.gen_names_dict.get(x, 'Other')))
+            df.reset_index(level='tech', drop=True, inplace=True)
+
+            idx_map = pd.MultiIndex(levels=df.index.levels + [tech_index.categories],
+                                        codes=df.index.codes + [tech_index.codes],
+                                        names=df.index.names + tech_index.names)
+
+            df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
+            # Move tech back to position 1
+            index_labels = list(df.index.names)
+            index_labels.insert(1, index_labels.pop(index_labels.index("tech")))
+            df = df.reorder_levels(index_labels, axis=0)
+
         if unmapped_techs:
             self.logger.warning(f"The following Generators could not be re-classified, they wil be renamed 'Other': {unmapped_techs}")
         return df
@@ -165,7 +189,7 @@ class PlotDataHelper(dict):
         """
 
         # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-        adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in df.index.unique(level="tech")]
+        adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in df.columns]
 
         if not adjusted_vre_gen_list:
             self.logger.warning("Curtailment techs could not be identified correctly for Marmot's Curtailment property. "
@@ -173,7 +197,7 @@ class PlotDataHelper(dict):
             return df
         else: 
             # Retrun df with just vre techs
-            return df.loc[(slice(None), adjusted_vre_gen_list), :]
+            return df[df.columns.intersection(self.vre_gen_cat)]
 
     def df_process_gen_inputs(self, df) -> pd.DataFrame:
         """
@@ -193,6 +217,12 @@ class PlotDataHelper(dict):
         if set(['timestamp','tech']).issubset(df.index.names):
             df = df.reset_index(['timestamp','tech'])
         df = df.groupby(["timestamp", "tech"], as_index=False, observed=True).sum()
+        # Rename generator technologies
+        df = self.rename_gen_techs(df)
+        # If duplicate rows remain, groupby again
+        if df[["timestamp", "tech"]].duplicated().any():
+            df = df.groupby(["timestamp", "tech"], as_index=False, observed=True).sum()
+        # Filter for only data in ordered_gen
         df = df[df.tech.isin(self.ordered_gen)]
         # Check if data is not already categorical
         if df.tech.dtype.name != "category":
