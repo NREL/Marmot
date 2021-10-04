@@ -204,11 +204,10 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
                 
-                if self[f"{agg}_Cost_Unserved_Energy"] == {}:
+                Cost_Unserved_Energy = self[f"{agg}_Cost_Unserved_Energy"][scenario]
+                if Cost_Unserved_Energy.empty:
                     Cost_Unserved_Energy = self["generator_Total_Generation_Cost"][scenario].copy()
                     Cost_Unserved_Energy.iloc[:,0] = 0
-                else:
-                    Cost_Unserved_Energy = self[f"{agg}_Cost_Unserved_Energy"][scenario]
                 Cost_Unserved_Energy = Cost_Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
@@ -346,12 +345,11 @@ class MPlot(PlotDataHelper):
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
                 
-                if self["generator_Emissions_Cost"] == {}:
+                Emissions_Cost = self["generator_Emissions_Cost"][scenario]
+                if Emissions_Cost.empty:
                     self.logger.warning(f"generator_Emissions_Cost not included in {scenario} results, Emissions_Cost will not be included in plot")
                     Emissions_Cost = self["generator_Start_&_Shutdown_Cost"][scenario].copy()
                     Emissions_Cost.iloc[:,0] = 0
-                else:
-                    Emissions_Cost = self["generator_Emissions_Cost"][scenario]
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)
@@ -578,11 +576,10 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
                 
-                if self[f"{agg}_Cost_Unserved_Energy"] == {}:
+                Cost_Unserved_Energy = self[f"{agg}_Cost_Unserved_Energy"][scenario]
+                if Cost_Unserved_Energy.empty:
                     Cost_Unserved_Energy = self["generator_Total_Generation_Cost"][scenario].copy()
                     Cost_Unserved_Energy.iloc[:,0] = 0
-                else:
-                    Cost_Unserved_Energy = self[f"{agg}_Cost_Unserved_Energy"][scenario]
                 Cost_Unserved_Energy = Cost_Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
@@ -794,12 +791,12 @@ class MPlot(PlotDataHelper):
                 Start_Shutdown_Cost = Start_Shutdown_Cost.sum(axis=0)
                 Start_Shutdown_Cost.rename("Start_&_Shutdown_Cost", inplace=True)
                 
-                if self["generator_Emissions_Cost"] == {}:
-                    self.logger.warning(f"generator_Emissions_Cost not included in {scenario} results, Emissions_Cost will not be included in plot")
+                Emissions_Cost = self["generator_Emissions_Cost"][scenario]
+                if Emissions_Cost.empty:
+                    self.logger.warning(f"generator_Emissions_Cost not included in {scenario} results, " 
+                                        "Emissions_Cost will not be included in plot")
                     Emissions_Cost = self["generator_Start_&_Shutdown_Cost"][scenario].copy()
                     Emissions_Cost.iloc[:,0] = 0
-                else:
-                    Emissions_Cost = self["generator_Emissions_Cost"][scenario]
                 Emissions_Cost = Emissions_Cost.xs(zone_input,level=self.AGG_BY)
                 Emissions_Cost = Emissions_Cost.sum(axis=0)
                 Emissions_Cost.rename("Emissions_Cost", inplace=True)

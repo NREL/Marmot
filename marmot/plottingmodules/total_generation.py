@@ -121,8 +121,8 @@ class MPlot(PlotDataHelper):
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
                 # Insert Curtailmnet into gen stack if it exhists in database
-                if self[f"generator_{self.curtailment_prop}"]:
-                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                if not Stacked_Curt.empty:
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
@@ -153,17 +153,16 @@ class MPlot(PlotDataHelper):
                 Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
                 Total_Load = Total_Load/interval_count
 
-                if self[f"{agg}_Unserved_Energy"] == {}:
+                Unserved_Energy = self[f"{agg}_Unserved_Energy"][scenario]
+                if Unserved_Energy.empty:
                     Unserved_Energy = self[f"{agg}_Load"][scenario].copy()
                     Unserved_Energy.iloc[:,0] = 0
-                else:
-                    Unserved_Energy = self[f"{agg}_Unserved_Energy"][scenario]
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
                 Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
                 
                 if pd.notna(start_date_range):
-
                     Unserved_Energy = Unserved_Energy[start_date_range:end_date_range]
+
                 Unserved_Energy = Unserved_Energy.rename(columns={0:scenario}).sum(axis=0)
                 Unserved_Energy = Unserved_Energy/interval_count
 
@@ -171,11 +170,10 @@ class MPlot(PlotDataHelper):
                 if (Unserved_Energy == 0).all() == False:
                     Unserved_Energy = Total_Load - Unserved_Energy
 
-                if self["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_total_pumped_load_line"):
+                Pump_Load = self["generator_Pump_Load"][scenario]
+                if Pump_Load.empty or not mconfig.parser("plot_data","include_total_pumped_load_line"):
                     Pump_Load = self['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
-                else:
-                    Pump_Load = self["generator_Pump_Load"][scenario]
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
@@ -330,11 +328,10 @@ class MPlot(PlotDataHelper):
                 # Calculates interval step to correct for MWh of generation
                 interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
 
-                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
-
                 # Insert Curtailmnet into gen stack if it exhists in database
-                if self[f"generator_{self.curtailment_prop}"]:
-                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                if not Stacked_Curt.empty:
+                    curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
@@ -538,9 +535,9 @@ class MPlot(PlotDataHelper):
                 interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
     
                 #Insert Curtailment into gen stack if it exhists in database
-                if self[f"generator_{self.curtailment_prop}"]:
+                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                if not Stacked_Curt.empty:
                     curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
-                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
@@ -557,11 +554,10 @@ class MPlot(PlotDataHelper):
                 Total_Load = Total_Load.groupby(["timestamp"]).sum()
 
                 # Get Pumped Load 
-                if self["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_total_pumped_load_line"):
+                Pump_Load = self["generator_Pump_Load"][scenario]
+                if Pump_Load.empty or not mconfig.parser("plot_data","include_total_pumped_load_line"):
                     Pump_Load = self['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
-                else:
-                    Pump_Load = self["generator_Pump_Load"][scenario]
                 Pump_Load = Pump_Load.xs(zone_input, level=self.AGG_BY)
                 Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
 
@@ -792,11 +788,11 @@ class MPlot(PlotDataHelper):
     
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
                 
-                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
     
                 #Insert Curtailmnet into gen stack if it exhists in database
-                if self[f"generator_{self.curtailment_prop}"]:
-                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                if not Stacked_Curt.empty:
+                    curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
                         Stacked_Curt = Stacked_Curt.xs(zone_input,level=self.AGG_BY)
                         Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)

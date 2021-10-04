@@ -196,10 +196,10 @@ class MPlot(PlotDataHelper):
 
         def setup_data(zone_input, scenario, Stacked_Gen):
 
-            curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
             # Insert Curtailmnet into gen stack if it exhists in database
-            if self[f"generator_{self.curtailment_prop}"]:
-                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario).copy()
+            Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario).copy()
+            if not Stacked_Curt.empty:
+                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
                 if self.shift_leapday == True:
                     Stacked_Curt = self.adjust_for_leapday(Stacked_Curt)
                 if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
@@ -235,12 +235,10 @@ class MPlot(PlotDataHelper):
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
 
-            if self["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_timeseries_pumped_load_line"):
+            Pump_Load = self["generator_Pump_Load"][scenario]
+            if Pump_Load.empty or not mconfig.parser("plot_data","include_timeseries_pumped_load_line"):
                 Pump_Load = self['generator_Generation'][scenario].copy()
                 Pump_Load.iloc[:,0] = 0
-            else:
-                Pump_Load = self["generator_Pump_Load"][scenario]
-
             if self.shift_leapday == True:
                 Pump_Load = self.adjust_for_leapday(Pump_Load)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
@@ -253,15 +251,12 @@ class MPlot(PlotDataHelper):
                 Total_Demand = Load
                 #Load = Total_Demand
 
-            try:
-                Unserved_Energy = self[f'{agg}_Unserved_Energy'][scenario].copy()
-            except KeyError:
+            Unserved_Energy = self[f'{agg}_Unserved_Energy'][scenario].copy()
+            if Unserved_Energy.empty:
                 Unserved_Energy = self[f'{agg}_Load'][scenario].copy()
                 Unserved_Energy.iloc[:,0] = 0
-            
             if self.shift_leapday == True:
                 Unserved_Energy = self.adjust_for_leapday(Unserved_Energy)
-
             Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
             Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
             Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series

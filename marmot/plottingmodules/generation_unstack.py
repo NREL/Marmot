@@ -115,7 +115,6 @@ class MPlot(PlotDataHelper):
                 # Pump_Load = pd.Series() # Initiate pump load
 
                 try:
-
                     Stacked_Gen = self["generator_Generation"].get(scenario).copy()
                     if self.shift_leapday == True:
                         Stacked_Gen = self.adjust_for_leapday(Stacked_Gen)
@@ -129,12 +128,11 @@ class MPlot(PlotDataHelper):
 
                 Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen)
 
-                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
-            
                 # Insert Curtailmnet into gen stack if it exhists in database
 
-                if self[f"generator_{self.curtailment_prop}"]:
-                    Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario).copy()
+                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario).copy()
+                if not Stacked_Curt.empty:
+                    curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
                     if self.shift_leapday == True:
                         Stacked_Curt = self.adjust_for_leapday(Stacked_Curt)
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
@@ -168,11 +166,10 @@ class MPlot(PlotDataHelper):
                 Load = Load.groupby(["timestamp"]).sum()
                 Load = Load.squeeze() #Convert to Series
 
-                if self["generator_Pump_Load"] == {}:
+                Pump_Load = self["generator_Pump_Load"][scenario].copy()
+                if Pump_Load.empty:
                     Pump_Load = self['generator_Generation'][scenario].copy()
                     Pump_Load.iloc[:,0] = 0
-                else:
-                    Pump_Load = self["generator_Pump_Load"][scenario]
                 if self.shift_leapday == True:
                     Pump_Load = self.adjust_for_leapday(Pump_Load)                                
                 Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
@@ -183,11 +180,10 @@ class MPlot(PlotDataHelper):
                 else:
                     Pump_Load = Load
                 
-                if self[f"{agg}_Unserved_Energy"] == {}:
+                Unserved_Energy = self[f"{agg}_Unserved_Energy"][scenario].copy()    
+                if Unserved_Energy.empty:
                     Unserved_Energy = self[f"{agg}_Load"][scenario].copy()
-                    Unserved_Energy.iloc[:,0] = 0
-                else:
-                    Unserved_Energy = self[f"{agg}_Unserved_Energy"][scenario].copy()                
+                    Unserved_Energy.iloc[:,0] = 0           
                 if self.shift_leapday == True:
                     Unserved_Energy = self.adjust_for_leapday(Unserved_Energy)                    
                 Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
