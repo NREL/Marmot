@@ -16,9 +16,9 @@ Click the following to quickly navigate to the main sections of the ReadME:
 ## Main Python Scripts
 Marmot is written in Python 3 and has two main programs:
 
-* [**Marmot Formatter**](https://github.com/NREL/Marmot/blob/master/marmot/marmot_h5_formatter.py): Formatting Data using marmot_h5_formatter.py
+* [**Marmot Formatter**](https://github.com/NREL/Marmot/blob/main/marmot/marmot_h5_formatter.py): Formatting Data using marmot_h5_formatter.py
 
-* [**Marmot Plotter**](https://github.com/NREL/Marmot/blob/master/marmot/marmot_plot_main.py): Plotting Figures using marmot_plot_main.py
+* [**Marmot Plotter**](https://github.com/NREL/Marmot/blob/main/marmot/marmot_plot_main.py): Plotting Figures using marmot_plot_main.py
 
 
 A high-level explanation of what these files do and suggested settings to change are described in this readme. Code specifics are described in more detail in the code docstrings.
@@ -28,7 +28,7 @@ A high-level explanation of what these files do and suggested settings to change
 - Marmot requires Python 3 and the following prerequisites to run.
   - hdf5>=1.10.4 *(Install with Conda or Download from HDF website)*
   - numpy
-  - pandas
+  - pandas (strongly reccommend using 1.0.5 due to performance bug)
   - PyYAML
   - h5py==2.10.0
   - matplotlib>=3.1.0
@@ -41,11 +41,11 @@ Each are explained [below](https://github.com/NREL/Marmot#conda-environment):
 
 #### Conda Environment
 - Setting up a new conda environment is the recommended route for running Marmot. Users will need certain user admin/rights to setup conda environments so this may not be possible on all systems.
-To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.com/NREL/Marmot/blob/master/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
+To ensure you are using all the required python modules, create a new conda environment using the provided [environment yml file](https://github.com/NREL/Marmot/blob/main/marmot-env.yml). If you are unsure how to do this, follow [these steps](https://docs.conda.io/projects/conda/en/latest/user-guide/tasks/manage-environments.html#creating-an-environment-from-an-environment-yml-file).
 Once the environment has been created it can be activated by typing `conda activate marmot-env `
 
 #### requirements txt file
-- A [requirements.txt](https://github.com/NREL/Marmot/blob/master/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`. If installing on a machine with restricted user rights adding `--user` to the command may be required.
+- A [requirements.txt](https://github.com/NREL/Marmot/blob/main/requirements.txt) file is also included with the repo, this can be used in place of the conda environment file. The txt file contains all the python modules that are required by Marmot to run. To install from the file run the following from any cmd window that is setup with Python (e.g Git Bash, Anaconda Prompt) `pip install -r requirements.txt`. If installing on a machine with restricted user rights adding `--user` to the command may be required.
 
 After all required prerequisites are installed, you are ready to install and run Marmot. There are **Two ways** to run Marmot, **Running Directly (A)** or **Importing as a Module (B)**. Most users will probably want to run Marmot directly, however some users may want to import Marmot into their own code. Both are explained below.
 
@@ -116,7 +116,7 @@ To run the Marmot Formatter open a terminal that is setup with Python, go to the
 
 **marmot_plot_main.py** is the main plotting script within Marmot. It reads in data that has been processed by the Marmot Formatter, creates plots, and then save the figures and data. These figures can be saved to any format specified by the user including both raster and vector formats. An associated .csv data file will also be created with each figure allowing users to view the plot data in a tabular format.
 
-The main plotting script works by calling on individual plotting modules. These can be viewed within the repo [plottingmodules](https://github.com/NREL/Marmot/tree/master/marmot/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc.
+The main plotting script works by calling on individual plotting modules. These can be viewed within the repo [plottingmodules](https://github.com/NREL/Marmot/tree/main/marmot/plottingmodules) folder and have descriptive names such as **total_generation.py**, **generation_stack.py**, **curtaiment.py** etc.
 
 As with the Marmot Formatter, users will need to adjust the input settings in the **Marmot_user_defined_inputs.csv** and set which plots to create in **Marmot_plot_select.csv**.
 
@@ -134,6 +134,8 @@ Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv
 
 - `zone_region_sublist` **Optional** List of *"regions/zones”* to plot if results are not required for all regions. The list of *"regions/zones”* should be contained within the `AGG_BY` aggregation. This is an optional field and can be left empty if not needed.
 
+- `TECH_SUBSET` **Optional** Tech category to subset by to allow plotting of only certain tecnologies, e.g thermal, vre, storage etc. The value given here should correspond to one of the columns in the [ordered_gen_categories.csv](https://github.com/NREL/Marmot/blob/main/mapping_folder/ordered_gen_categories.csv), described [below](https://github.com/NREL/Marmot#mapping-files). If left blank all available technologies will be plotted.
+
 - `Facet_ylabels` & `Facet_xlabels` **Optional** If you wish to create a Facet plot, these labels will be applied to the axis. The number of entries given to each label will determine the dimensions of the Facet plot.  For example, if you have 6 scenarios, your facet grid dimensions in x,y coordinates may be [2,3], [3,2] or [1,6] etc. This is an optional field and can be left empty if not needed. Facet plots can still be created without labels if desired. The facet layout will default to max 3 plots wide, with no maximum to the length.
 
 - `Tick_labels` **Optional** List of custom tick labels, which allows adjustment of scenario names on all bar plots. Does not apply to difference plots or plots from the `capacity_factor` module.
@@ -150,35 +152,27 @@ To run the Marmot Plotter open a terminal that is setup with Python, go to the m
 
 ## Mapping Files
 Marmot gives the user the ability to map extra regions to your data, rename generators, adjust generator technology colors, and group different technologies together using a set of csv files. Adjusting these values to your specific PLEXOS database is not required for Marmot to run but is recommended for the best results.
-Examples of these files can be found within in the repo in the [mapping_folder](https://github.com/NREL/Marmot/tree/master/mapping_folder).
+Examples of these files can be found within in the repo in the [mapping_folder](https://github.com/NREL/Marmot/tree/main/mapping_folder).
 
 These csv files are:
 
-- **gen_names.csv** This file allows you to change the name of the PLEXOS generator technology categories to be consistent. For example, change all the possible gas cc generator names to just be called "Gas-CC". The csv file has two columns *"Original"*, which contains the name of all the PLEXOS generator categories and *"New"*, which is the new name you want to give the categories. The *"Original"* column needs to include every generation category present in your PLEXOS database. The Marmot Formatter will warn the user if they are missing a category.
+- **[gen_names.csv](https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/gen_names.csv)** This file allows you to change the name of the PLEXOS generator technology categories to be consistent. For example, change all the possible gas cc generator names to just be called "Gas-CC". The csv file has two columns *"Original"*, which contains the name of all the PLEXOS generator categories and *"New"*, which is the new name you want to give the categories. The *"Original"* column needs to include every generation category present in your PLEXOS database. The Marmot Formatter will warn the user if they are missing a category.
 
-- **ordered_gen** Ordered list of generators which determines how they appear in a stack plot; generator names should equal those in the gen_names.csv *"New"* column. 
+- **[ordered_gen_categories.csv](https://github.com/NREL/Marmot/blob/main/mapping_folder/ordered_gen_categories.csv)** Ordered list of generators which determines how they appear in a stack plot; generator names should equal those in the gen_names.csv *"New"* column. 
 
-  ***New in v0.8.0*** - A reduced list of generators can be included to limit the technologies that are plotted e.g (only plot Gas or Hydro). Marmot will print a warning message if there are generators missing from the ordered list that are in the gen_names.csv *"New"* column. This message can be ignored if you are you are down-selecting technology types on purpose. 
+  ***New in v0.9.0***  Additional columns in the file allow plotting of only certain technologies when using the `TECH_SUBSET` entry in the **Marmot_user_defined_inputs.csv**. Users can change which technologies belong to the different technology categories by setting the values to TRUE. As well as being available to use by the `TECH_SUBSET` entry, the _vre_ category is also used to determine which technologies should be included in Marmot's internal _Curtailment_ property. The _re_ and _pv_ categories are also used by certain plots. Users are free to add their own technology categories by adding new columns to the file and setting which generators they would like to include to TRUE. The new additions to the file now replace the previous **_gen_cat.csv files**. 
 
-- **Region_mapping.csv** This file allows you to group PLEXOS regions together to create aggregated regions. The first column in the file should always be called *"region"* and should contain the names of all the regions in your PLEXOS database. The names given to all other columns is up to you. In the example given in the repo, we aggregated regions from NREL's recent [North American Renewable Integration Study](https://www.nrel.gov/analysis/naris.html) to the country and interconnect level. The use of Region_mapping is entirely optional; if not needed its entry in the **Marmot_user_defined_inputs.csv** can be left blank.
+- **[Region_mapping.csv](https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/Regions_Zones_Mapping_Full.csv)** This file allows you to group PLEXOS regions together to create aggregated regions. The first column in the file should always be called *"region"* and should contain the names of all the regions in your PLEXOS database. The names given to all other columns is up to you. In the example given in the repo, we aggregated regions from NREL's recent [North American Renewable Integration Study](https://www.nrel.gov/analysis/naris.html) to the country and interconnect level. The use of Region_mapping is entirely optional; if not needed its entry in the **Marmot_user_defined_inputs.csv** can be left blank.
 
-- **colour_dictionary.csv** This allows the user to adjust the color used to plot generation technology types e.g Gas-CC, Wind, PV etc. The names in the generator column should equal those in the gen_names.csv *"New"* column.
-
- - **pv_gen_cat.csv** , **re_gen_cat.csv** , **vre_gen_cat.csv** & **thermal_gen_cat.csv** - These files are used for grouping specified generator categories for certain actions like calculating curtailment (Marmot's *generator_Curtailment* property) and selecting specific technologies to plot in certain figures. The generators included in each file should have the same names as the "New" name column in the gen_names.csv. Below is an example of technologies included in the **vre_gen_cat.csv** (variable renewable energy). These technologies are used to determine the *generator_Curtailment* property values.
-
-  | VRE_Gen_Categories |
-  | ------------------ |
-  | Wind               |
-  | PV                 |
-  | dPV                |
-  | Offshore Wind      |
+- **[colour_dictionary.csv](https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/colour_dictionary.csv)** This allows the user to adjust the color used to plot generation technology types e.g Gas-CC, Wind, PV etc. The names in the generator column should equal those in the gen_names.csv *"New"* column.
   
+- **[emit_names.csv](https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/emit_names.csv)** This file allows you to change the name of the PLEXOS emissions categories to be consistent, it works in the same manner as the gen_names.csv, with *"Original"* and *"New"* columns. 
 
 ## Additional Configuration Settings
 
 **The adjustment of the following settings are all optional** and are setup with default values. Users who would like to further customize how Marmot works can change these values in a standard text editor.
 
-These additional configuration settings live within the [Marmot/marmot/config](https://github.com/NREL/Marmot/tree/master/marmot/config) folder of the repo. A **config.yml** file will be created the first time the **marmot_h5_formatter** or **marmot_plot_main** is run. After the yml file has been created users will be able to change any settings they like within the file. Once created, this file is never overwritten by Marmot. To revert to default settings, delete the config.yml file and Marmot will create it again at runtime.
+These additional configuration settings live within the [Marmot/marmot/config](https://github.com/NREL/Marmot/tree/main/marmot/config) folder of the repo. A **config.yml** file will be created the first time the **marmot_h5_formatter** or **marmot_plot_main** is run. After the yml file has been created users will be able to change any settings they like within the file. Once created, this file is never overwritten by Marmot. To revert to default settings, delete the config.yml file and Marmot will create it again at runtime.
 The config.yml file is not to be confused with the marmot_logging_config.yml file which is used to set the logging defaults used by Marmot and also exists in the same folder.
 
 The **config.yml** settings and their defaults are as follows:
@@ -257,21 +251,13 @@ The **config.yml** settings and their defaults are as follows:
 
   *Change the default plexos_properties_file.csv file, file must be created first*  
 
-- **category_file_names:**
-  - pv_gen_cat: pv_gen_cat.csv
-  - re_gen_cat: re_gen_cat.csv
-  - thermal_gen_cat: thermal_gen_cat.csv
-  - vre_gen_cat: vre_gen_cat.csv
-
-  *Change the default category files that live within the Mapping Folder, files must be created first*  
-
 - **color_dictionary_file:** colour_dictionary.csv
 
   *Change the default color dictionary file that lives within the Mapping Folder, file must be created first*  
 
-- **ordered_gen_file:** ordered_gen.csv
+- **ordered_gen_categories :** ordered_gen_categories.csv
 
-  *Change the default ordered_gen file that lives within the Mapping Folder, file must be created first*  
+  *Change the default ordered_gen_categories file that lives within the Mapping Folder, file must be created first*  
 
 ## Tips and tricks
 
