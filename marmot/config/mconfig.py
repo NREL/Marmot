@@ -6,26 +6,34 @@ Created on Tue Jan 19 17:44:11 2021
 
 This module creates the default config.yml file that is used by Marmot.
 The parser function is used to parse information from the config file.
-The defaults defined here should not be modifed by any user, instead edit the values directly in the config.yml file once created. 
+The defaults defined here should not be modifed by any user, 
+instead edit the values directly in the config.yml file once created. 
 """
 
 import os
 import yaml
+from typing import Union
 
-configfile_name = "config.yml"
+CONFIGFILE_NAME = "config.yml"
 
 path = os.path.abspath(__file__)
 dir_path = os.path.dirname(path)
-configfile_path = os.path.join(dir_path,configfile_name)
+configfile_path = os.path.join(dir_path,CONFIGFILE_NAME)
 
 
-def createConfig(configfile_path):
+def createConfig(configfile_path: str):
+    """Creates config.yml file using default values.
+
+    The following are Marmot default config settings that are used to 
+    create the config.yml file when Marmot is first run.
+    Users Should NOT edit these values, instead edit the values directly 
+    in the config.yml file once created. If the config.yml file is deleted, 
+    it will be created with these defaults when mconfig.py is called anytime Marmot
+    is run. 
+
+    Args:
+        configfile_path (str): Path to config.yml file
     """
-    The following are Marmot default config settings that are used to create the config.yml file when Marmot is first run.
-    Users Should NOT edit these values, instead edit the values directly in the config.yml file once created. 
-    If the config.yml file is deleted, it will be created with these defaults when mconfig.py is called.
-    """
-        
     data = dict(
         
         font_settings = dict(
@@ -81,28 +89,26 @@ def createConfig(configfile_path):
         yaml.safe_dump(data, cfgfile,default_flow_style=False, sort_keys=False)
 
 
-# Check if there is already a configurtion file
+# Check if there is already a configuration file
 if not os.path.isfile(configfile_path):
     # Create the configuration file as it doesn't exist yet
     createConfig(configfile_path)
     
     
-def parser(top_level, second_level=None): 
-    """
-    Pull requested value from config.yml file
-    
-    Parameters
-    ----------
-    top_level : string
-        top level of config dictionary, will return specified level and any sublevel.
-    second_level : string, optional
-        second level of config dictionary under top_level, will return a single value
+def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, float]: 
+    """Pull requested value from config.yml file
 
-    Returns
-    -------
-    value : varies(dict,string,int,float)
-        returns the requested level or value from the config file.
+    Args:
+        top_level (str): Top level of config dictionary, 
+            will return specified level and any sublevel.
+        second_level (str, optional): Second level of config dictionary 
+            under top_level, will return a single value. 
+            Defaults to None.
 
+    Returns:
+        Union[dict, str, int, float]: Returns the requested level 
+            or value from the config file. Return type varies based on
+            on level accessed.
     """
     with open(configfile_path, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile.read())
@@ -114,25 +120,18 @@ def parser(top_level, second_level=None):
     return value 
     
 
-def edit_value(new_value, top_level, second_level=None): 
+def edit_value(new_value: str, top_level: str, 
+               second_level: str = None):
+    """Edit the config.yml file through code
+
+    Args:
+        new_value (str): New value to apply to config file.
+        top_level (str): Top level of config dictionary, 
+            will return specified level and any sublevel.
+        second_level (str, optional): Second level of config dictionary under top_level, 
+            will return a single value. 
+            Defaults to None.
     """
-    Edit the config.yml file through code
-
-    Parameters
-    ----------
-    new_value : string/int/bool
-        New value to apply to config file.
-    top_level : string
-        top level of config dictionary, will return specified level and any sublevel.
-    second_level : string, optional
-        second level of config dictionary under top_level, will return a single value
-
-    Returns
-    -------
-    None.
-
-    """
-
     with open(configfile_path, "r") as f:
         cfg = yaml.safe_load(f)
     
@@ -146,13 +145,7 @@ def edit_value(new_value, top_level, second_level=None):
             
 
 def reset_defaults():   
-    '''
-    When called, resets config.yml to default values
-
-    Returns
-    -------
-    None.
-
-    '''
+    """When called, resets config.yml to default values
+    """
     createConfig(configfile_path)
 
