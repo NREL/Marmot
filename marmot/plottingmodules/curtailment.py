@@ -2,7 +2,8 @@
 """
 Created on Wed Dec 11 15:23:06 2019
 
-This module creates plots that show curtailment
+This module creates plots are
+related to the curtailment of generators. 
 @author: Daniel Levie
 """
 
@@ -23,7 +24,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    def __init__(self, argument_dict):
+    """Marmot MPlot class, common across all plotting modules.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The curtailment.py module contains methods that are
+    related to the curtailment of generators . 
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -41,8 +60,25 @@ class MPlot(PlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
         
         
-    def curt_duration_curve(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def curt_duration_curve(self, prop: str = None, 
+                            start_date_range: str = None, end_date_range: str = None, **_):
+        """Curtailment duration curve (line plot)
+        
+        Displays curtailment sorted from highest occurrence to lowest 
+        over given time period.
+
+        Args:
+            prop (str, optional): Controls type of re to include in plot.
+                Controlled through the plot_select.csv.
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         
         outputs = {}
         
@@ -185,8 +221,24 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def curt_pen(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def curt_pen(self, prop: str = None, 
+                 start_date_range: str = None, end_date_range: str = None, **_):
+        """Plot of curtailment vs penetration.
+
+        Each scenario is represented by a different symbel on a x, y axis
+
+        Args:
+            prop (str, optional): Controls type of re to include in plot.
+                Controlled through the plot_select.csv.
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         
         outputs = {}
         
@@ -377,14 +429,20 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-    def curt_total(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def curt_total(self, start_date_range: str = None, end_date_range: str = None, **_):
+        """Creates stacked barplots of total curtailment by technology.
 
-        """
-        This module calculates the total curtailment, broken down by technology. 
-        It produces a stacked bar plot, with a bar for each scenario.
-        """
+        A separate bar is created for each scenario.
 
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -542,14 +600,21 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
-    def curt_total_diff(self,figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def curt_total_diff(self, start_date_range: str = None, end_date_range: str = None, **_):
+        """Creates stacked barplots of total curtailment by technology relative to a base scenario.
 
-        """
-        This module calculates the total curtailment, broken down by technology. 
-        It produces a stacked bar plot, with a bar for each scenario.
-        """
+        Barplots show the change in total curtailment relative to a base scenario.
+        The default is to comapre against the first scenario provided in the inputs list.
 
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         return UnderDevelopment()
 
         outputs = {}
@@ -577,7 +642,7 @@ class MPlot(PlotDataHelper):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + scenario)
-                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
+                # Adjust list of values to drop from vre_gen_cat depending on if it exists in processed techs
                 #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
 
                 vre_collection = {}
@@ -693,18 +758,32 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
         return outputs
 
-    def curt_ind(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def curt_ind(self, figure_name: str = None, prop: str = None,
+                 start_date_range: str = None, end_date_range: str = None, **_):
+        """Curtailment as a percentage of total generation, of individual generators.
 
-        """
-        This module calculates the curtailment, as a percentage of total generation, of individual generators.
-        The generators are specified as a list of strings in the fourth column of Marmot_plot_select.csv.  
-        The module prints out two .csvs: 
+        The generators are specified as a comma seperated string in the 
+        fourth column of Marmot_plot_select.csv and is passed to the prop argument.
+        The method outputs two.csv files: 
             -one that contains curtailment, in percent, for each scenario and site. 
             -the other contains total generation, in TWh, for each scenario and site.
-    
-        """
 
+        This method does not return data to MarmotPlot, data is saved within the method directly 
+        to the output folder.
+
+        Args:
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            prop (str, optional): comma seperated string of generators to display. 
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -845,11 +924,25 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def average_diurnal_curt(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
-        """Average diurnal renewable curtailment plot
+    def average_diurnal_curt(self, timezone: str = None, start_date_range: str = None,
+                             end_date_range: str = None, **_):
+        """Average diurnal renewable curtailment plot. 
+
+        Each scenario is plotted as a separate line and shows the average 
+        hourly curtailment over a 24 hour period averaged across the entire year
+        or time period defined.
+
+        Args:
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
         """
-        
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -859,7 +952,6 @@ class MPlot(PlotDataHelper):
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
-
 
         if 1 in check_input_data:
             return MissingInputData()

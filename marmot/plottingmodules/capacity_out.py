@@ -1,3 +1,9 @@
+"""
+This module contain methods that are
+related to related to generators that are on an outage.  
+@author: Daniel Levie 
+"""
+
 import os
 import logging
 import numpy as np
@@ -14,7 +20,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
 
 
 class MPlot(PlotDataHelper):
-    def __init__(self, argument_dict):
+    """Marmot MPlot class, common across all plotting modules.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name., 
+    
+    The capacity_out.py module contains methods that are
+    related to generators that are on an outage. 
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -31,10 +55,21 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
 
 
-    def capacity_out_stack(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="",start_date_range=None, 
-                             end_date_range=None):
-        
+    def capacity_out_stack(self, start_date_range: str = None, 
+                             end_date_range: str = None, **_):
+        """Creates Timeseries stacked area plots of generation on outage by technology.
+
+        Each scenario is plotted by a separate facet plot. 
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -62,7 +97,9 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {str(zone_input)}')
 
-            fig2, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharex = True, sharey='row',squeeze=False)
+            fig2, axs = plt.subplots(ydimension,xdimension, 
+                                     figsize=((self.x*xdimension),(self.y*ydimension)),
+                                     sharex=True, sharey='row', squeeze=False)
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
             axs = axs.ravel()
 
@@ -72,7 +109,6 @@ class MPlot(PlotDataHelper):
                 self.logger.info(f"Scenario = {scenario}")
                 i+=1
                 
-
                 install_cap = self["generator_Installed_Capacity"].get(scenario).copy()
                 avail_cap = self["generator_Available_Capacity"].get(scenario).copy()
                 if self.shift_leapday == True:
@@ -110,7 +146,8 @@ class MPlot(PlotDataHelper):
                 single_scen_out = cap_out.set_index([scenario_names],append = True)
                 chunks.append(single_scen_out)
                 
-                plotlib.create_stackplot(axs=axs, data=cap_out, color_dict=self.PLEXOS_color_dict, labels=cap_out.columns, n=i)
+                plotlib.create_stackplot(axs=axs, data=cap_out, color_dict=self.PLEXOS_color_dict, 
+                                         labels=cap_out.columns, n=i)
                 PlotDataHelper.set_plot_timeseries_format(axs, n=i)
                 axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0), facecolor='inherit', frameon=True)
             
@@ -123,7 +160,8 @@ class MPlot(PlotDataHelper):
 
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=30)
+            plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', 
+                       rotation='vertical', labelpad=30)
             # Looks better for a one scenario plot
             #plt.tight_layout(rect=[0, 0.03, 1.25, 0.97])
             
@@ -136,9 +174,8 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def capacity_out_stack_PASA(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
+    def capacity_out_stack_PASA(self, start: int = None, 
+                                end: int = None, timezone: str = "", **_):
         
         outputs = UnderDevelopment()
         self.logger.warning('capacity_out_stack_PASA requires PASA files, and is under development. Skipping plot.')
@@ -266,7 +303,6 @@ class MPlot(PlotDataHelper):
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
 
-           #fig1.savefig('/home/mschwarz/PLEXOS results analysis/test/PJM_outages_2024_2011_test', dpi=600, bbox_inches='tight') #Test
 
             outputs[zone_input] = {'fig' : fig1, 'data_table' : Data_Table_Out}
         return outputs

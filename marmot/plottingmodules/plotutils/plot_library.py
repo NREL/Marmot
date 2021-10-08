@@ -17,7 +17,6 @@ from typing import Tuple, List
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 
-
 logger = logging.getLogger('marmot_plot.'+__name__)
 
 
@@ -163,7 +162,7 @@ def create_stacked_bar_plot(df: pd.DataFrame, colour: dict, angle: int = 0,
     return fig, axs
 
 
-def create_clustered_stacked_bar_plot(df_list: List[pd.DataFrame, pd.DataFrame], 
+def create_clustered_stacked_bar_plot(df_list: List[pd.DataFrame], 
                                       ax, labels: list, color_dict: dict, 
                                       title: str = "",  H: str = "//", **kwargs):
     """Given a bar plot with both stacked and unstacked bars.

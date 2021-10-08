@@ -2,7 +2,8 @@
 """
 Created on Mon Dec  9 13:20:56 2019
 
-This module creates capacity factor and average output plots 
+This module contain methods that are
+related to the capacity factor of generators and average output plots 
 @author: Daniel Levie 
 """
 
@@ -18,8 +19,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The capacity_factor.py module contain methods that are
+    related to the capacity factor of generators. 
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -34,9 +52,22 @@ class MPlot(PlotDataHelper):
         self.y = mconfig.parser("figure_size","ydimension")
         
         
-    def avg_output_when_committed(self, figure_name=None, prop=None, start=None, 
-                                  end=None, timezone="", start_date_range=None, 
-                                  end_date_range=None):
+    def avg_output_when_committed(self,
+                                  start_date_range: str = None, 
+                                  end_date_range: str = None, **_):
+        """Creates barplots of the percentage average generation output when committed by technology type. 
+
+        Each scenario is plotted by a different colored grouped bar. 
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -156,9 +187,21 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def cf(self, figure_name=None, prop=None, start=None, 
-           end=None, timezone="", start_date_range=None, 
-           end_date_range=None):
+    def cf(self, start_date_range: str = None, 
+           end_date_range: str = None, **_):
+        """Creates barplots of generator capacity factors by technology type. 
+
+        Each scenario is plotted by a different colored grouped bar. 
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         
         outputs = {}
         
@@ -267,9 +310,21 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def time_at_min_gen(self, figure_name=None, prop=None, start=None, 
-           end=None, timezone="", start_date_range=None, 
-           end_date_range=None):
+    def time_at_min_gen(self, start_date_range: str = None, 
+                        end_date_range: str = None, **_):
+        """Creates barplots of generator percentage time at min-gen by technology type. 
+
+        Each scenario is plotted by a different colored grouped bar. 
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         
         outputs = {}
         
