@@ -5,7 +5,7 @@ First Created on Thu Dec  5 14:16:30 2019
 marmot_plot_main.py is the main plotting script within Marmot which calls on supporting files to read in data, 
 create the plot, and then return the plot and data to marmot_plot_main.py. 
 The supporting modules can be viewed within the repo plottingmodules folder and 
-have descriptive names such as total_generation.py, generation_stack.py, curtaiment.py etc.
+have descriptive names such as total_generation.py, generation_stack.py, curtailment.py etc.
 
 @author: Daniel Levie
 """
@@ -30,6 +30,7 @@ import yaml
 import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
+from typing import Union
 
 try:
     from marmot.meta_data import MetaData
@@ -54,33 +55,24 @@ class SetupLogger():
 
     Allows an optional suffix to be included which will be appended to the
     end of the log file name, this is useful when running multiple
-    processes in parallel to allow logging to seperate files.
-    
+    processes in parallel to allow logging to separate files.
+
     Allows log_directory to be changed from default
-    
-    SetupLogger is a subclass of all other module classes
     """
 
-    def __init__(self, log_directory='logs', log_suffix=None):
+    def __init__(self, log_directory: str = 'logs', log_suffix: str = None):
         """Setuplogger __init__ method.
-        
+
         Formats log filename, 
         configures logger from marmot_logging_config.yml file,
         handles rollover of log file on each instantiation.
-        
         Allows log_directory to be changed from default
-        
-        Parameters
-        ----------
-        log_directory : string, optional
-            log directory to save logs, The default is 'logs'
-        log_suffix : string, optional
-            optional suffix to add to end of log file. The default is None.
 
-        Returns
-        -------
-        None.
-
+        Args:
+            log_directory (str, optional): log directory to save logs. 
+                Defaults to 'logs'.
+            log_suffix (str, optional): Optional suffix to add to end of log file. 
+                Defaults to None.
         """
         if log_suffix is None:
             self.log_suffix = ''
@@ -122,58 +114,50 @@ class MarmotPlot(SetupLogger):
     It also handles the area aggregation selection
     """
     
-    def __init__(self,Scenarios, AGG_BY, PLEXOS_Solutions_folder, gen_names, Marmot_plot_select, 
-                 Marmot_Solutions_folder=None,
-                 mapping_folder='mapping_folder',
-                 Scenario_Diff=None,
-                 zone_region_sublist=None,
-                 xlabels=None,
-                 ylabels=None,
-                 ticklabels=None,
-                 Region_Mapping=pd.DataFrame(),
-                 TECH_SUBSET=None,
+    def __init__(self, Scenarios: Union[str, list],
+                 AGG_BY: str, 
+                 PLEXOS_Solutions_folder: str, 
+                 gen_names: Union[str, pd.DataFrame],
+                 Marmot_plot_select: Union[str, pd.DataFrame], 
+                 Marmot_Solutions_folder: str = None,
+                 mapping_folder: str = 'mapping_folder',
+                 Scenario_Diff: Union[str, list] = None,
+                 zone_region_sublist: Union[str, list] = None,
+                 xlabels: Union[str, list] = None,
+                 ylabels: Union[str, list] = None,
+                 ticklabels: Union[str, list] = None,
+                 Region_Mapping: Union[str, pd.DataFrame] = pd.DataFrame(),
+                 TECH_SUBSET: Union[str, list] = None,
                  **kwargs):
         """Marmotplot class __init__ method.
 
-        Parameters
-        ----------
-        Scenarios : string/list
-            Name of scenarios to process.
-        AGG_BY : string
-            Informs region type to aggregate by when creating plots.
-        PLEXOS_Solutions_folder : string directory
-            Folder containing h5plexos results files.
-        gen_names : string directory/pd.DataFrame
-            Mapping file to rename generator technologies.
-        Marmot_plot_select : string directory/pd.DataFrame
-            selection of plots to plot.
-        Marmot_Solutions_folder : string directory, optional
-            Folder to save Marmot solution files. The default is None.
-        mapping_folder : string directory, optional
-            The location of the Marmot mapping folder. The default is 'mapping_folder'.
-        Scenario_Diff : string/list, optional
-            2 value string or list, used to compare 2 sceanrios. The default is None.
-        zone_region_sublist : string/list, optional
-            subset of regions to plot from AGG_BY. The default is None.
-        xlabels : string/list, optional
-            x axis labels for facet plots. The default is None.
-        ylabels : string/list, optional
-            y axis labels for facet plots. The default is None.
-        ticklabels : string/list, optional
-            custom ticklabels for plots, not available for every plot type. The default is None.
-        Region_Mapping : string directory/pd.DataFrame, optional
-            Mapping file to map custom regions/zones to create custom aggregations. 
-            Aggregations are created by grouping PLEXOS regions.
-            The default is pd.DataFrame().
-        TECH_SUBSET : str, optional
-            tech subset to plot (eg. vre, thermal, re)
-            The TECH_SUBSET value should be a column in the ordered_gen_categories.csv.
-            The default is None.
-
-        Returns
-        -------
-        None.
-
+        Args:
+            Scenarios (Union[str, list]): Name of scenarios to process.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            PLEXOS_Solutions_folder (str): Folder containing h5plexos results files.
+            gen_names (Union[str, pd.DataFrame]): Mapping file to rename generator technologies.
+            Marmot_plot_select (Union[str, pd.DataFrame]): Selection of plots to plot.
+            Marmot_Solutions_folder (str, optional): Folder to save Marmot solution files.
+                Defaults to None.
+            mapping_folder (str, optional): The location of the Marmot mapping folder.
+                Defaults to 'mapping_folder'.
+            Scenario_Diff (Union[str, list], optional): 2 value string or list, used to compare 2 scenarios. 
+                Defaults to None.
+            zone_region_sublist (Union[str, list], optional): Subset of regions to plot from AGG_BY. 
+                Defaults to None.
+            xlabels (Union[str, list], optional): x axis labels for facet plots. 
+                Defaults to None.
+            ylabels (Union[str, list], optional): y axis labels for facet plots. 
+                Defaults to None.
+            ticklabels (Union[str, list], optional): custom ticklabels for plots, not available for every plot type.
+                Defaults to None.
+            Region_Mapping (Union[str, pd.DataFrame], optional): Mapping file to map custom regions/zones 
+                to create custom aggregations. Aggregations are created by grouping PLEXOS regions. 
+                Defaults to pd.DataFrame().
+            TECH_SUBSET (Union[str, list], optional): Tech subset category to plot.
+                The TECH_SUBSET value should be a column in the ordered_gen_categories.csv.
+                If left None all techs will be plotted
+                Defaults to None.
         """
         super().__init__(**kwargs) # Instantiation of SetupLogger
         
@@ -264,17 +248,11 @@ class MarmotPlot(SetupLogger):
         except KeyError:
             pass     
                         
-        
     def run_plotter(self):
-        '''
+        """
         Main method to call to begin plotting figures, this method takes 
-        no input variables, all required varibales are passed in via the __init__ method.
-
-        Returns
-        -------
-        None.
-
-        '''
+        no input variables, all required variables are passed in via the __init__ method.
+        """
         
         self.logger.info(f"Area Aggregation selected: {self.AGG_BY}")
         
@@ -340,7 +318,7 @@ class MarmotPlot(SetupLogger):
         else:
             ordered_gen = ordered_gen_categories['Ordered_Gen'].str.strip().tolist()
         
-        # If Other category does not exhist in ordered_gen, create entry 
+        # If Other category does not exist in ordered_gen, create entry 
         if 'Other' not in ordered_gen:
             ordered_gen.append('Other')
 
@@ -397,7 +375,7 @@ class MarmotPlot(SetupLogger):
         
         gen_names_dict=self.gen_names[['Original','New']].set_index("Original").to_dict()["New"]
 
-        # If curtailment category does not exhist in ordered_gen, create entry 
+        # If curtailment category does not exist in ordered_gen, create entry 
         curtailment_name = gen_names_dict.get('Curtailment','Curtailment')
         if curtailment_name not in ordered_gen:
             ordered_gen.append(curtailment_name)
@@ -519,7 +497,7 @@ class MarmotPlot(SetupLogger):
                 "shift_leapday": shift_leapday
                 }
             
-            # Create ouput folder for each plotting module
+            # Create output folder for each plotting module
             figures = os.path.join(figure_folder, f"{self.AGG_BY}_{module}")
             try:
                 os.makedirs(figures)
@@ -534,7 +512,7 @@ class MarmotPlot(SetupLogger):
             # Main loop to process each figure and pass plot specific variables to methods
             for index, row in module_plots.iterrows(): 
                 
-                # Set Plot defauts
+                # Set Plot defaults
                 mpl.rc('xtick', labelsize=font_defaults['xtick_size'])
                 mpl.rc('ytick', labelsize=font_defaults['ytick_size'])
                 mpl.rc('axes', labelsize=font_defaults['axes_label_size'])
@@ -547,7 +525,7 @@ class MarmotPlot(SetupLogger):
                 print("\n\n\n")
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
-                # Modifes timezone string before plotting
+                # Modifies timezone string before plotting
                 if pd.isna(row.iloc[5]):
                     row.iloc[5] = "Date"
                 else:
@@ -646,7 +624,7 @@ def main():
     # These variables (along with Region_Mapping) are used to initialize MetaData
     PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
     
-    # For plots using the differnec of the values between two scenarios.
+    # For plots using the difference of the values between two scenarios.
     # Max two entries, the second scenario is subtracted from the first.
     Scenario_Diff = pd.Series(str(Marmot_user_defined_inputs.loc['Scenario_Diff_plot'].squeeze()).split(",")).str.strip().tolist()
     if Scenario_Diff == ['nan']: Scenario_Diff = [""]

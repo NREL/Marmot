@@ -3,7 +3,7 @@
 Created on Mon Jun 22 16:14:56 2020
 
 Module to retrieve metadata from 
-prdocution cost modelling results 
+production cost modelling results 
 @author: Ryan Houseman
 """
 
@@ -15,38 +15,32 @@ import numpy as np
 import logging
 
 class MetaData():
-    """
-    Class to handle the retreival of metadata from the formatted or
-    original plexos solution h5 files
+    """Handle the retrieval of metadata from the formatted or
+    original plexos solution h5 files.
 
-    Attributes
-    ----------
-    filename : str
-        The name of the h5 file to retreive data from  
-    h5_data : h5 file
-        loaded h5 file in memory
+    Attributes:
+        filename (str) = The name of the h5 file to retreive data from.
+        h5_data (h5py.File) = loaded h5 file in memory.
     """
 
-    filename = None
-    h5_data = None
+    filename: str = None
+    h5_data: h5py.File = None
     
-    def __init__(self, HDF5_folder_in, read_from_formatted_h5=True, 
-                    Region_Mapping=pd.DataFrame(), partition_number=0):
-        """
-        Parameters
-        ----------
-        HDF5_folder_in : folder
-            Folder containing h5plexos h5 files .
-        read_from_formatted_h5 : Boolean, optional
-            Boolean for whether the metadata is being read from the 
-            formatted hdf5 file or the original PLEXOS solution file.
-            default True
-        Region_Mapping : pd.DataFrame, optional
-            DataFrame of extra regions to map.
-        partition_number : int, optional
-            Which temporal partition of h5 data to retrieve metadata from
-            in the formatted h5 file, default is 0 (first entry)
 
+    def __init__(self, HDF5_folder_in: str, read_from_formatted_h5: bool = True, 
+                 Region_Mapping: pd.DataFrame = pd.DataFrame(),
+                 partition_number: int = 0):
+        """MetaData init method
+
+        Args:
+            HDF5_folder_in (str): Folder containing h5plexos h5 files.
+            read_from_formatted_h5 (bool, optional): Boolean for whether the metadata is 
+                being read from the formatted hdf5 file or the original PLEXOS solution file.
+                Defaults to True.
+            Region_Mapping (pd.DataFrame, optional): DataFrame of extra regions to map. 
+                Defaults to pd.DataFrame().
+            partition_number (int, optional): Which temporal partition of h5 data to retrieve 
+                metadata from in the formatted h5 file. Defaults to 0.
         """
         self.logger = logging.getLogger('marmot_format.'+__name__)        
         self.HDF5_folder_in = HDF5_folder_in
@@ -57,14 +51,18 @@ class MetaData():
         self.start_index = None
 
     @classmethod
-    def _check_if_exhisting_filename(cls, filename) -> bool:
-        """
-        classmethod to check if the passed filename
-        is the same or different from previous calls
-        if different replaces the filename with new value 
+    def _check_if_existing_filename(cls, filename: str) -> bool:
+        """Check if the passed filename is the same or different from previous calls
+
+        If file is different replaces the filename with new value 
         and closes old file
+
+        Args:
+            filename (str): The name of the h5 file to retreive data from.
+
+        Returns:
+            bool: False if new file, True if existing 
         """
-        
         if cls.filename != filename:
             cls.filename = filename
             cls.close_h5()
@@ -74,13 +72,18 @@ class MetaData():
 
     @classmethod
     def close_h5(cls) -> None:
-        """Closes h5 file open in memory"""
+        """Closes h5 file open in memory
+        """
         if cls.h5_data:
             cls.h5_data.close()
     
-    def _read_data(self, filename) -> None:
-        """Reads h5 file into memory"""
-        
+    def _read_data(self, filename: str) -> None:
+        """Reads h5 file into memory
+
+        Args:
+            filename (str): The name of the h5 file to retreive 
+                data from.
+        """
         self.logger.debug(f"Reading New h5 file: {filename}")
         processed_file_format = "{}_formatted.h5"
         
@@ -117,10 +120,14 @@ class MetaData():
                                     "created by h5plexos.\n\nMarmot will now quit.")
                 sys.exit()     
 
-    def generator_category(self, filename) -> pd.DataFrame:
-        """Generator categories mapping"""
+    def generator_category(self, filename: str) -> pd.DataFrame:
+        """Generator categories mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
 
         try:    
@@ -135,10 +142,14 @@ class MetaData():
 
         return gen_category
             
-    def region_generators(self, filename) -> pd.DataFrame:
-        """Region generators mapping"""
+    def region_generators(self, filename: str) -> pd.DataFrame:
+        """Region generators mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
 
         try:    
@@ -154,9 +165,13 @@ class MetaData():
         
         return region_gen
         
-    def region_generator_category(self, filename) -> pd.DataFrame:
-        """"Region generators category mapping"""
-                
+    def region_generator_category(self, filename: str) -> pd.DataFrame:
+        """Region generators category mapping
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """     
         try:
             region_gen = self.region_generators(filename)
             gen_category = self.generator_category(filename)
@@ -167,10 +182,14 @@ class MetaData():
 
         return region_gen_cat
         
-    def zone_generators(self, filename) -> pd.DataFrame:
-        """Zone generators mapping"""
+    def zone_generators(self, filename: str) -> pd.DataFrame:
+        """Zone generators mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -185,9 +204,13 @@ class MetaData():
         
         return zone_gen
         
-    def zone_generator_category(self, filename) -> pd.DataFrame:
-        """Zone generators category mapping"""
-                
+    def zone_generator_category(self, filename: str) -> pd.DataFrame:
+        """Zone generators category mapping
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """    
         try:
             zone_gen = self.zone_generators(filename)
             gen_category = self.generator_category(filename)
@@ -200,10 +223,14 @@ class MetaData():
         
     # Generator storage has been updated so that only one of tail_storage & head_storage is required
     # If both are available, both are used
-    def generator_storage(self, filename) -> pd.DataFrame:
-        """Generator Storage mapping"""
+    def generator_storage(self, filename: str) -> pd.DataFrame:
+        """Generator Storage mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         head_tail = [0,0]
         try:    
@@ -253,10 +280,14 @@ class MetaData():
         
         return gen_storage
     
-    def node_region(self, filename) -> pd.DataFrame:
-        """Node Region mapping"""
+    def node_region(self, filename: str) -> pd.DataFrame:
+        """Node Region mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -271,10 +302,14 @@ class MetaData():
 
         return node_region
         
-    def node_zone(self, filename) -> pd.DataFrame:
-        """Node zone mapping"""
+    def node_zone(self, filename: str) -> pd.DataFrame:
+        """Node zone mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -289,10 +324,14 @@ class MetaData():
         
         return node_zone
     
-    def generator_node(self, filename) -> pd.DataFrame:
-        """generator node mapping"""
+    def generator_node(self, filename: str) -> pd.DataFrame:
+        """generator node mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -307,10 +346,14 @@ class MetaData():
 
         return generator_node
         
-    def regions(self, filename) -> pd.DataFrame:
-        """Region objects"""
+    def regions(self, filename: str) -> pd.DataFrame:
+        """Region objects
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
 
         try:
@@ -327,10 +370,14 @@ class MetaData():
         
         return regions   
     
-    def zones(self, filename) -> pd.DataFrame:
-        """Zone objects"""
+    def zones(self, filename: str) -> pd.DataFrame:
+        """Zone objects
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -344,10 +391,14 @@ class MetaData():
 
         return zones
              
-    def lines(self, filename) -> pd.DataFrame:
-        """Line objects"""
+    def lines(self, filename: str) -> pd.DataFrame:
+        """Line objects
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -361,10 +412,14 @@ class MetaData():
 
         return lines
     
-    def region_regions(self, filename) -> pd.DataFrame:
-        """Region-region mapping"""
+    def region_regions(self, filename: str) -> pd.DataFrame:
+        """Region-region mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             region_regions = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_regions']))
@@ -374,10 +429,14 @@ class MetaData():
 
         return region_regions
     
-    def region_interregionallines(self, filename) -> pd.DataFrame:
-        """Region inter-regional lines mapping"""
+    def region_interregionallines(self, filename: str) -> pd.DataFrame:
+        """Region inter-regional lines mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -395,10 +454,14 @@ class MetaData():
 
         return region_interregionallines
             
-    def region_intraregionallines(self, filename) -> pd.DataFrame:
-        """Region intra-regional lines mapping"""
-
-        if not self._check_if_exhisting_filename(filename):
+    def region_intraregionallines(self, filename: str) -> pd.DataFrame:
+        """Region intra-regional lines mapping
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -419,10 +482,14 @@ class MetaData():
         
         return region_intraregionallines
       
-    def region_exporting_lines(self, filename) -> pd.DataFrame:
-        """Region exporting lines mapping"""
-
-        if not self._check_if_exhisting_filename(filename):
+    def region_exporting_lines(self, filename: str) -> pd.DataFrame:
+        """Region exporting lines mapping
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -438,10 +505,14 @@ class MetaData():
 
         return region_exportinglines 
       
-    def region_importing_lines(self, filename) -> pd.DataFrame:
-        """Region importing lines mapping"""
-
-        if not self._check_if_exhisting_filename(filename):
+    def region_importing_lines(self, filename: str) -> pd.DataFrame:
+        """Region importing lines mapping
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -457,10 +528,14 @@ class MetaData():
 
         return region_importinglines
 
-    def zone_interzonallines(self, filename) -> pd.DataFrame:
-        """zone inter-zonal lines mapping"""
+    def zone_interzonallines(self, filename: str) -> pd.DataFrame:
+        """zone inter-zonal lines mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -476,10 +551,14 @@ class MetaData():
         
         return zone_interzonallines
                 
-    def zone_intrazonallines(self, filename) -> pd.DataFrame:
-        """zone intra-zonal lines mapping"""
+    def zone_intrazonallines(self, filename: str) -> pd.DataFrame:
+        """zone intra-zonal lines mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -494,10 +573,14 @@ class MetaData():
 
         return zone_intrazonallines
                  
-    def zone_exporting_lines(self, filename) -> pd.DataFrame:
-        """zone exporting lines mapping"""
+    def zone_exporting_lines(self, filename: str) -> pd.DataFrame:
+        """zone exporting lines mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -512,10 +595,14 @@ class MetaData():
 
         return zone_exportinglines 
     
-    def zone_importing_lines(self, filename) -> pd.DataFrame:
-        """zone importing lines mapping"""
+    def zone_importing_lines(self, filename: str) -> pd.DataFrame:
+        """zone importing lines mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -530,10 +617,14 @@ class MetaData():
         
         return zone_importinglines 
 
-    def interface_lines(self, filename) -> pd.DataFrame:
-        """Interface -> lines mapping"""
+    def interface_lines(self, filename: str) -> pd.DataFrame:
+        """Interface -> lines mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -547,27 +638,39 @@ class MetaData():
 
         return interface_lines
 
-    def region_lines(self, filename) -> pd.DataFrame:
-        """Lines within each region""" 
+    def region_lines(self, filename: str) -> pd.DataFrame:
+        """Lines within each region
         
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
         region_interregionallines = self.region_interregionallines(filename)
         region_intraregionallines = self.region_intraregionallines(filename)
         region_lines = pd.concat([region_interregionallines,region_intraregionallines])
         return region_lines
     
-    def zone_lines(self, filename) -> pd.DataFrame:
-        """Lines within each zone""" 
+    def zone_lines(self, filename: str) -> pd.DataFrame:
+        """Lines within each zone
         
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
         zone_interzonallines = self.zone_interzonallines(filename)
         zone_intrazonallines = self.zone_intrazonallines(filename)
         zone_lines = pd.concat([zone_interzonallines,zone_intrazonallines])
         zone_lines = zone_lines.rename(columns={'region':'zone'})
         return zone_lines
 
-    def reserves(self, filename) -> pd.DataFrame:
-        """Reserves objects"""
+    def reserves(self, filename: str) -> pd.DataFrame:
+        """Reserves objects
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -580,10 +683,14 @@ class MetaData():
  
         return reserves 
             
-    def reserves_generators(self, filename) -> pd.DataFrame:
-        """Reserves generators mapping"""
+    def reserves_generators(self, filename: str) -> pd.DataFrame:
+        """Reserves generators mapping
         
-        if not self._check_if_exhisting_filename(filename):
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
             self._read_data(filename)
         try:
             try:
@@ -598,9 +705,13 @@ class MetaData():
         
         return reserves_generators 
 
-    def reserves_regions(self, filename) -> pd.DataFrame:
-        """Reserves regions mapping"""
+    def reserves_regions(self, filename: str) -> pd.DataFrame:
+        """Reserves regions mapping
         
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
         reserves_generators = self.reserves_generators(filename)
         region_generators = self.region_generators(filename)
         try:
@@ -615,9 +726,13 @@ class MetaData():
         reserves_regions.reset_index(drop=True,inplace=True)
         return reserves_regions
         
-    def reserves_zones(self, filename) -> pd.DataFrame:
-        """Reserves zones mapping"""
+    def reserves_zones(self, filename: str) -> pd.DataFrame:
+        """Reserves zones mapping
         
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
         reserves_generators = self.reserves_generators(filename)
         zone_generators = self.zone_generators(filename)
         try:
