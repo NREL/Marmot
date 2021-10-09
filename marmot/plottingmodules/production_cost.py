@@ -2,8 +2,8 @@
 """
 Created on Tue Dec 17 16:24:40 2019
 
-This module plots figures related to the cost of opertaing the power system.
-Plots can be broken down by cost categories, genertaor types etc. 
+This module plots figures related to the cost of operating the power system.
+Plots can be broken down by cost categories, generator types etc. 
 @author: Daniel Levie
 """
 
@@ -18,7 +18,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    def __init__(self, argument_dict):
+    """Marmot MPlot class, common across all plotting modules.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The production_cost.py module contains methods that are
+    related related to the cost of operating the power system. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -36,17 +54,31 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
         
-    def prod_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        
+    def prod_cost(self, start_date_range: str = None, 
+                  end_date_range: str = None, **_):
+        """Plots total system net revenue and cost normalized by the installed capacity of the area.
+
+        Total revenue is made up of reserve and energy revenues which are displayed in a stacked
+        bar plot with total generation cost. Net revensue is represented by a dot.
+        Each sceanrio is plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Total_Generation_Cost",self.Scenarios),
-                      (True,"generator_Pool_Revenue",self.Scenarios),
-                      (True,"generator_Reserves_Revenue",self.Scenarios),
-                      (True,"generator_Installed_Capacity",self.Scenarios)]
+        properties = [(True, "generator_Total_Generation_Cost", self.Scenarios),
+                      (True, "generator_Pool_Revenue", self.Scenarios),
+                      (True, "generator_Reserves_Revenue", self.Scenarios),
+                      (True, "generator_Installed_Capacity", self.Scenarios)]
         
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -88,7 +120,7 @@ class MPlot(PlotDataHelper):
                 Pool_Revenues = Pool_Revenues/Total_Installed_Capacity #Change to $/MW-year
                 Pool_Revenues.rename("Energy_Revenues", inplace=True)
 
-                ### Might cvhnage to Net Reserve Revenue at later date
+                ### Might change to Net Reserve Revenue at later date
                 Reserve_Revenues = self["generator_Reserves_Revenue"].get(scenario)
                 Reserve_Revenues = Reserve_Revenues.xs(zone_input,level=self.AGG_BY)
                 Reserve_Revenues = self.df_process_gen_inputs(Reserve_Revenues)
@@ -161,10 +193,23 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
+    def sys_cost(self, start_date_range: str = None, 
+                 end_date_range: str = None, **_):
+        """Creates a stacked bar plot of Total Generation Cost and Cost of Unserved Energy.
 
-    def sys_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        
+        Plot only shows totals and is NOT broken down into technology or cost type 
+        specific values.
+        Each sceanrio is plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -212,7 +257,8 @@ class MPlot(PlotDataHelper):
                 Cost_Unserved_Energy = Cost_Unserved_Energy.sum(axis=0)
                 Cost_Unserved_Energy.rename("Cost_Unserved_Energy", inplace=True)
 
-                Total_Systems_Cost = pd.concat([Total_Systems_Cost, Total_Gen_Cost, Cost_Unserved_Energy], axis=1, sort=False)
+                Total_Systems_Cost = pd.concat([Total_Systems_Cost, Total_Gen_Cost, Cost_Unserved_Energy], 
+                                               axis=1, sort=False)
 
                 Total_Systems_Cost.columns = Total_Systems_Cost.columns.str.replace('_',' ')
                 Total_Systems_Cost.rename({0:scenario}, axis='index', inplace=True)
@@ -290,20 +336,29 @@ class MPlot(PlotDataHelper):
                 if k>=len(cost_totals)-1:
                     break
             
-
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
+    def detailed_gen_cost(self, start_date_range: str = None, 
+                          end_date_range: str = None, **_):
+        """Creates stacked bar plot of total generation cost by cost type (fuel, emission, start cost etc.)
 
-    def detailed_gen_cost(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        
+        Creates a more deatiled system cost plot.
+        Each sceanrio is plotted as a separate bar.
+
+        start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Total_Generation_Cost",self.Scenarios),
-                      (True,"generator_Fuel_Cost",self.Scenarios),
+        properties = [(True,"generator_Fuel_Cost",self.Scenarios),
                       (True,"generator_VO&M_Cost",self.Scenarios),
                       (True,"generator_Start_&_Shutdown_Cost",self.Scenarios),
                       (False,"generator_Emissions_Cost",self.Scenarios)]
@@ -441,9 +496,23 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def sys_cost_type(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        
+    def sys_cost_type(self, start_date_range: str = None, 
+                      end_date_range: str = None, **_):
+        """Creates stacked bar plot of total generation cost by generator technology type.
+
+        Another way to represent total generation cost, this time by tech type,
+        i.e Coal, Gas, Hydro etc.
+        Each sceanrio is plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
         
@@ -534,9 +603,23 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def sys_cost_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        
+    def sys_cost_diff(self, start_date_range: str = None, 
+                      end_date_range: str = None, **_):
+        """Creates stacked barplots of Total Generation Cost and Cost of Unserved Energy relative to a base scenario.
+
+        Barplots show the change in total total generation cost relative to a base scenario.
+        The default is to comapre against the first scenario provided in the inputs list.
+        Plot only shows totals and is NOT broken down into technology or cost type specific values.
+        Each sceanrio is plotted as a separate bar.
+
+        start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         if self.AGG_BY == 'zone':
             agg = 'zone'
         else:
@@ -644,9 +727,23 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def sys_cost_type_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        
+    def sys_cost_type_diff(self, start_date_range: str = None, 
+                           end_date_range: str = None, **_):
+        """Creates stacked barplots of Total Generation Cost by generator technology type relative to a base scenario.
+
+        Barplots show the change in total total generation cost relative to a base scenario.
+        The default is to comapre against the first scenario provided in the inputs list.
+        Each sceanrio is plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
         
@@ -742,15 +839,29 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def detailed_gen_cost_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        
+    def detailed_gen_cost_diff(self, start_date_range: str = None, 
+                               end_date_range: str = None, **_):
+        """Creates stacked barplots of Total Generation Cost by by cost type (fuel, emission, start cost etc.)
+        relative to a base scenario.
+
+        Barplots show the change in total total generation cost relative to a base scenario.
+        The default is to comapre against the first scenario provided in the inputs list.
+        Each sceanrio is plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Total_Generation_Cost",self.Scenarios),
-                      (True,"generator_Fuel_Cost",self.Scenarios),
+        properties = [(True,"generator_Fuel_Cost",self.Scenarios),
                       (True,"generator_VO&M_Cost",self.Scenarios),
                       (True,"generator_Start_&_Shutdown_Cost",self.Scenarios),
                       (False,"generator_Emissions_Cost",self.Scenarios)]

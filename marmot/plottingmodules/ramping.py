@@ -3,7 +3,7 @@
 Created on Mon Dec  9 13:20:56 2019
 
 This module creates bar plot of the total volume of generator starts in MW,GW,etc.
-@author: Daniel Levie
+@author: Marty Schwarz
 """
 
 import logging
@@ -13,12 +13,29 @@ import matplotlib.pyplot as plt
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
-from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData, UnderDevelopment)
 
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The ramping.py module contains methods that are
+    related to the ramp periods of generators. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -35,9 +52,21 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
     
-    def capacity_started(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-       
+    def capacity_started(self, start_date_range: str = None, 
+                         end_date_range: str = None, **_):
+        """Creates bar plots of total thermal capacity started by technology type.
+
+        Each sceanrio is plotted as a separate color grouped bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -70,6 +99,7 @@ class MPlot(PlotDataHelper):
                     break
                 
                 Gen = Gen.reset_index()
+                Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
                 # Gen = Gen.drop(columns = ['region'])
@@ -103,8 +133,8 @@ class MPlot(PlotDataHelper):
 
                     for gen in gen_names:
                         sgt = stt.loc[stt['gen_name'] == gen]
-                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommited hours.
-                            #print('Couting starts for: ' + gen)
+                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommitted hours.
+                            #print('Counting starts for: ' + gen)
                             for idx in range(len(sgt['Output (MWh)']) - 1):
                                     if sgt["Output (MWh)"].iloc[idx] == 0 and not sgt["Output (MWh)"].iloc[idx + 1] == 0:
                                         cap_started = cap_started + sgt["Installed Capacity (MW)"].iloc[idx]
@@ -122,10 +152,10 @@ class MPlot(PlotDataHelper):
                     # for gen in gen_names:
                     #     sgt = stt.loc[stt['gen_name'] == gen]
 
-                    #     if any(sgt[0] == 0) and not all(sgt[0] == 0):   #Check that this generator has some, but not all, uncommited hours.
+                    #     if any(sgt[0] == 0) and not all(sgt[0] == 0):   #Check that this generator has some, but not all, uncommitted hours.
                     #         zeros = sgt.loc[sgt[0] == 0]
 
-                    #         print('Couting starts and stops for: ' + gen)
+                    #         print('Counting starts and stops for: ' + gen)
                     #         for idx in range(len(zeros['timestamp']) - 1):
                     #                if not zeros['timestamp'].iloc[idx + 1] == pd.Timedelta(1,'h'):
                     #                    starts = starts + 1
@@ -176,8 +206,18 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def count_ramps(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def count_ramps(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
+
+        # Plot currently displays the same as capacity_started, this plot needs looking at 
+
+        outputs = UnderDevelopment()
+        self.logger.warning('count_ramps is under development')
+        return outputs
         
         outputs = {}
         
@@ -240,8 +280,8 @@ class MPlot(PlotDataHelper):
 
                     for gen in gen_names:
                         sgt = stt.loc[stt['gen_name'] == gen]
-                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommited hours.
-                            #print('Couting starts for: ' + gen)
+                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommitted hours.
+                            #print('Counting starts for: ' + gen)
                             for idx in range(len(sgt['Output (MWh)']) - 1):
                                     if sgt["Output (MWh)"].iloc[idx] == 0 and not sgt["Output (MWh)"].iloc[idx + 1] == 0:
                                         up_ramps = up_ramps + sgt["Installed Capacity (MW)"].iloc[idx]
