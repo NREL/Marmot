@@ -18,8 +18,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The generation_unstack.py module contains methods that are
+    related to the timeseries generation of generators, displayed in an unstacked line format. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -38,8 +55,44 @@ class MPlot(PlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         
-    def gen_unstack(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
+    def gen_unstack(self, figure_name: str = None, prop: str = None,
+                    start: int = None, end: int = None,
+                    timezone: str = "", start_date_range: str = None,
+                    end_date_range: str = None, **_):
+        """Creates a timeseries plot of generation by technology each plotted as a line.
+
+        If multiple scenarios are passed they will be plotted in a facet plot.
+        The plot can be further customized by passing specific values to the
+        prop argument.
+
+        Args:
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            prop (str, optional): Special argument used to adjust specific 
+                plot settings. Controlled through the plot_select.csv.
+                Opinions available are:
+                    - Peak Demand
+                    - Min Net Load
+                    - Date Range
+                Defaults to None.
+            start (int, optional): Used in conjunction with the prop argument.
+                Will define the number of days to plot before a certain event in 
+                a timeseries plot, e.g Peak Demand.
+                Defaults to None.
+            end (int, optional): Used in conjunction with the prop argument.
+                Will define the number of days to plot after a certain event in 
+                a timeseries plot, e.g Peak Demand.
+                Defaults to None.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         outputs = {}  
         
         facet=False
@@ -128,8 +181,7 @@ class MPlot(PlotDataHelper):
 
                 Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen)
 
-                # Insert Curtailmnet into gen stack if it exhists in database
-
+                # Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario).copy()
                 if not Stacked_Curt.empty:
                     curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
@@ -152,7 +204,7 @@ class MPlot(PlotDataHelper):
                 else:
                     vre_gen_cat = self.vre_gen_cat
                     
-                # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+                # Adjust list of values to drop depending on if it exists in Stacked_Gen df
                 vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
                 Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
                 Net_Load = Net_Load.sum(axis=1)

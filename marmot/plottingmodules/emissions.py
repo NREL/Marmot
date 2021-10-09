@@ -2,7 +2,8 @@
 """
 Created on Mon Nov 2 8:41:40 2020
 
-This module plots figures related to emissions 
+This module plots figures related to the fossil fuel 
+emissions of generators. 
 @author: Brian Sergi
 
 TO DO:
@@ -22,7 +23,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    def __init__(self, argument_dict):
+    """Marmot MPlot class, common across all plotting modules.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The emissions.py module contains methods that are
+    related to the fossil fuel emissions of generators. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -41,10 +60,25 @@ class MPlot(PlotDataHelper):
         
 
     # function to collect total emissions by fuel type
-    def total_emissions_by_type(self, figure_name=None, prop=None, start=None,
-                             end=None, timezone="", start_date_range=None,
-                             end_date_range=None):
+    def total_emissions_by_type(self, prop: str = None, start_date_range: str = None,
+                                end_date_range: str = None, **_):
+        """Creates a stacked bar plot of emissions by generator tech type.
 
+        The emission type to plot is defined using the prop argument.
+        A separate bar is created for each scenario.
+
+        Args:
+            prop (str, optional): Controls type of emission to plot.
+                Controlled through the plot_select.csv.
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
 

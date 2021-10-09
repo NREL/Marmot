@@ -24,8 +24,25 @@ custom_legend_elements = Patch(facecolor='#DD0200',
                                alpha=0.5, edgecolor='#DD0200')
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The generation_stack.py contains methods that are
+    related to the timeseries generation of generators, in a stacked area format.  
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -44,8 +61,30 @@ class MPlot(PlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         
-    def committed_stack(self, figure_name=None, prop=None, start=None, end=None,
-                        timezone="", start_date_range=None, end_date_range=None):
+    def committed_stack(self, start_date_range: str = None, 
+                        end_date_range: str = None, **_):
+        """Plots the timeseries of committed generation compared to the total available capacity 
+        
+        The upper line shows the total available cpacity that can be committed 
+        The area between the lower line and the x-axis plots the total capacity that is 
+        committed and producing energy. ​
+
+        Any gap that exists between the upper and lower line is generation that is 
+        not committed but available to use.  
+
+        Data is plotted in a facet plot, each row of the facet plot represents 
+        separate generation technologies.
+        Each bar the facet plot represents separate scenarios.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -129,7 +168,9 @@ class MPlot(PlotDataHelper):
                 for j,tech in enumerate(tech_list_sort):
                     if tech not in gen.columns:
                         gen_one_tech = pd.Series(0,index = gen.index)
-                        commit_cap = pd.Series(0,index = gen.index) #Add dummy columns to deal with coal retirements (coal showing up in 2024, but not future years).
+                        # Add dummy columns to deal with coal retirements 
+                        # (coal showing up in 2024, but not future years).
+                        commit_cap = pd.Series(0,index = gen.index) 
                     elif tech in self.thermal_gen_cat:
                         gen_one_tech = gen[tech]
                         commit_cap = thermal_commit_cap[tech]
@@ -160,15 +201,57 @@ class MPlot(PlotDataHelper):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
-            plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=60)
+            plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})", 
+                       color='black', rotation='vertical', labelpad=60)
             data_table = pd.DataFrame() #TODO: write actual data out
             outputs[zone_input] = {'fig':fig, 'data_table':data_table}
         return outputs
 
 
-    def gen_stack(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone="", start_date_range=None, end_date_range=None):
-      
+    def gen_stack(self, figure_name: str = None, prop: str = None,
+                  start: int = None, end: int = None,
+                  timezone: str = "", start_date_range: str = None,
+                  end_date_range: str = None, **_):
+        """Creates a timeseries stacked area plot of generation by technology.
+
+        The stack order of technologies is determined by the ordered_gen_categories.csv
+        
+        If multiple scenarios are passed they will be plotted in a facet plot.
+        The plot can be further customized by passing specific values to the
+        prop argument.
+
+        Args:
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            prop (str, optional): Special argument used to adjust specific 
+                plot settings. Controlled through the plot_select.csv.
+                Opinions available are:
+                    - Peak Demand
+                    - Min Net Load
+                    - Date Range
+                    - Peak RE
+                    - Peak Unserved Energy
+                    - Peak Curtailment
+                Defaults to None.
+            start (int, optional): Used in conjunction with the prop argument.
+                Will define the number of days to plot before a certain event in 
+                a timeseries plot, e.g Peak Demand.
+                Defaults to None.
+            end (int, optional): Used in conjunction with the prop argument.
+                Will define the number of days to plot after a certain event in 
+                a timeseries plot, e.g Peak Demand.
+                Defaults to None.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+
+        """
         facet=False
         if 'Facet' in figure_name:
             facet = True
@@ -196,7 +279,7 @@ class MPlot(PlotDataHelper):
 
         def setup_data(zone_input, scenario, Stacked_Gen):
 
-            # Insert Curtailmnet into gen stack if it exhists in database
+            # Insert Curtailment into gen stack if it exists in database
             Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario).copy()
             if not Stacked_Curt.empty:
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
@@ -210,7 +293,8 @@ class MPlot(PlotDataHelper):
                         Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
                     Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
-                    Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                    Stacked_Gen.insert(len(Stacked_Gen.columns), 
+                                       column=curtailment_name, value=Stacked_Curt) #Insert curtailment into
                     # Calculates Net Load by removing variable gen + curtailment
                     vre_gen_cat = self.vre_gen_cat + [curtailment_name]
                 else:
@@ -218,15 +302,13 @@ class MPlot(PlotDataHelper):
                     
             else:
                 vre_gen_cat = self.vre_gen_cat
-            # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+            # Adjust list of values to drop depending on if it exists in Stacked_Gen df
             vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
             Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)
-            
 
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
-
 
             Load = self[f'{agg}_Load'].get(scenario).copy()
             if self.shift_leapday == True:
@@ -265,7 +347,13 @@ class MPlot(PlotDataHelper):
             if (Unserved_Energy == 0).all() == False:
                 Unserved_Energy = Load - Unserved_Energy
             
-            data = {"Stacked_Gen":Stacked_Gen, "Load":Load, "Net_Load":Net_Load, "Pump_Load":Pump_Load, "Total_Demand":Total_Demand, "Unserved_Energy":Unserved_Energy,"ue_data_table":unserved_eng_data_table}
+            data = {"Stacked_Gen": Stacked_Gen,
+                    "Load": Load,
+                    "Net_Load": Net_Load,
+                    "Pump_Load": Pump_Load,
+                    "Total_Demand": Total_Demand,
+                    "Unserved_Energy": Unserved_Energy,
+                    "ue_data_table": unserved_eng_data_table}
             return data
 
         def data_prop(data):
@@ -391,7 +479,13 @@ class MPlot(PlotDataHelper):
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
 
-            data = {"Stacked_Gen":Stacked_Gen, "Load":Load, "Pump_Load":Pump_Load, "Total_Demand":Total_Demand, "Unserved_Energy":Unserved_Energy,"ue_data_table":unserved_eng_data_table}
+            data = {"Stacked_Gen": Stacked_Gen, 
+                    "Load": Load, 
+                    "Pump_Load": Pump_Load, 
+                    "Total_Demand": Total_Demand, 
+                    "Unserved_Energy": Unserved_Energy,
+                    "ue_data_table": unserved_eng_data_table}
+
             data["peak_demand_t"] = peak_demand_t
             data["Peak_Demand"] = Peak_Demand
             data["min_net_load_t"] = min_net_load_t
@@ -647,8 +741,24 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def gen_diff(self, figure_name=None, prop=None, start=None, end=None,
-                 timezone="", start_date_range=None, end_date_range=None):
+    def gen_diff(self, timezone: str = "", start_date_range: str = None,
+                 end_date_range: str = None, **_):
+        """Plots the difference in generation between two scenarios.
+
+        A line plot is created for each technology representing the difference 
+        between the scenarios.
+
+        Args:
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -746,17 +856,12 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def gen_stack_all_periods(self, figure_name=None, prop=None, start=None, end=None,
-                              timezone="", start_date_range=None, end_date_range=None):
-        '''
-        DEPRCIATED FOR NOW
+    def gen_stack_all_periods(self, **_):
+        """DEPRECIATED FOR NOW
 
-        Returns
-        -------
-        outputs : UnderDevelopment()
-
-        '''
-
+        Returns:
+            UnderDevelopment()
+        """
         outputs = UnderDevelopment()
         self.logger.warning('total_gen_facet is under development')
         return outputs
@@ -811,7 +916,7 @@ class MPlot(PlotDataHelper):
 
     #         # Calculates Net Load by removing variable gen + curtailment
     #         self.vre_gen_cat = self.vre_gen_cat + ['Curtailment']
-    #         # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+    #         # Adjust list of values to drop depending on if it exists in Stacked_Gen df
     #         self.vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
     #         Net_Load = Stacked_Gen.drop(labels = self.vre_gen_cat, axis=1)
     #         Net_Load = Net_Load.sum(axis=1)
