@@ -4,7 +4,7 @@ Created on Mon Dec 9 10:34:48 2019
 Updated July 26th 16:20:00 2021
 
 This module plots figures which show the amount of thermal capacity 
-available but not commited (i.e in reserve)
+available but not committed (i.e in reserve)
 @author: Daniel Levie and Marty Schwarz
 """
 
@@ -22,8 +22,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The thermal_cap_reserve module contains methods that
+    display the amount of generation in reserve, i.e non committed capacity.
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -38,16 +55,21 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
         
-    def thermal_cap_reserves(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        """ 
-        Plots the total thermal generation capacity that is not commited, 
-        i.e in reserve
-        
+    def thermal_cap_reserves(self, start_date_range: str = None, 
+                             end_date_range: str = None, **_):
+        """Plots the total thermal generation capacity that is not committed, i.e in reserve.
+
         If multiple scenarios are included, each one will be plotted on a 
-        seperate subplot
-        
+        separate facet subplot.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         outputs = {}
         

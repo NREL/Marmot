@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+"""
+This module contains methods that are
+related to investigating generator and other device sensitivities. 
+"""
 
 import os
 import logging
@@ -18,8 +22,25 @@ custom_legend_elements = [Patch(facecolor='#DD0200',
                          label='Unserved Energy')]
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The sensitivities.py module contains methods that are
+    related to investigating generator sensitivities. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -36,24 +57,39 @@ class MPlot(PlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
 
-    def _process_ts(self,df,zone_input):
+    def _process_ts(self, df, zone_input):
         oz = df.xs(zone_input, level = self.AGG_BY)
         oz = oz.reset_index()
         oz = oz.groupby('timestamp').sum()
         return(oz)
 
-    def sensitivities_gas(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
+    def sensitivities_gas(self, prop: str = None, timezone: str = "", 
+                          start_date_range: str = None, 
+                          end_date_range: str = None, **_):
+        """Highlights the difference in generation between two scenarios of a single resource. 
 
-        """
-        This method highlights the difference in generation between two scenarios of a single resource. 
+        Plot is currently under development and not available to use.
+        
         The two scenarios are specified in the "Scenario_Diff_plot" field of Marmot_user_defined_inputs.csv
-        The single resource is specfied in the "properties" field of Marmot_plot_select.csv.
+        The single resource is specified in the "properties" field of Marmot_plot_select.csv.
         Blue hatches represent additional energy produced by the resource, and red hatches represent decreased energy.
         The difference in Gas-CC and Gas-CT generation, curtailment, and net interchange are also plotted.
         Each zone is plotted on a separate figure.
         Figures and data tables are returned to plot_main
+
+        Args:
+            prop (str, optional): Controls what generator technology type to create plot for,
+                e.g Gas-CT, Wind etc. Controlled through the plot_select.csv.
+                Defaults to None.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
         """
         return UnderDevelopment()
 

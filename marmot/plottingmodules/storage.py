@@ -2,7 +2,7 @@
 """
 Created April 2020, updated August 2020
 
-This code creates energy storage plots and is called from Marmot_plot_main.py
+This module creates energy storage plots.
 @author: 
 """
 
@@ -18,8 +18,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The storage.py module contains methods that are
+    related to storage devices. 
+   
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -34,17 +51,25 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
 
-    def storage_volume(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
+    def storage_volume(self, timezone: str = "", 
+                       start_date_range: str = None, 
+                       end_date_range: str = None, **_):
+        """Creates time series plot of aggregate storage volume for all storage objects in a given region.
 
-        """
-        This method creates time series plot of aggregate storage volume for all storage objects in a given region, 
-        along with a horizontal line representing full charge.
+        A horizontal line represents full charge of the storage device.
         All scenarios are plotted on a single figure.
-        Figures and data tables are returned to plot_main
+
+        Args:
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
-        
         if self.AGG_BY == 'zone':
                 agg = 'zone'
         else:
