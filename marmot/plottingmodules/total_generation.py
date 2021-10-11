@@ -18,17 +18,32 @@ import marmot.config.mconfig as mconfig
 import marmot.plottingmodules.plotutils.plot_library as plotlib
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
-            UnderDevelopment, MissingZoneData)
+            MissingZoneData)
 
 
 custom_legend_elements = Patch(facecolor='#DD0200',
-                            alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')
+                               alpha=0.5, edgecolor='#DD0200',
+                               label='Unserved Energy')
 
-custom_legend_elements_month = Patch(facecolor='#DD0200',alpha=0.7,edgecolor='#DD0200',
+custom_legend_elements_month = Patch(facecolor='#DD0200',alpha=0.7,
+                                     edgecolor='#DD0200',
                                      label='Unserved_Energy')
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The total_genertion.py module contains methods that are
+    display the total amount of generation over a given time period.
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    
+    Attributes:
+        MONTHS (dict) = dictionary of months.
+    """
 
     MONTHS = {  1 : "January",
                 2 : "February",
@@ -44,8 +59,13 @@ class MPlot(PlotDataHelper):
                 12 : "December"
             }
 
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
 
-    def __init__(self, argument_dict):
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -64,9 +84,21 @@ class MPlot(PlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         
+    def total_gen(self, start_date_range: str = None, 
+                  end_date_range: str = None, **_):
+        """Creates a stacked bar plot of total generation by technology type.
 
-    def total_gen(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone="", start_date_range=None, end_date_range=None):
+        A separate bar is created for each scenario.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
 
@@ -120,7 +152,7 @@ class MPlot(PlotDataHelper):
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
-                # Insert Curtailmnet into gen stack if it exhists in database
+                # Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                 if not Stacked_Curt.empty:
                     if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
@@ -130,7 +162,8 @@ class MPlot(PlotDataHelper):
                         if self.curtailment_prop == 'Curtailment':
                             Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns), 
+                                               column=curtailment_name, value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
@@ -232,11 +265,15 @@ class MPlot(PlotDataHelper):
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
 
             Total_Generation_Stack_Out.plot.bar(stacked=True, ax=ax,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1')
+                                                color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                       for x in Total_Generation_Stack_Out.columns], 
+                                                edgecolor='black', linewidth='0.1')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.set_ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.set_ylabel(f"Total Generation ({unitconversion['units']}h)", 
+                          color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             # Set x-tick labels 
             if len(self.custom_xticklabels) > 1:
@@ -281,21 +318,37 @@ class MPlot(PlotDataHelper):
                 handles.append(custom_legend_elements)
                 labels += ['Unserved Energy']
 
-            ax.legend(reversed(handles),reversed(labels),loc = 'lower left',bbox_to_anchor=(1.05,0),facecolor='inherit', frameon=True)
+            ax.legend(reversed(handles),reversed(labels), loc='lower left',
+                      bbox_to_anchor=(1.05,0), facecolor='inherit', frameon=True)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
         return outputs
 
-    def total_gen_diff(self, figure_name=None, prop=None, start=None, end=None,
-                       timezone="", start_date_range=None, end_date_range=None):
+    def total_gen_diff(self, start_date_range: str = None, 
+                       end_date_range: str = None, **_):
+        """Creates a stacked bar plot of total generation by technology type, relative to a base scenario.
+
+        Barplots show the change in total generation relative to a base scenario.
+        The default is to comapre against the first scenario provided in the inputs list.
+        Each sceanrio is plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Generation",self.Scenarios),
-                      (False,f"generator_{self.curtailment_prop}",self.Scenarios)]
+        properties = [(True, "generator_Generation", self.Scenarios),
+                      (False, f"generator_{self.curtailment_prop}", self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -328,7 +381,7 @@ class MPlot(PlotDataHelper):
                 # Calculates interval step to correct for MWh of generation
                 interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
 
-                # Insert Curtailmnet into gen stack if it exhists in database
+                # Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                 if not Stacked_Curt.empty:
                     curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
@@ -339,7 +392,8 @@ class MPlot(PlotDataHelper):
                         if self.curtailment_prop == 'Curtailment':
                             Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns), 
+                                               column=curtailment_name, value=Stacked_Curt) #Insert curtailment into
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
@@ -361,7 +415,8 @@ class MPlot(PlotDataHelper):
 
             #Ensures region has generation, else skips
             try:
-                Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) #Change to a diff on first scenario
+                #Change to a diff on first scenario
+                Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) 
             except KeyError:
                 out = MissingZoneData()
                 outputs[zone_input] = out
@@ -391,10 +446,13 @@ class MPlot(PlotDataHelper):
             
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
             Total_Generation_Stack_Out.plot.bar(stacked=True,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
+                                                color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                        for x in Total_Generation_Stack_Out.columns],
+                                                edgecolor='black', linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             # Set x-tick labels 
             tick_labels = Total_Generation_Stack_Out.index
@@ -409,9 +467,11 @@ class MPlot(PlotDataHelper):
                 y_net = [net_diff.loc[scenario]] * 2
                 net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
 
-            ax.set_ylabel(f"Generation Change ({format(unitconversion['units'])}h) \n relative to {self.Scenarios[0].replace('_',' ')}",  color='black', rotation='vertical')
+            ax.set_ylabel((f"Generation Change ({format(unitconversion['units'])}h) \n "
+                          f"relative to {self.Scenarios[0].replace('_',' ')}"), 
+                          color='black', rotation='vertical')
             
-            plt.axhline(linewidth=0.5,linestyle='--',color='grey')
+            plt.axhline(linewidth=0.5, linestyle='--', color='grey')
 
             handles, labels = ax.get_legend_handles_labels()
 
@@ -419,45 +479,78 @@ class MPlot(PlotDataHelper):
             labels += ['Net Gen Change']
 
             #Main legend
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+            ax.legend(reversed(handles), reversed(labels), loc='lower left', 
+                      bbox_to_anchor=(1,0), facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-        
     def total_gen_monthly(self, **kwargs):
-        """ Total generation by Month"""
+        """Creates stacked bar plot of total generation by technology by month.
+
+        A separate bar is created for each scenario.
+
+        This methods calls _monthly_gen() to create the figure.
+
+        Returns:
+            [type]: [description]
+        """
 
         outputs = self._monthly_gen(**kwargs)
         return outputs
 
     def monthly_vre_generation_percentage(self, **kwargs):
-        """Monthly Total Variable Renewable Generation by technology percentage,
-           Each vre technology is plotted as a bar, the total of all bars add to 100%
-           Each sceanrio is plotted on a seperate facet plot 
-           Technologies that belong to VRE can be set in the vre_gen_cat.csv file 
-           in the Mapping folder
+        """Creates clustered barplot of total monthly percentage variable renewable generation by technology.
+
+           Each vre technology + curtailment if present is plotted as a separate clustered bar, 
+           the total of all bars add to 100%.
+           Each scenario is plotted on a separate facet plot.
+           Technologies that belong to VRE can be set in the ordered_gen_catagories.csv file 
+           in the Mapping folder.
+
+           This methods calls _monthly_gen() and passes the vre_only=True and 
+           plot_as_percnt=True arguments to create the figure.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
+        
         outputs = self._monthly_gen(vre_only=True, plot_as_percnt=True, **kwargs)
         return outputs
     
     def monthly_vre_generation(self, **kwargs):
-        """Monthly Total Variable Renewable Generation
-            Each vre technology is plotted as a bar
-            Each sceanrio is plotted on a seperate facet plot 
-           Technologies that belong to VRE can be set in the vre_gen_cat.csv file 
-           in the Mapping folder
+        """Creates clustered barplot of total monthly variable renewable generation by technology.
+
+           Each vre technology + curtailment if present is plotted as a separate clustered bar
+           Each scenario is plotted on a separate facet plot.
+           Technologies that belong to VRE can be set in the ordered_gen_catagories.csv file 
+           in the Mapping folder.
+
+           This methods calls _monthly_gen() and passes the vre_only=True arguments to 
+           create the figure.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
+        
         outputs = self._monthly_gen(vre_only=True, **kwargs)
         return outputs
 
-    def _monthly_gen(self, vre_only=False, plot_as_percnt=False, figure_name=None, prop=None, start=None, end=None,
-                  timezone=None, start_date_range=None, end_date_range=None):
-        """ Creates monthly generation plot, internal method called from 
+    def _monthly_gen(self, vre_only: bool = False, 
+                     plot_as_percnt: bool = False, **_):
+        """Creates monthly generation plot, internal method called from 
             monthly_vre_percentage_generation or monthly_vre_generation
+
+        Args:
+            vre_only (bool, optional): If True only plots vre technologies.
+                Defaults to False.
+            plot_as_percnt (bool, optional): If True only plots data as a percentage.
+                Defaults to False.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
-        
         # Create Dictionary to hold Datframes for each scenario
         outputs = {}
         
@@ -534,7 +627,7 @@ class MPlot(PlotDataHelper):
                 # Calculates interval step to correct for MWh of generation if data is subhourly
                 interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
     
-                #Insert Curtailment into gen stack if it exhists in database
+                #Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                 if not Stacked_Curt.empty:
                     curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
@@ -545,7 +638,8 @@ class MPlot(PlotDataHelper):
                         if self.curtailment_prop == 'Curtailment':
                             Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns), column=curtailment_name, value=Stacked_Curt) 
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns), 
+                                               column=curtailment_name, value=Stacked_Curt) 
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 # Get Total Load 
@@ -654,8 +748,9 @@ class MPlot(PlotDataHelper):
                     stack = True
 
                 month_gen.plot.bar(stacked=stack, ax=axs[i],
-                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in month_gen.columns], 
-                                  edgecolor='black', linewidth='0.1', legend=False)
+                                   color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                          for x in month_gen.columns], 
+                                   edgecolor='black', linewidth='0.1', legend=False)
                 axs[i].spines['right'].set_visible(False)
                 axs[i].spines['top'].set_visible(False)
                 axs[i].margins(x=0.01)
@@ -664,7 +759,8 @@ class MPlot(PlotDataHelper):
                 if plot_as_percnt:
                     axs[i].yaxis.set_major_formatter(mtick.PercentFormatter(1, decimals=0))  
                 else:
-                    axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                    axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                                     lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 
                 # Set x-tick labels 
                 tick_labels = month_gen.index
@@ -715,14 +811,16 @@ class MPlot(PlotDataHelper):
             self.add_facet_labels(fig)
             
             fig.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             
             #Y-label should change if there are facet labels, leave at 40 for now, works for all values in spacing
             labelpad = 40
             if plot_as_percnt:
                 plt.ylabel(f"% of Generation",  color='black', rotation='vertical', labelpad=labelpad)
             else:
-                plt.ylabel(f"Total Genertaion ({unitconversion['units']}h)",  color='black', rotation='vertical', labelpad=labelpad)
+                plt.ylabel(f"Total Generation ({unitconversion['units']}h)", color='black', 
+                           rotation='vertical', labelpad=labelpad)
 
             if mconfig.parser('plot_title_as_region'):
                 plt.title(zone_input)
@@ -734,14 +832,23 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
         return outputs
-    
 
-    def total_gen_pie(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone=None, start_date_range=None, end_date_range=None):
-        """Total Generation Pie Chart """
-        
+    def total_gen_pie(self, start_date_range: str = None, 
+                      end_date_range: str = None, **_):
+        """Creates a pie chart of total generation and curtailment.
+
+        Each sceanrio is plotted as a separate pie chart.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         # Create Dictionary to hold Datframes for each scenario
-        
         outputs = {}
                     
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -789,7 +896,7 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
                 
     
-                #Insert Curtailmnet into gen stack if it exhists in database
+                #Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                 if not Stacked_Curt.empty:
                     curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
@@ -800,7 +907,9 @@ class MPlot(PlotDataHelper):
                         if self.curtailment_prop == 'Curtailment':
                             Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                        #Insert curtailment into
+                        Total_Gen_Stack.insert(len(Total_Gen_Stack.columns), 
+                                               column=curtailment_name, value=Stacked_Curt) 
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
                 
                 Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
@@ -825,7 +934,8 @@ class MPlot(PlotDataHelper):
                
                 axs[i].pie(scenario_data, labels=scenario_data.index, 
                                        shadow=True, startangle=90, labeldistance=None,
-                                       colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in scenario_data.index])
+                                       colors=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                               for x in scenario_data.index])
                 
                 # create list of gen technologies
                 l1 = scenario_data.index.tolist()
@@ -844,16 +954,17 @@ class MPlot(PlotDataHelper):
                             alpha=1.0)
                 handles.append(gen_legend_patches)
 
-            axs[grid_size-1].legend(reversed(handles),reversed(labels),
-                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+            axs[grid_size-1].legend(reversed(handles) ,reversed(labels),
+                                    loc = 'lower left', bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
 
             # add facet labels
             self.add_facet_labels(fig)
             
             fig.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(f"Total Genertaion (%)",  color='black', rotation='vertical')
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
+            plt.ylabel(f"Total Generation (%)",  color='black', rotation='vertical')
             if mconfig.parser('plot_title_as_region'):
                 plt.title(zone_input)
 
@@ -864,151 +975,3 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig, 'data_table': Total_Gen_Out}
 
         return outputs
-
-
-    #===============================================================================
-    ## Total Gen Facet Plots removed for now, code not stable and needs testing
-    #===============================================================================
-
-    def total_gen_facet(self, figure_name=None, prop=None, start=None, end=None,
-                        timezone="", start_date_range=None, end_date_range=None):
-        outputs = UnderDevelopment()
-        self.logger.warning('total_gen_facet is under development')
-        return outputs
-
-    #     self['generator_Generation'] = {}
-    #     self.mplot_data_dictf"{self.AGG_BY}_Load"] = {}
-    #     self[f"generator_{self.curtailment_prop}"] = {}
-
-    #     for scenario in self.Scenarios:
-    #         try:
-    #             self['generator_Generation'][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "generator_Generation")
-    #             self[f"generator_{self.curtailment_prop}"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  f"generator_{self.curtailment_prop}")
-    #             # If data is to be agreagted by zone, then zone properties are loaded, else region properties are loaded
-    #             if self.AGG_BY == "zone":
-    #                 self.mplot_data_dictf"{self.AGG_BY}_Load"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"), "zone_Load")
-    #             else:
-    #                 self.mplot_data_dictf"{self.AGG_BY}_Load"][scenario] = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario+ "_formatted.h5"),  "region_Load")
-
-    #         except Exception:
-    #             pass
-
-
-    #     Total_Generation_Stack_Out = pd.DataFrame()
-    #     Total_Load_Out = pd.DataFrame()
-    #     self.logger.info("Zone = " + self.zone_input)
-
-
-    #     for scenario in self.Scenarios:
-    #         self.logger.info("Scenario = " + scenario)
-    #         try:
-    #             Total_Gen_Stack = self['generator_Generation'].get(scenario)
-    #             Total_Gen_Stack = Total_Gen_Stack.xs(self.zone_input,level=self.AGG_BY)
-    #             Total_Gen_Stack = df_process_gen_inputs(Total_Gen_Stack, self)
-    #             Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
-    #             Stacked_Curt = Stacked_Curt.xs(self.zone_input,level=self.AGG_BY)
-    #             Stacked_Curt = df_process_gen_inputs(Stacked_Curt, self)
-                #   If using Marmot's curtailment property
-                #     if self.curtailment_prop == 'Curtailment':
-                #         Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
-    #             Stacked_Curt = Stacked_Curt.sum(axis=1)
-    #             Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='Curtailment',value=Stacked_Curt) #Insert curtailment into
-    #             Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
-
-    #             Total_Gen_Stack = Total_Gen_Stack.sum(axis=0)
-    #             Total_Gen_Stack.rename(scenario, inplace=True)
-
-    #             Total_Generation_Stack_Out = pd.concat([Total_Generation_Stack_Out, Total_Gen_Stack], axis=1, sort=False).fillna(0)
-
-    #             Total_Load = self.mplot_data_dictf"{self.AGG_BY}_Load"].get(scenario)
-    #             Total_Load = Total_Load.xs(self.zone_input,level=self.AGG_BY)
-    #             Total_Load = Total_Load.groupby(["timestamp"]).sum()
-    #             Total_Load = Total_Load.rename(columns={0:scenario}).sum(axis=0)
-    #             Total_Load_Out = pd.concat([Total_Load_Out, Total_Load], axis=0, sort=False)
-    #         except Exception:
-    #             self.logger.warning("Error: Skipping " + scenario)
-    #             pass
-
-    #     Total_Load_Out = Total_Load_Out.rename(columns={0:'Total Load'})
-
-    #     Total_Generation_Stack_Out = create_categorical_tech_index(Total_Generation_Stack_Out, self)
-    #     Total_Generation_Stack_Out = Total_Generation_Stack_Out.T/1000
-    #     Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
-
-    #     # Data table of values to return to main program
-    #     Data_Table_Out = pd.concat([Total_Load_Out/1000, Total_Generation_Stack_Out],  axis=1, sort=False)
-
-    #     Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
-    
-    #     Total_Load_Out.index = Total_Load_Out.index.str.replace('_',' ')
-    #     Total_Load_Out.index = Total_Load_Out.index.str.wrap(10, break_long_words=False)
-    #     
-    #     Total_Load_Out = Total_Load_Out.T/1000
-
-    #     xdimension=len(self.xlabels)
-    #     ydimension=len(self.ylabels)
-    #     grid_size = xdimension*ydimension
-
-    #     fig2, axs = plt.subplots(ydimension,xdimension, figsize=((2*xdimension), (4*ydimension)), sharey=True)
-    #     axs = axs.ravel()
-    #     plt.subplots_adjust(wspace=0, hspace=0.01)
-
-    #     i=0
-    #     for index in Total_Generation_Stack_Out.index:
-
-    #         sb = Total_Generation_Stack_Out.iloc[i:i+1].plot.bar(stacked=True, rot=angle,
-    #         color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',
-    #                                      ax=axs[i])
-
-    #         axs[i].get_legend().remove()
-    #         axs[i].spines['right'].set_visible(False)
-    #         axs[i].spines['top'].set_visible(False)
-    #         axs[i].xaxis.set_ticklabels([])
-    #         if angle > 0:
-    #             ax.set_xticklabels(Total_Generation_Stack_Out.iloc[i:i+1].index, ha="right")
-    #             tick_length = 8
-    #         else:
-    #             tick_length = 5
-    #         ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-    #         ax.tick_params(axis='x', which='major', length=tick_length, width=1)
-    #         axs[i].yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-    #         axs[i].margins(x=0.01)
-
-    #         height = [int(Total_Load_Out[index])]
-    #         axs[i].axhline(y=height,xmin=0.25,xmax=0.75, linestyle ='--', c="black",linewidth=1.5)
-
-    #         handles, labels = axs[1].get_legend_handles_labels()
-
-    #         leg1 = axs[grid_size-1].legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-    #                   facecolor='inherit', frameon=True)
-
-    #         #Legend 2
-    #         leg2 = axs[grid_size-1].legend(['Load'], loc='upper left',bbox_to_anchor=(1, 0.95),
-    #                       facecolor='inherit', frameon=True)
-
-    #         fig2.add_artist(leg1)
-
-    #         i=i+1
-
-    #     all_axes = fig2.get_axes()
-
-    #     self.xlabels = pd.Series(self.xlabels).str.replace('_',' ').str.wrap(10, break_long_words=False)
-
-    #     j=0
-    #     k=0
-    #     for ax in all_axes:
-    #         if ax.is_last_row():
-    #             ax.set_xlabel(xlabel=(self.xlabels[j]),  color='black')
-    #             j=j+1
-    #         if ax.is_first_col():
-    #             ax.set_ylabel(ylabel=(self.ylabels[k]),  color='black', rotation='vertical')
-    #             k=k+1
-
-    #     fig2.add_subplot(111, frameon=False)
-    #     plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-    #     plt.ylabel('Total Genertaion (GWh)',  color='black', rotation='vertical', labelpad=60)
-
-    #     return {'fig': fig2, 'data_table': Data_Table_Out}
-    
-
-     

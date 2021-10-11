@@ -19,7 +19,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    def __init__(self, argument_dict):
+    """Marmot MPlot Class, common across all plotting modules.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The unserved_energy.py module contains methods that are
+    related to unserved energy in the power system. 
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -34,9 +52,24 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
 
-    def unserved_energy_timeseries(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def unserved_energy_timeseries(self, timezone: str = "",
+                                   start_date_range: str = None, 
+                                   end_date_range: str = None, **_):
+        """Creates a timeseries line plot of total unserved energy.
 
+        Each sceanrio is plotted as a separate line.
+
+        Args:
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -73,10 +106,12 @@ class MPlot(PlotDataHelper):
 
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
                 unserved_eng_timeseries.rename(scenario, inplace=True)
-                Unserved_Energy_Timeseries_Out = pd.concat([Unserved_Energy_Timeseries_Out, unserved_eng_timeseries], axis=1, sort=False).fillna(0)
+                Unserved_Energy_Timeseries_Out = pd.concat([Unserved_Energy_Timeseries_Out, unserved_eng_timeseries], 
+                                                           axis=1, sort=False).fillna(0)
 
             Unserved_Energy_Timeseries_Out.columns = Unserved_Energy_Timeseries_Out.columns.str.replace('_',' ')
-            Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out.loc[:, (Unserved_Energy_Timeseries_Out >= 1).any(axis=0)]
+            Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out.loc[:, (Unserved_Energy_Timeseries_Out >= 1)
+                                                                                    .any(axis=0)]
 
             # correct sum for non-hourly runs
             interval_count = PlotDataHelper.get_sub_hour_interval_count(Unserved_Energy_Timeseries_Out)
@@ -102,17 +137,19 @@ class MPlot(PlotDataHelper):
             iter_colour = iter(self.color_list)
 
             for column in Unserved_Energy_Timeseries_Out:
-                ax.plot(Unserved_Energy_Timeseries_Out[column], linewidth=3, antialiased=True,
-                         color=next(iter_colour), label=column)
+                ax.plot(Unserved_Energy_Timeseries_Out[column], linewidth=3, 
+                        antialiased=True, color=next(iter_colour), label=column)
                 ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
-            ax.set_ylabel(f"Unserved Energy ({unitconversion['units']})",  color='black', rotation='vertical')
+            ax.set_ylabel(f"Unserved Energy ({unitconversion['units']})", 
+                          color='black', rotation='vertical')
             ax.set_ylim(bottom=0)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             PlotDataHelper.set_plot_timeseries_format(axs)
             if mconfig.parser("plot_title_as_region"):
@@ -121,9 +158,21 @@ class MPlot(PlotDataHelper):
 
         return outputs
 
+    def tot_unserved_energy(self, start_date_range: str = None, 
+                            end_date_range: str = None, **_):
+        """Creates a bar plot of total unserved energy.
 
-    def tot_unserved_energy(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+        Each sceanrio is plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -162,7 +211,8 @@ class MPlot(PlotDataHelper):
                 unserved_eng_timeseries = unserved_eng_timeseries.squeeze() #Convert to Series
                 unserved_eng_timeseries.rename(scenario, inplace=True)
                                 
-                Unserved_Energy_Timeseries_Out = pd.concat([Unserved_Energy_Timeseries_Out, unserved_eng_timeseries], axis=1, sort=False).fillna(0)
+                Unserved_Energy_Timeseries_Out = pd.concat([Unserved_Energy_Timeseries_Out, unserved_eng_timeseries],
+                                                           axis=1, sort=False).fillna(0)
 
             Unserved_Energy_Timeseries_Out.columns = Unserved_Energy_Timeseries_Out.columns.str.replace('_',' ')
 
@@ -193,8 +243,10 @@ class MPlot(PlotDataHelper):
             ax=axs[0]
             
             plotlib.create_bar_plot(Total_Unserved_Energy_Out.T, ax, color_dict)
-            ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)",  color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)", 
+                          color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.xaxis.set_visible(False)
             ax.margins(x=0.01)
             
@@ -222,14 +274,25 @@ class MPlot(PlotDataHelper):
                     verticalalignment='center', fontsize=13)
 
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
-
         return outputs
 
+    def average_diurnal_ue(self, start_date_range: str = None, 
+                           end_date_range: str = None, **_):
+        """Creates a line plot of average diurnal unserved energy.
 
-    def average_diurnal_ue(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
-        """average diurnal unserved energy line plot"""
-        
+        Each scenario is plotted as a separate line and shows the average 
+        hourly unserved energy over a 24 hour period averaged across the entire year
+        or time period defined.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -305,13 +368,15 @@ class MPlot(PlotDataHelper):
                         label=column)
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                     facecolor='inherit', frameon=True)
-            ax.set_ylabel(f"Average Diurnal Unserved Energy ({unitconversion['units']})",  color='black', rotation='vertical')
+            ax.set_ylabel(f"Average Diurnal Unserved Energy ({unitconversion['units']})", 
+                          color='black', rotation='vertical')
             
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             
             # Set time ticks

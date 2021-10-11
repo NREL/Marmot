@@ -25,8 +25,25 @@ custom_legend_elements = Patch(facecolor='#DD0200',
                                alpha=0.5, edgecolor='#DD0200')
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The total_installed_capacity module contains methods that are
+    related to the total installed capacity of generators and other devices. 
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.    
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -45,11 +62,15 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
 
-    def total_cap(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone="", start_date_range=None, end_date_range=None):
+    def total_cap(self, **_):
+        """Creates a stacked barplot of total installed capacity.
 
+        Each sceanrio will be plotted as a separate bar.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
-
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
@@ -112,14 +133,16 @@ class MPlot(PlotDataHelper):
             fig1, ax = plt.subplots(figsize=(self.x, self.y))
 
             Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=ax,
-                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
+                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                         for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Installed Capacity ({unitconversion['units']})",
                           color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
@@ -139,10 +162,17 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-    def total_cap_diff(self, figure_name=None, prop=None, start=None, end=None,
-                       timezone="", start_date_range=None, end_date_range=None):
-        outputs = {}
+    def total_cap_diff(self, **_):
+        """Creates a stacked barplot of total installed capacity relative to a base scenario.
 
+        Barplots show the change in total installed capacity relative to a base scenario.
+        The default is to comapre against the first scenario provided in the inputs list.
+        Each sceanrio is plotted as a separate bar.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
+        outputs = {}
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
@@ -168,7 +198,10 @@ class MPlot(PlotDataHelper):
                 zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 if scenario == 'ADS':
                     zone_input_adj = zone_input.split('_WI')[0]
-                    Total_Installed_Capacity.index = pd.MultiIndex.from_frame(Total_Installed_Capacity.index.to_frame().fillna('All'))  # Fix NaN values from formatter
+                    Total_Installed_Capacity.index = pd.MultiIndex.from_frame(Total_Installed_Capacity
+                                                                              .index
+                                                                              .to_frame()
+                                                                              .fillna('All'))  # Fix NaN values from formatter
                     zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
                 else:
                     zone_input_adj = zone_input
@@ -190,10 +223,12 @@ class MPlot(PlotDataHelper):
                 Total_Installed_Capacity = self.df_process_gen_inputs(Total_Installed_Capacity)
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0: scenario}, inplace=True)
-                Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
+                Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity],
+                                                         axis=0, sort=False).fillna(0)
 
             try:
-                Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Scenarios[0])  # Change to a diff on first scenario
+                # Change to a diff on first scenario
+                Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Scenarios[0])  
             except KeyError:
                 out = MissingZoneData()
                 outputs[zone_input] = out
@@ -220,13 +255,16 @@ class MPlot(PlotDataHelper):
             fig2, ax = plt.subplots(figsize=(self.x, self.y))
 
             Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=ax,
-                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
+                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                         for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.set_ylabel(f"Capacity Change ({unitconversion['units']}) \n relative to {self.Scenarios[0]}", color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.set_ylabel((f"Capacity Change ({unitconversion['units']}) \n "
+                           f"relative to {self.Scenarios[0]}"), color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             tick_labels = Total_Installed_Capacity_Out.index
             PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
@@ -243,10 +281,17 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
+    def total_cap_and_gen_facet(self, **_):
+        """Creates a facet plot comparing total generation and installed capacity.
 
-    def total_cap_and_gen_facet(self, figure_name=None, prop=None, start=None, end=None,
-                                timezone="", start_date_range=None, end_date_range=None):
+        Creates a plot with 2 facet plots, total installed capacity on the left 
+        and total generation on the right. 
+        Each facet contains stacked bar plots, each scenario is plotted as a 
+        separate bar.
 
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         # generation figure
         self.logger.info("Generation data")
         # gen_obj = gen.mplot(self.argument_dict)
@@ -278,17 +323,21 @@ class MPlot(PlotDataHelper):
             capacity_units = [unit for unit in capacity_units if unit is not None][0].group()
 
             # Remove any suffixes from column names
-            Total_Installed_Capacity_Out.columns = [re.sub('[\s (]|GW|TW|MW|kW|\)', '', i) for i in Total_Installed_Capacity_Out.columns]
+            Total_Installed_Capacity_Out.columns = [re.sub('[\s (]|GW|TW|MW|kW|\)', '', i) 
+                                                    for i in Total_Installed_Capacity_Out.columns]
 
 
             Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=axs[0],
-                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
+                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                         for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 
             axs[0].spines['right'].set_visible(False)
             axs[0].spines['top'].set_visible(False)
-            axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})",  color='black', rotation='vertical')
-            axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})", 
+                              color='black', rotation='vertical')
+            axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
@@ -315,28 +364,38 @@ class MPlot(PlotDataHelper):
                 '''
                 return [column for column in list(df.columns) if substring in column][0]
 
-            Total_Load_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, "Total Load (Demand + \n Storage Charging)")]
-            Total_Demand_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, "Total Demand")]
-            Unserved_Energy_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, "Unserved Energy")]
-            Total_Generation_Stack_Out = Total_Gen_Results.drop([check_column_substring(Total_Gen_Results, "Total Load (Demand + \n Storage Charging)"),
-                                                                 check_column_substring(Total_Gen_Results, "Total Demand"),
-                                                                 check_column_substring(Total_Gen_Results, "Unserved Energy")], axis=1)
+            Total_Load_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
+                                                                             "Total Load (Demand + \n Storage Charging)")]
+            Total_Demand_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
+                                                                               "Total Demand")]
+            Unserved_Energy_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
+                                                                                  "Unserved Energy")]
+            Total_Generation_Stack_Out = Total_Gen_Results.drop([check_column_substring(Total_Gen_Results,
+                                                                                        "Total Load (Demand + \n Storage Charging)"),
+                                                                 check_column_substring(Total_Gen_Results, 
+                                                                                        "Total Demand"),
+                                                                 check_column_substring(Total_Gen_Results, 
+                                                                                        "Unserved Energy")], axis=1)
 
             Pump_Load_Out = Total_Load_Out - Total_Demand_Out
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_', ' ')
 
             # Remove any suffixes from column names
-            Total_Generation_Stack_Out.columns = [re.sub('[\s (]|GWh|TWh|MWh|kWh|\)', '', i) for i in Total_Generation_Stack_Out.columns]
+            Total_Generation_Stack_Out.columns = [re.sub('[\s (]|GWh|TWh|MWh|kWh|\)', '', i) 
+                                                  for i in Total_Generation_Stack_Out.columns]
 
             Total_Generation_Stack_Out.plot.bar(stacked=True, ax=axs[1],
-                                                color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns],
+                                                color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                       for x in Total_Generation_Stack_Out.columns],
                                                 edgecolor='black', linewidth='0.1')
 
             axs[1].spines['right'].set_visible(False)
             axs[1].spines['top'].set_visible(False)
-            axs[1].set_ylabel(f"Total Generation ({energy_units})",  color='black', rotation='vertical')
-            axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            axs[1].set_ylabel(f"Total Generation ({energy_units})", 
+                              color='black', rotation='vertical')
+            axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
@@ -350,7 +409,8 @@ class MPlot(PlotDataHelper):
             data_tables = []
             for n, scenario in enumerate(self.Scenarios):
 
-                x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + axs[1].patches[n].get_width()]
+                x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + 
+                     axs[1].patches[n].get_width()]
                 height1 = [float(Total_Load_Out[scenario])]*2
                 lp1 = plt.plot(x, height1, c='black', linewidth=1.5)
                 height2 = [float(Total_Demand_Out[scenario])]*2
@@ -396,11 +456,12 @@ class MPlot(PlotDataHelper):
                           facecolor='inherit', frameon=True)
 
             # add labels to panels
-            axs[0].set_title("A.", fontdict={"weight": "bold", "size": 11}, loc='left',pad=4)
-            axs[1].set_title("B.", fontdict={"weight": "bold", "size": 11}, loc='left',pad=4)
+            axs[0].set_title("A.", fontdict={"weight": "bold", "size": 11}, loc='left', pad=4)
+            axs[1].set_title("B.", fontdict={"weight": "bold", "size": 11}, loc='left', pad=4)
             
             fig.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if mconfig.parser('plot_title_as_region'):
                 plt.title(zone_input)
 

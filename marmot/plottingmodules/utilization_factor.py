@@ -2,9 +2,12 @@
 """
 Created on Mon Dec  9 13:20:56 2019
 
+Note! Module is currently not production ready and 
+methods are not available to use.
+
 This code creates plots of generator utilization factor 
-(similiar to capacity factor but based on Available Capacity instead of Installed Capacity) 
-and is called from Marmot_plot_main.py
+(similar to capacity factor but based on Available Capacity instead of Installed Capacity) 
+and is called from Marmot_plot_main.py  
 @author: adyreson
 """
 
@@ -19,7 +22,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, MissingZoneData)
 
 
-def df_process_gen_ind_inputs(df,self):
+def df_process_gen_ind_inputs(df, self):
     df = df.reset_index(['timestamp','tech','gen_name'])
     df['tech'].replace(self.gen_names_dict, inplace=True)
     df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show.
@@ -32,8 +35,25 @@ def df_process_gen_ind_inputs(df,self):
     return df
 
 class MPlot(PlotDataHelper):
+    """Marmot MPlot class, common across all plotting modules.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The utilization.py module contains methods that are
+    related to the utilization of generators and other devices. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -47,11 +67,12 @@ class MPlot(PlotDataHelper):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
 
+    def uf_fleet(self, **_):
+        """Plot under development
 
-    def uf_fleet(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
         return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
@@ -153,10 +174,12 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
 
-    def uf_gen(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        
+    def uf_gen(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
         return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
@@ -254,10 +277,12 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig2, 'data_table': CF_all_scenarios}
         return outputs
 
-    def uf_fleet_by_type(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        
+    def uf_fleet_by_type(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
         return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
@@ -354,10 +379,12 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
 
-    def GW_fleet(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        
+    def GW_fleet(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
         return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
