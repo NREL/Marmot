@@ -3,7 +3,8 @@
 Created on Tue Jan 21 15:59:45 2020
 Updated on Monday 21 Sep 2020
 
-This module creates plots of reserve provision and shortage at the generation and region level
+This module creates plots of reserve provision and shortage at the generation 
+and region level.
 @author: Daniel Levie
 """
 
@@ -23,7 +24,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    def __init__(self, argument_dict):
+    """Marmot MPlot class, common across all plotting modules.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The reserves.py module contains methods that are
+    related to reserve provision and shortage. 
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -35,20 +54,50 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
+    def reserve_gen_timeseries(self, figure_name: str = None, prop: str = None,
+                               start: int = None, end: int = None,
+                               timezone: str = "", start_date_range: str = None,
+                               end_date_range: str = None, **_):
+        """Creates a generation timeseries stackplot of total cumulative reserve provision by tech type.
+        
+        The code will create either a facet plot or a single plot depending on 
+        if the Facet argument is active.
+        If a facet plot is created, each scenario is plotted on a separate facet, 
+        otherwise all scenarios are plotted on a single plot.
+        To make a facet plot, ensure the work 'Facet' is found in the figure_name.
+        Generation order is determined by the ordered_gen_categories.csv.
 
-    def reserve_gen_timeseries(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
+        Args:
+            figure_name (str, optional): User defined figure output name. Used here 
+                to determine if a Facet plot should be created.
+                Defaults to None.
+            prop (str, optional): Special argument used to adjust specific 
+                plot settings. Controlled through the plot_select.csv.
+                Opinions available are:
+                    - Peak Demand
+                    - Date Range
+                Defaults to None.
+            start (int, optional): Used in conjunction with the prop argument.
+                Will define the number of days to plot before a certain event in 
+                a timeseries plot, e.g Peak Demand.
+                Defaults to None.
+            end (int, optional): Used in conjunction with the prop argument.
+                Will define the number of days to plot after a certain event in 
+                a timeseries plot, e.g Peak Demand.
+                Defaults to None.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
-        This method creates a generation stackplot of reserve provision for each region.
-        A Facet Plot is created if multiple scenarios are compared.
-        Generation is ordered by tech type that provides reserves
-        Figures and data tables are returned to plot_main
-        """
-        # If not facet plot, only plot first sceanrio
+        # If not facet plot, only plot first scenario
         facet=False
         if 'Facet' in figure_name:
             facet = True
@@ -182,15 +231,21 @@ class MPlot(PlotDataHelper):
             outputs[region] = {'fig': fig1, 'data_table': data_table_out}
         return outputs
 
-    def total_reserves_by_gen(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        """
-        This method creates a generation barplot of total reserve provision by generator for each region.
-        Multiple scenarios are assigned to the x-axis
-        Figures and data tables are returned to plot_main
-        """
+    def total_reserves_by_gen(self, start_date_range: str = None, 
+                              end_date_range: str = None, **_):
+        """Creates a generation stacked barplot of total reserve provision by generator tech type.
 
+        A separate bar is created for each scenario.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -289,36 +344,68 @@ class MPlot(PlotDataHelper):
         return outputs
 
     def reg_reserve_shortage(self, **kwargs):
-        """
-        This method creates a bar plot of reserve shortage for each region in MWh.
-        Bars are grouped by reserve type
-        Figures and data tables are returned to plot_main
+        """Creates a bar plot of reserve shortage for each region in MWh.
+        
+        Bars are grouped by reserve type, each scenario is plotted as a differnet color.
+
+        The 'Shortage' argument is passed to the _reserve_bar_plots() method to 
+        create this plot.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         outputs = self._reserve_bar_plots("Shortage", **kwargs)
         return outputs
 
     def reg_reserve_provision(self, **kwargs):
-        """
-        This method creates a bar plot of reserve provision for each region in MWh.
-        Bars are grouped by reserve type
-        Figures and data tables are returned to plot_main
+        """Creates a bar plot of reserve provision for each region in MWh.
+        
+        Bars are grouped by reserve type, each scenario is plotted as a differnet color.
+
+        The 'Provision' argument is passed to the _reserve_bar_plots() method to 
+        create this plot.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         outputs = self._reserve_bar_plots("Provision", **kwargs)
         return outputs
 
     def reg_reserve_shortage_hrs(self, **kwargs):
+        """creates a bar plot of reserve shortage for each region in hrs.
+        
+        Bars are grouped by reserve type, each scenario is plotted as a differnet color.
+        
+        The 'Shortage' argument and count_hours=True is passed to the _reserve_bar_plots() method to 
+        create this plot.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
-        This method creates a bar plot of reserve shortage for each region in hrs.
-        Bars are grouped by reserve type
-        Figures and data tables are returned to plot_main
-        """
-        outputs = self._reserve_bar_plots("Shortage",count_hours=True)
+        outputs = self._reserve_bar_plots("Shortage", count_hours=True)
         return outputs
 
-    def _reserve_bar_plots(self, data_set, count_hours=False, figure_name=None, 
-                           prop=None, start=None, end=None, timezone="", 
-                           start_date_range=None, end_date_range=None):
-        
+    def _reserve_bar_plots(self, data_set: str, count_hours: bool = False, 
+                           start_date_range: str = None, 
+                           end_date_range: str = None, **_):
+        """internal _reserve_bar_plots method, creates 'Shortage', 'Provision' and 'Shortage' bar 
+        plots
+
+        Bars are grouped by reserve type, each scenario is plotted as a differnet color.
+
+        Args:
+            data_set (str): Identifies the reserve data set to use and pull
+                from the formatted h5 file.
+            count_hours (bool, optional): if True creates a 'Shortage' hours plot.
+                Defaults to False.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -349,16 +436,13 @@ class MPlot(PlotDataHelper):
                 except KeyError:
                     self.logger.info(f"No reserves deployed in {scenario}")
                     continue
-                timestamps = reserve_timeseries.index.get_level_values('timestamp').unique()
-                # Calculates interval step to correct for MWh of generation
-                time_delta = timestamps[1]- timestamps[0]
-                # Finds intervals in 60 minute period
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(reserve_timeseries)
 
                 reserve_timeseries = reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False)
                 # Drop duplicates to remove double counting
                 reserve_timeseries.drop_duplicates(inplace=True)
-                # Set Type equal to parent value if Type eqauls '-'
+                # Set Type equal to parent value if Type equals '-'
                 reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', reserve_timeseries['parent'])
                 reserve_timeseries.set_index(["timestamp","Type","parent"],append=True,inplace=True)
 
@@ -409,21 +493,38 @@ class MPlot(PlotDataHelper):
             outputs[region] = {'fig': fig2,'data_table': Data_Table_Out}
         return outputs
 
+    def reg_reserve_shortage_timeseries(self, figure_name: str = None,
+                                        timezone: str = "", start_date_range: str = None, 
+                                        end_date_range: str = None, **_):
+        """Creates a timeseries line plot of reserve shortage.
 
-    def reg_reserve_shortage_timeseries(self,figure_name=None, 
-                           prop=None, start=None, end=None, timezone="", 
-                           start_date_range=None, end_date_range=None):
-        """
-        This method creates a timeseries line plot of reserve shortage for each region.
-        A Facet Plot is created if multiple scenarios are compared.
         A line is plotted for each reserve type shortage.
-        Figures and data tables are returned to plot_main
+
+        The code will create either a facet plot or a single plot depending on 
+        if the Facet argument is active.
+        If a facet plot is created, each scenario is plotted on a separate facet, 
+        otherwise all scenarios are plotted on a single plot.
+        To make a facet plot, ensure the work 'Facet' is found in the figure_name.
+
+        Args:
+            figure_name (str, optional): User defined figure output name. Used here 
+                to determine if a Facet plot should be created.
+                Defaults to None.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data from.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         facet=False
         if 'Facet' in figure_name:
             facet = True
         
-        # If not facet plot, only plot first sceanrio
+        # If not facet plot, only plot first scenario
         if not facet:
             Scenarios = [self.Scenarios[0]]
         else:
@@ -471,8 +572,9 @@ class MPlot(PlotDataHelper):
                 
                 reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False,inplace=True)
                 reserve_timeseries = reserve_timeseries.drop_duplicates()
-                # Set Type equal to parent value if Type eqauls '-'
-                reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', reserve_timeseries['parent'])
+                # Set Type equal to parent value if Type equals '-'
+                reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', 
+                                                                             reserve_timeseries['parent'])
                 reserve_timeseries = reserve_timeseries.pivot(index='timestamp', columns='Type', values=0)
 
                 if pd.notna(start_date_range):
@@ -521,7 +623,9 @@ class MPlot(PlotDataHelper):
                 legend_handles = [Line2D([0], [0], color=color_dict[Type], lw=2, label=Type)]
                 reserve_legend.extend(legend_handles)
 
-            axs[grid_size-1].legend(handles=reserve_legend,loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+            axs[grid_size-1].legend(handles=reserve_legend, loc='lower left', 
+                                    bbox_to_anchor=(1,0), facecolor='inherit', 
+                                    frameon=True)
 
             #Remove extra axes
             if excess_axs != 0:
@@ -531,9 +635,11 @@ class MPlot(PlotDataHelper):
             self.add_facet_labels(fig3)
 
             fig3.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             # plt.xlabel(timezone,  color='black', rotation='horizontal',labelpad = 30)
-            plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 40)
+            plt.ylabel('Reserve Shortage [MW]',  color='black', 
+                       rotation='vertical',labelpad = 40)
             
             if mconfig.parser("plot_title_as_region"):
                plt.title(region)

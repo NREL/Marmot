@@ -462,12 +462,13 @@ class PlotDataHelper(dict):
         Used to adjust sums of certain for variables for sub-hourly runs
 
         Args:
-            df (pd.DataFrame): pandas multiindex dataframe.
+            df (pd.DataFrame): pandas dataframe with timestamp in index.
 
         Returns:
             int: Number of intervals per 60 minutes.
         """
-        time_delta = df.index[1] - df.index[0]
+        timestamps = df.index.get_level_values('timestamp').unique()
+        time_delta = timestamps[1] - timestamps[0]
         # Finds intervals in 60 minute period
         intervals_per_hour = 60/(time_delta/np.timedelta64(1, 'm'))
         # If intervals are greater than 1 hour, returns 1
