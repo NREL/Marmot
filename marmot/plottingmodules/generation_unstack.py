@@ -56,7 +56,7 @@ class MPlot(PlotDataHelper):
 
         
     def gen_unstack(self, figure_name: str = None, prop: str = None,
-                    start: int = None, end: int = None,
+                    start: float = None, end: float= None,
                     timezone: str = "", start_date_range: str = None,
                     end_date_range: str = None, **_):
         """Creates a timeseries plot of generation by technology each plotted as a line.
@@ -75,11 +75,11 @@ class MPlot(PlotDataHelper):
                     - Min Net Load
                     - Date Range
                 Defaults to None.
-            start (int, optional): Used in conjunction with the prop argument.
+            start (float, optional): Used in conjunction with the prop argument.
                 Will define the number of days to plot before a certain event in 
                 a timeseries plot, e.g Peak Demand.
                 Defaults to None.
-            end (int, optional): Used in conjunction with the prop argument.
+            end (float, optional): Used in conjunction with the prop argument.
                 Will define the number of days to plot after a certain event in 
                 a timeseries plot, e.g Peak Demand.
                 Defaults to None.
@@ -87,7 +87,7 @@ class MPlot(PlotDataHelper):
                 Defaults to "".
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:

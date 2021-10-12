@@ -64,7 +64,7 @@ class MPlot(PlotDataHelper):
                 Defaults to "".
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -112,10 +112,6 @@ class MPlot(PlotDataHelper):
             Unserved_Energy_Timeseries_Out.columns = Unserved_Energy_Timeseries_Out.columns.str.replace('_',' ')
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out.loc[:, (Unserved_Energy_Timeseries_Out >= 1)
                                                                                     .any(axis=0)]
-
-            # correct sum for non-hourly runs
-            interval_count = PlotDataHelper.get_sub_hour_interval_count(Unserved_Energy_Timeseries_Out)
-            Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/interval_count
 
             if Unserved_Energy_Timeseries_Out.empty==True:
                 self.logger.info(f'No Unserved Energy in {zone_input}')
@@ -167,7 +163,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -203,6 +199,9 @@ class MPlot(PlotDataHelper):
                 unserved_eng_timeseries = unserved_eng_timeseries.xs(zone_input,level=self.AGG_BY)
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
                 
+                # correct sum for non-hourly runs
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(unserved_eng_timeseries)
+
                 if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
@@ -216,8 +215,7 @@ class MPlot(PlotDataHelper):
 
             Unserved_Energy_Timeseries_Out.columns = Unserved_Energy_Timeseries_Out.columns.str.replace('_',' ')
 
-            # correct sum for non-hourly runs
-            interval_count = PlotDataHelper.get_sub_hour_interval_count(Unserved_Energy_Timeseries_Out)
+            
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/interval_count
 
             Total_Unserved_Energy_Out.index = Total_Unserved_Energy_Out.index.str.replace('_',' ')
@@ -287,7 +285,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:

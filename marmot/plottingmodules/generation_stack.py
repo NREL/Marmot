@@ -79,7 +79,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -116,8 +116,8 @@ class MPlot(PlotDataHelper):
             
             gens = self.df_process_gen_inputs(gens)
             tech_list = list(gens.columns)
-            tech_list_sort = [tech_type for tech_type in 
-                                self.ordered_gen if tech_type in tech_list and tech_type in self.thermal_gen_cat]
+            tech_list_sort = [tech_type for tech_type in self.ordered_gen 
+                              if tech_type in tech_list and tech_type in self.thermal_gen_cat]
 
             if not tech_list_sort:
                 self.logger.info(f'No Thermal Generation in: {zone_input}')
@@ -127,7 +127,8 @@ class MPlot(PlotDataHelper):
             xdimension = len(self.Scenarios)
             ydimension = len(tech_list_sort)
             
-            fig, axs = plotlib.setup_plot(xdimension, ydimension, ravel_axs=False, sharex=True, sharey='row')
+            fig, axs = plotlib.setup_plot(xdimension, ydimension, ravel_axs=False, 
+                                          sharex=True, sharey='row')
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
 
             for i, scenario in enumerate(self.Scenarios):
@@ -141,7 +142,7 @@ class MPlot(PlotDataHelper):
         
                 #Calculate  committed cap (for thermal only).
                 thermal_commit_cap = units_gen * avail_cap
-                thermal_commit_cap = thermal_commit_cap.xs(zone_input,level = self.AGG_BY)
+                thermal_commit_cap = thermal_commit_cap.xs(zone_input, level=self.AGG_BY)
                 thermal_commit_cap = self.df_process_gen_inputs(thermal_commit_cap)
                 # Drop all zero columns
                 thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
@@ -178,10 +179,11 @@ class MPlot(PlotDataHelper):
                         gen_one_tech = gen[tech]
                         commit_cap = avail_cap[tech]
 
-                    gen_line = axs[j,i].plot(gen_one_tech, alpha=0, color=self.PLEXOS_color_dict[tech])[0]
+                    gen_line = axs[j,i].plot(gen_one_tech, alpha=0, 
+                                             color=self.PLEXOS_color_dict[tech])[0]
                     gen_lines.append(gen_line)
                     gen_fill = axs[j,i].fill_between(gen_one_tech.index, gen_one_tech, 0, 
-                                                color=self.PLEXOS_color_dict[tech], alpha=0.5)
+                                                     color=self.PLEXOS_color_dict[tech], alpha=0.5)
                     if tech != 'Hydro':
                         cc = axs[j,i].plot(commit_cap, color = self.PLEXOS_color_dict[tech])
 
@@ -189,7 +191,8 @@ class MPlot(PlotDataHelper):
                     axs[j,i].spines['top'].set_visible(False)
                     axs[j,i].tick_params(axis='y', which='major', length=5, width=1)
                     axs[j,i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[j,i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                    axs[j,i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                                       lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                     axs[j,i].margins(x=0.01)
                     PlotDataHelper.set_plot_timeseries_format(axs,(j,i))
 
@@ -198,7 +201,8 @@ class MPlot(PlotDataHelper):
 
             #fig.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
             fig.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})", 
@@ -209,7 +213,7 @@ class MPlot(PlotDataHelper):
 
 
     def gen_stack(self, figure_name: str = None, prop: str = None,
-                  start: int = None, end: int = None,
+                  start: float = None, end: float= None,
                   timezone: str = "", start_date_range: str = None,
                   end_date_range: str = None, **_):
         """Creates a timeseries stacked area plot of generation by technology.
@@ -233,11 +237,11 @@ class MPlot(PlotDataHelper):
                     - Peak Unserved Energy
                     - Peak Curtailment
                 Defaults to None.
-            start (int, optional): Used in conjunction with the prop argument.
+            start (float, optional): Used in conjunction with the prop argument.
                 Will define the number of days to plot before a certain event in 
                 a timeseries plot, e.g Peak Demand.
                 Defaults to None.
-            end (int, optional): Used in conjunction with the prop argument.
+            end (float, optional): Used in conjunction with the prop argument.
                 Will define the number of days to plot after a certain event in 
                 a timeseries plot, e.g Peak Demand.
                 Defaults to None.
@@ -245,7 +249,7 @@ class MPlot(PlotDataHelper):
                 Defaults to "".
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -276,7 +280,6 @@ class MPlot(PlotDataHelper):
         # with all required properties, returns a 1 if required data is missing
             return self.get_formatted_data(properties)
 
-
         def setup_data(zone_input, scenario, Stacked_Gen):
 
             # Insert Curtailment into gen stack if it exists in database
@@ -299,7 +302,6 @@ class MPlot(PlotDataHelper):
                     vre_gen_cat = self.vre_gen_cat + [curtailment_name]
                 else:
                     vre_gen_cat = self.vre_gen_cat
-                    
             else:
                 vre_gen_cat = self.vre_gen_cat
             # Adjust list of values to drop depending on if it exists in Stacked_Gen df
@@ -391,6 +393,7 @@ class MPlot(PlotDataHelper):
                 unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
 
             elif prop == "Min Net Load":
+                print(type(end))
                 min_net_load_t = Net_Load.idxmin()
                 end_date = min_net_load_t + dt.timedelta(days=end)
                 start_date = min_net_load_t - dt.timedelta(days=start)
@@ -472,10 +475,7 @@ class MPlot(PlotDataHelper):
                 Load = Load[start_date : end_date]
                 Unserved_Energy = Unserved_Energy[start_date : end_date]
                 Total_Demand = Total_Demand[start_date : end_date]
-
                 unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
-                
-
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
 
@@ -516,7 +516,9 @@ class MPlot(PlotDataHelper):
             plot_number = len(all_scenarios)
             excess_axs = grid_size - plot_number
 
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
+            fig1, axs = plt.subplots(ydimension, xdimension, 
+                                     figsize=((self.x*xdimension),(self.y*ydimension)), 
+                                     sharey=True, squeeze=False)
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
             axs = axs.ravel()
             data_tables = []
@@ -526,12 +528,10 @@ class MPlot(PlotDataHelper):
                 self.logger.info(f"Scenario = {scenario}")
 
                 try:
-
                     Stacked_Gen = self['generator_Generation'].get(scenario).copy()
                     if self.shift_leapday == True:
                         Stacked_Gen = self.adjust_for_leapday(Stacked_Gen)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
-                    
                 except KeyError:
                     self.logger.warning(f'No generation in {zone_input}')
                     out = MissingZoneData()
@@ -589,14 +589,16 @@ class MPlot(PlotDataHelper):
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
                 
                 # Data table of values to return to main program
-                single_scen_out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], axis=1, sort=False)
+                single_scen_out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], 
+                                            axis=1, sort=False)
                 scenario_names = pd.Series([scenario] * len(single_scen_out),name = 'Scenario')
                 single_scen_out = single_scen_out.add_suffix(f" ({unitconversion['units']})")
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
                 data_tables.append(single_scen_out)
 
                 
-                plotlib.create_stackplot(axs, Stacked_Gen, self.PLEXOS_color_dict, labels=Stacked_Gen.columns, n=i)
+                plotlib.create_stackplot(axs, Stacked_Gen, self.PLEXOS_color_dict, 
+                                         labels=Stacked_Gen.columns, n=i)
 
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].plot(Unserved_Energy,
@@ -613,34 +615,38 @@ class MPlot(PlotDataHelper):
 
                 if prop == "Min Net Load":
                     axs[i].annotate(f"Min Net Load: \n{str(format(Min_Net_Load, '.2f'))} {unitconversion['units']}",
-                                    xy=(min_net_load_t, Min_Net_Load), xytext=((min_net_load_t + dt.timedelta(days=0.1)),
-                                                                               (max(Load))),
-                        fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                                    xy=(min_net_load_t, Min_Net_Load), 
+                                    xytext=((min_net_load_t + dt.timedelta(days=0.1)), (max(Load))),
+                                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
                 # Peak Demand label overlaps other labels on a facet plot
                 elif prop == "Peak Demand":
                     axs[i].annotate(f"Peak Demand: \n{str(format(Total_Demand[peak_demand_t], '.2f'))} {unitconversion['units']}",
-                                    xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)),
-                                                                             (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
-                                fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                                    xy=(peak_demand_t, Peak_Demand), 
+                                    xytext=((peak_demand_t + dt.timedelta(days=0.1)),
+                                            (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
+                                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
                 
                 if prop == "Peak RE":
                     axs[i].annotate(f"Peak RE: \n{str(format(Peak_RE, '.2f'))} {unitconversion['units']}",
-                                    xy=(peak_re_t, gen_peak_re2), xytext=((peak_re_t + dt.timedelta(days=0.5)),
-                                                                                (max(Total_Demand))),
-                        fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                                    xy=(peak_re_t, gen_peak_re2), 
+                                    xytext=((peak_re_t + dt.timedelta(days=0.5)),
+                                            (max(Total_Demand))),
+                                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
                 
                 if prop == "Peak Unserved Energy":
                     axs[i].annotate(f"Peak Unserved Energy: \n{str(format(peak_ue, '.2f'))} {unitconversion['units']}",
-                                    xy=(peak_ue_t, Total_Demand[peak_ue_t]), xytext=((peak_ue_t + dt.timedelta(days=0.5)),
-                                                                                (max(Total_Demand))),
-                        fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                                    xy=(peak_ue_t, Total_Demand[peak_ue_t]), 
+                                    xytext=((peak_ue_t + dt.timedelta(days=0.5)),
+                                            (max(Total_Demand))),
+                                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
                 
                 if prop == "Peak Curtailment":
                     axs[i].annotate(f"Peak Curtailment: \n{str(format(peak_curt, '.2f'))} {unitconversion['units']}",
-                                    xy=(peak_curt_t, gen_peak_curt), xytext=((peak_curt_t + dt.timedelta(days=0.5)),
-                                                                                (max(Total_Demand))),
-                        fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                                    xy=(peak_curt_t, gen_peak_curt), 
+                                    xytext=((peak_curt_t + dt.timedelta(days=0.5)),
+                                            (max(Total_Demand))),
+                                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].fill_between(Load.index, Load,Unserved_Energy,
@@ -684,13 +690,16 @@ class MPlot(PlotDataHelper):
             self.add_facet_labels(fig1)
 
             fig1.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if mconfig.parser('plot_title_as_region'):
                 plt.title(zone_input)
 
-            #Ylabel should change if there are facet labels, leave at 40 for now, works for all values in spacing
+            #Ylabel should change if there are facet labels, leave at 40 for now, 
+            # works for all values in spacing
             labelpad = 40
-            plt.ylabel(f"Generation ({unitconversion['units']})", color='black', rotation='vertical', labelpad = labelpad)
+            plt.ylabel(f"Generation ({unitconversion['units']})", color='black', 
+                       rotation='vertical', labelpad=labelpad)
 
             #Remove extra axes
             if excess_axs != 0:
@@ -753,7 +762,7 @@ class MPlot(PlotDataHelper):
                 Defaults to "".
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -779,7 +788,8 @@ class MPlot(PlotDataHelper):
 
             Total_Gen_Stack_1 = self['generator_Generation'].get(self.Scenario_Diff[0])
             if Total_Gen_Stack_1 is None:
-                self.logger.warning(f'Scenario_Diff "{self.Scenario_Diff[0]}" is not in data. Ensure User Input Sheet is set up correctly!')
+                self.logger.warning(f"Scenario_Diff '{self.Scenario_Diff[0]}'' is not in data. "
+                                    "Ensure User Input Sheet is set up correctly!")
                 outputs = InputSheetError()
                 return outputs
             
@@ -790,18 +800,19 @@ class MPlot(PlotDataHelper):
             Total_Gen_Stack_1 = Total_Gen_Stack_1.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_1 = self.df_process_gen_inputs(Total_Gen_Stack_1)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
-            Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns = self.ordered_gen).fillna(0)
+            Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns=self.ordered_gen).fillna(0)
 
             Total_Gen_Stack_2 = self['generator_Generation'].get(self.Scenario_Diff[1])
             if Total_Gen_Stack_2 is None:
-                self.logger.warning(f'Scenario_Diff "{self.Scenario_Diff[1]}" is not in data. Ensure User Input Sheet is set up correctly!')
+                self.logger.warning(f"Scenario_Diff '{self.Scenario_Diff[1]}' is not in data. "
+                                    "Ensure User Input Sheet is set up correctly!")
                 outputs = InputSheetError()
                 return outputs
 
             Total_Gen_Stack_2 = Total_Gen_Stack_2.xs(zone_input,level=self.AGG_BY)
             Total_Gen_Stack_2 = self.df_process_gen_inputs(Total_Gen_Stack_2)
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
-            Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns = self.ordered_gen).fillna(0)
+            Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns=self.ordered_gen).fillna(0)
 
             self.logger.info(f'Scenario 1 = {self.Scenario_Diff[0]}')
             self.logger.info(f'Scenario 2 = {self.Scenario_Diff[1]}')
@@ -836,10 +847,10 @@ class MPlot(PlotDataHelper):
             ax = axs[0]
 
             for column in Gen_Stack_Out:
-                ax.plot(Gen_Stack_Out[column], linewidth=3, color=self.PLEXOS_color_dict[column],
-                        label=column)
+                ax.plot(Gen_Stack_Out[column], linewidth=3, 
+                        color=self.PLEXOS_color_dict[column], label=column)
                 ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
+                          facecolor='inherit', frameon=True)
 
             ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
             ax.set_ylabel(f"Generation Difference ({unitconversion['units']})",  color='black', rotation='vertical')

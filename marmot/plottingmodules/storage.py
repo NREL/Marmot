@@ -64,7 +64,7 @@ class MPlot(PlotDataHelper):
                 Defaults to "".
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:

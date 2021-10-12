@@ -57,7 +57,7 @@ class MPlot(PlotDataHelper):
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
     def reserve_gen_timeseries(self, figure_name: str = None, prop: str = None,
-                               start: int = None, end: int = None,
+                               start: float = None, end: float= None,
                                timezone: str = "", start_date_range: str = None,
                                end_date_range: str = None, **_):
         """Creates a generation timeseries stackplot of total cumulative reserve provision by tech type.
@@ -79,11 +79,11 @@ class MPlot(PlotDataHelper):
                     - Peak Demand
                     - Date Range
                 Defaults to None.
-            start (int, optional): Used in conjunction with the prop argument.
+            start (float, optional): Used in conjunction with the prop argument.
                 Will define the number of days to plot before a certain event in 
                 a timeseries plot, e.g Peak Demand.
                 Defaults to None.
-            end (int, optional): Used in conjunction with the prop argument.
+            end (float, optional): Used in conjunction with the prop argument.
                 Will define the number of days to plot after a certain event in 
                 a timeseries plot, e.g Peak Demand.
                 Defaults to None.
@@ -91,7 +91,7 @@ class MPlot(PlotDataHelper):
                 Defaults to "".
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -240,7 +240,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -400,7 +400,7 @@ class MPlot(PlotDataHelper):
                 Defaults to False.
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -514,7 +514,7 @@ class MPlot(PlotDataHelper):
                 Defaults to "".
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:

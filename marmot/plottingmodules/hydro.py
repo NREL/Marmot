@@ -73,7 +73,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -179,7 +179,7 @@ class MPlot(PlotDataHelper):
         Data is saved within this method.
 
         Args:
-            end (int, optional): Determines length of plot period. 
+            end (float, optional): Determines length of plot period. 
                 Defaults to 7.
             timezone (str, optional): The timezone to display on the x-axes.
                 Defaults to "".

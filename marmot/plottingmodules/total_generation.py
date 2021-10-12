@@ -93,7 +93,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -336,7 +336,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -494,7 +494,7 @@ class MPlot(PlotDataHelper):
         This methods calls _monthly_gen() to create the figure.
 
         Returns:
-            [type]: [description]
+            dict: Dictionary containing the created plot and its data table.
         """
 
         outputs = self._monthly_gen(**kwargs)
@@ -614,7 +614,7 @@ class MPlot(PlotDataHelper):
                        
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
                 if vre_only:
-                    Total_Gen_Stack[Total_Gen_Stack.columns.intersection(self.vre_gen_cat)]
+                    Total_Gen_Stack = Total_Gen_Stack[Total_Gen_Stack.columns.intersection(self.vre_gen_cat)]
 
                 if Total_Gen_Stack.empty:
                     if vre_only:
@@ -842,7 +842,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:

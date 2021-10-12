@@ -62,7 +62,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -95,6 +95,7 @@ class MPlot(PlotDataHelper):
                         self.logger.warning(f'No data in {zone_input}')
                         continue
                 Gen = Gen.reset_index()
+                Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
@@ -196,7 +197,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
@@ -319,7 +320,7 @@ class MPlot(PlotDataHelper):
         Args:
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data from.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
 
         Returns:
