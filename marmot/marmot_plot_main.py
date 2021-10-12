@@ -526,20 +526,21 @@ class MarmotPlot(SetupLogger):
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
                 # Modifies timezone string before plotting
-                if pd.isna(row.iloc[5]):
-                    row.iloc[5] = "Date"
+                if pd.isna(row.iloc[6]):
+                    row.iloc[6] = "Date"
                 else:
-                    row.iloc[5] = f"Date ({row.iloc[5]})"
+                    row.iloc[6] = f"Date ({row.iloc[6]})"
 
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
                                            prop = row.iloc[2],
-                                           start = row.iloc[3],
-                                           end=row.iloc[4],
-                                           timezone = row.iloc[5],
-                                           start_date_range = row.iloc[6],
-                                           end_date_range = row.iloc[7])
+                                           y_axis_max = float(row.iloc[3]),
+                                           start = float(row.iloc[4]),
+                                           end = float(row.iloc[5]),
+                                           timezone = row.iloc[6],
+                                           start_date_range = row.iloc[7],
+                                           end_date_range = row.iloc[8])
                 
                 if isinstance(Figure_Out, MissingInputData):
                     self.logger.info("Add Inputs With Formatter Before Attempting to Plot!\n")

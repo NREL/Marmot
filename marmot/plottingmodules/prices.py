@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 """
-price analysis plots, price duration curves = timeseries plots
+price analysis plots, price duration curves and timeseries plots.
+Prices plotted in $/MWh
 @author: adyreson and Daniel Levie
 """
 
@@ -18,7 +19,25 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    def __init__(self, argument_dict):
+    """Marmot MPlot class, common across all plotting modules.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The price.py module contains methods that are
+    related to grid prices at regions, zones, nodes etc. 
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """MPlot init method
+
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
@@ -32,15 +51,26 @@ class MPlot(PlotDataHelper):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
 
-    def pdc_all_regions(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        """
-        This method creates a price duration curve for all regions/zones and plots them on
-        a single facet plot.
+    def pdc_all_regions(self, y_axis_max: float = None, 
+                        start_date_range: str = None,
+                        end_date_range: str = None, **_):
+        """Creates a price duration curve for all regions/zones and plots them on a single facet plot.
+        
+        Price is in $/MWh.
         The code automatically creates a facet plot based on the number of regions/zones in the input.
         All scenarios are plotted on a single facet for each region/zone
-        """
-            
+
+        Args:
+            y_axis_max (float, optional): Max y-axis value. 
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
+        """              
         if self.AGG_BY == 'zone':
             agg = 'zone'
         else:
@@ -99,43 +129,63 @@ class MPlot(PlotDataHelper):
             color_dict = dict(zip(duration_curve.columns,self.color_list))
 
             for column in duration_curve:
-                plotlib.create_line_plot(axs,duration_curve,column,color_dict,n=n,label=column)
-                if (prop!=prop)==False:
-                    axs[n].set_ylim(bottom=0,top=int(prop))
+                plotlib.create_line_plot(axs,duration_curve, column, color_dict,
+                                         n=n, label=column)
+                if pd.notna(y_axis_max):
+                    axs[n].set_ylim(bottom=0, top=float(y_axis_max))
                 axs[n].set_xlim(0,len(duration_curve))
                 axs[n].set_title(zone_input.replace('_',' '))
 
                 handles, labels = axs[n].get_legend_handles_labels()
                 #Legend
-                axs[grid_size-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
+                axs[grid_size-1].legend((handles), (labels), loc='lower left',
+                                        bbox_to_anchor=(1,0), facecolor='inherit', 
+                                        frameon=True)
         
         # Remove extra axes
         if excess_axs != 0:
             PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
         
         fig2.add_subplot(111, frameon=False)
-        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', labelpad=30)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, 
+                        right=False)
+        plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', 
+                   labelpad=30)
         plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
 
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
-        fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), dpi=600, bbox_inches='tight')
+        fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), 
+                     dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
         outputs = DataSavedInModule()
         return outputs
     
-    def region_pdc(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def region_pdc(self, figure_name: str = None, y_axis_max: float = None,
+                   start_date_range: str = None, 
+                   end_date_range: str = None, **_):
+        """Creates a price duration curve for each region. Price in $/MWh
 
-        """
-        This method creates a price duration curve for each region.
-        The code will create either a facet plot or a single plot depening on if the Facet argument is active.
-        If a facet plot is created, each scenario is plotted on a seperate facet, otherwise all scenarios are
-        plotted on a single plot.
+        The code will create either a facet plot or a single plot depending on 
+        if the Facet argument is active.
+        If a facet plot is created, each scenario is plotted on a separate facet, 
+        otherwise all scenarios are plotted on a single plot.
+        To make a facet plot, ensure the work 'Facet' is found in the figure_name.
+
+        Args:
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            y_axis_max (float, optional): Max y-axis value. 
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
         """
         outputs = {}
         
@@ -201,9 +251,10 @@ class MPlot(PlotDataHelper):
 
             n=0
             for column in duration_curve:
-                plotlib.create_line_plot(axs,duration_curve,column,color_dict,n=n,label=column)
-                if (prop!=prop)==False:
-                    axs[n].set_ylim(bottom=0,top=int(prop))
+                plotlib.create_line_plot(axs, duration_curve, column, color_dict, 
+                                         n=n, label=column)
+                if pd.notna(y_axis_max):
+                    axs[n].set_ylim(bottom=0,top=float(y_axis_max))
                 axs[n].set_xlim(0,len(duration_curve))
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
@@ -211,8 +262,10 @@ class MPlot(PlotDataHelper):
                     n+=1
 
             fig1.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, 
+                            right=False)
+            plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', 
+                       labelpad=20)
             plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
@@ -220,14 +273,31 @@ class MPlot(PlotDataHelper):
         return outputs
 
 
-    def region_timeseries_price(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def region_timeseries_price(self, figure_name: str = None, y_axis_max: float = None,
+                                timezone: str = "", start_date_range: str = None, 
+                                end_date_range: str = None, **_):
+        """Creates price timeseries line plot for each region. Price is $/MWh.
 
-        """
-        This method creates price timeseries plot for each region.
-        The code will create either a facet plot or a single plot depening on if the Facet argument is active.
-        If a facet plot is created, each scenario is plotted on a seperate facet, otherwise all scenarios are
-        plotted on a single plot.
+        The code will create either a facet plot or a single plot depending on 
+        if the Facet argument is active.
+        If a facet plot is created, each scenario is plotted on a separate facet, 
+        otherwise all scenarios are plotted on a single plot. 
+        To make a facet plot, ensure the work 'Facet' is found in the figure_name.
+
+        Args:
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            y_axis_max (float, optional): Max y-axis value. 
+                Defaults to None.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
         """
         outputs = {}
         
@@ -291,9 +361,10 @@ class MPlot(PlotDataHelper):
 
             n=0 #Counter for scenario subplots
             for column in timeseries:
-                plotlib.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
-                if (prop!=prop)==False:
-                    axs[n].set_ylim(bottom=0,top=int(prop))
+                plotlib.create_line_plot(axs, timeseries, column, 
+                                         color_dict, n=n, label=column)
+                if pd.notna(y_axis_max):
+                    axs[n].set_ylim(bottom=0,top=float(y_axis_max))
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
                 
@@ -302,23 +373,38 @@ class MPlot(PlotDataHelper):
                     n+=1
 
             fig3.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
-            plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
+            plt.ylabel(f"{self.AGG_BY} Price ($/MWh)", color='black', 
+                       rotation='vertical', labelpad=20)
             plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
             outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
         return outputs
 
-    def timeseries_price_all_regions(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def timeseries_price_all_regions(self, y_axis_max: float = None,
+                                     timezone: str = "", start_date_range: str = None, 
+                                     end_date_range: str = None, **_):
+        """Creates a price timeseries plot for all regions/zones and plots them on a single facet plot.
 
-        """
-        This method creates a price timeseries plot for all regions/zones and plots them on
-        a single facet plot.
+        Price in $/MWh.
         The code automatically creates a facet plot based on the number of regions/zones in the input.
-        All scenarios are plotted on a single facet for each region/zone
+        All scenarios are plotted on a single facet for each region/zone.
+
+        Args:
+            y_axis_max (float, optional): Max y-axis value. 
+                Defaults to None.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
         """
         outputs = {}
         
@@ -381,8 +467,8 @@ class MPlot(PlotDataHelper):
             for column in timeseries:
                 plotlib.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
                 axs[n].set_title(zone_input.replace('_',' '))
-                if (prop!=prop)==False:
-                    axs[n].set_ylim(bottom=0,top=int(prop))
+                if pd.notna(y_axis_max):
+                    axs[n].set_ylim(bottom=0,top=float(y_axis_max))
                 PlotDataHelper.set_plot_timeseries_format(axs,n)
 
                 handles, labels = axs[n].get_legend_handles_labels()
@@ -395,60 +481,81 @@ class MPlot(PlotDataHelper):
             PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
         
         fig4.add_subplot(111, frameon=False)
-        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=30)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, 
+                        right=False)
+        plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', 
+                   labelpad=30)
         plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
 
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
-        fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), dpi=600, bbox_inches='tight')
+        fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), 
+                     dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
         outputs = DataSavedInModule()
         return outputs
     
-    
-    
     def node_pdc(self, **kwargs):
+        """Creates a price duration curve for a set of specifc nodes.
+
+        Price in $/MWh.
+        The code will create either a facet plot or a single plot depending on 
+        the number of nodes included in plot_select.csv property entry.
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception.
         """
-        This method creates a price duration curve for a set of specifc nodes.
-        The code will create either a facet plot or a single plot depening on 
-        the number of nodes included in plot_select.csv
-        """    
-        
         outputs = self._node_price(PDC=True, **kwargs)
         return outputs
     
-        
-    
     def node_timeseries_price(self, **kwargs):
-        """
-        This method creates a price timeseries plot for a set of specifc nodes.
+        """Creates a price timeseries plot for a set of specifc nodes.
         
-        The code will create either a facet plot or a single plot depening on 
-        the number of nodes included in plot_select.csv
+        Price in $/MWh.
+        The code will create either a facet plot or a single plot depending on 
+        the number of nodes included in plot_select.csv property entry.
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception.
         """    
-        
         outputs = self._node_price(**kwargs)
         return outputs
         
-        
-        
-    def _node_price(self, PDC=None, figure_name=None, prop=None, start=None, 
-                    end=None, timezone="", start_date_range=None, 
-                    end_date_range=None):
+    def _node_price(self, PDC: bool = False, figure_name: str = None,
+                    prop: str = None, y_axis_max: float = None,
+                    timezone: str = "", 
+                    start_date_range: str = None, 
+                    end_date_range: str = None, **_):
+        """Creates a price duration curve or timeseries plot for a set of specifc nodes. 
 
-        """
-        This method creates a price duration curve or timeseries plot for a 
-        specifc node. 
+        This method is called from either node_pdc() or node_timeseries_price()
+        
         If PDC == True, a price duration curve plot will be created
-        The code will create either a facet plot or a single plot depening on 
-        the number of nodes included in plot_select.csv
+        The code will create either a facet plot or a single plot depending on 
+        the number of nodes included in plot_select.csv property entry.
         Plots and Data are saved within the module
-        """    
-            
-            
+
+        Args:
+            PDC (bool, optional): If True creates a price duration curve.
+                Defaults to False.
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            prop (str, optional): comma seperated string of nodes to display. 
+                Defaults to None.
+            y_axis_max (float, optional): Max y-axis value. 
+                Defaults to None.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception.
+        """
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
@@ -510,17 +617,24 @@ class MPlot(PlotDataHelper):
         for n, node in enumerate(select_nodes):
             
             if PDC:
-                node_pdc = pdc.xs(node)
-                node_pdc.reset_index(drop=True, inplace=True)
+                try:
+                    node_pdc = pdc.xs(node)
+                    node_pdc.reset_index(drop=True, inplace=True)
+                except KeyError:
+                    self.logger.info(f"{node} not found")
+                    continue
             else:
-                node_pdc = pdc.xs(node, level='node')
+                try:
+                    node_pdc = pdc.xs(node, level='node')
+                except KeyError:
+                    self.logger.info(f"{node} not found")
+                    continue
             
             for column in node_pdc:
                 plotlib.create_line_plot(axs,node_pdc, column, color_dict, 
                                        n=n, label=column)
-                # if (prop!=prop)==False:
-                axs[n].set_ylim(bottom=0,top=int(200))
-                
+                if pd.notna(y_axis_max):
+                    axs[n].set_ylim(bottom=0, top=float(y_axis_max))
                 if not PDC:
                     PlotDataHelper.set_plot_timeseries_format(axs,n)
                 # axs[n].set_xlim(0,len(node_pdc))
@@ -552,47 +666,64 @@ class MPlot(PlotDataHelper):
         outputs = DataSavedInModule()
         return outputs
     
-    
     def node_price_hist(self, **kwargs):
-        """
-        This method creates a price histogram for a specifc nodes.
+        """Creates a price histogram for a specifc nodes. Price in $/MWh.
         
         A facet plot will be created if more than one scenario are included on the 
         user input sheet
-        Each scenario will be plotted on a seperate subplot.
-        If a set of nodes are passed at input, each will be saved to a seperate 
+        Each scenario will be plotted on a separate subplot.
+        If a set of nodes are passed at input, each will be saved to a separate 
         figure with node name as a suffix. 
         Plots and Data are saved within the module
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception.
         """    
-        
         outputs = self._node_hist(**kwargs)
         return outputs
         
-        
     def node_price_hist_diff(self, **kwargs):
-        """
-        This method creates a difference price histogram for a specifc nodes.
+        """Creates a difference price histogram for a specifc nodes. Price in $/MWh.
         
         This plot requires more than one scenario to display correctly.
         A facet plot will be created
-        Each scenario will be plotted on a seperate subplot, with values disaplying 
+        Each scenario will be plotted on a separate subplot, with values displaying 
         the relative difference to the first scenario in the list.
-        If a set of nodes are passed at input, each will be saved to a seperate 
+        If a set of nodes are passed at input, each will be saved to a separate 
         figure with node name as a suffix. 
         Plots and Data are saved within the module
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception.
         """    
-        
         outputs = self._node_hist(diff_plot=True, **kwargs)
         return outputs
         
-    
-    def _node_hist(self, diff_plot=None, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-        """
-        Internal code for hist plots. 
-        """
+    def _node_hist(self, diff_plot: bool = False, figure_name: str = None,
+                   prop: str = None, start_date_range: str = None,
+                   end_date_range: str = None, **_):
+        """Internal code for hist plots.
         
-        
+        Called from node_price_hist() or node_price_hist_diff(). 
+
+        Hist range and bin size is currently hardcoded from -100 to +100
+        with a bin width of 2.5 $/MWh 
+
+        Args:
+            diff_plot (bool, optional): If True creates a diff plot. 
+                Defaults to False.
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            prop (str, optional): comma seperated string of nodes to display. 
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception.
+        """
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
@@ -645,7 +776,7 @@ class MPlot(PlotDataHelper):
             p_hist.columns = p_hist.columns.str.replace('_',' ')
             data_out = p_hist.add_suffix(" ($/MWh)")
             
-            xdimension, ydimension =  self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
+            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
             grid_size = xdimension*ydimension
              # Used to calculate any excess axis to delete
             plot_number = len(self.Scenarios)
@@ -669,7 +800,7 @@ class MPlot(PlotDataHelper):
             
             for n, column in enumerate(p_hist):
                 
-                # Set plot data eqaul to 0 if all zero, e.g diff plot
+                # Set plot data equal to 0 if all zero, e.g diff plot
                 if sum(p_hist[column]) == 0:
                     data = 0
                 else:
@@ -723,7 +854,7 @@ class MPlot(PlotDataHelper):
         return outputs
     
     
-    def _process_data(self,data_collection,scenario,zone_input):
+    def _process_data(self, data_collection, scenario, zone_input):
         df = data_collection.get(scenario)
         df = df.xs(zone_input,level=self.AGG_BY)
         df = df.rename(columns={0:scenario})
