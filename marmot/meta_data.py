@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Retrieve metadata from PLEXOS production cost modelling results.
 
-Database can be either a h5plexos file or a formatted MArmot hdf5 files
+Database can be either a h5plexos file or a formatted Marmot hdf5 file.
+
 @author: Ryan Houseman
 """
 
