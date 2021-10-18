@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>marmot.config.mconfig &mdash; Marmot 0.9.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Marmot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/index.html">How-to Guides</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references/index.html">References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../references/input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/region_mapping.html">region_mapping: csv file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../references/code/modules.html">Code Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/code/modules.html#initialization-code">Initialization Code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.meta_data.html">marmot.meta_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/code/modules.html#config-package">Config Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/code/modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/code/modules.html#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Marmot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+      <li>marmot.config.mconfig</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for marmot.config.mconfig</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Created on Tue Jan 19 17:44:11 2021</span>
+
+<span class="sd">@author: Daniel Levie</span>
+
+<span class="sd">This module creates the default config.yml file that is used by Marmot.</span>
+<span class="sd">The parser function is used to parse information from the config file.</span>
+<span class="sd">The defaults defined here should not be modifed by any user, </span>
+<span class="sd">instead edit the values directly in the config.yml file once created. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+
+<span class="n">CONFIGFILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;config.yml&quot;</span>
+
+<span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+<span class="n">dir_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">dirname</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="n">configfile_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_path</span><span class="p">,</span><span class="n">CONFIGFILE_NAME</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="createConfig"><a class="viewcode-back" href="../../../references/code/marmot.config.mconfig.html#marmot.config.mconfig.createConfig">[docs]</a><span class="k">def</span> <span class="nf">createConfig</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates config.yml file using default values.</span>
+
+<span class="sd">    The following are Marmot default config settings that are used to </span>
+<span class="sd">    create the config.yml file when Marmot is first run.</span>
+<span class="sd">    Users Should NOT edit these values, instead edit the values directly </span>
+<span class="sd">    in the config.yml file once created. If the config.yml file is deleted, </span>
+<span class="sd">    it will be created with these defaults when mconfig.py is called anytime Marmot</span>
+<span class="sd">    is run. </span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        configfile_path (str): Path to config.yml file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        
+        <span class="n">font_settings</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">xtick_size</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="n">ytick_size</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="n">axes_label_size</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="n">legend_size</span> <span class="o">=</span> <span class="mi">12</span><span class="p">,</span>
+            <span class="n">title_size</span> <span class="o">=</span> <span class="mi">16</span><span class="p">,</span>
+            <span class="n">font_family</span> <span class="o">=</span> <span class="s1">&#39;serif&#39;</span>
+            <span class="p">),</span>
+        
+        <span class="n">text_position</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">title_height</span> <span class="o">=</span> <span class="mi">40</span>
+            <span class="p">),</span>
+        
+        <span class="n">figure_size</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">xdimension</span> <span class="o">=</span> <span class="mi">6</span><span class="p">,</span>
+            <span class="n">ydimension</span> <span class="o">=</span> <span class="mi">4</span><span class="p">),</span>
+        
+        <span class="n">axes_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">x_axes_minticks</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+            <span class="n">x_axes_maxticks</span> <span class="o">=</span> <span class="mi">8</span><span class="p">,</span>
+            <span class="n">y_axes_decimalpt</span> <span class="o">=</span> <span class="mi">1</span><span class="p">),</span>
+        
+        <span class="n">axes_label_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">rotate_x_labels</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">rotate_at_num_labels</span> <span class="o">=</span> <span class="mi">7</span><span class="p">,</span>
+            <span class="n">rotation_angle</span> <span class="o">=</span> <span class="mi">45</span><span class="p">),</span>
+        
+        <span class="n">plot_data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+            <span class="n">curtailment_property</span> <span class="o">=</span> <span class="s1">&#39;Curtailment&#39;</span><span class="p">,</span>
+            <span class="n">include_total_pumped_load_line</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+            <span class="n">include_timeseries_pumped_load_line</span> <span class="o">=</span> <span class="kc">True</span><span class="p">),</span>
+
+        <span class="n">figure_file_format</span> <span class="o">=</span> <span class="s1">&#39;svg&#39;</span><span class="p">,</span>
+        
+        <span class="n">shift_leapday</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">skip_existing_properties</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">auto_convert_units</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">plot_title_as_region</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        
+        <span class="n">user_defined_inputs_file</span> <span class="o">=</span> <span class="s1">&#39;Marmot_user_defined_inputs.csv&#39;</span><span class="p">,</span>
+
+        <span class="n">plot_select_file</span> <span class="o">=</span> <span class="s1">&#39;Marmot_plot_select.csv&#39;</span><span class="p">,</span>
+
+        <span class="n">plexos_properties_file</span> <span class="o">=</span> <span class="s1">&#39;plexos_properties.csv&#39;</span><span class="p">,</span>
+        
+        <span class="n">color_dictionary_file</span> <span class="o">=</span> <span class="s1">&#39;colour_dictionary.csv&#39;</span><span class="p">,</span>
+        <span class="n">ordered_gen_categories</span> <span class="o">=</span> <span class="s1">&#39;ordered_gen_categories.csv&#39;</span>
+        <span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cfgfile</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cfgfile</span><span class="p">,</span><span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<span class="c1"># Check if there is already a configuration file</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isfile</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">):</span>
+    <span class="c1"># Create the configuration file as it doesn&#39;t exist yet</span>
+    <span class="n">createConfig</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">)</span>
+    
+    
+<div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../references/code/marmot.config.mconfig.html#marmot.config.mconfig.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">top_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span> 
+    <span class="sd">&quot;&quot;&quot;Pull requested value from config.yml file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        top_level (str): Top level of config dictionary, </span>
+<span class="sd">            will return specified level and any sublevel.</span>
+<span class="sd">        second_level (str, optional): Second level of config dictionary </span>
+<span class="sd">            under top_level, will return a single value. </span>
+<span class="sd">            Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[dict, str, int, float]: Returns the requested level </span>
+<span class="sd">            or value from the config file. Return type varies based on</span>
+<span class="sd">            on level accessed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ymlfile</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">ymlfile</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">second_level</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">][</span><span class="n">second_level</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">value</span> </div>
+    
+
+<div class="viewcode-block" id="edit_value"><a class="viewcode-back" href="../../../references/code/marmot.config.mconfig.html#marmot.config.mconfig.edit_value">[docs]</a><span class="k">def</span> <span class="nf">edit_value</span><span class="p">(</span><span class="n">new_value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> 
+               <span class="n">second_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Edit the config.yml file through code</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        new_value (str): New value to apply to config file.</span>
+<span class="sd">        top_level (str): Top level of config dictionary, </span>
+<span class="sd">            will return specified level and any sublevel.</span>
+<span class="sd">        second_level (str, optional): Second level of config dictionary under top_level, </span>
+<span class="sd">            will return a single value. </span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">second_level</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">][</span><span class="n">second_level</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>  
+            
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span><span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+            <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span><span class="n">f</span><span class="p">,</span><span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+            
+
+<div class="viewcode-block" id="reset_defaults"><a class="viewcode-back" href="../../../references/code/marmot.config.mconfig.html#marmot.config.mconfig.reset_defaults">[docs]</a><span class="k">def</span> <span class="nf">reset_defaults</span><span class="p">():</span>   
+    <span class="sd">&quot;&quot;&quot;When called, resets config.yml to default values</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">createConfig</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Alliance for Sustainable Energy, LLC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Install the Marmot software &mdash; Marmot 0.9.0 documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+        <script src="../_static/jquery.js"></script>
+        <script src="../_static/underscore.js"></script>
+        <script src="../_static/doctools.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Tutorial: Formatting PLEXOS modelling results" href="format-tutorial.html" />
+    <link rel="prev" title="Get Started" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../index.html" class="icon icon-home"> Marmot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">Get Started</a><ul class="current">
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How-to Guides</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../references/index.html">References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../references/input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../references/input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../references/input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../references/input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../references/input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/region_mapping.html">region_mapping: csv file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../references/code/modules.html">Code Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../references/code/modules.html#initialization-code">Initialization Code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.meta_data.html">marmot.meta_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../references/code/modules.html#config-package">Config Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../references/code/modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../references/code/modules.html#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">Marmot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="index.html">Get Started</a> &raquo;</li>
+      <li>Install the Marmot software</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/get-started/install.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="install-the-marmot-software">
+<h1>Install the Marmot software<a class="headerlink" href="#install-the-marmot-software" title="Permalink to this headline"></a></h1>
+<ul class="simple">
+<li><p>Marmot requires Python 3.6 and the following prerequisites to run:</p>
+<ul>
+<li><p>hdf5&gt;=1.10.4 (Install with conda or download from <a class="reference external" href="https://www.hdfgroup.org/downloads/hdf5">HDF group website</a>)</p></li>
+<li><p>numpy</p></li>
+<li><p>pandas</p></li>
+<li><p>PyYAML</p></li>
+<li><p>h5py==2.10.0</p></li>
+<li><p>matplotlib&gt;=3.1.0</p></li>
+<li><p><a class="reference external" href="https://github.com/NREL/h5plexos">h5plexos</a> &gt;=0.6</p></li>
+<li><p>tables</p></li>
+</ul>
+</li>
+</ul>
+<section id="install-system-packages">
+<h2>Install system packages<a class="headerlink" href="#install-system-packages" title="Permalink to this headline"></a></h2>
+<p>Install the latest versions of <a class="reference external" href="https://www.anaconda.com/products/individual">Anaconda</a> and <a class="reference external" href="https://git-scm.com/">Git</a></p>
+</section>
+<section id="clone-the-marmot-repository">
+<h2>Clone the Marmot repository<a class="headerlink" href="#clone-the-marmot-repository" title="Permalink to this headline"></a></h2>
+<p>Clone the most recent version of the <code class="docutils literal notranslate"><span class="pre">Marmot</span></code> repository:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recurse</span><span class="o">-</span><span class="n">submodules</span> <span class="n">git</span><span class="nd">@github</span><span class="o">.</span><span class="n">com</span><span class="p">:</span><span class="n">NREL</span><span class="o">/</span><span class="n">Marmot</span><span class="o">.</span><span class="n">git</span> <span class="o">--</span><span class="n">branch</span> <span class="n">v0</span><span class="mf">.8.0</span>
+</pre></div>
+</div>
+<p>You will need to have set up a public key using <code class="docutils literal notranslate"><span class="pre">ssh-keygen</span></code> and <a class="reference external" href="https://github.com/settings/ssh/new">added your public key to your GitHub account</a> for this to work. Or, you can use HTTPS instead:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recurse</span><span class="o">-</span><span class="n">submodules</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NREL</span><span class="o">/</span><span class="n">Marmot</span><span class="o">.</span><span class="n">git</span> <span class="o">--</span><span class="n">branch</span> <span class="n">v0</span><span class="mf">.8.0</span>
+</pre></div>
+</div>
+</section>
+<section id="set-up-a-conda-environment">
+<h2>Set up a conda environment<a class="headerlink" href="#set-up-a-conda-environment" title="Permalink to this headline"></a></h2>
+<p>Setting up a new conda environment is the recommended route for running Marmot.
+To ensure you are using all the required Python modules, create a new conda
+environment using the provided <a class="reference external" href="https://github.com/NREL/Marmot/blob/main/marmot-env.yml">marmot-env yml file</a>,
+located in the Marmot repository.</p>
+<ul>
+<li><p>To create and activate a new conda environment open a terminal and follow these steps:</p>
+<blockquote>
+<div><ol class="arabic">
+<li><p>Create the environment from the <code class="docutils literal notranslate"><span class="pre">marmot-env.yml</span></code> file, if you are not in the Marmot directory, use the full file path to the file:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env</span><span class="o">.</span><span class="n">yml</span>
+</pre></div>
+</div>
+</li>
+<li><p>Activate the new environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env</span>
+</pre></div>
+</div>
+</li>
+<li><p>The required modules should now be ready to use, to verify the environment was setup correctly type:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="nb">list</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</div></blockquote>
+</li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Get Started" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="format-tutorial.html" class="btn btn-neutral float-right" title="Tutorial: Formatting PLEXOS modelling results" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Alliance for Sustainable Energy, LLC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

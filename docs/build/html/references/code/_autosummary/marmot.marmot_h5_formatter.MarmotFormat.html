@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>marmot.marmot_h5_formatter.MarmotFormat &mdash; Marmot 0.9.0 documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="marmot.marmot_h5_formatter.Process" href="marmot.marmot_h5_formatter.Process.html" />
+    <link rel="prev" title="marmot.marmot_h5_formatter.main" href="marmot.marmot_h5_formatter.main.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> Marmot
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/index.html">How-to Guides</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/region_mapping.html">region_mapping: csv file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../modules.html">Code Reference</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../modules.html#initialization-code">Initialization Code</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.meta_data.html">marmot.meta_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules.html#config-package">Config Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules.html#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Marmot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+          <li><a href="../../index.html">References</a> &raquo;</li>
+          <li><a href="../modules.html">Code Reference</a> &raquo;</li>
+          <li><a href="marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a> &raquo;</li>
+      <li>marmot.marmot_h5_formatter.MarmotFormat</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../../_sources/references/code/_autosummary/marmot.marmot_h5_formatter.MarmotFormat.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="marmot-marmot-h5-formatter-marmotformat">
+<h1>marmot.marmot_h5_formatter.MarmotFormat<a class="headerlink" href="#marmot-marmot-h5-formatter-marmotformat" title="Permalink to this headline"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.MarmotFormat">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MarmotFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Scenario_name:</span> <span class="pre">str,</span> <span class="pre">PLEXOS_Solutions_folder:</span> <span class="pre">str,</span> <span class="pre">Plexos_Properties:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_Solutions_folder:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">mapping_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'mapping_folder',</span> <span class="pre">Region_Mapping:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">emit_names:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">VoLL:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10000,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat" title="Permalink to this definition"></a></dt>
+<dd><p>Bases: <a class="reference internal" href="marmot.marmot_h5_formatter.SetupLogger.html#marmot.marmot_h5_formatter.SetupLogger" title="marmot.marmot_h5_formatter.SetupLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_h5_formatter.SetupLogger</span></code></a></p>
+<p>Main module class to be instantiated to run the formatter.</p>
+<p>MarmotFormat reads in PLEXOS hdf5 files created with the h5plexos library
+and processes the output results to ready them for plotting.
+Once the outputs have been processed, they are saved to an intermediary hdf5 file
+which can then be read into the Marmot plotting code</p>
+<p>Marmotformat class __init__ method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Scenario_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of scenario to process.</p></li>
+<li><p><strong>PLEXOS_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Folder containing h5plexos results files.</p></li>
+<li><p><strong>Plexos_Properties</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame]</span></code>) – PLEXOS properties to process,
+must follow format seen in Marmot directory.</p></li>
+<li><p><strong>Marmot_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Folder to save Marmot solution files.
+Defaults to None.</p></li>
+<li><p><strong>mapping_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The location of the Marmot mapping folder.
+Defaults to ‘mapping_folder’.</p></li>
+<li><p><strong>Region_Mapping</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame],</span> <span class="pre">optional</span></code>) – Mapping file to map custom
+regions/zones to create custom aggregations.
+Aggregations are created by grouping PLEXOS regions.
+Defaults to pd.DataFrame().</p></li>
+<li><p><strong>emit_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame],</span> <span class="pre">optional</span></code>) – Mapping file to rename
+emissions types. Defaults to pd.DataFrame().</p></li>
+<li><p><strong>VoLL</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code>) – Value of lost load, used to calculate cost of
+unserved energy. Defaults to 10000.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.MarmotFormat.output_metadata" title="marmot.marmot_h5_formatter.MarmotFormat.output_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output_metadata</span></code></a>(files_list, hdf_out_folder, ...)</p></td>
+<td><p>Transfers metadata from original PLEXOS solutions file to processed HDF5 file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.MarmotFormat.run_formatter" title="marmot.marmot_h5_formatter.MarmotFormat.run_formatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_formatter</span></code></a>()</p></td>
+<td><p>Main method to call to begin processing h5plexos files</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.MarmotFormat.output_metadata">
+<span class="sig-name descname"><span class="pre">output_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdf_out_folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HDF5_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HDF5_folder_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat.output_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat.output_metadata" title="Permalink to this definition"></a></dt>
+<dd><p>Transfers metadata from original PLEXOS solutions file to processed HDF5 file.</p>
+<p>For each partition in a given scenario, the metadata from that partition
+is copied over and saved in the processed output file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>files_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – List of all h5 files in hdf5 folder in alpha numeric order</p></li>
+<li><p><strong>hdf_out_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of formatted output h5 files</p></li>
+<li><p><strong>HDF5_output</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of formatted hdf5 output file</p></li>
+<li><p><strong>HDF5_folder_in</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of original PLEXOS solutions h5 files</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.MarmotFormat.run_formatter">
+<span class="sig-name descname"><span class="pre">run_formatter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat.run_formatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.MarmotFormat.run_formatter" title="Permalink to this definition"></a></dt>
+<dd><p>Main method to call to begin processing h5plexos files</p>
+<p>This method takes no input variables, all required variables
+are passed in via the __init__ method.</p>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="marmot.marmot_h5_formatter.main.html" class="btn btn-neutral float-left" title="marmot.marmot_h5_formatter.main" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="marmot.marmot_h5_formatter.Process.html" class="btn btn-neutral float-right" title="marmot.marmot_h5_formatter.Process" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2021, Alliance for Sustainable Energy, LLC.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
