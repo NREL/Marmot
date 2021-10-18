@@ -40,7 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -177,49 +182,49 @@ Defaults to pd.DataFrame().</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.add_facet_labels" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.add_facet_labels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">add_facet_labels</span></code></a>(fig[, xlabels_bottom, ...])</p></td>
-<td><p>Adds labels to outside of Facet plot</p></td>
+<td><p>Adds labels to outside of Facet plot.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.adjust_for_leapday" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.adjust_for_leapday"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust_for_leapday</span></code></a>(df)</p></td>
 <td><p>Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.assign_curtailment_techs" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.assign_curtailment_techs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assign_curtailment_techs</span></code></a>(df)</p></td>
-<td><p>Assign technologies to Marmot's Curtailment property (generator_Curtailment)</p></td>
+<td><p>Assign technologies to Marmot's Curtailment property (generator_Curtailment).</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.capacity_energy_unitconversion" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.capacity_energy_unitconversion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">capacity_energy_unitconversion</span></code></a>(max_value)</p></td>
 <td><p>Auto unitconversion for capacity and energy figures.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.create_categorical_tech_index" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.create_categorical_tech_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_categorical_tech_index</span></code></a>(df)</p></td>
-<td><p>Creates categorical index based on generators</p></td>
+<td><p>Creates categorical index based on generators.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.df_process_gen_inputs" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.df_process_gen_inputs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_gen_inputs</span></code></a>(df)</p></td>
-<td><p>Processes generation data into a pivot table</p></td>
+<td><p>Processes generation data into a pivot table.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_formatted_data" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_formatted_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_formatted_data</span></code></a>(properties)</p></td>
-<td><p>Get data from formatted h5 file</p></td>
+<td><p>Get data from formatted h5 file.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_sub_hour_interval_count" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_sub_hour_interval_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_sub_hour_interval_count</span></code></a>(df)</p></td>
-<td><p>Detects the interval spacing;</p></td>
+<td><p>Detects the interval spacing of timeseries data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.merge_new_agg" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.merge_new_agg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_new_agg</span></code></a>(df)</p></td>
-<td><p>Adds new region aggregation in the plotting step</p></td>
+<td><p>Adds new region aggregation in the plotting step.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.read_processed_h5file" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.read_processed_h5file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_processed_h5file</span></code></a>(plx_prop_name, scenario)</p></td>
-<td><p>Reads Data from processed h5file</p></td>
+<td><p>Reads Data from processed h5file.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.remove_excess_axs" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.remove_excess_axs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">remove_excess_axs</span></code></a>(axs, excess_axs, grid_size)</p></td>
-<td><p>Removes excess axes spins + tick marks</p></td>
+<td><p>Removes excess axes spins + tick marks.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.rename_gen_techs" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.rename_gen_techs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename_gen_techs</span></code></a>(df)</p></td>
-<td><p>Renames generator technologies based on the gen_names.csv file</p></td>
+<td><p>Renames generator technologies based on the gen_names.csv file.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_barplot_xticklabels" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_barplot_xticklabels"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_barplot_xticklabels</span></code></a>(labels, ax[, ...])</p></td>
 <td><p>Set the xticklabels on bar plots and determine whether they will be rotated.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_plot_timeseries_format" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_plot_timeseries_format"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_plot_timeseries_format</span></code></a>(axs[, n, ...])</p></td>
-<td><p>Auto sets timeseries format</p></td>
+<td><p>Auto sets timeseries format.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_x_y_dimension" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_x_y_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_x_y_dimension</span></code></a>(region_number)</p></td>
-<td><p>Sets X,Y dimension of plots without x,y labels</p></td>
+<td><p>Sets X,Y dimension of plots without x,y labels.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.setup_facet_xy_dimensions" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.setup_facet_xy_dimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">setup_facet_xy_dimensions</span></code></a>([facet, ...])</p></td>
 <td><p>Sets facet plot x,y dimensions based on user defined labeles</p></td>
@@ -232,7 +237,7 @@ Defaults to pd.DataFrame().</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_formatted_data">
 <span class="sig-name descname"><span class="pre">get_formatted_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.get_formatted_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_formatted_data" title="Permalink to this definition"></a></dt>
-<dd><p>Get data from formatted h5 file</p>
+<dd><p>Get data from formatted h5 file.</p>
 <p>Adds data to dictionary with scenario name as key</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -240,7 +245,7 @@ Defaults to pd.DataFrame().</p></li>
 plexos property information</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>list</em> – If 1 in list required data is missing</p>
+<dd class="field-even"><p><em>list</em> – If 1 in list required data is missing .</p>
 </dd>
 </dl>
 </dd></dl>
@@ -248,7 +253,7 @@ plexos property information</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.read_processed_h5file">
 <span class="sig-name descname"><span class="pre">read_processed_h5file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plx_prop_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.read_processed_h5file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.read_processed_h5file" title="Permalink to this definition"></a></dt>
-<dd><p>Reads Data from processed h5file</p>
+<dd><p>Reads Data from processed h5file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -257,7 +262,7 @@ plexos property information</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>pd.DataFrame</em> – Requested dataframe</p>
+<dd class="field-even"><p><em>pd.DataFrame</em> – Requested dataframe.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -265,13 +270,13 @@ plexos property information</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.rename_gen_techs">
 <span class="sig-name descname"><span class="pre">rename_gen_techs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.rename_gen_techs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.rename_gen_techs" title="Permalink to this definition"></a></dt>
-<dd><p>Renames generator technologies based on the gen_names.csv file</p>
+<dd><p>Renames generator technologies based on the gen_names.csv file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – Dataframe to process.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>pd.DataFrame</em> – Processed DataFrame with renamed techs</p>
+<dd class="field-even"><p><em>pd.DataFrame</em> – Processed DataFrame with renamed techs.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -279,18 +284,13 @@ plexos property information</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.assign_curtailment_techs">
 <span class="sig-name descname"><span class="pre">assign_curtailment_techs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.assign_curtailment_techs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.assign_curtailment_techs" title="Permalink to this definition"></a></dt>
-<dd><p>Assign technologies to Marmot’s Curtailment property (generator_Curtailment)</p>
+<dd><p>Assign technologies to Marmot’s Curtailment property (generator_Curtailment).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – Dataframe to process.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Dataframe containing only specified</dt><dd><p>curtailment technologies.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p><em>pd.DataFrame</em> – Dataframe containing only specified curtailment technologies.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -298,7 +298,7 @@ plexos property information</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.df_process_gen_inputs">
 <span class="sig-name descname"><span class="pre">df_process_gen_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.df_process_gen_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.df_process_gen_inputs" title="Permalink to this definition"></a></dt>
-<dd><p>Processes generation data into a pivot table</p>
+<dd><p>Processes generation data into a pivot table.</p>
 <p>Also calls rename_gen_techs() to rename technologies
 Technology names will be columns,
 Timeseries as index</p>
@@ -315,13 +315,13 @@ Timeseries as index</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.create_categorical_tech_index">
 <span class="sig-name descname"><span class="pre">create_categorical_tech_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.create_categorical_tech_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.create_categorical_tech_index" title="Permalink to this definition"></a></dt>
-<dd><p>Creates categorical index based on generators</p>
+<dd><p>Creates categorical index based on generators.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – Dataframe to process.</p>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>pd.DataFrame</em> – Processed DataFrame</p>
+<dd class="field-even"><p><em>pd.DataFrame</em> – Processed DataFrame.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -329,7 +329,7 @@ Timeseries as index</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.merge_new_agg">
 <span class="sig-name descname"><span class="pre">merge_new_agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.merge_new_agg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.merge_new_agg" title="Permalink to this definition"></a></dt>
-<dd><p>Adds new region aggregation in the plotting step</p>
+<dd><p>Adds new region aggregation in the plotting step.</p>
 <p>This allows one to create a new aggregation without re-formatting the .h5 file.
 :param df: Dataframe to process.
 :type df: <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p>
@@ -349,7 +349,7 @@ Timeseries as index</p>
 :type df: <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Same dataframe, with time index shifted</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Same dataframe, with time index shifted.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -376,7 +376,7 @@ Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_x_y_dimension">
 <span class="sig-name descname"><span class="pre">set_x_y_dimension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region_number</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.set_x_y_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_x_y_dimension" title="Permalink to this definition"></a></dt>
-<dd><p>Sets X,Y dimension of plots without x,y labels</p>
+<dd><p>Sets X,Y dimension of plots without x,y labels.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>region_number</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code>) – # regions/scenarios</p>
@@ -390,7 +390,7 @@ Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.add_facet_labels">
 <span class="sig-name descname"><span class="pre">add_facet_labels</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fig</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabels_bottom</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_xlabels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alternative_ylabels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.add_facet_labels"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.add_facet_labels" title="Permalink to this definition"></a></dt>
-<dd><p>Adds labels to outside of Facet plot</p>
+<dd><p>Adds labels to outside of Facet plot.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -409,7 +409,7 @@ Defaults to None.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_plot_timeseries_format">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">set_plot_timeseries_format</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">minticks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">4</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">maxticks</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">8</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.set_plot_timeseries_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_plot_timeseries_format" title="Permalink to this definition"></a></dt>
-<dd><p>Auto sets timeseries format</p>
+<dd><p>Auto sets timeseries format.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -452,7 +452,7 @@ Defaults to mconfig.parser(“axes_label_options”, “rotation_angle”).</p><
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.remove_excess_axs">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">remove_excess_axs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">axs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">excess_axs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grid_size</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.remove_excess_axs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.remove_excess_axs" title="Permalink to this definition"></a></dt>
-<dd><p>Removes excess axes spins + tick marks</p>
+<dd><p>Removes excess axes spins + tick marks.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -467,8 +467,8 @@ Defaults to mconfig.parser(“axes_label_options”, “rotation_angle”).</p><
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_sub_hour_interval_count">
 <em class="property"><span class="pre">static</span> </em><span class="sig-name descname"><span class="pre">get_sub_hour_interval_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">int</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#PlotDataHelper.get_sub_hour_interval_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_sub_hour_interval_count" title="Permalink to this definition"></a></dt>
-<dd><p>Detects the interval spacing;</p>
-<p>Used to adjust sums of certain for variables for sub-hourly runs</p>
+<dd><p>Detects the interval spacing of timeseries data.</p>
+<p>Used to adjust sums of certain variables for sub-hourly data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – pandas dataframe with timestamp in index.</p>
@@ -491,12 +491,7 @@ Defaults to mconfig.parser(“axes_label_options”, “rotation_angle”).</p><
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Dataframe with values sorted from</dt><dd><p>largest to smallest.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p><em>pd.DataFrame</em> – Dataframe with values sorted from largest to smallest.</p>
 </dd>
 </dl>
 </dd></dl>

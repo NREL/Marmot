@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 18 16:37:06 2020
+"""Methods used to assist with the creation of Marmot plots.
 
-Functions used to assist with the creation of Marmot plots
 @author: Daniel Levie
 """
 
@@ -24,7 +22,7 @@ logger = logging.getLogger('marmot_plot.'+__name__)
 
 
 class PlotDataHelper(dict):
-    """ Methods used to assist with the creation of Marmot plots
+    """Methods used to assist with the creation of Marmot plots
 
     Collection of Methods to assist with creation of figures,
     including getting and formatting data, setting up plot sizes and adding 
@@ -64,7 +62,7 @@ class PlotDataHelper(dict):
         self.Region_Mapping = Region_Mapping
 
     def get_formatted_data(self, properties: list) -> list:
-        """Get data from formatted h5 file
+        """Get data from formatted h5 file.
         
         Adds data to dictionary with scenario name as key
 
@@ -73,7 +71,7 @@ class PlotDataHelper(dict):
                 plexos property information
 
         Returns:
-            list: If 1 in list required data is missing 
+            list: If 1 in list required data is missing .
         """
         check_input_data = []
         
@@ -102,14 +100,14 @@ class PlotDataHelper(dict):
         return check_input_data
 
     def read_processed_h5file(self, plx_prop_name: str, scenario: str) -> pd.DataFrame:
-        """ Reads Data from processed h5file
+        """Reads Data from processed h5file.
 
         Args:
             plx_prop_name (str): Name of property, e.g generator_Generation
             scenario (str): Name of scenario.
 
         Returns:
-            pd.DataFrame: Requested dataframe
+            pd.DataFrame: Requested dataframe.
         """
         try:
             with pd.HDFStore(os.path.join(self.Marmot_Solutions_folder, "Processed_HDF5_folder", 
@@ -119,13 +117,13 @@ class PlotDataHelper(dict):
             return pd.DataFrame()
         
     def rename_gen_techs(self, df: pd.DataFrame) -> pd.DataFrame:
-        """ Renames generator technologies based on the gen_names.csv file 
+        """Renames generator technologies based on the gen_names.csv file.
 
         Args:
             df (pd.DataFrame): Dataframe to process.
 
         Returns:
-            pd.DataFrame: Processed DataFrame with renamed techs
+            pd.DataFrame: Processed DataFrame with renamed techs.
         """
         # If tech is a column name
         if 'tech' in df.columns:
@@ -158,14 +156,13 @@ class PlotDataHelper(dict):
         return df
 
     def assign_curtailment_techs(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Assign technologies to Marmot's Curtailment property (generator_Curtailment)
+        """Assign technologies to Marmot's Curtailment property (generator_Curtailment).
 
         Args:
             df (pd.DataFrame): Dataframe to process.
 
         Returns:
-            pd.DataFrame: Dataframe containing only specified 
-                curtailment technologies.
+            pd.DataFrame: Dataframe containing only specified curtailment technologies.
         """
 
         # Adjust list of values to drop from vre_gen_cat depending on if it exists in processed techs
@@ -180,7 +177,7 @@ class PlotDataHelper(dict):
             return df[df.columns.intersection(self.vre_gen_cat)]
 
     def df_process_gen_inputs(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Processes generation data into a pivot table 
+        """Processes generation data into a pivot table. 
 
         Also calls rename_gen_techs() to rename technologies 
         Technology names will be columns,
@@ -211,13 +208,13 @@ class PlotDataHelper(dict):
         return df
 
     def create_categorical_tech_index(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Creates categorical index based on generators
+        """Creates categorical index based on generators.
 
         Args:
             df (pd.DataFrame): Dataframe to process.
 
         Returns:
-            pd.DataFrame: Processed DataFrame
+            pd.DataFrame: Processed DataFrame.
         """
         df.index = df.index.astype("category")
         df.index = df.index.set_categories(self.ordered_gen)
@@ -226,7 +223,7 @@ class PlotDataHelper(dict):
 
     def merge_new_agg(self, df: pd.DataFrame) -> pd.DataFrame:
         #TODO Needs fixing 
-        """Adds new region aggregation in the plotting step
+        """Adds new region aggregation in the plotting step.
 
         This allows one to create a new aggregation without re-formatting the .h5 file.
         Args:
@@ -248,7 +245,7 @@ class PlotDataHelper(dict):
             df (pd.DataFrame): Dataframe to process.
 
         Returns:
-            pd.DataFrame: Same dataframe, with time index shifted
+            pd.DataFrame: Same dataframe, with time index shifted.
         """
         if ('2008' not in self.Marmot_Solutions_folder 
             and '2012' not in self.Marmot_Solutions_folder 
@@ -296,7 +293,7 @@ class PlotDataHelper(dict):
         return xdimension, ydimension
 
     def set_x_y_dimension(self, region_number: int) -> Tuple[int, int]:
-        """Sets X,Y dimension of plots without x,y labels
+        """Sets X,Y dimension of plots without x,y labels.
 
         Args:
             region_number (int): # regions/scenarios
@@ -320,7 +317,7 @@ class PlotDataHelper(dict):
                          alternative_xlabels: list = None,
                          alternative_ylabels: list = None,
                          **kwargs) -> None:
-        """Adds labels to outside of Facet plot
+        """Adds labels to outside of Facet plot.
 
         Args:
             fig (matplotlib.fig): matplotlib figure.
@@ -380,7 +377,7 @@ class PlotDataHelper(dict):
                                    minticks: int = mconfig.parser("axes_options","x_axes_minticks"),
                                    maxticks: int = mconfig.parser("axes_options","x_axes_maxticks")
                                    ) -> None:
-        """Auto sets timeseries format
+        """Auto sets timeseries format.
 
         Args:
             axs (matplotlib.axes): matplotlib.axes
@@ -438,7 +435,7 @@ class PlotDataHelper(dict):
 
     @staticmethod
     def remove_excess_axs(axs, excess_axs: int, grid_size: int) -> None:
-        """Removes excess axes spins + tick marks
+        """Removes excess axes spins + tick marks.
 
         Args:
             axs (matplotlib.axes): matplotlib.axes
@@ -457,9 +454,9 @@ class PlotDataHelper(dict):
 
     @staticmethod
     def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
-        """Detects the interval spacing; 
+        """Detects the interval spacing of timeseries data. 
         
-        Used to adjust sums of certain for variables for sub-hourly runs
+        Used to adjust sums of certain variables for sub-hourly data.
 
         Args:
             df (pd.DataFrame): pandas dataframe with timestamp in index.
@@ -483,8 +480,7 @@ class PlotDataHelper(dict):
             col (str): Column name by which to sort.
 
         Returns:
-            pd.DataFrame: Dataframe with values sorted from 
-                largest to smallest.
+            pd.DataFrame: Dataframe with values sorted from largest to smallest.
         """
         sorted_duration = (df.sort_values(by=col, ascending=False)
                         .reset_index()

@@ -40,7 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -145,16 +150,13 @@
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_library.create_stacked_bar_plot">
 <span class="sig-name descname"><span class="pre">create_stacked_bar_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">colour</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">angle</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_tick_labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">list</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_library.html#create_stacked_bar_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_library.create_stacked_bar_plot" title="Permalink to this definition"></a></dt>
 <dd><p>Creates a stacked bar plot</p>
-<p>Wrapper around pandas.plot.bar
-:param df: DataFrame of data to plot.
-:type df: <code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>
-:param colour: dictionary of colours, dict keys should be</p>
-<blockquote>
-<div><p>found in df columns.</p>
-</div></blockquote>
+<p>Wrapper around pandas.plot.bar</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – DataFrame of data to plot.</p></li>
+<li><p><strong>colour</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – dictionary of colours, dict keys should be
+found in df columns.</p></li>
 <li><p><strong>angle</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code>) – angle of rotation of labels.
 Defaults to 0.</p></li>
 <li><p><strong>custom_tick_labels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list,</span> <span class="pre">optional</span></code>) – list of custom labels to apply to x-axes.

@@ -40,7 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -145,14 +150,13 @@
 <dt class="sig sig-object py" id="marmot.plottingmodules.production_cost.MPlot">
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/production_cost.html#MPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.production_cost.MPlot" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper</span></code></a></p>
-<p>Marmot MPlot class, common across all plotting modules.</p>
+<p>production_cost MPlot class.</p>
 <p>All the plotting modules use this same class name.
 This class contains plotting methods that are grouped based on the
 current module name.</p>
 <p>The production_cost.py module contains methods that are
 related related to the cost of operating the power system.</p>
 <p>MPlot inherits from the PlotDataHelper class to assist in creating figures.</p>
-<p>MPlot init method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>argument_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary containing all
@@ -239,19 +243,17 @@ Defaults to None.</p></li>
 <dd><p>Creates stacked bar plot of total generation cost by cost type (fuel, emission, start cost etc.)</p>
 <p>Creates a more deatiled system cost plot.
 Each sceanrio is plotted as a separate bar.</p>
-<dl>
-<dt>start_date_range (str, optional): Defines a start date at which to represent data from.</dt><dd><blockquote>
-<div><p>Defaults to None.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>end_date_range (str, optional): Defines a end date at which to represent data to.</dt><dd><p>Defaults to None.</p>
-</dd>
-</dl>
-</dd>
-</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
+Defaults to None.</p></li>
+<li><p><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -286,19 +288,17 @@ Defaults to None.</p></li>
 The default is to comapre against the first scenario provided in the inputs list.
 Plot only shows totals and is NOT broken down into technology or cost type specific values.
 Each sceanrio is plotted as a separate bar.</p>
-<dl>
-<dt>start_date_range (str, optional): Defines a start date at which to represent data from.</dt><dd><blockquote>
-<div><p>Defaults to None.</p>
-</div></blockquote>
-<dl class="simple">
-<dt>end_date_range (str, optional): Defines a end date at which to represent data to.</dt><dd><p>Defaults to None.</p>
-</dd>
-</dl>
-</dd>
-</dl>
 <dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
+Defaults to None.</p></li>
+<li><p><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
 </dd>
 </dl>
 </dd></dl>

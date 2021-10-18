@@ -86,7 +86,7 @@ Guide to input files and key python classes and functions
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :caption: Contents:
    :hidden:
 

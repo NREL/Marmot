@@ -40,7 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -145,10 +150,8 @@
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process">
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="marmot.meta_data.MetaData.html#marmot.meta_data.MetaData" title="marmot.meta_data.MetaData"><span class="pre">marmot.meta_data.MetaData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emit_names</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">logging.Logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.marmot_h5_formatter.SetupLogger.html#marmot.marmot_h5_formatter.SetupLogger" title="marmot.marmot_h5_formatter.SetupLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_h5_formatter.SetupLogger</span></code></a></p>
-<p>Contains methods for processing h5plexos query data.</p>
-<p>All methods are PLEXOS Class specific
-e.g generator, region, zone, line etc.</p>
-<p>Process __init__ method.</p>
+<p>Process PLEXOS class specific data from h5plexos database.</p>
+<p>All methods are PLEXOS Class specific e.g generator, region, zone, line etc.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -173,64 +176,59 @@ emission names.</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_abatement" title="marmot.marmot_h5_formatter.Process.df_process_abatement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_abatement</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Abatement Class</p></td>
+<td><p>Format PLEXOS Abatement Class data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_constraint" title="marmot.marmot_h5_formatter.Process.df_process_constraint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_constraint</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Constraint Class</p></td>
+<td><p>Format PLEXOS Constraint Class data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_emission" title="marmot.marmot_h5_formatter.Process.df_process_emission"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_emission</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Emission Class</p></td>
+<td><p>Format PLEXOS Emission Class data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_emissions_generators" title="marmot.marmot_h5_formatter.Process.df_process_emissions_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_emissions_generators</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Emissions_Generators Relational Class</p></td>
+<td><p>Format PLEXOS Emissions_Generators Relational Class data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_fuel" title="marmot.marmot_h5_formatter.Process.df_process_fuel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_fuel</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Fuel Class</p></td>
+<td><p>Format PLEXOS Fuel Class data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_generator" title="marmot.marmot_h5_formatter.Process.df_process_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_generator</span></code></a>()</p></td>
-<td><p>Format data which comes from the PLEXOS Generator Class.</p></td>
+<td><p>Format PLEXOS Generator Class data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_interface" title="marmot.marmot_h5_formatter.Process.df_process_interface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_interface</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Interface Class</p></td>
+<td><p>Format PLEXOS PLEXOS Interface Class data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_line" title="marmot.marmot_h5_formatter.Process.df_process_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_line</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Line Class</p></td>
+<td><p>Format PLEXOS Line Class data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_node" title="marmot.marmot_h5_formatter.Process.df_process_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_node</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Node Class</p></td>
+<td><p>Format PLEXOS Node Class data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_region" title="marmot.marmot_h5_formatter.Process.df_process_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_region</span></code></a>()</p></td>
-<td><p>Format data which comes from the PLEXOS Region Class.</p></td>
+<td><p>Format PLEXOS Region Class data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_region_regions" title="marmot.marmot_h5_formatter.Process.df_process_region_regions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_region_regions</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Region_Regions Relational Class</p></td>
+<td><p>Format PLEXOS Region_Regions Relational Class data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_reserve" title="marmot.marmot_h5_formatter.Process.df_process_reserve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_reserve</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Reserve Class</p></td>
+<td><p>Format PLEXOS Reserve Class data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_reserves_generators" title="marmot.marmot_h5_formatter.Process.df_process_reserves_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_reserves_generators</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Reserve_Generators Relational Class</p></td>
+<td><p>Format PLEXOS Reserve_Generators Relational Class data.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_storage" title="marmot.marmot_h5_formatter.Process.df_process_storage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_storage</span></code></a>()</p></td>
-<td><p>Method for formatting data which comes from the PLEXOS Storage Class</p></td>
+<td><p>Format PLEXOS Storage Class data.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_zone" title="marmot.marmot_h5_formatter.Process.df_process_zone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_zone</span></code></a>()</p></td>
-<td><p>Method for formating data which comes from the PLEXOS Zone Class</p></td>
+<td><p>Format PLEXOS Zone Class data.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_generator">
 <span class="sig-name descname"><span class="pre">df_process_generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_generator" title="Permalink to this definition"></a></dt>
-<dd><p>Format data which comes from the PLEXOS Generator Class.</p>
+<dd><p>Format PLEXOS Generator Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -238,15 +236,10 @@ emission names.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_region">
 <span class="sig-name descname"><span class="pre">df_process_region</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_region" title="Permalink to this definition"></a></dt>
-<dd><p>Format data which comes from the PLEXOS Region Class.</p>
+<dd><p>Format PLEXOS Region Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -254,15 +247,10 @@ emission names.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_zone">
 <span class="sig-name descname"><span class="pre">df_process_zone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_zone" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formating data which comes from the PLEXOS Zone Class</p>
+<dd><p>Format PLEXOS Zone Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -270,15 +258,10 @@ emission names.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_line">
 <span class="sig-name descname"><span class="pre">df_process_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_line" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Line Class</p>
+<dd><p>Format PLEXOS Line Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -286,15 +269,10 @@ emission names.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_interface">
 <span class="sig-name descname"><span class="pre">df_process_interface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_interface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_interface" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Interface Class</p>
+<dd><p>Format PLEXOS PLEXOS Interface Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -302,15 +280,10 @@ emission names.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_reserve">
 <span class="sig-name descname"><span class="pre">df_process_reserve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_reserve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_reserve" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Reserve Class</p>
+<dd><p>Format PLEXOS Reserve Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -318,16 +291,10 @@ emission names.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_reserves_generators">
 <span class="sig-name descname"><span class="pre">df_process_reserves_generators</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_reserves_generators" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS
-Reserve_Generators Relational Class</p>
+<dd><p>Format PLEXOS Reserve_Generators Relational Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -335,15 +302,10 @@ Reserve_Generators Relational Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_fuel">
 <span class="sig-name descname"><span class="pre">df_process_fuel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_fuel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_fuel" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Fuel Class</p>
+<dd><p>Format PLEXOS Fuel Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -351,15 +313,10 @@ Reserve_Generators Relational Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_constraint">
 <span class="sig-name descname"><span class="pre">df_process_constraint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_constraint" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Constraint Class</p>
+<dd><p>Format PLEXOS Constraint Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -367,15 +324,10 @@ Reserve_Generators Relational Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_emission">
 <span class="sig-name descname"><span class="pre">df_process_emission</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_emission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_emission" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Emission Class</p>
+<dd><p>Format PLEXOS Emission Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -383,16 +335,10 @@ Reserve_Generators Relational Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_emissions_generators">
 <span class="sig-name descname"><span class="pre">df_process_emissions_generators</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_emissions_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_emissions_generators" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS
-Emissions_Generators Relational Class</p>
+<dd><p>Format PLEXOS Emissions_Generators Relational Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -400,15 +346,10 @@ Emissions_Generators Relational Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_storage">
 <span class="sig-name descname"><span class="pre">df_process_storage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_storage" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Storage Class</p>
+<dd><p>Format PLEXOS Storage Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -416,16 +357,10 @@ Emissions_Generators Relational Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_region_regions">
 <span class="sig-name descname"><span class="pre">df_process_region_regions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_region_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_region_regions" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS
-Region_Regions Relational Class</p>
+<dd><p>Format PLEXOS Region_Regions Relational Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -433,15 +368,10 @@ Region_Regions Relational Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_node">
 <span class="sig-name descname"><span class="pre">df_process_node</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_node" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Node Class</p>
+<dd><p>Format PLEXOS Node Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -449,15 +379,10 @@ Region_Regions Relational Class</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_abatement">
 <span class="sig-name descname"><span class="pre">df_process_abatement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_abatement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_abatement" title="Permalink to this definition"></a></dt>
-<dd><p>Method for formatting data which comes from the PLEXOS Abatement Class</p>
+<dd><p>Format PLEXOS Abatement Class data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><p><em>pd.DataFrame</em> –</p>
-<dl class="simple">
-<dt>Processed Output,</dt><dd><p>single value column with multiindex.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
 </dd>
 </dl>
 </dd></dl>

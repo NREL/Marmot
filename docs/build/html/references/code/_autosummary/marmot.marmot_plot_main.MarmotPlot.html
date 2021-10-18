@@ -40,7 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -149,7 +154,6 @@
 <p>MarmotPlot handles the selection of plotting module to create the desired
 figure and saving of outputs.
 It also handles the area aggregation selection</p>
-<p>Marmotplot class __init__ method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -190,15 +194,16 @@ Defaults to None.</p></li>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_plot_main.MarmotPlot.run_plotter" title="marmot.marmot_plot_main.MarmotPlot.run_plotter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_plotter</span></code></a>()</p></td>
-<td><p>Main method to call to begin plotting figures, this method takes no input variables, all required variables are passed in via the __init__ method.</p></td>
+<td><p>Main method to call to begin plotting figures.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.marmot_plot_main.MarmotPlot.run_plotter">
 <span class="sig-name descname"><span class="pre">run_plotter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#MarmotPlot.run_plotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.MarmotPlot.run_plotter" title="Permalink to this definition"></a></dt>
-<dd><p>Main method to call to begin plotting figures, this method takes
-no input variables, all required variables are passed in via the __init__ method.</p>
+<dd><p>Main method to call to begin plotting figures.</p>
+<p>This method takes no input variables, all required variables are
+passed in via the __init__ method.</p>
 </dd></dl>
 
 </dd></dl>

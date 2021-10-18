@@ -40,7 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -146,15 +151,15 @@
 <em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SetupLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_directory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'logs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_suffix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#SetupLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.SetupLogger" title="Permalink to this definition"></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Sets up the python logger.</p>
-<p>Allows an optional suffix to be included which will be appended to the
-end of the log file name, this is useful when running multiple
-processes in parallel to allow logging to separate files.</p>
-<p>Allows log_directory to be changed from default</p>
-<p>Setuplogger __init__ method.</p>
-<p>Formats log filename,
-configures logger from marmot_logging_config.yml file,
-handles rollover of log file on each instantiation.
-Allows log_directory to be changed from default</p>
+<p>This class handles the following.</p>
+<ol class="arabic simple">
+<li><p>Configures logger from marmot_logging_config.yml file.</p></li>
+<li><p>Handles rollover of log file on each instantiation.</p></li>
+<li><p>Sets log_directory.</p></li>
+<li><p>Append optional suffix to the end of the log file name</p></li>
+</ol>
+<p>Optional suffix is useful when running multiple processes in parallel to
+allow logging to separate files.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

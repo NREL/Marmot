@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jan 14 07:42:06 2020
+"""System unserved energy plots.
 
 This module creates unserved energy timeseries line plots and total bar
 plots and is called from marmot_plot_main.py
+
 @author: Daniel Levie 
 """
 
@@ -19,7 +19,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot Class, common across all plotting modules.
+    """unserved_energy MPlot Class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -32,8 +32,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

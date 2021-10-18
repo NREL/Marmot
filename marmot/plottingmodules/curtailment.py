@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Wed Dec 11 15:23:06 2019
+"""Device curtailment plots.
 
-This module creates plots are
-related to the curtailment of generators. 
+This module creates plots are related to the curtailment of generators.
+
 @author: Daniel Levie
 """
 
@@ -24,7 +23,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """curtailment MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -37,8 +36,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.
@@ -764,9 +762,10 @@ class MPlot(PlotDataHelper):
 
         The generators are specified as a comma seperated string in the 
         fourth column of Marmot_plot_select.csv and is passed to the prop argument.
-        The method outputs two.csv files: 
-            -one that contains curtailment, in percent, for each scenario and site. 
-            -the other contains total generation, in TWh, for each scenario and site.
+        The method outputs two.csv files:
+        
+        - one that contains curtailment, in percent, for each scenario and site. 
+        - the other contains total generation, in TWh, for each scenario and site.
 
         This method does not return data to MarmotPlot, data is saved within the method directly 
         to the output folder.

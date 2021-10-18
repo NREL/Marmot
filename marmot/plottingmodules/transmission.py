@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created April 2020, updated August 2020
+"""System transmission plots.
 
 This code creates transmission line and interface plots.
+
 @author: Daniel Levie, Marty Schwarz
 """
 
@@ -23,7 +23,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """transmission MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -36,8 +36,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.
@@ -1202,7 +1201,7 @@ class MPlot(PlotDataHelper):
     def line_flow_ind_seasonal(self, figure_name: str = None, prop: str = None, 
                                start_date_range: str = None, 
                                end_date_range: str = None, **_):
-        """#TODO: Finish Docstring 
+        """TODO: Finish Docstring.
 
         This method differs from the previous method, in that it plots seasonal line limits.
         To use this method, line import/export must be an "interval" property, not a "year" property.

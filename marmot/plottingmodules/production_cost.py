@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Dec 17 16:24:40 2019
+"""System operating cost plots.
 
 This module plots figures related to the cost of operating the power system.
 Plots can be broken down by cost categories, generator types etc. 
+
 @author: Daniel Levie
 """
 
@@ -18,7 +18,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """production_cost MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -31,8 +31,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.
@@ -346,7 +345,8 @@ class MPlot(PlotDataHelper):
         Creates a more deatiled system cost plot.
         Each sceanrio is plotted as a separate bar.
 
-        start_date_range (str, optional): Defines a start date at which to represent data from. 
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
@@ -612,7 +612,8 @@ class MPlot(PlotDataHelper):
         Plot only shows totals and is NOT broken down into technology or cost type specific values.
         Each sceanrio is plotted as a separate bar.
 
-        start_date_range (str, optional): Defines a start date at which to represent data from. 
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.

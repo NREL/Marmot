@@ -37,7 +37,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -135,10 +140,8 @@
              
   <h1>Source code for marmot.plottingmodules.plotutils.plot_data_helper</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Created on Fri Sep 18 16:37:06 2020</span>
+<span class="sd">&quot;&quot;&quot;Methods used to assist with the creation of Marmot plots.</span>
 
-<span class="sd">Functions used to assist with the creation of Marmot plots</span>
 <span class="sd">@author: Daniel Levie</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -160,7 +163,7 @@
 
 
 <div class="viewcode-block" id="PlotDataHelper"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper">[docs]</a><span class="k">class</span> <span class="nc">PlotDataHelper</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Methods used to assist with the creation of Marmot plots</span>
+    <span class="sd">&quot;&quot;&quot;Methods used to assist with the creation of Marmot plots</span>
 
 <span class="sd">    Collection of Methods to assist with creation of figures,</span>
 <span class="sd">    including getting and formatting data, setting up plot sizes and adding </span>
@@ -200,7 +203,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span>
 
 <div class="viewcode-block" id="PlotDataHelper.get_formatted_data"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_formatted_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_formatted_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get data from formatted h5 file</span>
+        <span class="sd">&quot;&quot;&quot;Get data from formatted h5 file.</span>
 <span class="sd">        </span>
 <span class="sd">        Adds data to dictionary with scenario name as key</span>
 
@@ -209,7 +212,7 @@
 <span class="sd">                plexos property information</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            list: If 1 in list required data is missing </span>
+<span class="sd">            list: If 1 in list required data is missing .</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="p">[]</span>
         
@@ -238,14 +241,14 @@
         <span class="k">return</span> <span class="n">check_input_data</span></div>
 
 <div class="viewcode-block" id="PlotDataHelper.read_processed_h5file"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.read_processed_h5file">[docs]</a>    <span class="k">def</span> <span class="nf">read_processed_h5file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Reads Data from processed h5file</span>
+        <span class="sd">&quot;&quot;&quot;Reads Data from processed h5file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            plx_prop_name (str): Name of property, e.g generator_Generation</span>
 <span class="sd">            scenario (str): Name of scenario.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: Requested dataframe</span>
+<span class="sd">            pd.DataFrame: Requested dataframe.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span><span class="p">,</span> <span class="s2">&quot;Processed_HDF5_folder&quot;</span><span class="p">,</span> 
@@ -255,13 +258,13 @@
             <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
         
 <div class="viewcode-block" id="PlotDataHelper.rename_gen_techs"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.rename_gen_techs">[docs]</a>    <span class="k">def</span> <span class="nf">rename_gen_techs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot; Renames generator technologies based on the gen_names.csv file </span>
+        <span class="sd">&quot;&quot;&quot;Renames generator technologies based on the gen_names.csv file.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: Processed DataFrame with renamed techs</span>
+<span class="sd">            pd.DataFrame: Processed DataFrame with renamed techs.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># If tech is a column name</span>
         <span class="k">if</span> <span class="s1">&#39;tech&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -294,14 +297,13 @@
         <span class="k">return</span> <span class="n">df</span></div>
 
 <div class="viewcode-block" id="PlotDataHelper.assign_curtailment_techs"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.assign_curtailment_techs">[docs]</a>    <span class="k">def</span> <span class="nf">assign_curtailment_techs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Assign technologies to Marmot&#39;s Curtailment property (generator_Curtailment)</span>
+        <span class="sd">&quot;&quot;&quot;Assign technologies to Marmot&#39;s Curtailment property (generator_Curtailment).</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: Dataframe containing only specified </span>
-<span class="sd">                curtailment technologies.</span>
+<span class="sd">            pd.DataFrame: Dataframe containing only specified curtailment technologies.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
 
         <span class="c1"># Adjust list of values to drop from vre_gen_cat depending on if it exists in processed techs</span>
@@ -316,7 +318,7 @@
             <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vre_gen_cat</span><span class="p">)]</span></div>
 
 <div class="viewcode-block" id="PlotDataHelper.df_process_gen_inputs"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.df_process_gen_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_gen_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Processes generation data into a pivot table </span>
+        <span class="sd">&quot;&quot;&quot;Processes generation data into a pivot table. </span>
 
 <span class="sd">        Also calls rename_gen_techs() to rename technologies </span>
 <span class="sd">        Technology names will be columns,</span>
@@ -347,13 +349,13 @@
         <span class="k">return</span> <span class="n">df</span></div>
 
 <div class="viewcode-block" id="PlotDataHelper.create_categorical_tech_index"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.create_categorical_tech_index">[docs]</a>    <span class="k">def</span> <span class="nf">create_categorical_tech_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Creates categorical index based on generators</span>
+        <span class="sd">&quot;&quot;&quot;Creates categorical index based on generators.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: Processed DataFrame</span>
+<span class="sd">            pd.DataFrame: Processed DataFrame.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">)</span>
@@ -362,7 +364,7 @@
 
 <div class="viewcode-block" id="PlotDataHelper.merge_new_agg"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.merge_new_agg">[docs]</a>    <span class="k">def</span> <span class="nf">merge_new_agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="c1">#TODO Needs fixing </span>
-        <span class="sd">&quot;&quot;&quot;Adds new region aggregation in the plotting step</span>
+        <span class="sd">&quot;&quot;&quot;Adds new region aggregation in the plotting step.</span>
 
 <span class="sd">        This allows one to create a new aggregation without re-formatting the .h5 file.</span>
 <span class="sd">        Args:</span>
@@ -384,7 +386,7 @@
 <span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: Same dataframe, with time index shifted</span>
+<span class="sd">            pd.DataFrame: Same dataframe, with time index shifted.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;2008&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span> 
             <span class="ow">and</span> <span class="s1">&#39;2012&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span> 
@@ -432,7 +434,7 @@
         <span class="k">return</span> <span class="n">xdimension</span><span class="p">,</span> <span class="n">ydimension</span></div>
 
 <div class="viewcode-block" id="PlotDataHelper.set_x_y_dimension"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_x_y_dimension">[docs]</a>    <span class="k">def</span> <span class="nf">set_x_y_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
-        <span class="sd">&quot;&quot;&quot;Sets X,Y dimension of plots without x,y labels</span>
+        <span class="sd">&quot;&quot;&quot;Sets X,Y dimension of plots without x,y labels.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            region_number (int): # regions/scenarios</span>
@@ -456,7 +458,7 @@
                          <span class="n">alternative_xlabels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                          <span class="n">alternative_ylabels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                          <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Adds labels to outside of Facet plot</span>
+        <span class="sd">&quot;&quot;&quot;Adds labels to outside of Facet plot.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            fig (matplotlib.fig): matplotlib figure.</span>
@@ -516,7 +518,7 @@
                                    <span class="n">minticks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_options&quot;</span><span class="p">,</span><span class="s2">&quot;x_axes_minticks&quot;</span><span class="p">),</span>
                                    <span class="n">maxticks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_options&quot;</span><span class="p">,</span><span class="s2">&quot;x_axes_maxticks&quot;</span><span class="p">)</span>
                                    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Auto sets timeseries format</span>
+        <span class="sd">&quot;&quot;&quot;Auto sets timeseries format.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            axs (matplotlib.axes): matplotlib.axes</span>
@@ -574,7 +576,7 @@
 
 <div class="viewcode-block" id="PlotDataHelper.remove_excess_axs"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.remove_excess_axs">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">remove_excess_axs</span><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <span class="n">excess_axs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Removes excess axes spins + tick marks</span>
+        <span class="sd">&quot;&quot;&quot;Removes excess axes spins + tick marks.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            axs (matplotlib.axes): matplotlib.axes</span>
@@ -593,9 +595,9 @@
 
 <div class="viewcode-block" id="PlotDataHelper.get_sub_hour_interval_count"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_sub_hour_interval_count">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Detects the interval spacing; </span>
+        <span class="sd">&quot;&quot;&quot;Detects the interval spacing of timeseries data. </span>
 <span class="sd">        </span>
-<span class="sd">        Used to adjust sums of certain for variables for sub-hourly runs</span>
+<span class="sd">        Used to adjust sums of certain variables for sub-hourly data.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            df (pd.DataFrame): pandas dataframe with timestamp in index.</span>
@@ -619,8 +621,7 @@
 <span class="sd">            col (str): Column name by which to sort.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: Dataframe with values sorted from </span>
-<span class="sd">                largest to smallest.</span>
+<span class="sd">            pd.DataFrame: Dataframe with values sorted from largest to smallest.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">sorted_duration</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
                         <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>

@@ -38,7 +38,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -136,10 +141,8 @@
              
   <section id="marmot-config-mconfig-module">
 <h1>marmot.config.mconfig module<a class="headerlink" href="#marmot-config-mconfig-module" title="Permalink to this headline"></a></h1>
-<p>Created on Tue Jan 19 17:44:11 2021</p>
-<p>&#64;author: Daniel Levie</p>
-<p>This module creates the default config.yml file that is used by Marmot.
-The parser function is used to parse information from the config file.
+<p>This module creates the default config.yml file that is used by Marmot.</p>
+<p>The parser function is used to parse information from the config file.
 The defaults defined here should not be modifed by any user,
 instead edit the values directly in the config.yml file once created.</p>
 <dl class="py function">
@@ -152,6 +155,129 @@ Users Should NOT edit these values, instead edit the values directly
 in the config.yml file once created. If the config.yml file is deleted,
 it will be created with these defaults when mconfig.py is called anytime Marmot
 is run.</p>
+<p>The default config settings are as follows:</p>
+<ul>
+<li><p><strong>font_settings:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>xtick_size: 12</p></li>
+<li><p>ytick_size: 12</p></li>
+<li><p>axes_label_size: 16</p></li>
+<li><p>legend_size: 12</p></li>
+<li><p>title_size: 16</p></li>
+<li><p>font_family: serif</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p><em>Settings to adjust font sizes, family, and tick size within figures</em></p>
+<ul>
+<li><p><strong>text_position:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>title_height: 40</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p><em>Adjust the position of text relative to the edge of the plot (matplotlib points)</em></p>
+<ul>
+<li><p><strong>figure_size:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>xdimension: 6</p></li>
+<li><p>ydimension: 4</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p><em>Adjust the x and y-axes dimensions of the output figure</em></p>
+<ul>
+<li><p><strong>axes_options:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>x_axes_maxticks: 8</p></li>
+<li><p>x_axes_minticks: 4</p></li>
+<li><p>y_axes_decimalpt: 1</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p><em>Allows adjustment of the minimum and maximum tick marks on datetime x-axes and the number of decimal
+points to include on the y-axes</em></p>
+<ul>
+<li><p><strong>axes_label_options:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>rotate_x_labels: true</p></li>
+<li><p>rotate_at_num_labels: 7</p></li>
+<li><p>rotation_angle: 45</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p><em>Controls whether x-axes labels are rotated from their default horizontal (0 degrees),
+and at what number of labels to begin rotating to the specified rotation_angle.
+By default, labels will begin rotating at 7 labels to an angle of 45 degrees from 0 degrees</em></p>
+<ul>
+<li><p><strong>plot_data:</strong></p>
+<blockquote>
+<div><ul class="simple">
+<li><p>curtailment_property: Curtailment</p></li>
+<li><p>include_total_pumped_load_line: false</p></li>
+<li><p>include_timeseries_pumped_load_line: true</p></li>
+</ul>
+</div></blockquote>
+</li>
+</ul>
+<p><em>Controls certain plot data settings. `curtailment_property` source of Curtailment data.
+The code defaults to Marmot’s calculated Curtailment property. `include_total_pumped_load_line`
+specifies whether to include the line representing pumped load in total generation bar plots.
+`include_timeseries_pumped_load_line` specifies whether to include the line representing pumped load
+in timeseries generation plots</em></p>
+<ul class="simple">
+<li><p><strong>figure_file_format:</strong> svg</p></li>
+</ul>
+<p><em>Adjust the plot image format. The default is **svg*</em>, a vector-based image.
+This field accepts any format that is compatible with matplotlib*</p>
+<ul class="simple">
+<li><p><strong>shift_leapday:</strong> false</p></li>
+</ul>
+<p><em>Handles auto shifting of leap day, if required by your model. The default is false</em></p>
+<ul class="simple">
+<li><p><strong>skip_existing_properties:</strong> true</p></li>
+</ul>
+<p><em>Toggles whether existing properties are skipped or overwritten if they already contained in
+a previous processed_h5 file, the default is to skip</em></p>
+<ul class="simple">
+<li><p><strong>auto_convert_units:</strong> true</p></li>
+</ul>
+<p><em>If True automatically converts Energy and Capacity units so that no number exceeds 1000.
+All base units are in MW, and units can be converted to GW, TW and kW</em></p>
+<ul class="simple">
+<li><p><strong>plot_title_as_region:</strong> true</p></li>
+</ul>
+<p><em>If True a the region/zone name will be added as a title to the figure</em></p>
+<ul class="simple">
+<li><p><strong>user_defined_inputs_file:</strong> Marmot_user_defined_inputs.csv</p></li>
+</ul>
+<p><em>Change the default Marmot_user_defined_inputs file, file must be created first</em></p>
+<ul class="simple">
+<li><p><strong>plot_select_file:</strong> Marmot_plot_select.csv</p></li>
+</ul>
+<p><em>Change the default Marmot_plot_select.csv file, file must be created first</em></p>
+<ul class="simple">
+<li><p><strong>plexos_properties_file:</strong> plexos_properties.csv</p></li>
+</ul>
+<p><em>Change the default plexos_properties_file.csv file, file must be created first</em></p>
+<ul class="simple">
+<li><p><strong>color_dictionary_file:</strong> colour_dictionary.csv</p></li>
+</ul>
+<p><em>Change the default color dictionary file that lives within the Mapping Folder, file must be created first</em></p>
+<ul class="simple">
+<li><p><strong>ordered_gen_categories :</strong> ordered_gen_categories.csv</p></li>
+</ul>
+<p><em>Change the default ordered_gen_categories file that lives within the Mapping Folder, file must be created first</em></p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>configfile_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to config.yml file</p>
@@ -162,7 +288,7 @@ is run.</p>
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/marmot/config/mconfig.html#parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Pull requested value from config.yml file</p>
+<dd><p>Pull requested value from config.yml file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -174,13 +300,8 @@ Defaults to None.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p><p><em>Union[dict, str, int, float]</em> –</p>
-<dl class="simple">
-<dt>Returns the requested level</dt><dd><p>or value from the config file. Return type varies based on
-on level accessed.</p>
-</dd>
-</dl>
-</p>
+<dd class="field-even"><p><em>Union[dict, str, int, float]</em> – Returns the requested level or value from the config file.
+Return type varies based on level accessed.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -188,7 +309,7 @@ on level accessed.</p>
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">edit_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_value</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">top_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/config/mconfig.html#edit_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Edit the config.yml file through code</p>
+<dd><p>Edit the config.yml file through code.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -206,7 +327,7 @@ Defaults to None.</p></li>
 <dl class="py function">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">reset_defaults</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/config/mconfig.html#reset_defaults"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>When called, resets config.yml to default values</p>
+<dd><p>When called, resets config.yml to default values.</p>
 </dd></dl>
 
 </section>

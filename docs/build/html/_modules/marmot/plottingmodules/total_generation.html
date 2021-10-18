@@ -37,7 +37,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -135,10 +140,10 @@
              
   <h1>Source code for marmot.plottingmodules.total_generation</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Created on Mon Dec  9 13:20:56 2019</span>
+<span class="sd">&quot;&quot;&quot;Total generation plots.</span>
 
 <span class="sd">This module plots figures of total generation for a year, month etc.</span>
+
 <span class="sd">@author: Daniel Levie </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -166,7 +171,7 @@
                                      <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Unserved_Energy&#39;</span><span class="p">)</span>
 
 <div class="viewcode-block" id="MPlot"><a class="viewcode-back" href="../../../references/code/marmot.plottingmodules.total_generation.html#marmot.plottingmodules.total_generation.MPlot">[docs]</a><span class="k">class</span> <span class="nc">MPlot</span><span class="p">(</span><span class="n">PlotDataHelper</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Marmot MPlot class, common across all plotting modules.</span>
+    <span class="sd">&quot;&quot;&quot;total_generation MPlot class.</span>
 
 <span class="sd">    All the plotting modules use this same class name.</span>
 <span class="sd">    This class contains plotting methods that are grouped based on the</span>
@@ -196,8 +201,7 @@
             <span class="p">}</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;MPlot init method</span>
-
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            argument_dict (dict): Dictionary containing all</span>
 <span class="sd">                arguments passed from MarmotPlot.</span>

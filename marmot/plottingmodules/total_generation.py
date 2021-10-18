@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  9 13:20:56 2019
+"""Total generation plots.
 
 This module plots figures of total generation for a year, month etc.
+
 @author: Daniel Levie 
 """
 
@@ -30,7 +30,7 @@ custom_legend_elements_month = Patch(facecolor='#DD0200',alpha=0.7,
                                      label='Unserved_Energy')
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """total_generation MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -60,8 +60,7 @@ class MPlot(PlotDataHelper):
             }
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

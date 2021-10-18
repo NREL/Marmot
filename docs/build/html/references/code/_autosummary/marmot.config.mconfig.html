@@ -40,7 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -140,10 +145,8 @@
              
   <section id="module-marmot.config.mconfig">
 <span id="marmot-config-mconfig"></span><h1>marmot.config.mconfig<a class="headerlink" href="#module-marmot.config.mconfig" title="Permalink to this headline"></a></h1>
-<p>Created on Tue Jan 19 17:44:11 2021</p>
-<p>&#64;author: Daniel Levie</p>
-<p>This module creates the default config.yml file that is used by Marmot.
-The parser function is used to parse information from the config file.
+<p>This module creates the default config.yml file that is used by Marmot.</p>
+<p>The parser function is used to parse information from the config file.
 The defaults defined here should not be modifed by any user,
 instead edit the values directly in the config.yml file once created.</p>
 <p class="rubric">Functions</p>
@@ -157,13 +160,13 @@ instead edit the values directly in the config.yml file once created.</p>
 <td><p>Creates config.yml file using default values.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="marmot.config.mconfig.edit_value.html#marmot.config.mconfig.edit_value" title="marmot.config.mconfig.edit_value"><code class="xref py py-obj docutils literal notranslate"><span class="pre">edit_value</span></code></a>(new_value, top_level[, second_level])</p></td>
-<td><p>Edit the config.yml file through code</p></td>
+<td><p>Edit the config.yml file through code.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="marmot.config.mconfig.parser.html#marmot.config.mconfig.parser" title="marmot.config.mconfig.parser"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parser</span></code></a>(top_level[, second_level])</p></td>
-<td><p>Pull requested value from config.yml file</p></td>
+<td><p>Pull requested value from config.yml file.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="marmot.config.mconfig.reset_defaults.html#marmot.config.mconfig.reset_defaults" title="marmot.config.mconfig.reset_defaults"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reset_defaults</span></code></a>()</p></td>
-<td><p>When called, resets config.yml to default values</p></td>
+<td><p>When called, resets config.yml to default values.</p></td>
 </tr>
 </tbody>
 </table>

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
+"""System sensitivity plots
+
 This module contains methods that are
 related to investigating generator and other device sensitivities. 
 """
@@ -22,7 +23,7 @@ custom_legend_elements = [Patch(facecolor='#DD0200',
                          label='Unserved Energy')]
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """sensitivities MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -35,8 +36,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

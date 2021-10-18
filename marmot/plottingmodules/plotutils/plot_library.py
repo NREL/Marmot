@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 17 10:34:06 2021
+"""Plot library for creating regularly used plot types.
 
-Plot library for creating regularly used plot types
 @author: Daniel Levie
 """
 
@@ -127,6 +125,7 @@ def create_stacked_bar_plot(df: pd.DataFrame, colour: dict, angle: int = 0,
     """Creates a stacked bar plot
 
     Wrapper around pandas.plot.bar
+
     Args:
         df (pd.DataFrame): DataFrame of data to plot.
         colour (dict): dictionary of colours, dict keys should be 
@@ -165,7 +164,7 @@ def create_stacked_bar_plot(df: pd.DataFrame, colour: dict, angle: int = 0,
 def create_clustered_stacked_bar_plot(df_list: List[pd.DataFrame], 
                                       ax, labels: list, color_dict: dict, 
                                       title: str = "",  H: str = "//", **kwargs):
-    """Given a bar plot with both stacked and unstacked bars.
+    """Creates a clustered stacked barplot.
 
     Args:
         df_list (List[pd.DataFrame, pd.DataFrame]): List of Pandas DataFrames

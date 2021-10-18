@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Jan 21 15:59:45 2020
-Updated on Monday 21 Sep 2020
+"""Generator reserve plots.
 
 This module creates plots of reserve provision and shortage at the generation 
 and region level.
+
 @author: Daniel Levie
 """
 
@@ -24,7 +23,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """reserves MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -37,8 +36,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.
@@ -76,8 +74,10 @@ class MPlot(PlotDataHelper):
             prop (str, optional): Special argument used to adjust specific 
                 plot settings. Controlled through the plot_select.csv.
                 Opinions available are:
-                    - Peak Demand
-                    - Date Range
+
+                - Peak Demand
+                - Date Range
+                
                 Defaults to None.
             start (float, optional): Used in conjunction with the prop argument.
                 Will define the number of days to plot before a certain event in 

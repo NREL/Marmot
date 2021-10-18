@@ -40,7 +40,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -140,7 +145,7 @@
              
   <section id="module-marmot.marmot_h5_formatter">
 <span id="marmot-marmot-h5-formatter"></span><h1>marmot.marmot_h5_formatter<a class="headerlink" href="#module-marmot.marmot_h5_formatter" title="Permalink to this headline"></a></h1>
-<p>First Created on Wed May 22 14:29:48 2019</p>
+<p>Main formatting source code to format modelling results for plotting.</p>
 <p>This code was written to process PLEXOS HDF5 outputs to get them ready for plotting.
 Once the data is processed it is outputted as an intermediary HDF5 file format so that
 it can be read into the marmot_plot_main.py file</p>
@@ -153,7 +158,7 @@ it can be read into the marmot_plot_main.py file</p>
 </colgroup>
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="marmot.marmot_h5_formatter.main.html#marmot.marmot_h5_formatter.main" title="marmot.marmot_h5_formatter.main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">main</span></code></a>()</p></td>
-<td><p>The following code is run if the formatter is run directly, it does not run if the formatter is imported as a module.</p></td>
+<td><p>Run the formatting code and format desired properties based on user input files.</p></td>
 </tr>
 </tbody>
 </table>
@@ -168,7 +173,7 @@ it can be read into the marmot_plot_main.py file</p>
 <td><p>Main module class to be instantiated to run the formatter.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="marmot.marmot_h5_formatter.Process.html#marmot.marmot_h5_formatter.Process" title="marmot.marmot_h5_formatter.Process"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Process</span></code></a>(df, metadata, model, Region_Mapping, ...)</p></td>
-<td><p>Contains methods for processing h5plexos query data.</p></td>
+<td><p>Process PLEXOS class specific data from h5plexos database.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="marmot.marmot_h5_formatter.SetupLogger.html#marmot.marmot_h5_formatter.SetupLogger" title="marmot.marmot_h5_formatter.SetupLogger"><code class="xref py py-obj docutils literal notranslate"><span class="pre">SetupLogger</span></code></a>([log_directory, log_suffix])</p></td>
 <td><p>Sets up the python logger.</p></td>

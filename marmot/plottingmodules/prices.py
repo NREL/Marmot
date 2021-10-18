@@ -1,7 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-price analysis plots, price duration curves and timeseries plots.
+"""Locational price analysis plots.
+
+Price analysis plots, price duration curves and timeseries plots.
 Prices plotted in $/MWh
+
 @author: adyreson and Daniel Levie
 """
 
@@ -19,7 +21,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """price MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -32,8 +34,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

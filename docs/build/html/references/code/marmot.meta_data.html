@@ -38,7 +38,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -136,9 +141,8 @@
              
   <section id="marmot-meta-data-module">
 <h1>marmot.meta_data module<a class="headerlink" href="#marmot-meta-data-module" title="Permalink to this headline"></a></h1>
-<p>Created on Mon Jun 22 16:14:56 2020</p>
-<p>Module to retrieve metadata from
-production cost modelling results
+<p>Retrieve metadata from PLEXOS production cost modelling results.</p>
+<p>Database can be either a h5plexos file or a formatted MArmot hdf5 files
 &#64;author: Ryan Houseman</p>
 <dl class="py class">
 <dt class="sig sig-object py">
@@ -166,7 +170,6 @@ original plexos solution h5 files.</p>
 </dl>
 </dd></dl>
 
-<p>MetaData init method</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -194,13 +197,13 @@ metadata from in the formatted h5 file. Defaults to 0.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py">
 <em class="property"><span class="pre">classmethod</span> </em><span class="sig-name descname"><span class="pre">close_h5</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.close_h5"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Closes h5 file open in memory</p>
+<dd><p>Closes h5 file open in memory.</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">generator_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.generator_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Generator categories mapping</p>
+<dd><p>Generator categories mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -212,7 +215,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">region_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.region_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Region generators mapping</p>
+<dd><p>Region generators mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -224,7 +227,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">region_generator_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.region_generator_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Region generators category mapping</p>
+<dd><p>Region generators category mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -236,7 +239,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zone_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.zone_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Zone generators mapping</p>
+<dd><p>Zone generators mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -248,7 +251,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zone_generator_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.zone_generator_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Zone generators category mapping</p>
+<dd><p>Zone generators category mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -260,7 +263,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">generator_storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.generator_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Generator Storage mapping</p>
+<dd><p>Generator Storage mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -272,7 +275,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">node_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.node_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Node Region mapping</p>
+<dd><p>Node Region mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -284,7 +287,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">node_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.node_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Node zone mapping</p>
+<dd><p>Node zone mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -296,7 +299,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">generator_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.generator_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>generator node mapping</p>
+<dd><p>generator node mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -308,7 +311,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Region objects</p>
+<dd><p>Region objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -320,7 +323,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.zones"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Zone objects</p>
+<dd><p>Zone objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -332,7 +335,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Line objects</p>
+<dd><p>Line objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -344,7 +347,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">region_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.region_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Region-region mapping</p>
+<dd><p>Region-region mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -356,7 +359,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">region_interregionallines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.region_interregionallines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Region inter-regional lines mapping</p>
+<dd><p>Region inter-regional lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -368,7 +371,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">region_intraregionallines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.region_intraregionallines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Region intra-regional lines mapping</p>
+<dd><p>Region intra-regional lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -380,7 +383,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">region_exporting_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.region_exporting_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Region exporting lines mapping</p>
+<dd><p>Region exporting lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -392,7 +395,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">region_importing_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.region_importing_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Region importing lines mapping</p>
+<dd><p>Region importing lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -404,7 +407,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zone_interzonallines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.zone_interzonallines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>zone inter-zonal lines mapping</p>
+<dd><p>Zone inter-zonal lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -416,7 +419,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zone_intrazonallines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.zone_intrazonallines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>zone intra-zonal lines mapping</p>
+<dd><p>Zone intra-zonal lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -428,7 +431,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zone_exporting_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.zone_exporting_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>zone exporting lines mapping</p>
+<dd><p>Zone exporting lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -440,7 +443,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zone_importing_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.zone_importing_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>zone importing lines mapping</p>
+<dd><p>Zone importing lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -452,7 +455,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">interface_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.interface_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Interface -&gt; lines mapping</p>
+<dd><p>Interface to lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -464,7 +467,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">region_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.region_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Lines within each region</p>
+<dd><p>Region to Lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -476,7 +479,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">zone_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.zone_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Lines within each zone</p>
+<dd><p>Zone to Lines mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -488,7 +491,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">reserves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.reserves"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Reserves objects</p>
+<dd><p>Reserves objects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -500,7 +503,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">reserves_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Reserves generators mapping</p>
+<dd><p>Reserves to generators mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -512,7 +515,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">reserves_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.reserves_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Reserves regions mapping</p>
+<dd><p>Reserves to regions mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.
@@ -524,7 +527,7 @@ If retreiving from fromatted h5 file, just pass scenario name.</p>
 <dl class="py method">
 <dt class="sig sig-object py">
 <span class="sig-name descname"><span class="pre">reserves_zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../_modules/marmot/meta_data.html#MetaData.reserves_zones"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
-<dd><p>Reserves zones mapping</p>
+<dd><p>Reserves to zones mapping.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>filename</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – The name of the h5 file to retreive data from.

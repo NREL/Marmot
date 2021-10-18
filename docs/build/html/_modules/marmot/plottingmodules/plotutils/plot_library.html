@@ -37,7 +37,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -135,10 +140,8 @@
              
   <h1>Source code for marmot.plottingmodules.plotutils.plot_library</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Created on Fri Sep 17 10:34:06 2021</span>
+<span class="sd">&quot;&quot;&quot;Plot library for creating regularly used plot types.</span>
 
-<span class="sd">Plot library for creating regularly used plot types</span>
 <span class="sd">@author: Daniel Levie</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -263,6 +266,7 @@
     <span class="sd">&quot;&quot;&quot;Creates a stacked bar plot</span>
 
 <span class="sd">    Wrapper around pandas.plot.bar</span>
+
 <span class="sd">    Args:</span>
 <span class="sd">        df (pd.DataFrame): DataFrame of data to plot.</span>
 <span class="sd">        colour (dict): dictionary of colours, dict keys should be </span>
@@ -301,7 +305,7 @@
 <div class="viewcode-block" id="create_clustered_stacked_bar_plot"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_library.html#marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot">[docs]</a><span class="k">def</span> <span class="nf">create_clustered_stacked_bar_plot</span><span class="p">(</span><span class="n">df_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> 
                                       <span class="n">ax</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">color_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> 
                                       <span class="n">title</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>  <span class="n">H</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;//&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Given a bar plot with both stacked and unstacked bars.</span>
+    <span class="sd">&quot;&quot;&quot;Creates a clustered stacked barplot.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        df_list (List[pd.DataFrame, pd.DataFrame]): List of Pandas DataFrames</span>

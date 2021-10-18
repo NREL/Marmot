@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  9 10:34:48 2019
+"""Hydro generator plots.
 
-This module creates hydro analysis plots
+This module creates hydro analysis plots.
 
 DL: Oct 9th 2021, This plot is in need of work. 
 It may not produce production ready figures.
@@ -30,7 +29,7 @@ custom_legend_elements = [Patch(facecolor='#DD0200',
                          label='Unserved Energy')]
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """hydro MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -43,8 +42,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

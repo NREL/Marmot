@@ -37,7 +37,12 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
@@ -135,12 +140,11 @@
              
   <h1>Source code for marmot.plottingmodules.reserves</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">Created on Tue Jan 21 15:59:45 2020</span>
-<span class="sd">Updated on Monday 21 Sep 2020</span>
+<span class="sd">&quot;&quot;&quot;Generator reserve plots.</span>
 
 <span class="sd">This module creates plots of reserve provision and shortage at the generation </span>
 <span class="sd">and region level.</span>
+
 <span class="sd">@author: Daniel Levie</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
@@ -160,7 +164,7 @@
 
 
 <div class="viewcode-block" id="MPlot"><a class="viewcode-back" href="../../../references/code/marmot.plottingmodules.reserves.html#marmot.plottingmodules.reserves.MPlot">[docs]</a><span class="k">class</span> <span class="nc">MPlot</span><span class="p">(</span><span class="n">PlotDataHelper</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Marmot MPlot class, common across all plotting modules.</span>
+    <span class="sd">&quot;&quot;&quot;reserves MPlot class.</span>
 
 <span class="sd">    All the plotting modules use this same class name.</span>
 <span class="sd">    This class contains plotting methods that are grouped based on the</span>
@@ -173,8 +177,7 @@
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;MPlot init method</span>
-
+        <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            argument_dict (dict): Dictionary containing all</span>
 <span class="sd">                arguments passed from MarmotPlot.</span>
@@ -212,8 +215,10 @@
 <span class="sd">            prop (str, optional): Special argument used to adjust specific </span>
 <span class="sd">                plot settings. Controlled through the plot_select.csv.</span>
 <span class="sd">                Opinions available are:</span>
-<span class="sd">                    - Peak Demand</span>
-<span class="sd">                    - Date Range</span>
+
+<span class="sd">                - Peak Demand</span>
+<span class="sd">                - Date Range</span>
+<span class="sd">                </span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            start (float, optional): Used in conjunction with the prop argument.</span>
 <span class="sd">                Will define the number of days to plot before a certain event in </span>
