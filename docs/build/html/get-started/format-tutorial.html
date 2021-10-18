@@ -46,7 +46,11 @@
 <li class="toctree-l3"><a class="reference internal" href="install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial: Formatting PLEXOS modelling results</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial: Formatting PLEXOS modelling results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#your-input-data-and-how-to-organize-it">Your input data and how to organize it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-the-input-files">Setting up the input files</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
 </li>
@@ -144,6 +148,40 @@
              
   <section id="tutorial-formatting-plexos-modelling-results">
 <h1>Tutorial: Formatting PLEXOS modelling results<a class="headerlink" href="#tutorial-formatting-plexos-modelling-results" title="Permalink to this headline"></a></h1>
+<p>This is an introductory tutorial on formatting PLEXOS modelling results with Marmot.
+By the end of this tutorial you will have completed the following:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Set up your input data folders.</p></li>
+<li><p>Set up the user input files required for formatting.</p></li>
+<li><p>Run the formatter and created Marmot formatted h5 files.</p></li>
+</ol>
+</div></blockquote>
+<p><strong>Before you do anything else</strong>, make sure you have installed Marmot and its prerequisites correctly
+by following the <a class="reference internal" href="install.html#install-the-marmot-software"><span class="std std-ref">Install the Marmot software</span></a> instructions.</p>
+<section id="your-input-data-and-how-to-organize-it">
+<h2>Your input data and how to organize it<a class="headerlink" href="#your-input-data-and-how-to-organize-it" title="Permalink to this headline"></a></h2>
+<p>For this tutorial we will use example data located in the
+<a class="reference external" href="https://github.com/NREL/Marmot/tree/sphinx-docs/example-data">Marmot/example-data</a> folder.
+This folder contains two sets of example data, 5 minute and hourly.
+We will work with the hourly data.</p>
+<p>Copy the <strong>hourly</strong> folder to a directory of your choosing.
+Once you open the hourly data folder you will see the following sub-folders:</p>
+<img alt="../_images/hourly-data-folder.png" src="../_images/hourly-data-folder.png" />
+<p><strong>Base DA</strong> and <strong>High VG DA</strong> contain data that are grouped together under the same scenario.
+The name of the folder is the scenario name and is an important identifier in Marmot.
+Depending on how a user has setup their PLEXOS model, this folder should contain 1 or more files that are
+temporally disaggregated.</p>
+<img alt="../_images/h5-files.png" src="../_images/h5-files.png" />
+<p>These scenario folders contain two files each, broken into monthly data sets.
+The files are h5 files and are what the Marmot formatter expects as an input.
+See <a class="reference external" href="https://github.com/NREL/h5plexos">h5plexos</a> for an explanation on how these files are created.</p>
+</section>
+<section id="setting-up-the-input-files">
+<h2>Setting up the input files<a class="headerlink" href="#setting-up-the-input-files" title="Permalink to this headline"></a></h2>
+<p>To let Marmot know where our data is stored and which properties we would like to process,
+we need to setup our input files.</p>
+</section>
 </section>
 
 
