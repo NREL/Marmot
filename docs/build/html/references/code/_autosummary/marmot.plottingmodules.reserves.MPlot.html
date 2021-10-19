@@ -1,34 +1,69 @@
-<!DOCTYPE html>
-<html class="writer-html5" lang="en" >
-<head>
-  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>marmot.plottingmodules.reserves.MPlot &mdash; Marmot 0.9.0 documentation</title>
-      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <!--[if lt IE 9]>
-    <script src="../../../_static/js/html5shiv.min.js"></script>
-  <![endif]-->
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
   
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>marmot.plottingmodules.reserves.MPlot &mdash; Marmot 0.9.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
         <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
         <script src="../../../_static/jquery.js"></script>
         <script src="../../../_static/underscore.js"></script>
         <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/js/theme.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="marmot.plottingmodules.sensitivities" href="marmot.plottingmodules.sensitivities.html" />
     <link rel="prev" title="marmot.plottingmodules.reserves" href="marmot.plottingmodules.reserves.html" /> 
 </head>
 
-<body class="wy-body-for-nav"> 
+<body class="wy-body-for-nav">
+
+   
   <div class="wy-grid-for-nav">
+    
     <nav data-toggle="wy-nav-shift" class="wy-nav-side">
       <div class="wy-side-scroll">
         <div class="wy-side-nav-search" >
+          
+
+          
             <a href="../../../index.html" class="icon icon-home"> Marmot
+          
+
+          
           </a>
+
+          
+            
+            
+          
+
+          
 <div role="search">
   <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
     <input type="text" name="q" placeholder="Search docs" />
@@ -36,8 +71,18 @@
     <input type="hidden" name="area" value="default" />
   </form>
 </div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
@@ -46,7 +91,16 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#your-input-data-and-how-to-organize-it">Your input data and how to organize it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/format-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/format-tutorial.html#plexos-properties">plexos_properties</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#running-the-formatter">Running the formatter</a></li>
+</ul>
+</li>
 <li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
 </ul>
 </li>
@@ -117,38 +171,79 @@
 </li>
 </ul>
 
+            
+          
         </div>
       </div>
     </nav>
 
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
           <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
           <a href="../../../index.html">Marmot</a>
+        
       </nav>
 
+
       <div class="wy-nav-content">
+        
         <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
   <ul class="wy-breadcrumbs">
-      <li><a href="../../../index.html" class="icon icon-home"></a> &raquo;</li>
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
           <li><a href="../../index.html">References</a> &raquo;</li>
+        
           <li><a href="../modules.html">Code Reference</a> &raquo;</li>
+        
           <li><a href="marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a> &raquo;</li>
+        
       <li>marmot.plottingmodules.reserves.MPlot</li>
+    
+    
       <li class="wy-breadcrumbs-aside">
+        
+            
             <a href="../../../_sources/references/code/_autosummary/marmot.plottingmodules.reserves.MPlot.rst.txt" rel="nofollow"> View page source</a>
+          
+        
       </li>
+    
   </ul>
+
+  
   <hr/>
 </div>
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
-             
-  <section id="marmot-plottingmodules-reserves-mplot">
-<h1>marmot.plottingmodules.reserves.MPlot<a class="headerlink" href="#marmot-plottingmodules-reserves-mplot" title="Permalink to this headline"></a></h1>
+            
+  <div class="section" id="marmot-plottingmodules-reserves-mplot">
+<h1>marmot.plottingmodules.reserves.MPlot<a class="headerlink" href="#marmot-plottingmodules-reserves-mplot" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot" title="Permalink to this definition"></a></dt>
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper</span></code></a></p>
 <p>reserves MPlot class.</p>
 <p>All the plotting modules use this same class name.
@@ -179,20 +274,20 @@ arguments passed from MarmotPlot.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage_hrs</span></code></a>(**kwargs)</p></td>
 <td><p>creates a bar plot of reserve shortage for each region in hrs.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage_timeseries</span></code></a>([...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage_timeseries</span></code></a>([…])</p></td>
 <td><p>Creates a timeseries line plot of reserve shortage.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries" title="marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reserve_gen_timeseries</span></code></a>([figure_name, prop, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries" title="marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reserve_gen_timeseries</span></code></a>([figure_name, prop, …])</p></td>
 <td><p>Creates a generation timeseries stackplot of total cumulative reserve provision by tech type.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen" title="marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_reserves_by_gen</span></code></a>([start_date_range, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen" title="marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_reserves_by_gen</span></code></a>([start_date_range, …])</p></td>
 <td><p>Creates a generation stacked barplot of total reserve provision by generator tech type.</p></td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries">
-<span class="sig-name descname"><span class="pre">reserve_gen_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reserve_gen_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reserve_gen_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reserve_gen_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a generation timeseries stackplot of total cumulative reserve provision by tech type.</p>
 <p>The code will create either a facet plot or a single plot depending on
 if the Facet argument is active.
@@ -239,7 +334,7 @@ Defaults to None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen">
-<span class="sig-name descname"><span class="pre">total_reserves_by_gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.total_reserves_by_gen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">total_reserves_by_gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.total_reserves_by_gen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a generation stacked barplot of total reserve provision by generator tech type.</p>
 <p>A separate bar is created for each scenario.</p>
 <dl class="field-list simple">
@@ -259,7 +354,7 @@ Defaults to None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage">
-<span class="sig-name descname"><span class="pre">reg_reserve_shortage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reg_reserve_shortage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a bar plot of reserve shortage for each region in MWh.</p>
 <p>Bars are grouped by reserve type, each scenario is plotted as a differnet color.</p>
 <p>The ‘Shortage’ argument is passed to the _reserve_bar_plots() method to
@@ -273,7 +368,7 @@ create this plot.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reg_reserve_provision">
-<span class="sig-name descname"><span class="pre">reg_reserve_provision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_provision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_provision" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reg_reserve_provision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_provision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_provision" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a bar plot of reserve provision for each region in MWh.</p>
 <p>Bars are grouped by reserve type, each scenario is plotted as a differnet color.</p>
 <p>The ‘Provision’ argument is passed to the _reserve_bar_plots() method to
@@ -287,7 +382,7 @@ create this plot.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs">
-<span class="sig-name descname"><span class="pre">reg_reserve_shortage_hrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage_hrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reg_reserve_shortage_hrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage_hrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs" title="Permalink to this definition">¶</a></dt>
 <dd><p>creates a bar plot of reserve shortage for each region in hrs.</p>
 <p>Bars are grouped by reserve type, each scenario is plotted as a differnet color.</p>
 <p>The ‘Shortage’ argument and count_hours=True is passed to the _reserve_bar_plots() method to
@@ -301,7 +396,7 @@ create this plot.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries">
-<span class="sig-name descname"><span class="pre">reg_reserve_shortage_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries" title="Permalink to this definition"></a></dt>
+<span class="sig-name descname"><span class="pre">reg_reserve_shortage_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a timeseries line plot of reserve shortage.</p>
 <p>A line is plotted for each reserve type shortage.</p>
 <p>The code will create either a facet plot or a single plot depending on
@@ -331,37 +426,55 @@ Defaults to None.</p></li>
 
 </dd></dl>
 
-</section>
+</div>
 
 
            </div>
+           
           </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="marmot.plottingmodules.reserves.html" class="btn btn-neutral float-left" title="marmot.plottingmodules.reserves" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="marmot.plottingmodules.sensitivities.html" class="btn btn-neutral float-right" title="marmot.plottingmodules.sensitivities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="marmot.plottingmodules.sensitivities.html" class="btn btn-neutral float-right" title="marmot.plottingmodules.sensitivities" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="marmot.plottingmodules.reserves.html" class="btn btn-neutral float-left" title="marmot.plottingmodules.reserves" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
     </div>
+  
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright 2021, Alliance for Sustainable Energy, LLC.</p>
-  </div>
+    <p>
+        &copy; Copyright 2021, Alliance for Sustainable Energy, LLC
 
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
 
 </footer>
+
         </div>
       </div>
+
     </section>
+
   </div>
-  <script>
+  
+
+
+  <script type="text/javascript">
       jQuery(function () {
           SphinxRtdTheme.Navigation.enable(true);
       });
-  </script> 
+  </script>
+
+  
+  
+    
+   
 
 </body>
 </html>

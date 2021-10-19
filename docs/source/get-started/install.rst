@@ -1,3 +1,9 @@
+.. raw:: html
+
+    <style>
+        h2  {border-bottom: 1px solid gray;}
+    </style>
+
 
 Install the Marmot software
 =============================

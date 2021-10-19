@@ -1,3 +1,9 @@
+.. raw:: html
+
+    <style>
+        h2  {border-bottom: 1px solid gray;}
+    </style>
+
 
 Tutorial: Formatting PLEXOS modelling results 
 ===============================================
@@ -45,6 +51,7 @@ Setting up the input files
 To let Marmot know where our data is stored and which properties we would like to process,
 we need to setup our input files. 
 
+
 Marmot_user_defined_input
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -72,6 +79,7 @@ the input files. For this tutorial we will save our outputs in the same location
 Setup the 3 rows using your inputs, they should look something like this when you're finished:
 
 .. image:: ../images/user-defined-inputs-format-values.png
+
 
 plexos_properties
 ~~~~~~~~~~~~~~~~~~~
@@ -126,6 +134,9 @@ Marmot will now begin formatting your properties and will print messages to the 
 Once completed the formatted outputs will be located in a new folder called **Processed_HDF5_folder**
 within the **hourly** data folder. When you open this folder you will see the following h5 files:
 
+.. image:: ../images/processed-h5-files.png
+
+Congratulations, you have successfully formatted PLEXOS results with Marmot and are now ready to plot.
 
 
 
