@@ -1,0 +1,432 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>Code Reference &mdash; Marmot 0.9.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+        <script data-url_root="../../" id="documentation_options" src="../../_static/documentation_options.js"></script>
+        <script src="../../_static/jquery.js"></script>
+        <script src="../../_static/underscore.js"></script>
+        <script src="../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="marmot.marmot_h5_formatter" href="_autosummary/marmot.marmot_h5_formatter.html" />
+    <link rel="prev" title="Region Mapping: csv file" href="../input-files/mapping-folder/region_mapping.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../index.html" class="icon icon-home"> Marmot
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../get-started/index.html">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/format-tutorial.html#your-input-data-and-how-to-organize-it">Your input data and how to organize it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/format-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../get-started/format-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../get-started/format-tutorial.html#plexos-properties">plexos_properties</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/format-tutorial.html#running-the-formatter">Running the formatter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../get-started/plot-tutorial.html">Tutorial: Creating plots and data-tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/plot-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../get-started/plot-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../get-started/plot-tutorial.html#marmot-plot-select">Marmot_plot_select</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../get-started/plot-tutorial.html#running-the-plotter">Running the Plotter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../how-to/index.html">How-to Guides</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../index.html">References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Code Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#initialization-code">Initialization Code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.meta_data.html">marmot.meta_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#config-package">Config Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">Marmot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../index.html">References</a> &raquo;</li>
+        
+      <li>Code Reference</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../_sources/references/code/modules.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="code-reference">
+<h1>Code Reference<a class="headerlink" href="#code-reference" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="initialization-code">
+<h2>Initialization Code<a class="headerlink" href="#initialization-code" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.marmot_h5_formatter.html#module-marmot.marmot_h5_formatter" title="marmot.marmot_h5_formatter"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.marmot_h5_formatter</span></code></a></p></td>
+<td><p>Main formatting source code to format modelling results for plotting.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.marmot_plot_main.html#module-marmot.marmot_plot_main" title="marmot.marmot_plot_main"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.marmot_plot_main</span></code></a></p></td>
+<td><p>Main plotting source code, creates output figures and data-tables.</p></td>
+</tr>
+</tbody>
+</table>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.meta_data.html#module-marmot.meta_data" title="marmot.meta_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.meta_data</span></code></a></p></td>
+<td><p>Retrieve metadata from PLEXOS production cost modelling results.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="config-package">
+<h2>Config Package<a class="headerlink" href="#config-package" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.config.mconfig.html#module-marmot.config.mconfig" title="marmot.config.mconfig"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.config.mconfig</span></code></a></p></td>
+<td><p>This module creates the default config.yml file that is used by Marmot.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="plotting-modules-package">
+<h2>Plotting Modules Package<a class="headerlink" href="#plotting-modules-package" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.capacity_factor.html#module-marmot.plottingmodules.capacity_factor" title="marmot.plottingmodules.capacity_factor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.capacity_factor</span></code></a></p></td>
+<td><p>Generator capacity factor plots .</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.capacity_out.html#module-marmot.plottingmodules.capacity_out" title="marmot.plottingmodules.capacity_out"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.capacity_out</span></code></a></p></td>
+<td><p>Generator outage plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.curtailment.html#module-marmot.plottingmodules.curtailment" title="marmot.plottingmodules.curtailment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.curtailment</span></code></a></p></td>
+<td><p>Device curtailment plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.emissions.html#module-marmot.plottingmodules.emissions" title="marmot.plottingmodules.emissions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.emissions</span></code></a></p></td>
+<td><p>Generator emissions plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.generation_stack.html#module-marmot.plottingmodules.generation_stack" title="marmot.plottingmodules.generation_stack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.generation_stack</span></code></a></p></td>
+<td><p>Timeseries generation stacked area plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.generation_unstack.html#module-marmot.plottingmodules.generation_unstack" title="marmot.plottingmodules.generation_unstack"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.generation_unstack</span></code></a></p></td>
+<td><p>Timeseries generation line plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.hydro.html#module-marmot.plottingmodules.hydro" title="marmot.plottingmodules.hydro"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.hydro</span></code></a></p></td>
+<td><p>Hydro generator plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.prices.html#module-marmot.plottingmodules.prices" title="marmot.plottingmodules.prices"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.prices</span></code></a></p></td>
+<td><p>Locational price analysis plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.production_cost.html#module-marmot.plottingmodules.production_cost" title="marmot.plottingmodules.production_cost"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.production_cost</span></code></a></p></td>
+<td><p>System operating cost plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.ramping.html#module-marmot.plottingmodules.ramping" title="marmot.plottingmodules.ramping"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.ramping</span></code></a></p></td>
+<td><p>Generator start and ramping plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.reserves.html#module-marmot.plottingmodules.reserves" title="marmot.plottingmodules.reserves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.reserves</span></code></a></p></td>
+<td><p>Generator reserve plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.sensitivities.html#module-marmot.plottingmodules.sensitivities" title="marmot.plottingmodules.sensitivities"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.sensitivities</span></code></a></p></td>
+<td><p>System sensitivity plots</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.storage.html#module-marmot.plottingmodules.storage" title="marmot.plottingmodules.storage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.storage</span></code></a></p></td>
+<td><p>Energy storage plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.thermal_cap_reserve.html#module-marmot.plottingmodules.thermal_cap_reserve" title="marmot.plottingmodules.thermal_cap_reserve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.thermal_cap_reserve</span></code></a></p></td>
+<td><p>Thermal capacity plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.thermal_cap_reserve.html#module-marmot.plottingmodules.thermal_cap_reserve" title="marmot.plottingmodules.thermal_cap_reserve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.thermal_cap_reserve</span></code></a></p></td>
+<td><p>Thermal capacity plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.total_generation.html#module-marmot.plottingmodules.total_generation" title="marmot.plottingmodules.total_generation"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.total_generation</span></code></a></p></td>
+<td><p>Total generation plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.total_installed_capacity.html#module-marmot.plottingmodules.total_installed_capacity" title="marmot.plottingmodules.total_installed_capacity"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.total_installed_capacity</span></code></a></p></td>
+<td><p>Generato total installed capacity plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.transmission.html#module-marmot.plottingmodules.transmission" title="marmot.plottingmodules.transmission"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.transmission</span></code></a></p></td>
+<td><p>System transmission plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.unserved_energy.html#module-marmot.plottingmodules.unserved_energy" title="marmot.plottingmodules.unserved_energy"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.unserved_energy</span></code></a></p></td>
+<td><p>System unserved energy plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.utilization_factor.html#module-marmot.plottingmodules.utilization_factor" title="marmot.plottingmodules.utilization_factor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.utilization_factor</span></code></a></p></td>
+<td><p>Note! Module is currently not production ready.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="section" id="plot-utility-package">
+<h2>Plot Utility Package<a class="headerlink" href="#plot-utility-package" title="Permalink to this headline">¶</a></h2>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html#module-marmot.plottingmodules.plotutils.plot_data_helper" title="marmot.plottingmodules.plotutils.plot_data_helper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.plotutils.plot_data_helper</span></code></a></p></td>
+<td><p>Methods used to assist with the creation of Marmot plots.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html#module-marmot.plottingmodules.plotutils.plot_exceptions" title="marmot.plottingmodules.plotutils.plot_exceptions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.plotutils.plot_exceptions</span></code></a></p></td>
+<td><p>Exception classes to handle specific actions and results.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_library.html#module-marmot.plottingmodules.plotutils.plot_library" title="marmot.plottingmodules.plotutils.plot_library"><code class="xref py py-obj docutils literal notranslate"><span class="pre">marmot.plottingmodules.plotutils.plot_library</span></code></a></p></td>
+<td><p>Plot library for creating regularly used plot types.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="_autosummary/marmot.marmot_h5_formatter.html" class="btn btn-neutral float-right" title="marmot.marmot_h5_formatter" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="../input-files/mapping-folder/region_mapping.html" class="btn btn-neutral float-left" title="Region Mapping: csv file" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alliance for Sustainable Energy, LLC
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

@@ -1,0 +1,546 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>marmot.marmot_h5_formatter.Process &mdash; Marmot 0.9.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="marmot.marmot_h5_formatter.SetupLogger" href="marmot.marmot_h5_formatter.SetupLogger.html" />
+    <link rel="prev" title="marmot.marmot_h5_formatter.MarmotFormat" href="marmot.marmot_h5_formatter.MarmotFormat.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Marmot
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#your-input-data-and-how-to-organize-it">Your input data and how to organize it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/format-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/format-tutorial.html#plexos-properties">plexos_properties</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#running-the-formatter">Running the formatter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating plots and data-tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/plot-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/plot-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/plot-tutorial.html#marmot-plot-select">Marmot_plot_select</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/plot-tutorial.html#running-the-plotter">Running the Plotter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/index.html">How-to Guides</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">References</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../../input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../modules.html">Code Reference</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="../modules.html#initialization-code">Initialization Code</a><ul class="current">
+<li class="toctree-l4 current"><a class="reference internal" href="marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.meta_data.html">marmot.meta_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules.html#config-package">Config Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../modules.html#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Marmot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">References</a> &raquo;</li>
+        
+          <li><a href="../modules.html">Code Reference</a> &raquo;</li>
+        
+          <li><a href="marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a> &raquo;</li>
+        
+      <li>marmot.marmot_h5_formatter.Process</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+            
+            <a href="../../../_sources/references/code/_autosummary/marmot.marmot_h5_formatter.Process.rst.txt" rel="nofollow"> View page source</a>
+          
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <div class="section" id="marmot-marmot-h5-formatter-process">
+<h1>marmot.marmot_h5_formatter.Process<a class="headerlink" href="#marmot-marmot-h5-formatter-process" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process">
+<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="marmot.meta_data.MetaData.html#marmot.meta_data.MetaData" title="marmot.meta_data.MetaData"><span class="pre">marmot.meta_data.MetaData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emit_names</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">logging.Logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="marmot.marmot_h5_formatter.SetupLogger.html#marmot.marmot_h5_formatter.SetupLogger" title="marmot.marmot_h5_formatter.SetupLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_h5_formatter.SetupLogger</span></code></a></p>
+<p>Process PLEXOS class specific data from h5plexos database.</p>
+<p>All methods are PLEXOS Class specific e.g generator, region, zone, line etc.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – Unprocessed h5plexos dataframe containing
+class and property specifc data.</p></li>
+<li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">MetaData</span></code>) – Instantiation of MetaData for specific
+h5plexos file.</p></li>
+<li><p><strong>model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of specific PLEXOS model partition</p></li>
+<li><p><strong>Region_Mapping</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – DataFrame to map custom
+regions/zones to create custom aggregations.</p></li>
+<li><p><strong>emit_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – DataFrame with 2 columns to rename
+emission names.</p></li>
+<li><p><strong>logger</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Logger</span></code>) – logger object from SetupLogger.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="longtable docutils align-default">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_abatement" title="marmot.marmot_h5_formatter.Process.df_process_abatement"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_abatement</span></code></a>()</p></td>
+<td><p>Format PLEXOS Abatement Class data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_constraint" title="marmot.marmot_h5_formatter.Process.df_process_constraint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_constraint</span></code></a>()</p></td>
+<td><p>Format PLEXOS Constraint Class data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_emission" title="marmot.marmot_h5_formatter.Process.df_process_emission"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_emission</span></code></a>()</p></td>
+<td><p>Format PLEXOS Emission Class data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_emissions_generators" title="marmot.marmot_h5_formatter.Process.df_process_emissions_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_emissions_generators</span></code></a>()</p></td>
+<td><p>Format PLEXOS Emissions_Generators Relational Class data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_fuel" title="marmot.marmot_h5_formatter.Process.df_process_fuel"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_fuel</span></code></a>()</p></td>
+<td><p>Format PLEXOS Fuel Class data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_generator" title="marmot.marmot_h5_formatter.Process.df_process_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_generator</span></code></a>()</p></td>
+<td><p>Format PLEXOS Generator Class data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_interface" title="marmot.marmot_h5_formatter.Process.df_process_interface"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_interface</span></code></a>()</p></td>
+<td><p>Format PLEXOS PLEXOS Interface Class data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_line" title="marmot.marmot_h5_formatter.Process.df_process_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_line</span></code></a>()</p></td>
+<td><p>Format PLEXOS Line Class data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_node" title="marmot.marmot_h5_formatter.Process.df_process_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_node</span></code></a>()</p></td>
+<td><p>Format PLEXOS Node Class data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_region" title="marmot.marmot_h5_formatter.Process.df_process_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_region</span></code></a>()</p></td>
+<td><p>Format PLEXOS Region Class data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_region_regions" title="marmot.marmot_h5_formatter.Process.df_process_region_regions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_region_regions</span></code></a>()</p></td>
+<td><p>Format PLEXOS Region_Regions Relational Class data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_reserve" title="marmot.marmot_h5_formatter.Process.df_process_reserve"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_reserve</span></code></a>()</p></td>
+<td><p>Format PLEXOS Reserve Class data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_reserves_generators" title="marmot.marmot_h5_formatter.Process.df_process_reserves_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_reserves_generators</span></code></a>()</p></td>
+<td><p>Format PLEXOS Reserve_Generators Relational Class data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_storage" title="marmot.marmot_h5_formatter.Process.df_process_storage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_storage</span></code></a>()</p></td>
+<td><p>Format PLEXOS Storage Class data.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.marmot_h5_formatter.Process.df_process_zone" title="marmot.marmot_h5_formatter.Process.df_process_zone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_zone</span></code></a>()</p></td>
+<td><p>Format PLEXOS Zone Class data.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_generator">
+<span class="sig-name descname"><span class="pre">df_process_generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_generator" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Generator Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_region">
+<span class="sig-name descname"><span class="pre">df_process_region</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_region" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Region Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_zone">
+<span class="sig-name descname"><span class="pre">df_process_zone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_zone" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Zone Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_line">
+<span class="sig-name descname"><span class="pre">df_process_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_line" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Line Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_interface">
+<span class="sig-name descname"><span class="pre">df_process_interface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_interface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_interface" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS PLEXOS Interface Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_reserve">
+<span class="sig-name descname"><span class="pre">df_process_reserve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_reserve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_reserve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Reserve Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_reserves_generators">
+<span class="sig-name descname"><span class="pre">df_process_reserves_generators</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_reserves_generators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Reserve_Generators Relational Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_fuel">
+<span class="sig-name descname"><span class="pre">df_process_fuel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_fuel"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_fuel" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Fuel Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_constraint">
+<span class="sig-name descname"><span class="pre">df_process_constraint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_constraint" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Constraint Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_emission">
+<span class="sig-name descname"><span class="pre">df_process_emission</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_emission"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_emission" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Emission Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_emissions_generators">
+<span class="sig-name descname"><span class="pre">df_process_emissions_generators</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_emissions_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_emissions_generators" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Emissions_Generators Relational Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_storage">
+<span class="sig-name descname"><span class="pre">df_process_storage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_storage" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Storage Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_region_regions">
+<span class="sig-name descname"><span class="pre">df_process_region_regions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_region_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_region_regions" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Region_Regions Relational Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_node">
+<span class="sig-name descname"><span class="pre">df_process_node</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_node" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Node Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.marmot_h5_formatter.Process.df_process_abatement">
+<span class="sig-name descname"><span class="pre">df_process_abatement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_abatement"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_h5_formatter.Process.df_process_abatement" title="Permalink to this definition">¶</a></dt>
+<dd><p>Format PLEXOS Abatement Class data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+           </div>
+           
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="marmot.marmot_h5_formatter.SetupLogger.html" class="btn btn-neutral float-right" title="marmot.marmot_h5_formatter.SetupLogger" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+      
+      
+        <a href="marmot.marmot_h5_formatter.MarmotFormat.html" class="btn btn-neutral float-left" title="marmot.marmot_h5_formatter.MarmotFormat" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alliance for Sustainable Energy, LLC
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

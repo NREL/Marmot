@@ -1,0 +1,803 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>marmot.plottingmodules.plotutils.plot_data_helper &mdash; Marmot 0.9.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
+        <script src="../../../../_static/jquery.js"></script>
+        <script src="../../../../_static/underscore.js"></script>
+        <script src="../../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../../index.html" class="icon icon-home"> Marmot
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../get-started/index.html">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/format-tutorial.html#your-input-data-and-how-to-organize-it">Your input data and how to organize it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/format-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../get-started/format-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../get-started/format-tutorial.html#plexos-properties">plexos_properties</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/format-tutorial.html#running-the-formatter">Running the formatter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../get-started/plot-tutorial.html">Tutorial: Creating plots and data-tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/plot-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../get-started/plot-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../get-started/plot-tutorial.html#marmot-plot-select">Marmot_plot_select</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../get-started/plot-tutorial.html#running-the-plotter">Running the Plotter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../how-to/index.html">How-to Guides</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../references/index.html">References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../../references/input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../references/input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../references/input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../references/input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../references/input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../../references/code/modules.html">Code Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../../references/code/modules.html#initialization-code">Initialization Code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.meta_data.html">marmot.meta_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../references/code/modules.html#config-package">Config Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../references/code/modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../references/code/modules.html#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../../index.html">Marmot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../../index.html">Module code</a> &raquo;</li>
+        
+      <li>marmot.plottingmodules.plotutils.plot_data_helper</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for marmot.plottingmodules.plotutils.plot_data_helper</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;Methods used to assist with the creation of Marmot plots.</span>
+
+<span class="sd">@author: Daniel Levie</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">textwrap</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">datetime</span> <span class="k">as</span> <span class="nn">dt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">concurrent.futures</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span>
+
+<span class="kn">import</span> <span class="nn">marmot.config.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;marmot_plot.&#39;</span><span class="o">+</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="PlotDataHelper"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper">[docs]</a><span class="k">class</span> <span class="nc">PlotDataHelper</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Methods used to assist with the creation of Marmot plots</span>
+
+<span class="sd">    Collection of Methods to assist with creation of figures,</span>
+<span class="sd">    including getting and formatting data, setting up plot sizes and adding </span>
+<span class="sd">    elements to plots such as labels.</span>
+
+<span class="sd">    PlotDataHelper inherits the python class &#39;dict&#39; so acts like a dictionary and stores the</span>
+<span class="sd">    formatted data when retrieved by the get_formatted_data method.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">Marmot_Solutions_folder</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ordered_gen</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> 
+                 <span class="n">PLEXOS_color_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span> <span class="n">Scenarios</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">ylabels</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> 
+                 <span class="n">xlabels</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">gen_names_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">,</span>
+                 <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            Marmot_Solutions_folder (str): Folder to save Marmot solution files.</span>
+<span class="sd">            AGG_BY (str): Informs region type to aggregate by when creating plots.</span>
+<span class="sd">            ordered_gen (list): Ordered list of generator technologies to plot, </span>
+<span class="sd">                order defines the generator technology position in stacked bar and area plots</span>
+<span class="sd">            PLEXOS_color_dict (dict): Dictionary of colors to use for generation technologies</span>
+<span class="sd">            Scenarios (list): Name of scenarios to process.</span>
+<span class="sd">            ylabels (list): y-axis labels for facet plots.</span>
+<span class="sd">            xlabels (list): x-axis labels for facet plots.</span>
+<span class="sd">            gen_names_dict (dict): Mapping dictionary to rename generator technologies.</span>
+<span class="sd">            Region_Mapping (pd.DataFrame, optional): Mapping file to map custom regions/zones </span>
+<span class="sd">                to create custom aggregations. Aggregations are created by grouping PLEXOS regions.</span>
+<span class="sd">                Defaults to pd.DataFrame().</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span> <span class="o">=</span> <span class="n">Marmot_Solutions_folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">=</span> <span class="n">AGG_BY</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span> <span class="o">=</span> <span class="n">ordered_gen</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span> <span class="o">=</span> <span class="n">PLEXOS_color_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">=</span> <span class="n">ylabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">xlabels</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span> <span class="o">=</span> <span class="n">gen_names_dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span>
+
+<div class="viewcode-block" id="PlotDataHelper.get_formatted_data"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_formatted_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_formatted_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get data from formatted h5 file.</span>
+<span class="sd">        </span>
+<span class="sd">        Adds data to dictionary with scenario name as key</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            properties (list): list of tuples containing required </span>
+<span class="sd">                plexos property information</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: If 1 in list required data is missing .</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">check_input_data</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
+            <span class="n">required</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">,</span> <span class="n">scenario_list</span> <span class="o">=</span> <span class="n">prop</span>
+            <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+            
+            <span class="c1"># Create new set of scenarios that are not yet in dictionary</span>
+            <span class="n">scen_list</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">scenario_list</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            
+            <span class="c1"># If set is not empty add data to dict</span>
+            <span class="k">if</span> <span class="n">scen_list</span><span class="p">:</span>
+                <span class="c1"># Read data in with multi threading</span>
+                <span class="n">executor_func_setup</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">read_processed_h5file</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">)</span>
+                <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span><span class="n">max_workers</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span> <span class="k">as</span> <span class="n">executor</span><span class="p">:</span>
+                    <span class="n">data_files</span> <span class="o">=</span> <span class="n">executor</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">executor_func_setup</span><span class="p">,</span> <span class="n">scen_list</span><span class="p">)</span>
+                <span class="c1"># Save data to dict</span>
+                <span class="k">for</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">scen_list</span><span class="p">,</span> <span class="n">data_files</span><span class="p">):</span>
+                    <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">scenario</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+            <span class="c1"># If any of the dataframes are empty for given property log warning</span>
+            <span class="k">if</span> <span class="kc">True</span> <span class="ow">in</span> <span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()]:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2"> is MISSING from the Marmot formatted h5 files&quot;</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">required</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">check_input_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">check_input_data</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.read_processed_h5file"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.read_processed_h5file">[docs]</a>    <span class="k">def</span> <span class="nf">read_processed_h5file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Reads Data from processed h5file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            plx_prop_name (str): Name of property, e.g generator_Generation</span>
+<span class="sd">            scenario (str): Name of scenario.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Requested dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span><span class="p">,</span> <span class="s2">&quot;Processed_HDF5_folder&quot;</span><span class="p">,</span> 
+                                            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">_formatted.h5&quot;</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">file</span><span class="p">[</span><span class="n">plx_prop_name</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
+        
+<div class="viewcode-block" id="PlotDataHelper.rename_gen_techs"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.rename_gen_techs">[docs]</a>    <span class="k">def</span> <span class="nf">rename_gen_techs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Renames generator technologies based on the gen_names.csv file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed DataFrame with renamed techs.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># If tech is a column name</span>
+        <span class="k">if</span> <span class="s1">&#39;tech&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">original_tech_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="c1"># Checks if all generator tech categories have been identified and matched. If not, lists categories that need a match</span>
+            <span class="n">unmapped_techs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">original_tech_index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;tech&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalIndex</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">)))</span>
+        
+        <span class="c1"># If tech is in the index </span>
+        <span class="k">elif</span> <span class="s1">&#39;tech&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
+            <span class="n">original_tech_index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;tech&#39;</span><span class="p">)</span>
+            <span class="c1"># Checks if all generator tech categories have been identified and matched. If not, lists categories that need a match</span>
+            <span class="n">unmapped_techs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">original_tech_index</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        
+            <span class="n">tech_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalIndex</span><span class="p">(</span><span class="n">original_tech_index</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;Other&#39;</span><span class="p">)))</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;tech&#39;</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="n">idx_map</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span><span class="n">levels</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span> <span class="o">+</span> <span class="p">[</span><span class="n">tech_index</span><span class="o">.</span><span class="n">categories</span><span class="p">],</span>
+                                        <span class="n">codes</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">codes</span> <span class="o">+</span> <span class="p">[</span><span class="n">tech_index</span><span class="o">.</span><span class="n">codes</span><span class="p">],</span>
+                                        <span class="n">names</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">tech_index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">idx_map</span><span class="p">)</span>
+            <span class="c1"># Move tech back to position 1</span>
+            <span class="n">index_labels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+            <span class="n">index_labels</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">index_labels</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">index_labels</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;tech&quot;</span><span class="p">)))</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">index_labels</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">unmapped_techs</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;The following Generators could not be re-classified, they wil be renamed &#39;Other&#39;: </span><span class="si">{</span><span class="n">unmapped_techs</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.assign_curtailment_techs"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.assign_curtailment_techs">[docs]</a>    <span class="k">def</span> <span class="nf">assign_curtailment_techs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Assign technologies to Marmot&#39;s Curtailment property (generator_Curtailment).</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Dataframe containing only specified curtailment technologies.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># Adjust list of values to drop from vre_gen_cat depending on if it exists in processed techs</span>
+        <span class="n">adjusted_vre_gen_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vre_gen_cat</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">adjusted_vre_gen_list</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Curtailment techs could not be identified correctly for Marmot&#39;s Curtailment property. &quot;</span>
+            <span class="s2">&quot;This is likely happening as the &#39;vre&#39; column was not present in the ordered_gen_categories.csv.&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span>
+        <span class="k">else</span><span class="p">:</span> 
+            <span class="c1"># Retrun df with just vre techs</span>
+            <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vre_gen_cat</span><span class="p">)]</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.df_process_gen_inputs"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.df_process_gen_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_gen_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Processes generation data into a pivot table. </span>
+
+<span class="sd">        Also calls rename_gen_techs() to rename technologies </span>
+<span class="sd">        Technology names will be columns,</span>
+<span class="sd">        Timeseries as index</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Transformed Dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">set</span><span class="p">([</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span><span class="s1">&#39;tech&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">([</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span><span class="s1">&#39;tech&#39;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="c1"># Rename generator technologies</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rename_gen_techs</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="c1"># If duplicate rows remain, groupby again</span>
+        <span class="k">if</span> <span class="n">df</span><span class="p">[[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">],</span> <span class="n">as_index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">observed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="c1"># Filter for only data in ordered_gen</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">)]</span>
+        <span class="c1"># Check if data is not already categorical</span>
+        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">tech</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;tech&quot;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s1">&#39;timestamp&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s1">&#39;tech&#39;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.create_categorical_tech_index"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.create_categorical_tech_index">[docs]</a>    <span class="k">def</span> <span class="nf">create_categorical_tech_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates categorical index based on generators.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.merge_new_agg"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.merge_new_agg">[docs]</a>    <span class="k">def</span> <span class="nf">merge_new_agg</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="c1">#TODO Needs fixing </span>
+        <span class="sd">&quot;&quot;&quot;Adds new region aggregation in the plotting step.</span>
+
+<span class="sd">        This allows one to create a new aggregation without re-formatting the .h5 file.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Same dataframe, with new aggregation level added.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">agg_new</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[[</span><span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]]</span>
+        <span class="n">agg_new</span> <span class="o">=</span> <span class="n">agg_new</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;region&#39;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">agg_new</span><span class="p">,</span><span class="n">left_on</span> <span class="o">=</span> <span class="s1">&#39;region&#39;</span><span class="p">,</span> <span class="n">right_index</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span><span class="p">(</span><span class="n">df</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.adjust_for_leapday"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.adjust_for_leapday">[docs]</a>    <span class="k">def</span> <span class="nf">adjust_for_leapday</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.</span>
+
+<span class="sd">        Modeled year must be included in the scenario parent directory name.</span>
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Dataframe to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Same dataframe, with time index shifted.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="p">(</span><span class="s1">&#39;2008&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span> 
+            <span class="ow">and</span> <span class="s1">&#39;2012&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span> 
+            <span class="ow">and</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="n">dt</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">2024</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">28</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mi">0</span><span class="p">)):</span>
+            
+            <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">set_levels</span><span class="p">(</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)]</span><span class="o">.</span><span class="n">shift</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="n">freq</span> <span class="o">=</span> <span class="s1">&#39;D&#39;</span><span class="p">),</span>
+                <span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;timestamp&#39;</span><span class="p">)</span>
+            
+        <span class="c1"># # Special case where timezone shifting may also be necessary.</span>
+        <span class="c1">#     df.index = df.index.set_levels(</span>
+        <span class="c1">#         df.index.levels[df.index.names.index(&#39;timestamp&#39;)].shift(-3,freq = &#39;H&#39;),</span>
+        <span class="c1">#         level = &#39;timestamp&#39;)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.setup_facet_xy_dimensions"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.setup_facet_xy_dimensions">[docs]</a>    <span class="k">def</span> <span class="nf">setup_facet_xy_dimensions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">facet</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> 
+                                  <span class="n">multi_scenario</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Sets facet plot x,y dimensions based on user defined labeles</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            facet (bool, optional): Trigger for plotting facet plots. </span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            multi_scenario (list, optional): List of scenarios.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[int, int]: Facet x,y dimensions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">xdimension</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]:</span>
+            <span class="n">xdimension</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">ydimension</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]:</span>
+            <span class="n">ydimension</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="c1"># If the plot is not a facet plot, grid size should be 1x1</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">facet</span><span class="p">:</span>
+            <span class="n">xdimension</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">ydimension</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="k">return</span> <span class="n">xdimension</span><span class="p">,</span> <span class="n">ydimension</span>
+        <span class="c1"># If no labels were provided or dimensions less than len scenarios use Marmot default dimension settings</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span> <span class="ow">or</span> <span class="n">xdimension</span><span class="o">*</span><span class="n">ydimension</span><span class="o">&lt;</span><span class="nb">len</span><span class="p">(</span><span class="n">multi_scenario</span><span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Dimensions could not be determined from x &amp; y labels - Using Marmot default dimensions&quot;</span><span class="p">)</span>
+            <span class="n">xdimension</span><span class="p">,</span> <span class="n">ydimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">set_x_y_dimension</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">multi_scenario</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">xdimension</span><span class="p">,</span> <span class="n">ydimension</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.set_x_y_dimension"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_x_y_dimension">[docs]</a>    <span class="k">def</span> <span class="nf">set_x_y_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">region_number</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Sets X,Y dimension of plots without x,y labels.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            region_number (int): # regions/scenarios</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Tuple[int, int]: Facet x,y dimensions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">region_number</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+            <span class="n">xdimension</span> <span class="o">=</span> <span class="mi">3</span>
+            <span class="n">ydimension</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">region_number</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">region_number</span> <span class="o">&lt;=</span> <span class="mi">3</span><span class="p">:</span>
+            <span class="n">xdimension</span> <span class="o">=</span> <span class="n">region_number</span>
+            <span class="n">ydimension</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">region_number</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>
+            <span class="n">xdimension</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">ydimension</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">xdimension</span><span class="p">,</span><span class="n">ydimension</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.add_facet_labels"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.add_facet_labels">[docs]</a>    <span class="k">def</span> <span class="nf">add_facet_labels</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fig</span><span class="p">,</span> 
+                         <span class="n">xlabels_bottom</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+                         <span class="n">alternative_xlabels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="n">alternative_ylabels</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+                         <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Adds labels to outside of Facet plot.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            fig (matplotlib.fig): matplotlib figure.</span>
+<span class="sd">            xlabels_bottom (bool, optional): If True labels are placed under bottom. </span>
+<span class="sd">                Defaults to True.</span>
+<span class="sd">            alternative_xlabels (list, optional): Alteranative xlabels. </span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            alternative_ylabels (list, optional): Alteranative ylabels. </span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">font_defaults</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;font_settings&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">alternative_xlabels</span><span class="p">:</span>
+            <span class="n">xlabel</span> <span class="o">=</span> <span class="n">alternative_xlabels</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">xlabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span>
+
+        <span class="k">if</span> <span class="n">alternative_ylabels</span><span class="p">:</span>
+            <span class="n">ylabel</span> <span class="o">=</span> <span class="n">alternative_ylabels</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ylabel</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span>
+
+        <span class="n">all_axes</span> <span class="o">=</span> <span class="n">fig</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()</span>
+        <span class="n">j</span><span class="o">=</span><span class="mi">0</span>
+        <span class="n">k</span><span class="o">=</span><span class="mi">0</span>
+        <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">all_axes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">xlabels_bottom</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_last_row</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="p">(</span><span class="n">xlabel</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> 
+                                    <span class="n">fontsize</span><span class="o">=</span><span class="n">font_defaults</span><span class="p">[</span><span class="s1">&#39;axes_label_size&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: xlabel missing for subplot x</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_row</span><span class="p">():</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="p">(</span><span class="n">xlabel</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> 
+                                    <span class="n">fontsize</span><span class="o">=</span><span class="n">font_defaults</span><span class="p">[</span><span class="s1">&#39;axes_label_size&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s1">&#39;top&#39;</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: xlabel missing for subplot x</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                    <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+            <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_col</span><span class="p">():</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="p">(</span><span class="n">ylabel</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span> 
+                                    <span class="n">fontsize</span><span class="o">=</span><span class="n">font_defaults</span><span class="p">[</span><span class="s1">&#39;axes_label_size&#39;</span><span class="p">]</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: ylabel missing for subplot y</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+                <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.set_plot_timeseries_format"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_plot_timeseries_format">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">set_plot_timeseries_format</span><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+                                   <span class="n">minticks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_options&quot;</span><span class="p">,</span><span class="s2">&quot;x_axes_minticks&quot;</span><span class="p">),</span>
+                                   <span class="n">maxticks</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_options&quot;</span><span class="p">,</span><span class="s2">&quot;x_axes_maxticks&quot;</span><span class="p">)</span>
+                                   <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Auto sets timeseries format.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axs (matplotlib.axes): matplotlib.axes</span>
+<span class="sd">            n (int, optional): Counter for facet plot. Defaults to 0.</span>
+<span class="sd">            minticks (int, optional): Minimum tick marks. </span>
+<span class="sd">                Defaults to mconfig.parser(&quot;axes_options&quot;,&quot;x_axes_minticks&quot;).</span>
+<span class="sd">            maxticks (int, optional): Max tick marks. </span>
+<span class="sd">                Defaults to mconfig.parser(&quot;axes_options&quot;,&quot;x_axes_maxticks&quot;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">locator</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">AutoDateLocator</span><span class="p">(</span><span class="n">minticks</span><span class="o">=</span><span class="n">minticks</span><span class="p">,</span> <span class="n">maxticks</span><span class="o">=</span><span class="n">maxticks</span><span class="p">)</span>
+        <span class="n">formatter</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">ConciseDateFormatter</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">formats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="se">\n</span><span class="s1"> %b&#39;</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">zero_formats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;%b</span><span class="se">\n</span><span class="s1"> %Y&#39;</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">zero_formats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="se">\n</span><span class="s1"> %b&#39;</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">zero_formats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;%H:%M</span><span class="se">\n</span><span class="s1"> </span><span class="si">%d</span><span class="s1">-%b&#39;</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">offset_formats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;%b %Y&#39;</span>
+        <span class="n">formatter</span><span class="o">.</span><span class="n">show_offset</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
+        <span class="n">axs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.set_barplot_xticklabels"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.set_barplot_xticklabels">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">set_barplot_xticklabels</span><span class="p">(</span><span class="n">labels</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">ax</span><span class="p">,</span> 
+                                <span class="n">rotate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_label_options&quot;</span><span class="p">,</span> <span class="s2">&quot;rotate_x_labels&quot;</span><span class="p">),</span>
+                                <span class="n">num_labels</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_label_options&quot;</span><span class="p">,</span> <span class="s2">&quot;rotate_at_num_labels&quot;</span><span class="p">),</span>
+                                <span class="n">angle</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_label_options&quot;</span><span class="p">,</span> <span class="s2">&quot;rotation_angle&quot;</span><span class="p">),</span>
+                                <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set the xticklabels on bar plots and determine whether they will be rotated.</span>
+
+<span class="sd">        Wrapper around matplotlib set_xticklabels</span>
+<span class="sd">        </span>
+<span class="sd">        Checks to see if the number of labels is greater than or equal to the default</span>
+<span class="sd">        number set in config.yml. If this is the case, rotate</span>
+<span class="sd">        specify whether or not to rotate the labels and angle specifies what angle they should </span>
+<span class="sd">        be rotated to.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            labels (list): Labels to apply to xticks</span>
+<span class="sd">            ax (matplotlib.axes): matplotlib.axes</span>
+<span class="sd">            rotate (bool, optional): rotate labels True/False. </span>
+<span class="sd">                Defaults to mconfig.parser(&quot;axes_label_options&quot;, &quot;rotate_x_labels&quot;).</span>
+<span class="sd">            num_labels (int, optional): Number of labels to rotate at. </span>
+<span class="sd">                Defaults to mconfig.parser(&quot;axes_label_options&quot;, &quot;rotate_at_num_labels&quot;).</span>
+<span class="sd">            angle (float, optional): Angle of rotation. </span>
+<span class="sd">                Defaults to mconfig.parser(&quot;axes_label_options&quot;, &quot;rotation_angle&quot;).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">rotate</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">labels</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="n">num_labels</span><span class="p">:</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="n">angle</span><span class="p">,</span> <span class="n">ha</span><span class="o">=</span><span class="s2">&quot;right&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">break_long_words</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+                <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">labels</span> <span class="o">=</span> <span class="p">[</span><span class="n">textwrap</span><span class="o">.</span><span class="n">fill</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="n">break_long_words</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">]</span>
+            <span class="n">ax</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">labels</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.remove_excess_axs"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.remove_excess_axs">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">remove_excess_axs</span><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <span class="n">excess_axs</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">grid_size</span><span class="p">:</span> <span class="nb">int</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Removes excess axes spins + tick marks.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            axs (matplotlib.axes): matplotlib.axes</span>
+<span class="sd">            excess_axs (int): # of excess axes.</span>
+<span class="sd">            grid_size (int): Size of facet grid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="n">excess_axs</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">axs</span><span class="p">[(</span><span class="n">grid_size</span><span class="p">)</span><span class="o">-</span><span class="n">excess_axs</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[(</span><span class="n">grid_size</span><span class="p">)</span><span class="o">-</span><span class="n">excess_axs</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;left&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[(</span><span class="n">grid_size</span><span class="p">)</span><span class="o">-</span><span class="n">excess_axs</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;bottom&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[(</span><span class="n">grid_size</span><span class="p">)</span><span class="o">-</span><span class="n">excess_axs</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">axs</span><span class="p">[(</span><span class="n">grid_size</span><span class="p">)</span><span class="o">-</span><span class="n">excess_axs</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span>
+                                                    <span class="n">which</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span>
+                                                    <span class="n">colors</span><span class="o">=</span><span class="s1">&#39;white&#39;</span><span class="p">)</span>
+            <span class="n">excess_axs</span><span class="o">-=</span><span class="mi">1</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.get_sub_hour_interval_count"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.get_sub_hour_interval_count">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">get_sub_hour_interval_count</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Detects the interval spacing of timeseries data. </span>
+<span class="sd">        </span>
+<span class="sd">        Used to adjust sums of certain variables for sub-hourly data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): pandas dataframe with timestamp in index.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            int: Number of intervals per 60 minutes.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">timestamps</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="n">time_delta</span> <span class="o">=</span> <span class="n">timestamps</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">timestamps</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="c1"># Finds intervals in 60 minute period</span>
+        <span class="n">intervals_per_hour</span> <span class="o">=</span> <span class="mi">60</span><span class="o">/</span><span class="p">(</span><span class="n">time_delta</span><span class="o">/</span><span class="n">np</span><span class="o">.</span><span class="n">timedelta64</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;m&#39;</span><span class="p">))</span>
+        <span class="c1"># If intervals are greater than 1 hour, returns 1</span>
+        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">intervals_per_hour</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.sort_duration"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.sort_duration">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">sort_duration</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">col</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Converts a dataframe time series into a duration curve.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): pandas multiindex dataframe.</span>
+<span class="sd">            col (str): Column name by which to sort.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Dataframe with values sorted from largest to smallest.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sorted_duration</span> <span class="o">=</span> <span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">col</span><span class="p">,</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+                        <span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+                        <span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;timestamp&#39;</span><span class="p">]))</span>
+        
+        <span class="k">return</span> <span class="n">sorted_duration</span></div>
+
+<div class="viewcode-block" id="PlotDataHelper.capacity_energy_unitconversion"><a class="viewcode-back" href="../../../../references/code/marmot.plottingmodules.plotutils.plot_data_helper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.capacity_energy_unitconversion">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">capacity_energy_unitconversion</span><span class="p">(</span><span class="n">max_value</span><span class="p">:</span> <span class="nb">float</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Auto unitconversion for capacity and energy figures.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            max_value (float): Value used to determine divisor and units.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: Dictionary containing divisor and units.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">max_value</span> <span class="o">&lt;</span> <span class="mi">1000</span> <span class="ow">and</span> <span class="n">max_value</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;MW&#39;</span>
+        <span class="k">elif</span> <span class="n">max_value</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="mf">0.001</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;kW&#39;</span>
+        <span class="k">elif</span> <span class="n">max_value</span> <span class="o">&gt;</span> <span class="mf">999999.9</span><span class="p">:</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">1000000</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;TW&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">1000</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;GW&#39;</span>
+        
+        <span class="c1"># Disables auto unit conversion, all values in MW</span>
+        <span class="k">if</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;auto_convert_units&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">divisor</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">units</span> <span class="o">=</span> <span class="s1">&#39;MW&#39;</span>
+            
+        <span class="k">return</span> <span class="p">{</span><span class="s1">&#39;units&#39;</span><span class="p">:</span><span class="n">units</span><span class="p">,</span> <span class="s1">&#39;divisor&#39;</span><span class="p">:</span><span class="n">divisor</span><span class="p">}</span></div></div>
+
+
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alliance for Sustainable Energy, LLC
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>

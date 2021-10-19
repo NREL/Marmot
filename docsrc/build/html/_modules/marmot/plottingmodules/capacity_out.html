@@ -1,0 +1,591 @@
+
+
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  <title>marmot.plottingmodules.capacity_out &mdash; Marmot 0.9.0 documentation</title>
+  
+
+  
+  
+  
+  
+
+  
+  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
+  
+    
+      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+    
+    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+
+    
+
+  
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav">
+
+   
+  <div class="wy-grid-for-nav">
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+          
+
+          
+            <a href="../../../index.html" class="icon icon-home"> Marmot
+          
+
+          
+          </a>
+
+          
+            
+            
+          
+
+          
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+
+          
+        </div>
+
+        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+          
+            
+            
+              
+            
+            
+              <p class="caption"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#your-input-data-and-how-to-organize-it">Your input data and how to organize it</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/format-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/format-tutorial.html#plexos-properties">plexos_properties</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#running-the-formatter">Running the formatter</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating plots and data-tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/plot-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/plot-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../get-started/plot-tutorial.html#marmot-plot-select">Marmot_plot_select</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../get-started/plot-tutorial.html#running-the-plotter">Running the Plotter</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../how-to/index.html">How-to Guides</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references/index.html">References</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../../references/input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../../references/code/modules.html">Code Reference</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/code/modules.html#initialization-code">Initialization Code</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.meta_data.html">marmot.meta_data</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/code/modules.html#config-package">Config Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/code/modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../../references/code/modules.html#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+            
+          
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" aria-label="top navigation">
+        
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">Marmot</a>
+        
+      </nav>
+
+
+      <div class="wy-nav-content">
+        
+        <div class="rst-content">
+        
+          
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<div role="navigation" aria-label="breadcrumbs navigation">
+
+  <ul class="wy-breadcrumbs">
+    
+      <li><a href="../../../index.html">Docs</a> &raquo;</li>
+        
+          <li><a href="../../index.html">Module code</a> &raquo;</li>
+        
+      <li>marmot.plottingmodules.capacity_out</li>
+    
+    
+      <li class="wy-breadcrumbs-aside">
+        
+      </li>
+    
+  </ul>
+
+  
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+            
+  <h1>Source code for marmot.plottingmodules.capacity_out</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Generator outage plots.</span>
+
+<span class="sd">This module contain methods that arerelated to related to </span>
+<span class="sd">generators that are on an outage.  </span>
+
+<span class="sd">@author: Daniel Levie </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
+<span class="kn">import</span> <span class="nn">matplotlib.dates</span> <span class="k">as</span> <span class="nn">mdates</span>
+<span class="kn">import</span> <span class="nn">marmot.plottingmodules.plotutils.plot_library</span> <span class="k">as</span> <span class="nn">plotlib</span>
+
+<span class="kn">import</span> <span class="nn">marmot.config.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">PlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">MissingInputData</span><span class="p">,</span> 
+            <span class="n">UnderDevelopment</span><span class="p">,</span> <span class="n">MissingZoneData</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MPlot"><a class="viewcode-back" href="../../../references/code/marmot.plottingmodules.capacity_out.html#marmot.plottingmodules.capacity_out.MPlot">[docs]</a><span class="k">class</span> <span class="nc">MPlot</span><span class="p">(</span><span class="n">PlotDataHelper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;capacity_out MPlot class.</span>
+
+<span class="sd">    All the plotting modules use this same class name.</span>
+<span class="sd">    This class contains plotting methods that are grouped based on the</span>
+<span class="sd">    current module name., </span>
+<span class="sd">    </span>
+<span class="sd">    The capacity_out.py module contains methods that are</span>
+<span class="sd">    related to generators that are on an outage. </span>
+
+<span class="sd">    MPlot inherits from the PlotDataHelper class to assist in creating figures.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            argument_dict (dict): Dictionary containing all</span>
+<span class="sd">                arguments passed from MarmotPlot.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># iterate over items in argument_dict and set as properties of class</span>
+        <span class="c1"># see key_list in Marmot_plot_main for list of properties</span>
+        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">argument_dict</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
+
+        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">,</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span> 
+                    <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">)</span> 
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;marmot_plot.&#39;</span><span class="o">+</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;figure_size&quot;</span><span class="p">,</span><span class="s2">&quot;xdimension&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;figure_size&quot;</span><span class="p">,</span><span class="s2">&quot;ydimension&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">y_axes_decimalpt</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_options&quot;</span><span class="p">,</span><span class="s2">&quot;y_axes_decimalpt&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="MPlot.capacity_out_stack"><a class="viewcode-back" href="../../../references/code/marmot.plottingmodules.capacity_out.html#marmot.plottingmodules.capacity_out.MPlot.capacity_out_stack">[docs]</a>    <span class="k">def</span> <span class="nf">capacity_out_stack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start_date_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                             <span class="n">end_date_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates Timeseries stacked area plots of generation on outage by technology.</span>
+
+<span class="sd">        Each scenario is plotted by a separate facet plot. </span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            start_date_range (str, optional): Defines a start date at which to represent data from. </span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: dictionary containing the created plot and its data table.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{}</span>
+        
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and contain 3 parts:</span>
+        <span class="c1"># required True/False, property name and scenarios required, scenarios must be a list.</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;generator_Installed_Capacity&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">),</span>
+                      <span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;generator_Available_Capacity&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)]</span>
+        
+        <span class="c1"># Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  </span>
+        <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
+        <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
+
+
+        <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">check_input_data</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">MissingInputData</span><span class="p">()</span>
+        
+        <span class="c1"># sets up x, y dimensions of plot</span>
+        <span class="n">xdimension</span><span class="p">,</span> <span class="n">ydimension</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">setup_facet_xy_dimensions</span><span class="p">(</span><span class="n">multi_scenario</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)</span>
+
+        <span class="n">grid_size</span> <span class="o">=</span> <span class="n">xdimension</span><span class="o">*</span><span class="n">ydimension</span>
+
+        <span class="c1"># Used to calculate any excess axis to delete</span>
+        <span class="n">plot_number</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">)</span>
+        <span class="n">excess_axs</span> <span class="o">=</span> <span class="n">grid_size</span> <span class="o">-</span> <span class="n">plot_number</span>
+
+        <span class="k">for</span> <span class="n">zone_input</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Zone = </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">zone_input</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+            <span class="n">fig2</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ydimension</span><span class="p">,</span><span class="n">xdimension</span><span class="p">,</span> 
+                                     <span class="n">figsize</span><span class="o">=</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">x</span><span class="o">*</span><span class="n">xdimension</span><span class="p">),(</span><span class="bp">self</span><span class="o">.</span><span class="n">y</span><span class="o">*</span><span class="n">ydimension</span><span class="p">)),</span>
+                                     <span class="n">sharex</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">sharey</span><span class="o">=</span><span class="s1">&#39;row&#39;</span><span class="p">,</span> <span class="n">squeeze</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+            <span class="n">axs</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+
+            <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">i</span><span class="o">=-</span><span class="mi">1</span>
+            <span class="k">for</span> <span class="n">scenario</span> <span class="ow">in</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Scenario = </span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">i</span><span class="o">+=</span><span class="mi">1</span>
+                
+                <span class="n">install_cap</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Installed_Capacity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">avail_cap</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Available_Capacity&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">scenario</span><span class="p">)</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">shift_leapday</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="n">avail_cap</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span><span class="n">avail_cap</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">zone_input</span> <span class="ow">in</span> <span class="n">avail_cap</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">():</span>
+                    <span class="n">avail_cap</span> <span class="o">=</span> <span class="n">avail_cap</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No Generation in: </span><span class="si">{</span><span class="n">zone_input</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
+                    <span class="k">continue</span>
+                <span class="n">avail_cap</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;avail&#39;</span><span class="p">]</span>
+                <span class="n">install_cap</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;cap&#39;</span><span class="p">]</span>
+                <span class="n">avail_cap</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+                
+                <span class="n">cap_out</span> <span class="o">=</span> <span class="n">avail_cap</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">install_cap</span><span class="p">,</span><span class="n">left_on</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;gen_name&#39;</span><span class="p">],</span><span class="n">right_on</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;gen_name&#39;</span><span class="p">])</span>
+                <span class="n">cap_out</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">cap_out</span><span class="p">[</span><span class="s1">&#39;cap&#39;</span><span class="p">]</span> <span class="o">-</span> <span class="n">cap_out</span><span class="p">[</span><span class="s1">&#39;avail&#39;</span><span class="p">]</span>
+                
+                <span class="n">cap_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">cap_out</span><span class="p">)</span>
+
+                <span class="c1">#Subset only thermal gen categories</span>
+                <span class="n">thermal_gens</span> <span class="o">=</span> <span class="p">[</span><span class="n">therm</span> <span class="k">for</span> <span class="n">therm</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">thermal_gen_cat</span> <span class="k">if</span> <span class="n">therm</span> <span class="ow">in</span> <span class="n">cap_out</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+                <span class="n">cap_out</span> <span class="o">=</span> <span class="n">cap_out</span><span class="p">[</span><span class="n">thermal_gens</span><span class="p">]</span>
+                
+                <span class="k">if</span> <span class="n">cap_out</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No Thermal Generation in: </span><span class="si">{</span><span class="n">zone_input</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                    <span class="k">continue</span>
+
+                <span class="c1"># unitconversion based off peak outage hour, only checked once </span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">unitconversion</span> <span class="o">=</span> <span class="n">PlotDataHelper</span><span class="o">.</span><span class="n">capacity_energy_unitconversion</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">cap_out</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)))</span>
+               
+                <span class="n">cap_out</span> <span class="o">=</span> <span class="n">cap_out</span> <span class="o">/</span> <span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;divisor&#39;</span><span class="p">]</span>
+
+                <span class="n">scenario_names</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">([</span><span class="n">scenario</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">cap_out</span><span class="p">),</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;Scenario&#39;</span><span class="p">)</span>
+                <span class="n">single_scen_out</span> <span class="o">=</span> <span class="n">cap_out</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="n">scenario_names</span><span class="p">],</span><span class="n">append</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span>
+                <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">single_scen_out</span><span class="p">)</span>
+                
+                <span class="n">plotlib</span><span class="o">.</span><span class="n">create_stackplot</span><span class="p">(</span><span class="n">axs</span><span class="o">=</span><span class="n">axs</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">cap_out</span><span class="p">,</span> <span class="n">color_dict</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span> 
+                                         <span class="n">labels</span><span class="o">=</span><span class="n">cap_out</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">PlotDataHelper</span><span class="o">.</span><span class="n">set_plot_timeseries_format</span><span class="p">(</span><span class="n">axs</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="n">loc</span> <span class="o">=</span> <span class="s1">&#39;lower left&#39;</span><span class="p">,</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mf">1.05</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span> <span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;inherit&#39;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">chunks</span><span class="p">:</span>
+                <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
+                <span class="k">continue</span>
+                
+            <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">chunks</span><span class="p">,</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span>
+            <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">Data_Table_Out</span><span class="o">.</span><span class="n">add_suffix</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot; (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+
+            <span class="n">fig2</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelcolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Capacity out (</span><span class="si">{</span><span class="n">unitconversion</span><span class="p">[</span><span class="s1">&#39;units&#39;</span><span class="p">]</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> 
+                       <span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">labelpad</span><span class="o">=</span><span class="mi">30</span><span class="p">)</span>
+            <span class="c1"># Looks better for a one scenario plot</span>
+            <span class="c1">#plt.tight_layout(rect=[0, 0.03, 1.25, 0.97])</span>
+            
+            <span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">(</span><span class="n">rect</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.03</span><span class="p">,</span><span class="mi">1</span><span class="p">,</span><span class="mf">0.97</span><span class="p">])</span>
+            
+            <span class="k">if</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_title_as_region&quot;</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">zone_input</span><span class="p">)</span>
+
+            <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;fig&#39;</span><span class="p">:</span> <span class="n">fig2</span><span class="p">,</span> <span class="s1">&#39;data_table&#39;</span><span class="p">:</span> <span class="n">Data_Table_Out</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">outputs</span></div>
+
+
+<div class="viewcode-block" id="MPlot.capacity_out_stack_PASA"><a class="viewcode-back" href="../../../references/code/marmot.plottingmodules.capacity_out.html#marmot.plottingmodules.capacity_out.MPlot.capacity_out_stack_PASA">[docs]</a>    <span class="k">def</span> <span class="nf">capacity_out_stack_PASA</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">start</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
+                                <span class="n">end</span><span class="p">:</span> <span class="nb">float</span><span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">timezone</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">):</span>
+        
+        <span class="n">outputs</span> <span class="o">=</span> <span class="n">UnderDevelopment</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;capacity_out_stack_PASA requires PASA files, and is under development. Skipping plot.&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">outputs</span> 
+    
+        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">zone_input</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span><span class="p">:</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s1">&#39;Zone = &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">zone_input</span><span class="p">))</span>
+
+            <span class="n">xdimension</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">xdimension</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">xdimension</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">ydimension</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ydimension</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">ydimension</span> <span class="o">=</span> <span class="mi">1</span>
+            <span class="n">grid_size</span> <span class="o">=</span> <span class="n">xdimension</span><span class="o">*</span><span class="n">ydimension</span>
+            <span class="n">fig1</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">ydimension</span><span class="p">,</span><span class="n">xdimension</span><span class="p">,</span> <span class="n">figsize</span><span class="o">=</span><span class="p">((</span><span class="mi">8</span><span class="o">*</span><span class="n">xdimension</span><span class="p">),(</span><span class="mi">4</span><span class="o">*</span><span class="n">ydimension</span><span class="p">)),</span> <span class="n">sharey</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Multi_Scenario</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">axs</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
+            <span class="n">i</span><span class="o">=</span><span class="mi">0</span>
+
+            <span class="n">met_year</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="c1">#Extract met year from PLEXOS parent scenario.</span>
+
+            <span class="k">for</span> <span class="n">scenario</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Multi_Scenario</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Scenario = &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">scenario</span><span class="p">))</span>
+
+                <span class="n">infra_year</span> <span class="o">=</span> <span class="n">scenario</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span> <span class="c1">#Extract infra year from scenario name.</span>
+                <span class="n">capacity_out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;/projects/continental/pcm/Outage Profiles/capacity out for plotting/&#39;</span><span class="p">,</span><span class="n">infra_year</span> <span class="o">+</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">met_year</span> <span class="o">+</span> <span class="s1">&#39;_capacity out.csv&#39;</span><span class="p">))</span>
+                <span class="n">capacity_out</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">capacity_out</span><span class="o">.</span><span class="n">DATETIME</span><span class="p">)</span>
+                <span class="n">one_zone</span> <span class="o">=</span> <span class="n">capacity_out</span><span class="p">[</span><span class="n">capacity_out</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]</span> <span class="o">==</span> <span class="n">zone_input</span><span class="p">]</span>    <span class="c1">#Select only this particular zone.</span>
+                <span class="n">one_zone</span> <span class="o">=</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;DATETIME&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">])</span>
+                <span class="n">one_zone</span> <span class="o">=</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;columns&#39;</span><span class="p">)</span>
+                <span class="n">one_zone</span> <span class="o">=</span> <span class="n">one_zone</span> <span class="o">/</span> <span class="mi">1000</span> <span class="c1">#MW -&gt; GW</span>
+                <span class="c1">#Calculate average outage for all technology for all year.</span>
+                <span class="n">sum_ts</span> <span class="o">=</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;columns&#39;</span><span class="p">)</span>
+                <span class="n">overall_avg</span> <span class="o">=</span> <span class="n">sum_ts</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+
+               <span class="c1">#Subset to match dispatch time horizon.</span>
+                <span class="n">Gen</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span> <span class="n">Marmot_Solutions_folder</span><span class="p">,</span> <span class="n">scenario</span><span class="p">,</span> <span class="s2">&quot;Processed_HDF5_folder&quot;</span><span class="p">,</span> <span class="n">scenario</span><span class="o">+</span><span class="s2">&quot;_formatted.h5&quot;</span><span class="p">),</span>  <span class="s2">&quot;generator_Generation&quot;</span><span class="p">)</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">Gen</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">end</span> <span class="o">=</span>  <span class="n">Gen</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+               <span class="c1">#OR select only time period of interest.</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prop</span> <span class="o">==</span> <span class="s1">&#39;Date Range&#39;</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Plotting specific date range: </span><span class="se">\</span>
+<span class="s2">                    </span><span class="si">{}</span><span class="s2"> to </span><span class="si">{}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span><span class="p">),</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">)))</span>
+                    <span class="n">one_zone</span> <span class="o">=</span> <span class="n">one_zone</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">start_date</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">end_date</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">one_zone</span> <span class="o">=</span> <span class="n">one_zone</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">end</span><span class="p">]</span>
+
+                <span class="n">tech_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">tech_type</span> <span class="k">for</span> <span class="n">tech_type</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span> <span class="k">if</span> <span class="n">tech_type</span> <span class="ow">in</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>  <span class="c1">#Order columns.</span>
+                <span class="n">one_zone</span> <span class="o">=</span> <span class="n">one_zone</span><span class="p">[</span><span class="n">tech_list</span><span class="p">]</span>
+
+                <span class="n">overall_avg_vec</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">overall_avg</span><span class="p">),</span><span class="nb">len</span><span class="p">(</span><span class="n">one_zone</span><span class="o">.</span><span class="n">index</span><span class="p">)),</span> <span class="n">index</span> <span class="o">=</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Annual average&#39;</span><span class="p">])</span>
+                <span class="n">overall_avg_vec</span> <span class="o">=</span> <span class="n">overall_avg_vec</span> <span class="o">/</span> <span class="mi">1000</span>
+                <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">one_zone</span><span class="p">,</span><span class="n">overall_avg_vec</span><span class="p">],</span> <span class="n">axis</span> <span class="o">=</span> <span class="s1">&#39;columns&#39;</span><span class="p">)</span>
+
+                <span class="n">locator</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">AutoDateLocator</span><span class="p">(</span><span class="n">minticks</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">maxticks</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
+                <span class="n">formatter</span> <span class="o">=</span> <span class="n">mdates</span><span class="o">.</span><span class="n">ConciseDateFormatter</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">formats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="se">\n</span><span class="s1"> %b&#39;</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">zero_formats</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;%b</span><span class="se">\n</span><span class="s1"> %Y&#39;</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">zero_formats</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="se">\n</span><span class="s1"> %b&#39;</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">zero_formats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;%H:%M</span><span class="se">\n</span><span class="s1"> </span><span class="si">%d</span><span class="s1">-%b&#39;</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">offset_formats</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;%b %Y&#39;</span>
+                <span class="n">formatter</span><span class="o">.</span><span class="n">show_offset</span> <span class="o">=</span> <span class="kc">False</span>
+
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Multi_Scenario</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="p">:</span>
+                    <span class="n">sp</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">stackplot</span><span class="p">(</span><span class="n">one_zone</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">one_zone</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;#333333&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">index</span><span class="p">])</span>
+
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">FuncFormatter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">format</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;,.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_axes_decimalpt</span><span class="si">}</span><span class="s1">f&#39;</span><span class="p">)))</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">y</span> <span class="o">=</span> <span class="n">overall_avg</span><span class="p">,</span> <span class="n">xmin</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Annual average&#39;</span><span class="p">)</span> <span class="c1">#Add horizontal line at average.</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Multi_Scenario</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+                        <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+                        <span class="n">leg1</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">handles</span><span class="p">),</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower left&#39;</span><span class="p">,</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;inherit&#39;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">axs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">leg1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sp</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">stackplot</span><span class="p">(</span><span class="n">one_zone</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span><span class="p">,</span> <span class="n">labels</span><span class="o">=</span><span class="n">one_zone</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span> <span class="n">linewidth</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                              <span class="n">colors</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="s1">&#39;#333333&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">one_zone</span><span class="o">.</span><span class="n">T</span><span class="o">.</span><span class="n">index</span><span class="p">])</span>
+
+                    <span class="n">axs</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">FuncFormatter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">format</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;,.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_axes_decimalpt</span><span class="si">}</span><span class="s1">f&#39;</span><span class="p">)))</span>
+                    <span class="n">axs</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_locator</span><span class="p">(</span><span class="n">locator</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span>
+                    <span class="n">axs</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">y</span> <span class="o">=</span> <span class="n">overall_avg</span><span class="p">,</span> <span class="n">xmin</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Annual average&#39;</span><span class="p">)</span> <span class="c1">#Add horizontal line at average.</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Multi_Scenario</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="p">:</span>
+                        <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
+                        <span class="n">leg1</span> <span class="o">=</span> <span class="n">axs</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">handles</span><span class="p">),</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span> <span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower left&#39;</span><span class="p">,</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">),</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;inherit&#39;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                        <span class="n">axs</span><span class="o">.</span><span class="n">add_artist</span><span class="p">(</span><span class="n">leg1</span><span class="p">)</span>
+
+                <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="n">all_axes</span> <span class="o">=</span> <span class="n">fig1</span><span class="o">.</span><span class="n">get_axes</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">,</span><span class="s1">&#39; &#39;</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="n">break_long_words</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+            <span class="n">j</span><span class="o">=</span><span class="mi">0</span>
+            <span class="n">k</span><span class="o">=</span><span class="mi">0</span>
+            <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">all_axes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_last_row</span><span class="p">():</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">xlabel</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">)</span>
+                    <span class="n">j</span><span class="o">=</span><span class="n">j</span><span class="o">+</span><span class="mi">1</span>
+                <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_col</span><span class="p">():</span>
+                    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="n">ylabel</span><span class="o">=</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span>  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
+                    <span class="n">k</span><span class="o">=</span><span class="n">k</span><span class="o">+</span><span class="mi">1</span>
+
+
+            <span class="n">fig1</span><span class="o">.</span><span class="n">add_subplot</span><span class="p">(</span><span class="mi">111</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">labelcolor</span><span class="o">=</span><span class="s1">&#39;none&#39;</span><span class="p">,</span> <span class="n">top</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">left</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">xlabel</span><span class="p">(</span><span class="n">timezone</span><span class="p">,</span>  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">,</span> <span class="n">labelpad</span> <span class="o">=</span> <span class="mi">40</span><span class="p">)</span>
+            <span class="n">plt</span><span class="o">.</span><span class="n">ylabel</span><span class="p">(</span><span class="s1">&#39;Capacity out (MW)&#39;</span><span class="p">,</span>  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">,</span> <span class="n">labelpad</span> <span class="o">=</span> <span class="mi">60</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_title_as_region&quot;</span><span class="p">):</span>
+                <span class="n">plt</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">zone_input</span><span class="p">)</span>
+
+
+            <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;fig&#39;</span> <span class="p">:</span> <span class="n">fig1</span><span class="p">,</span> <span class="s1">&#39;data_table&#39;</span> <span class="p">:</span> <span class="n">Data_Table_Out</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">outputs</span></div></div>
+</pre></div>
+
+           </div>
+           
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>
+        &copy; Copyright 2021, Alliance for Sustainable Energy, LLC
+
+    </p>
+  </div>
+  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
+
+</footer>
+
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+  
+
+
+  <script type="text/javascript">
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script>
+
+  
+  
+    
+   
+
+</body>
+</html>
