@@ -6,7 +6,7 @@ Install the Marmot software
   
   * hdf5>=1.10.4 (Install with conda or download from `HDF group website <https://www.hdfgroup.org/downloads/hdf5>`_)
   * numpy
-  * pandas
+  * pandas==1.0.5
   * PyYAML
   * h5py==2.10.0
   * matplotlib>=3.1.0

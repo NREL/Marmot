@@ -48,7 +48,12 @@
 </li>
 <li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial: Formatting PLEXOS modelling results</a><ul>
 <li class="toctree-l3"><a class="reference internal" href="#your-input-data-and-how-to-organize-it">Your input data and how to organize it</a></li>
-<li class="toctree-l3"><a class="reference internal" href="#setting-up-the-input-files">Setting up the input files</a></li>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#plexos-properties">plexos_properties</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-formatter">Running the formatter</a></li>
 </ul>
 </li>
 <li class="toctree-l2"><a class="reference internal" href="plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
@@ -149,6 +154,7 @@
   <section id="tutorial-formatting-plexos-modelling-results">
 <h1>Tutorial: Formatting PLEXOS modelling results<a class="headerlink" href="#tutorial-formatting-plexos-modelling-results" title="Permalink to this headline"></a></h1>
 <p>This is an introductory tutorial on formatting PLEXOS modelling results with Marmot.
+It assumes your are familiar with the PLEXOS production cost modelling software.
 By the end of this tutorial you will have completed the following:</p>
 <blockquote>
 <div><ol class="arabic simple">
@@ -169,7 +175,7 @@ We will work with the hourly data.</p>
 Once you open the hourly data folder you will see the following sub-folders:</p>
 <img alt="../_images/hourly-data-folder.png" src="../_images/hourly-data-folder.png" />
 <p><strong>Base DA</strong> and <strong>High VG DA</strong> contain data that are grouped together under the same scenario.
-The name of the folder is the scenario name and is an important identifier in Marmot.
+The name of the folder is the <em>scenario name</em> and is an important identifier in Marmot.
 Depending on how a user has setup their PLEXOS model, this folder should contain 1 or more files that are
 temporally disaggregated.</p>
 <img alt="../_images/h5-files.png" src="../_images/h5-files.png" />
@@ -181,6 +187,72 @@ See <a class="reference external" href="https://github.com/NREL/h5plexos">h5plex
 <h2>Setting up the input files<a class="headerlink" href="#setting-up-the-input-files" title="Permalink to this headline"></a></h2>
 <p>To let Marmot know where our data is stored and which properties we would like to process,
 we need to setup our input files.</p>
+<section id="marmot-user-defined-input">
+<h3>Marmot_user_defined_input<a class="headerlink" href="#marmot-user-defined-input" title="Permalink to this headline"></a></h3>
+<p>The first file you should setup is the <a class="reference internal" href="../references/input-files/Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a>. This file is located in the
+<a class="reference external" href="https://github.com/NREL/Marmot/tree/main/marmot">Marmot/marmot</a> directory.
+If you open the file in a spreadsheet programme such as MS Excel you will see the following structure:</p>
+<img alt="../_images/user-defined-inputs.jpg" src="../_images/user-defined-inputs.jpg" />
+<p>The file has 4 columns, with column <strong>D</strong> used for adjusting input. For this tutorial we will focus on the following rows,
+for a more comprehensive look at this file see our How-to Guides and
+<a class="reference internal" href="../references/input-files/Marmot_user_defined_inputs.html"><span class="doc">Input File References sections</span></a></p>
+<img alt="../_images/user-defined-inputs-format.png" src="../_images/user-defined-inputs-format.png" />
+<p>The first two rows define where our input files are saved and where to save our outputs. The <strong>PLEXOS_Solutions_folder</strong>
+should point to the root of our <em>scenario name</em> folders described above. For our data this is the <strong>hourly</strong> folder we setup earlier.</p>
+<p>The <strong>Marmot_Solutions_folder</strong> allows you to save the outputs from the formatter and plotter in a different location to
+the input files. For this tutorial we will save our outputs in the same location as our inputs.</p>
+<p><strong>Scenario_process_list</strong> identifies the scenarios we want to process with the formatter. This would correspond to the
+<em>scenario name</em> folders within the the <strong>hourly</strong> folder, <strong>Base DA</strong> and <strong>High VG DA</strong>. Multiple scenarios should be comma separated.</p>
+<p>Setup the 3 rows using your inputs, they should look something like this when you’re finished:</p>
+<img alt="../_images/user-defined-inputs-format-values.png" src="../_images/user-defined-inputs-format-values.png" />
+</section>
+<section id="plexos-properties">
+<h3>plexos_properties<a class="headerlink" href="#plexos-properties" title="Permalink to this headline"></a></h3>
+<p>Next we will setup the <a class="reference internal" href="../references/input-files/plexos_properties.html#plexos-properties-csv-file"><span class="std std-ref">plexos_properties: csv file</span></a>. This file is also located in the
+<a class="reference external" href="https://github.com/NREL/Marmot/tree/main/marmot">Marmot/marmot</a> directory. This file specifies which properties we want to
+processes with Marmot.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>For Marmot to process a property it must have been included in your PLEXOS report output.</p>
+</div>
+<p>When you open the file you will see the following structure:</p>
+<img alt="../_images/plexos-properties-example.png" src="../_images/plexos-properties-example.png" />
+<p>The file has 5 columns, columns <strong>B</strong> and <strong>C</strong> specify the type of property to process. Column <strong>D</strong> accepts TRUE/FALSE values
+used to determine whether Marmot should process the specified property. For a more comprehensive look at this file see our How-to Guides and
+<a class="reference internal" href="../references/input-files/plexos_properties.html"><span class="doc">Input File References sections</span></a></p>
+<p>Set all the values in column D to False except the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>generator Available Capacity</p></li>
+<li><p>generator Generation</p></li>
+<li><p>generator Pump Load</p></li>
+<li><p>generator Installed Capacity</p></li>
+<li><p>region Load</p></li>
+</ul>
+</div></blockquote>
+<p>Marmot will now know to process these properties.</p>
+<img alt="../_images/plexos-properties-tut-props.png" src="../_images/plexos-properties-tut-props.png" />
+</section>
+</section>
+<section id="running-the-formatter">
+<h2>Running the formatter<a class="headerlink" href="#running-the-formatter" title="Permalink to this headline"></a></h2>
+<p>With the input files setup, we are now ready to process our selected properties.
+Open a terminal that is setup with Python and conda such as Anaconda prompt and change directory
+to the <code class="docutils literal notranslate"><span class="pre">Marmot\marmot</span></code> repository folder using the <code class="docutils literal notranslate"><span class="pre">cd</span></code> command like the following example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">E</span><span class="p">:</span>\<span class="n">Marmot</span>\<span class="n">marmot</span>
+</pre></div>
+</div>
+<p>Next activate the marmot-env:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env</span>
+</pre></div>
+</div>
+<p>Finally initiate the formatter using the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">.</span>\<span class="n">marmot_h5_formatter</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Marmot will now begin formatting your properties and will print messages to the terminal.
+Once completed the formatted outputs will be located in a new folder called <strong>Processed_HDF5_folder</strong>
+within the <strong>hourly</strong> data folder. When you open this folder you will see the following h5 files:</p>
 </section>
 </section>
 
