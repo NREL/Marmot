@@ -37,7 +37,7 @@
   <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Tutorial: Creating Plots and Data-Tables" href="plot-tutorial.html" />
+    <link rel="next" title="Tutorial: Creating plots and data-tables" href="plot-tutorial.html" />
     <link rel="prev" title="Install the Marmot software" href="install.html" /> 
 </head>
 
@@ -101,7 +101,15 @@
 <li class="toctree-l3"><a class="reference internal" href="#running-the-formatter">Running the formatter</a></li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="plot-tutorial.html">Tutorial: Creating Plots and Data-Tables</a></li>
+<li class="toctree-l2"><a class="reference internal" href="plot-tutorial.html">Tutorial: Creating plots and data-tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="plot-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="plot-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="plot-tutorial.html#marmot-plot-select">Marmot_plot_select</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="plot-tutorial.html#running-the-plotter">Running the Plotter</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How-to Guides</a><ul class="simple">
@@ -120,7 +128,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/region_mapping.html">region_mapping: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
 </ul>
 </li>
 </ul>
@@ -241,7 +249,7 @@
 <h1>Tutorial: Formatting PLEXOS modelling results<a class="headerlink" href="#tutorial-formatting-plexos-modelling-results" title="Permalink to this headline">¶</a></h1>
 <p>This is an introductory tutorial on formatting PLEXOS modelling results with Marmot.
 It assumes your are familiar with the PLEXOS production cost modelling software.
-By the end of this tutorial you will have completed the following:</p>
+By the end of this tutorial, you will have completed the following:</p>
 <blockquote>
 <div><ol class="arabic simple">
 <li><p>Set up your input data folders.</p></li>
@@ -249,8 +257,11 @@ By the end of this tutorial you will have completed the following:</p>
 <li><p>Run the formatter and created Marmot formatted h5 files.</p></li>
 </ol>
 </div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
 <p><strong>Before you do anything else</strong>, make sure you have installed Marmot and its prerequisites correctly
 by following the <a class="reference internal" href="install.html#install-the-marmot-software"><span class="std std-ref">Install the Marmot software</span></a> instructions.</p>
+</div>
 <div class="section" id="your-input-data-and-how-to-organize-it">
 <h2>Your input data and how to organize it<a class="headerlink" href="#your-input-data-and-how-to-organize-it" title="Permalink to this headline">¶</a></h2>
 <p>For this tutorial we will use example data located in the
@@ -287,7 +298,7 @@ for a more comprehensive look at this file see our How-to Guides and
 should point to the root of our <em>scenario name</em> folders described above. For our data this is the <strong>hourly</strong> folder we setup earlier.</p>
 <p>The <strong>Marmot_Solutions_folder</strong> allows you to save the outputs from the formatter and plotter in a different location to
 the input files. For this tutorial we will save our outputs in the same location as our inputs.</p>
-<p><strong>Scenario_process_list</strong> identifies the scenarios we want to process with the formatter. This would correspond to the
+<p><strong>Scenario_process_list</strong> identifies the scenarios we want to process with the formatter. This corresponds to the
 <em>scenario name</em> folders within the the <strong>hourly</strong> folder, <strong>Base DA</strong> and <strong>High VG DA</strong>. Multiple scenarios should be comma separated.</p>
 <p>Setup the 3 rows using your inputs, they should look something like this when you’re finished:</p>
 <img alt="../_images/user-defined-inputs-format-values.png" src="../_images/user-defined-inputs-format-values.png" />
@@ -352,7 +363,7 @@ within the <strong>hourly</strong> data folder. When you open this folder you wi
   
     <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
       
-        <a href="plot-tutorial.html" class="btn btn-neutral float-right" title="Tutorial: Creating Plots and Data-Tables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
+        <a href="plot-tutorial.html" class="btn btn-neutral float-right" title="Tutorial: Creating plots and data-tables" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right"></span></a>
       
       
         <a href="install.html" class="btn btn-neutral float-left" title="Install the Marmot software" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left"></span> Previous</a>

@@ -10,14 +10,15 @@ Tutorial: Formatting PLEXOS modelling results
 
 This is an introductory tutorial on formatting PLEXOS modelling results with Marmot.
 It assumes your are familiar with the PLEXOS production cost modelling software.
-By the end of this tutorial you will have completed the following:
+By the end of this tutorial, you will have completed the following:
 
    1. Set up your input data folders.
    2. Set up the user input files required for formatting.
    3. Run the formatter and created Marmot formatted h5 files.
 
-**Before you do anything else**, make sure you have installed Marmot and its prerequisites correctly 
-by following the :ref:`Install the Marmot software` instructions.
+.. note::
+  **Before you do anything else**, make sure you have installed Marmot and its prerequisites correctly 
+  by following the :ref:`Install the Marmot software` instructions.
 
 
 Your input data and how to organize it 
@@ -73,7 +74,7 @@ should point to the root of our *scenario name* folders described above. For our
 The **Marmot_Solutions_folder** allows you to save the outputs from the formatter and plotter in a different location to 
 the input files. For this tutorial we will save our outputs in the same location as our inputs.
 
-**Scenario_process_list** identifies the scenarios we want to process with the formatter. This would correspond to the
+**Scenario_process_list** identifies the scenarios we want to process with the formatter. This corresponds to the
 *scenario name* folders within the the **hourly** folder, **Base DA** and **High VG DA**. Multiple scenarios should be comma separated.
 
 Setup the 3 rows using your inputs, they should look something like this when you're finished:

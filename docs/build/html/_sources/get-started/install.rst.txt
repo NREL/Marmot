@@ -10,9 +10,9 @@ Install the Marmot software
 
 - Marmot requires Python 3.6 and the following prerequisites to run:
   
-  * hdf5>=1.10.4 (Install with conda or download from `HDF group website <https://www.hdfgroup.org/downloads/hdf5>`_)
+  * hdf5=1.10.4 (Install with conda or download from `HDF group website <https://www.hdfgroup.org/downloads/hdf5>`_)
   * numpy
-  * pandas==1.0.5
+  * pandas=1.0.5
   * PyYAML
   * h5py==2.10.0
   * matplotlib>=3.1.0

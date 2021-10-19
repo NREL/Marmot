@@ -8,7 +8,7 @@
   
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   
-  <title>Tutorial: Creating Plots and Data-Tables &mdash; Marmot 0.9.0 documentation</title>
+  <title>Tutorial: Creating plots and data-tables &mdash; Marmot 0.9.0 documentation</title>
   
 
   
@@ -101,7 +101,15 @@
 <li class="toctree-l3"><a class="reference internal" href="format-tutorial.html#running-the-formatter">Running the formatter</a></li>
 </ul>
 </li>
-<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial: Creating Plots and Data-Tables</a></li>
+<li class="toctree-l2 current"><a class="current reference internal" href="#">Tutorial: Creating plots and data-tables</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#setting-up-the-input-files">Setting up the input files</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#marmot-user-defined-input">Marmot_user_defined_input</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#marmot-plot-select">Marmot_plot_select</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#running-the-plotter">Running the Plotter</a></li>
+</ul>
+</li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="../how-to/index.html">How-to Guides</a><ul class="simple">
@@ -120,7 +128,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/region_mapping.html">region_mapping: csv file</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../references/input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
 </ul>
 </li>
 </ul>
@@ -216,7 +224,7 @@
         
           <li><a href="index.html">Get Started</a> &raquo;</li>
         
-      <li>Tutorial: Creating Plots and Data-Tables</li>
+      <li>Tutorial: Creating plots and data-tables</li>
     
     
       <li class="wy-breadcrumbs-aside">
@@ -238,7 +246,98 @@
   <style>
     h2  {border-bottom: 1px solid gray;}
 </style><div class="section" id="tutorial-creating-plots-and-data-tables">
-<h1>Tutorial: Creating Plots and Data-Tables<a class="headerlink" href="#tutorial-creating-plots-and-data-tables" title="Permalink to this headline">¶</a></h1>
+<h1>Tutorial: Creating plots and data-tables<a class="headerlink" href="#tutorial-creating-plots-and-data-tables" title="Permalink to this headline">¶</a></h1>
+<p>This is an introductory tutorial on creating plots and data-tables with Marmot.
+By the end of this tutorial, you will have completed the following:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Set up the user input files required for plotting.</p></li>
+<li><p>Run the Plotter and created viewable figures and data-table outputs.</p></li>
+</ol>
+</div></blockquote>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><strong>This tutorial assumes you have already completed installation and the previous tutorial on formatting results</strong>,
+make sure you have Marmot formatted h5 files created before beginning.</p>
+</div>
+<div class="section" id="setting-up-the-input-files">
+<h2>Setting up the input files<a class="headerlink" href="#setting-up-the-input-files" title="Permalink to this headline">¶</a></h2>
+<p>To let Marmot know where our formatted data is stored and which figures we would like to create,
+we need to setup our input files.</p>
+<div class="section" id="marmot-user-defined-input">
+<h3>Marmot_user_defined_input<a class="headerlink" href="#marmot-user-defined-input" title="Permalink to this headline">¶</a></h3>
+<p>As with the formatter the <a class="reference internal" href="../references/input-files/Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a> also needs to be modified to run the plotter.
+This file is located in the <a class="reference external" href="https://github.com/NREL/Marmot/tree/main/marmot">Marmot/marmot</a> directory.</p>
+<p>For this tutorial we will focus on the following rows,
+for a more comprehensive look at this file see our How-to Guides and
+<a class="reference internal" href="../references/input-files/Marmot_user_defined_inputs.html"><span class="doc">Input File References sections</span></a></p>
+<img alt="../_images/user-defined-inputs-plot.png" src="../_images/user-defined-inputs-plot.png" />
+<p>The first two rows define where our input files are saved and where to save our outputs. The <strong>PLEXOS_Solutions_folder</strong>
+should point to the root of our <em>scenario name</em> folders. For our data this is the <strong>hourly</strong> folder we setup
+in the previous tutorial, <a class="reference internal" href="format-tutorial.html#tutorial-formatting-plexos-modelling-results"><span class="std std-ref">Tutorial: Formatting PLEXOS modelling results</span></a>.</p>
+<p>The <strong>Marmot_Solutions_folder</strong> allows you to save the outputs from the formatter and plotter in a different location to
+the input files. For this tutorial we will save our outputs in the same location as our inputs.</p>
+<p><strong>Scenarios</strong> identifies the scenarios we want to plot and compare. This corresponds to the
+<em>scenario name</em> folders within the the <strong>hourly</strong> folder, <strong>Base DA</strong> and <strong>High VG DA</strong>.
+Multiple scenarios should be comma separated.</p>
+<p><strong>AGG_BY</strong> determines the geographic area by which to aggregate when creating plots. By default, PLEXOS has two
+aggregations, <em>region</em> and <em>zone</em>. For this tutorial we will aggregate by zone. for a more detailed look at
+this property and how to create custom aggregations see our How-to Guides and the
+<a class="reference internal" href="../references/input-files/mapping-folder/region_mapping.html#region-mapping-csv-file"><span class="std std-ref">Region Mapping: csv file</span></a> reference.</p>
+<p>Setup the 4 rows using your inputs, also set any unused optional values to blank entries. They should look something
+like this when you’re finished:</p>
+<img alt="../_images/user-defined-inputs-plot-values.png" src="../_images/user-defined-inputs-plot-values.png" />
+</div>
+<div class="section" id="marmot-plot-select">
+<h3>Marmot_plot_select<a class="headerlink" href="#marmot-plot-select" title="Permalink to this headline">¶</a></h3>
+<p>Next we will setup the <a class="reference internal" href="../references/input-files/Marmot_plot_select.html#marmot-plot-select-csv-file"><span class="std std-ref">Marmot_plot_select: csv file</span></a>. This file is also located in the
+<a class="reference external" href="https://github.com/NREL/Marmot/tree/main/marmot">Marmot/marmot</a> directory. This file specifies which figures we want to
+create with Marmot.</p>
+<p>When you open the file, you will see the following structure:</p>
+<img alt="../_images/plot-select-example.png" src="../_images/plot-select-example.png" />
+<p>The file has 11 columns, column <strong>A</strong> is the name of the figures we can create and the names they will be given once saved.
+Column <strong>B</strong> accepts TRUE/FALSE values and is used to determine whether Marmot should create the specified figure.
+For a more comprehensive look at this file see our How-to Guides and
+<a class="reference internal" href="../references/input-files/Marmot_plot_select.html"><span class="doc">Input File References sections</span></a></p>
+<p>Set all the values in column B to False except the following:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>Stacked_Gen_Peak_Demand</p></li>
+<li><p>Total_Generation</p></li>
+<li><p>Total_Installed_Capacity</p></li>
+</ul>
+</div></blockquote>
+<p>Marmot will now know to create these figures.</p>
+<img alt="../_images/plot-select-tut-fig.png" src="../_images/plot-select-tut-fig.png" />
+</div>
+</div>
+<div class="section" id="running-the-plotter">
+<h2>Running the Plotter<a class="headerlink" href="#running-the-plotter" title="Permalink to this headline">¶</a></h2>
+<p>With the input files setup, we are now ready to create our selected figures.
+Open a terminal that is setup with Python and conda such as Anaconda prompt and change directory
+to the <code class="docutils literal notranslate"><span class="pre">Marmot\marmot</span></code> repository folder using the <code class="docutils literal notranslate"><span class="pre">cd</span></code> command like the following example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">E</span><span class="p">:</span>\<span class="n">Marmot</span>\<span class="n">marmot</span>
+</pre></div>
+</div>
+<p>Next activate the marmot-env:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env</span>
+</pre></div>
+</div>
+<p>Finally initiate the plotter using the following command:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">.</span>\<span class="n">marmot_plot_main</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+<p>Marmot will now begin creating your figures and will print messages to the terminal.
+Once completed the figures will be located in a new folder called <strong>Figures_Output</strong>
+within the <strong>hourly</strong> data folder. Figures will be organized into sub-folders named by
+the selected area aggregation and the figure type.</p>
+<img alt="../_images/figures-output-folder.png" src="../_images/figures-output-folder.png" />
+<p>Open the <strong>region_total_generation</strong> sub-folder and you will see the following files.</p>
+<img alt="../_images/total_gen_fig_folder.png" src="../_images/total_gen_fig_folder.png" />
+<p>A figure and its data-table were created for each region within the database. By default, figures
+are saved as an svg format and data-tables as csv’s. Below is the total generation figure for <strong>region 3</strong>.</p>
+<img alt="../_images/3_Total_Generation.svg" src="../_images/3_Total_Generation.svg" /><p>Congratulations, you have successfully created figures with Marmot.</p>
+</div>
 </div>
 
 
