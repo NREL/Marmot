@@ -1,7 +1,7 @@
-"""
-Created on Mon Dec  9 10:34:48 2019
+"""Timeseries generation line plots. 
 
-This code creates generation UNstacked plots and is called from Marmot_plot_main.py
+This code creates generation non-stacked line plots.
+
 @author: Daniel Levie
 """
 import logging
@@ -18,7 +18,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """generation_unstack MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -31,8 +31,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.
@@ -71,9 +70,11 @@ class MPlot(PlotDataHelper):
             prop (str, optional): Special argument used to adjust specific 
                 plot settings. Controlled through the plot_select.csv.
                 Opinions available are:
-                    - Peak Demand
-                    - Min Net Load
-                    - Date Range
+
+                - Peak Demand
+                - Min Net Load
+                - Date Range
+                
                 Defaults to None.
             start (float, optional): Used in conjunction with the prop argument.
                 Will define the number of days to plot before a certain event in 

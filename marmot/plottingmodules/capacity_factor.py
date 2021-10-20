@@ -1,10 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  9 13:20:56 2019
+"""Generator capacity factor plots .
 
-This module contain methods that are
-related to the capacity factor of generators and average output plots 
-@author: Daniel Levie 
+This module contain methods that are related to the capacity factor 
+of generators and average output plots 
 """
 
 import logging
@@ -19,7 +17,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """capacity_factor MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -32,8 +30,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

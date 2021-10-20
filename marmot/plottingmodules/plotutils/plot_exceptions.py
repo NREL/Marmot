@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Fri Sep 17 16:00:00 2021
+"""Exception classes to handle specific actions and results.
 
-Exception classes to handle specific actions and results
 @author: Daniel Levie
 """
 

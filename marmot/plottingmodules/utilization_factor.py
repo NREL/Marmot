@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  9 13:20:56 2019
+"""Note! Module is currently not production ready.
 
 Note! Module is currently not production ready and 
 methods are not available to use.
@@ -8,6 +7,7 @@ methods are not available to use.
 This code creates plots of generator utilization factor 
 (similar to capacity factor but based on Available Capacity instead of Installed Capacity) 
 and is called from Marmot_plot_main.py  
+
 @author: adyreson
 """
 
@@ -35,7 +35,7 @@ def df_process_gen_ind_inputs(df, self):
     return df
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """utilization_factor MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -48,8 +48,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

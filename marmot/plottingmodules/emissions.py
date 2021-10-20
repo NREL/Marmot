@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Nov 2 8:41:40 2020
+"""Generator emissions plots.
 
-This module plots figures related to the fossil fuel 
-emissions of generators. 
+This module plots figures related to the fossil fuel emissions of generators. 
+
 @author: Brian Sergi
 
 TO DO:
@@ -23,7 +22,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """emissions MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -36,8 +35,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jun 22 16:14:56 2020
+"""Retrieve metadata from PLEXOS production cost modelling results.
 
-Module to retrieve metadata from 
-production cost modelling results 
+Database can be either a h5plexos file or a formatted Marmot hdf5 file.
+
 @author: Ryan Houseman
 """
 
@@ -30,8 +29,7 @@ class MetaData():
     def __init__(self, HDF5_folder_in: str, read_from_formatted_h5: bool = True, 
                  Region_Mapping: pd.DataFrame = pd.DataFrame(),
                  partition_number: int = 0):
-        """MetaData init method
-
+        """
         Args:
             HDF5_folder_in (str): Folder containing h5plexos h5 files.
             read_from_formatted_h5 (bool, optional): Boolean for whether the metadata is 
@@ -52,7 +50,7 @@ class MetaData():
 
     @classmethod
     def _check_if_existing_filename(cls, filename: str) -> bool:
-        """Check if the passed filename is the same or different from previous calls
+        """Check if the passed filename is the same or different from previous calls.
 
         If file is different replaces the filename with new value 
         and closes old file
@@ -72,13 +70,13 @@ class MetaData():
 
     @classmethod
     def close_h5(cls) -> None:
-        """Closes h5 file open in memory
+        """Closes h5 file open in memory.
         """
         if cls.h5_data:
             cls.h5_data.close()
     
     def _read_data(self, filename: str) -> None:
-        """Reads h5 file into memory
+        """Reads h5 file into memory.
 
         Args:
             filename (str): The name of the h5 file to retreive 
@@ -121,7 +119,7 @@ class MetaData():
                 sys.exit()     
 
     def generator_category(self, filename: str) -> pd.DataFrame:
-        """Generator categories mapping
+        """Generator categories mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -143,7 +141,7 @@ class MetaData():
         return gen_category
             
     def region_generators(self, filename: str) -> pd.DataFrame:
-        """Region generators mapping
+        """Region generators mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -166,7 +164,7 @@ class MetaData():
         return region_gen
         
     def region_generator_category(self, filename: str) -> pd.DataFrame:
-        """Region generators category mapping
+        """Region generators category mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -183,7 +181,7 @@ class MetaData():
         return region_gen_cat
         
     def zone_generators(self, filename: str) -> pd.DataFrame:
-        """Zone generators mapping
+        """Zone generators mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -205,7 +203,7 @@ class MetaData():
         return zone_gen
         
     def zone_generator_category(self, filename: str) -> pd.DataFrame:
-        """Zone generators category mapping
+        """Zone generators category mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -224,7 +222,7 @@ class MetaData():
     # Generator storage has been updated so that only one of tail_storage & head_storage is required
     # If both are available, both are used
     def generator_storage(self, filename: str) -> pd.DataFrame:
-        """Generator Storage mapping
+        """Generator Storage mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -281,7 +279,7 @@ class MetaData():
         return gen_storage
     
     def node_region(self, filename: str) -> pd.DataFrame:
-        """Node Region mapping
+        """Node Region mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -303,7 +301,7 @@ class MetaData():
         return node_region
         
     def node_zone(self, filename: str) -> pd.DataFrame:
-        """Node zone mapping
+        """Node zone mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -325,7 +323,7 @@ class MetaData():
         return node_zone
     
     def generator_node(self, filename: str) -> pd.DataFrame:
-        """generator node mapping
+        """generator node mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -347,7 +345,7 @@ class MetaData():
         return generator_node
         
     def regions(self, filename: str) -> pd.DataFrame:
-        """Region objects
+        """Region objects.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -371,7 +369,7 @@ class MetaData():
         return regions   
     
     def zones(self, filename: str) -> pd.DataFrame:
-        """Zone objects
+        """Zone objects.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -392,7 +390,7 @@ class MetaData():
         return zones
              
     def lines(self, filename: str) -> pd.DataFrame:
-        """Line objects
+        """Line objects.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -413,7 +411,7 @@ class MetaData():
         return lines
     
     def region_regions(self, filename: str) -> pd.DataFrame:
-        """Region-region mapping
+        """Region-region mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -430,7 +428,7 @@ class MetaData():
         return region_regions
     
     def region_interregionallines(self, filename: str) -> pd.DataFrame:
-        """Region inter-regional lines mapping
+        """Region inter-regional lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -455,7 +453,7 @@ class MetaData():
         return region_interregionallines
             
     def region_intraregionallines(self, filename: str) -> pd.DataFrame:
-        """Region intra-regional lines mapping
+        """Region intra-regional lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -483,7 +481,7 @@ class MetaData():
         return region_intraregionallines
       
     def region_exporting_lines(self, filename: str) -> pd.DataFrame:
-        """Region exporting lines mapping
+        """Region exporting lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -506,7 +504,7 @@ class MetaData():
         return region_exportinglines 
       
     def region_importing_lines(self, filename: str) -> pd.DataFrame:
-        """Region importing lines mapping
+        """Region importing lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -529,7 +527,7 @@ class MetaData():
         return region_importinglines
 
     def zone_interzonallines(self, filename: str) -> pd.DataFrame:
-        """zone inter-zonal lines mapping
+        """Zone inter-zonal lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -552,7 +550,7 @@ class MetaData():
         return zone_interzonallines
                 
     def zone_intrazonallines(self, filename: str) -> pd.DataFrame:
-        """zone intra-zonal lines mapping
+        """Zone intra-zonal lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -574,7 +572,7 @@ class MetaData():
         return zone_intrazonallines
                  
     def zone_exporting_lines(self, filename: str) -> pd.DataFrame:
-        """zone exporting lines mapping
+        """Zone exporting lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -596,7 +594,7 @@ class MetaData():
         return zone_exportinglines 
     
     def zone_importing_lines(self, filename: str) -> pd.DataFrame:
-        """zone importing lines mapping
+        """Zone importing lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -618,7 +616,7 @@ class MetaData():
         return zone_importinglines 
 
     def interface_lines(self, filename: str) -> pd.DataFrame:
-        """Interface -> lines mapping
+        """Interface to lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -639,7 +637,7 @@ class MetaData():
         return interface_lines
 
     def region_lines(self, filename: str) -> pd.DataFrame:
-        """Lines within each region
+        """Region to Lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -651,7 +649,7 @@ class MetaData():
         return region_lines
     
     def zone_lines(self, filename: str) -> pd.DataFrame:
-        """Lines within each zone
+        """Zone to Lines mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -664,7 +662,7 @@ class MetaData():
         return zone_lines
 
     def reserves(self, filename: str) -> pd.DataFrame:
-        """Reserves objects
+        """Reserves objects.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -684,7 +682,7 @@ class MetaData():
         return reserves 
             
     def reserves_generators(self, filename: str) -> pd.DataFrame:
-        """Reserves generators mapping
+        """Reserves to generators mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -706,7 +704,7 @@ class MetaData():
         return reserves_generators 
 
     def reserves_regions(self, filename: str) -> pd.DataFrame:
-        """Reserves regions mapping
+        """Reserves to regions mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 
@@ -727,7 +725,7 @@ class MetaData():
         return reserves_regions
         
     def reserves_zones(self, filename: str) -> pd.DataFrame:
-        """Reserves zones mapping
+        """Reserves to zones mapping.
         
         Args:
             filename (str): The name of the h5 file to retreive data from. 

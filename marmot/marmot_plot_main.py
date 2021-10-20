@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-First Created on Thu Dec  5 14:16:30 2019
+"""Main plotting source code, creates output figures and data-tables.
 
 marmot_plot_main.py is the main plotting script within Marmot which calls on supporting files to read in data, 
 create the plot, and then return the plot and data to marmot_plot_main.py. 
@@ -53,21 +52,19 @@ pd.set_option("display.max_colwidth", 1000)
 class SetupLogger():
     """Sets up the python logger.
 
-    Allows an optional suffix to be included which will be appended to the
-    end of the log file name, this is useful when running multiple
-    processes in parallel to allow logging to separate files.
+    This class handles the following.
 
-    Allows log_directory to be changed from default
+    1. Configures logger from marmot_logging_config.yml file.
+    2. Handles rollover of log file on each instantiation.
+    3. Sets log_directory.
+    4. Append optional suffix to the end of the log file name
+
+    Optional suffix is useful when running multiple processes in parallel to 
+    allow logging to separate files.
     """
 
     def __init__(self, log_directory: str = 'logs', log_suffix: str = None):
-        """Setuplogger __init__ method.
-
-        Formats log filename, 
-        configures logger from marmot_logging_config.yml file,
-        handles rollover of log file on each instantiation.
-        Allows log_directory to be changed from default
-
+        """
         Args:
             log_directory (str, optional): log directory to save logs. 
                 Defaults to 'logs'.
@@ -129,8 +126,7 @@ class MarmotPlot(SetupLogger):
                  Region_Mapping: Union[str, pd.DataFrame] = pd.DataFrame(),
                  TECH_SUBSET: Union[str, list] = None,
                  **kwargs):
-        """Marmotplot class __init__ method.
-
+        """
         Args:
             Scenarios (Union[str, list]): Name of scenarios to process.
             AGG_BY (str): Informs region type to aggregate by when creating plots.
@@ -249,9 +245,10 @@ class MarmotPlot(SetupLogger):
             pass     
                         
     def run_plotter(self):
-        """
-        Main method to call to begin plotting figures, this method takes 
-        no input variables, all required variables are passed in via the __init__ method.
+        """Main method to call to begin plotting figures. 
+        
+        This method takes no input variables, all required variables are 
+        passed in via the __init__ method.
         """
         
         self.logger.info(f"Area Aggregation selected: {self.AGG_BY}")
@@ -598,10 +595,8 @@ class MarmotPlot(SetupLogger):
 
 
 def main():
-    '''
-    The following code is run if the formatter is run directly,
-    it does not run if the formatter is imported as a module. 
-    '''
+    """Run the plotting code and create desired plots and data-tables based on user input files.
+    """
     #===============================================================================
     # Load Input Properties
     #===============================================================================

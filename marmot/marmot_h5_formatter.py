@@ -1,6 +1,5 @@
 # -*- coding: utf-8 -*-
-"""
-First Created on Wed May 22 14:29:48 2019
+"""Main formatting source code to format modelling results for plotting.
 
 This code was written to process PLEXOS HDF5 outputs to get them ready for plotting.
 Once the data is processed it is outputted as an intermediary HDF5 file format so that
@@ -84,17 +83,20 @@ UNITS_CONVERSION = {
 class SetupLogger():
     """Sets up the python logger.
 
-    Allows an optional suffix to be included which will be appended to the
-    end of the log file name, this is useful when running multiple
-    processes in parallel to allow logging to separate files.
+    This class handles the following.
 
-    Allows log_directory to be changed from default
+    1. Configures logger from marmot_logging_config.yml file.
+    2. Handles rollover of log file on each instantiation.
+    3. Sets log_directory.
+    4. Append optional suffix to the end of the log file name
+
+    Optional suffix is useful when running multiple processes in parallel to 
+    allow logging to separate files.
     """
 
     def __init__(self, log_directory: str = 'logs', 
                  log_suffix: str = None):
-        """Setuplogger __init__ method.
-
+        """
         Args:
             log_directory (str, optional): log directory to save logs. 
                 Defaults to 'logs'.
@@ -135,17 +137,15 @@ class SetupLogger():
 
 
 class Process(SetupLogger):
-    """Contains methods for processing h5plexos query data.
+    """Process PLEXOS class specific data from h5plexos database.
 
-    All methods are PLEXOS Class specific
-    e.g generator, region, zone, line etc.
+    All methods are PLEXOS Class specific e.g generator, region, zone, line etc.
     """
 
     def __init__(self, df: pd.DataFrame, metadata: MetaData, 
                  model: str, Region_Mapping: pd.DataFrame, 
                  emit_names: pd.DataFrame, logger: logging.Logger):
-        """Process __init__ method.
-
+        """
         Args:
             df (pd.DataFrame): Unprocessed h5plexos dataframe containing
                 class and property specifc data.
@@ -172,11 +172,10 @@ class Process(SetupLogger):
                                        .set_index("Original").to_dict()["New"])
 
     def df_process_generator(self) -> pd.DataFrame:
-        """Format data which comes from the PLEXOS Generator Class.
+        """Format PLEXOS Generator Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['tech', 'gen_name'], level=['category', 'name'], inplace=True)
@@ -228,11 +227,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_region(self) -> pd.DataFrame:
-        """Format data which comes from the PLEXOS Region Class.
+        """Format PLEXOS Region Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
@@ -259,12 +257,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_zone(self) -> pd.DataFrame:
-        """
-        Method for formating data which comes from the PLEXOS Zone Class
+        """Format PLEXOS Zone Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('zone', level='name', inplace=True)
@@ -276,12 +272,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_line(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS Line Class
+        """Format PLEXOS Line Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('line_name', level='name', inplace=True)
@@ -293,12 +287,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_interface(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS Interface Class
+        """Format PLEXOS PLEXOS Interface Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['interface_name', 'interface_category'], 
@@ -311,12 +303,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_reserve(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS Reserve Class
+        """Format PLEXOS Reserve Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['parent', 'Type'], level=['name', 'category'], inplace=True)
@@ -338,13 +328,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_reserves_generators(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS 
-        Reserve_Generators Relational Class
+        """Format PLEXOS Reserve_Generators Relational Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
@@ -379,12 +366,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_fuel(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS Fuel Class
+        """Format PLEXOS Fuel Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('fuel_type', level='name', inplace=True)
@@ -396,12 +381,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_constraint(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS Constraint Class
+        """Format PLEXOS Constraint Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['constraint_category', 'constraint'], 
@@ -414,12 +397,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_emission(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS Emission Class
+        """Format PLEXOS Emission Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename('emission_type', level='name', inplace=True)
@@ -431,13 +412,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_emissions_generators(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS 
-        Emissions_Generators Relational Class
+        """Format PLEXOS Emissions_Generators Relational Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
@@ -484,12 +462,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_storage(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS Storage Class
+        """Format PLEXOS Storage Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df = df.reset_index()  # unzip the levels in index
@@ -516,13 +492,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_region_regions(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS 
-        Region_Regions Relational Class
+        """Format PLEXOS Region_Regions Relational Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -533,12 +506,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_node(self) -> pd.DataFrame:
-        """
-        Method for formatting data which comes from the PLEXOS Node Class
+        """Format PLEXOS Node Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('node', level='name', inplace=True)
@@ -582,12 +553,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_abatement(self):
-        """
-        Method for formatting data which comes from the PLEXOS Abatement Class
+        """Format PLEXOS Abatement Class data.
 
         Returns:
-            pd.DataFrame: Processed Output, 
-                single value column with multiindex.
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename('abatement_name', level='name', inplace=True)
@@ -616,8 +585,7 @@ class MarmotFormat(SetupLogger):
                  emit_names: Union[str, pd.DataFrame] = pd.DataFrame(),
                  VoLL: int = 10000,
                  **kwargs):
-        """Marmotformat class __init__ method.
-
+        """
         Args:
             Scenario_name (str): Name of scenario to process.
             PLEXOS_Solutions_folder (str): Folder containing h5plexos results files.
@@ -1066,10 +1034,7 @@ class MarmotFormat(SetupLogger):
 
 
 def main():
-    '''
-    The following code is run if the formatter is run directly,
-    it does not run if the formatter is imported as a module.
-    '''
+    """Run the formatting code and format desired properties based on user input files."""
 
     # ===============================================================================
     # Input Properties

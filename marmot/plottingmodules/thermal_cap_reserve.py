@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec 9 10:34:48 2019
-Updated July 26th 16:20:00 2021
+"""Thermal capacity plots.
 
 This module plots figures which show the amount of thermal capacity 
 available but not committed (i.e in reserve)
+
 @author: Daniel Levie and Marty Schwarz
 """
 
@@ -22,7 +21,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """thermal_cap_reserve MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -35,8 +34,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

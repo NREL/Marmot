@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Tue Dec 10 08:51:15 2019
+"""Generato total installed capacity plots.
 
-This module plots figures of the total installed capacity of the system
+This module plots figures of the total installed capacity of the system.
+This
 @author: Daniel Levie
 """
 
@@ -25,7 +25,7 @@ custom_legend_elements = Patch(facecolor='#DD0200',
                                alpha=0.5, edgecolor='#DD0200')
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """total_installed_capacity MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -38,8 +38,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.

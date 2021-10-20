@@ -1,9 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Created April 2020, updated August 2020
+"""Energy storage plots.
 
 This module creates energy storage plots.
-@author: 
 """
 
 import logging
@@ -18,7 +16,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
 
 
 class MPlot(PlotDataHelper):
-    """Marmot MPlot class, common across all plotting modules.
+    """storage MPlot class.
 
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
@@ -31,8 +29,7 @@ class MPlot(PlotDataHelper):
     """
 
     def __init__(self, argument_dict: dict):
-        """MPlot init method
-
+        """
         Args:
             argument_dict (dict): Dictionary containing all
                 arguments passed from MarmotPlot.
