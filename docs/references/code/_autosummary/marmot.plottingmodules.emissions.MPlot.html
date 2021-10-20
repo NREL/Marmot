@@ -251,7 +251,7 @@
 <h1>marmot.plottingmodules.emissions.MPlot<a class="headerlink" href="#marmot-plottingmodules-emissions-mplot" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.plottingmodules.emissions.MPlot">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/emissions.html#MPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.emissions.MPlot" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MPlot</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">argument_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/emissions.html#MPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.emissions.MPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper</span></code></a></p>
 <p>emissions MPlot class.</p>
 <p>All the plotting modules use this same class name.
@@ -260,46 +260,53 @@ current module name.</p>
 <p>The emissions.py module contains methods that are
 related to the fossil fuel emissions of generators.</p>
 <p>MPlot inherits from the PlotDataHelper class to assist in creating figures.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>argument_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary containing all
-arguments passed from MarmotPlot.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argument_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary containing all
+arguments passed from MarmotPlot.</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
+<table border="1" class="longtable docutils align-default">
 <colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
+<col width="10%" />
+<col width="90%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.emissions.MPlot.total_emissions_by_type" title="marmot.plottingmodules.emissions.MPlot.total_emissions_by_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_emissions_by_type</span></code></a>([prop, …])</p></td>
-<td><p>Creates a stacked bar plot of emissions by generator tech type.</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#marmot.plottingmodules.emissions.MPlot.total_emissions_by_type" title="marmot.plottingmodules.emissions.MPlot.total_emissions_by_type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_emissions_by_type</span></code></a>([prop,&nbsp;…])</td>
+<td>Creates a stacked bar plot of emissions by generator tech type.</td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.emissions.MPlot.total_emissions_by_type">
-<span class="sig-name descname"><span class="pre">total_emissions_by_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/emissions.html#MPlot.total_emissions_by_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.emissions.MPlot.total_emissions_by_type" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">total_emissions_by_type</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/emissions.html#MPlot.total_emissions_by_type"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.emissions.MPlot.total_emissions_by_type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a stacked bar plot of emissions by generator tech type.</p>
 <p>The emission type to plot is defined using the prop argument.
 A separate bar is created for each scenario.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Controls type of emission to plot.
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Controls type of emission to plot.
 Controlled through the plot_select.csv.
-Defaults to None.</p></li>
-<li><p><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
-Defaults to None.</p></li>
-<li><p><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
-Defaults to None.</p></li>
+Defaults to None.</li>
+<li><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
+Defaults to None.</li>
+<li><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
+Defaults to None.</li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>dict</em> – dictionary containing the created plot and its data table.</p>
-</dd>
-</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>dict</em> – dictionary containing the created plot and its data table.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

@@ -248,16 +248,15 @@
 </style><div class="section" id="install-the-marmot-software">
 <h1>Install the Marmot software<a class="headerlink" href="#install-the-marmot-software" title="Permalink to this headline">¶</a></h1>
 <ul class="simple">
-<li><p>Marmot requires Python 3.6 and the following prerequisites to run:</p>
-<ul>
-<li><p>hdf5=1.10.4 (Install with conda or download from <a class="reference external" href="https://www.hdfgroup.org/downloads/hdf5">HDF group website</a>)</p></li>
-<li><p>numpy</p></li>
-<li><p>pandas=1.0.5</p></li>
-<li><p>PyYAML</p></li>
-<li><p>h5py==2.10.0</p></li>
-<li><p>matplotlib&gt;=3.1.0</p></li>
-<li><p><a class="reference external" href="https://github.com/NREL/h5plexos">h5plexos</a> &gt;=0.6</p></li>
-<li><p>tables</p></li>
+<li>Marmot requires Python 3.6 and the following prerequisites to run:<ul>
+<li>hdf5=1.10.4 (Install with conda or download from <a class="reference external" href="https://www.hdfgroup.org/downloads/hdf5">HDF group website</a>)</li>
+<li>numpy</li>
+<li>pandas=1.0.5</li>
+<li>PyYAML</li>
+<li>h5py==2.10.0</li>
+<li>matplotlib&gt;=3.1.0</li>
+<li><a class="reference external" href="https://github.com/NREL/h5plexos">h5plexos</a> &gt;=0.6</li>
+<li>tables</li>
 </ul>
 </li>
 </ul>
@@ -283,20 +282,20 @@ To ensure you are using all the required Python modules, create a new conda
 environment using the provided <a class="reference external" href="https://github.com/NREL/Marmot/blob/main/marmot-env.yml">marmot-env yml file</a>,
 located in the Marmot repository.</p>
 <ul>
-<li><p>To create and activate a new conda environment open a terminal and follow these steps:</p>
+<li><p class="first">To create and activate a new conda environment open a terminal and follow these steps:</p>
 <blockquote>
 <div><ol class="arabic">
-<li><p>Create the environment from the <code class="docutils literal notranslate"><span class="pre">marmot-env.yml</span></code> file, if you are not in the Marmot directory, use the full file path to the file:</p>
+<li><p class="first">Create the environment from the <code class="docutils literal notranslate"><span class="pre">marmot-env.yml</span></code> file, if you are not in the Marmot directory, use the full file path to the file:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">env</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env</span><span class="o">.</span><span class="n">yml</span>
 </pre></div>
 </div>
 </li>
-<li><p>Activate the new environment:</p>
+<li><p class="first">Activate the new environment:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env</span>
 </pre></div>
 </div>
 </li>
-<li><p>The required modules should now be ready to use, to verify the environment was setup correctly type:</p>
+<li><p class="first">The required modules should now be ready to use, to verify the environment was setup correctly type:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="nb">list</span>
 </pre></div>
 </div>

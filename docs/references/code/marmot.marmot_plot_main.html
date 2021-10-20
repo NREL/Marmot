@@ -249,73 +249,81 @@ have descriptive names such as total_generation.py, generation_stack.py, curtail
 <p>&#64;author: Daniel Levie</p>
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SetupLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_directory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'logs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_suffix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_plot_main.html#SetupLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">SetupLogger</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">log_directory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'logs'</span></span></em>, <em><span class="n"><span class="pre">log_suffix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_plot_main.html#SetupLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Sets up the python logger.</p>
 <p>This class handles the following.</p>
 <ol class="arabic simple">
-<li><p>Configures logger from marmot_logging_config.yml file.</p></li>
-<li><p>Handles rollover of log file on each instantiation.</p></li>
-<li><p>Sets log_directory.</p></li>
-<li><p>Append optional suffix to the end of the log file name</p></li>
+<li>Configures logger from marmot_logging_config.yml file.</li>
+<li>Handles rollover of log file on each instantiation.</li>
+<li>Sets log_directory.</li>
+<li>Append optional suffix to the end of the log file name</li>
 </ol>
 <p>Optional suffix is useful when running multiple processes in parallel to
 allow logging to separate files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>log_directory</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – log directory to save logs.
-Defaults to ‘logs’.</p></li>
-<li><p><strong>log_suffix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Optional suffix to add to end of log file.
-Defaults to None.</p></li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>log_directory</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – log directory to save logs.
+Defaults to ‘logs’.</li>
+<li><strong>log_suffix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Optional suffix to add to end of log file.
+Defaults to None.</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MarmotPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Scenarios:</span> <span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">AGG_BY:</span> <span class="pre">str,</span> <span class="pre">PLEXOS_Solutions_folder:</span> <span class="pre">str,</span> <span class="pre">gen_names:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_plot_select:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_Solutions_folder:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">mapping_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'mapping_folder',</span> <span class="pre">Scenario_Diff:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">zone_region_sublist:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">xlabels:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">ylabels:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">ticklabels:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">Region_Mapping:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">TECH_SUBSET:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_plot_main.html#MarmotPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MarmotPlot</span></code><span class="sig-paren">(</span><em><span class="pre">Scenarios:</span> <span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">AGG_BY:</span> <span class="pre">str,</span> <span class="pre">PLEXOS_Solutions_folder:</span> <span class="pre">str,</span> <span class="pre">gen_names:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_plot_select:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_Solutions_folder:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">mapping_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'mapping_folder',</span> <span class="pre">Scenario_Diff:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">zone_region_sublist:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">xlabels:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">ylabels:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">ticklabels:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">Region_Mapping:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">TECH_SUBSET:</span> <span class="pre">Optional[Union[str,</span> <span class="pre">list]]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_plot_main.html#MarmotPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="_autosummary/marmot.marmot_plot_main.SetupLogger.html#marmot.marmot_plot_main.SetupLogger" title="marmot.marmot_plot_main.SetupLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_plot_main.SetupLogger</span></code></a></p>
 <p>Main module class to be instantiated to run the plotter.</p>
 <p>MarmotPlot handles the selection of plotting module to create the desired
 figure and saving of outputs.
 It also handles the area aggregation selection</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Scenarios</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list]</span></code>) – Name of scenarios to process.</p></li>
-<li><p><strong>AGG_BY</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Informs region type to aggregate by when creating plots.</p></li>
-<li><p><strong>PLEXOS_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Folder containing h5plexos results files.</p></li>
-<li><p><strong>gen_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame]</span></code>) – Mapping file to rename generator technologies.</p></li>
-<li><p><strong>Marmot_plot_select</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame]</span></code>) – Selection of plots to plot.</p></li>
-<li><p><strong>Marmot_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Folder to save Marmot solution files.
-Defaults to None.</p></li>
-<li><p><strong>mapping_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The location of the Marmot mapping folder.
-Defaults to ‘mapping_folder’.</p></li>
-<li><p><strong>Scenario_Diff</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – 2 value string or list, used to compare 2 scenarios.
-Defaults to None.</p></li>
-<li><p><strong>zone_region_sublist</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – Subset of regions to plot from AGG_BY.
-Defaults to None.</p></li>
-<li><p><strong>xlabels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – x axis labels for facet plots.
-Defaults to None.</p></li>
-<li><p><strong>ylabels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – y axis labels for facet plots.
-Defaults to None.</p></li>
-<li><p><strong>ticklabels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – custom ticklabels for plots, not available for every plot type.
-Defaults to None.</p></li>
-<li><p><strong>Region_Mapping</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame],</span> <span class="pre">optional</span></code>) – Mapping file to map custom regions/zones
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Scenarios</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list]</span></code>) – Name of scenarios to process.</li>
+<li><strong>AGG_BY</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Informs region type to aggregate by when creating plots.</li>
+<li><strong>PLEXOS_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Folder containing h5plexos results files.</li>
+<li><strong>gen_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame]</span></code>) – Mapping file to rename generator technologies.</li>
+<li><strong>Marmot_plot_select</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame]</span></code>) – Selection of plots to plot.</li>
+<li><strong>Marmot_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Folder to save Marmot solution files.
+Defaults to None.</li>
+<li><strong>mapping_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The location of the Marmot mapping folder.
+Defaults to ‘mapping_folder’.</li>
+<li><strong>Scenario_Diff</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – 2 value string or list, used to compare 2 scenarios.
+Defaults to None.</li>
+<li><strong>zone_region_sublist</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – Subset of regions to plot from AGG_BY.
+Defaults to None.</li>
+<li><strong>xlabels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – x axis labels for facet plots.
+Defaults to None.</li>
+<li><strong>ylabels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – y axis labels for facet plots.
+Defaults to None.</li>
+<li><strong>ticklabels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – custom ticklabels for plots, not available for every plot type.
+Defaults to None.</li>
+<li><strong>Region_Mapping</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame],</span> <span class="pre">optional</span></code>) – Mapping file to map custom regions/zones
 to create custom aggregations. Aggregations are created by grouping PLEXOS regions.
-Defaults to pd.DataFrame().</p></li>
-<li><p><strong>TECH_SUBSET</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – Tech subset category to plot.
+Defaults to pd.DataFrame().</li>
+<li><strong>TECH_SUBSET</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">list],</span> <span class="pre">optional</span></code>) – Tech subset category to plot.
 The TECH_SUBSET value should be a column in the ordered_gen_categories.csv.
 If left None all techs will be plotted
-Defaults to None.</p></li>
+Defaults to None.</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">run_plotter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_plot_main.html#MarmotPlot.run_plotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">run_plotter</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_plot_main.html#MarmotPlot.run_plotter"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Main method to call to begin plotting figures.</p>
 <p>This method takes no input variables, all required variables are
 passed in via the __init__ method.</p>
@@ -325,7 +333,7 @@ passed in via the __init__ method.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_plot_main.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_plot_main.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Run the plotting code and create desired plots and data-tables based on user input files.</p>
 </dd></dl>
 

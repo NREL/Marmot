@@ -251,7 +251,7 @@
 <h1>marmot.plottingmodules.reserves.MPlot<a class="headerlink" href="#marmot-plottingmodules-reserves-mplot" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MPlot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">argument_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MPlot</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">argument_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper</span></code></a></p>
 <p>reserves MPlot class.</p>
 <p>All the plotting modules use this same class name.
@@ -260,42 +260,45 @@ current module name.</p>
 <p>The reserves.py module contains methods that are
 related to reserve provision and shortage.</p>
 <p>MPlot inherits from the PlotDataHelper class to assist in creating figures.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>argument_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary containing all
-arguments passed from MarmotPlot.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>argument_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Dictionary containing all
+arguments passed from MarmotPlot.</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
+<table border="1" class="longtable docutils align-default">
 <colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
+<col width="10%" />
+<col width="90%" />
 </colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_provision" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_provision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_provision</span></code></a>(**kwargs)</p></td>
-<td><p>Creates a bar plot of reserve provision for each region in MWh.</p></td>
+<tbody valign="top">
+<tr class="row-odd"><td><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_provision" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_provision"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_provision</span></code></a>(**kwargs)</td>
+<td>Creates a bar plot of reserve provision for each region in MWh.</td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage</span></code></a>(**kwargs)</p></td>
-<td><p>Creates a bar plot of reserve shortage for each region in MWh.</p></td>
+<tr class="row-even"><td><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage</span></code></a>(**kwargs)</td>
+<td>Creates a bar plot of reserve shortage for each region in MWh.</td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage_hrs</span></code></a>(**kwargs)</p></td>
-<td><p>creates a bar plot of reserve shortage for each region in hrs.</p></td>
+<tr class="row-odd"><td><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage_hrs</span></code></a>(**kwargs)</td>
+<td>creates a bar plot of reserve shortage for each region in hrs.</td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage_timeseries</span></code></a>([…])</p></td>
-<td><p>Creates a timeseries line plot of reserve shortage.</p></td>
+<tr class="row-even"><td><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries" title="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reg_reserve_shortage_timeseries</span></code></a>([…])</td>
+<td>Creates a timeseries line plot of reserve shortage.</td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries" title="marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reserve_gen_timeseries</span></code></a>([figure_name, prop, …])</p></td>
-<td><p>Creates a generation timeseries stackplot of total cumulative reserve provision by tech type.</p></td>
+<tr class="row-odd"><td><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries" title="marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reserve_gen_timeseries</span></code></a>([figure_name,&nbsp;prop,&nbsp;…])</td>
+<td>Creates a generation timeseries stackplot of total cumulative reserve provision by tech type.</td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen" title="marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_reserves_by_gen</span></code></a>([start_date_range, …])</p></td>
-<td><p>Creates a generation stacked barplot of total reserve provision by generator tech type.</p></td>
+<tr class="row-even"><td><a class="reference internal" href="#marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen" title="marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_reserves_by_gen</span></code></a>([start_date_range,&nbsp;…])</td>
+<td>Creates a generation stacked barplot of total reserve provision by generator tech type.</td>
 </tr>
 </tbody>
 </table>
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries">
-<span class="sig-name descname"><span class="pre">reserve_gen_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reserve_gen_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reserve_gen_timeseries</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">start</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">end</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">float</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reserve_gen_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reserve_gen_timeseries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a generation timeseries stackplot of total cumulative reserve provision by tech type.</p>
 <p>The code will create either a facet plot or a single plot depending on
 if the Facet argument is active.
@@ -303,108 +306,125 @@ If a facet plot is created, each scenario is plotted on a separate facet,
 otherwise all scenarios are plotted on a single plot.
 To make a facet plot, ensure the work ‘Facet’ is found in the figure_name.
 Generation order is determined by the ordered_gen_categories.csv.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>figure_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – User defined figure output name. Used here
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>figure_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – User defined figure output name. Used here
 to determine if a Facet plot should be created.
-Defaults to None.</p></li>
-<li><p><strong>prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – <p>Special argument used to adjust specific
+Defaults to None.</li>
+<li><strong>prop</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – <p>Special argument used to adjust specific
 plot settings. Controlled through the plot_select.csv.
 Opinions available are:</p>
 <ul>
-<li><p>Peak Demand</p></li>
-<li><p>Date Range</p></li>
+<li>Peak Demand</li>
+<li>Date Range</li>
 </ul>
 <p>Defaults to None.</p>
-</p></li>
-<li><p><strong>start</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float,</span> <span class="pre">optional</span></code>) – Used in conjunction with the prop argument.
+</li>
+<li><strong>start</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float,</span> <span class="pre">optional</span></code>) – Used in conjunction with the prop argument.
 Will define the number of days to plot before a certain event in
 a timeseries plot, e.g Peak Demand.
-Defaults to None.</p></li>
-<li><p><strong>end</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float,</span> <span class="pre">optional</span></code>) – Used in conjunction with the prop argument.
+Defaults to None.</li>
+<li><strong>end</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">float,</span> <span class="pre">optional</span></code>) – Used in conjunction with the prop argument.
 Will define the number of days to plot after a certain event in
 a timeseries plot, e.g Peak Demand.
-Defaults to None.</p></li>
-<li><p><strong>timezone</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The timezone to display on the x-axes.
-Defaults to “”.</p></li>
-<li><p><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
-Defaults to None.</p></li>
-<li><p><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
-Defaults to None.</p></li>
+Defaults to None.</li>
+<li><strong>timezone</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The timezone to display on the x-axes.
+Defaults to “”.</li>
+<li><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
+Defaults to None.</li>
+<li><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
+Defaults to None.</li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
-</dd>
-</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>dict</em> – Dictionary containing the created plot and its data table.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen">
-<span class="sig-name descname"><span class="pre">total_reserves_by_gen</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.total_reserves_by_gen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">total_reserves_by_gen</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.total_reserves_by_gen"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.total_reserves_by_gen" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a generation stacked barplot of total reserve provision by generator tech type.</p>
 <p>A separate bar is created for each scenario.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
-Defaults to None.</p></li>
-<li><p><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
-Defaults to None.</p></li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
+Defaults to None.</li>
+<li><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
+Defaults to None.</li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
-</dd>
-</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>dict</em> – Dictionary containing the created plot and its data table.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage">
-<span class="sig-name descname"><span class="pre">reg_reserve_shortage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reg_reserve_shortage</span></code><span class="sig-paren">(</span><em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a bar plot of reserve shortage for each region in MWh.</p>
 <p>Bars are grouped by reserve type, each scenario is plotted as a differnet color.</p>
 <p>The ‘Shortage’ argument is passed to the _reserve_bar_plots() method to
 create this plot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>dict</em> – Dictionary containing the created plot and its data table.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reg_reserve_provision">
-<span class="sig-name descname"><span class="pre">reg_reserve_provision</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_provision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_provision" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reg_reserve_provision</span></code><span class="sig-paren">(</span><em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_provision"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_provision" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a bar plot of reserve provision for each region in MWh.</p>
 <p>Bars are grouped by reserve type, each scenario is plotted as a differnet color.</p>
 <p>The ‘Provision’ argument is passed to the _reserve_bar_plots() method to
 create this plot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>dict</em> – Dictionary containing the created plot and its data table.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs">
-<span class="sig-name descname"><span class="pre">reg_reserve_shortage_hrs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage_hrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reg_reserve_shortage_hrs</span></code><span class="sig-paren">(</span><em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage_hrs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_hrs" title="Permalink to this definition">¶</a></dt>
 <dd><p>creates a bar plot of reserve shortage for each region in hrs.</p>
 <p>Bars are grouped by reserve type, each scenario is plotted as a differnet color.</p>
 <p>The ‘Shortage’ argument and count_hours=True is passed to the _reserve_bar_plots() method to
 create this plot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>dict</em> – Dictionary containing the created plot and its data table.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries">
-<span class="sig-name descname"><span class="pre">reg_reserve_shortage_timeseries</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">reg_reserve_shortage_timeseries</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">timezone</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em>, <em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/reserves.html#MPlot.reg_reserve_shortage_timeseries"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.reserves.MPlot.reg_reserve_shortage_timeseries" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a timeseries line plot of reserve shortage.</p>
 <p>A line is plotted for each reserve type shortage.</p>
 <p>The code will create either a facet plot or a single plot depending on
@@ -412,24 +432,28 @@ if the Facet argument is active.
 If a facet plot is created, each scenario is plotted on a separate facet,
 otherwise all scenarios are plotted on a single plot.
 To make a facet plot, ensure the work ‘Facet’ is found in the figure_name.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>figure_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – User defined figure output name. Used here
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>figure_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – User defined figure output name. Used here
 to determine if a Facet plot should be created.
-Defaults to None.</p></li>
-<li><p><strong>timezone</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The timezone to display on the x-axes.
-Defaults to “”.</p></li>
-<li><p><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
-Defaults to None.</p></li>
-<li><p><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
-Defaults to None.</p></li>
+Defaults to None.</li>
+<li><strong>timezone</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The timezone to display on the x-axes.
+Defaults to “”.</li>
+<li><strong>start_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a start date at which to represent data from.
+Defaults to None.</li>
+<li><strong>end_date_range</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Defines a end date at which to represent data to.
+Defaults to None.</li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>dict</em> – Dictionary containing the created plot and its data table.</p>
-</dd>
-</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>dict</em> – Dictionary containing the created plot and its data table.</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>

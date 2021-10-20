@@ -70,11 +70,14 @@ html_theme = "sphinx_rtd_theme"
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+html4_writer=True
 
 html_theme_options = {
     'collapse_navigation': False,
     'sticky_navigation': True,
-    'titles_only': False
+    'titles_only': False,
+    "navigation_depth": 4,
+    'display_version': True,
 }
 
 # -- Extension configuration -------------------------------------------------
@@ -83,7 +86,7 @@ autosummary_generate = True  # Turn on sphinx.ext.autosummary
 autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
 autodoc_member_order = 'bysource'
 
-# autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
+autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
 add_module_names = False  # Remove namespaces from class/method signatures
 # # Remove 'view source code' from top of page (for html, not python)
 html_show_sourcelink = True

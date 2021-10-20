@@ -252,14 +252,14 @@ It assumes your are familiar with the PLEXOS production cost modelling software.
 By the end of this tutorial, you will have completed the following:</p>
 <blockquote>
 <div><ol class="arabic simple">
-<li><p>Set up your input data folders.</p></li>
-<li><p>Set up the user input files required for formatting.</p></li>
-<li><p>Run the formatter and created Marmot formatted h5 files.</p></li>
+<li>Set up your input data folders.</li>
+<li>Set up the user input files required for formatting.</li>
+<li>Run the formatter and created Marmot formatted h5 files.</li>
 </ol>
 </div></blockquote>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p><strong>Before you do anything else</strong>, make sure you have installed Marmot and its prerequisites correctly
+<p class="first admonition-title">Note</p>
+<p class="last"><strong>Before you do anything else</strong>, make sure you have installed Marmot and its prerequisites correctly
 by following the <a class="reference internal" href="install.html#install-the-marmot-software"><span class="std std-ref">Install the Marmot software</span></a> instructions.</p>
 </div>
 <div class="section" id="your-input-data-and-how-to-organize-it">
@@ -309,8 +309,8 @@ the input files. For this tutorial we will save our outputs in the same location
 <a class="reference external" href="https://github.com/NREL/Marmot/tree/main/marmot">Marmot/marmot</a> directory. This file specifies which properties we want to
 processes with Marmot.</p>
 <div class="admonition note">
-<p class="admonition-title">Note</p>
-<p>For Marmot to process a property it must have been included in your PLEXOS report output.</p>
+<p class="first admonition-title">Note</p>
+<p class="last">For Marmot to process a property it must have been included in your PLEXOS report output.</p>
 </div>
 <p>When you open the file you will see the following structure:</p>
 <img alt="../_images/plexos-properties-example.png" src="../_images/plexos-properties-example.png" />
@@ -320,11 +320,11 @@ used to determine whether Marmot should process the specified property. For a mo
 <p>Set all the values in column D to False except the following:</p>
 <blockquote>
 <div><ul class="simple">
-<li><p>generator Available Capacity</p></li>
-<li><p>generator Generation</p></li>
-<li><p>generator Pump Load</p></li>
-<li><p>generator Installed Capacity</p></li>
-<li><p>region Load</p></li>
+<li>generator Available Capacity</li>
+<li>generator Generation</li>
+<li>generator Pump Load</li>
+<li>generator Installed Capacity</li>
+<li>region Load</li>
 </ul>
 </div></blockquote>
 <p>Marmot will now know to process these properties.</p>

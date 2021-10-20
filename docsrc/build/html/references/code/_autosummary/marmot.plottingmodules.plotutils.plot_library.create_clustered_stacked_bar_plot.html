@@ -251,24 +251,28 @@
 <h1>marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot<a class="headerlink" href="#marmot-plottingmodules-plotutils-plot-library-create-clustered-stacked-bar-plot" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot">
-<span class="sig-name descname"><span class="pre">create_clustered_stacked_bar_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ax</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">H</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'//'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_library.html#create_clustered_stacked_bar_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">create_clustered_stacked_bar_plot</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">df_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">pandas.core.frame.DataFrame</span><span class="p"><span class="pre">]</span></span></span></em>, <em><span class="n"><span class="pre">ax</span></span></em>, <em><span class="n"><span class="pre">labels</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em><span class="n"><span class="pre">color_dict</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">dict</span></span></em>, <em><span class="n"><span class="pre">title</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">''</span></span></em>, <em><span class="n"><span class="pre">H</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'//'</span></span></em>, <em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_library.html#create_clustered_stacked_bar_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates a clustered stacked barplot.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>df_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List[pd.DataFrame,</span> <span class="pre">pd.DataFrame]</span></code>) – List of Pandas DataFrames
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">List[pd.DataFrame,</span> <span class="pre">pd.DataFrame]</span></code>) – List of Pandas DataFrames
 The columns within each dataframe will be stacked with different colors.
 The corresponding columns between each dataframe will be set next to each
-other and given different hatches.</p></li>
-<li><p><strong>ax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes</span></code>) – matplotlib.axes</p></li>
-<li><p><strong>labels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – A list of strings, usually the scenario names</p></li>
-<li><p><strong>color_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Color dictionary, keys should be the same as labels</p></li>
-<li><p><strong>title</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Optional plot title. Defaults to “”.</p></li>
-<li><p><strong>H</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Sets the hatch pattern to differentiate dataframe bars.
-Defaults to “//”.</p></li>
+other and given different hatches.</li>
+<li><strong>ax</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">matplotlib.axes</span></code>) – matplotlib.axes</li>
+<li><strong>labels</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – A list of strings, usually the scenario names</li>
+<li><strong>color_dict</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code>) – Color dictionary, keys should be the same as labels</li>
+<li><strong>title</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Optional plot title. Defaults to “”.</li>
+<li><strong>H</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Sets the hatch pattern to differentiate dataframe bars.
+Defaults to “//”.</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

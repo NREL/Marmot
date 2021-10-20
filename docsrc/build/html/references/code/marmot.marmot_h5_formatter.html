@@ -248,271 +248,332 @@ it can be read into the marmot_plot_main.py file</p>
 <p>&#64;author: Daniel Levie</p>
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SetupLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_directory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'logs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_suffix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#SetupLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">SetupLogger</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">log_directory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'logs'</span></span></em>, <em><span class="n"><span class="pre">log_suffix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#SetupLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Sets up the python logger.</p>
 <p>This class handles the following.</p>
 <ol class="arabic simple">
-<li><p>Configures logger from marmot_logging_config.yml file.</p></li>
-<li><p>Handles rollover of log file on each instantiation.</p></li>
-<li><p>Sets log_directory.</p></li>
-<li><p>Append optional suffix to the end of the log file name</p></li>
+<li>Configures logger from marmot_logging_config.yml file.</li>
+<li>Handles rollover of log file on each instantiation.</li>
+<li>Sets log_directory.</li>
+<li>Append optional suffix to the end of the log file name</li>
 </ol>
 <p>Optional suffix is useful when running multiple processes in parallel to
 allow logging to separate files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>log_directory</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – log directory to save logs.
-Defaults to ‘logs’.</p></li>
-<li><p><strong>log_suffix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Optional suffix to add to end of log file.
-Defaults to None.</p></li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>log_directory</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – log directory to save logs.
+Defaults to ‘logs’.</li>
+<li><strong>log_suffix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Optional suffix to add to end of log file.
+Defaults to None.</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">Process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData" title="marmot.meta_data.MetaData"><span class="pre">marmot.meta_data.MetaData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emit_names</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">logging.Logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">Process</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em><span class="n"><span class="pre">metadata</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData" title="marmot.meta_data.MetaData"><span class="pre">marmot.meta_data.MetaData</span></a></span></em>, <em><span class="n"><span class="pre">model</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em><span class="n"><span class="pre">Region_Mapping</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em><span class="n"><span class="pre">emit_names</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em><span class="n"><span class="pre">logger</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">logging.Logger</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="_autosummary/marmot.marmot_h5_formatter.SetupLogger.html#marmot.marmot_h5_formatter.SetupLogger" title="marmot.marmot_h5_formatter.SetupLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_h5_formatter.SetupLogger</span></code></a></p>
 <p>Process PLEXOS class specific data from h5plexos database.</p>
 <p>All methods are PLEXOS Class specific e.g generator, region, zone, line etc.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – Unprocessed h5plexos dataframe containing
-class and property specifc data.</p></li>
-<li><p><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">MetaData</span></code>) – Instantiation of MetaData for specific
-h5plexos file.</p></li>
-<li><p><strong>model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of specific PLEXOS model partition</p></li>
-<li><p><strong>Region_Mapping</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – DataFrame to map custom
-regions/zones to create custom aggregations.</p></li>
-<li><p><strong>emit_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – DataFrame with 2 columns to rename
-emission names.</p></li>
-<li><p><strong>logger</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Logger</span></code>) – logger object from SetupLogger.</p></li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>df</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – Unprocessed h5plexos dataframe containing
+class and property specifc data.</li>
+<li><strong>metadata</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">MetaData</span></code>) – Instantiation of MetaData for specific
+h5plexos file.</li>
+<li><strong>model</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of specific PLEXOS model partition</li>
+<li><strong>Region_Mapping</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – DataFrame to map custom
+regions/zones to create custom aggregations.</li>
+<li><strong>emit_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">pd.DataFrame</span></code>) – DataFrame with 2 columns to rename
+emission names.</li>
+<li><strong>logger</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">logging.Logger</span></code>) – logger object from SetupLogger.</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_generator</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_generator</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Generator Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_region</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_region</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Region Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_zone</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_zone</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Zone Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_line</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_line</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Line Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_interface</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_interface"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_interface</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_interface"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS PLEXOS Interface Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_reserve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_reserve"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_reserve</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_reserve"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Reserve Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_reserves_generators</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_reserves_generators</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Reserve_Generators Relational Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_fuel</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_fuel"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_fuel</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_fuel"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Fuel Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_constraint</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_constraint</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_constraint"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Constraint Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_emission</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_emission"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_emission</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_emission"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Emission Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_emissions_generators</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_emissions_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_emissions_generators</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_emissions_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Emissions_Generators Relational Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_storage</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_storage</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Storage Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_region_regions</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_region_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_region_regions</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_region_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Region_Regions Relational Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_node</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_node</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">pandas.core.frame.DataFrame</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Node Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">df_process_abatement</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_abatement"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">df_process_abatement</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#Process.df_process_abatement"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Format PLEXOS Abatement Class data.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Returns:</th><td class="field-body"><em>pd.DataFrame</em> – Processed output, single value column with multiindex.</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">MarmotFormat</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">Scenario_name:</span> <span class="pre">str,</span> <span class="pre">PLEXOS_Solutions_folder:</span> <span class="pre">str,</span> <span class="pre">Plexos_Properties:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_Solutions_folder:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">mapping_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'mapping_folder',</span> <span class="pre">Region_Mapping:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">emit_names:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">VoLL:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10000,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">MarmotFormat</span></code><span class="sig-paren">(</span><em><span class="pre">Scenario_name:</span> <span class="pre">str,</span> <span class="pre">PLEXOS_Solutions_folder:</span> <span class="pre">str,</span> <span class="pre">Plexos_Properties:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame],</span> <span class="pre">Marmot_Solutions_folder:</span> <span class="pre">Optional[str]</span> <span class="pre">=</span> <span class="pre">None,</span> <span class="pre">mapping_folder:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'mapping_folder',</span> <span class="pre">Region_Mapping:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">emit_names:</span> <span class="pre">Union[str,</span> <span class="pre">pandas.core.frame.DataFrame]</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[],</span> <span class="pre">VoLL:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">10000,</span> <span class="pre">**kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Bases: <a class="reference internal" href="_autosummary/marmot.marmot_h5_formatter.SetupLogger.html#marmot.marmot_h5_formatter.SetupLogger" title="marmot.marmot_h5_formatter.SetupLogger"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_h5_formatter.SetupLogger</span></code></a></p>
 <p>Main module class to be instantiated to run the formatter.</p>
 <p>MarmotFormat reads in PLEXOS hdf5 files created with the h5plexos library
 and processes the output results to ready them for plotting.
 Once the outputs have been processed, they are saved to an intermediary hdf5 file
 which can then be read into the Marmot plotting code</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>Scenario_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of scenario to process.</p></li>
-<li><p><strong>PLEXOS_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Folder containing h5plexos results files.</p></li>
-<li><p><strong>Plexos_Properties</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame]</span></code>) – PLEXOS properties to process,
-must follow format seen in Marmot directory.</p></li>
-<li><p><strong>Marmot_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Folder to save Marmot solution files.
-Defaults to None.</p></li>
-<li><p><strong>mapping_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The location of the Marmot mapping folder.
-Defaults to ‘mapping_folder’.</p></li>
-<li><p><strong>Region_Mapping</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame],</span> <span class="pre">optional</span></code>) – Mapping file to map custom
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>Scenario_name</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of scenario to process.</li>
+<li><strong>PLEXOS_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Folder containing h5plexos results files.</li>
+<li><strong>Plexos_Properties</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame]</span></code>) – PLEXOS properties to process,
+must follow format seen in Marmot directory.</li>
+<li><strong>Marmot_Solutions_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Folder to save Marmot solution files.
+Defaults to None.</li>
+<li><strong>mapping_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – The location of the Marmot mapping folder.
+Defaults to ‘mapping_folder’.</li>
+<li><strong>Region_Mapping</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame],</span> <span class="pre">optional</span></code>) – Mapping file to map custom
 regions/zones to create custom aggregations.
 Aggregations are created by grouping PLEXOS regions.
-Defaults to pd.DataFrame().</p></li>
-<li><p><strong>emit_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame],</span> <span class="pre">optional</span></code>) – Mapping file to rename
-emissions types. Defaults to pd.DataFrame().</p></li>
-<li><p><strong>VoLL</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code>) – Value of lost load, used to calculate cost of
-unserved energy. Defaults to 10000.</p></li>
+Defaults to pd.DataFrame().</li>
+<li><strong>emit_names</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Union[str,</span> <span class="pre">pd.DataFrame],</span> <span class="pre">optional</span></code>) – Mapping file to rename
+emissions types. Defaults to pd.DataFrame().</li>
+<li><strong>VoLL</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code>) – Value of lost load, used to calculate cost of
+unserved energy. Defaults to 10000.</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">output_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hdf_out_folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HDF5_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">HDF5_folder_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat.output_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">output_metadata</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">files_list</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em><span class="n"><span class="pre">hdf_out_folder</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em><span class="n"><span class="pre">HDF5_output</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em><span class="n"><span class="pre">HDF5_folder_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat.output_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Transfers metadata from original PLEXOS solutions file to processed HDF5 file.</p>
 <p>For each partition in a given scenario, the metadata from that partition
 is copied over and saved in the processed output file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>files_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – List of all h5 files in hdf5 folder in alpha numeric order</p></li>
-<li><p><strong>hdf_out_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of formatted output h5 files</p></li>
-<li><p><strong>HDF5_output</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of formatted hdf5 output file</p></li>
-<li><p><strong>HDF5_folder_in</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of original PLEXOS solutions h5 files</p></li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>files_list</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>) – List of all h5 files in hdf5 folder in alpha numeric order</li>
+<li><strong>hdf_out_folder</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of formatted output h5 files</li>
+<li><strong>HDF5_output</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Name of formatted hdf5 output file</li>
+<li><strong>HDF5_folder_in</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Location of original PLEXOS solutions h5 files</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">run_formatter</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat.run_formatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">run_formatter</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#MarmotFormat.run_formatter"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Main method to call to begin processing h5plexos files</p>
 <p>This method takes no input variables, all required variables
 are passed in via the __init__ method.</p>
@@ -522,7 +583,7 @@ are passed in via the __init__ method.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py">
-<span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
+<code class="sig-name descname"><span class="pre">main</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/marmot/marmot_h5_formatter.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a></dt>
 <dd><p>Run the formatting code and format desired properties based on user input files.</p>
 </dd></dl>
 

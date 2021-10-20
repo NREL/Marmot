@@ -35,8 +35,8 @@ Marmot - an energy modelling results visualization tool
 ========================================================
 
 Marmot is a data formatting and visualization tool for PLEXOS production cost modelling results.
-It provides and efficient way to view PLEXOS results by combing temporally disaggregated results 
-and allowing teh aggregation of different device types and modelling region.
+It provides an efficient way to view PLEXOS results by combing temporally disaggregated results 
+and allowing the aggregation of different device types and modelling regions.
 
 Marmot has approximately 100 pre-built plots which allow significant customization to allow a
 user to create publication figures and data-tables fast.

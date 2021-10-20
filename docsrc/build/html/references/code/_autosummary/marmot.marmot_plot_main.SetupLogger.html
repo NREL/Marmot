@@ -251,35 +251,39 @@
 <h1>marmot.marmot_plot_main.SetupLogger<a class="headerlink" href="#marmot-marmot-plot-main-setuplogger" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.marmot_plot_main.SetupLogger">
-<em class="property"><span class="pre">class</span> </em><span class="sig-name descname"><span class="pre">SetupLogger</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">log_directory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'logs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_suffix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#SetupLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.SetupLogger" title="Permalink to this definition">¶</a></dt>
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">SetupLogger</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">log_directory</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">'logs'</span></span></em>, <em><span class="n"><span class="pre">log_suffix</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/marmot_plot_main.html#SetupLogger"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.marmot_plot_main.SetupLogger" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
 <p>Sets up the python logger.</p>
 <p>This class handles the following.</p>
 <ol class="arabic simple">
-<li><p>Configures logger from marmot_logging_config.yml file.</p></li>
-<li><p>Handles rollover of log file on each instantiation.</p></li>
-<li><p>Sets log_directory.</p></li>
-<li><p>Append optional suffix to the end of the log file name</p></li>
+<li>Configures logger from marmot_logging_config.yml file.</li>
+<li>Handles rollover of log file on each instantiation.</li>
+<li>Sets log_directory.</li>
+<li>Append optional suffix to the end of the log file name</li>
 </ol>
 <p>Optional suffix is useful when running multiple processes in parallel to
 allow logging to separate files.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>log_directory</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – log directory to save logs.
-Defaults to ‘logs’.</p></li>
-<li><p><strong>log_suffix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Optional suffix to add to end of log file.
-Defaults to None.</p></li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first last simple">
+<li><strong>log_directory</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – log directory to save logs.
+Defaults to ‘logs’.</li>
+<li><strong>log_suffix</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Optional suffix to add to end of log file.
+Defaults to None.</li>
 </ul>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 <p class="rubric">Methods</p>
-<table class="longtable docutils align-default">
+<table border="1" class="longtable docutils align-default">
 <colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
+<col width="10%" />
+<col width="90%" />
 </colgroup>
-<tbody>
+<tbody valign="top">
 </tbody>
 </table>
 </dd></dl>

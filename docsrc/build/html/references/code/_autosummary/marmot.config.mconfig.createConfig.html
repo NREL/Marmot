@@ -251,7 +251,7 @@
 <h1>marmot.config.mconfig.createConfig<a class="headerlink" href="#marmot-config-mconfig-createconfig" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="marmot.config.mconfig.createConfig">
-<span class="sig-name descname"><span class="pre">createConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">configfile_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/config/mconfig.html#createConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.config.mconfig.createConfig" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">createConfig</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">configfile_path</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/config/mconfig.html#createConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.config.mconfig.createConfig" title="Permalink to this definition">¶</a></dt>
 <dd><p>Creates config.yml file using default values.</p>
 <p>The following are Marmot default config settings that are used to
 create the config.yml file when Marmot is first run.
@@ -261,48 +261,48 @@ it will be created with these defaults when mconfig.py is called anytime Marmot
 is run.</p>
 <p>The default config settings are as follows:</p>
 <ul>
-<li><p><strong>font_settings:</strong></p>
+<li><p class="first"><strong>font_settings:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>xtick_size: 12</p></li>
-<li><p>ytick_size: 12</p></li>
-<li><p>axes_label_size: 16</p></li>
-<li><p>legend_size: 12</p></li>
-<li><p>title_size: 16</p></li>
-<li><p>font_family: serif</p></li>
+<li>xtick_size: 12</li>
+<li>ytick_size: 12</li>
+<li>axes_label_size: 16</li>
+<li>legend_size: 12</li>
+<li>title_size: 16</li>
+<li>font_family: serif</li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><em>Settings to adjust font sizes, family, and tick size within figures</em></p>
 <ul>
-<li><p><strong>text_position:</strong></p>
+<li><p class="first"><strong>text_position:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>title_height: 40</p></li>
+<li>title_height: 40</li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><em>Adjust the position of text relative to the edge of the plot (matplotlib points)</em></p>
 <ul>
-<li><p><strong>figure_size:</strong></p>
+<li><p class="first"><strong>figure_size:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>xdimension: 6</p></li>
-<li><p>ydimension: 4</p></li>
+<li>xdimension: 6</li>
+<li>ydimension: 4</li>
 </ul>
 </div></blockquote>
 </li>
 </ul>
 <p><em>Adjust the x and y-axes dimensions of the output figure</em></p>
 <ul>
-<li><p><strong>axes_options:</strong></p>
+<li><p class="first"><strong>axes_options:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>x_axes_maxticks: 8</p></li>
-<li><p>x_axes_minticks: 4</p></li>
-<li><p>y_axes_decimalpt: 1</p></li>
+<li>x_axes_maxticks: 8</li>
+<li>x_axes_minticks: 4</li>
+<li>y_axes_decimalpt: 1</li>
 </ul>
 </div></blockquote>
 </li>
@@ -310,12 +310,12 @@ is run.</p>
 <p><em>Allows adjustment of the minimum and maximum tick marks on datetime x-axes and the number of decimal
 points to include on the y-axes</em></p>
 <ul>
-<li><p><strong>axes_label_options:</strong></p>
+<li><p class="first"><strong>axes_label_options:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>rotate_x_labels: true</p></li>
-<li><p>rotate_at_num_labels: 7</p></li>
-<li><p>rotation_angle: 45</p></li>
+<li>rotate_x_labels: true</li>
+<li>rotate_at_num_labels: 7</li>
+<li>rotation_angle: 45</li>
 </ul>
 </div></blockquote>
 </li>
@@ -324,12 +324,12 @@ points to include on the y-axes</em></p>
 and at what number of labels to begin rotating to the specified rotation_angle.
 By default, labels will begin rotating at 7 labels to an angle of 45 degrees from 0 degrees</em></p>
 <ul>
-<li><p><strong>plot_data:</strong></p>
+<li><p class="first"><strong>plot_data:</strong></p>
 <blockquote>
 <div><ul class="simple">
-<li><p>curtailment_property: Curtailment</p></li>
-<li><p>include_total_pumped_load_line: false</p></li>
-<li><p>include_timeseries_pumped_load_line: true</p></li>
+<li>curtailment_property: Curtailment</li>
+<li>include_total_pumped_load_line: false</li>
+<li>include_timeseries_pumped_load_line: true</li>
 </ul>
 </div></blockquote>
 </li>
@@ -340,53 +340,56 @@ specifies whether to include the line representing pumped load in total generati
 `include_timeseries_pumped_load_line` specifies whether to include the line representing pumped load
 in timeseries generation plots</em></p>
 <ul class="simple">
-<li><p><strong>figure_file_format:</strong> svg</p></li>
+<li><strong>figure_file_format:</strong> svg</li>
 </ul>
 <p><em>Adjust the plot image format. The default is **svg*</em>, a vector-based image.
 This field accepts any format that is compatible with matplotlib*</p>
 <ul class="simple">
-<li><p><strong>shift_leapday:</strong> false</p></li>
+<li><strong>shift_leapday:</strong> false</li>
 </ul>
 <p><em>Handles auto shifting of leap day, if required by your model. The default is false</em></p>
 <ul class="simple">
-<li><p><strong>skip_existing_properties:</strong> true</p></li>
+<li><strong>skip_existing_properties:</strong> true</li>
 </ul>
 <p><em>Toggles whether existing properties are skipped or overwritten if they already contained in
 a previous processed_h5 file, the default is to skip</em></p>
 <ul class="simple">
-<li><p><strong>auto_convert_units:</strong> true</p></li>
+<li><strong>auto_convert_units:</strong> true</li>
 </ul>
 <p><em>If True automatically converts Energy and Capacity units so that no number exceeds 1000.
 All base units are in MW, and units can be converted to GW, TW and kW</em></p>
 <ul class="simple">
-<li><p><strong>plot_title_as_region:</strong> true</p></li>
+<li><strong>plot_title_as_region:</strong> true</li>
 </ul>
 <p><em>If True a the region/zone name will be added as a title to the figure</em></p>
 <ul class="simple">
-<li><p><strong>user_defined_inputs_file:</strong> Marmot_user_defined_inputs.csv</p></li>
+<li><strong>user_defined_inputs_file:</strong> Marmot_user_defined_inputs.csv</li>
 </ul>
 <p><em>Change the default Marmot_user_defined_inputs file, file must be created first</em></p>
 <ul class="simple">
-<li><p><strong>plot_select_file:</strong> Marmot_plot_select.csv</p></li>
+<li><strong>plot_select_file:</strong> Marmot_plot_select.csv</li>
 </ul>
 <p><em>Change the default Marmot_plot_select.csv file, file must be created first</em></p>
 <ul class="simple">
-<li><p><strong>plexos_properties_file:</strong> plexos_properties.csv</p></li>
+<li><strong>plexos_properties_file:</strong> plexos_properties.csv</li>
 </ul>
 <p><em>Change the default plexos_properties_file.csv file, file must be created first</em></p>
 <ul class="simple">
-<li><p><strong>color_dictionary_file:</strong> colour_dictionary.csv</p></li>
+<li><strong>color_dictionary_file:</strong> colour_dictionary.csv</li>
 </ul>
 <p><em>Change the default color dictionary file that lives within the Mapping Folder, file must be created first</em></p>
 <ul class="simple">
-<li><p><strong>ordered_gen_categories :</strong> ordered_gen_categories.csv</p></li>
+<li><strong>ordered_gen_categories :</strong> ordered_gen_categories.csv</li>
 </ul>
 <p><em>Change the default ordered_gen_categories file that lives within the Mapping Folder, file must be created first</em></p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>configfile_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to config.yml file</p>
-</dd>
-</dl>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><strong>configfile_path</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Path to config.yml file</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

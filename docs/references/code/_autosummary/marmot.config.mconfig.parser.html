@@ -251,23 +251,27 @@
 <h1>marmot.config.mconfig.parser<a class="headerlink" href="#marmot-config-mconfig-parser" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="marmot.config.mconfig.parser">
-<span class="sig-name descname"><span class="pre">parser</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">top_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">second_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../../_modules/marmot/config/mconfig.html#parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.config.mconfig.parser" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">parser</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">top_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em><span class="n"><span class="pre">second_level</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Union</span><span class="p"><span class="pre">[</span></span><span class="pre">dict</span><span class="p"><span class="pre">,</span> </span><span class="pre">str</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">float</span><span class="p"><span class="pre">]</span></span><a class="reference internal" href="../../../_modules/marmot/config/mconfig.html#parser"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.config.mconfig.parser" title="Permalink to this definition">¶</a></dt>
 <dd><p>Pull requested value from config.yml file.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>top_level</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Top level of config dictionary,
-will return specified level and any sublevel.</p></li>
-<li><p><strong>second_level</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Second level of config dictionary
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>top_level</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code>) – Top level of config dictionary,
+will return specified level and any sublevel.</li>
+<li><strong>second_level</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">str,</span> <span class="pre">optional</span></code>) – Second level of config dictionary
 under top_level, will return a single value.
-Defaults to None.</p></li>
+Defaults to None.</li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>Union[dict, str, int, float]</em> – Returns the requested level or value from the config file.
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>Union[dict, str, int, float]</em> – Returns the requested level or value from the config file.
 Return type varies based on level accessed.</p>
-</dd>
-</dl>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>

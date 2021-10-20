@@ -250,29 +250,33 @@
 <h1>marmot.plottingmodules.plotutils.plot_library.setup_plot<a class="headerlink" href="#marmot-plottingmodules-plotutils-plot-library-setup-plot" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_library.setup_plot">
-<span class="sig-name descname"><span class="pre">setup_plot</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">xdimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ydimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(6,</span> <span class="pre">4)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ravel_axs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sharey</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">squeeze</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_library.html#setup_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_library.setup_plot" title="Permalink to this definition">¶</a></dt>
+<code class="sig-name descname"><span class="pre">setup_plot</span></code><span class="sig-paren">(</span><em><span class="n"><span class="pre">xdimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em><span class="n"><span class="pre">ydimension</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em><span class="n"><span class="pre">figsize</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">int</span><span class="p"><span class="pre">,</span> </span><span class="pre">int</span><span class="p"><span class="pre">]</span></span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">(6,</span> <span class="pre">4)</span></span></em>, <em><span class="n"><span class="pre">ravel_axs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em><span class="n"><span class="pre">sharey</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em>, <em><span class="n"><span class="pre">squeeze</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em>, <em><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Tuple</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_library.html#setup_plot"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_library.setup_plot" title="Permalink to this definition">¶</a></dt>
 <dd><p>Setup matplotlib plot</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>xdimension</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code>) – Facet plot x dimension.
-Defaults to 1.</p></li>
-<li><p><strong>ydimension</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code>) – Facet plot y dimension.
-Defaults to 1.</p></li>
-<li><p><strong>figsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple[int,</span> <span class="pre">int],</span> <span class="pre">optional</span></code>) – The dimensions of each subplot in inches.
-Defaults to (mconfig.parser(“figure_size”,”xdimension”), mconfig.parser(“figure_size”,”ydimension”)).</p></li>
-<li><p><strong>ravel_axs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool,</span> <span class="pre">optional</span></code>) – Whether to flatten matplotlib axs array.
-Defaults to True.</p></li>
-<li><p><strong>sharey</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool,</span> <span class="pre">optional</span></code>) – Share y-axes labels.
-Defaults to True.</p></li>
-<li><p><strong>squeeze</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool,</span> <span class="pre">optional</span></code>) – Share x-axes labels.
-Defaults to False.</p></li>
+<table class="docutils field-list" frame="void" rules="none">
+<col class="field-name" />
+<col class="field-body" />
+<tbody valign="top">
+<tr class="field-odd field"><th class="field-name">Parameters:</th><td class="field-body"><ul class="first simple">
+<li><strong>xdimension</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code>) – Facet plot x dimension.
+Defaults to 1.</li>
+<li><strong>ydimension</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">int,</span> <span class="pre">optional</span></code>) – Facet plot y dimension.
+Defaults to 1.</li>
+<li><strong>figsize</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">Tuple[int,</span> <span class="pre">int],</span> <span class="pre">optional</span></code>) – The dimensions of each subplot in inches.
+Defaults to (mconfig.parser(“figure_size”,”xdimension”), mconfig.parser(“figure_size”,”ydimension”)).</li>
+<li><strong>ravel_axs</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool,</span> <span class="pre">optional</span></code>) – Whether to flatten matplotlib axs array.
+Defaults to True.</li>
+<li><strong>sharey</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool,</span> <span class="pre">optional</span></code>) – Share y-axes labels.
+Defaults to True.</li>
+<li><strong>squeeze</strong> (<code class="xref py py-class docutils literal notranslate"><span class="pre">bool,</span> <span class="pre">optional</span></code>) – Share x-axes labels.
+Defaults to False.</li>
 </ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p><em>tuple</em> – matplotlib fig, matplotlib axes</p>
-</dd>
-</dl>
+</td>
+</tr>
+<tr class="field-even field"><th class="field-name">Returns:</th><td class="field-body"><p class="first last"><em>tuple</em> – matplotlib fig, matplotlib axes</p>
+</td>
+</tr>
+</tbody>
+</table>
 </dd></dl>
 
 </div>
