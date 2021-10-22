@@ -1,3 +1,12 @@
+.. raw:: html
+
+   <script>
+      var arr = document.getElementsByClassName('reference internal');
+      for(var i = 0; i < arr.length; i++) {
+      arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
+      }
+   </script>
+
 Code Reference
 ===============
 
@@ -51,7 +60,6 @@ Plotting Modules Package
    marmot.plottingmodules.reserves
    marmot.plottingmodules.sensitivities
    marmot.plottingmodules.storage
-   marmot.plottingmodules.thermal_cap_reserve
    marmot.plottingmodules.thermal_cap_reserve
    marmot.plottingmodules.total_generation
    marmot.plottingmodules.total_installed_capacity

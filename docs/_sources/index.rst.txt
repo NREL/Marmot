@@ -30,6 +30,14 @@
         }
     </style>
 
+    <script>
+      var arr = document.getElementsByClassName('reference internal');
+      for(var i = 0; i < arr.length; i++) {
+      arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
+      }
+    </script>
+
+
 
 Marmot - an energy modelling results visualization tool 
 ========================================================
@@ -56,14 +64,14 @@ Contents
 :doc:`Get started <get-started/index>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Install the software, introductory tutorials
+Install the software, introductory tutorials.
 
 .. rst-class:: column column2
 
 :doc:`How-to Guides <how-to/index>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Guides on using Marmot
+Guides on using Marmot.
 
 .. rst-class:: clearfix row
 
@@ -76,13 +84,21 @@ Marmot output figures examples
 
 .. rst-class:: column column2
 
-:doc:`References <references/index>`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+:doc:`Input File References <references/input-files/files>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Guide to input files and key python classes and functions
+Guide to input files.
 
 
 .. rst-class:: clearfix row
+
+:doc:`Code References <references/code/modules>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Guide to key Python classes and functions.
+
+.. rst-class:: column column2
+
 
 
 .. toctree::
@@ -93,7 +109,8 @@ Guide to input files and key python classes and functions
    get-started/index
    how-to/index
    plot-gallery/index
-   references/index
+   references/input-files/files
+   references/code/modules
    
 
 Indices and tables

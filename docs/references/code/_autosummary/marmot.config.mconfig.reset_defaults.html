@@ -35,10 +35,18 @@
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="marmot.plottingmodules.capacity_factor" href="marmot.plottingmodules.capacity_factor.html" />
     <link rel="prev" title="marmot.config.mconfig.parser" href="marmot.config.mconfig.parser.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
 </head>
 
 <body class="wy-body-for-nav">
@@ -118,59 +126,156 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1 current"><a class="reference internal" href="../../index.html">References</a><ul class="current">
-<li class="toctree-l2"><a class="reference internal" href="../../input-files/files.html">Input File Reference</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../input-files/plexos_properties.html">plexos_properties: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../input-files/mapping-folder/index.html">Mapping Folder</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2 current"><a class="reference internal" href="../modules.html">Code Reference</a><ul class="current">
-<li class="toctree-l3"><a class="reference internal" href="../modules.html#initialization-code">Initialization Code</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.meta_data.html">marmot.meta_data</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../modules.html">Code Reference</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#initialization-code">Initialization Code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_h5_formatter.main.html">marmot.marmot_h5_formatter.main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_h5_formatter.MarmotFormat.html">marmot.marmot_h5_formatter.MarmotFormat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_h5_formatter.Process.html">marmot.marmot_h5_formatter.Process</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_h5_formatter.SetupLogger.html">marmot.marmot_h5_formatter.SetupLogger</a></li>
 </ul>
 </li>
-<li class="toctree-l3 current"><a class="reference internal" href="../modules.html#config-package">Config Package</a><ul class="current">
-<li class="toctree-l4 current"><a class="reference internal" href="marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.marmot_plot_main.html">marmot.marmot_plot_main</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_plot_main.main.html">marmot.marmot_plot_main.main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_plot_main.MarmotPlot.html">marmot.marmot_plot_main.MarmotPlot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.marmot_plot_main.SetupLogger.html">marmot.marmot_plot_main.SetupLogger</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.meta_data.html">marmot.meta_data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.meta_data.MetaData.html">marmot.meta_data.MetaData</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../modules.html#plot-utility-package">Plot Utility Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+<li class="toctree-l2 current"><a class="reference internal" href="../modules.html#config-package">Config Package</a><ul class="current">
+<li class="toctree-l3 current"><a class="reference internal" href="marmot.config.mconfig.html">marmot.config.mconfig</a><ul class="current">
+<li class="toctree-l4"><a class="reference internal" href="marmot.config.mconfig.createConfig.html">marmot.config.mconfig.createConfig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.config.mconfig.edit_value.html">marmot.config.mconfig.edit_value</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.config.mconfig.parser.html">marmot.config.mconfig.parser</a></li>
+<li class="toctree-l4 current"><a class="current reference internal" href="#">marmot.config.mconfig.reset_defaults</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.capacity_factor.MPlot.html">marmot.plottingmodules.capacity_factor.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.capacity_out.MPlot.html">marmot.plottingmodules.capacity_out.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.curtailment.MPlot.html">marmot.plottingmodules.curtailment.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.emissions.MPlot.html">marmot.plottingmodules.emissions.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.generation_stack.MPlot.html">marmot.plottingmodules.generation_stack.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.generation_unstack.MPlot.html">marmot.plottingmodules.generation_unstack.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.hydro.MPlot.html">marmot.plottingmodules.hydro.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.prices.MPlot.html">marmot.plottingmodules.prices.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.production_cost.MPlot.html">marmot.plottingmodules.production_cost.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.ramping.MPlot.html">marmot.plottingmodules.ramping.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.reserves.MPlot.html">marmot.plottingmodules.reserves.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.sensitivities.MPlot.html">marmot.plottingmodules.sensitivities.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.storage.MPlot.html">marmot.plottingmodules.storage.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.MPlot.html">marmot.plottingmodules.thermal_cap_reserve.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.total_generation.MPlot.html">marmot.plottingmodules.total_generation.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.total_installed_capacity.MPlot.html">marmot.plottingmodules.total_installed_capacity.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.transmission.MPlot.html">marmot.plottingmodules.transmission.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.unserved_energy.MPlot.html">marmot.plottingmodules.unserved_energy.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.utilization_factor.df_process_gen_ind_inputs.html">marmot.plottingmodules.utilization_factor.df_process_gen_ind_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.utilization_factor.MPlot.html">marmot.plottingmodules.utilization_factor.MPlot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../modules.html#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.html">marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html">marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError.html">marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError.html">marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment.html">marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation.html">marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.create_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_bar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.create_grouped_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_grouped_bar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.create_hist_plot.html">marmot.plottingmodules.plotutils.plot_library.create_hist_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.create_line_plot.html">marmot.plottingmodules.plotutils.plot_library.create_line_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.create_stacked_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_stacked_bar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.create_stackplot.html">marmot.plottingmodules.plotutils.plot_library.create_stackplot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.setup_plot.html">marmot.plottingmodules.plotutils.plot_library.setup_plot</a></li>
 </ul>
 </li>
 </ul>
@@ -222,8 +327,6 @@
     
       <li><a href="../../../index.html">Docs</a> &raquo;</li>
         
-          <li><a href="../../index.html">References</a> &raquo;</li>
-        
           <li><a href="../modules.html">Code Reference</a> &raquo;</li>
         
           <li><a href="marmot.config.mconfig.html">marmot.config.mconfig</a> &raquo;</li>
@@ -234,7 +337,9 @@
       <li class="wy-breadcrumbs-aside">
         
             
-            <a href="../../../_sources/references/code/_autosummary/marmot.config.mconfig.reset_defaults.rst.txt" rel="nofollow"> View page source</a>
+            
+              <a href="https://github.com/nrel/Marmot/blob/gh-pages/docsrc/source/references/code/_autosummary/marmot.config.mconfig.reset_defaults.rst" class="fa fa-github"> Edit on GitHub</a>
+            
           
         
       </li>
@@ -247,7 +352,19 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
             
-  <div class="section" id="marmot-config-mconfig-reset-defaults">
+  <script>
+   var arr = document.getElementsByClassName('reference internal');
+   for(var i = 0; i < arr.length; i++) {
+   arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
+   }
+</script>
+
+<script>
+   var arr2 = document.getElementsByTagName('h1');
+   for(var i = 0; i < arr2.length; i++) {
+   arr2[i].innerHTML = arr2[i].innerHTML.replace(/\./g, '.<br />');
+   }
+</script><div class="section" id="marmot-config-mconfig-reset-defaults">
 <h1>marmot.config.mconfig.reset_defaults<a class="headerlink" href="#marmot-config-mconfig-reset-defaults" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="marmot.config.mconfig.reset_defaults">

@@ -35,8 +35,16 @@
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
   <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
 </head>
 
 <body class="wy-body-for-nav">
@@ -116,59 +124,156 @@
 <li class="toctree-l1"><a class="reference internal" href="../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../../references/index.html">References</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../references/input-files/files.html">Input File Reference</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/plexos_properties.html">plexos_properties: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/mapping-folder/index.html">Mapping Folder</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../references/input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references/input-files/files.html">Input File Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../references/input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references/input-files/plexos_properties.html">plexos_properties: csv file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references/input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../../references/input-files/mapping-folder/index.html">Mapping Folder</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
 </ul>
 </li>
 </ul>
 </li>
-<li class="toctree-l2"><a class="reference internal" href="../../references/code/modules.html">Code Reference</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../references/code/modules.html#initialization-code">Initialization Code</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_plot_main.html">marmot.marmot_plot_main</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.meta_data.html">marmot.meta_data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../references/code/modules.html">Code Reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="../../references/code/modules.html#initialization-code">Initialization Code</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_h5_formatter.main.html">marmot.marmot_h5_formatter.main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_h5_formatter.MarmotFormat.html">marmot.marmot_h5_formatter.MarmotFormat</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_h5_formatter.Process.html">marmot.marmot_h5_formatter.Process</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_h5_formatter.SetupLogger.html">marmot.marmot_h5_formatter.SetupLogger</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../references/code/modules.html#config-package">Config Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.config.mconfig.html">marmot.config.mconfig</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_plot_main.html">marmot.marmot_plot_main</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_plot_main.main.html">marmot.marmot_plot_main.main</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_plot_main.MarmotPlot.html">marmot.marmot_plot_main.MarmotPlot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.marmot_plot_main.SetupLogger.html">marmot.marmot_plot_main.SetupLogger</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../references/code/modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.meta_data.html">marmot.meta_data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html">marmot.meta_data.MetaData</a></li>
 </ul>
 </li>
-<li class="toctree-l3"><a class="reference internal" href="../../references/code/modules.html#plot-utility-package">Plot Utility Package</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../references/code/modules.html#config-package">Config Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.config.mconfig.html">marmot.config.mconfig</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.config.mconfig.createConfig.html">marmot.config.mconfig.createConfig</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.config.mconfig.edit_value.html">marmot.config.mconfig.edit_value</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.config.mconfig.parser.html">marmot.config.mconfig.parser</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.config.mconfig.reset_defaults.html">marmot.config.mconfig.reset_defaults</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../references/code/modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.capacity_factor.MPlot.html">marmot.plottingmodules.capacity_factor.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.capacity_out.MPlot.html">marmot.plottingmodules.capacity_out.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.curtailment.MPlot.html">marmot.plottingmodules.curtailment.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.emissions.MPlot.html">marmot.plottingmodules.emissions.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.generation_stack.MPlot.html">marmot.plottingmodules.generation_stack.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.generation_unstack.MPlot.html">marmot.plottingmodules.generation_unstack.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.hydro.MPlot.html">marmot.plottingmodules.hydro.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.prices.MPlot.html">marmot.plottingmodules.prices.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.production_cost.MPlot.html">marmot.plottingmodules.production_cost.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.ramping.MPlot.html">marmot.plottingmodules.ramping.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.reserves.MPlot.html">marmot.plottingmodules.reserves.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.sensitivities.MPlot.html">marmot.plottingmodules.sensitivities.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.storage.MPlot.html">marmot.plottingmodules.storage.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.MPlot.html">marmot.plottingmodules.thermal_cap_reserve.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.total_generation.MPlot.html">marmot.plottingmodules.total_generation.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.MPlot.html">marmot.plottingmodules.total_installed_capacity.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.transmission.MPlot.html">marmot.plottingmodules.transmission.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.MPlot.html">marmot.plottingmodules.unserved_energy.MPlot</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.df_process_gen_ind_inputs.html">marmot.plottingmodules.utilization_factor.df_process_gen_ind_inputs</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.MPlot.html">marmot.plottingmodules.utilization_factor.MPlot</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../../references/code/modules.html#plot-utility-package">Plot Utility Package</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.html">marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html">marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError.html">marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError.html">marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment.html">marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation.html">marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_bar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_grouped_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_grouped_bar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_hist_plot.html">marmot.plottingmodules.plotutils.plot_library.create_hist_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_line_plot.html">marmot.plottingmodules.plotutils.plot_library.create_line_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_stacked_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_stacked_bar_plot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_stackplot.html">marmot.plottingmodules.plotutils.plot_library.create_stackplot</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.setup_plot.html">marmot.plottingmodules.plotutils.plot_library.setup_plot</a></li>
 </ul>
 </li>
 </ul>
@@ -253,7 +358,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 
-<div class="viewcode-block" id="MetaData"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData">[docs]</a><span class="k">class</span> <span class="nc">MetaData</span><span class="p">():</span>
+<div class="viewcode-block" id="MetaData"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData">[docs]</a><span class="k">class</span> <span class="nc">MetaData</span><span class="p">():</span>
     <span class="sd">&quot;&quot;&quot;Handle the retrieval of metadata from the formatted or</span>
 <span class="sd">    original plexos solution h5 files.</span>
 
@@ -308,7 +413,7 @@
         <span class="k">elif</span> <span class="bp">cls</span><span class="o">.</span><span class="n">filename</span> <span class="o">==</span> <span class="n">filename</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
 
-<div class="viewcode-block" id="MetaData.close_h5"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.close_h5">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="MetaData.close_h5"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.close_h5">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">close_h5</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Closes h5 file open in memory.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -358,7 +463,7 @@
                                     <span class="s2">&quot;created by h5plexos.</span><span class="se">\n\n</span><span class="s2">Marmot will now quit.&quot;</span><span class="p">)</span>
                 <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span>     
 
-<div class="viewcode-block" id="MetaData.generator_category"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.generator_category">[docs]</a>    <span class="k">def</span> <span class="nf">generator_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.generator_category"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.generator_category">[docs]</a>    <span class="k">def</span> <span class="nf">generator_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generator categories mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -380,7 +485,7 @@
 
         <span class="k">return</span> <span class="n">gen_category</span></div>
             
-<div class="viewcode-block" id="MetaData.region_generators"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.region_generators">[docs]</a>    <span class="k">def</span> <span class="nf">region_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.region_generators"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.region_generators">[docs]</a>    <span class="k">def</span> <span class="nf">region_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region generators mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -403,7 +508,7 @@
         
         <span class="k">return</span> <span class="n">region_gen</span></div>
         
-<div class="viewcode-block" id="MetaData.region_generator_category"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.region_generator_category">[docs]</a>    <span class="k">def</span> <span class="nf">region_generator_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.region_generator_category"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.region_generator_category">[docs]</a>    <span class="k">def</span> <span class="nf">region_generator_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region generators category mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -420,7 +525,7 @@
 
         <span class="k">return</span> <span class="n">region_gen_cat</span></div>
         
-<div class="viewcode-block" id="MetaData.zone_generators"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.zone_generators">[docs]</a>    <span class="k">def</span> <span class="nf">zone_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.zone_generators"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.zone_generators">[docs]</a>    <span class="k">def</span> <span class="nf">zone_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Zone generators mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -442,7 +547,7 @@
         
         <span class="k">return</span> <span class="n">zone_gen</span></div>
         
-<div class="viewcode-block" id="MetaData.zone_generator_category"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.zone_generator_category">[docs]</a>    <span class="k">def</span> <span class="nf">zone_generator_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.zone_generator_category"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.zone_generator_category">[docs]</a>    <span class="k">def</span> <span class="nf">zone_generator_category</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Zone generators category mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -461,7 +566,7 @@
         
     <span class="c1"># Generator storage has been updated so that only one of tail_storage &amp; head_storage is required</span>
     <span class="c1"># If both are available, both are used</span>
-<div class="viewcode-block" id="MetaData.generator_storage"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.generator_storage">[docs]</a>    <span class="k">def</span> <span class="nf">generator_storage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.generator_storage"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.generator_storage">[docs]</a>    <span class="k">def</span> <span class="nf">generator_storage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Generator Storage mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -518,7 +623,7 @@
         
         <span class="k">return</span> <span class="n">gen_storage</span></div>
     
-<div class="viewcode-block" id="MetaData.node_region"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.node_region">[docs]</a>    <span class="k">def</span> <span class="nf">node_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.node_region"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.node_region">[docs]</a>    <span class="k">def</span> <span class="nf">node_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Node Region mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -540,7 +645,7 @@
 
         <span class="k">return</span> <span class="n">node_region</span></div>
         
-<div class="viewcode-block" id="MetaData.node_zone"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.node_zone">[docs]</a>    <span class="k">def</span> <span class="nf">node_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.node_zone"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.node_zone">[docs]</a>    <span class="k">def</span> <span class="nf">node_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Node zone mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -562,7 +667,7 @@
         
         <span class="k">return</span> <span class="n">node_zone</span></div>
     
-<div class="viewcode-block" id="MetaData.generator_node"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.generator_node">[docs]</a>    <span class="k">def</span> <span class="nf">generator_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.generator_node"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.generator_node">[docs]</a>    <span class="k">def</span> <span class="nf">generator_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;generator node mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -584,7 +689,7 @@
 
         <span class="k">return</span> <span class="n">generator_node</span></div>
         
-<div class="viewcode-block" id="MetaData.regions"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.regions">[docs]</a>    <span class="k">def</span> <span class="nf">regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.regions"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.regions">[docs]</a>    <span class="k">def</span> <span class="nf">regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region objects.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -608,7 +713,7 @@
         
         <span class="k">return</span> <span class="n">regions</span>   </div>
     
-<div class="viewcode-block" id="MetaData.zones"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.zones">[docs]</a>    <span class="k">def</span> <span class="nf">zones</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.zones"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.zones">[docs]</a>    <span class="k">def</span> <span class="nf">zones</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Zone objects.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -629,7 +734,7 @@
 
         <span class="k">return</span> <span class="n">zones</span></div>
              
-<div class="viewcode-block" id="MetaData.lines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.lines">[docs]</a>    <span class="k">def</span> <span class="nf">lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.lines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.lines">[docs]</a>    <span class="k">def</span> <span class="nf">lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Line objects.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -650,7 +755,7 @@
 
         <span class="k">return</span> <span class="n">lines</span></div>
     
-<div class="viewcode-block" id="MetaData.region_regions"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.region_regions">[docs]</a>    <span class="k">def</span> <span class="nf">region_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.region_regions"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.region_regions">[docs]</a>    <span class="k">def</span> <span class="nf">region_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region-region mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -667,7 +772,7 @@
 
         <span class="k">return</span> <span class="n">region_regions</span></div>
     
-<div class="viewcode-block" id="MetaData.region_interregionallines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.region_interregionallines">[docs]</a>    <span class="k">def</span> <span class="nf">region_interregionallines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.region_interregionallines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.region_interregionallines">[docs]</a>    <span class="k">def</span> <span class="nf">region_interregionallines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region inter-regional lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -692,7 +797,7 @@
 
         <span class="k">return</span> <span class="n">region_interregionallines</span></div>
             
-<div class="viewcode-block" id="MetaData.region_intraregionallines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.region_intraregionallines">[docs]</a>    <span class="k">def</span> <span class="nf">region_intraregionallines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.region_intraregionallines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.region_intraregionallines">[docs]</a>    <span class="k">def</span> <span class="nf">region_intraregionallines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region intra-regional lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -720,7 +825,7 @@
         
         <span class="k">return</span> <span class="n">region_intraregionallines</span></div>
       
-<div class="viewcode-block" id="MetaData.region_exporting_lines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.region_exporting_lines">[docs]</a>    <span class="k">def</span> <span class="nf">region_exporting_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.region_exporting_lines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.region_exporting_lines">[docs]</a>    <span class="k">def</span> <span class="nf">region_exporting_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region exporting lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -743,7 +848,7 @@
 
         <span class="k">return</span> <span class="n">region_exportinglines</span> </div>
       
-<div class="viewcode-block" id="MetaData.region_importing_lines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.region_importing_lines">[docs]</a>    <span class="k">def</span> <span class="nf">region_importing_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.region_importing_lines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.region_importing_lines">[docs]</a>    <span class="k">def</span> <span class="nf">region_importing_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region importing lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -766,7 +871,7 @@
 
         <span class="k">return</span> <span class="n">region_importinglines</span></div>
 
-<div class="viewcode-block" id="MetaData.zone_interzonallines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.zone_interzonallines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_interzonallines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.zone_interzonallines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.zone_interzonallines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_interzonallines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Zone inter-zonal lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -789,7 +894,7 @@
         
         <span class="k">return</span> <span class="n">zone_interzonallines</span></div>
                 
-<div class="viewcode-block" id="MetaData.zone_intrazonallines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.zone_intrazonallines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_intrazonallines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.zone_intrazonallines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.zone_intrazonallines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_intrazonallines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Zone intra-zonal lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -811,7 +916,7 @@
 
         <span class="k">return</span> <span class="n">zone_intrazonallines</span></div>
                  
-<div class="viewcode-block" id="MetaData.zone_exporting_lines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.zone_exporting_lines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_exporting_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.zone_exporting_lines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.zone_exporting_lines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_exporting_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Zone exporting lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -833,7 +938,7 @@
 
         <span class="k">return</span> <span class="n">zone_exportinglines</span> </div>
     
-<div class="viewcode-block" id="MetaData.zone_importing_lines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.zone_importing_lines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_importing_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.zone_importing_lines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.zone_importing_lines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_importing_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Zone importing lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -855,7 +960,7 @@
         
         <span class="k">return</span> <span class="n">zone_importinglines</span> </div>
 
-<div class="viewcode-block" id="MetaData.interface_lines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.interface_lines">[docs]</a>    <span class="k">def</span> <span class="nf">interface_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.interface_lines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.interface_lines">[docs]</a>    <span class="k">def</span> <span class="nf">interface_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Interface to lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -876,7 +981,7 @@
 
         <span class="k">return</span> <span class="n">interface_lines</span></div>
 
-<div class="viewcode-block" id="MetaData.region_lines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.region_lines">[docs]</a>    <span class="k">def</span> <span class="nf">region_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.region_lines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.region_lines">[docs]</a>    <span class="k">def</span> <span class="nf">region_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Region to Lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -888,7 +993,7 @@
         <span class="n">region_lines</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">region_interregionallines</span><span class="p">,</span><span class="n">region_intraregionallines</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">region_lines</span></div>
     
-<div class="viewcode-block" id="MetaData.zone_lines"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.zone_lines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.zone_lines"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.zone_lines">[docs]</a>    <span class="k">def</span> <span class="nf">zone_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Zone to Lines mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -901,7 +1006,7 @@
         <span class="n">zone_lines</span> <span class="o">=</span> <span class="n">zone_lines</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;region&#39;</span><span class="p">:</span><span class="s1">&#39;zone&#39;</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">zone_lines</span></div>
 
-<div class="viewcode-block" id="MetaData.reserves"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.reserves">[docs]</a>    <span class="k">def</span> <span class="nf">reserves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.reserves"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.reserves">[docs]</a>    <span class="k">def</span> <span class="nf">reserves</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Reserves objects.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -921,7 +1026,7 @@
  
         <span class="k">return</span> <span class="n">reserves</span> </div>
             
-<div class="viewcode-block" id="MetaData.reserves_generators"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.reserves_generators">[docs]</a>    <span class="k">def</span> <span class="nf">reserves_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.reserves_generators"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.reserves_generators">[docs]</a>    <span class="k">def</span> <span class="nf">reserves_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Reserves to generators mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -943,7 +1048,7 @@
         
         <span class="k">return</span> <span class="n">reserves_generators</span> </div>
 
-<div class="viewcode-block" id="MetaData.reserves_regions"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.reserves_regions">[docs]</a>    <span class="k">def</span> <span class="nf">reserves_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.reserves_regions"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.reserves_regions">[docs]</a>    <span class="k">def</span> <span class="nf">reserves_regions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Reserves to regions mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>
@@ -964,7 +1069,7 @@
         <span class="n">reserves_regions</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">reserves_regions</span></div>
         
-<div class="viewcode-block" id="MetaData.reserves_zones"><a class="viewcode-back" href="../../references/code/marmot.meta_data.html#marmot.meta_data.MetaData.reserves_zones">[docs]</a>    <span class="k">def</span> <span class="nf">reserves_zones</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="MetaData.reserves_zones"><a class="viewcode-back" href="../../references/code/_autosummary/marmot.meta_data.MetaData.html#marmot.meta_data.MetaData.reserves_zones">[docs]</a>    <span class="k">def</span> <span class="nf">reserves_zones</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Reserves to zones mapping.</span>
 <span class="sd">        </span>
 <span class="sd">        Args:</span>

@@ -1,0 +1,49 @@
+
+/*wraps text inside class and function tables*/
+.wy-table-responsive table td,
+.wy-table-responsive table th {
+  white-space: normal;
+}
+
+
+
+/* .wy-nav-content {
+    margin-left:400px;
+} */
+
+/* .wy-nav-content-wrap {
+    position: relative;
+   } */
+
+/* .wy-nav-side {
+    position:fixed;
+    min-width: 300px !important;
+    max-width: 400px !important;
+    width: auto;
+    overflow-x:hidden;
+    overflow-y:hidden;
+}
+.wy-side-scroll {
+    min-width: 300px !important;
+    max-width: 400px !important;
+    width: auto;
+    overflow-x:hidden;
+    overflow-y:hidden;
+}
+
+.wy-menu-vertical {
+    min-width: 300px !important;
+    max-width: 400px !important;
+    width: auto;
+    overflow-x:hidden;
+    overflow-y:hidden;
+}
+
+.wy-side-nav-search{
+    min-width: 300px !important;
+    max-width: 400px !important;
+    width: auto;
+    overflow-x:hidden;
+    overflow-y:hidden;
+} */
+

@@ -12,6 +12,7 @@
 #
 import os
 import sys
+import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('../../'))
 
 
@@ -49,6 +50,10 @@ extensions = ["sphinx.ext.autodoc",
     'sphinx_click.ext',
     "sphinx.ext.autosectionlabel"]
 
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+}
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -57,18 +62,24 @@ templates_path = ['_templates']
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
-
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "sphinx_rtd_theme"
+html_theme = 'sphinx_rtd_theme'
+html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+# These paths are either relative to html_static_path
+# or fully qualified paths (eg. https://...)
+html_css_files = [
+    'css/custom.css',
+]
 
 html4_writer=True
 
@@ -78,6 +89,15 @@ html_theme_options = {
     'titles_only': False,
     "navigation_depth": 4,
     'display_version': True,
+}
+
+
+html_context = {
+    "display_github": True,
+    "github_user": "nrel",
+    "github_repo": "Marmot",
+    "github_version": "gh-pages",
+    "conf_py_path": "/docsrc/source/",
 }
 
 # -- Extension configuration -------------------------------------------------
