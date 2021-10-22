@@ -46,13 +46,23 @@ Marmot is a data formatting and visualization tool for PLEXOS production cost mo
 It provides an efficient way to view PLEXOS results by combing temporally disaggregated results 
 and allowing the aggregation of different device types and modelling regions.
 
-Marmot has approximately 100 pre-built plots which allow significant customization to allow a
+Marmot has approximately 100 pre-built plots which allow significant customization, allowing a
 user to create publication figures and data-tables fast.
+
+.. figure:: /images/3_Stacked_Gen_Facet_Grid_Peak_Demand.svg
+    :align: center
+
+    Stacked Generation Plot
+
+.. figure:: /images/3_Total_Installed_Capacity_and_Generation_Facet.svg
+    :align: center
+
+    Total Installed Capacity and Total Generation Plot
 
 If you are a new Marmot user, check out the **Get Started** section of the documentation for 
 installation instructions and introductory tutorials. For more in depth explanations of various 
 operations and details on Marmot, read our **How-to Guides**. If you would like to see some 
-example plot outputs, they can be viewed in the **Plotting Examples Gallery**.
+example plot outputs, you can view them in the **Plotting Examples Gallery**.
 
 Contents
 ------------
