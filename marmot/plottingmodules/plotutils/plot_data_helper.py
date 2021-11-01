@@ -170,7 +170,8 @@ class PlotDataHelper(dict):
 
         if not adjusted_vre_gen_list:
             logger.warning("Curtailment techs could not be identified correctly for Marmot's Curtailment property. "
-            "This is likely happening as the 'vre' column was not present in the ordered_gen_categories.csv.")
+            "This is likely happening as the 'vre' column was not present in the ordered_gen_categories.csv or there "
+            "are no vre generators in the selected region")
             return df
         else: 
             # Retrun df with just vre techs
