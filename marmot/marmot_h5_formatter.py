@@ -723,9 +723,15 @@ class MarmotFormat(SetupLogger):
             if "_" in plexos_class:
                 df = db.query_relation_property(plexos_class, plexos_prop, 
                                                 timescale=timescale)
+                object_class = plexos_class
             else:
                 df = db.query_object_property(plexos_class, plexos_prop, 
                                                 timescale=timescale)
+                if ((0,6,0) <= db.version and db.version < (0,7,0)):
+                    object_class = f"{plexos_class}s"
+                else:
+                    object_class = plexos_class
+
         except KeyError:
             df = self._report_prop_error(plexos_prop, plexos_class)
             return df
@@ -733,10 +739,10 @@ class MarmotFormat(SetupLogger):
         # handles h5plexos naming discrepency 
         if ((0,6,0) <= db.version and db.version < (0,7,0)):
             # Get original units from h5plexos file 
-            df_units = (db.h5file[f'/data/ST/{timescale}/{f"{plexos_class}s"}/{plexos_prop}']
+            df_units = (db.h5file[f'/data/ST/{timescale}/{object_class}/{plexos_prop}']
                       .attrs['units'].decode('UTF-8'))
         else:
-            df_units = (db.h5file[f'/data/ST/{timescale}/{plexos_class}/{plexos_prop}']
+            df_units = (db.h5file[f'/data/ST/{timescale}/{object_class}/{plexos_prop}']
                       .attrs['unit'])
 
         # find unit conversion values
