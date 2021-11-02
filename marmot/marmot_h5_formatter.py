@@ -732,7 +732,7 @@ class MarmotFormat(SetupLogger):
                 else:
                     object_class = plexos_class
 
-        except KeyError:
+        except (ValueError, KeyError):
             df = self._report_prop_error(plexos_prop, plexos_class)
             return df
         
