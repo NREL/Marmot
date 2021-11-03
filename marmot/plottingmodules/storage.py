@@ -34,7 +34,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def storage_volume(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
 
         """
@@ -103,24 +103,24 @@ class MPlot(object):
                 use = use.groupby("timestamp").sum() / 1000
                 use.columns = [scenario]
 
-                if prop == "Peak Demand":
+                # if prop == "Peak Demand":
 
-                    peak_demand_t = Total_Demand.idxmax()
-                    end_date = peak_demand_t + dt.timedelta(days=end)
-                    start_date = peak_demand_t - dt.timedelta(days=start)
-                    Peak_Demand = Total_Demand[peak_demand_t]
-                    storage_volume = storage_volume[start_date : end_date]
-                    use = use[start_date : end_date]
+                #     peak_demand_t = Total_Demand.idxmax()
+                #     end_date = peak_demand_t + dt.timedelta(days=end)
+                #     start_date = peak_demand_t - dt.timedelta(days=start)
+                #     Peak_Demand = Total_Demand[peak_demand_t]
+                #     storage_volume = storage_volume[start_date : end_date]
+                #     use = use[start_date : end_date]
 
-                elif prop == "Min Net Load":
-                    min_net_load_t = Net_Load.idxmin()
-                    end_date = min_net_load_t + dt.timedelta(days=end)
-                    start_date = min_net_load_t - dt.timedelta(days=start)
-                    Min_Net_Load = Net_Load[min_net_load_t]
-                    storage_volume = storage_volume[start_date : end_date]
-                    use = use[start_date : end_date]
+                # elif prop == "Min Net Load":
+                #     min_net_load_t = Net_Load.idxmin()
+                #     end_date = min_net_load_t + dt.timedelta(days=end)
+                #     start_date = min_net_load_t - dt.timedelta(days=start)
+                #     Min_Net_Load = Net_Load[min_net_load_t]
+                #     storage_volume = storage_volume[start_date : end_date]
+                #     use = use[start_date : end_date]
 
-                elif prop == 'Date Range':
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
 
@@ -137,9 +137,6 @@ class MPlot(object):
             Data_Table_Out = pd.concat([storage_volume_all_scenarios,use_all_scenarios],axis = 1)
             #Make scenario/color dictionary.
             color_dict = dict(zip(storage_volume_all_scenarios.columns,self.color_list))
-
-            # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and storage_volume_all_scenarios.index[1] > dt.datetime(2024,2,28,0,0):
-            #     storage_volume_all_scenarios.index = storage_volume_all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
             fig1, axs = mfunc.setup_plot(ydimension = 2,sharey = False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -161,7 +158,7 @@ class MPlot(object):
 
                 mfunc.create_line_plot(axs,use_all_scenarios,column,color_dict,label = column + ' Unserved Energy', n = 1)
                 axs[1].set_ylabel('Unserved Energy (GWh)',  color='black', rotation='vertical')
-                axs[1].set_xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal')
+                axs[1].set_xlabel(timezone,  color='black', rotation='horizontal')
                 axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[1].margins(x=0.01)
 

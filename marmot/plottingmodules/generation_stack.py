@@ -1,7 +1,7 @@
 """
 Created on Mon Dec  9 10:34:48 2019
 This code creates generation stack plots and is called from Marmot_plot_main.py
-@author: dlevie
+@author: Daniel Levie
 """
 
 import pandas as pd
@@ -14,7 +14,6 @@ import numpy as np
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
 import logging
-#import textwrap
 
 
 #mpl.rcParams['axes.titlesize'] = mconfig.parser("font_settings","title_size")
@@ -35,12 +34,13 @@ class MPlot(object):
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         self.mplot_data_dict = {}
 
 
     def committed_stack(self, figure_name=None, prop=None, start=None, end=None,
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -169,8 +169,8 @@ class MPlot(object):
 
 
     def gen_stack(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone=None, start_date_range=None, end_date_range=None):
-
+                  timezone="", start_date_range=None, end_date_range=None):
+      
         facet=False
         if 'Facet' in figure_name:
             facet = True
@@ -186,7 +186,7 @@ class MPlot(object):
             # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
             # required True/False, property name and scenarios required, scenarios must be a list.
             properties = [(True,"generator_Generation",scenario_list),
-                          (False,"generator_Curtailment",scenario_list),
+                          (False,f"generator_{self.curtailment_prop}",scenario_list),
                           (False,"generator_Pump_Load",scenario_list),
                           (True,f"{agg}_Load",scenario_list),
                           (False,f"{agg}_Unserved_Energy",scenario_list)]
@@ -198,10 +198,9 @@ class MPlot(object):
         def setup_data(zone_input, scenario, Stacked_Gen):
 
             curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
-
             # Insert Curtailmnet into gen stack if it exhists in database
-            if self.mplot_data_dict['generator_Curtailment']:
-                Stacked_Curt = self.mplot_data_dict['generator_Curtailment'].get(scenario).copy()
+            if self.mplot_data_dict[f"generator_{self.curtailment_prop}"]:
+                Stacked_Curt = self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(scenario).copy()
                 if self.shift_leapday == True:
                     Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
                 if zone_input in Stacked_Curt.index.get_level_values(self.AGG_BY).unique():
@@ -221,6 +220,7 @@ class MPlot(object):
             vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
             Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)
+            
 
             # Removes columns that only contain 0
             Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
@@ -233,26 +233,12 @@ class MPlot(object):
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
 
-            #######################
-            ###DO NOT COMMIT
-            #Use input load instead of zonal load.
-            # Total_Demand = pd.read_csv('/Users/jnovache/Volumes/nrelnas01/PLEXOS CEII/Projects/Xcel_Weather/Load/load_2028_2011_EST.csv',index_col = 'DATETIME')
-            # Total_Demand = Total_Demand['PSCO_WI']
-            # Total_Demand.index = pd.to_datetime(Total_Demand.index)
-            # Total_Demand.index = Total_Demand.index.shift(1,freq = 'D')
-            # Total_Demand.index = Total_Demand.index.shift(-2,freq = 'H')
-            # Total_Demand = Total_Demand.loc[Stacked_Gen.index]
-            # Total_Demand = Total_Demand.squeeze()
-
-            ###DO NOT COMMIT
-            #######################
-
-
-            try:
-                Pump_Load = self.mplot_data_dict['generator_Pump_Load'][scenario].copy()
-            except KeyError:
+            if self.mplot_data_dict["generator_Pump_Load"] == {} or not mconfig.parser("plot_data","include_timeseries_pumped_load_line"):
                 Pump_Load = self.mplot_data_dict['generator_Generation'][scenario].copy()
                 Pump_Load.iloc[:,0] = 0
+            else:
+                Pump_Load = self.mplot_data_dict["generator_Pump_Load"][scenario]
+
             if self.shift_leapday == True:
                 Pump_Load = mfunc.shift_leapday(Pump_Load,self.Marmot_Solutions_folder)
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
@@ -270,6 +256,7 @@ class MPlot(object):
             except KeyError:
                 Unserved_Energy = self.mplot_data_dict[f'{agg}_Load'][scenario].copy()
                 Unserved_Energy.iloc[:,0] = 0
+            
             if self.shift_leapday == True:
                 Unserved_Energy = mfunc.shift_leapday(Unserved_Energy,self.Marmot_Solutions_folder)
 
@@ -280,7 +267,7 @@ class MPlot(object):
             unserved_eng_data_table = Unserved_Energy # Used for output to data table csv
             if (Unserved_Energy == 0).all() == False:
                 Unserved_Energy = Load - Unserved_Energy
-
+            
             data = {"Stacked_Gen":Stacked_Gen, "Load":Load, "Net_Load":Net_Load, "Pump_Load":Pump_Load, "Total_Demand":Total_Demand, "Unserved_Energy":Unserved_Energy,"ue_data_table":unserved_eng_data_table}
             return data
 
@@ -297,6 +284,14 @@ class MPlot(object):
             Peak_Demand = 0
             min_net_load_t = None
             Min_Net_Load = 0
+            peak_re_t = None
+            peak_re = 0
+            gen_peak_re = 0
+            peak_ue = 0
+            peak_ue_t = None
+            peak_curt = 0
+            peak_curt_t = None
+            gen_peak_curt = 0
 
             if prop == "Peak Demand":
                 peak_demand_t = Total_Demand.idxmax()
@@ -331,6 +326,70 @@ class MPlot(object):
                 Unserved_Energy = Unserved_Energy[start_date_range : end_date_range]
                 Total_Demand = Total_Demand[start_date_range : end_date_range]
                 unserved_eng_data_table = unserved_eng_data_table[start_date_range : end_date_range]
+            
+            elif prop == 'Peak RE':
+                re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
+                all_gen = [name for name in Stacked_Gen.columns]
+                if len(re_gen_cat) == 0:
+                    re_total = pd.DataFrame()
+                else:
+                    re_total = Stacked_Gen[re_gen_cat[0]]
+                    i = 1
+                    while i < len(re_gen_cat):
+                        re_total = re_total + Stacked_Gen[re_gen_cat[i]]
+                        i += 1
+                gen_total = Stacked_Gen[all_gen[0]]
+                j = 1
+                while j < len(all_gen):
+                    gen_total = gen_total + Stacked_Gen[all_gen[j]]
+                    j += 1
+                peak_re_t = re_total.idxmax()
+                peak_re = re_total[peak_re_t]
+                gen_peak_re = gen_total[peak_re_t]
+                end_date = peak_re_t + dt.timedelta(days=end)
+                start_date = peak_re_t - dt.timedelta(days=start)
+                Min_Net_Load = Net_Load[peak_re_t]
+                Stacked_Gen = Stacked_Gen[start_date : end_date]
+                Load = Load[start_date : end_date]
+                Unserved_Energy = Unserved_Energy[start_date : end_date]
+                Total_Demand = Total_Demand[start_date : end_date]
+
+                unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
+            
+            elif prop == 'Peak Unserved Energy':
+                peak_ue_t = unserved_eng_data_table.idxmax()
+                peak_ue = unserved_eng_data_table[peak_ue_t]
+                end_date = peak_ue_t + dt.timedelta(days=end)
+                start_date = peak_ue_t - dt.timedelta(days=start)
+                Min_Net_Load = Net_Load[peak_ue_t]
+                Stacked_Gen = Stacked_Gen[start_date : end_date]
+                Load = Load[start_date : end_date]
+                Unserved_Energy = Unserved_Energy[start_date : end_date]
+                Total_Demand = Total_Demand[start_date : end_date]
+
+                unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
+                
+            elif prop == 'Peak Curtailment':
+                all_gen = [name for name in Stacked_Gen.columns]
+                gen_total = Stacked_Gen[all_gen[0]]
+                j = 1
+                while j < len(all_gen):
+                    gen_total = gen_total + Stacked_Gen[all_gen[j]]
+                    j += 1
+                curtailment = Stacked_Gen['Curtailment']
+                peak_curt_t = curtailment.idxmax()
+                peak_curt = curtailment[peak_curt_t]
+                gen_peak_curt = gen_total[peak_curt_t]
+                end_date = peak_curt_t + dt.timedelta(days=end)
+                start_date = peak_curt_t - dt.timedelta(days=start)
+                Min_Net_Load = Net_Load[peak_curt_t]
+                Stacked_Gen = Stacked_Gen[start_date : end_date]
+                Load = Load[start_date : end_date]
+                Unserved_Energy = Unserved_Energy[start_date : end_date]
+                Total_Demand = Total_Demand[start_date : end_date]
+
+                unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
+                
 
             else:
                 self.logger.info("Plotting graph for entire timeperiod")
@@ -340,6 +399,14 @@ class MPlot(object):
             data["Peak_Demand"] = Peak_Demand
             data["min_net_load_t"] = min_net_load_t
             data["Min_Net_Load"] = Min_Net_Load
+            data["peak_re_t"] = peak_re_t
+            data["Peak_RE"] = peak_re
+            data["Gen_peak_re"] = gen_peak_re
+            data["Peak_Unserved_Energy"] = peak_ue
+            data["peak_ue_t"] = peak_ue_t
+            data["peak_curt"] = peak_curt
+            data["peak_curt_t"] = peak_curt_t
+            data["gen_peak_curt"] = gen_peak_curt
             return data
 
         def mkplot(outputs, zone_input, all_scenarios):
@@ -398,6 +465,14 @@ class MPlot(object):
                 peak_demand_t = data["peak_demand_t"]
                 min_net_load_t = data["min_net_load_t"]
                 Min_Net_Load = data["Min_Net_Load"]
+                Peak_RE = data["Peak_RE"]
+                peak_re_t = data["peak_re_t"]
+                gen_peak_re2 = data["Gen_peak_re"]
+                peak_ue = data["Peak_Unserved_Energy"]
+                peak_ue_t = data["peak_ue_t"]
+                peak_curt = data["peak_curt"]
+                peak_curt_t = data["peak_curt_t"]
+                gen_peak_curt = data["gen_peak_curt"]
 
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
@@ -411,8 +486,12 @@ class MPlot(object):
                 Unserved_Energy = Unserved_Energy / unitconversion['divisor']
                 unserved_eng_data_table = unserved_eng_data_table / unitconversion['divisor']
                 Peak_Demand = Peak_Demand / unitconversion['divisor']
+                Peak_RE = Peak_RE / unitconversion['divisor']
+                gen_peak_re2 = gen_peak_re2/ unitconversion['divisor']
+                gen_peak_curt = gen_peak_curt / unitconversion['divisor']
+                peak_ue = peak_ue/ unitconversion['divisor']
+                peak_curt = peak_curt/ unitconversion['divisor']
                 Min_Net_Load = Min_Net_Load / unitconversion['divisor']
-
                 Load = Load.rename('Total Load \n (Demand + Storage Charging)')
                 Total_Demand = Total_Demand.rename('Total Demand')
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
@@ -423,18 +502,6 @@ class MPlot(object):
                 single_scen_out = single_scen_out.add_suffix(f" ({unitconversion['units']})")
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
                 data_tables.append(single_scen_out)
-
-                ##DO NOT COMMIT
-                #Pull P05 hourly flow
-                # interface_Flow_collection = {}
-                # mfunc.get_data(interface_Flow_collection,"interface_Flow", self.Marmot_Solutions_folder, self.Scenarios)
-                # int_flow = interface_Flow_collection[scenario]
-                # int_flow = int_flow.xs('P05 West of Cascades-South_WI',level = 'interface_name')
-                # int_flow = mfunc.shift_leapday(int_flow,self.Marmot_Solutions_folder)
-                # int_flow = int_flow.droplevel('interface_category')
-                # int_flow = int_flow[self.start_date : self.end_date]
-                # int_flow = int_flow /unitconversion['divisor']
-                # int_flow.columns = ['P05 flow']
 
                 # # only difference linewidth = 0,5
                 axs[i].stackplot(Stacked_Gen.index.values, Stacked_Gen.values.T, labels=Stacked_Gen.columns, linewidth=0,
@@ -472,6 +539,24 @@ class MPlot(object):
                                     xy=(peak_demand_t, Peak_Demand), xytext=((peak_demand_t + dt.timedelta(days=0.1)),
                                                                              (max(Total_Demand) + Total_Demand[peak_demand_t]*0.1)),
                                 fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                
+                if prop == "Peak RE":
+                    axs[i].annotate(f"Peak RE: \n{str(format(Peak_RE, '.2f'))} {unitconversion['units']}",
+                                    xy=(peak_re_t, gen_peak_re2), xytext=((peak_re_t + dt.timedelta(days=0.5)),
+                                                                                (max(Total_Demand))),
+                        fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                
+                if prop == "Peak Unserved Energy":
+                    axs[i].annotate(f"Peak Unserved Energy: \n{str(format(peak_ue, '.2f'))} {unitconversion['units']}",
+                                    xy=(peak_ue_t, Total_Demand[peak_ue_t]), xytext=((peak_ue_t + dt.timedelta(days=0.5)),
+                                                                                (max(Total_Demand))),
+                        fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+                
+                if prop == "Peak Curtailment":
+                    axs[i].annotate(f"Peak Curtailment: \n{str(format(peak_curt, '.2f'))} {unitconversion['units']}",
+                                    xy=(peak_curt_t, gen_peak_curt), xytext=((peak_curt_t + dt.timedelta(days=0.5)),
+                                                                                (max(Total_Demand))),
+                        fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].fill_between(Load.index, Load,Unserved_Energy,
@@ -576,7 +661,7 @@ class MPlot(object):
 
 
     def gen_diff(self, figure_name=None, prop=None, start=None, end=None,
-                 timezone=None, start_date_range=None, end_date_range=None):
+                 timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -624,7 +709,7 @@ class MPlot(object):
             self.logger.info(f'Scenario 2 = {self.Scenario_Diff[1]}')
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
 
-            if prop == 'Date Range':
+            if pd.notna(start_date_range):
                 self.logger.info(f"Plotting specific date range: \
                 {str(start_date_range)} to {str(end_date_range)}")
                 Gen_Stack_Out = Gen_Stack_Out[start_date_range : end_date_range]
@@ -660,7 +745,7 @@ class MPlot(object):
 
             ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
             ax.set_ylabel(f"Generation Difference ({unitconversion['units']})",  color='black', rotation='vertical')
-            ax.set_xlabel(f'Date ({timezone})',  color='black', rotation='horizontal')
+            ax.set_xlabel(timezone,  color='black', rotation='horizontal')
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.tick_params(axis='y', which='major', length=5, width=1)
@@ -674,7 +759,7 @@ class MPlot(object):
 
 
     def gen_stack_all_periods(self, figure_name=None, prop=None, start=None, end=None,
-                              timezone=None, start_date_range=None, end_date_range=None):
+                              timezone="", start_date_range=None, end_date_range=None):
         '''
         DEPRCIATED FOR NOW
 
@@ -697,7 +782,7 @@ class MPlot(object):
     #     except:
     #         Pump_Load_read = Stacked_Gen_read.copy()
     #         Pump_Load_read.iloc[:,0] = 0
-    #     Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", "generator_Curtailment" )
+    #     Stacked_Curt_read = pd.read_hdf(self.hdf_out_folder + "/" + self.Scenarios[0]+"_formatted.h5", f"generator_{self.curtailment_prop}" )
 
     #     # If data is to be aggregated by zone, then zone properties are loaded, else region properties are loaded
     #     if self.AGG_BY == "zone":
@@ -805,7 +890,7 @@ class MPlot(object):
 
 
     #             ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-    #             ax.set_xlabel('Date ' + '(' + str(timezone) + ')',  color='black', rotation='horizontal')
+    #             ax.set_xlabel(timezone,  color='black', rotation='horizontal')
     #             ax.spines['right'].set_visible(False)
     #             ax.spines['top'].set_visible(False)
     #             ax.tick_params(axis='y', which='major', length=5, width=1)
@@ -861,3 +946,11 @@ class MPlot(object):
     #     return outputs
 
 
+
+
+
+########################################################################################
+
+########################################################################################
+
+# def monthly_gen_bar_plot()

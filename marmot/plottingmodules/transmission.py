@@ -4,7 +4,7 @@ Created April 2020, updated August 2020
 
 This code creates transmission line and interface plots and is called from Marmot_plot_main.py
 
-@author: dlevie
+@author: Daniel Levie, Marty Schwarz
 """
 
 import os
@@ -62,7 +62,7 @@ class MPlot(object):
         return outputs
 
     def _util(self,hist=None, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
       
         outputs = {}
         
@@ -184,7 +184,7 @@ class MPlot(object):
         return outputs
 
     def int_flow_ind(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method plots flow, import and export limit, for individual transmission interchanges, with a facet for each interchange.
@@ -211,7 +211,7 @@ class MPlot(object):
 
         outputs = {}
 
-        if not pd.isnull(start_date_range):
+        if pd.notna(start_date_range):
             self.logger.info(f"Plotting specific date range: \
                 {str(start_date_range)} to {str(end_date_range)}")
 
@@ -314,7 +314,7 @@ class MPlot(object):
 
                         if self.shift_leapday == True:
                             single_int = mfunc.shift_leapday(single_int,self.Marmot_Solutions_folder)
-                        if not pd.isnull(start_date_range):
+                        if pd.notna(start_date_range):
                             single_int = single_int[start_date_range : end_date_range]
                             limits = limits[start_date_range : end_date_range]
                         if duration_curve:
@@ -380,7 +380,7 @@ class MPlot(object):
         return outputs 
 
     def int_flow_ind_seasonal(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method plots flow, import and export limit, for individual transmission interchanges, with a facet for each interchange.
@@ -591,7 +591,7 @@ class MPlot(object):
 
     #TODO: re-organize parameters (self vs. not self)
     def int_flow_ind_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method plots the hourly difference in interface flow between two scenarios for individual interfaces, with a facet for each interface.
@@ -797,7 +797,7 @@ class MPlot(object):
 
 
     def line_flow_ind(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
         """
         This method plots flow, import and export limit, for individual transmission lines, with a facet for each line.
         The lines are specified in the plot properties field of Marmot_plot_select.csv (column 4).
@@ -1000,7 +1000,7 @@ class MPlot(object):
         return outputs
 
     def line_flow_ind_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method plots the flow difference for individual transmission lines, with a facet for each line.
@@ -1030,7 +1030,7 @@ class MPlot(object):
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = prop.split(",")
         if select_lines == None:
-            outpus = mfunc.InputSheetError()
+            outputs = mfunc.InputSheetError()
             return outputs
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
@@ -1106,7 +1106,7 @@ class MPlot(object):
         return outputs
 
     def line_flow_ind_seasonal(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method differs from the previous method, in that it plots seasonal line limits.
@@ -1722,7 +1722,7 @@ class MPlot(object):
 
     def _region_region_interchange(self,scenario_type,plot_scenario=True, 
                                    figure_name=None, prop=None, start=None, end=None,
-                        timezone=None, start_date_range=None, end_date_range=None):
+                        timezone="", start_date_range=None, end_date_range=None):
 
         outputs = {}
         
@@ -1780,9 +1780,6 @@ class MPlot(object):
                 rr_int_agg = rr_int.groupby(['timestamp','parent','child'],as_index=True).sum()
                 rr_int_agg.rename(columns = {0:'flow (MW)'}, inplace = True)
                 rr_int_agg = rr_int_agg.reset_index()
-
-                # if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and rr_int_agg.index[0] > dt.datetime(2024,2,28,0,0):
-                #     rr_int_agg.index = rr_int_agg.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
                 # If plotting all regions update plot setup
                 if plot_scenario == False:
@@ -1886,7 +1883,7 @@ class MPlot(object):
         return outputs
 
     def region_region_checkerboard(self,figure_name=None, prop=None, start=None,
-                                   end=None, timezone=None, start_date_range=None,
+                                   end=None, timezone="", start_date_range=None,
                                    end_date_range=None):
         """
         This method creates a checkerboard/heatmap figure showing total interchanges between regions
@@ -2015,7 +2012,7 @@ class MPlot(object):
 
     def _violations(self,total_violations=None,
                     figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
 
         outputs = {}
@@ -2093,7 +2090,7 @@ class MPlot(object):
                 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
-                ax.set_xlabel(f"Date {(timezone)}",  color='black', rotation='horizontal')
+                ax.set_xlabel(timezone,  color='black', rotation='horizontal')
                 handles, labels = ax.get_legend_handles_labels()
                 ax.legend(handles, labels, loc='best',facecolor='inherit', frameon=True)
 
@@ -2107,7 +2104,7 @@ class MPlot(object):
 
 
     def net_export(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
 
         """
@@ -2153,7 +2150,7 @@ class MPlot(object):
                 net_export = net_export.groupby("timestamp").sum()
                 net_export.columns = [scenario]
 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     net_export = net_export[start_date_range : end_date_range]
@@ -2215,7 +2212,7 @@ class MPlot(object):
         return outputs
 
     def zonal_interchange(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
 
         """
@@ -2315,7 +2312,7 @@ class MPlot(object):
                         net_export = export - imports
                     net_export.columns = [other_zone]
 
-                    if not pd.isnull(start_date_range):
+                    if pd.notna(start_date_range):
                         if other_zone == [other_zones[0]]:
                             self.logger.info(f"Plotting specific date range: \
                             {str(start_date_range)} to {str(end_date_range)}")
@@ -2383,7 +2380,7 @@ class MPlot(object):
         return outputs
 
     def zonal_interchange_total(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
 
         """
@@ -2470,7 +2467,7 @@ class MPlot(object):
                         net_export = export - imports
                     net_export.columns = [other_zone]
 
-                    if not pd.isnull(start_date_range):
+                    if pd.notna(start_date_range):
                         if other_zone == other_zones[0]:
                             self.logger.info(f"Plotting specific date range: \
                             {str(start_date_range)} to {str(end_date_range)}")
@@ -2520,7 +2517,7 @@ class MPlot(object):
         return outputs
 
     def total_int_flow_ind(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone=None, start_date_range=None,
+                    end=None, timezone="", start_date_range=None,
                     end_date_range=None):
         
         """
@@ -2578,7 +2575,7 @@ class MPlot(object):
                 flow = flow_all.xs(inter,level = 'interface_name')
                 flow = flow.reset_index()
                  
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info("Plotting specific date range: \
                     {} to {}".format(str(start_date_range),str(end_date_range)))
                     flow = flow[start_date_range : end_date_range]
@@ -2731,15 +2728,13 @@ class MPlot(object):
     #             scenario_color_dict.update(dictionary)
 
     #         all_scenarios.index = pd.to_datetime(all_scenarios.index)
-    #         if all_scenarios.empty == False and '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and all_scenarios.index[0] > dt.datetime(2024,2,28,0,0):
-    #             all_scenarios.index = all_scenarios.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
     #         fig5, ax = plt.subplots(figsize=(9,6))
     #         for idx,column in enumerate(all_scenarios.columns):
     #             ax.plot(all_scenarios.index.values,all_scenarios[column], linewidth=2, color = scenario_color_dict.get(column,'#333333'),label=column)
 
     #         ax.set_ylabel('Transmission utilization (%)',  color='black', rotation='vertical')
-    #         ax.set_xlabel('Date ' + '(' + timezone + ')',  color='black', rotation='horizontal')
+    #         ax.set_xlabel(timezone,  color='black', rotation='horizontal')
     #         ax.spines['right'].set_visible(False)
     #         ax.spines['top'].set_visible(False)
     #         ax.tick_params(axis='y', which='major', length=5, width=1)

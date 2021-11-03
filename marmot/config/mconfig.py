@@ -29,10 +29,10 @@ def createConfig(configfile_path):
     data = dict(
         
         font_settings = dict(
-            xtick_size = 11,
+            xtick_size = 12,
             ytick_size = 12,
             axes_label_size = 16,
-            legend_size = 11,
+            legend_size = 12,
             title_size = 16,
             font_family = 'serif'
             ),
@@ -55,6 +55,11 @@ def createConfig(configfile_path):
             rotate_at_num_labels = 7,
             rotation_angle = 45),
         
+        plot_data = dict(
+            curtailment_property = 'Curtailment',
+            include_total_pumped_load_line = True,
+            include_timeseries_pumped_load_line = True),
+
         figure_file_format = 'svg',
         
         shift_leapday = False,
@@ -63,6 +68,10 @@ def createConfig(configfile_path):
         plot_title_as_region = True,
         
         user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
+
+        plot_select_file = 'Marmot_plot_select.csv',
+
+        plexos_properties_file = 'plexos_properties.csv',
         
         category_file_names = dict(
             pv_gen_cat = 'pv_gen_cat.csv',

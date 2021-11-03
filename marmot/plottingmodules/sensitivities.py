@@ -26,6 +26,7 @@ class MPlot(object):
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.mplot_data_dict = {}
+        self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
 
     def _process_ts(self,df,zone_input):
@@ -35,7 +36,7 @@ class MPlot(object):
         return(oz)
 
     def sensitivities_gas(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
 
         """
@@ -63,7 +64,7 @@ class MPlot(object):
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenario_Diff),
-                      (True,"generator_Curtailment",self.Scenario_Diff),
+                      (True,f"generator_{self.curtailment_prop}",self.Scenario_Diff),
                       (True,"region_Net_Interchange",self.Scenario_Diff)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
@@ -93,8 +94,8 @@ class MPlot(object):
         scen_CT = scen.xs('Gas-CT',level = 'tech')
         scen_CC = scen.xs('Gas-CC',level = 'tech')
 
-        curt_bc = mfunc.shift_leapday(self.mplot_data_dict["generator_Curtailment"].get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder)
-        curt_scen = mfunc.shift_leapday(self.mplot_data_dict["generator_Curtailment"].get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder)
+        curt_bc = mfunc.shift_leapday(self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[0]),self.Marmot_Solutions_folder)
+        curt_scen = mfunc.shift_leapday(self.mplot_data_dict[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[1]),self.Marmot_Solutions_folder)
         curt_diff_all = curt_scen - curt_bc
 
         regions = list(bc.index.get_level_values(self.AGG_BY).unique())
@@ -205,7 +206,7 @@ class MPlot(object):
                 axs[0].tick_params(axis='y', which='major', length=5, width=1)
                 axs[0].tick_params(axis='x', which='major', length=5, width=1)
                 axs[0].set_ylabel('Generation (MW)',  color='black', rotation='vertical')
-                axs[0].set_xlabel('Date ' + '(' + timezone + ')',  color='black', rotation='horizontal')
+                axs[0].set_xlabel(timezone,  color='black', rotation='horizontal')
                 axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].margins(x=0.01)
                 mfunc.set_plot_timeseries_format(axs)

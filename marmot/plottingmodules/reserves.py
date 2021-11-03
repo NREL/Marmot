@@ -34,7 +34,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def reserve_gen_timeseries(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         """
         This method creates a generation stackplot of reserve provision for each region.
@@ -89,6 +89,10 @@ class MPlot(object):
                     self.logger.info(f"No reserves deployed in: {scenario}")
                     continue
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
+
+                if reserve_provision_timeseries.empty is True:
+                    self.logger.info(f"No reserves deployed in: {scenario}")
+                    continue
                 # unitconversion based off peak generation hour, only checked once 
                 if n == 0:
                     unitconversion = mfunc.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
@@ -104,8 +108,8 @@ class MPlot(object):
                     Peak_Reserve = total_reserve[peak_reserve_t]
 
                 elif prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
-                    {str(start_date_range} to {str(end_date_range)}")
+                    self.logger.info(f"Plotting specific date range: \
+                        {str(start_date_range)} to {str(end_date_range)}")
                     reserve_provision_timeseries = reserve_provision_timeseries[start_date_range : end_date_range]
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
@@ -173,7 +177,7 @@ class MPlot(object):
         return outputs
 
     def total_reserves_by_gen(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         """
         This method creates a generation barplot of total reserve provision by generator for each region.
@@ -211,10 +215,12 @@ class MPlot(object):
                     continue
                 reserve_provision_timeseries = mfunc.df_process_gen_inputs(reserve_provision_timeseries,self.ordered_gen)
 
+                if reserve_provision_timeseries.empty is True:
+                    self.logger.info(f"No reserves deployed in: {scenario}")
+                    continue
+
                 # Calculates interval step to correct for MWh of generation
-                time_delta = reserve_provision_timeseries.index[1]- reserve_provision_timeseries.index[0]
-                # Finds intervals in 60 minute period
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                interval_count = mfunc.get_sub_hour_interval_count(reserve_provision_timeseries)
 
                 # sum totals by fuel types
                 reserve_provision_timeseries = reserve_provision_timeseries/interval_count
@@ -241,19 +247,13 @@ class MPlot(object):
             
             data_table_out = Total_Reserves_Out.add_suffix(f" ({unitconversion['units']}h)")
             
-            Total_Reserves_Out, angle = mfunc.check_label_angle(Total_Reserves_Out, False)
             # create figure
-            #fig1 = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict)
-            fig1, axs = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, angle)
+            fig1, axs = mfunc.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, 
+                                                        custom_tick_labels=self.custom_xticklabels)
 
             # additional figure formatting
             #fig1.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
             axs.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
-
-            # replace x-axis with custom labels
-            if len(self.ticklabels) > 1:
-                ticklabels = [textwrap.fill(x.replace('-','- '),8) for x in self.ticklabels]
-                axs.set_xticklabels(ticklabels)
 
             # create list of gen technologies
             l1 = Total_Reserves_Out.columns.tolist()
@@ -309,7 +309,7 @@ class MPlot(object):
         return outputs
 
     def _reserve_bar_plots(self, data_set, count_hours=False, figure_name=None, 
-                           prop=None, start=None, end=None, timezone=None, 
+                           prop=None, start=None, end=None, timezone="", 
                            start_date_range=None, end_date_range=None):
         
         outputs = {}
@@ -387,8 +387,7 @@ class MPlot(object):
             # create color dictionary
             color_dict = dict(zip(reserve_out.columns,self.color_list))
             
-            reserve_out, angle = mfunc.check_label_angle(reserve_out, False)
-            fig2,axs = mfunc.create_grouped_bar_plot(reserve_out,color_dict,angle)
+            fig2,axs = mfunc.create_grouped_bar_plot(reserve_out, color_dict)
             if count_hours == False:
                 axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs.set_ylabel(f"Reserve {data_set} [{unitconversion['units']}h]",  color='black', rotation='vertical')
@@ -404,7 +403,7 @@ class MPlot(object):
 
 
     def reg_reserve_shortage_timeseries(self,figure_name=None, 
-                           prop=None, start=None, end=None, timezone=None, 
+                           prop=None, start=None, end=None, timezone="", 
                            start_date_range=None, end_date_range=None):
         """
         This method creates a timeseries line plot of reserve shortage for each region.
@@ -467,7 +466,7 @@ class MPlot(object):
                 reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', reserve_timeseries['parent'])
                 reserve_timeseries = reserve_timeseries.pivot(index='timestamp', columns='Type', values=0)
 
-                if prop == 'Date Range':
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     reserve_timeseries = reserve_timeseries[start_date_range : end_date_range]
@@ -525,7 +524,7 @@ class MPlot(object):
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            # plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal',labelpad = 30)
+            # plt.xlabel(timezone,  color='black', rotation='horizontal',labelpad = 30)
             plt.ylabel('Reserve Shortage [MW]',  color='black', rotation='vertical',labelpad = 40)
             
             if mconfig.parser("plot_title_as_region"):

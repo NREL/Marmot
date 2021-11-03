@@ -2,7 +2,9 @@
 """
 Created on Tue Dec 10 08:51:15 2019
 
-@author: dlevie
+This module plots figures of the total installed capacity of the system
+
+@author: Daniel Levie
 """
 
 import os
@@ -41,7 +43,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def total_cap(self, figure_name=None, prop=None, start=None, end=None,
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         outputs = {}
 
@@ -103,11 +105,10 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
-            Total_Installed_Capacity_Out, angle = mfunc.check_label_angle(Total_Installed_Capacity_Out, False)
             
             fig1, ax = plt.subplots(figsize=(self.x, self.y))
 
-            Total_Installed_Capacity_Out.plot.bar(stacked=True, figsize=(self.x, self.y), rot=angle, ax=ax,
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=ax,
                                                   color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 
@@ -116,13 +117,16 @@ class MPlot(object):
             ax.set_ylabel(f"Total Installed Capacity ({unitconversion['units']})",
                           color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            if angle > 0:
-                ax.set_xticklabels(Total_Installed_Capacity_Out.index, ha="right")
-                tick_length = 8
+            
+            # Set x-tick labels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Installed_Capacity_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',
                       bbox_to_anchor=(1, 0), facecolor='inherit', frameon=True)
@@ -133,7 +137,7 @@ class MPlot(object):
         return outputs
 
     def total_cap_diff(self, figure_name=None, prop=None, start=None, end=None,
-                       timezone=None, start_date_range=None, end_date_range=None):
+                       timezone="", start_date_range=None, end_date_range=None):
         outputs = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -184,7 +188,6 @@ class MPlot(object):
                 Total_Installed_Capacity.rename(index={0: scenario}, inplace=True)
                 Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity], axis=0, sort=False).fillna(0)
 
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             try:
                 Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Scenarios[0])  # Change to a diff on first scenario
@@ -193,6 +196,8 @@ class MPlot(object):
                 outputs[zone_input] = out
                 continue
             Total_Installed_Capacity_Out.drop(self.Scenarios[0], inplace=True)  # Drop base entry
+
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
 
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
             if Total_Installed_Capacity_Out.empty:
@@ -208,11 +213,10 @@ class MPlot(object):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
-            Total_Installed_Capacity_Out, angle = mfunc.check_label_angle(Total_Installed_Capacity_Out, False)
 
             fig2, ax = plt.subplots(figsize=(self.x, self.y))
 
-            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=angle, ax=ax,
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=ax,
                                                   color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 
@@ -220,13 +224,12 @@ class MPlot(object):
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Capacity Change ({unitconversion['units']}) \n relative to {self.Scenarios[0]}", color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            if angle > 0:
-                ax.set_xticklabels(Total_Installed_Capacity_Out.index, ha="right")
-                tick_length = 8
-            else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+            
+            tick_labels = Total_Installed_Capacity_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
 
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',
@@ -239,7 +242,7 @@ class MPlot(object):
 
 
     def total_cap_and_gen_facet(self, figure_name=None, prop=None, start=None, end=None,
-                                timezone=None, start_date_range=None, end_date_range=None):
+                                timezone="", start_date_range=None, end_date_range=None):
 
         # generation figure
         self.logger.info("Generation data")
@@ -266,7 +269,6 @@ class MPlot(object):
                 continue
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
-            Total_Installed_Capacity_Out, angle = mfunc.check_label_angle(Total_Installed_Capacity_Out, False)
 
             # Check units of data
             capacity_units = [re.search('GW|MW|TW|kW', unit) for unit in Total_Installed_Capacity_Out.columns]
@@ -276,7 +278,7 @@ class MPlot(object):
             Total_Installed_Capacity_Out.columns = [re.sub('[\s (]|GW|TW|MW|kW|\)', '', i) for i in Total_Installed_Capacity_Out.columns]
 
 
-            Total_Installed_Capacity_Out.plot.bar(stacked=True, rot=angle, ax=axs[0],
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=axs[0],
                                                   color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Installed_Capacity_Out.columns],
                                                   edgecolor='black', linewidth='0.1')
 
@@ -284,19 +286,16 @@ class MPlot(object):
             axs[0].spines['top'].set_visible(False)
             axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})",  color='black', rotation='vertical')
             axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            if angle > 0:
-                axs[0].set_xticklabels(Total_Installed_Capacity_Out.index, ha="right")
-                tick_length = 8
+            
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            axs[0].tick_params(axis='y', which='major', length=tick_length, width=1)
-            axs[0].tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Installed_Capacity_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=axs[0])
+            
+            axs[0].tick_params(axis='y', which='major', length=5, width=1)
+            axs[0].tick_params(axis='x', which='major', length=5, width=1)
             axs[0].get_legend().remove()
-
-            # replace x-axis with custom labels
-            # if len(self.ticklabels) > 1:
-            #     ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.ticklabels]
-            #     axs[0].set_xticklabels(ticklabels)
 
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
@@ -323,12 +322,11 @@ class MPlot(object):
             Pump_Load_Out = Total_Load_Out - Total_Demand_Out
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_', ' ')
-            Total_Generation_Stack_Out, angle2 = mfunc.check_label_angle(Total_Generation_Stack_Out, False)
 
             # Remove any suffixes from column names
             Total_Generation_Stack_Out.columns = [re.sub('[\s (]|GWh|TWh|MWh|kWh|\)', '', i) for i in Total_Generation_Stack_Out.columns]
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, rot=angle2, ax=axs[1],
+            Total_Generation_Stack_Out.plot.bar(stacked=True, ax=axs[1],
                                                 color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns],
                                                 edgecolor='black', linewidth='0.1')
 
@@ -336,13 +334,15 @@ class MPlot(object):
             axs[1].spines['top'].set_visible(False)
             axs[1].set_ylabel(f"Total Generation ({energy_units})",  color='black', rotation='vertical')
             axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            if angle2 > 0:
-                axs[1].set_xticklabels(Total_Generation_Stack_Out.index, ha="right")
-                tick_length = 8
+            
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
             else:
-                tick_length = 5
-            axs[1].tick_params(axis='y', which='major', length=tick_length, width=1)
-            axs[1].tick_params(axis='x', which='major', length=tick_length, width=1)
+                tick_labels = Total_Generation_Stack_Out.index
+            mfunc.set_barplot_xticklabels(tick_labels, ax=axs[1])
+            
+            axs[1].tick_params(axis='y', which='major', length=5, width=1)
+            axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
             data_tables = []
             for n, scenario in enumerate(self.Scenarios):
@@ -360,11 +360,6 @@ class MPlot(object):
                                         alpha=0.5)
 
                 data_tables = pd.DataFrame() #TODO pass output data back to plot main 
-
-            # replace x-axis with custom labels
-            if len(self.ticklabels) > 1:
-                ticklabels = [textwrap.fill(x.replace('-', '- '), 8) for x in self.ticklabels]
-                axs[1].set_xticklabels(ticklabels)
 
             # get names of generator to create custom legend
             l1 = Total_Installed_Capacity_Out.columns.tolist()

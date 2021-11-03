@@ -7,7 +7,7 @@ import matplotlib.dates as mdates
 import numpy as np
 import logging
 import marmot.plottingmodules.marmot_plot_functions as mfunc
-import config.mconfig as mconfig
+import marmot.config.mconfig as mconfig
 
 
 #===============================================================================
@@ -26,7 +26,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def capacity_out_stack(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="",start_date_range=None, 
                              end_date_range=None):
         
         outputs = {}
@@ -80,13 +80,10 @@ class MPlot(object):
                 avail_cap.reset_index(inplace = True)
                 
                 cap_out = avail_cap.merge(install_cap,left_on = ['gen_name'],right_on = ['gen_name'])
-                cap_out['Capacity out'] = cap_out['cap'] - cap_out['avail']
+                cap_out[0] = cap_out['cap'] - cap_out['avail']
                 
-                cap_out = cap_out.groupby(["timestamp", "tech"], as_index=False).sum()
-                cap_out.tech = cap_out.tech.astype("category")
-                cap_out.tech.cat.set_categories(self.ordered_gen, inplace=True)
-                cap_out = cap_out.sort_values(["tech"])
-                cap_out = cap_out.pivot(index = 'timestamp', columns = 'tech', values = 'Capacity out')
+                cap_out = mfunc.df_process_gen_inputs(cap_out, self.ordered_gen)
+
                 #Subset only thermal gen categories
                 thermal_gens = [therm for therm in self.thermal_gen_cat if therm in cap_out.columns]
                 cap_out = cap_out[thermal_gens]
@@ -132,7 +129,7 @@ class MPlot(object):
 
 
     def capacity_out_stack_PASA(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         
         outputs = mfunc.UnderDevelopment()
@@ -188,9 +185,6 @@ class MPlot(object):
 
                 tech_list = [tech_type for tech_type in self.ordered_gen if tech_type in one_zone.columns]  #Order columns.
                 one_zone = one_zone[tech_list]
-
-                if '2008' not in self.Marmot_Solutions_folder and '2012' not in self.Marmot_Solutions_folder and one_zone.index[0] > dt.datetime(2024,2,28,0,0):
-                    one_zone.index = one_zone.index.shift(1,freq = 'D') #TO DEAL WITH LEAP DAYS, SPECIFIC TO MARTY'S PROJECT, REMOVE AFTER.
 
                 overall_avg_vec = pd.DataFrame(np.repeat(np.array(overall_avg),len(one_zone.index)), index = one_zone.index, columns = ['Annual average'])
                 overall_avg_vec = overall_avg_vec / 1000
@@ -259,7 +253,7 @@ class MPlot(object):
 
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.xlabel('Date ' + '(' + self.timezone + ')',  color='black', rotation='horizontal', labelpad = 40)
+            plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad = 40)
             plt.ylabel('Capacity out (MW)',  color='black', rotation='vertical', labelpad = 60)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)

@@ -29,7 +29,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def pdc_all_regions(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         """
         This method creates a price duration curve for all regions/zones and plots them on
         a single facet plot.
@@ -76,7 +76,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[start_date_range:end_date_range]
@@ -124,7 +124,7 @@ class MPlot(object):
         return outputs
     
     def region_pdc(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method creates a price duration curve for each region.
@@ -161,7 +161,7 @@ class MPlot(object):
 
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[start_date_range:end_date_range]
@@ -215,7 +215,7 @@ class MPlot(object):
 
 
     def region_timeseries_price(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method creates price timeseries plot for each region.
@@ -252,7 +252,7 @@ class MPlot(object):
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[start_date_range:end_date_range]
@@ -299,14 +299,13 @@ class MPlot(object):
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', labelpad=20)
-            if not math.isnan(timezone):
-                plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
+            plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
             outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
         return outputs
 
     def timeseries_price_all_regions(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
 
         """
         This method creates a price timeseries plot for all regions/zones and plots them on
@@ -356,7 +355,7 @@ class MPlot(object):
                 price = self._process_data(self.mplot_data_dict[f"{agg}_Price"],scenario,zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[start_date_range:end_date_range]
@@ -429,7 +428,7 @@ class MPlot(object):
         
         
     def _node_price(self, PDC=None, figure_name=None, prop=None, start=None, 
-                    end=None, timezone=None, start_date_range=None, 
+                    end=None, timezone="", start_date_range=None, 
                     end_date_range=None):
 
         """
@@ -475,7 +474,7 @@ class MPlot(object):
             price = price.groupby(["timestamp","node"]).sum()
             price.rename(columns={0:scenario}, inplace=True)
             
-            if not pd.isnull(start_date_range):
+            if pd.notna(start_date_range):
                 self.logger.info(f"Plotting specific date range: \
                                   {str(start_date_range)} to {str(end_date_range)}")
                 price = price[pd.to_datetime(start_date_range):pd.to_datetime(end_date_range)]
@@ -579,7 +578,7 @@ class MPlot(object):
         
     
     def _node_hist(self, diff_plot=None, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         """
         Internal code for hist plots. 
         """
@@ -620,7 +619,7 @@ class MPlot(object):
                 price = price.groupby(["timestamp"]).sum()
                 price.rename(columns={0:scenario}, inplace=True)
                 
-                if not pd.isnull(start_date_range):
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                                       {str(start_date_range)} to {str(end_date_range)}")
                     price = price[pd.to_datetime(start_date_range):pd.to_datetime(end_date_range)]

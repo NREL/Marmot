@@ -3,6 +3,8 @@
 Created on Mon Dec 9 10:34:48 2019
 Updated July 26th 16:20:00 2021
 
+This module plots figures which show the amount of thermal capacity 
+available but not commited (i.e in reserve)
 
 @author: Daniel Levie and Marty Schwarz
 """
@@ -33,7 +35,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
 
     def thermal_cap_reserves(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone=None, start_date_range=None, 
+                             end=None, timezone="", start_date_range=None, 
                              end_date_range=None):
         """ 
         Plots the total thermal generation capacity that is not commited, 
@@ -114,7 +116,7 @@ class MPlot(object):
                     outputs[zone_input] = out
                     continue
                    
-                if prop == 'Date Range':
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     thermal_reserve = thermal_reserve[start_date_range : end_date_range]

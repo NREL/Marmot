@@ -5,7 +5,7 @@ Created on Mon Dec  9 13:20:56 2019
 This module creates bar plot of the total volume of generator starts in MW,GW,etc.
 
 
-@author: dlevie
+@author: Daniel Levie
 """
 
 import pandas as pd
@@ -33,7 +33,7 @@ class MPlot(object):
         self.mplot_data_dict = {}
     
     def capacity_started(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
        
         outputs = {}
         
@@ -79,7 +79,7 @@ class MPlot(object):
                 Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
                 
-                if prop == 'Date Range':
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
@@ -147,23 +147,20 @@ class MPlot(object):
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
             cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
-            
-            cap_started_all_scenarios, angle = mfunc.check_label_angle(cap_started_all_scenarios, True)
-            
+                        
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=angle,
+            cap_started_all_scenarios.T.plot.bar(stacked = False,
                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
-            if angle > 0:
-                ax.set_xticklabels(cap_started_all_scenarios.columns, ha="right")
-                tick_length = 8
-            else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+            
+            tick_labels = cap_started_all_scenarios.columns
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
@@ -175,7 +172,7 @@ class MPlot(object):
 
 
     def count_ramps(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone=None, start_date_range=None, end_date_range=None):
+                  timezone="", start_date_range=None, end_date_range=None):
         
         outputs = {}
         
@@ -219,7 +216,7 @@ class MPlot(object):
                 # Min = pd.read_hdf(os.path.join(Marmot_Solutions_folder, scenario,"Processed_HDF5_folder", scenario + "_formatted.h5"),"generator_Hours_at_Minimum")
                 # Min = Min.xs(zone_input, level = AGG_BY)
 
-                if prop == 'Date Range':
+                if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     Gen = Gen[start_date_range : end_date_range]
@@ -262,24 +259,21 @@ class MPlot(object):
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
-            
-            #TODO: use mfunc functions
-            cap_started_all_scenarios, angle = mfunc.check_label_angle(cap_started_all_scenarios, True)
-            
+                        
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
-            cap_started_all_scenarios.T.plot.bar(stacked = False, rot=angle,
+            cap_started_all_scenarios.T.plot.bar(stacked = False,
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
-            if angle > 0:
-                ax.set_xticklabels(cap_started_all_scenarios.columns, ha="right")
-                tick_length = 8
-            else:
-                tick_length = 5
-            ax.tick_params(axis='y', which='major', length=tick_length, width=1)
-            ax.tick_params(axis='x', which='major', length=tick_length, width=1)
+            
+            # Set x-tick labels 
+            tick_labels = cap_started_all_scenarios.columns
+            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)

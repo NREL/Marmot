@@ -1,0 +1,15 @@
+Input,Input_type,Importance,User_defined_value
+PLEXOS_Solutions_folder,folder,required,/Volumes/PLEXOS CEII/Projects/FLECCS/test cases/Solutions/thermal storage
+Marmot_Solutions_folder,folder,required,/Volumes/PLEXOS CEII/Projects/FLECCS/test cases/Solutions/thermal storage
+Scenario_process_list,List,required,"both_aux_50load, no_aux_50load"
+VoLL,int,required,10000
+Region_Mapping.csv_name,string,required(default),
+gen_names.csv_name,string,required(default),gen_names.csv
+emit_names.csv_name,string,required(default),emit_names.csv
+Scenarios,string or List,required,"no aux boiler, 1 aux boiler, both aux boilers"
+Scenario_Diff_plot,List [Max 2],optional,
+AGG_BY,string,required,region
+zone_region_sublist,List,optional,
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,
+Tick_labels,List,optional,
