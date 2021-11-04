@@ -113,7 +113,7 @@ class MarmotPlot(SetupLogger):
     
     def __init__(self, Scenarios: Union[str, list],
                  AGG_BY: str, 
-                 PLEXOS_Solutions_folder: str, 
+                 Model_Solutions_folder: str, 
                  gen_names: Union[str, pd.DataFrame],
                  Marmot_plot_select: Union[str, pd.DataFrame], 
                  Marmot_Solutions_folder: str = None,
@@ -130,7 +130,8 @@ class MarmotPlot(SetupLogger):
         Args:
             Scenarios (Union[str, list]): Name of scenarios to process.
             AGG_BY (str): Informs region type to aggregate by when creating plots.
-            PLEXOS_Solutions_folder (str): Folder containing h5plexos results files.
+            Model_Solutions_folder (str): Folder containing model simulation 
+                results subfolders and their files.
             gen_names (Union[str, pd.DataFrame]): Mapping file to rename generator technologies.
             Marmot_plot_select (Union[str, pd.DataFrame]): Selection of plots to plot.
             Marmot_Solutions_folder (str, optional): Folder to save Marmot solution files.
@@ -164,7 +165,7 @@ class MarmotPlot(SetupLogger):
         
         self.AGG_BY = AGG_BY
         self.TECH_SUBSET = TECH_SUBSET
-        self.PLEXOS_Solutions_folder = PLEXOS_Solutions_folder
+        self.Model_Solutions_folder = Model_Solutions_folder
         
         if isinstance(gen_names, str):
             try:
@@ -188,7 +189,7 @@ class MarmotPlot(SetupLogger):
         self.Marmot_Solutions_folder = Marmot_Solutions_folder
         
         if self.Marmot_Solutions_folder is None:
-            self.Marmot_Solutions_folder = self.PLEXOS_Solutions_folder
+            self.Marmot_Solutions_folder = self.Model_Solutions_folder
             
         self.mapping_folder = mapping_folder
         
@@ -256,7 +257,7 @@ class MarmotPlot(SetupLogger):
         if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
             self.logger.info(f"Only plotting {self.AGG_BY}: {self.zone_region_sublist}")
 
-        #metadata_HDF5_folder_in = os.path.join(self.PLEXOS_Solutions_folder, self.Scenarios[0])
+        #metadata_HDF5_folder_in = os.path.join(self.Model_Solutions_folder, self.Scenarios[0])
         metadata_HDF5_folder_in = os.path.join(self.Marmot_Solutions_folder,'Processed_HDF5_folder')
         
         figure_format = mconfig.parser("figure_file_format")
@@ -618,7 +619,7 @@ def main():
     Scenarios = pd.Series(Marmot_user_defined_inputs.loc['Scenarios'].squeeze().split(",")).str.strip().tolist()
     
     # These variables (along with Region_Mapping) are used to initialize MetaData
-    PLEXOS_Solutions_folder = Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder'].to_string(index=False).strip()
+    Model_Solutions_folder = Marmot_user_defined_inputs.loc['Model_Solutions_folder'].to_string(index=False).strip()
     
     # For plots using the difference of the values between two scenarios.
     # Max two entries, the second scenario is subtracted from the first.
@@ -654,7 +655,7 @@ def main():
     ticklabels = pd.Series(str(Marmot_user_defined_inputs.loc['Tick_labels'].squeeze()).split(",")).str.strip().tolist()
     if ticklabels == ['nan']: ticklabels = [""]
     
-    initiate = MarmotPlot(Scenarios, AGG_BY, PLEXOS_Solutions_folder, gen_names, Marmot_plot_select,
+    initiate = MarmotPlot(Scenarios, AGG_BY, Model_Solutions_folder, gen_names, Marmot_plot_select,
                           Marmot_Solutions_folder=Marmot_Solutions_folder,
                           mapping_folder=Mapping_folder,
                           Scenario_Diff=Scenario_Diff,

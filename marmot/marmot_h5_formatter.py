@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """Main formatting source code to format modelling results for plotting.
 
-This code was written to process PLEXOS HDF5 outputs to get them ready for plotting.
+This code was orginally written to process PLEXOS HDF5 outputs to get them ready for plotting,
+but has since been expanded to allow class additions to process results from any energy 
+simulation model. 
 Once the data is processed it is outputted as an intermediary HDF5 file format so that
 it can be read into the marmot_plot_main.py file
-
 
 @author: Daniel Levie
 """
@@ -159,7 +160,7 @@ class Process():
 
         if not self.emit_names.empty:
             self.emit_names_dict = (self.emit_names[['Original', 'New']]
-                                       .set_index("Original").to_dict()["New"])
+                                        .set_index("Original").to_dict()["New"])
 
     def get_input_files(self) -> list:
         """Gets a list of input files within the scenario folders
@@ -182,11 +183,11 @@ class Process():
         pass
 
     def get_processed_data(self, prop_class: str, property: str, 
-                  timescale: str, model_filename: str) -> pd.DataFrame:
+                           timescale: str, model_filename: str) -> pd.DataFrame:
         pass
 
     def report_prop_error(self, property: str, 
-                           prop_class: str) -> pd.DataFrame:
+                          prop_class: str) -> pd.DataFrame:
         """Outputs a warning message when the get_processed_data method
         cannot find the specified property in the simulation model solution files.
 
@@ -315,12 +316,14 @@ class ProcessPLEXOS(Process):
         db = self.hdf5_collection.get(model_filename)
         try:
             if "_" in plexos_class:
-                df = db.query_relation_property(plexos_class, plexos_prop, 
+                df = db.query_relation_property(plexos_class, 
+                                                plexos_prop, 
                                                 timescale=timescale,
                                                 phase=self.plexos_block)
                 object_class = plexos_class
             else:
-                df = db.query_object_property(plexos_class, plexos_prop, 
+                df = db.query_object_property(plexos_class, 
+                                              plexos_prop, 
                                               timescale=timescale,
                                               phase=self.plexos_block)
                 if ((0,6,0) <= db.version and db.version < (0,7,0)):
@@ -403,52 +406,65 @@ class ProcessPLEXOS(Process):
                         level=['category', 'name'], 
                         inplace=True)
 
-        if self.metadata.region_generator_category(model_filename).empty is False:
-            region_gen_idx = pd.CategoricalIndex(self.metadata
-                                                     .region_generator_category(model_filename)
-                                                     .index.get_level_values(0))
-            region_gen_idx = region_gen_idx.repeat(len(df.index
-                                                         .get_level_values('timestamp')
-                                                         .unique()))
+        region_gen_cat_meta = self.metadata.region_generator_category(model_filename)
+        zone_gen_cat_meta = self.metadata.zone_generator_category(model_filename)
+        timeseries_len = len(df.index.get_level_values('timestamp').unique())
 
-            idx_region = pd.MultiIndex(levels=df.index.levels + [region_gen_idx.categories],
-                                       codes=df.index.codes + [region_gen_idx.codes],
-                                       names=df.index.names + region_gen_idx.names)
+        if region_gen_cat_meta.empty is False:
+            region_gen_idx = pd.CategoricalIndex(region_gen_cat_meta
+                                                 .index.get_level_values(0))
+
+            region_gen_idx = region_gen_idx.repeat(timeseries_len)
+
+            idx_region = pd.MultiIndex(levels=df.index.levels 
+                                       + [region_gen_idx.categories],
+                                       codes=df.index.codes 
+                                       + [region_gen_idx.codes],
+                                       names=df.index.names 
+                                       + region_gen_idx.names)
         else:
             idx_region = df.index
 
-        if self.metadata.zone_generator_category(model_filename).empty is False:
-            zone_gen_idx = pd.CategoricalIndex(self.metadata.zone_generator_category(model_filename)
-                                                   .index.get_level_values(0))
-            zone_gen_idx = zone_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+        if zone_gen_cat_meta.empty is False:
+            zone_gen_idx = pd.CategoricalIndex(zone_gen_cat_meta
+                                               .index.get_level_values(0))
 
-            idx_zone = pd.MultiIndex(levels=idx_region.levels + [zone_gen_idx.categories],
-                                     codes=idx_region.codes + [zone_gen_idx.codes],
-                                     names=idx_region.names + zone_gen_idx.names)
+            zone_gen_idx = zone_gen_idx.repeat(timeseries_len)
+
+            idx_zone = pd.MultiIndex(levels=idx_region.levels 
+                                     + [zone_gen_idx.categories],
+                                     codes=idx_region.codes 
+                                     + [zone_gen_idx.codes],
+                                     names=idx_region.names 
+                                     + zone_gen_idx.names)
         else:
             idx_zone = idx_region
 
         if not self.Region_Mapping.empty:
-            region_gen_mapping_idx = (pd.MultiIndex
-                                        .from_frame(self.metadata
-                                                       .region_generator_category(model_filename)
-                                                       .merge(self.Region_Mapping,
-                                                                    how="left",
-                                                                    on='region')
-                                                                  .sort_values(by=['tech', 'gen_name'])
-                                                                  .drop(['region', 'tech', 'gen_name'], 
-                                                                        axis=1)))
-            region_gen_mapping_idx = region_gen_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+            region_gen_mapping_idx = pd.MultiIndex.from_frame(region_gen_cat_meta
+                                                  .merge(self.Region_Mapping,
+                                                         how="left",
+                                                         on='region')
+                                                  .sort_values(by=['tech', 'gen_name'])
+                                                  .drop(['region', 'tech', 'gen_name'], 
+                                                        axis=1))
 
-            idx_map = pd.MultiIndex(levels=idx_zone.levels + region_gen_mapping_idx.levels,
-                                    codes=idx_zone.codes + region_gen_mapping_idx.codes,
-                                    names=idx_zone.names + region_gen_mapping_idx.names)
+            region_gen_mapping_idx = region_gen_mapping_idx.repeat(timeseries_len)
+
+            idx_map = pd.MultiIndex(levels=idx_zone.levels 
+                                    + region_gen_mapping_idx.levels,
+                                    codes=idx_zone.codes 
+                                    + region_gen_mapping_idx.codes,
+                                    names=idx_zone.names 
+                                    + region_gen_mapping_idx.names)
         else:
             idx_map = idx_zone
 
         df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        # Gets names of all columns in df and places in list
+        df_col = list(df.index.names)
+        # move timestamp to start of df
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
 
@@ -467,24 +483,32 @@ class ProcessPLEXOS(Process):
         """
         df = df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
+
+        timeseries_len = len(df.index.get_level_values('timestamp').unique())
+
         # checks if Region_Mapping contains data to merge, skips if empty
         if not self.Region_Mapping.empty:  
-            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions(model_filename)
-                                                   .merge(self.Region_Mapping,
-                                                          how="left",
-                                                          on='region')
-                                                   .drop(['region', 'category'], axis=1)
-                                                   )
-            mapping_idx = mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
+            mapping_idx = pd.MultiIndex.from_frame(self.metadata
+                                       .regions(model_filename)
+                                       .merge(self.Region_Mapping,
+                                              how="left",
+                                              on='region')
+                                       .drop(['region', 'category'], axis=1))
 
-            idx = pd.MultiIndex(levels=df.index.levels + mapping_idx.levels,
-                                codes=df.index.codes + mapping_idx.codes,
-                                names=df.index.names + mapping_idx.names)
+            mapping_idx = mapping_idx.repeat(timeseries_len)
+
+            idx = pd.MultiIndex(levels=df.index.levels 
+                                + mapping_idx.levels,
+                                codes=df.index.codes 
+                                + mapping_idx.codes,
+                                names=df.index.names 
+                                + mapping_idx.names)
         else:
             idx = df.index
+
         df = pd.DataFrame(data=df.values.reshape(-1), index=idx)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # Move timestamp to start of df
+        df_col = list(df.index.names)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -503,8 +527,8 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property", "category"])
         df.index.rename('zone', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)  #
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -523,8 +547,8 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property", "category"])
         df.index.rename('line_name', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)  
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) 
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -544,8 +568,8 @@ class ProcessPLEXOS(Process):
         df.index.rename(['interface_name', 'interface_category'], 
                             level=['name', 'category'], inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)  
+        df_col.insert(0, df_col.pop(df_col.index("timestamp"))) 
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -562,17 +586,19 @@ class ProcessPLEXOS(Process):
             pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = df.droplevel(level=["band", "property"])
-        df.index.rename(['parent', 'Type'], level=['name', 'category'], inplace=True)
+        df.index.rename(['parent', 'Type'], level=['name', 'category'], 
+                        inplace=True)
         df = df.reset_index()  # unzip the levels in index
         if self.metadata.reserves_regions(model_filename).empty is False:
             # Merges in regions where reserves are located
             df = df.merge(self.metadata.reserves_regions(model_filename), 
-                            how='left', on='parent')  
+                            how='left', on='parent')
+
         if self.metadata.reserves_zones(model_filename).empty is False:
             # Merges in zones where reserves are located
             df = df.merge(self.metadata.reserves_zones(model_filename), 
                             how='left', on='parent')  
-        df_col = list(df.columns)  # Gets names of all columns in df and places in list
+        df_col = list(df.columns)  
         df_col.remove(0)
         # move timestamp to start of df
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  
@@ -616,9 +642,9 @@ class ProcessPLEXOS(Process):
             df = df.merge(self.metadata.reserves_zones(model_filename), 
                             how='left', on=['parent', 'zone'])  
 
-        df_col = list(df.columns)  # Gets names of all columns in df and places in list
+        df_col = list(df.columns) 
         df_col.remove(0)
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df.set_index(df_col, inplace=True)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -637,8 +663,8 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property", "category"])
         df.index.rename('fuel_type', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -656,10 +682,10 @@ class ProcessPLEXOS(Process):
         """
         df = df.droplevel(level=["band", "property"])
         df.index.rename(['constraint_category', 'constraint'], 
-                            level=['category', 'name'], inplace=True)
+                        level=['category', 'name'], inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -678,8 +704,8 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property"])
         df.index.rename('emission_type', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -706,18 +732,28 @@ class ProcessPLEXOS(Process):
         # merge in region and zone information
         if self.metadata.region_generator_category(model_filename).empty is False:
             # merge in region information
-            df = df.merge(self.metadata.region_generator_category(model_filename).reset_index(), 
-                                how='left', on=['gen_name', 'tech'])
+            df = df.merge(self.metadata
+                              .region_generator_category(model_filename)
+                              .reset_index(), 
+                          how='left', 
+                          on=['gen_name', 'tech'])
+
         if self.metadata.zone_generator_category(model_filename).empty is False:
             # Merges in zones where reserves are located
-            df = df.merge(self.metadata.zone_generator_category(model_filename).reset_index(), 
-                                how='left', on=['gen_name', 'tech'])  
+            df = df.merge(self.metadata
+                              .zone_generator_category(model_filename)
+                              .reset_index(), 
+                          how='left',
+                          on=['gen_name', 'tech'])
+
         if not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
 
         if not self.emit_names.empty:
             # reclassify emissions as specified by user in mapping
-            df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: self.emit_names_dict.get(x, x)))
+            df['pollutant'] = pd.Categorical(df['pollutant'].map(lambda x: 
+                                                                 self.emit_names_dict
+                                                                     .get(x, x)))
 
         # remove categoricals (otherwise h5 save will fail)
         df = df.astype({'tech': 'object', 'pollutant': 'object'})
@@ -725,13 +761,17 @@ class ProcessPLEXOS(Process):
         # Checks if all emissions categories have been identified and matched. 
         # If not, lists categories that need a match
         if not self.emit_names.empty:
-            if self.emit_names_dict != {} and (set(df['pollutant'].unique()).issubset(self.emit_names["New"].unique())) is False:
-                missing_emit_cat = list((set(df['pollutant'].unique())) - (set(self.emit_names["New"].unique())))
-                self.logger.warning(f"The following emission objects do not have a correct category mapping: {missing_emit_cat}\n")
+            if self.emit_names_dict != {} and \
+            (set(df['pollutant'].unique())
+                                .issubset(self.emit_names["New"].unique())) is False:
+                missing_emit_cat = list((set(df['pollutant'].unique())) 
+                                        - (set(self.emit_names["New"].unique())))
+                self.logger.warning("The following emission objects do not have a "
+                                    f"correct category mapping: {missing_emit_cat}\n")
 
-        df_col = list(df.columns)  # Gets names of all columns in df and places in list
+        df_col = list(df.columns)
         df_col.remove(0)
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df.set_index(df_col, inplace=True)
         # downcast values to save on memory
         df[0] = pd.to_numeric(df[0].values, downcast='float')
@@ -757,7 +797,7 @@ class ProcessPLEXOS(Process):
         if self.metadata.region_generators(model_filename).empty is False:
             # Merges in regions where generators are located
             df = df.merge(self.metadata.region_generators(model_filename),
-                            how='left', on='gen_name')  
+                          how='left', on='gen_name')  
         if self.metadata.zone_generators(model_filename).empty is False:
             # Merges in zones where generators are located
             df = df.merge(self.metadata.zone_generators(model_filename), 
@@ -767,9 +807,9 @@ class ProcessPLEXOS(Process):
             # Merges in all Region Mappings
             df = df.merge(self.Region_Mapping, how='left', on='region')  
         df.rename(columns={'name': 'storage_resource'}, inplace=True)
-        df_col = list(df.columns)  # Gets names of all columns in df and places in list
-        df_col.remove(0)  # Removes 0, the data column from the list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.columns)
+        df_col.remove(0)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df.set_index(df_col, inplace=True)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -787,8 +827,8 @@ class ProcessPLEXOS(Process):
         """
         df = df.droplevel(level=["band", "property"])
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -807,40 +847,62 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property", "category"])
         df.index.rename('node', level='name', inplace=True)
         df.sort_index(level=['node'], inplace=True)
-        if self.metadata.node_region(model_filename).empty is False:
-            node_region_idx = pd.CategoricalIndex(self.metadata.node_region(model_filename).index.get_level_values(0))
-            node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
-            idx_region = pd.MultiIndex(levels=df.index.levels + [node_region_idx.categories],
-                                       codes=df.index.codes + [node_region_idx.codes],
-                                       names=df.index.names + node_region_idx.names)
+
+        node_region_meta = self.metadata.node_region(model_filename)
+        node_zone_meta = self.metadata.node_zone(model_filename)
+        timeseries_len = len(df.index.get_level_values('timestamp').unique())
+
+        if node_region_meta.empty is False:
+            node_region_idx = pd.CategoricalIndex(node_region_meta
+                                                  .index.get_level_values(0))
+
+            node_region_idx = node_region_idx.repeat(timeseries_len)
+
+            idx_region = pd.MultiIndex(levels=df.index.levels
+                                       + [node_region_idx.categories],
+                                       codes=df.index.codes 
+                                       + [node_region_idx.codes],
+                                       names=df.index.names 
+                                       + node_region_idx.names)
         else:
             idx_region = df.index
-        if self.metadata.node_zone(model_filename).empty is False:
-            node_zone_idx = pd.CategoricalIndex(self.metadata.node_zone(model_filename).index.get_level_values(0))
-            node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
-            idx_zone = pd.MultiIndex(levels=idx_region.levels + [node_zone_idx.categories],
-                                     codes=idx_region.codes + [node_zone_idx.codes],
-                                     names=idx_region.names + node_zone_idx.names)
+
+        if node_zone_meta.empty is False:
+            node_zone_idx = pd.CategoricalIndex(node_zone_meta
+                                                .index.get_level_values(0))
+
+            node_zone_idx = node_zone_idx.repeat(timeseries_len)
+
+            idx_zone = pd.MultiIndex(levels=idx_region.levels 
+                                     + [node_zone_idx.categories],
+                                     codes=idx_region.codes 
+                                     + [node_zone_idx.codes],
+                                     names=idx_region.names 
+                                     + node_zone_idx.names)
         else:
             idx_zone = idx_region
-        if not self.Region_Mapping.empty:
-            region_mapping_idx = pd.MultiIndex.from_frame(self.metadata.node_region(model_filename)
-                                                          .merge(self.Region_Mapping,
-                                                                 how="left",
-                                                                 on='region')
-                                                          .drop(['region', 'node'], axis=1)
-                                                          )
-            region_mapping_idx = region_mapping_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
-            idx_map = pd.MultiIndex(levels=idx_zone.levels + region_mapping_idx.levels,
-                                    codes=idx_zone.codes + region_mapping_idx.codes,
-                                    names=idx_zone.names + region_mapping_idx.names)
+        if not self.Region_Mapping.empty:
+            region_mapping_idx = pd.MultiIndex.from_frame(node_region_meta
+                                              .merge(self.Region_Mapping,
+                                                     how="left",
+                                                     on='region')
+                                              .drop(['region', 'node'], axis=1))
+                                
+            region_mapping_idx = region_mapping_idx.repeat(timeseries_len)
+
+            idx_map = pd.MultiIndex(levels=idx_zone.levels 
+                                    + region_mapping_idx.levels,
+                                    codes=idx_zone.codes 
+                                    + region_mapping_idx.codes,
+                                    names=idx_zone.names 
+                                    + region_mapping_idx.names)
         else:
             idx_map = idx_zone
 
         df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -859,8 +921,8 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property"])
         df.index.rename('abatement_name', level='name', inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
-        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df_col = list(df.index.names)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
@@ -869,14 +931,14 @@ class ProcessPLEXOS(Process):
 class MarmotFormat(SetupLogger):
     """Main module class to be instantiated to run the formatter.
 
-    MarmotFormat reads in PLEXOS hdf5 files created with the h5plexos library
-    and processes the output results to ready them for plotting.
+    MarmotFormat handles the passing on information to the various
+    Process classes and handles the saving of formatted results.
     Once the outputs have been processed, they are saved to an intermediary hdf5 file
     which can then be read into the Marmot plotting code
     """
 
     def __init__(self, Scenario_name: str, 
-                 PLEXOS_Solutions_folder: str, 
+                 Model_Solutions_folder: str, 
                  Plexos_Properties: Union[str, pd.DataFrame],
                  Marmot_Solutions_folder: str = None,
                  mapping_folder: str = 'mapping_folder',
@@ -887,39 +949,46 @@ class MarmotFormat(SetupLogger):
         """
         Args:
             Scenario_name (str): Name of scenario to process.
-            PLEXOS_Solutions_folder (str): Folder containing h5plexos results files.
-            Plexos_Properties (Union[str, pd.DataFrame]): PLEXOS properties to process, 
-                must follow format seen in Marmot directory.
-            Marmot_Solutions_folder (str, optional): Folder to save Marmot solution files.
+            Model_Solutions_folder (str): Folder containing model simulation 
+                results subfolders and their files.
+            Plexos_Properties (Union[str, pd.DataFrame]): PLEXOS properties 
+                to process, must follow format seen in Marmot directory.
+            Marmot_Solutions_folder (str, optional): Folder to save Marmot 
+                solution files.
                 Defaults to None.
-            mapping_folder (str, optional): The location of the Marmot mapping folder.
+            mapping_folder (str, optional): The location of the Marmot 
+                mapping folder.
                 Defaults to 'mapping_folder'.
-            Region_Mapping (Union[str, pd.DataFrame], optional): Mapping file to map custom 
-                regions/zones to create custom aggregations.
+            Region_Mapping (Union[str, pd.DataFrame], optional): Mapping file 
+                to map custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
-            emit_names (Union[str, pd.DataFrame], optional): Mapping file to rename 
-                emissions types. Defaults to pd.DataFrame().
-            VoLL (int, optional): Value of lost load, used to calculate cost of 
-                unserved energy. Defaults to 10000.
+            emit_names (Union[str, pd.DataFrame], optional): Mapping file 
+                to rename emissions types. 
+                Defaults to pd.DataFrame().
+            VoLL (int, optional): Value of lost load, used to calculate 
+                cost of unserved energy. 
+                Defaults to 10000.
         """
         super().__init__(**kwargs) # Instantiation of SetupLogger
 
         self.Scenario_name = Scenario_name
-        self.PLEXOS_Solutions_folder = PLEXOS_Solutions_folder
+        self.Model_Solutions_folder = Model_Solutions_folder
         self.Marmot_Solutions_folder = Marmot_Solutions_folder
         self.mapping_folder = mapping_folder
         self.VoLL = VoLL
 
         if self.Marmot_Solutions_folder is None:
-            self.Marmot_Solutions_folder = self.PLEXOS_Solutions_folder
+            self.Marmot_Solutions_folder = self.Model_Solutions_folder
 
         if isinstance(Plexos_Properties, str):
             try:
                 self.Plexos_Properties = pd.read_csv(Plexos_Properties)
             except FileNotFoundError:
-                self.logger.warning("Could not find specified Plexos_Properties file; "
-                        "check file name. This is required to run Marmot, system will now exit")
+                self.logger.warning("Could not find specified "
+                                    "Plexos_Properties file; check file name. "
+                                    "This is required to run Marmot, "
+                                    "system will now exit")
                 sys.exit()
         elif isinstance(Plexos_Properties, pd.DataFrame):
             self.Plexos_Properties = Plexos_Properties
@@ -930,8 +999,9 @@ class MarmotFormat(SetupLogger):
                 if not self.Region_Mapping.empty:
                     self.Region_Mapping = self.Region_Mapping.astype(str)
             except FileNotFoundError:
-                self.logger.warning("Could not find specified Region Mapping file; "
-                        "check file name\n")
+                self.logger.warning("Could not find specified "
+                                    "Region Mapping file; "
+                                    "check file name\n")
                 self.Region_Mapping = pd.DataFrame()
         elif isinstance(Region_Mapping, pd.DataFrame):
             self.Region_Mapping = Region_Mapping
@@ -947,11 +1017,13 @@ class MarmotFormat(SetupLogger):
             try:
                 self.emit_names = pd.read_csv(emit_names)
                 if not self.emit_names.empty:
-                    self.emit_names.rename(columns={self.emit_names.columns[0]: 'Original',
+                    self.emit_names.rename(columns=
+                    {self.emit_names.columns[0]: 'Original',
                                                     self.emit_names.columns[1]: 'New'},
                                            inplace=True)
             except FileNotFoundError:
-                self.logger.warning('Could not find specified emissions mapping file; check file name\n')
+                self.logger.warning("Could not find specified emissions "
+                                    "mapping file; check file name\n")
                 self.emit_names = pd.DataFrame()
         elif isinstance(emit_names, pd.DataFrame):
             self.emit_names = emit_names
@@ -969,7 +1041,8 @@ class MarmotFormat(SetupLogger):
         Args:
             df (pd.DataFrame): Dataframe to save 
             file_name (str): name of hdf5 file
-            key (str): formatted property identifier, e.g generator_Generation
+            key (str): formatted property identifier, 
+                e.g generator_Generation
             mode (str, optional): file access mode. 
                 Defaults to "a".
             complevel (int, optional): compression level. 
@@ -987,11 +1060,13 @@ class MarmotFormat(SetupLogger):
         """Main method to call to begin formatting simulation model results
 
         Args:
-            sim_model (str, optional): Name of simulation model to process data for.
+            sim_model (str, optional): Name of simulation model to 
+                process data for.
                 Defaults to 'PLEXOS'.
             plexos_block (str, optional): PLEXOS results type. 
                 Defaults to 'ST'.
-            append_block_name (bool, optional): Append block type to scenario name. 
+            append_block_name (bool, optional): Append block type to 
+                scenario name. 
                 Defaults to False.
         """
         if append_block_name:
@@ -1002,7 +1077,7 @@ class MarmotFormat(SetupLogger):
         self.logger.info(f"#### Processing {scen_name} PLEXOS Results ####")
 
         hdf5_output_name = f"{scen_name}_formatted.h5"
-        input_folder = os.path.join(self.PLEXOS_Solutions_folder, 
+        input_folder = os.path.join(self.Model_Solutions_folder, 
                                       str(self.Scenario_name))
         output_folder = os.path.join(self.Marmot_Solutions_folder, 
                                       'Processed_HDF5_folder')
@@ -1105,8 +1180,9 @@ class MarmotFormat(SetupLogger):
                         oldsize = Processed_Data_Out.size
                         # Remove duplicates; keep first entry
                         Processed_Data_Out = (Processed_Data_Out.loc
-                                                [~Processed_Data_Out.index
-                                                                    .duplicated(keep='first')])  
+                                              [~Processed_Data_Out
+                                              .index.duplicated(keep='first')])
+
                         if (oldsize - Processed_Data_Out.size) > 0:
                             self.logger.info("Drop duplicates removed "
                                              f"{oldsize-Processed_Data_Out.size} rows")
@@ -1118,8 +1194,9 @@ class MarmotFormat(SetupLogger):
                         try:
                             self.logger.info("Saving data to h5 file...")
                             MarmotFormat._save_to_h5(Processed_Data_Out,
-                                        output_file_path, 
-                                        key=f'{row["group"]}_{row["data_set"]}')
+                                                     output_file_path, 
+                                                     key=(f'{row["group"]}_'
+                                                          f'{row["data_set"]}'))
 
                             self.logger.info("Data saved to h5 file successfully\n")
                             save_attempt=4
@@ -1139,8 +1216,8 @@ class MarmotFormat(SetupLogger):
         # Calculate Extra Outputs
         # ===============================================================================
         if "generator_Curtailment" not in \
-            h5py.File(output_file_path, 'r') \
-            or not mconfig.parser('skip_existing_properties'):
+            h5py.File(output_file_path, 'r') or not \
+            mconfig.parser('skip_existing_properties'):
             try:
                 self.logger.info("Processing generator Curtailment")
                 try:
@@ -1179,8 +1256,8 @@ class MarmotFormat(SetupLogger):
                                     "processing skipped\n")
 
         if "region_Cost_Unserved_Energy" not in \
-            h5py.File(output_file_path, 'r') \
-            or not mconfig.parser('skip_existing_properties'):
+            h5py.File(output_file_path, 'r') or not \
+            mconfig.parser('skip_existing_properties'):
             try:
                 self.logger.info("Calculating Cost Unserved Energy: Regions")
                 Cost_Unserved_Energy = pd.read_hdf(output_file_path,
@@ -1197,8 +1274,8 @@ class MarmotFormat(SetupLogger):
                 pass
 
         if "zone_Cost_Unserved_Energy" not in \
-            h5py.File(output_file_path, 'r') \
-            or not mconfig.parser('skip_existing_properties'):
+            h5py.File(output_file_path, 'r') or not \
+            mconfig.parser('skip_existing_properties'):
             try:
                 self.logger.info("Calculating Cost Unserved Energy: Zones")
                 Cost_Unserved_Energy = pd.read_hdf(output_file_path,
@@ -1234,6 +1311,17 @@ def main():
                                              index_col='Input',
                                              skipinitialspace=True)
 
+    simulation_model = (Marmot_user_defined_inputs.loc['Simulation_model']
+                                                        .to_string(index=False).strip())
+
+    if pd.isna(Marmot_user_defined_inputs.loc['PLEXOS_data_blocks',
+                                              'User_defined_value']):
+        plexos_data_blocks = ['ST']
+    else:
+        plexos_data_blocks = (pd.Series(Marmot_user_defined_inputs.loc['PLEXOS_data_blocks']
+                                                                  .squeeze().split(","))
+                                                                  .str.strip().tolist())
+
     # File which determiens which plexos properties to pull from the h5plexos results and 
     # process, this file is in the repo
     Plexos_Properties = pd.read_csv(mconfig.parser('plexos_properties_file'))
@@ -1243,9 +1331,9 @@ def main():
     Scenario_List = (pd.Series(Marmot_user_defined_inputs.loc['Scenario_process_list']
                                                          .squeeze().split(","))
                                                          .str.strip().tolist())
-    # The folder that contains all PLEXOS h5plexos outputs - the h5 files should 
+    # The folder that contains all the simulation model outputs - the files should 
     # be contained in another folder with the Scenario_name
-    PLEXOS_Solutions_folder = (Marmot_user_defined_inputs.loc['PLEXOS_Solutions_folder']
+    Model_Solutions_folder = (Marmot_user_defined_inputs.loc['Model_Solutions_folder']
                                                          .to_string(index=False).strip())
 
     # Folder to save your processed solutions
@@ -1253,8 +1341,10 @@ def main():
                                               'User_defined_value']):
         Marmot_Solutions_folder = None
     else:
-        Marmot_Solutions_folder = (Marmot_user_defined_inputs.loc['Marmot_Solutions_folder']
-                                                             .to_string(index=False).strip())
+        Marmot_Solutions_folder = (Marmot_user_defined_inputs.loc
+                                                             ['Marmot_Solutions_folder']
+                                                             .to_string(index=False)
+                                                             .strip())
 
     # This folder contains all the csv required for mapping and selecting outputs 
     # to process. Examples of these mapping files are within the Marmot repo, you 
@@ -1285,15 +1375,9 @@ def main():
     # Loop through scenarios in list
     # ===================================================================================
 
-    model = 'PLEXOS'
-    plexos_blocks = ['ST']
-    append_block_name = True
-
-
     for Scenario_name in Scenario_List:
         
-        
-        initiate = MarmotFormat(Scenario_name, PLEXOS_Solutions_folder, 
+        initiate = MarmotFormat(Scenario_name, Model_Solutions_folder, 
                                 Plexos_Properties,
                                 Marmot_Solutions_folder=Marmot_Solutions_folder,
                                 mapping_folder=Mapping_folder,
@@ -1301,12 +1385,12 @@ def main():
                                 emit_names=emit_names,
                                 VoLL=VoLL)
 
-        if model=='PLEXOS':
-            for block in plexos_blocks:
+        if simulation_model=='PLEXOS':
+            for block in plexos_data_blocks:
                 initiate.run_formatter(plexos_block=block, 
-                                       append_block_name=append_block_name)
+                                       append_block_name=mconfig.parser('append_plexos_block_name'))
         else:
-            initiate.run_formatter(sim_model=model)
+            initiate.run_formatter(sim_model=simulation_model)
 
 
 if __name__ == '__main__':
@@ -1324,22 +1408,23 @@ if __name__ == '__main__':
 # test = test[['600003_PR IS31G_20','600005_MNTCE31G_22']]
 # test = test.reset_index()
 
-# test.index.get_level_values('region') = test.index.get_level_values('region').astype("category")
+# test.index.get_level_values('region') = (test.index.get_level_values('region')
+#                                                       .astype("category"))
 
 # test['timestamp'] = test['timestamp'].astype("category")
 
-# test.index = test.index.set_levels(test.index.levels[-1].astype('category'), level=-1)
+# test.index = (test.index.set_levels(test.index.levels[-1].
+#                                           astype('category'), level=-1))
 
 # test.memory_usage(deep=True)
 # test[0] = pd.to_numeric(test[0], downcast='float')
 
 # test.memory_usage(deep=False)
 
-# Stacked_Gen_read = Stacked_Gen_read.reset_index() # unzip the levels in index
+# Stacked_Gen_read = Stacked_Gen_read.reset_index() 
 # Stacked_Gen_read.rename(columns={'name':'zone'}, inplace=True)
-#         Stacked_Gen_read = Stacked_Gen_read.drop(["band", "property", "category"],axis=1)
-    # if int(Stacked_Gen_read.sum(axis=0)) >= 0:
-    #     print("WARNING! Scenario contains Unserved Energy: " + str(int(Stacked_Gen_read.sum(axis=0))) + "MW")
+#         Stacked_Gen_read = Stacked_Gen_read.drop(["band", 
+#                                               "property", "category"],axis=1)
 
     #storage = db.storage("Generation")
     #storage = df_process_storage(storage, overlap)
