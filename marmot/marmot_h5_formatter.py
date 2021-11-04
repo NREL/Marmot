@@ -1154,7 +1154,7 @@ def main():
                                             skipinitialspace=True)
 
     # File which determiens which plexos properties to pull from the h5plexos results and process, this file is in the repo
-    Plexos_Properties = pd.read_csv(mconfig.parser('plexos_properties_file'))
+    Plexos_Properties = pd.read_csv('plexos_properties.csv') #mconfig.parser('plexos_properties_file')
     
     # Name of the Scenario(s) being run, must have the same name(s) as the folder holding the runs HDF5 file
     Scenario_List = pd.Series(Marmot_user_defined_inputs.loc['Scenario_process_list'].squeeze().split(",")).str.strip().tolist()

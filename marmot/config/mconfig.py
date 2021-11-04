@@ -110,9 +110,11 @@ def parser(top_level, second_level=None):
         returns the requested level or value from the config file.
 
     """
+    print(configfile_path)
+    print('yay')
     with open(configfile_path, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile.read())
-    
+    print(cfg)
     if not second_level:
         value = cfg[top_level]
     else:

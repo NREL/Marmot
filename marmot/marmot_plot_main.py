@@ -507,7 +507,9 @@ class MarmotPlot(SetupLogger):
                 pass
             
             # Import plot module from plottingmodules package
+            
             plot_module = importlib.import_module('marmot.plottingmodules.' + module)
+            print(f'LL some overwrites for {plot_module}, may be issue in future')
             # reload
             # importlib.reload(plot_module)
             # Instantiate the module class
@@ -616,7 +618,8 @@ def main():
     Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), usecols=['Input','User_defined_value'],
                                          index_col='Input', skipinitialspace=True)
 
-    Marmot_plot_select = pd.read_csv(mconfig.parser("plot_select_file"))
+    Marmot_plot_select = pd.read_csv("Marmot_plot_select.csv")
+    # Marmot_plot_select = pd.read_csv(mconfig.parser("plot_select_file"))
     
     # Folder to save your processed solutions
     if pd.isna(Marmot_user_defined_inputs.loc['Marmot_Solutions_folder','User_defined_value']):

@@ -1287,6 +1287,56 @@ class MPlot(object):
         outputs = mfunc.DataSavedInModule()
         return outputs
 
+    def _grab_zone_net_load(self,zone_input, scenario, interconnect_aggby=False):
+
+        fxnaggregator = self.AGG_BY
+        
+        #what is the interconnect for this zone?
+        if interconnect_aggby:
+            Stacked_Gen_A = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
+            Stacked_Gen_A = Stacked_Gen_A.reset_index()
+            fxnaggregator = 'Interconnection'
+            zone_input = Stacked_Gen_A[Stacked_Gen_A[self.AGG_BY]==zone_input][fxnaggregator].unique()[0]
+
+        try:
+            Stacked_Gen = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
+            if self.shift_leapday == True:
+                Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
+            Stacked_Gen = Stacked_Gen.xs(zone_input,level=fxnaggregator)
+        except KeyError:
+            self.logger.warning(f'No generation in {zone_input}')
+            out = mfunc.MissingZoneData()
+            return out
+
+        Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
+
+        curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+        #print(self.mplot_data_dict[f"generator_Curtailment"].get(scenario).copy())
+        # Insert Curtailmnet into gen stack if it exhists in database
+        if self.mplot_data_dict[f"generator_{curtailment_name}"]:
+            Stacked_Curt = self.mplot_data_dict[f"generator_{curtailment_name}"].get(scenario).copy()
+            if self.shift_leapday == True:
+                Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
+            if zone_input in Stacked_Curt.index.get_level_values(fxnaggregator).unique():
+                Stacked_Curt = Stacked_Curt.xs(zone_input,level=fxnaggregator)
+                Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                Stacked_Curt = Stacked_Curt.sum(axis=1)
+                Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
+                Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
+                # Calculates Net Load by removing variable gen + curtailment
+                vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+            else:
+                vre_gen_cat = self.vre_gen_cat
+                
+        else:
+            vre_gen_cat = self.vre_gen_cat
+        # vre_gen_cat = self.vre_gen_cat
+        vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
+        
+        Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
+        Net_Load = Net_Load.sum(axis=1)
+        return (Net_Load,zone_input)
+
     def line_scatter(self, figure_name=None, prop=None, start=None, end=None,
                   timezone=None, start_date_range=None, end_date_range=None):
         
@@ -1348,7 +1398,35 @@ class MPlot(object):
             begin_onpeak = 8
             end_onpeak = 12
             tmp_df['cat'] = tmp_df['hour'].apply(lambda x: f'on-peak (HB {begin_onpeak}-{end_onpeak})' if begin_onpeak<x<=end_onpeak else 'off-peak') # make categories as desired        
-            
+        
+        #here we can record the system-wide net load by scenario
+
+        # for scenario in self.Scenarios:
+        #     try:
+        #         all_gen = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
+        #         if self.shift_leapday == True:
+        #             all_gen = mfunc.shift_leapday(all_gen,self.Marmot_Solutions_folder)
+        #         # Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
+        #     except KeyError:
+        #         self.logger.warning(f'No generation... probably some problem')
+        #         out = mfunc.MissingZoneData()
+        #         return out
+        #     for z in all_gen.index.get_level_values(self.AGG_BY).unique():
+        #         print(z)
+        #         print(self._grab_zone_net_load(z,scenario))
+        #         print(type(self._grab_zone_net_load(z,scenario)))
+            #try to concat? Use scenario pointers?
+        
+        #split the props to see if we want net load
+        use_net_load = False
+        interconnect_net_load = False
+        if prop[0]=="Load" and len(prop)>1:
+            for n in range(1,len(prop)):
+                if prop[n] == 'Net' or prop[n]=='net':
+                    use_net_load=True
+                elif prop[n] == "all" or prop[n]=='All':
+                    interconnect_net_load=True
+
 
         #here we can grab interchange
         for zone_input in self.Zones:
@@ -1356,6 +1434,8 @@ class MPlot(object):
             
             data_table_chunks = []
             for scenario in self.Scenarios:
+                if use_net_load:
+                    net_load,label_addenda = self._grab_zone_net_load(zone_input,scenario,interconnect_aggby=interconnect_net_load)
 
                 rr_int = self.mplot_data_dict[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
                 if self.shift_leapday == True:
@@ -1420,13 +1500,36 @@ class MPlot(object):
                 else:
                     Load = Load.xs(zone_input,level=self.AGG_BY)
                 Load = Load.groupby(["timestamp"]).sum()
-                data_table['sort_attribute'] = Load.squeeze().tolist()
+
+                #do a comparison that could allow switching to net load?
+                # print('my comparison!!!')
+                # print(Load)
+                # print(net_load)
+                # print(type(net_load))
+                # print(net_load.tolist())
+                # print(Load.squeeze())
+
+                if use_net_load:
+                    data_table['sort_attribute'] = net_load.tolist()
+                else:
+                    data_table['sort_attribute'] = Load.squeeze().tolist()
+                    label_addenda = zone_input
+
                 data_table_chunks.append(data_table)
 
                 # sorted_data_table = data_table.sort_values(['sort_attribute'],ascending = False)
                 # data_avgs.append(sorted_data_table.mean(axis=0))
                 # data_table_chunks.append(sorted_data_table.iloc[:int(len(sorted_data_table.index)*top_pct),:])
                 # data_table_chunks.append(data_table)
+
+            # can we recategorize?
+            if categorize_hours and use_net_load:
+                tmp_df['net_load'] = net_load.tolist()
+                tmp_df['pct_rank'] = tmp_df['net_load'].rank(pct=True)
+                pct_cut = .98
+                tmp_df['cat'] = [f'RA hour (top {int(100*(1-pct_cut))}% of {label_addenda} net load hours)' if a>pct_cut else 'non-RA hour' for a in tmp_df['pct_rank']]
+                # tmp_df['hour'].apply(lambda x: f'on-peak (HB {begin_onpeak}-{end_onpeak})' if begin_onpeak<x<=end_onpeak else 'off-peak') # make categories as desired        
+                
 
             zone_interchange_timeseries = pd.concat(data_table_chunks, copy=False, axis=0)
             #create and bank unit conversions
@@ -1458,7 +1561,17 @@ class MPlot(object):
                     axs[n].scatter(zone_interchange_timeseries_wcategories[column],zone_interchange_timeseries_wcategories['sort_attribute'],
                                    c=zone_interchange_timeseries_wcategories['cat'].map(color_dict),s=2,alpha=.05, rasterized=True)
                     axs[n].set_xlabel(f"{zone_input} to {column} Flow ({line_unitconversion['units']})", fontsize=12)
-                    axs[n].set_ylabel(f"{lookup_label} ({attr_unitconversion['units']})", fontsize=12)
+                    if use_net_load:
+                        split_label = lookup_label.split("_")
+                        split_label.insert(1,'net')
+                        lookup_label = "_".join(split_label)
+
+                    axs[n].set_ylabel(f"{lookup_label} - {label_addenda} - ({attr_unitconversion['units']})", fontsize=12)
+                    d1 = str(tmp_df.at[tmp_df.index[0],'timestamp'])
+                    d2 = str(tmp_df.at[tmp_df.index[len(tmp_df.index)-1],'timestamp'])
+                    date1 = d1.split(" ")[0]
+                    date2 = d2.split(" ")[0]
+                    axs[n].set_title(f"5min intervals for {date1} - {date2} plotted", fontsize=12)
                     #subset before doing polyfit
                     for cat in categories:
                         zone_interchange_timeseries_wcategories_subset = zone_interchange_timeseries_wcategories[zone_interchange_timeseries_wcategories['cat']==cat].copy()
