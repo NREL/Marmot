@@ -8,6 +8,7 @@ import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
+from matplotlib.lines import Line2D
 import numpy as np
 import marmot.plottingmodules.marmot_plot_functions as mfunc
 import marmot.config.mconfig as mconfig
@@ -52,7 +53,8 @@ class MPlot(object):
                           (False,f"generator_{self.curtailment_prop}",scenario_list),
                           (False,"generator_Pump_Load",scenario_list),
                           (True,f"{agg}_Load",scenario_list),
-                          (False,f"{agg}_Unserved_Energy",scenario_list)]
+                          (False,f"{agg}_Unserved_Energy",scenario_list),
+                          (True,"line_Flow",scenario_list)]
             
             # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
             return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
@@ -76,6 +78,9 @@ class MPlot(object):
         if not facet:
             xdimension = 1
             ydimension = 1
+        
+        if prop=='VRE_compare':
+            xdimension=(len(self.vre_gen_cat)-1)
 
         # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
         if xdimension > 1:
@@ -89,7 +94,7 @@ class MPlot(object):
         grid_size = xdimension*ydimension
             
         # Used to calculate any excess axis to delete
-        plot_number = len(all_scenarios)
+        plot_number = len(all_scenarios)*xdimension
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
@@ -106,6 +111,95 @@ class MPlot(object):
             for i, scenario in enumerate(all_scenarios):
                 self.logger.info(f"Scenario = {scenario}")
                 # Pump_Load = pd.Series() # Initiate pump load
+
+                #here we can also decide to grab imports to plot them vs. generation to see if some correlations going on?
+                if prop=='VRE_compare':
+                    
+                    #record which interfaces are in the zone?
+                    if self.AGG_BY=='zone':
+                        zone_lines = self.meta.zone_lines()
+                    else:
+                        zone_lines = self.meta.region_lines()
+                    try:
+                        zone_lines = zone_lines.set_index([self.AGG_BY])
+                    except:
+                        self.logger.info("Column to Aggregate by is missing")
+                        continue
+
+                    zone_lines = zone_lines.xs(zone_input)
+                    zone_lines = zone_lines['line_name'].unique()
+
+                    #Map lines to interfaces
+                    # all_ints = self.meta.interface_lines() #Map lines to interfaces
+                    all_ints = self.meta.region_interregionallines()
+                    all_ints.index = all_ints.line_name
+                    ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
+
+                    #flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
+                    #flow = flow.droplevel('interface_category')
+
+                    # export_limits = self.mplot_data_dict["interface_Export_Limit"].get(scenario).droplevel('timestamp')
+                    # export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+                    # export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
+                    # export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+
+                    # #Drop unnecessary columns.
+                    # export_limits.reset_index(inplace = True)
+                    # export_limits.drop(columns = 'interface_category',inplace = True)
+                    # export_limits.set_index('interface_name',inplace = True)
+
+                    # import_limits = self.mplot_data_dict["interface_Import_Limit"].get(scenario).droplevel('timestamp')
+                    # import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+                    # import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
+                    # import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+                    # reported_ints = import_limits.index.get_level_values('interface_name').unique()
+                    # print(reported_ints)
+
+                    # flow_all = self.mplot_data_dict["interface_Flow"][scenario]
+                    flow_all = self.mplot_data_dict['line_Flow'][scenario].copy()
+                    # self.mplot_data_dict["line_Flow"][scenario].copy()
+                    # self.meta.region_interregionallines()
+                    flow_zone = flow_all[flow_all.index.get_level_values('line_name').isin(ints.index)]
+                    reported_ints = flow_zone.index.get_level_values('line_name').unique()
+                    
+
+                    flow_zone.reset_index(inplace = True)
+                    #flow_zone.drop(columns = 'interface_category',inplace = True)
+                    fz = flow_zone.groupby(['timestamp'],as_index=True).sum()
+                    print(fz) #hopefully close to ready to plot!!!
+                    print('sdf')
+                    #import_limits.set_index('interface_name',inplace = True)
+
+                    # flow = flow_all.xs(inter,level = 'interface_name')
+                    # flow = flow.reset_index()
+                    
+                    # if pd.notna(start_date_range):
+                    #     self.logger.info("Plotting specific date range: \
+                    #     {} to {}".format(str(start_date_range),str(end_date_range)))
+                    #     flow = flow[start_date_range : end_date_range]
+                
+                    # flow = flow[0]
+
+                    # pos_sing = pd.Series(flow.where(flow > 0).sum())
+                    # pos = pos.append(pos_sing)
+                    # neg_sing = pd.Series(flow.where(flow < 0).sum())
+                    # neg = neg.append(neg_sing)
+                    
+                    # if scenario == self.Scenarios[0]:
+                    #     max_val = max(pos.max(),abs(neg.max()))
+                    #     unitconversion = mfunc.capacity_energy_unitconversion(max_val)
+
+                    # both = pd.concat([pos,neg],axis = 1)
+                    # both.columns = ['Total Export','Total Import']
+                    # both = both / unitconversion['divisor']
+                    # both.index = available_inter
+                    # net_flows_all.append(both)
+
+                    # #Add scenario column to output table.
+                    # scenario_names = pd.Series([scenario] * len(both),name = 'Scenario')
+                    # data_table = both.set_index([scenario_names],append = True)
+                    # data_table = data_table.add_suffix(f" ({unitconversion['units']})")
+                    # data_out_chunk.append(data_table)
 
                 # the comparison generation stack, if desired, should filter on interconnect
                 if prop=='VRE_compare':
@@ -245,31 +339,59 @@ class MPlot(object):
                 data_table = Stacked_Gen.add_suffix(f" ({unitconversion['units']})")
                 data_table = data_table.set_index([scenario_names],append=True)
                 data_tables.append(data_table)
+
+                #add the flow lines first so they are on bottom by default
+                if prop=='VRE_compare':
+                    for c in range(len(self.vre_gen_cat)-1):
+                        axs[i+c].plot(fz.index.values,fz[fz.columns[0]]/max(fz[fz.columns[0]]),
+                        linewidth=2,color='lightgrey',label='net flow')
                 
+                vre_counter = 0
                 for column in Stacked_Gen.columns:
                     if prop=='VRE_compare':
                         if column in self.vre_gen_cat:
                             #normalize generation to allow for better comparison
                             # print(max(Stacked_Gen[column]))
-                            axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column]/max(Stacked_Gen[column]), linewidth=2,
+                            axs[i+vre_counter].plot(Stacked_Gen.index.values,Stacked_Gen[column]/max(Stacked_Gen[column]), linewidth=2,
                             color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
                             # print(interconnect_Stacked_Gen)
-                            axs[i].plot(interconnect_Stacked_Gen.index.values,interconnect_Stacked_Gen[column]/max(interconnect_Stacked_Gen[column]), linewidth=2,linestyle='dashed',
+                            axs[i+vre_counter].plot(interconnect_Stacked_Gen.index.values,interconnect_Stacked_Gen[column]/max(interconnect_Stacked_Gen[column]), linewidth=2,linestyle='dashed',
                             color=self.PLEXOS_color_dict.get(column,'#333333'),label=column+"_"+interconnect)
+
+                            #let's also try to do some annotation of correlations?
+                            column_1 = Stacked_Gen[column]
+                            column_2 = interconnect_Stacked_Gen[column]
+                            column_3 = fz[fz.columns[0]]
+                            correlation1,correlation2,correlation3 = column_1.corr(column_2),column_1.corr(column_3),column_2.corr(column_3)
+                            l2 = str(column+"_"+interconnect)
+                            l3 = 'net flow'
+                            axs[i+vre_counter].annotate(f"{column}-{l2} corr= {round(correlation1,3)}",
+                                    xy=(Stacked_Gen.index.values[10], -0.5),fontsize=10)
+                            axs[i+vre_counter].annotate(f"{column}-{l3} corr= {round(correlation2,3)}",
+                                    xy=(Stacked_Gen.index.values[10], -0.7),fontsize=10)
+                            axs[i+vre_counter].annotate(f"{l2}-{l3} corr= {round(correlation3,3)}",
+                                    xy=(Stacked_Gen.index.values[10], -0.9),fontsize=10)
+                            axs[i+vre_counter].set_ylim((-1.0,1.0)) #set normalized axes
+                            vre_counter+=1 
                     else:
                         axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2,
                         color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
-
+                
                 if (Unserved_Energy == 0).all() == False:
                     lp2 = axs[i].plot(Unserved_Energy, color='#DD0200')
 
-                axs[i].spines['right'].set_visible(False)
-                axs[i].spines['top'].set_visible(False)
-                axs[i].tick_params(axis='y', which='major', length=5, width=1)
-                axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                axs[i].margins(x=0.01)
-                mfunc.set_plot_timeseries_format(axs,i)
+                for c in range(vre_counter):
+                    axs[i+c].spines['right'].set_visible(False)
+                    axs[i+c].spines['top'].set_visible(False)
+                    #if c==0:
+                    axs[i+c].tick_params(axis='y', which='major', length=5, width=1)
+                    axs[i+c].tick_params(axis='x', which='major', length=5, width=1)
+                    axs[i+c].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                    #else:
+                    #    axs[i+c].spines['left'].set_visible(False)
+                        # axs[i+c].set_yticks([])
+                    axs[i+c].margins(x=0.01)
+                    mfunc.set_plot_timeseries_format(axs,i+c)
 
                 # create list of gen technologies
                 l1 = Stacked_Gen.columns.tolist()
@@ -286,7 +408,6 @@ class MPlot(object):
             labels.sort(key = lambda i:self.ordered_gen.index(i))
             
             # create custom gen_tech legend
-            from matplotlib.lines import Line2D
             
             handles = []
             new_labels = []
@@ -303,6 +424,11 @@ class MPlot(object):
                     gen_tech_legend = Patch(facecolor=self.PLEXOS_color_dict[tech],
                                 alpha=1.0)
                     handles.append(gen_tech_legend)
+
+            if prop=='VRE_compare':
+                flow_legend = Line2D([0], [0], color='lightgrey', linewidth=2, linestyle='solid')
+                handles.append(flow_legend)
+                new_labels.append('net flow')
             
             if (Unserved_Energy == 0).all() == False:
                 handles.append(lp2[0])
@@ -329,7 +455,7 @@ class MPlot(object):
                 plt.title(zone_input)
             labelpad = 40
             if prop=='VRE_compare':
-                plt.ylabel(f"Normalized Generation",  color='black', rotation='vertical', labelpad=labelpad)
+                plt.ylabel(f"Normalized Generation/Flow",  color='black', rotation='vertical', labelpad=labelpad)
             else:
                 plt.ylabel(f"Generation ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
             
