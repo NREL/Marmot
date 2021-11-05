@@ -102,9 +102,28 @@ class MPlot(object):
             data_tables = []
             unique_tech_names = []
 
+
             for i, scenario in enumerate(all_scenarios):
                 self.logger.info(f"Scenario = {scenario}")
                 # Pump_Load = pd.Series() # Initiate pump load
+
+                # the comparison generation stack, if desired, should filter on interconnect
+                if prop=='VRE_compare':
+                    try:
+                        interconnect_Stacked_Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
+                        interconnect_Stacked_Gen_reset = interconnect_Stacked_Gen.reset_index() 
+                        interconnect = interconnect_Stacked_Gen_reset[interconnect_Stacked_Gen_reset[self.AGG_BY]==zone_input]['Interconnection'].unique()[0]
+                        if self.shift_leapday == True:
+                            interconnect_Stacked_Gen = mfunc.shift_leapday(interconnect_Stacked_Gen,self.Marmot_Solutions_folder)
+                        interconnect_Stacked_Gen = interconnect_Stacked_Gen.xs(interconnect,level='Interconnection')
+                        
+                    except KeyError:
+                        continue
+
+                    if interconnect_Stacked_Gen.empty == True:
+                        continue
+
+                    interconnect_Stacked_Gen = mfunc.df_process_gen_inputs(interconnect_Stacked_Gen, self.ordered_gen)
 
                 try:
 
@@ -219,6 +238,8 @@ class MPlot(object):
                     unitconversion = mfunc.capacity_energy_unitconversion(max(Stacked_Gen.max()))
                 Stacked_Gen = Stacked_Gen/unitconversion['divisor']
                 Unserved_Energy = Unserved_Energy/unitconversion['divisor']
+                if prop=='VRE_compare':
+                    interconnect_Stacked_Gen = interconnect_Stacked_Gen/unitconversion['divisor']
                 
                 scenario_names = pd.Series([scenario]*len(Stacked_Gen),name='Scenario')
                 data_table = Stacked_Gen.add_suffix(f" ({unitconversion['units']})")
@@ -226,8 +247,18 @@ class MPlot(object):
                 data_tables.append(data_table)
                 
                 for column in Stacked_Gen.columns:
-                    axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2,
-                       color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
+                    if prop=='VRE_compare':
+                        if column in self.vre_gen_cat:
+                            #normalize generation to allow for better comparison
+                            # print(max(Stacked_Gen[column]))
+                            axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column]/max(Stacked_Gen[column]), linewidth=2,
+                            color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
+                            # print(interconnect_Stacked_Gen)
+                            axs[i].plot(interconnect_Stacked_Gen.index.values,interconnect_Stacked_Gen[column]/max(interconnect_Stacked_Gen[column]), linewidth=2,linestyle='dashed',
+                            color=self.PLEXOS_color_dict.get(column,'#333333'),label=column+"_"+interconnect)
+                    else:
+                        axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2,
+                        color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
 
                 if (Unserved_Energy == 0).all() == False:
                     lp2 = axs[i].plot(Unserved_Energy, color='#DD0200')
@@ -255,20 +286,36 @@ class MPlot(object):
             labels.sort(key = lambda i:self.ordered_gen.index(i))
             
             # create custom gen_tech legend
+            from matplotlib.lines import Line2D
+            
             handles = []
+            new_labels = []
             for tech in labels:
-                gen_tech_legend = Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0)
-                handles.append(gen_tech_legend)
+                if prop == 'VRE_compare':
+                    if tech in self.vre_gen_cat:
+                        gen_tech_legend = Line2D([0], [0], color=self.PLEXOS_color_dict[tech], linewidth=2, linestyle='solid')
+                        gen_dot_legend = Line2D([0], [0], color=self.PLEXOS_color_dict[tech], linewidth=2, linestyle='dashed')
+                        handles.append(gen_tech_legend)
+                        handles.append(gen_dot_legend)
+                        new_labels.append(tech)
+                        new_labels.append(tech+"_"+interconnect)
+                else:
+                    gen_tech_legend = Patch(facecolor=self.PLEXOS_color_dict[tech],
+                                alpha=1.0)
+                    handles.append(gen_tech_legend)
             
             if (Unserved_Energy == 0).all() == False:
                 handles.append(lp2[0])
                 labels += ['Unserved Energy']
-                
 
-            axs[grid_size-1].legend(reversed(handles),reversed(labels),
-                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
-                                    facecolor='inherit', frameon=True)
+            if prop == 'VRE_compare':
+                axs[grid_size-1].legend(reversed(handles),reversed(new_labels),
+                                        loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                        facecolor='inherit', frameon=True)
+            else:
+                axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                                        loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                        facecolor='inherit', frameon=True)
             
             xlabels = [x.replace('_',' ') for x in self.xlabels]
             ylabels = [y.replace('_',' ') for y in self.ylabels]
@@ -281,7 +328,10 @@ class MPlot(object):
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             labelpad = 40
-            plt.ylabel(f"Generation ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
+            if prop=='VRE_compare':
+                plt.ylabel(f"Normalized Generation",  color='black', rotation='vertical', labelpad=labelpad)
+            else:
+                plt.ylabel(f"Generation ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
             
              #Remove extra axis
             if excess_axs != 0:
