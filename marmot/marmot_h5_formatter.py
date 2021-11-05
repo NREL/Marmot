@@ -1018,8 +1018,8 @@ class MarmotFormat(SetupLogger):
                 self.emit_names = pd.read_csv(emit_names)
                 if not self.emit_names.empty:
                     self.emit_names.rename(columns=
-                    {self.emit_names.columns[0]: 'Original',
-                                                    self.emit_names.columns[1]: 'New'},
+                                           {self.emit_names.columns[0]: 'Original',
+                                           self.emit_names.columns[1]: 'New'},
                                            inplace=True)
             except FileNotFoundError:
                 self.logger.warning("Could not find specified emissions "
