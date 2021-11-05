@@ -216,45 +216,41 @@ class MarmotPlot(SetupLogger):
         self.mapping_folder = mapping_folder
         
         if isinstance(Scenario_Diff, str):
-            self.Scenario_Diff = (pd.Series(Scenario_Diff.split(",")).str
-                                                                     .strip()
-                                                                     .tolist())
+            self.Scenario_Diff = (pd.Series(Scenario_Diff.split(","))
+                                    .str.strip().tolist())
         elif isinstance(Scenario_Diff, list):
             self.Scenario_Diff = Scenario_Diff
+
         if Scenario_Diff == ['nan'] or Scenario_Diff is None: 
             self.Scenario_Diff = [""]
         
         if isinstance(zone_region_sublist, str):
-            self.zone_region_sublist = (pd.Series(zone_region_sublist.split(",")).str
-                                                                                .strip()
-                                                                                .tolist())
+            self.zone_region_sublist = (pd.Series(zone_region_sublist.split(","))
+                                          .str.strip().tolist())
         elif isinstance(zone_region_sublist, list):
             self.zone_region_sublist = zone_region_sublist
         else:
             self.zone_region_sublist = []
         
         if isinstance(xlabels, str):
-            self.xlabels = (pd.Series(xlabels.split(",")).str
-                                                         .strip()
-                                                         .tolist())
+            self.xlabels = (pd.Series(xlabels.split(","))
+                              .str.strip().tolist())                   
         elif isinstance(xlabels, list):
             self.xlabels = xlabels
         if xlabels == ['nan'] or xlabels is None: 
             self.xlabels = [""]
         
         if isinstance(ylabels, str):
-            self.ylabels = (pd.Series(ylabels.split(",")).str
-                                                         .strip()
-                                                         .tolist())
+            self.ylabels = (pd.Series(ylabels.split(","))
+                              .str.strip().tolist())                                       
         elif isinstance(ylabels, list):
             self.ylabels = ylabels
         if ylabels == ['nan'] or ylabels is None:
             self.ylabels = [""]
         
         if isinstance(ticklabels, str):
-            self.custom_xticklabels = (pd.Series(ticklabels.split(",")).str
-                                                                       .strip()
-                                                                       .tolist())
+            self.custom_xticklabels = (pd.Series(ticklabels.split(","))
+                                         .str.strip().tolist())
         elif isinstance(ticklabels, list):
             self.custom_xticklabels = ticklabels
         if ticklabels == ['nan'] or ticklabels is None:
@@ -293,7 +289,6 @@ class MarmotPlot(SetupLogger):
             self.logger.info(f"Only plotting {self.AGG_BY}: "
                             f"{self.zone_region_sublist}")
 
-        #metadata_HDF5_folder_in = os.path.join(self.Model_Solutions_folder, self.Scenarios[0])
         metadata_HDF5_folder_in = os.path.join(self.Marmot_Solutions_folder,
                                                'Processed_HDF5_folder')
         
@@ -319,11 +314,6 @@ class MarmotPlot(SetupLogger):
         
         hdf_out_folder = os.path.join(self.Marmot_Solutions_folder,
                                       'Processed_HDF5_folder')
-        try:
-            os.makedirs(hdf_out_folder)
-        except FileExistsError:
-            # directory already exists
-            pass
         
         #================================================================================
         # Standard Generation Order, Gen Categorization Lists, Plotting Colors
@@ -339,7 +329,6 @@ class MarmotPlot(SetupLogger):
                                 'run Marmot, system will now exit')
             sys.exit()
         
-
         if (set(self.gen_names["New"].unique())
         .issubset(ordered_gen_categories['Ordered_Gen'].str.strip().tolist())) == False:
             missing_gen = (set(self.gen_names.New.unique()) 
@@ -350,7 +339,6 @@ class MarmotPlot(SetupLogger):
                                 "gen_names csv do not exist in "
                                 "ordered_gen_categories.csv!: "
                                 f"{missing_gen}")
-            
             
         # Subset ordered_gen to user desired generation
         if self.TECH_SUBSET:
@@ -672,7 +660,9 @@ class MarmotPlot(SetupLogger):
                     else:
                         # Save figures
                         Figure_Out[zone_input]["fig"].savefig(os.path.join(figures,
-                                                              f'{zone_input}_{row["Figure Output Name"]}.{figure_format}'),
+                                                              f'{zone_input}_'
+                                                              f'{row["Figure Output Name"]}'
+                                                              f'.{figure_format}'),
                                                               dpi=600,
                                                               bbox_inches='tight')
 
@@ -682,7 +672,8 @@ class MarmotPlot(SetupLogger):
                                              'does not return a data table')
                         else:
                             Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures,
-                                                                        f'{zone_input}_{row["Figure Output Name"]}.csv'))
+                                                                        f'{zone_input}_'
+                                                                        f'{row["Figure Output Name"]}.csv'))
 
                 self.logger.info('Plotting Completed for '
                                  f'{row["Figure Output Name"]}\n')
