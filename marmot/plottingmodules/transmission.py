@@ -1292,9 +1292,11 @@ class MPlot(object):
         fxnaggregator = self.AGG_BY
         
         #what is the interconnect for this zone?
+        print(interconnect_aggby)
         if interconnect_aggby:
             Stacked_Gen_A = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
             Stacked_Gen_A = Stacked_Gen_A.reset_index()
+            print(Stacked_Gen_A.columns)
             fxnaggregator = 'Interconnection'
             zone_input = Stacked_Gen_A[Stacked_Gen_A[self.AGG_BY]==zone_input][fxnaggregator].unique()[0]
 
@@ -1561,7 +1563,8 @@ class MPlot(object):
                     axs[n].scatter(zone_interchange_timeseries_wcategories[column],zone_interchange_timeseries_wcategories['sort_attribute'],
                                    c=zone_interchange_timeseries_wcategories['cat'].map(color_dict),s=2,alpha=.05, rasterized=True)
                     axs[n].set_xlabel(f"{zone_input} to {column} Flow ({line_unitconversion['units']})", fontsize=12)
-                    if use_net_load:
+                    print(lookup_label)
+                    if use_net_load and 'net' not in lookup_label:
                         split_label = lookup_label.split("_")
                         split_label.insert(1,'net')
                         lookup_label = "_".join(split_label)
