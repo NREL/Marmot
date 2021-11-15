@@ -1,38 +1,70 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  9 13:20:56 2019
+"""Generator capacity factor plots .
 
-This mdouel creates capacity factor and average output plots 
-
-
-@author: Daniel Levie 
+This module contain methods that are related to the capacity factor 
+of generators and average output plots 
 """
 
+import logging
+import numpy as np
 import pandas as pd
 import matplotlib.ticker as mtick
-import numpy as np
-import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
 import matplotlib.pyplot as plt
 
+import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
-class MPlot(object):
 
-    def __init__(self, argument_dict):
+class MPlot(PlotDataHelper):
+    """capacity_factor MPlot class.
+
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The capacity_factor.py module contain methods that are
+    related to the capacity factor of generators. 
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         
-        self.mplot_data_dict = {}
         
-    def avg_output_when_committed(self, figure_name=None, prop=None, start=None, 
-                                  end=None, timezone="", start_date_range=None, 
-                                  end_date_range=None):
+    def avg_output_when_committed(self,
+                                  start_date_range: str = None, 
+                                  end_date_range: str = None, **_):
+        """Creates barplots of the percentage average generation output when committed by technology type. 
+
+        Each scenario is plotted by a different colored grouped bar. 
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -40,11 +72,12 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -52,19 +85,20 @@ class MPlot(object):
 
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
                         self.logger.warning(f'No data in {zone_input}')
                         continue
                 Gen = Gen.reset_index()
+                Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 # techs = list(Gen['tech'].unique())
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]
-                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.drop(columns = ['timestamp','tech'])
@@ -121,7 +155,7 @@ class MPlot(object):
             CF_all_scenarios.index = CF_all_scenarios.index.str.replace('_',' ')
             
             if CF_all_scenarios.empty == True:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Data_Table_Out = CF_all_scenarios.T
@@ -137,7 +171,7 @@ class MPlot(object):
             
             # Set x-tick labels 
             tick_labels = CF_all_scenarios.columns
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -151,9 +185,21 @@ class MPlot(object):
         return outputs
 
 
-    def cf(self, figure_name=None, prop=None, start=None, 
-           end=None, timezone="", start_date_range=None, 
-           end_date_range=None):
+    def cf(self, start_date_range: str = None, 
+           end_date_range: str = None, **_):
+        """Creates barplots of generator capacity factors by technology type. 
+
+        Each scenario is plotted by a different colored grouped bar. 
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         
         outputs = {}
         
@@ -162,11 +208,12 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -175,13 +222,13 @@ class MPlot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
                         self.logger.warning(f'No data in {zone_input}')
                         continue
-                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
+                Gen = self.df_process_gen_inputs(Gen)
                 
                 if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
@@ -203,9 +250,9 @@ class MPlot(object):
                 Total_Gen = Gen.sum(axis=0)
                 Total_Gen.rename(scenario, inplace = True)
                 
-                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
-                Cap = mfunc.df_process_gen_inputs(Cap, self.ordered_gen)
+                Cap = self.df_process_gen_inputs(Cap)
                 Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
                 Cap.rename(scenario, inplace = True)
 
@@ -218,7 +265,7 @@ class MPlot(object):
             CF_all_scenarios.columns = CF_all_scenarios.columns.str.replace('_',' ')
 
             if CF_all_scenarios.empty == True:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Data_Table_Out = CF_all_scenarios.T
@@ -229,11 +276,11 @@ class MPlot(object):
             CF_all_scenarios.plot.bar(stacked = False, 
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
             
-            # This code would be used to create the bar plot using mfunc.create_bar_plot()
-            # fig1, axs = mfunc.setup_plot()
+            # This code would be used to create the bar plot using plotlib.create_bar_plot()
+            # fig1, axs = plotlib.setup_plot()
             # #flatten object
             # ax=axs[0]
-            # mfunc.create_bar_plot(CF_all_scenarios, ax, self.color_list, angle)
+            # plotlib.create_bar_plot(CF_all_scenarios, ax, self.color_list, angle)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
@@ -242,7 +289,7 @@ class MPlot(object):
             
             # Set x-tick labels 
             tick_labels = CF_all_scenarios.index
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -261,9 +308,21 @@ class MPlot(object):
         return outputs
 
 
-    def time_at_min_gen(self, figure_name=None, prop=None, start=None, 
-           end=None, timezone="", start_date_range=None, 
-           end_date_range=None):
+    def time_at_min_gen(self, start_date_range: str = None, 
+                        end_date_range: str = None, **_):
+        """Creates barplots of generator percentage time at min-gen by technology type. 
+
+        Each scenario is plotted by a different colored grouped bar. 
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table.
+        """
         
         outputs = {}
         
@@ -273,11 +332,12 @@ class MPlot(object):
                       (True,"generator_Installed_Capacity",self.Scenarios),
                       (True,"generator_Hours_at_Minimum",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -287,7 +347,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {str(scenario)}")
 
-                Min = self.mplot_data_dict["generator_Hours_at_Minimum"].get(scenario)
+                Min = self["generator_Hours_at_Minimum"].get(scenario)
                 try:
                     Min = Min.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -297,7 +357,7 @@ class MPlot(object):
                 Min = Min.set_index('gen_name')
                 Min = Min.rename(columns = {0:"Hours at Minimum"})
 
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -312,7 +372,7 @@ class MPlot(object):
                 Gen = Gen[~Gen['tech'].isin(self.vre_gen_cat)]
                 Gen.index = Gen.timestamp
 
-                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Caps = Cap.groupby('gen_name').mean()
                 Caps.reset_index()
@@ -340,7 +400,7 @@ class MPlot(object):
                 time_at_min = time_at_min.append(time_at_min_individ)
 
             if time_at_min.empty == True:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             Data_Table_Out = time_at_min.T
@@ -357,7 +417,7 @@ class MPlot(object):
             
             # Set x-tick labels 
             tick_labels = time_at_min.columns
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)

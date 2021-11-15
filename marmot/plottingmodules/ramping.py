@@ -1,40 +1,71 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  9 13:20:56 2019
+"""Generator start and ramping plots.
 
 This module creates bar plot of the total volume of generator starts in MW,GW,etc.
 
-
-@author: Daniel Levie
+@author: Marty Schwarz
 """
 
-import pandas as pd
 import logging
+import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData, UnderDevelopment)
 
 
-#===============================================================================
-class MPlot(object):
+class MPlot(PlotDataHelper):
+    """ramping MPlot class.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The ramping.py module contains methods that are
+    related to the ramp periods of generators. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+               
+         # Instantiation of MPlotHelperFunctions
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
-        self.mplot_data_dict = {}
     
-    def capacity_started(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
-       
+    def capacity_started(self, start_date_range: str = None, 
+                         end_date_range: str = None, **_):
+        """Creates bar plots of total thermal capacity started by technology type.
+
+        Each sceanrio is plotted as a separate color grouped bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -42,11 +73,13 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
@@ -56,7 +89,7 @@ class MPlot(object):
 
                 self.logger.info(f"Scenario = {str(scenario)}")
 
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
@@ -65,13 +98,14 @@ class MPlot(object):
                     break
                 
                 Gen = Gen.reset_index()
+                Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
                 # Gen = Gen.drop(columns = ['region'])
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.
 
-                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.drop(columns = ['timestamp','tech'])
@@ -98,8 +132,8 @@ class MPlot(object):
 
                     for gen in gen_names:
                         sgt = stt.loc[stt['gen_name'] == gen]
-                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommited hours.
-                            #print('Couting starts for: ' + gen)
+                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommitted hours.
+                            #print('Counting starts for: ' + gen)
                             for idx in range(len(sgt['Output (MWh)']) - 1):
                                     if sgt["Output (MWh)"].iloc[idx] == 0 and not sgt["Output (MWh)"].iloc[idx + 1] == 0:
                                         cap_started = cap_started + sgt["Installed Capacity (MW)"].iloc[idx]
@@ -117,10 +151,10 @@ class MPlot(object):
                     # for gen in gen_names:
                     #     sgt = stt.loc[stt['gen_name'] == gen]
 
-                    #     if any(sgt[0] == 0) and not all(sgt[0] == 0):   #Check that this generator has some, but not all, uncommited hours.
+                    #     if any(sgt[0] == 0) and not all(sgt[0] == 0):   #Check that this generator has some, but not all, uncommitted hours.
                     #         zeros = sgt.loc[sgt[0] == 0]
 
-                    #         print('Couting starts and stops for: ' + gen)
+                    #         print('Counting starts and stops for: ' + gen)
                     #         for idx in range(len(zeros['timestamp']) - 1):
                     #                if not zeros['timestamp'].iloc[idx + 1] == pd.Timedelta(1,'h'):
                     #                    starts = starts + 1
@@ -137,11 +171,11 @@ class MPlot(object):
                 # print('Method 2 (first making a data frame with only 0s, then checking if timestamps > 1 hour) took ' + str(elapsed) + ' seconds')
 
             if cap_started_all_scenarios.empty == True:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
@@ -157,7 +191,7 @@ class MPlot(object):
             ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
             
             tick_labels = cap_started_all_scenarios.columns
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -171,8 +205,18 @@ class MPlot(object):
         return outputs
 
 
-    def count_ramps(self, figure_name=None, prop=None, start=None, end=None, 
-                  timezone="", start_date_range=None, end_date_range=None):
+    def count_ramps(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
+
+        # Plot currently displays the same as capacity_started, this plot needs looking at 
+
+        outputs = UnderDevelopment()
+        self.logger.warning('count_ramps is under development')
+        return outputs
         
         outputs = {}
         
@@ -181,11 +225,13 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone =  {zone_input}")
@@ -194,7 +240,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
 
                 Gen = Gen.reset_index()
@@ -204,7 +250,7 @@ class MPlot(object):
                 Gen = Gen[['timestamp','gen_name','tech','Output (MWh)']]
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.tops.
 
-                Cap = self.mplot_data_dict["generator_Installed_Capacity"].get(scenario)
+                Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
                 Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
@@ -233,8 +279,8 @@ class MPlot(object):
 
                     for gen in gen_names:
                         sgt = stt.loc[stt['gen_name'] == gen]
-                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommited hours.
-                            #print('Couting starts for: ' + gen)
+                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommitted hours.
+                            #print('Counting starts for: ' + gen)
                             for idx in range(len(sgt['Output (MWh)']) - 1):
                                     if sgt["Output (MWh)"].iloc[idx] == 0 and not sgt["Output (MWh)"].iloc[idx + 1] == 0:
                                         up_ramps = up_ramps + sgt["Installed Capacity (MW)"].iloc[idx]
@@ -249,13 +295,13 @@ class MPlot(object):
             cap_started_all_scenarios = pd.concat(cap_started_chunk)
             
             if cap_started_all_scenarios.empty == True:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
             
             cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
 
-            unitconversion = mfunc.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
@@ -270,7 +316,7 @@ class MPlot(object):
             
             # Set x-tick labels 
             tick_labels = cap_started_all_scenarios.columns
-            mfunc.set_barplot_xticklabels(tick_labels, ax=ax)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
             
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)

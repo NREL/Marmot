@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Jun 22 16:14:56 2020
+"""Retrieve metadata from PLEXOS production cost modelling results.
+
+Database can be either a h5plexos file or a formatted Marmot hdf5 file.
 
 @author: Ryan Houseman
 """
-
-# This is the new MetaData class
 
 import os
 import sys
@@ -14,155 +13,254 @@ import pandas as pd
 import numpy as np
 import logging
 
-class MetaData:
+class MetaData():
+    """Handle the retrieval of metadata from the formatted or
+    original plexos solution h5 files.
+
+    Attributes:
+        filename (str) = The name of the h5 file to retreive data from.
+        h5_data (h5py.File) = loaded h5 file in memory.
+    """
+
+    filename: str = None
+    h5_data: h5py.File = None
     
-    def __init__(self, HDF5_folder_in, processed_h5, Region_Mapping=pd.DataFrame(), file=None):
+
+    def __init__(self, HDF5_folder_in: str, read_from_formatted_h5: bool = True, 
+                 Region_Mapping: pd.DataFrame = pd.DataFrame(),
+                 partition_number: int = 0):
         """
-        Parameters
-        ----------
-        HDF5_folder_in : folder
-            Folder containing h5plexos h5 files .
-        processed_h5 : Boolean
-            Boolean for whether the metadata is being read from the processed hdf5 file or the original PLEXOS solution file.
-        Region_Mapping : pd.DataFrame
-            DataFrame of extra regions to map.
-        file : string, optional
-            Name of h5 file. The default is None.  Some scenarios have multiple partitions.
+        Args:
+            HDF5_folder_in (str): Folder containing h5plexos h5 files.
+            read_from_formatted_h5 (bool, optional): Boolean for whether the metadata is 
+                being read from the formatted hdf5 file or the original PLEXOS solution file.
+                Defaults to True.
+            Region_Mapping (pd.DataFrame, optional): DataFrame of extra regions to map. 
+                Defaults to pd.DataFrame().
+            partition_number (int, optional): Which temporal partition of h5 data to retrieve 
+                metadata from in the formatted h5 file. Defaults to 0.
         """
         self.logger = logging.getLogger('marmot_format.'+__name__)        
         self.HDF5_folder_in = HDF5_folder_in
         self.Region_Mapping = Region_Mapping
-        self.processed_h5 = processed_h5
-        
-        if self.processed_h5:
-            try:
-                self.data = h5py.File(os.path.join(self.HDF5_folder_in, file), 'r')
-                self.partitions = [key for key in self.data['metadata'].keys()]
-                self.start_index = 'metadata/' + self.partitions[0] + '/'
-            except OSError:
-                self.logger.info('Unable to find processed HDF5 file required to run marmot_plot_main.py.  \n Check for file, or run marmot_h5_formatter.py again.')
-        else:
-            if file == None: 
-                startdir=os.getcwd()
-                os.chdir(self.HDF5_folder_in)  
-                files = sorted(os.listdir()) 
-                os.chdir(startdir)
-                files_list = []
-                for names in files:
-                    if names.endswith(".h5"):
-                        files_list.append(names) # Creates a list of only the hdf5 files
-                if len(files_list) == 0:
-                    self.logger.info("\n In order to initialize your database's metadata, Marmot is looking for a h5plexos solution file.  \n It is looking in " + self.HDF5_folder_in + ", but it cannot find any *.h5 files there. \n Please check the 'PLEXOS_Solutions_folder' input in row 2 of your 'Marmot_user_defined_inputs.csv'. \n Ensure that it matches the filepath containing the *.h5 files created by h5plexos. \n \n Marmot will now quit.")
-                    sys.exit()
-                else:
-                    file=files_list[0]
-            self.data = h5py.File(os.path.join(self.HDF5_folder_in, file), 'r')
-            self.start_index = 'metadata/'
-            
-# These methods are called in the Process class within results_formatter
-# If metadata does not contain that object or relation an empty dataframe is returned        
+        self.read_from_formatted_h5 = read_from_formatted_h5
+        self.partition_number = partition_number
 
-# Generator categories mapping
-    def generator_category(self):
-        try:    
-            try:
-                gen_category = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/generator']))
-            except KeyError:
-                gen_category = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/generators']))
-            gen_category.rename(columns={'name':'gen_name','category':'tech'}, inplace=True)
-            gen_category = gen_category.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            return gen_category
-        except:
-            generator_category = pd.DataFrame()
-            return generator_category
+        self.start_index = None
+
+    @classmethod
+    def _check_if_existing_filename(cls, filename: str) -> bool:
+        """Check if the passed filename is the same or different from previous calls.
+
+        If file is different replaces the filename with new value 
+        and closes old file
+
+        Args:
+            filename (str): The name of the h5 file to retreive data from.
+
+        Returns:
+            bool: False if new file, True if existing 
+        """
+        if cls.filename != filename:
+            cls.filename = filename
+            cls.close_h5()
+            return False
+        elif cls.filename == filename:
+            return True
+
+    @classmethod
+    def close_h5(cls) -> None:
+        """Closes h5 file open in memory.
+        """
+        if cls.h5_data:
+            cls.h5_data.close()
     
-# Region generators mapping
-    def region_generators(self):
+    def _read_data(self, filename: str) -> None:
+        """Reads h5 file into memory.
+
+        Args:
+            filename (str): The name of the h5 file to retreive 
+                data from.
+        """
+        self.logger.debug(f"Reading New h5 file: {filename}")
+        processed_file_format = "{}_formatted.h5"
+        
+        try:  
+            if self.read_from_formatted_h5:
+
+                filename = processed_file_format.format(filename)
+                self.h5_data = h5py.File(os.path.join(self.HDF5_folder_in, filename), 'r')
+                partitions = [key for key in self.h5_data['metadata'].keys()]
+                if self.partition_number > len(partitions):
+                    self.logger.warning(f"\nYou have chosen to use metadata partition_number {self.partition_number}, "
+                                    f"But there are only {len(partitions)} partitions in your formatted h5 file.\n"
+                                    "Defaulting to partition_number 0")
+                    self.partition_number = 0
+
+                self.start_index = f"metadata/{partitions[self.partition_number]}/"
+            else:
+                self.h5_data = h5py.File(os.path.join(self.HDF5_folder_in, filename), 'r')
+                self.start_index = "metadata/"
+
+        except OSError:
+            if self.read_from_formatted_h5:
+                self.logger.warning("Unable to find processed HDF5 file to retrieve metadata.\n"
+                                    "Check scenario name.")
+                return
+            else:
+                self.logger.info("\nIn order to initialize your database's metadata, "
+                                    "Marmot is looking for a h5plexos solution file.\n"
+                                    f"It is looking in {self.HDF5_folder_in}, but it cannot "
+                                    "find any *.h5 files there.\n"
+                                    "Please check the 'PLEXOS_Solutions_folder' input in row 2 of your "
+                                    "'Marmot_user_defined_inputs.csv'.\n"
+                                    "Ensure that it matches the filepath containing the *.h5 files "
+                                    "created by h5plexos.\n\nMarmot will now quit.")
+                sys.exit()     
+
+    def generator_category(self, filename: str) -> pd.DataFrame:
+        """Generator categories mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+
         try:    
             try:
-                region_gen = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/regions_generators']))
+                gen_category = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/generator']))
             except KeyError:
-                region_gen = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_generators']))
+                gen_category = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/generators']))
+            gen_category.rename(columns={'name':'gen_name','category':'tech'}, inplace=True)
+            gen_category = gen_category.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)   
+        except KeyError:
+            gen_category = pd.DataFrame()
+
+        return gen_category
+            
+    def region_generators(self, filename: str) -> pd.DataFrame:
+        """Region generators mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+
+        try:    
+            try:
+                region_gen = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/regions_generators']))
+            except KeyError:
+                region_gen = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_generators']))
             region_gen.rename(columns={'child':'gen_name','parent':'region'}, inplace=True)
             region_gen = region_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
-            return region_gen
-        except:
-            region_generators = pd.DataFrame()
-            return region_generators
+        except KeyError:
+            region_gen = pd.DataFrame()
         
-    def region_generator_category(self):
+        return region_gen
+        
+    def region_generator_category(self, filename: str) -> pd.DataFrame:
+        """Region generators category mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """     
         try:
-            region_gen = self.region_generators()
-            gen_category = self.generator_category()
+            region_gen = self.region_generators(filename)
+            gen_category = self.generator_category(filename)
             region_gen_cat = region_gen.merge(gen_category,
-                            how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('region')
-            return region_gen_cat
-        except:
-            region_generator_category = pd.DataFrame()
-            return region_generator_category
+                            how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('region')  
+        except KeyError:
+            region_gen_cat = pd.DataFrame()
+
+        return region_gen_cat
         
-# Zone generators mapping
-    def zone_generators(self):
+    def zone_generators(self, filename: str) -> pd.DataFrame:
+        """Zone generators mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                zone_gen = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zones_generators']))
+                zone_gen = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zones_generators']))
             except KeyError:
-                zone_gen = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_generators']))    
+                zone_gen = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_generators']))    
             zone_gen.rename(columns={'child':'gen_name','parent':'zone'}, inplace=True)
             zone_gen = zone_gen.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_gen.drop_duplicates(subset=["gen_name"],keep='first',inplace=True) #For generators which belong to more than 1 region, drop duplicates.
-            return zone_gen
-        except:
-            zone_generators = pd.DataFrame()
-            return zone_generators
+        except KeyError:
+            zone_gen = pd.DataFrame()
         
-    def zone_generator_category(self): 
+        return zone_gen
+        
+    def zone_generator_category(self, filename: str) -> pd.DataFrame:
+        """Zone generators category mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """    
         try:
-            zone_gen = self.zone_generators()
-            gen_category = self.generator_category()
+            zone_gen = self.zone_generators(filename)
+            gen_category = self.generator_category(filename)
             zone_gen_cat = zone_gen.merge(gen_category,
-                            how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('zone')
-            return zone_gen_cat
-        except:
-            zone_generator_category = pd.DataFrame()
-            return zone_generator_category
+                            how="left", on='gen_name').sort_values(by=['tech','gen_name']).set_index('zone')  
+        except KeyError:
+            zone_gen_cat = pd.DataFrame()
+
+        return zone_gen_cat
         
-# Generator storage has been updated so that only one of tail_storage & head_storage is required
-# If both are available, both are used
-    
-    def generator_storage(self):
+    # Generator storage has been updated so that only one of tail_storage & head_storage is required
+    # If both are available, both are used
+    def generator_storage(self, filename: str) -> pd.DataFrame:
+        """Generator Storage mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         head_tail = [0,0]
         try:    
             generator_headstorage = pd.DataFrame()
             generator_tailstorage = pd.DataFrame()
             try:
-                generator_headstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generators_headstorage']))
+                generator_headstorage = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/generators_headstorage']))
                 head_tail[0] = 1
             except KeyError:
                 pass
             try:
-                generator_headstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generator_headstorage']))
+                generator_headstorage = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/generator_headstorage']))
                 head_tail[0] = 1
             except KeyError:
                 pass
             try:
-                generator_headstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/exportinggenerators_headstorage']))
+                generator_headstorage = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/exportinggenerators_headstorage']))
                 head_tail[0] = 1
             except KeyError:
                 pass
             try:
-                generator_tailstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generators_tailstorage']))
+                generator_tailstorage = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/generators_tailstorage']))
                 head_tail[1] = 1
             except KeyError:
                 pass
             try:
-                generator_tailstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generator_tailstorage']))
+                generator_tailstorage = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/generator_tailstorage']))
                 head_tail[1] = 1
             except KeyError:
                 pass
             try:
-                generator_tailstorage = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/importinggenerators_tailstorage']))
+                generator_tailstorage = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/importinggenerators_tailstorage']))
                 head_tail[1] = 1
             except KeyError:
                 pass
@@ -175,284 +273,445 @@ class MetaData:
                 gen_storage = generator_tailstorage 
             gen_storage.rename(columns={'child':'name','parent':'gen_name'}, inplace=True)
             gen_storage = gen_storage.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            return gen_storage
         except:
-            generator_storage = pd.DataFrame()
-            return generator_storage
+            gen_storage = pd.DataFrame()
+        
+        return gen_storage
     
-    def node_region(self):
+    def node_region(self, filename: str) -> pd.DataFrame:
+        """Node Region mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                node_region = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/nodes_region']))
+                node_region = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/nodes_region']))
             except KeyError:
-                node_region = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/node_region']))
+                node_region = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/node_region']))
             node_region.rename(columns={'child':'region','parent':'node'}, inplace=True)
             node_region = node_region.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            node_region = node_region.sort_values(by=['node']).set_index('region')
-            return node_region
+            node_region = node_region.sort_values(by=['node']).set_index('region') 
         except:
             node_region = pd.DataFrame()
-            return node_region
+
+        return node_region
         
-    def node_zone(self):
+    def node_zone(self, filename: str) -> pd.DataFrame:
+        """Node zone mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                node_zone = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/nodes_zone']))
+                node_zone = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/nodes_zone']))
             except KeyError:
-                node_zone = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/node_zone']))
+                node_zone = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/node_zone']))
             node_zone.rename(columns={'child':'zone','parent':'node'}, inplace=True)
             node_zone = node_zone.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            node_zone = node_zone.sort_values(by=['node']).set_index('zone')
-            return node_zone
+            node_zone = node_zone.sort_values(by=['node']).set_index('zone')   
         except:
             node_zone = pd.DataFrame()
-            return node_zone
+        
+        return node_zone
     
-    def generator_node(self):
+    def generator_node(self, filename: str) -> pd.DataFrame:
+        """generator node mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                generator_node = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generators_nodes']))
+                generator_node = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/generators_nodes']))
             except KeyError:
-                generator_node = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/generator_nodes']))
+                generator_node = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/generator_nodes']))
             generator_node.rename(columns={'child':'node','parent':'gen_name'}, inplace=True)
             generator_node = generator_node.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            # generators_nodes = generators_nodes.sort_values(by=['generator'])
-            return generator_node
+            # generators_nodes = generators_nodes.sort_values(by=['generator'])   
         except:
             generator_node = pd.DataFrame()
-            return generator_node
-        
-        
-##############################################################################
-    
-# These methods were not originally part of the MetaData class and were used to 
-# Setup the pickle files for metadata.  They are now methods that can be called and
-# return that data instead of having to read a pickle file.
 
-    # returns metadata regions
-    def regions(self):
+        return generator_node
+        
+    def regions(self, filename: str) -> pd.DataFrame:
+        """Region objects.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+
         try:
             try:
-                regions = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/regions']))
+                regions = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/regions']))
             except KeyError:
-                regions = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/region']))
+                regions = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/region']))
             regions = regions.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             regions.rename(columns={'name':'region'}, inplace=True)
             regions.sort_values(['category','region'],inplace=True)
-            return regions   
         except KeyError:
             self.logger.warning("Regional data not included in h5plexos results")
-            return pd.DataFrame()
+            regions = pd.DataFrame()
+        
+        return regions   
     
-    def zones(self):
+    def zones(self, filename: str) -> pd.DataFrame:
+        """Zone objects.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                zones = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/zones']))
+                zones = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/zones']))
             except KeyError:
-                zones = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/zone']))
+                zones = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/zone']))
             zones = zones.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            return zones
         except KeyError:
             self.logger.warning("Zonal data not included in h5plexos results")
-            return pd.DataFrame()
+            zones = pd.DataFrame()
+
+        return zones
              
-    def lines(self):
+    def lines(self, filename: str) -> pd.DataFrame:
+        """Line objects.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                lines=pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/lines']))
+                lines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/lines']))
             except KeyError:
-                lines=pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/line']))
+                lines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/line']))
             lines = lines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             lines.rename(columns={"name":"line_name"},inplace=True)
-            return lines
         except KeyError:
             self.logger.warning("Line data not included in h5plexos results")
+
+        return lines
     
-    def region_regions(self):
+    def region_regions(self, filename: str) -> pd.DataFrame:
+        """Region-region mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
-            region_regions = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_regions']))
+            region_regions = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_regions']))
             region_regions = region_regions.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            return region_regions
         except KeyError:
             self.logger.warning("region_regions data not included in h5plexos results")
+
+        return region_regions
     
-    
-    def region_interregionallines(self):
+    def region_interregionallines(self, filename: str) -> pd.DataFrame:
+        """Region inter-regional lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                region_interregionallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_interregionallines']))
+                region_interregionallines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_interregionallines']))
             except KeyError:
-                region_interregionallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_interregionalline']))
+                region_interregionallines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_interregionalline']))
             
             region_interregionallines = region_interregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_interregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
             if not self.Region_Mapping.empty:
-                region_interregionallines=pd.merge(region_interregionallines,self.Region_Mapping,how='left',on="region")
-            return region_interregionallines
+                region_interregionallines=pd.merge(region_interregionallines,self.Region_Mapping,how='left',on="region") 
         except KeyError:
             region_interregionallines = pd.DataFrame()
             self.logger.warning("Region Interregionallines data not included in h5plexos results")
-            return region_interregionallines
+
+        return region_interregionallines
             
-      
-    def region_intraregionallines(self):
-       try:
-           try:
-               region_intraregionallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_intraregionallines']))
-           except KeyError:
-               try:
-                   region_intraregionallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_intraregionalline']))
-               except KeyError:
-                   region_intraregionallines=pd.concat([pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_importinglines'])),
-                                                        pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_exportinglines']))]).drop_duplicates()
-           region_intraregionallines = region_intraregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-           region_intraregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
-           if not self.Region_Mapping.empty:
-               region_intraregionallines=pd.merge(region_intraregionallines,self.Region_Mapping,how='left',on="region")
-           return region_intraregionallines
-       except KeyError: 
-           region_intraregionallines = pd.DataFrame()
-           self.logger.warning("Region Intraregionallines Lines data not included in h5plexos results")  
-           return region_intraregionallines
-                
-      
-    def region_exporting_lines(self):
-      try:
-          try:
-              region_exportinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_exportinglines']))
-          except KeyError:
-              region_exportinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_exportingline']))
-          region_exportinglines = region_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-          region_exportinglines = region_exportinglines.rename(columns={'parent':'region','child':'line_name'})
-          if not self.Region_Mapping.empty:
-              region_exportinglines=pd.merge(region_exportinglines,self.Region_Mapping,how='left',on="region")
-          return region_exportinglines 
-      except KeyError:
-          self.logger.warning("Region Exporting Lines data not included in h5plexos results") 
-      
-    def region_importing_lines(self):
+    def region_intraregionallines(self, filename: str) -> pd.DataFrame:
+        """Region intra-regional lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                region_importinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_importinglines']))
+                region_intraregionallines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_intraregionallines']))
             except KeyError:
-                region_importinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/region_importingline']))
+                try:
+                    region_intraregionallines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_intraregionalline']))
+                except KeyError:
+                    region_intraregionallines=pd.concat([pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_importinglines'])),
+                                                            pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_exportinglines']))]).drop_duplicates()
+            region_intraregionallines = region_intraregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            region_intraregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+            if not self.Region_Mapping.empty:
+                region_intraregionallines=pd.merge(region_intraregionallines,self.Region_Mapping,how='left',on="region")
+        except KeyError: 
+            region_intraregionallines = pd.DataFrame()
+            self.logger.warning("Region Intraregionallines Lines data not included in h5plexos results")  
+        
+        return region_intraregionallines
+      
+    def region_exporting_lines(self, filename: str) -> pd.DataFrame:
+        """Region exporting lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+        try:
+            try:
+                region_exportinglines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_exportinglines']))
+            except KeyError:
+                region_exportinglines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_exportingline']))
+            region_exportinglines = region_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            region_exportinglines = region_exportinglines.rename(columns={'parent':'region','child':'line_name'})
+            if not self.Region_Mapping.empty:
+                region_exportinglines=pd.merge(region_exportinglines,self.Region_Mapping,how='left',on="region")
+        except KeyError:
+            self.logger.warning("Region Exporting Lines data not included in h5plexos results") 
+
+        return region_exportinglines 
+      
+    def region_importing_lines(self, filename: str) -> pd.DataFrame:
+        """Region importing lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+        try:
+            try:
+                region_importinglines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_importinglines']))
+            except KeyError:
+                region_importinglines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/region_importingline']))
             region_importinglines = region_importinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_importinglines = region_importinglines.rename(columns={'parent':'region','child':'line_name'})
             if not self.Region_Mapping.empty:
                 region_importinglines=pd.merge(region_importinglines,self.Region_Mapping,how='left',on="region")
-            return region_importinglines 
         except KeyError:
             self.logger.warning("Region Importing Lines data not included in h5plexos results") 
 
-    def zone_interzonallines(self):
-            try:
-                try:
-                    zone_interzonallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_interzonallines']))
-                except KeyError:
-                    zone_interzonallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_interzonalline']))
-                
-                zone_interzonallines = zone_interzonallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-                zone_interzonallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
-                return zone_interzonallines
-            except KeyError:      
-                zone_interzonallines = pd.DataFrame()
-                self.logger.warning("Zone Interzonallines data not included in h5plexos results")
-                return zone_interzonallines
-                
-    def zone_intrazonallines(self):
-       try:
-           try:
-               zone_intrazonallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_intrazonallines']))
-           except KeyError:
-               zone_intrazonallines=pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_intrazonalline']))
-           zone_intrazonallines = zone_intrazonallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-           zone_intrazonallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
-           return zone_intrazonallines
-       except KeyError:      
-           zone_intrazonallines = pd.DataFrame()
-           self.logger.warning("Zone Intrazonallines Lines data not included in h5plexos results") 
-           return zone_intrazonallines
-                 
-    def zone_exporting_lines(self):
+        return region_importinglines
+
+    def zone_interzonallines(self, filename: str) -> pd.DataFrame:
+        """Zone inter-zonal lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                zone_exportinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_exportinglines']))
+                zone_interzonallines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_interzonallines']))
             except KeyError:
-                zone_exportinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_exportingline']))
+                zone_interzonallines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_interzonalline']))
+            
+            zone_interzonallines = zone_interzonallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            zone_interzonallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+        except KeyError:      
+            zone_interzonallines = pd.DataFrame()
+            self.logger.warning("Zone Interzonallines data not included in h5plexos results")
+        
+        return zone_interzonallines
+                
+    def zone_intrazonallines(self, filename: str) -> pd.DataFrame:
+        """Zone intra-zonal lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+        try:
+            try:
+                zone_intrazonallines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_intrazonallines']))
+            except KeyError:
+                zone_intrazonallines=pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_intrazonalline']))
+            zone_intrazonallines = zone_intrazonallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            zone_intrazonallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
+        except KeyError:      
+            zone_intrazonallines = pd.DataFrame()
+            self.logger.warning("Zone Intrazonallines Lines data not included in h5plexos results") 
+
+        return zone_intrazonallines
+                 
+    def zone_exporting_lines(self, filename: str) -> pd.DataFrame:
+        """Zone exporting lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+        try:
+            try:
+                zone_exportinglines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_exportinglines']))
+            except KeyError:
+                zone_exportinglines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_exportingline']))
             zone_exportinglines = zone_exportinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_exportinglines = zone_exportinglines.rename(columns={'parent':'region','child':'line_name'})
-            return zone_exportinglines 
         except KeyError:
             self.logger.warning("zone exporting lines data not included in h5plexos results") 
-            return pd.DataFrame()
+            zone_exportinglines = pd.DataFrame()
+
+        return zone_exportinglines 
     
-    def zone_importing_lines(self):
+    def zone_importing_lines(self, filename: str) -> pd.DataFrame:
+        """Zone importing lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                zone_importinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_importinglines']))
+                zone_importinglines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_importinglines']))
             except KeyError:
-                zone_importinglines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/zone_importingline']))
+                zone_importinglines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/zone_importingline']))
             zone_importinglines = zone_importinglines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             zone_importinglines = zone_importinglines.rename(columns={'parent':'region','child':'line_name'})
-            return zone_importinglines 
         except KeyError:
             self.logger.warning("zone importing lines data not included in h5plexos results") 
-            return pd.DataFrame()
+            zone_importinglines = pd.DataFrame()
+        
+        return zone_importinglines 
 
-    def interface_lines(self):
+    def interface_lines(self, filename: str) -> pd.DataFrame:
+        """Interface to lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+        try:
             try:
-                try:
-                    interface_lines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/interface_lines']))
-                except KeyError:
-                    interface_lines = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/interfaces_lines']))
-                interface_lines = interface_lines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-                interface_lines = interface_lines.rename(columns={'parent':'interface','child':'line'})
-                return interface_lines
+                interface_lines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/interface_lines']))
             except KeyError:
-                self.logger.warning("Interface Lines data not included in h5plexos results")
-    
-    # All Regional lines
-    def region_lines(self):
-        region_interregionallines = self.region_interregionallines()
-        region_intraregionallines = self.region_intraregionallines()
+                interface_lines = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/interfaces_lines']))
+            interface_lines = interface_lines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
+            interface_lines = interface_lines.rename(columns={'parent':'interface','child':'line'})
+        except KeyError:
+            self.logger.warning("Interface Lines data not included in h5plexos results")
+
+        return interface_lines
+
+    def region_lines(self, filename: str) -> pd.DataFrame:
+        """Region to Lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        region_interregionallines = self.region_interregionallines(filename)
+        region_intraregionallines = self.region_intraregionallines(filename)
         region_lines = pd.concat([region_interregionallines,region_intraregionallines])
         return region_lines
     
-    # All Zonal lines
-    def zone_lines(self):
-        zone_interzonallines = self.zone_interzonallines()
-        zone_intrazonallines = self.zone_intrazonallines()
+    def zone_lines(self, filename: str) -> pd.DataFrame:
+        """Zone to Lines mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        zone_interzonallines = self.zone_interzonallines(filename)
+        zone_intrazonallines = self.zone_intrazonallines(filename)
         zone_lines = pd.concat([zone_interzonallines,zone_intrazonallines])
         zone_lines = zone_lines.rename(columns={'region':'zone'})
         return zone_lines
 
-    def reserves(self):
+    def reserves(self, filename: str) -> pd.DataFrame:
+        """Reserves objects.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                reserves = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/reserves']))
+                reserves = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/reserves']))
             except KeyError:
-                reserves = pd.DataFrame(np.asarray(self.data[self.start_index + 'objects/reserve']))
+                reserves = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'objects/reserve']))
             reserves = reserves.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
-            return reserves 
         except KeyError:
             self.logger.warning("Reserves data not included in h5plexos results") 
+ 
+        return reserves 
             
-    def reserves_generators(self):
+    def reserves_generators(self, filename: str) -> pd.DataFrame:
+        """Reserves to generators mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
         try:
             try:
-                reserves_generators = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/reserves_generators']))
+                reserves_generators = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/reserves_generators']))
             except KeyError:
-                reserves_generators = pd.DataFrame(np.asarray(self.data[self.start_index + 'relations/reserve_generators']))
+                reserves_generators = pd.DataFrame(np.asarray(self.h5_data[self.start_index + 'relations/reserve_generators']))
             reserves_generators = reserves_generators.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             reserves_generators = reserves_generators.rename(columns={'child':'gen_name'})
-            return reserves_generators 
         except KeyError:
             self.logger.warning("Reserves data not included in h5plexos results") 
-            return pd.DataFrame()
-    
-    def reserves_regions(self):
-        reserves_generators = self.reserves_generators()
-        region_generators = self.region_generators()
+            reserves_generators = pd.DataFrame()
+        
+        return reserves_generators 
+
+    def reserves_regions(self, filename: str) -> pd.DataFrame:
+        """Reserves to regions mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        reserves_generators = self.reserves_generators(filename)
+        region_generators = self.region_generators(filename)
         try:
             reserves_regions = reserves_generators.merge(region_generators, how='left', on='gen_name')
         except KeyError:
@@ -465,9 +724,15 @@ class MetaData:
         reserves_regions.reset_index(drop=True,inplace=True)
         return reserves_regions
         
-    def reserves_zones(self):
-        reserves_generators = self.reserves_generators()
-        zone_generators = self.zone_generators()
+    def reserves_zones(self, filename: str) -> pd.DataFrame:
+        """Reserves to zones mapping.
+        
+        Args:
+            filename (str): The name of the h5 file to retreive data from. 
+                If retreiving from fromatted h5 file, just pass scenario name. 
+        """
+        reserves_generators = self.reserves_generators(filename)
+        zone_generators = self.zone_generators(filename)
         try:
             reserves_zones = reserves_generators.merge(zone_generators, how='left', on='gen_name')
         except KeyError:
@@ -477,6 +742,3 @@ class MetaData:
         reserves_zones.drop_duplicates(inplace=True)
         reserves_zones.reset_index(drop=True,inplace=True)
         return reserves_zones
-    
-    def close_file(self):
-        self.data.close()

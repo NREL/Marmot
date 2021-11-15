@@ -1,25 +1,28 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  9 13:20:56 2019
+"""Note! Module is currently not production ready.
+
+Note! Module is currently not production ready and 
+methods are not available to use.
 
 This code creates plots of generator utilization factor 
-(similiar to capacity factor but based on Available Capacity instead of Installed Capacity) 
-and is called from Marmot_plot_main.py
-
+(similar to capacity factor but based on Available Capacity instead of Installed Capacity) 
+and is called from Marmot_plot_main.py  
 
 @author: adyreson
 """
 
-import pandas as pd
-import numpy as np
-import matplotlib.pyplot as plt
 import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
+            UnderDevelopment, MissingZoneData)
 
-#===============================================================================
 
-def df_process_gen_ind_inputs(df,self):
+def df_process_gen_ind_inputs(df, self):
     df = df.reset_index(['timestamp','tech','gen_name'])
     df['tech'].replace(self.gen_names_dict, inplace=True)
     df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show.
@@ -31,22 +34,45 @@ def df_process_gen_ind_inputs(df,self):
 
     return df
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
+    """utilization_factor MPlot class.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The utilization.py module contains methods that are
+    related to the utilization of generators and other devices. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.mplot_data_dict = {}
-
-
-    def uf_fleet(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
         
-        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
+
+    def uf_fleet(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
+        return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -54,11 +80,12 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -72,7 +99,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -81,7 +108,7 @@ class MPlot(object):
 
                 Gen = df_process_gen_ind_inputs(Gen,self)
 
-                Ava = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
+                Ava = self["generator_Available_Capacity"].get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
                 Ava = df_process_gen_ind_inputs(Ava,self)
 
@@ -128,7 +155,7 @@ class MPlot(object):
             
             if not cf_chunk:
                 self.logger.warning("No generation in %s",zone_input)
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             CF_all_scenarios = pd.concat(cf_chunk, axis=1, sort=False)
@@ -137,7 +164,7 @@ class MPlot(object):
 
             # If CF_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
@@ -146,11 +173,13 @@ class MPlot(object):
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
 
-    def uf_gen(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        
-        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
+    def uf_gen(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
+        return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -158,11 +187,12 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties, self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(self.AGG_BY + " = " + zone_input)
@@ -175,7 +205,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -183,7 +213,7 @@ class MPlot(object):
                     continue
                 Gen=df_process_gen_ind_inputs(Gen,self)
 
-                Ava = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
+                Ava = self["generator_Available_Capacity"].get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
                 Ava = df_process_gen_ind_inputs(Ava,self)
                 Gen=pd.merge(Gen,Ava,on=['tech','timestamp','gen_name'])
@@ -227,7 +257,7 @@ class MPlot(object):
                 
             if not th_gen_chunk:
                 self.logger.warning("No generation in %s",zone_input)
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             CF_all_scenarios=pd.concat(th_gen_chunk, axis=1, sort=False)
@@ -239,18 +269,20 @@ class MPlot(object):
 
             # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
             outputs[zone_input] = {'fig': fig2, 'data_table': CF_all_scenarios}
         return outputs
 
-    def uf_fleet_by_type(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        
-        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
+    def uf_fleet_by_type(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
+        return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -258,11 +290,12 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
@@ -274,7 +307,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -282,7 +315,7 @@ class MPlot(object):
                     continue
                 Gen = df_process_gen_ind_inputs(Gen,self)
 
-                Ava = self.mplot_data_dict["generator_Available_Capacity"].get(scenario)
+                Ava = self["generator_Available_Capacity"].get(scenario)
                 Ava = Ava.xs(zone_input,level = self.AGG_BY)
                 Ava = df_process_gen_ind_inputs(Ava,self)
 
@@ -327,7 +360,7 @@ class MPlot(object):
             
             if not cf_chunk:
                 self.logger.warning("No generation in %s",zone_input)
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             if mconfig.parser("plot_title_as_region"):
                 ax3.set_title(zone_input)
@@ -338,29 +371,32 @@ class MPlot(object):
 
             # If GW_all_scenarios df is empty returns a empty dataframe and does not return plot
             if CF_all_scenarios.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
 
-    def GW_fleet(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        
-        return mfunc.UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
+    def GW_fleet(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
+        return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             GW_all_scenarios = pd.DataFrame()
@@ -374,7 +410,7 @@ class MPlot(object):
             for scenario in self.Scenarios:
 
                 self.logger.info("Scenario = " + str(scenario))
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario)
+                Gen = self["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -415,7 +451,7 @@ class MPlot(object):
             
             if not total_gen_chunks:
                 self.logger.warning("No generation in %s",zone_input)
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             if mconfig.parser("plot_title_as_region"):
                 ax3.set_title(zone_input)

@@ -1,0 +1,33 @@
+Ordered_Gen,vre,re,pv,thermal,storage
+Nuclear,,,,TRUE,
+Coal,,,,TRUE,
+Gas-CC,,,,TRUE,
+Gas-CC CCS,,,,TRUE,
+Gas-CT,,,,TRUE,
+Gas,,,,TRUE,
+Gas-Steam,,,,TRUE,
+Dual Fuel,,,,TRUE,
+DualFuel,,,,TRUE,
+Oil-Gas-Steam,,,,TRUE,
+Oil,,,,TRUE,
+Hydro,,TRUE,,,
+Ocean,,TRUE,,,
+Geothermal,,TRUE,,,
+Biomass,,TRUE,,,
+Biopower,,TRUE,,,
+Other,,,,,
+Wind,TRUE,TRUE,,,
+Offshore Wind,TRUE,TRUE,,,
+OffshoreWind,TRUE,TRUE,,,
+Solar,TRUE,TRUE,TRUE,,
+PV,TRUE,TRUE,TRUE,,
+dPV,TRUE,TRUE,TRUE,,
+CSP,,TRUE,,,
+PV-Battery,,TRUE,TRUE,,TRUE
+Battery,,,,,TRUE
+OSW-Battery,,,,,TRUE
+PHS,,,,,TRUE
+Storage,,,,,TRUE
+Net Imports,,,,,
+Curtailment,,,,,
+curtailment,,,,,

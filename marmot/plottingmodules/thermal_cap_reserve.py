@@ -1,49 +1,73 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec 9 10:34:48 2019
-Updated July 26th 16:20:00 2021
+"""Thermal capacity plots.
 
 This module plots figures which show the amount of thermal capacity 
-available but not commited (i.e in reserve)
+available but not committed (i.e in reserve)
 
 @author: Daniel Levie and Marty Schwarz
 """
 
-import pandas as pd
+import logging
 import numpy as np
-import textwrap
+import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 from matplotlib.patches import Patch
-import logging
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+
 import marmot.config.mconfig as mconfig
+import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
-#===============================================================================
 
+class MPlot(PlotDataHelper):
+    """thermal_cap_reserve MPlot class.
 
-class MPlot(object):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The thermal_cap_reserve module contains methods that
+    display the amount of generation in reserve, i.e non committed capacity.
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
 
-    def __init__(self, argument_dict):
+    def __init__(self, argument_dict: dict):
+        """
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
-        self.mplot_data_dict = {}
+        
+    def thermal_cap_reserves(self, start_date_range: str = None, 
+                             end_date_range: str = None, **_):
+        """Plots the total thermal generation capacity that is not committed, i.e in reserve.
 
-    def thermal_cap_reserves(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        """ 
-        Plots the total thermal generation capacity that is not commited, 
-        i.e in reserve
-        
         If multiple scenarios are included, each one will be plotted on a 
-        seperate subplot
-        
+        separate facet subplot.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         outputs = {}
         
@@ -52,17 +76,18 @@ class MPlot(object):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
                 
             # sets up x, y dimensions of plot
-            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
+            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
             
             grid_size = xdimension*ydimension
 
@@ -70,7 +95,7 @@ class MPlot(object):
             plot_number = len(self.Scenarios)
             excess_axs = grid_size - plot_number
             
-            fig1, axs = mfunc.setup_plot(xdimension,ydimension)
+            fig1, axs = plotlib.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             
             # holds list of unique generation technologies
@@ -81,12 +106,12 @@ class MPlot(object):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                Gen = self.mplot_data_dict["generator_Generation"].get(scenario).copy()
+                Gen = self["generator_Generation"].get(scenario).copy()
                 if self.shift_leapday == True:
-                    Gen = mfunc.shift_leapday(Gen,self.Marmot_Solutions_folder)
-                avail_cap = self.mplot_data_dict["generator_Available_Capacity"].get(scenario).copy()
+                    Gen = self.adjust_for_leapday(Gen)
+                avail_cap = self["generator_Available_Capacity"].get(scenario).copy()
                 if self.shift_leapday == True:
-                    avail_cap = mfunc.shift_leapday(avail_cap,self.Marmot_Solutions_folder)               
+                    avail_cap = self.adjust_for_leapday(avail_cap)               
                
                 # Check if zone is in avail_cap
                 try:
@@ -95,8 +120,8 @@ class MPlot(object):
                     self.logger.warning(f"No installed capacity in: {zone_input}")
                     break
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
-                avail_cap = mfunc.df_process_gen_inputs(avail_cap,self.ordered_gen)
-                Gen = mfunc.df_process_gen_inputs(Gen,self.ordered_gen)
+                avail_cap = self.df_process_gen_inputs(avail_cap)
+                Gen = self.df_process_gen_inputs(Gen)
                 Gen = Gen.loc[:, (Gen != 0).any(axis=0)]
 
                 thermal_reserve = avail_cap - Gen
@@ -107,12 +132,12 @@ class MPlot(object):
                 
                 #Convert units
                 if i == 0:
-                    unitconversion = mfunc.capacity_energy_unitconversion(max(thermal_reserve.sum(axis=1)))
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(thermal_reserve.sum(axis=1)))
                 thermal_reserve = thermal_reserve / unitconversion['divisor']
 
                 # Check if thermal_reserve contains data, if not skips
                 if thermal_reserve.empty == True:
-                    out = mfunc.MissingZoneData()
+                    out = MissingZoneData()
                     outputs[zone_input] = out
                     continue
                    
@@ -136,7 +161,7 @@ class MPlot(object):
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
                 axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[i].margins(x=0.01)
-                mfunc.set_plot_timeseries_format(axs,i)
+                PlotDataHelper.set_plot_timeseries_format(axs,i)
                 
                 # create list of unique gen technologies
                 l1 = thermal_reserve.columns.tolist()
@@ -158,14 +183,12 @@ class MPlot(object):
                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
                                     facecolor='inherit', frameon=True)
 
-            xlabels = [x.replace('_',' ') for x in self.xlabels]
-
             # add facet labels
-            mfunc.add_facet_labels(fig1, xlabels, self.ylabels)           
+            self.add_facet_labels(fig1)    
             
             # Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
             
             fig1.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -174,7 +197,7 @@ class MPlot(object):
                 plt.title(zone_input)
             # If data_table_chunks is empty, does not return data or figure
             if not data_table_chunks:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             # Concat all data tables together

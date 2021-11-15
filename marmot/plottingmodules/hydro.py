@@ -1,70 +1,108 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Dec  9 10:34:48 2019
+"""Hydro generator plots.
 
-This code creates hydro analysis and is called from Marmot_plot_main.py
+This module creates hydro analysis plots.
+
+DL: Oct 9th 2021, This plot is in need of work. 
+It may not produce production ready figures.
 
 @author: adyreson
 """
 
+import os
+import logging
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
-import os
 from matplotlib.patches import Patch
-import marmot.plottingmodules.marmot_plot_functions as mfunc
-import marmot.config.mconfig as mconfig
-import logging
 
-#===============================================================================
+import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
+            MissingZoneData)
+
 
 custom_legend_elements = [Patch(facecolor='#DD0200',
                             alpha=0.5, edgecolor='#DD0200',
                          label='Unserved Energy')]
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
+    """hydro MPlot class.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The hydro.py module contains methods that are
+    related to hydro generators. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+        
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        self.mplot_data_dict = {}
-
-    def hydro_continent_net_load(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
         
+
+    def hydro_continent_net_load(self, start_date_range: str = None, 
+                             end_date_range: str = None, **_):
+        """Creates a scatter plot of hydro generation vs net load 
+
+        Data is saved within this method.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception 
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Generation", [self.Scenarios[0]])]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = self.mplot_data_dict["generator_Generation"].get(self.Scenarios[0])
+            Stacked_Gen_read = self["generator_Generation"].get(self.Scenarios[0])
 
             self.logger.info("Zone = "+ zone_input)
             self.logger.info("Winter is defined as date range: \
             {} to {}".format(str(start_date_range),str(end_date_range)))
-            Net_Load = mfunc.df_process_gen_inputs(Stacked_Gen_read, self.ordered_gen)
+            Net_Load = self.df_process_gen_inputs(Stacked_Gen_read)
 
             # Calculates Net Load by removing variable gen
-            # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+            # Adjust list of values to drop depending on if it exists in Stacked_Gen df
             vre_gen_cat = [name for name in self.vre_gen_cat if name in Net_Load.columns]
             Net_Load = Net_Load.drop(labels = vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1) # Continent net load
@@ -75,8 +113,9 @@ class MPlot(object):
                 self.logger.warning("No Generation in %s",zone_input)
                 continue
             del Stacked_Gen_read
-            Stacked_Gen= mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
-            Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)] #Removes columns only containing 0
+            Stacked_Gen= self.df_process_gen_inputs(Stacked_Gen)
+            #Removes columns only containing 0
+            Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)] 
 
         #end weekly loop
 
@@ -84,7 +123,7 @@ class MPlot(object):
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
                 self.logger.warning("No Hydro Generation in %s", zone_input)
-                Hydro_Gen=mfunc.MissingZoneData()
+                Hydro_Gen=MissingZoneData()
                 continue
 
             del Stacked_Gen
@@ -93,9 +132,12 @@ class MPlot(object):
             fig2, ax2 = plt.subplots(figsize=(9,6))
 
             ax2.scatter(Net_Load[end_date_range:start_date_range],
-                        Hydro_Gen[end_date_range:start_date_range],color='black',s=5,label='Non-winter')
-            ax2.scatter(Net_Load[start_date_range:],Hydro_Gen[start_date_range:],color='blue',s=5,label='Winter',alpha=0.5)
-            ax2.scatter(Net_Load[:end_date_range],Hydro_Gen[:end_date_range],color='blue',s=5,alpha=0.5)
+                        Hydro_Gen[end_date_range:start_date_range], color='black',
+                        s=5, label='Non-winter')
+            ax2.scatter(Net_Load[start_date_range:],Hydro_Gen[start_date_range:],
+                        color='blue', s=5, label='Winter', alpha=0.5)
+            ax2.scatter(Net_Load[:end_date_range],Hydro_Gen[:end_date_range],
+                        color='blue', s=5, alpha=0.5)
 
 
             ax2.set_ylabel('In Region Hydro Generation (MW)',  color='black', rotation='vertical')
@@ -104,7 +146,8 @@ class MPlot(object):
             ax2.spines['top'].set_visible(False)
             ax2.tick_params(axis='y', which='major', length=5, width=1)
             ax2.tick_params(axis='x', which='major', length=5, width=1)
-            ax2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                                lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             ax2.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
@@ -112,31 +155,48 @@ class MPlot(object):
 
             handles, labels = ax2.get_legend_handles_labels()
 
-            leg1 = ax2.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+            leg1 = ax2.legend(reversed(handles), reversed(labels), 
+                              loc='lower left', bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
 
             ax2.add_artist(leg1)
             
-            fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Continent_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
+            fig2.savefig(os.path.join(hydro_figures, zone_input + 
+                                      f"_Hydro_Versus_Continent_Net_Load_{self.Scenarios[0]}"), 
+                         dpi=600, bbox_inches='tight')
         
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
 
-    def hydro_net_load(self, figure_name=None, prop=None, start=None, 
-                             end=None, timezone="", start_date_range=None, 
-                             end_date_range=None):
-        
+    def hydro_net_load(self, end: int = 7, timezone: str = "", **_):
+        """Line plot of hydro generation vs net load.
+
+        Creates separate plots for each week of the year, or longer depending 
+        on 'Day After' value passed through plot_select.csv
+
+        Data is saved within this method.
+
+        Args:
+            end (float, optional): Determines length of plot period. 
+                Defaults to 7.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception 
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Generation", [self.Scenarios[0]])]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for zone_input in self.Zones:
             self.logger.info("Zone = "+ zone_input)
@@ -144,9 +204,10 @@ class MPlot(object):
             #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
 
-            Stacked_Gen_read = self.mplot_data_dict["generator_Generation"].get(self.Scenarios[0])
+            Stacked_Gen_read = self["generator_Generation"].get(self.Scenarios[0])
             
-           # try:   #The rest of the function won't work if this particular zone can't be found in the solution file (e.g. if it doesn't include Mexico)
+           # The rest of the function won't work if this particular zone can't be found 
+           # in the solution file (e.g. if it doesn't include Mexico)
             try:
                 Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             except KeyError:
@@ -154,10 +215,10 @@ class MPlot(object):
                 continue
 
             del Stacked_Gen_read
-            Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
+            Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen)
 
             # Calculates Net Load by removing variable gen
-            # Adjust list of values to drop depending on if it exhists in Stacked_Gen df
+            # Adjust list of values to drop depending on if it exists in Stacked_Gen df
             vre_gen_cat = [name for name in self.vre_gen_cat if name in Stacked_Gen.columns]
             Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)
@@ -168,13 +229,14 @@ class MPlot(object):
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
                 self.logger.warning("No Hydro Generation in %s", zone_input)
-                Hydro_Gen=mfunc.MissingZoneData()
+                Hydro_Gen=MissingZoneData()
                 continue
 
             del Stacked_Gen
 
             first_date=Net_Load.index[0]
-            for wk in range(1,53): #assumes weekly, could be something else if user changes end Marmot_plot_select
+            #assumes weekly, could be something else if user changes end Marmot_plot_select
+            for wk in range(1,53): 
 
                 period_start=first_date+dt.timedelta(days=(wk-1)*7)
                 period_end=period_start+dt.timedelta(days=end)
@@ -191,10 +253,7 @@ class MPlot(object):
                 ax.plot(Hydro_Period, linewidth=2,
                        color=self.PLEXOS_color_dict.get('Hydro','#333333'),label='Hydro')
 
-
                 ax.plot(Net_Load_Period, color='black',label='Load')
-
-
 
                 ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
@@ -202,7 +261,8 @@ class MPlot(object):
                 ax.spines['top'].set_visible(False)
                 ax.tick_params(axis='y', which='major', length=5, width=1)
                 ax.tick_params(axis='x', which='major', length=5, width=1)
-                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                                    lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
 
                 locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
@@ -219,28 +279,25 @@ class MPlot(object):
                 if mconfig.parser("plot_title_as_region"):
                     ax.set_title(zone_input)
 
-
                 handles, labels = ax.get_legend_handles_labels()
 
-
                 #Legend 1
-                leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-
-
+                leg1 = ax.legend(reversed(handles), reversed(labels), 
+                                 loc='lower left',bbox_to_anchor=(1,0),
+                                 facecolor='inherit', frameon=True)
 
                 # Manually add the first legend back
                 ax.add_artist(leg1)
 
-
-                fig1.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_And_Net_Load" + "_" + self.Scenarios[0]+"_period_"+str(wk)), dpi=600, bbox_inches='tight')
-                Data_Table_Out.to_csv(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Scenarios[0]+"_period_"+str(wk)+ ".csv"))
+                fig1.savefig(os.path.join(hydro_figures, zone_input + 
+                                          f"_Hydro_And_Net_Load_{self.Scenarios[0]}_period_{str(wk)}"),
+                             dpi=600, bbox_inches='tight')
+                Data_Table_Out.to_csv(os.path.join(hydro_figures, zone_input + 
+                                          f"_Hydro_And_Net_Load_{self.Scenarios[0]}_period_{str(wk)}.csv"))
                 del fig1
                 del Data_Table_Out
                 mpl.pyplot.close('all')
             #end weekly loop
-
-
             #Scatter plot
             fig2, ax2 = plt.subplots(figsize=(9,6))
 
@@ -252,21 +309,24 @@ class MPlot(object):
             ax2.spines['top'].set_visible(False)
             ax2.tick_params(axis='y', which='major', length=5, width=1)
             ax2.tick_params(axis='x', which='major', length=5, width=1)
-            ax2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                            lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
             ax2.margins(x=0.01)
 
             handles, labels = ax2.get_legend_handles_labels()
 
-            leg1 = ax2.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
+            leg1 = ax2.legend(reversed(handles), reversed(labels), 
+                              loc='lower left',bbox_to_anchor=(1,0),
                               facecolor='inherit', frameon=True)
-
 
             ax2.add_artist(leg1)
             if mconfig.parser("plot_title_as_region"):
                 ax2.set_title(zone_input)
-            fig2.savefig(os.path.join(hydro_figures, zone_input + "_" + "Hydro_Versus_Net_Load" + "_" + self.Scenarios[0]), dpi=600, bbox_inches='tight')
+            fig2.savefig(os.path.join(hydro_figures, zone_input +
+                                      f"_Hydro_Versus_Net_Load_{self.Scenarios[0]}"),
+                         dpi=600, bbox_inches='tight')
         
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
 

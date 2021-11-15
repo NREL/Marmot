@@ -1,68 +1,114 @@
 # -*- coding: utf-8 -*-
-"""
-Created April 2020, updated August 2020
+"""System transmission plots.
 
-This code creates transmission line and interface plots and is called from Marmot_plot_main.py
+This code creates transmission line and interface plots.
 
 @author: Daniel Levie, Marty Schwarz
 """
 
 import os
+import logging
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib as mpl
 import matplotlib.dates as mdates
 import matplotlib.lines as mlines
-import logging
-import textwrap
-import marmot.plottingmodules.marmot_plot_functions as mfunc
+
 import marmot.config.mconfig as mconfig
+import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
+            UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
-#===============================================================================
 
-class MPlot(object):
+class MPlot(PlotDataHelper):
+    """transmission MPlot class.
 
-    def __init__(self, argument_dict):
+    All the plotting modules use this same class name.
+    This class contains plotting methods that are grouped based on the
+    current module name.
+    
+    The transmission.py module contains methods that are
+    related to the transmission network. 
+    
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    """
+
+    def __init__(self, argument_dict: dict):
+        """
+        Args:
+            argument_dict (dict): Dictionary containing all
+                arguments passed from MarmotPlot.
+        """
         # iterate over items in argument_dict and set as properties of class
         # see key_list in Marmot_plot_main for list of properties
         for prop in argument_dict:
             self.__setattr__(prop, argument_dict[prop])
+        
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
+                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.font_defaults = mconfig.parser("font_settings")
-        self.mplot_data_dict = {}
+        
 
-
-    #Duration curve of individual line utilization for all hours
     def line_util(self, **kwargs):
-        """
-        Method creates a timeseries line plot of transmission lineflow utilization for each region.
-        Utilization is plotted between 0 and 1 on the y-axis
-        The plot will default to showing the 10 highest utilized lines, a Line category can also be passed
-        instead using the property field in the Marmot_plot_select.csv
-        Each scenarios is plotted on a seperate Facet plot.
-        Figures and data tables are returned to plot_main
+        """Creates a timeseries line plot of transmission lineflow utilization for each region.
+
+        Utilization is plotted between 0 and 1 on the y-axis.
+        The plot will default to showing the 10 highest utilized lines. A Line category 
+        can also be passed instead, using the property field in the Marmot_plot_select.csv
+        Each scenarios is plotted on a separate Facet plot.
+
+        This methods calls _util() to create the figure.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         outputs = self._util(**kwargs)
         return outputs
 
     def line_hist(self, **kwargs):
-        """
-        This method creates a histogram of transmission lineflow utilization for each region.
-        Utilization is plotted between 0 and 1 on the x-axis, with no. lines on the y-axis.
-        Each bar is eqaul to a 0.05 utilization rate
-        The plot will default to showing all lines, a Line category can also be passed
+        """Creates a histogram of transmission lineflow utilization for each region.
+
+        Utilization is plotted between 0 and 1 on the x-axis, with # lines on the y-axis.
+        Each bar is equal to a 0.05 utilization rate
+        The plot will default to showing all lines. A Line category can also be passed
         instead using the property field in the Marmot_plot_select.csv
-        Each scenarios is plotted on a seperate Facet plot.
-        Figures and data tables are returned to plot_main
+        Each scenarios is plotted on a separate Facet plot.
+
+        This methods calls _util() and passes the hist=True argument to create the figure.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         outputs = self._util(hist=True, **kwargs)
         return outputs
 
-    def _util(self,hist=None, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
-      
+    def _util(self, hist: bool = False, prop: str = None, 
+              start_date_range: str = None, 
+              end_date_range: str = None, **_):
+        """Creates utilization plots, line plot and histograms
+
+        This methods is called from line_util() and line_hist()
+
+        Args:
+            hist (bool, optional): If True creates a histogram of utilization. 
+                Defaults to False.
+            prop (str, optional): Optional PLEXOS line category to display.
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -70,14 +116,16 @@ class MPlot(object):
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         # sets up x, y dimensions of plot
-        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,facet=True,multi_scenario=self.Scenarios)
+        xdimension, ydimension = self.setup_facet_xy_dimensions(facet=True, 
+                                                                multi_scenario=self.Scenarios)
         grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
@@ -87,7 +135,8 @@ class MPlot(object):
         for zone_input in self.Zones:
             self.logger.info(f"For all lines touching Zone = {zone_input}")
 
-            fig2, axs = mfunc.setup_plot(xdimension = xdimension, ydimension=ydimension,sharey = True)
+            fig2, axs = plotlib.setup_plot(xdimension=xdimension, 
+                                           ydimension=ydimension, sharey=True)
             plt.subplots_adjust(wspace=0.1, hspace=0.25)
 
             data_table=[]
@@ -96,9 +145,9 @@ class MPlot(object):
                 self.logger.info(f"Scenario = {str(scenario)}")
                 # gets correct metadata based on area aggregation
                 if self.AGG_BY=='zone':
-                    zone_lines = self.meta.zone_lines()
+                    zone_lines = self.meta.zone_lines(scenario)
                 else:
-                    zone_lines = self.meta.region_lines()
+                    zone_lines = self.meta.region_lines(scenario)
                 try:
                     zone_lines = zone_lines.set_index([self.AGG_BY])
                 except:
@@ -110,24 +159,26 @@ class MPlot(object):
                     zone_lines=zone_lines['line_name'].unique()
                 except KeyError:
                     self.logger.warning('No data to plot for scenario')
-                    outputs[zone_input] = mfunc.MissingZoneData()
+                    outputs[zone_input] = MissingZoneData()
                     continue
 
-                flow = self.mplot_data_dict["line_Flow"].get(scenario).copy()
-                flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] #Limit to only lines touching to this zone
+                flow = self["line_Flow"].get(scenario).copy()
+                #Limit to only lines touching to this zone
+                flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] 
 
                 if self.shift_leapday == True:
-                    flow = mfunc.shift_leapday(flow,self.Marmot_Solutions_folder)
-                limits = self.mplot_data_dict["line_Import_Limit"].get(scenario).copy()
+                    flow = self.adjust_for_leapday(flow)
+                limits = self["line_Import_Limit"].get(scenario).copy()
                 limits = limits.droplevel('timestamp').drop_duplicates()
 
                 limits.mask(limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
 
                 # This checks for a nan in string. If no scenario selected, do nothing.
-                if (prop != prop)==False:
+                if pd.notna(prop):
                     self.logger.info(f"Line category = {str(prop)}")
-                    line_relations = self.meta.lines().rename(columns={"name":"line_name"}).set_index(["line_name"])
-                    flow=pd.merge(flow,line_relations,left_index=True,right_index=True)
+                    line_relations = self.meta.lines(scenario).rename(columns={"name":"line_name"}).set_index(["line_name"])
+                    flow=pd.merge(flow,line_relations, left_index=True, 
+                                  right_index=True)
                     flow=flow[flow["category"] == prop]
                     flow=flow.drop('category',axis=1)
 
@@ -141,11 +192,12 @@ class MPlot(object):
 
                 color_dict = dict(zip(self.Scenarios,self.color_list))
                 if hist == True:
-                    mfunc.create_hist_plot(axs,annual_util,color_dict,label=scenario,n=n)
+                    plotlib.create_hist_plot(axs,annual_util,color_dict,label=scenario,n=n)
                 else:
                     for line in top_utilization.index.get_level_values(level='line_name').unique():
-                        duration_curve = flow.loc[line].sort_values(by = 'Util',ascending = False).reset_index(drop = True)
-                        mfunc.create_line_plot(axs,duration_curve,'Util',label=line,n=n)
+                        duration_curve = flow.loc[line].sort_values(by='Util', 
+                                                                    ascending=False).reset_index(drop=True)
+                        plotlib.create_line_plot(axs,duration_curve, 'Util' ,label=line, n=n)
                         axs[n].set_ylim((0,1.1))
                         handles, labels = axs[n].get_legend_handles_labels()
                         axs[n].legend(handles,labels, loc='best',
@@ -154,29 +206,32 @@ class MPlot(object):
 
             #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
 
             # add facet labels
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            ylabels = [textwrap.fill(y.replace('_',' '),10) for y in self.ylabels]
-            mfunc.add_facet_labels(fig2, xlabels, ylabels)
+            self.add_facet_labels(fig2)
 
             fig2.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if hist == True:
-                if (prop != prop)==True:
+                if pd.notna(prop):
                     prop_name = 'All Lines'
                 else:
                     prop_name = prop
-                plt.ylabel('Number of lines',  color='black', rotation='vertical', labelpad=30)
-                plt.xlabel(f'Line Utilization: {prop_name}',  color='black', rotation='horizontal', labelpad=30)
+                plt.ylabel('Number of lines',  color='black', 
+                           rotation='vertical', labelpad=30)
+                plt.xlabel(f'Line Utilization: {prop_name}',  color='black', 
+                           rotation='horizontal', labelpad=30)
             else:
-                if (prop != prop)==True:
+                if pd.notna(prop):
                     prop_name ='Top 10 Lines'
                 else:
                     prop_name = prop
-                plt.ylabel(f'Line Utilization: {prop_name}',  color='black', rotation='vertical', labelpad=60)
-                plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
+                plt.ylabel(f'Line Utilization: {prop_name}', color='black', 
+                           rotation='vertical', labelpad=60)
+                plt.xlabel('Intervals',  color='black', 
+                           rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             try:
@@ -189,13 +244,31 @@ class MPlot(object):
             outputs[zone_input] = {'fig': fig2,'data_table':Data_Out}
         return outputs
 
-    def int_flow_ind(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
+    def int_flow_ind(self, figure_name: str = None, prop: str = None, 
+                     start_date_range: str = None, 
+                     end_date_range: str = None, **_):
+        """Creates a line plot of interchange flows and their import and export limits.
 
-        """
-        This method plots flow, import and export limit, for individual transmission interchanges, with a facet for each interchange.
+        Each interchange is potted on a separate facet plot.
         The plot includes every interchange that originates or ends in the aggregation zone.
-        Figures and data tables are returned to plot_main
+        This can be adjusted by passing a comma separated string of interchanges to the property input.
+
+        The code will create either a timeseries or duration curve depending on 
+        if the word 'duration_curve' is in the figure_name.
+        To make a duration curve, ensure the word 'duration_curve' is found in the figure_name.
+
+        Args:
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            prop (str, optional): Comma separated string of interchanges. 
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
         """
         duration_curve=False
         if 'duration_curve' in figure_name:
@@ -207,11 +280,12 @@ class MPlot(object):
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         scenario = self.Scenarios[0]
 
@@ -228,9 +302,9 @@ class MPlot(object):
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
-                zone_lines = self.meta.zone_lines()
+                zone_lines = self.meta.zone_lines(scenario)
             else:
-                zone_lines = self.meta.region_lines()
+                zone_lines = self.meta.region_lines(scenario)
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
@@ -241,24 +315,24 @@ class MPlot(object):
             zone_lines = zone_lines['line_name'].unique()
 
             #Map lines to interfaces
-            all_ints = self.meta.interface_lines() #Map lines to interfaces
+            all_ints = self.meta.interface_lines(scenario) #Map lines to interfaces
             all_ints.index = all_ints.line
             ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
 
             #flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
             #flow = flow.droplevel('interface_category')
 
-            export_limits = self.mplot_data_dict["interface_Export_Limit"].get(scenario).droplevel('timestamp')
+            export_limits = self["interface_Export_Limit"].get(scenario).copy().droplevel('timestamp')
             export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
             export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
 
             #Drop unnecessary columns.
             export_limits.reset_index(inplace = True)
-            export_limits.drop(columns = 'interface_category',inplace = True)
+            export_limits.drop(columns=['interface_category', 'units'], inplace=True)
             export_limits.set_index('interface_name',inplace = True)
 
-            import_limits = self.mplot_data_dict["interface_Import_Limit"].get(scenario).droplevel('timestamp')
+            import_limits = self["interface_Import_Limit"].get(scenario).copy().droplevel('timestamp')
             import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
             import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
@@ -266,13 +340,13 @@ class MPlot(object):
 
             #Drop unnecessary columns.
             import_limits.reset_index(inplace = True)
-            import_limits.drop(columns = 'interface_category',inplace = True)
+            import_limits.drop(columns=['interface_category', 'units'], inplace=True)
             import_limits.set_index('interface_name',inplace = True)
 
             #Extract time index
-            ti = self.mplot_data_dict["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
+            ti = self["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
 
-            if prop != '':
+            if pd.notna(prop):
                 interf_list = prop.split(',')
                 self.logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
                 self.logger.info(interf_list)
@@ -280,8 +354,8 @@ class MPlot(object):
                 interf_list = reported_ints.copy()
 
             self.logger.info('Plotting full time series results.')
-            xdim,ydim = mfunc.set_x_y_dimension(len(interf_list))
-            fig2, axs = mfunc.setup_plot(xdim,ydim,sharey = False)
+            xdim,ydim = self.set_x_y_dimension(len(interf_list))
+            fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
 
             grid_size = xdim * ydim
             excess_axs = grid_size - len(interf_list)
@@ -311,34 +385,41 @@ class MPlot(object):
                     limits.index = ti
 
                     for scenario in self.Scenarios:
-                        flow = self.mplot_data_dict["interface_Flow"].get(scenario)
-                        single_int = flow.xs(interf,level = 'interface_name') / 1000
-                        single_int.index = single_int.index.droplevel('interface_category')
+                        flow = self["interface_Flow"].get(scenario)
+                        single_int = flow.xs(interf, level='interface_name') / 1000
+                        single_int.index = single_int.index.droplevel(['interface_category','units'])
                         single_int.columns = [interf]
                         single_int = single_int.reset_index().set_index('timestamp')
                         limits = limits.reset_index().set_index('timestamp')
 
                         if self.shift_leapday == True:
-                            single_int = mfunc.shift_leapday(single_int,self.Marmot_Solutions_folder)
+                            single_int = self.adjust_for_leapday(single_int)
                         if pd.notna(start_date_range):
                             single_int = single_int[start_date_range : end_date_range]
                             limits = limits[start_date_range : end_date_range]
                         if duration_curve:
-                            single_int = mfunc.sort_duration(single_int,interf)
+                            single_int = PlotDataHelper.sort_duration(single_int,interf)
 
-                        mfunc.create_line_plot(axs,single_int,interf,label = scenario + '\n interface flow', n = n)
+                        plotlib.create_line_plot(axs, single_int, interf, 
+                                                label=f"{scenario}\n interface flow",
+                                                n=n)
 
-                        #Only print limits if it doesn't change monthly or if you are plotting a time series. Otherwise the limit lines could be misleading.
+                        # Only print limits if it doesn't change monthly or if you are plotting a time series. 
+                        # Otherwise the limit lines could be misleading.
                         if not duration_curve or identical[0]:
                             if scenario == self.Scenarios[-1]:
                                 #Only plot limits for last scenario.
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
-                                mfunc.create_line_plot(axs,limits,'export limit',label = 'export limit',color_dict = limits_color_dict,linestyle = '--', n = n)
-                                mfunc.create_line_plot(axs,limits,'import limit',label = 'import limit',color_dict = limits_color_dict,linestyle = '--', n = n)
+                                plotlib.create_line_plot(axs, limits, 'export limit',
+                                                         label='export limit', color_dict=limits_color_dict,
+                                                         linestyle='--', n=n)
+                                plotlib.create_line_plot(axs, limits, 'import limit', 
+                                                         label='import limit', color_dict=limits_color_dict,
+                                                         linestyle='--', n=n)
 
                         #For output time series .csv
-                        scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
-                        single_int_out = single_int.set_index([scenario_names],append = True)
+                        scenario_names = pd.Series([scenario] * len(single_int), name='Scenario')
+                        single_int_out = single_int.set_index([scenario_names], append=True)
                         chunks_interf.append(single_int_out)
 
                     Data_out_line = pd.concat(chunks_interf,axis = 0)
@@ -346,7 +427,8 @@ class MPlot(object):
                     chunks.append(Data_out_line)
 
                 else:
-                    self.logger.warning(interf + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
+                    self.logger.warning(f"{interf} not found in results. Have you tagged "
+                                        "it with the 'Must Report' property in PLEXOS?")
                     excess_axs += 1
                     missing_ints += 1
                     continue
@@ -354,12 +436,12 @@ class MPlot(object):
                 axs[n].set_title(interf)
                 handles, labels = axs[n].get_legend_handles_labels()
                 if not duration_curve:
-                    mfunc.set_plot_timeseries_format(axs, n=n)
+                    PlotDataHelper.set_plot_timeseries_format(axs, n=n)
                 if n == len(interf_list) - 1:
-                    axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
+                    axs[n].legend(loc='lower left', bbox_to_anchor=(1.05, -0.2))
 
                 if missing_ints == len(interf_list):
-                    outputs = mfunc.MissingInputData()
+                    outputs = MissingInputData()
                     return outputs
 
             Data_Table_Out = pd.concat(chunks,axis = 1)
@@ -374,10 +456,12 @@ class MPlot(object):
             # Data_Table_Out.index = pd.date_range(start = '1/1/2024',end = '12/31/2024',freq = 'D')
 
             fig2.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
+            plt.ylabel('Flow (GW)',  color='black', rotation='vertical', 
+                       labelpad=30)
             if duration_curve:
-                plt.xlabel('Sorted hour of the year', color = 'black', labelpad = 30)
+                plt.xlabel('Sorted hour of the year', color='black', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
@@ -385,15 +469,24 @@ class MPlot(object):
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs 
 
-    def int_flow_ind_seasonal(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
+    def int_flow_ind_seasonal(self, figure_name: str = None, prop: str = None, 
+                              start_date_range: str = None, 
+                              end_date_range: str = None, **_):
+        """#TODO: Finish Docstring 
 
+        Args:
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            prop (str, optional): Comma separated string of interchanges. 
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
         """
-        This method plots flow, import and export limit, for individual transmission interchanges, with a facet for each interchange.
-        The plot includes every interchange that originates or ends in the aggregation zone.
-        Figures and data tables are returned to plot_main
-        """
-        
         #TODO: Use auto unit converter in method
         
         duration_curve=False
@@ -406,11 +499,12 @@ class MPlot(object):
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         scenario = self.Scenarios[0]
 
@@ -422,9 +516,9 @@ class MPlot(object):
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
-                zone_lines = self.meta.zone_lines()
+                zone_lines = self.meta.zone_lines(scenario)
             else:
-                zone_lines = self.meta.region_lines()
+                zone_lines = self.meta.region_lines(scenario)
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
@@ -435,14 +529,14 @@ class MPlot(object):
             zone_lines = zone_lines['line_name'].unique()
 
             #Map lines to interfaces
-            all_ints = self.meta.interface_lines() #Map lines to interfaces
+            all_ints = self.meta.interface_lines(scenario) #Map lines to interfaces
             all_ints.index = all_ints.line
             ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
 
             #flow = flow[flow.index.get_level_values('interface_name').isin(ints.interface)] #Limit to only interfaces touching to this zone
             #flow = flow.droplevel('interface_category')
 
-            export_limits = self.mplot_data_dict["interface_Export_Limit"].get(scenario).droplevel('timestamp')
+            export_limits = self["interface_Export_Limit"].get(scenario).droplevel('timestamp')
             export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
             export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
@@ -452,7 +546,7 @@ class MPlot(object):
             export_limits.drop(columns = 'interface_category',inplace = True)
             export_limits.set_index('interface_name',inplace = True)
 
-            import_limits = self.mplot_data_dict["interface_Import_Limit"].get(scenario).droplevel('timestamp')
+            import_limits = self["interface_Import_Limit"].get(scenario).droplevel('timestamp')
             import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
             import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
@@ -464,7 +558,7 @@ class MPlot(object):
             import_limits.set_index('interface_name',inplace = True)
 
             #Extract time index
-            ti = self.mplot_data_dict["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
+            ti = self["interface_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
 
             if prop != '':
                 interf_list = prop.split(',')
@@ -484,12 +578,13 @@ class MPlot(object):
                     self.logger.warning(interf + ' not found in results.')
                     interf_list.remove(interf)
             if not interf_list:
-                outputs = mfunc.MissingInputData()
+                outputs = MissingInputData()
                 return outputs
 
             xdim = 2
             ydim = len(interf_list)
-            fig2, axs = plt.subplots(ydim,xdim, figsize=((6*xdim),(4*ydim)), sharey=False, squeeze=False)
+            fig2, axs = plt.subplots(ydim, xdim, figsize=((6*xdim), (4*ydim)), 
+                                     sharey=False, squeeze=False)
 
             grid_size = xdim * ydim
             excess_axs = grid_size - len(interf_list)
@@ -518,34 +613,36 @@ class MPlot(object):
                 limits.index = ti
 
                 for scenario in self.Scenarios:
-                    flow = self.mplot_data_dict["interface_Flow"].get(scenario)
+                    flow = self["interface_Flow"].get(scenario)
                     single_int = flow.xs(interf,level = 'interface_name') / 1000
                     single_int.index = single_int.index.droplevel('interface_category')
                     single_int.columns = [interf]
                     if self.shift_leapday == True:
-                        single_int = mfunc.shift_leapday(single_int,self.Marmot_Solutions_folder)
+                        single_int = self.adjust_for_leapday(single_int)
                     summer = single_int[start_date_range:end_date_range]
                     winter = single_int.drop(summer.index)
                     summer_lim = limits[start_date_range:end_date_range]
                     winter_lim = limits.drop(summer.index)
 
                     if duration_curve:
-                        summer = mfunc.sort_duration(summer,interf)
-                        winter = mfunc.sort_duration(winter,interf)
-                        summer_lim = mfunc.sort_duration(summer_lim,'export limit')
-                        winter_lim = mfunc.sort_duration(winter_lim,'export limit')
+                        summer = PlotDataHelper.sort_duration(summer,interf)
+                        winter = PlotDataHelper.sort_duration(winter,interf)
+                        summer_lim = PlotDataHelper.sort_duration(summer_lim,'export limit')
+                        winter_lim = PlotDataHelper.sort_duration(winter_lim,'export limit')
 
                     axs[n,0].plot(summer[interf],linewidth = 1,label = scenario + '\n interface flow')
                     axs[n,1].plot(winter[interf],linewidth = 1,label = scenario + '\n interface flow')
                     if scenario == self.Scenarios[-1]:
                         for col in summer_lim:
                             limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
-                            axs[n,0].plot(summer_lim[col],linewidth = 1,linestyle = '--',color = limits_color_dict[col],label = col)
-                            axs[n,1].plot(winter_lim[col],linewidth = 1,linestyle = '--',color = limits_color_dict[col],label = col)
+                            axs[n,0].plot(summer_lim[col], linewidth=1, linestyle='--',
+                                          color=limits_color_dict[col], label=col)
+                            axs[n,1].plot(winter_lim[col], linewidth=1, linestyle='--', 
+                                          color=limits_color_dict[col], label=col)
 
                     #For output time series .csv
-                    scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
-                    single_int_out = single_int.set_index([scenario_names],append = True)
+                    scenario_names = pd.Series([scenario] * len(single_int), name='Scenario')
+                    single_int_out = single_int.set_index([scenario_names], append=True)
                     chunks_interf.append(single_int_out)
 
                 Data_out_line = pd.concat(chunks_interf,axis = 0)
@@ -557,7 +654,7 @@ class MPlot(object):
                 axs[n,1].set_title(interf)
                 handles, labels = axs[n,0].get_legend_handles_labels()
                 if not duration_curve:
-                    locator = mdates.AutoDateLocator(minticks = self.minticks, maxticks = self.maxticks)
+                    locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
                     formatter = mdates.ConciseDateFormatter(locator)
                     formatter.formats[2] = '%d\n %b'
                     formatter.zero_formats[1] = '%b\n %Y'
@@ -594,19 +691,20 @@ class MPlot(object):
 
         return outputs
 
-
     #TODO: re-organize parameters (self vs. not self)
-    def int_flow_ind_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
+    def int_flow_ind_diff(self, figure_name: str = None, **_):
+        """Plot under development
 
-        """
-        This method plots the hourly difference in interface flow between two scenarios for individual interfaces, with a facet for each interface.
+        This method plots the hourly difference in interface flow between two scenarios for 
+        individual interfaces, with a facet for each interface.
         The two scenarios are defined in the "Scenario_Diff" row of Marmot_user_defined_inputs.
         The interfaces are specified in the plot properties field of Marmot_plot_select.csv (column 4).
         The figure and data tables are saved within the module.
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
         """
-        
-        return mfunc.UnderDevelopment() # TODO: add new get_data method 
+        return UnderDevelopment() # TODO: add new get_data method 
         
         duration_curve=False
         if 'duration_curve' in figure_name:
@@ -617,12 +715,12 @@ class MPlot(object):
         Import_Limit_Collection = {}
         Export_Limit_Collection = {}
 
-        check_input_data.extend([mfunc.get_data(Flow_Collection,"interface_Flow",self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(Import_Limit_Collection,"interface_Import_Limit",self.Marmot_Solutions_folder, self.Scenarios)])
-        check_input_data.extend([mfunc.get_data(Export_Limit_Collection,"interface_Export_Limit",self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([get_data(Flow_Collection,"interface_Flow",self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([get_data(Import_Limit_Collection,"interface_Import_Limit",self.Marmot_Solutions_folder, self.Scenarios)])
+        check_input_data.extend([get_data(Export_Limit_Collection,"interface_Export_Limit",self.Marmot_Solutions_folder, self.Scenarios)])
 
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         scenario = self.Scenarios[0]
@@ -640,9 +738,9 @@ class MPlot(object):
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
-                zone_lines = self.meta.zone_lines()
+                zone_lines = self.meta.zone_lines(scenario)
             else:
-                zone_lines = self.meta.region_lines()
+                zone_lines = self.meta.region_lines(scenario)
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
@@ -653,7 +751,7 @@ class MPlot(object):
             zone_lines = zone_lines['line_name'].unique()
 
             #Map lines to interfaces
-            all_ints = self.meta.interface_lines() #Map lines to interfaces
+            all_ints = self.meta.interface_lines(scenario) #Map lines to interfaces
             all_ints.index = all_ints.line
             ints = all_ints.loc[all_ints.index.intersection(zone_lines)]
 
@@ -692,8 +790,8 @@ class MPlot(object):
                 interf_list = reported_ints.copy()
                 
             self.logger.info('Plotting full time series results.')
-            xdim,ydim = mfunc.set_x_y_dimension(len(interf_list))
-            fig2, axs = mfunc.setup_plot(xdim,ydim,sharey = False)
+            xdim,ydim = self.set_x_y_dimension(len(interf_list))
+            fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
 
             grid_size = xdim * ydim
             excess_axs = grid_size - len(interf_list)
@@ -729,7 +827,7 @@ class MPlot(object):
                         single_int.columns = [interf]
 
                         if self.shift_leapday == True:
-                            single_int = mfunc.shift_leapday(single_int,self.Marmot_Solutions_folder)
+                            single_int = self.adjust_for_leapday(single_int)
 
                         single_int = single_int.reset_index().set_index('timestamp')
                         limits = limits.reset_index().set_index('timestamp')
@@ -739,18 +837,18 @@ class MPlot(object):
                             limits = limits[self.start_date : self.end_date]
 
                         if duration_curve:
-                            single_int = mfunc.sort_duration(single_int,interf)
+                            single_int = PlotDataHelper.sort_duration(single_int,interf)
                             
 
-                        mfunc.create_line_plot(axs,single_int,interf,label = scenario + '\n interface flow', n = n)
+                        plotlib.create_line_plot(axs,single_int,interf,label = scenario + '\n interface flow', n = n)
                         
                         #Only print limits if it doesn't change monthly or if you are plotting a time series. Otherwise the limit lines could be misleading.
                         if not duration_curve or identical[0]: 
                             if scenario == self.Scenarios[-1]:
                                 #Only plot limits for last scenario.
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
-                                mfunc.create_line_plot(axs,limits,'export limit',label = 'export limit',color_dict = limits_color_dict,linestyle = '--', n = n)
-                                mfunc.create_line_plot(axs,limits,'import limit',label = 'import limit',color_dict = limits_color_dict,linestyle = '--', n = n)
+                                plotlib.create_line_plot(axs,limits,'export limit',label = 'export limit',color_dict = limits_color_dict,linestyle = '--', n = n)
+                                plotlib.create_line_plot(axs,limits,'import limit',label = 'import limit',color_dict = limits_color_dict,linestyle = '--', n = n)
 
                         #For output time series .csv
                         scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
@@ -770,12 +868,12 @@ class MPlot(object):
                 axs[n].set_title(interf)
                 handles, labels = axs[n].get_legend_handles_labels()
                 if not duration_curve:
-                    mfunc.set_plot_timeseries_format(axs, n=n)
+                    PlotDataHelper.set_plot_timeseries_format(axs, n=n)
                 if n == len(interf_list) - 1:
                     axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
 
                 if missing_ints == len(interf_list):
-                    outputs = mfunc.MissingInputData()
+                    outputs = MissingInputData()
                     return outputs
 
             Data_Table_Out = pd.concat(chunks,axis = 1)
@@ -802,18 +900,25 @@ class MPlot(object):
         return outputs
 
 
-    def line_flow_ind(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
+    def line_flow_ind(self, figure_name: str = None, prop: str = None, **_):
         """
-        This method plots flow, import and export limit, for individual transmission lines, with a facet for each line.
+        #TODO: Finish Docstring 
+
+
+        This method plots flow, import and export limit, for individual transmission lines, 
+        with a facet for each line.
         The lines are specified in the plot properties field of Marmot_plot_select.csv (column 4).
         The plot includes every interchange that originates or ends in the aggregation zone.
         Figures and data tables are returned to plot_main
-        """
-        
-        #TODO: Use auto unit converter in method
 
-        
+        Args:
+            figure_name (str, optional): [description]. Defaults to None.
+            prop (str, optional): [description]. Defaults to None.
+
+        Returns:
+            [type]: [description]
+        """
+        #TODO: Use auto unit converter in method
         duration_curve=False
         if 'duration_curve' in figure_name:
             duration_curve = True
@@ -824,32 +929,33 @@ class MPlot(object):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = prop.split(",")
         if select_lines == None:
-            return mfunc.InputSheetError()
+            return InputSheetError()
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines)
 
         scenario = self.Scenarios[0] #Select single scenario for purpose of extracting limits.
 
-        export_limits = self.mplot_data_dict["line_Export_Limit"].get(scenario).droplevel('timestamp')
+        export_limits = self["line_Export_Limit"].get(scenario).droplevel('timestamp')
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 
-        import_limits = self.mplot_data_dict["line_Import_Limit"].get(scenario).droplevel('timestamp')
+        import_limits = self["line_Import_Limit"].get(scenario).droplevel('timestamp')
         import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
 
 
-        flows = self.mplot_data_dict["line_Flow"][scenario]
+        flows = self["line_Flow"][scenario]
 
         # limited_lines = []
         # i = 0
@@ -868,13 +974,13 @@ class MPlot(object):
         # print(limited_lines)
         # pd.DataFrame(limited_lines).to_csv('/Users/mschwarz/OR OSW local/Solutions/Figures_Output/limited_lines.csv')
 
-        xdim,ydim = mfunc.set_x_y_dimension(len(select_lines))
+        xdim,ydim = self.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
-        fig2, axs = mfunc.setup_plot(xdim,ydim,sharey = False)
+        fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
         #plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-        reported_lines = self.mplot_data_dict["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
+        reported_lines = self["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
         n = -1
         missing_lines = 0
         chunks = []
@@ -903,18 +1009,19 @@ class MPlot(object):
                 limits_chunks.append(limits)
 
                 for scenario in self.Scenarios:
-                    flow = self.mplot_data_dict["line_Flow"][scenario]
+                    flow = self["line_Flow"][scenario]
                     single_line = flow.xs(line,level = 'line_name')
+                    single_line = single_line.droplevel('units')
                     single_line.columns = [line]
 
                     if self.shift_leapday == True:
-                        single_line = mfunc.shift_leapday(single_line,self.Marmot_Solutions_folder)
+                        single_line = self.adjust_for_leapday(single_line)
 
                     single_line_out = single_line.copy()
                     if duration_curve:
-                        single_line = mfunc.sort_duration(single_line,line)
+                        single_line = PlotDataHelper.sort_duration(single_line,line)
 
-                    mfunc.create_line_plot(axs,single_line,line, label = scenario + '\n line flow', n = n)
+                    plotlib.create_line_plot(axs, single_line, line, label = scenario + '\n line flow', n = n)
 
                     #Add %congested number to plot.
                     if scenario == self.Scenarios[0]:
@@ -944,19 +1051,19 @@ class MPlot(object):
                 missing_lines += 1
                 continue
 
-            mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+            PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
             axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit',color = 'red')
             axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit', color = 'green')
 
             axs[n].set_title(line)
             handles, labels = axs[n].get_legend_handles_labels()
             if not duration_curve:
-                mfunc.set_plot_timeseries_format(axs, n=n)
+                PlotDataHelper.set_plot_timeseries_format(axs, n=n)
             if n == len(select_lines) - 1:
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
 
         if missing_lines == len(select_lines):
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         Data_Table_Out = pd.concat(chunks,axis = 1)
@@ -975,21 +1082,27 @@ class MPlot(object):
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
        # Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + 'limits.csv'))
 
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
 
-    def line_flow_ind_diff(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
-
+    def line_flow_ind_diff(self, figure_name: str = None, 
+                           prop: str = None, **_):
         """
+        #TODO: Finish Docstring 
+
         This method plots the flow difference for individual transmission lines, with a facet for each line.
         The scenarios are specified in the "Scenario_Diff_plot" field of Marmot_user_defined_inputs.csv.
         The lines are specified in the plot properties field of Marmot_plot_select.csv (column 4).
         Figures and data tables are saved in the module.
-        """
-        
-        #TODO: Use auto unit converter in method
 
+        Args:
+            figure_name (str, optional): [description]. Defaults to None.
+            prop (str, optional): [description]. Defaults to None.
+
+        Returns:
+            [type]: [description]
+        """
+        #TODO: Use auto unit converter in method
         
         duration_curve=False
         if 'duration_curve' in figure_name:
@@ -999,30 +1112,31 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = prop.split(",")
         if select_lines == None:
-            outputs = mfunc.InputSheetError()
+            outputs = InputSheetError()
             return outputs
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines) 
-        flow_diff = self.mplot_data_dict["line_Flow"].get(self.Scenario_Diff[1]) - self.mplot_data_dict["line_Flow"].get(self.Scenario_Diff[0])
+        flow_diff = self["line_Flow"].get(self.Scenario_Diff[1]) - self["line_Flow"].get(self.Scenario_Diff[0])
 
-        xdim,ydim = mfunc.set_x_y_dimension(len(select_lines))
+        xdim,ydim = self.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
-        fig2, axs = mfunc.setup_plot(xdim,ydim,sharey = False)
+        fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-        reported_lines = self.mplot_data_dict["line_Flow"].get(self.Scenarios[0]).index.get_level_values('line_name').unique()
+        reported_lines = self["line_Flow"].get(self.Scenarios[0]).index.get_level_values('line_name').unique()
         n = -1
         missing_lines = 0
         chunks = []
@@ -1037,14 +1151,14 @@ class MPlot(object):
                 single_line = flow_diff.xs(line,level = 'line_name')
                 single_line.columns = [line]
                 if self.shift_leapday == True:
-                    single_line = mfunc.shift_leapday(single_line,self.Marmot_Solutions_folder)
+                    single_line = self.adjust_for_leapday(single_line)
 
                 single_line_out = single_line.copy()
                 if duration_curve:
-                    single_line = mfunc.sort_duration(single_line,line)
+                    single_line = PlotDataHelper.sort_duration(single_line,line)
                                         
-                #mfunc.create_line_plot(axs,single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', n = n)
-                mfunc.create_line_plot(axs,single_line,line, label = 'BESS - no BESS \n line flow', n = n)
+                #plotlib.create_line_plot(axs,single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', n = n)
+                plotlib.create_line_plot(axs,single_line,line, label = 'BESS - no BESS \n line flow', n = n)
 
 
             else:
@@ -1053,18 +1167,18 @@ class MPlot(object):
                 missing_lines += 1
                 continue
 
-            mfunc.remove_excess_axs(axs,excess_axs,grid_size)     
+            PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)     
             axs[n].set_title(line)
             handles, labels = axs[n].get_legend_handles_labels()
             if not duration_curve:
-                mfunc.set_plot_timeseries_format(axs, n=n)
+                PlotDataHelper.set_plot_timeseries_format(axs, n=n)
             if n == len(select_lines) - 1:
                 axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
 
             chunks.append(single_line_out)
 
         if missing_lines == len(select_lines):
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         Data_Table_Out = pd.concat(chunks,axis = 1)
@@ -1081,13 +1195,14 @@ class MPlot(object):
         fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
 
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
 
-    def line_flow_ind_seasonal(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
+    def line_flow_ind_seasonal(self, figure_name: str = None, prop: str = None, 
+                               start_date_range: str = None, 
+                               end_date_range: str = None, **_):
+        """TODO: Finish Docstring.
 
-        """
         This method differs from the previous method, in that it plots seasonal line limits.
         To use this method, line import/export must be an "interval" property, not a "year" property.
         This can be selected in  "plexos_properties.csv".
@@ -1098,17 +1213,23 @@ class MPlot(object):
         The plot includes every interchange that originates or ends in the aggregation zone. 
         Figures and data tables saved in the module.
 
+        Args:
+            figure_name (str, optional): [description]. Defaults to None.
+            prop (str, optional): [description]. Defaults to None.
+            start_date_range (str, optional): [description]. Defaults to None.
+            end_date_range (str, optional): [description]. Defaults to None.
+
+        Returns:
+            [type]: [description]
         """
-        
         #TODO: Use auto unit converter in method
 
-        
         if pd.isna(start_date_range):
             self.logger.warning('You are attempting to plot a time series facetted by two seasons,\n\
             but you are missing a value in the "Start Date" column of "Marmot_plot_select.csv" \
             Please enter dates in "Start Date" and "End Date". These will define the bounds of \
             one of your two seasons. The other season will be comprised of the rest of the year.')
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         duration_curve=False
         if 'duration_curve' in figure_name:
@@ -1120,16 +1241,17 @@ class MPlot(object):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = prop.split(",")
         if select_lines == None:
-            return mfunc.InputSheetError()
+            return InputSheetError()
 
 
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
@@ -1138,17 +1260,17 @@ class MPlot(object):
         scenario = self.Scenarios[0]
 
         #Line limits are seasonal.
-        export_limits = self.mplot_data_dict["line_Export_Limit"].get(scenario).droplevel('timestamp')
+        export_limits = self["line_Export_Limit"].get(scenario).droplevel('timestamp')
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 
-        import_limits = self.mplot_data_dict["line_Import_Limit"].get(scenario).droplevel('timestamp')
+        import_limits = self["line_Import_Limit"].get(scenario).droplevel('timestamp')
         import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
 
         #Extract time index
-        ti = self.mplot_data_dict["line_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
-        reported_lines = self.mplot_data_dict["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
+        ti = self["line_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
+        reported_lines = self["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
 
         self.logger.info('Carving out season from ' + start_date_range + ' to ' + end_date_range)
 
@@ -1161,14 +1283,14 @@ class MPlot(object):
                 self.logger.warning(line + ' not found in results.')
                 select_lines.remove(line)
         if not select_lines:
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         xdim = 2
         ydim = len(select_lines)
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
-        fig2, axs = plt.subplots(ydim,xdim, figsize=((6*xdim),(4*ydim)), sharey=False, squeeze=False) #Not using mfunc.setup_plot here, I used two dimensional axis array so don't want to axs.ravel().
+        fig2, axs = plt.subplots(ydim,xdim, figsize=((6*xdim),(4*ydim)), sharey=False, squeeze=False) #Not using plotlib.setup_plot here, I used two dimensional axis array so don't want to axs.ravel().
 
         #plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
@@ -1196,12 +1318,13 @@ class MPlot(object):
 
             for scenario in self.Scenarios:
 
-                flow = self.mplot_data_dict["line_Flow"][scenario]
+                flow = self["line_Flow"][scenario]
                 single_line = flow.xs(line,level = 'line_name')
+                single_line = single_line.droplevel('units')
                 single_line_out = single_line.copy()
                 single_line.columns = [line]
                 if self.shift_leapday == True:
-                    single_line = mfunc.shift_leapday(single_line,self.Marmot_Solutions_folder)
+                    single_line = self.adjust_for_leapday(single_line)
 
                 #Split into seasons.
                 summer = single_line[start_date_range : end_date_range]
@@ -1210,10 +1333,10 @@ class MPlot(object):
                 winter_lim = limits.drop(summer.index)
 
                 if duration_curve:
-                    summer = mfunc.sort_duration(summer,line)
-                    winter = mfunc.sort_duration(winter,line)
-                    summer_lim = mfunc.sort_duration(summer_lim,'export limit')
-                    winter_lim = mfunc.sort_duration(winter_lim,'export limit')
+                    summer = PlotDataHelper.sort_duration(summer,line)
+                    winter = PlotDataHelper.sort_duration(winter,line)
+                    summer_lim = PlotDataHelper.sort_duration(summer_lim,'export limit')
+                    winter_lim = PlotDataHelper.sort_duration(winter_lim,'export limit')
 
                 axs[i,0].plot(summer[line],linewidth = 1,label = scenario + '\n line flow')
                 axs[i,1].plot(winter[line],linewidth = 1,label = scenario + '\n line flow')
@@ -1243,7 +1366,7 @@ class MPlot(object):
 
 
         if missing_lines == len(select_lines):
-            outputs = mfunc.MissingInputData()
+            outputs = MissingInputData()
             return outputs
 
         Data_Table_Out = pd.concat(chunks,axis = 1)
@@ -1263,13 +1386,16 @@ class MPlot(object):
         fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
         #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
 
-    def extract_tx_cap(self, figure_name=None, prop=None, start=None, end=None, 
-                        timezone="", start_date_range=None, end_date_range=None):
-     
-        return mfunc.UnderDevelopment() #TODO: Needs finishing
+    def extract_tx_cap(self, **_):
+        """Plot under development
+
+        Returns:
+            UnderDevelopment(): Exception class, plot is not functional. 
+        """
+        return UnderDevelopment() #TODO: Needs finishing
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -1278,25 +1404,26 @@ class MPlot(object):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
         
         for scenario in self.Scenarios:
             self.logger.info(scenario)
             for zone_input in self.Zones:
 
                 #Lines
-                # lines = self.meta.region_interregionallines()
+                # lines = self.meta.region_interregionallines(scenario)
                 # if scenario == 'ADS':
                 #     zone_input = zone_input.split('_WI')[0]
                 #     lines = self.meta_ADS.region_interregionallines()
 
                 # lines = lines[lines['region'] == zone_input]
-                # import_lim = self.mplot_data_dict["line_Import_Limit"][scenario].reset_index()
-                # export_lim = self.mplot_data_dict["line_Export_Limit"][scenario].reset_index()
+                # import_lim = self["line_Import_Limit"][scenario].reset_index()
+                # export_lim = self["line_Export_Limit"][scenario].reset_index()
                 # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
                 # lines = lines[['line_name',0]]
                 # lines.columns = ['line_name','import_limit']
@@ -1307,13 +1434,13 @@ class MPlot(object):
                 # fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interregional_Line_Limits_' + scenario + '.csv')
                 # lines.to_csv(fn)
 
-                # lines = self.meta.region_intraregionallines()
+                # lines = self.meta.region_intraregionallines(scenario)
                 # if scenario == 'ADS':
                 #     lines = self.meta_ADS.region_intraregionallines()
 
                 # lines = lines[lines['region'] == zone_input]
-                # import_lim = self.mplot_data_dict["line_Import_Limit"][scenario].reset_index()
-                # export_lim = self.mplot_data_dict["line_Export_Limit"][scenario].reset_index()
+                # import_lim = self["line_Import_Limit"][scenario].reset_index()
+                # export_lim = self["line_Export_Limit"][scenario].reset_index()
                 # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
                 # lines = lines[['line_name',0]]
                 # lines.columns = ['line_name','import_limit']
@@ -1328,15 +1455,15 @@ class MPlot(object):
                 #Interfaces
                 PSCo_ints = ['P39 TOT 5_WI','P40 TOT 7_WI']
 
-                int_import_lim = self.mplot_data_dict["interface_Import_Limit"][scenario].reset_index()
-                int_export_lim = self.mplot_data_dict["interface_Export_Limit"][scenario].reset_index()
+                int_import_lim = self["interface_Import_Limit"][scenario].reset_index()
+                int_export_lim = self["interface_Export_Limit"][scenario].reset_index()
                 if scenario == 'NARIS':
                     last_timestamp = int_import_lim['timestamp'].unique()[-1] #Last because ADS uses the last timestamp.
                     int_import_lim = int_import_lim[int_import_lim['timestamp'] == last_timestamp]
                     int_export_lim = int_export_lim[int_export_lim['timestamp'] == last_timestamp]
                     lines2ints = self.meta_ADS.interface_lines()
                 else:
-                    lines2ints = self.meta.interface_lines()
+                    lines2ints = self.meta.interface_lines(scenario)
 
                 fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')
                 lines2ints.to_csv(fn)
@@ -1349,22 +1476,24 @@ class MPlot(object):
                 ints = ints.merge(lines2ints, how = 'inner', left_on = 'interface_name',right_on = 'interface')
 
     def region_region_interchange_all_scenarios(self, **kwargs):
-
         """
+        #TODO: Finish Docstring 
+
         This method creates a timeseries line plot of interchange flows between the selected region
-        to each conecting region.
+        to each connecting region.
         If there are more than 4 total interchanges, all other interchanges are aggregated into an 'other' grouping
-        Each scenarios is plotted on a seperate Facet plot.
+        Each scenarios is plotted on a separate Facet plot.
         Figures and data tables are returned to plot_main
         """
         outputs = self._region_region_interchange(self.Scenarios, **kwargs)
         return outputs
 
     def region_region_interchange_all_regions(self, **kwargs):
-
         """
+        #TODO: Finish Docstring 
+
         This method creates a timeseries line plot of interchange flows between the selected region
-        to each conecting region. All regions are plotted on a single figure with each focus region placed on a seperate
+        to each connecting region. All regions are plotted on a single figure with each focus region placed on a separate
         facet plot
         If there are more than 4 total interchanges, all other interchanges are aggregated into an 'other' grouping
         This figure only plots a single scenario that is defined by Main_scenario_plot in user_defined_inputs.csv.
@@ -1373,10 +1502,18 @@ class MPlot(object):
         outputs = self._region_region_interchange([self.Scenarios[0]],plot_scenario=False, **kwargs)
         return outputs
 
-    def _region_region_interchange(self,scenario_type,plot_scenario=True, 
-                                   figure_name=None, prop=None, start=None, end=None,
-                        timezone="", start_date_range=None, end_date_range=None):
+    def _region_region_interchange(self, scenario_type: str, plot_scenario: bool = True, 
+                                    timezone: str = "", **_):
+        """#TODO: Finish Docstring 
 
+        Args:
+            scenario_type (str): [description]
+            plot_scenario (bool, optional): [description]. Defaults to True.
+            timezone (str, optional): [description]. Defaults to "".
+
+        Returns:
+            [type]: [description]
+        """
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -1388,18 +1525,19 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",scenario_type)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
 
-            xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=scenario_type)
+            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=scenario_type)
 
-            fig3, axs = mfunc.setup_plot(xdimension,ydimension)
+            fig3, axs = plotlib.setup_plot(xdimension,ydimension)
             
             plt.subplots_adjust(wspace=0.6, hspace=0.3)
 
@@ -1407,9 +1545,9 @@ class MPlot(object):
             n=0
             for scenario in scenario_type:
 
-                rr_int = self.mplot_data_dict[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
+                rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
                 if self.shift_leapday == True:
-                    rr_int = mfunc.shift_leapday(rr_int,self.Marmot_Solutions_folder)
+                    rr_int = self.adjust_for_leapday(rr_int)
 
                 # For plot_main handeling - need to find better solution
                 if plot_scenario == False:
@@ -1421,7 +1559,7 @@ class MPlot(object):
                     agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
                     # Checks if keys all aggregate to a single value, this plot requires multiple values to work 
                     if len(set(agg_region_mapping.values())) == 1:
-                        return mfunc.UnsupportedAggregation()
+                        return UnsupportedAggregation()
                     rr_int = rr_int.reset_index()
                     rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)
@@ -1435,8 +1573,8 @@ class MPlot(object):
                     #Make a facet plot, one panel for each parent zone.
                     parent_region = rr_int_agg['parent'].unique()
                     plot_number = len(parent_region)
-                    xdimension, ydimension =  mfunc.set_x_y_dimension(plot_number)
-                    fig3, axs = mfunc.setup_plot(xdimension,ydimension,sharey=False)
+                    xdimension, ydimension =  self.set_x_y_dimension(plot_number)
+                    fig3, axs = plotlib.setup_plot(xdimension,ydimension,sharey=False)
                     plt.subplots_adjust(wspace=0.6, hspace=0.7)
 
                 else:
@@ -1465,16 +1603,16 @@ class MPlot(object):
 
                     #Convert units
                     if n == 0:
-                        unitconversion = mfunc.capacity_energy_unitconversion(single_parent.abs().values.max())
+                        unitconversion = PlotDataHelper.capacity_energy_unitconversion(single_parent.abs().values.max())
                     single_parent = single_parent / unitconversion['divisor']
 
                     for column in single_parent.columns:
 
-                        mfunc.create_line_plot(axs,single_parent,column,label=column,n=n)
+                        plotlib.create_line_plot(axs,single_parent,column,label=column,n=n)
                         axs[n].set_title(parent)
                         axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                         axs[n].margins(x=0.01)
-                        mfunc.set_plot_timeseries_format(axs,n)
+                        PlotDataHelper.set_plot_timeseries_format(axs,n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
                         axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
 
@@ -1487,11 +1625,11 @@ class MPlot(object):
 
             # if plotting all scenarios add facet labels
             if plot_scenario == True:
-                mfunc.add_facet_labels(fig3, self.xlabels, self.ylabels)
+                self.add_facet_labels(fig3)
 
             #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs, excess_axs, grid_size)
+                PlotDataHelper.remove_excess_axs(axs, excess_axs, grid_size)
 
             fig3.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -1505,7 +1643,7 @@ class MPlot(object):
                 save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_transmission')
                 fig3.savefig(os.path.join(save_figures, "Region_Region_Interchange_{}.svg".format(self.Scenarios[0])), dpi=600, bbox_inches='tight')
                 Data_Table_Out.to_csv(os.path.join(save_figures, "Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
-                outputs = mfunc.DataSavedInModule()
+                outputs = DataSavedInModule()
                 return outputs
 
             Data_Out = pd.concat(data_table_chunks, copy=False, axis=0)
@@ -1514,15 +1652,15 @@ class MPlot(object):
             outputs[zone_input] = {'fig': fig3,'data_table':Data_Out}
         return outputs
 
-    def region_region_checkerboard(self,figure_name=None, prop=None, start=None,
-                                   end=None, timezone="", start_date_range=None,
-                                   end_date_range=None):
-        """
-        This method creates a checkerboard/heatmap figure showing total interchanges between regions
-        Each sceanrio is plotted on its own facet plot
-        Figures and data tables are saved within method
-        """
+    def region_region_checkerboard(self, **_):
+        """Creates a checkerboard/heatmap figure showing total interchanges between regions/zones.
 
+        Each scenario is plotted on its own facet plot.
+        Plots and Data are saved within the module.
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception.
+        """
         outputs = {}
         
         if self.AGG_BY == 'zone':
@@ -1534,31 +1672,32 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
-        xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
+        xdimension, ydimension = self.set_x_y_dimension(len(self.Scenarios))
         grid_size = xdimension*ydimension
         excess_axs = grid_size - len(self.Scenarios)
 
-        fig4, axs = mfunc.setup_plot(xdimension,ydimension,sharey=False)
+        fig4, axs = plotlib.setup_plot(xdimension,ydimension,sharey=False)
         plt.subplots_adjust(wspace=0.02, hspace=0.4)
         max_flow_group = []
         Data_Out = []
         n=0
         for scenario in self.Scenarios:
-            rr_int = self.mplot_data_dict[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
+            rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
             if self.shift_leapday == True:
-                rr_int = mfunc.shift_leapday(rr_int,self.Marmot_Solutions_folder)
+                rr_int = self.adjust_for_leapday(rr_int)
 
             if self.AGG_BY != 'region' and self.AGG_BY != 'zone':
                     agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
                     # Checks if keys all aggregate to a single value, this plot requires multiple values to work 
                     if len(set(agg_region_mapping.values())) == 1:
-                        return mfunc.UnsupportedAggregation()
+                        return UnsupportedAggregation()
                     rr_int = rr_int.reset_index()
                     rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)
@@ -1589,7 +1728,8 @@ class MPlot(object):
             plt.setp(axs[n].get_xticklabels(), rotation=30, ha="right",
                  rotation_mode="anchor")
 
-            axs[n].set_xticks(np.arange(rr_int_agg.shape[1]+1)-.5, minor=True) #Delineate the boxes and make room at top and bottom
+            #Delineate the boxes and make room at top and bottom
+            axs[n].set_xticks(np.arange(rr_int_agg.shape[1]+1)-.5, minor=True) 
             axs[n].set_yticks(np.arange(rr_int_agg.shape[0]+1)-.5, minor=True)
             axs[n].grid(which="minor", color="k", linestyle='-', linewidth=1)
             axs[n].tick_params(which="minor", bottom=False, left=False)
@@ -1600,7 +1740,7 @@ class MPlot(object):
 
         #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
 
         cmap = mpl.cm.inferno
         norm = mpl.colors.Normalize(vmin=0, vmax=max(max_flow_group))
@@ -1608,56 +1748,83 @@ class MPlot(object):
         fig4.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
         cax=cax, label='Total Net Interchange [GWh]')
         fig4.add_subplot(111, frameon=False)
-        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.xlabel('To Region',  color='black', rotation='horizontal',labelpad = 40)
-        plt.ylabel('From Region', color='black', rotation='vertical', labelpad = 40)
+        plt.tick_params(labelcolor='none', top=False, 
+                        bottom=False, left=False, right=False)
+        plt.xlabel('To Region', color='black', rotation='horizontal',
+                   labelpad=40)
+        plt.ylabel('From Region', color='black', rotation='vertical', 
+                   labelpad=40)
 
         Data_Table_Out = pd.concat(Data_Out,axis=1)
-        save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_transmission')
-        fig4.savefig(os.path.join(save_figures, "region_region_checkerboard.svg"), dpi=600, bbox_inches='tight')
+        save_figures = os.path.join(self.figure_folder, f"{self.AGG_BY}_transmission")
+        fig4.savefig(os.path.join(save_figures, "region_region_checkerboard.svg"), 
+                     dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "region_region_checkerboard.csv"))
 
-        outputs = mfunc.DataSavedInModule()
+        outputs = DataSavedInModule()
         return outputs
 
-
     def line_violations_timeseries(self, **kwargs):
+        """Creates a timeseries line plot of lineflow violations for each region.
 
-        """
-        This method creates a timeseries line plot of lineflow violations for each region.
         The magnitude of each violation is plotted on the y-axis
-        Each sceanrio is plotted on the same plot.
-        Figures and data tables are returned to plot_main
+        Each sceanrio is plotted as a separate line.
+
+        This methods calls _violations() to create the figure.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         outputs = self._violations(**kwargs)
         return outputs
 
     def line_violations_totals(self, **kwargs):
+        """Creates a barplot of total lineflow violations for each region.
 
-        """
-        This method creates a bar plot of total lineflow violations for each region.
-        Each sceanrio is plotted on the same plot using vertical bars.
-        Figures and data tables are returned to plot_main
+        Each sceanrio is plotted as a separate bar.
+
+        This methods calls _violations() and passes the total_violations=True argument 
+        to create the figure.
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
         """
         outputs = self._violations(total_violations=True, **kwargs)
         return outputs
 
-    def _violations(self,total_violations=None,
-                    figure_name=None, prop=None, start=None,
-                    end=None, timezone="", start_date_range=None,
-                    end_date_range=None):
+    def _violations(self, total_violations: bool = False, 
+                    timezone: str = "", 
+                    start_date_range: str = None,
+                    end_date_range: str = None, **_):
+        """Creates line violation plots, line plot and barplots
 
+        This methods is called from line_violations_timeseries() and line_violations_totals()
+
+        Args:
+            total_violations (bool, optional): If True finds the sum of violations. 
+                Used to create barplots. Defaults to False.
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
+        """
         outputs = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Violation",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {zone_input}')
@@ -1667,11 +1834,11 @@ class MPlot(object):
                 self.logger.info(f"Scenario = {str(scenario)}")
 
                 if self.AGG_BY == 'zone':
-                    lines = self.meta.zone_lines()
+                    lines = self.meta.zone_lines(scenario)
                 else:
-                    lines = self.meta.region_lines()
+                    lines = self.meta.region_lines(scenario)
 
-                line_v = self.mplot_data_dict["line_Violation"].get(scenario)
+                line_v = self["line_Violation"].get(scenario)
                 line_v = line_v.reset_index()
 
                 viol = line_v.merge(lines,on = 'line_name',how = 'left')
@@ -1691,10 +1858,10 @@ class MPlot(object):
             all_scenarios = all_scenarios.loc[:, (all_scenarios != 0).any(axis=0)]
             
             if all_scenarios.empty:
-                outputs[zone_input] = mfunc.MissingZoneData()
+                outputs[zone_input] = MissingZoneData()
                 continue
             
-            unitconversion = mfunc.capacity_energy_unitconversion(all_scenarios.values.max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(all_scenarios.values.max())
             all_scenarios = all_scenarios/unitconversion['divisor']
 
             Data_Table_Out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
@@ -1702,7 +1869,7 @@ class MPlot(object):
             #Make scenario/color dictionary.
             color_dict = dict(zip(all_scenarios.columns,self.color_list))
 
-            fig5, axs = mfunc.setup_plot()
+            fig5, axs = plotlib.setup_plot()
             #flatten object
             ax = axs[0]
 
@@ -1718,10 +1885,10 @@ class MPlot(object):
 
             else:
                 for column in all_scenarios:
-                    mfunc.create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
+                    plotlib.create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
                 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
-                mfunc.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
+                PlotDataHelper.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
                 handles, labels = ax.get_legend_handles_labels()
                 ax.legend(handles, labels, loc='best',facecolor='inherit', frameon=True)
@@ -1734,17 +1901,24 @@ class MPlot(object):
 
         return outputs
 
+    def net_export(self, timezone: str = "", 
+                   start_date_range: str = None,
+                   end_date_range: str = None, **_):
+        """creates a timeseries net export line graph.
 
-    def net_export(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone="", start_date_range=None,
-                    end_date_range=None):
+        Scenarios are plotted as separate lines.
 
+        Args:
+            timezone (str, optional): The timezone to display on the x-axes.
+                Defaults to "".
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
         """
-        This method creates a net export line graph for each region.
-        All scenarios are plotted on a single figure.
-        Figures and data tables are returned to plot_main
-        """
-        
         if self.AGG_BY == 'zone':
             agg = 'zone'
         else:
@@ -1754,11 +1928,12 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_Net_Interchange",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         outputs = {}
         for zone_input in self.Zones:
@@ -1770,9 +1945,9 @@ class MPlot(object):
 
 
                 self.logger.info(f"Scenario = {scenario}")
-                net_export_read = self.mplot_data_dict[f"{agg}_Net_Interchange"].get(scenario)
+                net_export_read = self[f"{agg}_Net_Interchange"].get(scenario)
                 if self.shift_leapday == True:
-                    net_export_read = mfunc.shift_leapday(net_export_read,self.Marmot_Solutions_folder)                
+                    net_export_read = self.adjust_for_leapday(net_export_read)                
 
                 net_export = net_export_read.xs(zone_input, level = self.AGG_BY)
                 net_export = net_export.groupby("timestamp").sum()
@@ -1784,9 +1959,9 @@ class MPlot(object):
                     net_export = net_export[start_date_range : end_date_range]
 
                 net_export_all_scenarios = pd.concat([net_export_all_scenarios,net_export], axis = 1)
-                net_export_all_scenarios.columns = net_export_all_scenarios.columns.str.replace('_',' ')
+                net_export_all_scenarios.columns = net_export_all_scenarios.columns.str.replace('_', ' ')
 
-            unitconversion = mfunc.capacity_energy_unitconversion(net_export_all_scenarios.abs().max().max())
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(net_export_all_scenarios.abs().max().max())
 
             net_export_all_scenarios = net_export_all_scenarios/unitconversion["divisor"]
             # Data table of values to return to main program
@@ -1794,24 +1969,27 @@ class MPlot(object):
             #Make scenario/color dictionary.
             color_dict = dict(zip(net_export_all_scenarios.columns,self.color_list))
 
-            fig1, axs = mfunc.setup_plot()
+            fig1, axs = plotlib.setup_plot()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             # flatten object
             ax = axs[0]
 
             if net_export_all_scenarios.empty:
-                out = mfunc.MissingZoneData()
+                out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
 
             for column in net_export_all_scenarios:
-                mfunc.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
-                ax.set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
-                ax.set_xlabel(timezone,  color='black', rotation='horizontal')
-                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                plotlib.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
+                ax.set_ylabel(f'Net exports ({unitconversion["units"]})', color='black', 
+                              rotation='vertical')
+                ax.set_xlabel(timezone, color='black', rotation='horizontal')
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
-                ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
-                mfunc.set_plot_timeseries_format(axs)
+                ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
+                          linestyle=':')
+                PlotDataHelper.set_plot_timeseries_format(axs)
 
             labels = net_export_all_scenarios.columns.tolist()
             handles = []
@@ -1820,27 +1998,39 @@ class MPlot(object):
                 scen_legend_patches = mlines.Line2D([],[],color=color_dict[scen])
                 handles.append(scen_legend_patches)
 
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            ax.legend(reversed(handles), reversed(labels), loc='lower left', 
+                      bbox_to_anchor=(1,0), facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)            
                 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
-    def zonal_interchange(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone="", start_date_range=None,
-                    end_date_range=None):
+    def zonal_interchange(self, figure_name: str = None,
+                          start_date_range: str = None,
+                          end_date_range: str = None, **_):
+        """Creates a line plot of the net interchange between each zone, with a facet for each zone.
 
-        """
-        This method plots the net interchange between each zone, with a facet for each zone.
-        Figures and data tables are returned to plot_main.
         The method will only work if agg_by = "zone".
+
+        The code will create either a timeseries or duration curve depending on 
+        if the word 'duration_curve' is in the figure_name.
+        To make a duration curve, ensure the word 'duration_curve' is found in the figure_name.
+
+        Args:
+            figure_name (str, optional): User defined figure output name.
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
         """
-        
         if self.AGG_BY not in ["zone", "zones", "Zone", "Zones"]:
             self.logger.warning("This plot only supports aggregation zone")
-            return mfunc.UnsupportedAggregation()
+            return UnsupportedAggregation()
         
         duration_curve=False
         if 'duration_curve' in figure_name:
@@ -1850,26 +2040,17 @@ class MPlot(object):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
-
-        exp_lines = self.meta.zone_exporting_lines()
-        imp_lines = self.meta.zone_importing_lines()
-
-        if exp_lines.empty or imp_lines.empty:
-            outputs = mfunc.MissingMetaData()
-            return outputs
-
-        exp_lines.columns = ['region','line_name']
-        imp_lines.columns = ['region','line_name']
+            return MissingInputData()
 
         outputs = {}
 
         # sets up x, y dimensions of plot
-        xdimension, ydimension = mfunc.setup_facet_xy_dimensions(self.xlabels,self.ylabels,multi_scenario=self.Scenarios)
+        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
         grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
@@ -1880,39 +2061,50 @@ class MPlot(object):
 
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
-            #Find list of lines that connect each region.
-            exp_oz = exp_lines[exp_lines['region'] == zone_input]
-            imp_oz = imp_lines[imp_lines['region'] == zone_input]
-
-            other_zones = self.meta.zones().name.tolist()
-            try:
-                other_zones.remove(zone_input)
-            except:
-                self.logger.warning("Are you sure you set agg_by = zone?")
-
-            #xdimension,ydimension = mfunc.set_x_y_dimension(len(self.Scenarios))
-            fig7, axs = mfunc.setup_plot(xdimension,ydimension,sharey = True)
+            fig7, axs = plotlib.setup_plot(xdimension ,ydimension, sharey=True)
             plt.subplots_adjust(wspace=0.1, hspace=0.5)
 
             net_exports_all = []
 
             for n, scenario in enumerate(self.Scenarios):
                 net_exports = []
+
+                exp_lines = self.meta.zone_exporting_lines(scenario)
+                imp_lines = self.meta.zone_importing_lines(scenario)
+
+                if exp_lines.empty or imp_lines.empty:
+                    return MissingMetaData()
+
+                exp_lines.columns = ['region','line_name']
+                imp_lines.columns = ['region','line_name']
+
+                #Find list of lines that connect each region.
+                exp_oz = exp_lines[exp_lines['region'] == zone_input]
+                imp_oz = imp_lines[imp_lines['region'] == zone_input]
+
+                other_zones = self.meta.zones(scenario).name.tolist()
+                try:
+                    other_zones.remove(zone_input)
+                except:
+                    self.logger.warning("Are you sure you set agg_by = zone?")
+
                 self.logger.info(f"Scenario = {str(scenario)}")
-                flow = self.mplot_data_dict["line_Flow"][scenario].copy()
+                flow = self["line_Flow"][scenario].copy()
                 if self.shift_leapday == True:
-                    flow = mfunc.shift_leapday(flow,self.Marmot_Solutions_folder)
+                    flow = self.adjust_for_leapday(flow)
                 flow = flow.reset_index()
 
                 for other_zone in other_zones:
                     exp_other_oz = exp_lines[exp_lines['region'] == other_zone]
                     imp_other_oz = imp_lines[imp_lines['region'] == other_zone]
 
-                    exp_pair = pd.merge(exp_oz,imp_other_oz,left_on = 'line_name',right_on = 'line_name')
-                    imp_pair = pd.merge(imp_oz,exp_other_oz,left_on = 'line_name',right_on = 'line_name')
+                    exp_pair = pd.merge(exp_oz, imp_other_oz, left_on='line_name',
+                                        right_on='line_name')
+                    imp_pair = pd.merge(imp_oz, exp_other_oz, left_on='line_name',
+                                        right_on='line_name')
 
                     #Swap columns for importing lines
-                    imp_pair = imp_pair.reindex(columns = ['region_from','line_name','region_to'])
+                    imp_pair = imp_pair.reindex(columns=['region_from', 'line_name', 'region_to'])
 
                     export = flow[flow['line_name'].isin(exp_pair['line_name'])]
                     imports = flow[flow['line_name'].isin(imp_pair['line_name'])]
@@ -1937,7 +2129,7 @@ class MPlot(object):
                         net_export = net_export[start_date_range : end_date_range]
 
                     if duration_curve:
-                        net_export = mfunc.sort_duration(net_export,other_zone)
+                        net_export = PlotDataHelper.sort_duration(net_export,other_zone)
 
                     net_exports.append(net_export)
 
@@ -1948,7 +2140,7 @@ class MPlot(object):
 
                 # unitconversion based off peak export hour, only checked once
                 if zone_input == self.Zones[0] and scenario == self.Scenarios[0]:
-                    unitconversion = mfunc.capacity_energy_unitconversion(net_exports.max().max())
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(net_exports.max().max())
 
                 net_exports = net_exports / unitconversion['divisor']
 
@@ -1957,38 +2149,43 @@ class MPlot(object):
 
                 for column in net_exports:
                     linestyle = '--' if column == 'Net export' else 'solid'
-                    mfunc.create_line_plot(axs,net_exports,column = column, label = column, n = n,linestyle = linestyle)
+                    plotlib.create_line_plot(axs, net_exports, column=column, label=column,
+                                             n=n, linestyle=linestyle)
 
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                                 lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
-
-                axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
+                #Add horizontal line at 0.
+                axs[n].hlines(y=0, xmin=axs[n].get_xlim()[0], xmax=axs[n].get_xlim()[1],
+                              linestyle=':') 
                 if n == len(self.Scenarios) - 1:
-                    axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
+                    axs[n].legend(loc='lower left', bbox_to_anchor=(1, 0), 
+                                  facecolor='inherit', frameon=True)
 
                 if not duration_curve:
-                    mfunc.set_plot_timeseries_format(axs,n)
+                    PlotDataHelper.set_plot_timeseries_format(axs,n)
 
                 #Add scenario column to output table.
-                scenario_names = pd.Series([scenario] * len(net_exports),name = 'Scenario')
+                scenario_names = pd.Series([scenario] * len(net_exports), name='Scenario')
                 net_exports = net_exports.add_suffix(f" ({unitconversion['units']})")
-                net_exports = net_exports.set_index([scenario_names],append = True)
+                net_exports = net_exports.set_index([scenario_names], append=True)
                 net_exports_all.append(net_exports)
 
-            xlabels = [textwrap.fill(x.replace('_',' '),10) for x in self.xlabels]
-            mfunc.add_facet_labels(fig7, xlabels, self.ylabels)
+            self.add_facet_labels(fig7)
 
             #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs,excess_axs,grid_size)
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
 
             fig7.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
-            plt.ylabel(f"Net export ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=40)
+            plt.ylabel(f"Net export ({unitconversion['units']})", color='black', 
+                       rotation='vertical', labelpad=40)
             if duration_curve:
-                plt.xlabel('Sorted hour of the year',color = 'black', labelpad = 30)
+                plt.xlabel('Sorted hour of the year', color='black', labelpad=30)
             
             Data_Table_Out = pd.concat(net_exports_all)
             # if plotting all scenarios return figures to plot_main
@@ -1996,54 +2193,43 @@ class MPlot(object):
 
         return outputs
 
-    def zonal_interchange_total(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone="", start_date_range=None,
-                    end_date_range=None):
+    def zonal_interchange_total(self, start_date_range: str = None,
+                                end_date_range: str = None, **_):
+        """Creates a barplot of the net interchange between each zone, separated by positive and negative flows.
 
-        """
-        This method plots total net interchange between each zone, separated by positive and negative flows.
-        Figures and data tables are returned to plot_main.
         The method will only work if agg_by = "zone".
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            dict: dictionary containing the created plot and its data table
         """
         if self.AGG_BY not in ["zone", "zones", "Zone", "Zones"]:
             self.logger.warning("This plot only supports aggregation zone")
-            return mfunc.UnsupportedAggregation()
+            return UnsupportedAggregation()
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
-
-        exp_lines = self.meta.zone_exporting_lines()
-        imp_lines = self.meta.zone_importing_lines()
-
-        if exp_lines.empty or imp_lines.empty:
-            outputs = mfunc.MissingMetaData()
-            return outputs
-
-        exp_lines.columns = ['region','line_name']
-        imp_lines.columns = ['region','line_name']
+            return MissingInputData()
 
         outputs = {}
 
         for zone_input in self.Zones:
 
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
-
-            #Find list of lines that connect each region.
-            exp_oz = exp_lines[exp_lines['region'] == zone_input]
-            imp_oz = imp_lines[imp_lines['region'] == zone_input]
-
-            other_zones = self.meta.zones().name.tolist()
-            other_zones.remove(zone_input)
             
-            
-            fig, axs = mfunc.setup_plot(1,1,sharey = True)
+            fig, axs = plotlib.setup_plot(1, 1, sharey=True)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             # flatten object
             ax = axs[0]
@@ -2054,20 +2240,38 @@ class MPlot(object):
 
             for n, scenario in enumerate(self.Scenarios):
 
+                exp_lines = self.meta.zone_exporting_lines(scenario)
+                imp_lines = self.meta.zone_importing_lines(scenario)
+
+                if exp_lines.empty or imp_lines.empty:
+                    return MissingMetaData()
+
+                exp_lines.columns = ['region', 'line_name']
+                imp_lines.columns = ['region', 'line_name']
+
+                #Find list of lines that connect each region.
+                exp_oz = exp_lines[exp_lines['region'] == zone_input]
+                imp_oz = imp_lines[imp_lines['region'] == zone_input]
+
+                other_zones = self.meta.zones(scenario).name.tolist()
+                other_zones.remove(zone_input)
+
                 net_exports = []
                 self.logger.info(f"Scenario = {str(scenario)}")
-                flow = self.mplot_data_dict["line_Flow"][scenario]
+                flow = self["line_Flow"][scenario]
                 flow = flow.reset_index()
 
                 for other_zone in other_zones:
                     exp_other_oz = exp_lines[exp_lines['region'] == other_zone]
                     imp_other_oz = imp_lines[imp_lines['region'] == other_zone]
 
-                    exp_pair = pd.merge(exp_oz,imp_other_oz,left_on = 'line_name',right_on = 'line_name')
-                    imp_pair = pd.merge(imp_oz,exp_other_oz,left_on = 'line_name',right_on = 'line_name')
+                    exp_pair = pd.merge(exp_oz, imp_other_oz, left_on='line_name', 
+                                        right_on='line_name')
+                    imp_pair = pd.merge(imp_oz, exp_other_oz, left_on='line_name', 
+                                        right_on='line_name')
 
                     #Swap columns for importing lines
-                    imp_pair = imp_pair.reindex(columns = ['region_from','line_name','region_to'])
+                    imp_pair = imp_pair.reindex(columns=['region_from', 'line_name', 'region_to'])
 
                     export = flow[flow['line_name'].isin(exp_pair['line_name'])]
                     imports = flow[flow['line_name'].isin(imp_pair['line_name'])]
@@ -2093,10 +2297,10 @@ class MPlot(object):
 
                     net_exports.append(net_export)
 
-                net_exports = pd.concat(net_exports,axis = 1)
-                net_exports = net_exports.dropna(axis = 'columns')
+                net_exports = pd.concat(net_exports, axis=1)
+                net_exports = net_exports.dropna(axis='columns')
                 net_exports.index = pd.to_datetime(net_exports.index)
-                net_exports['Net Export'] = net_exports.sum(axis = 1)
+                net_exports['Net Export'] = net_exports.sum(axis=1)
 
                 positive = net_exports.agg(lambda x: x[x>0].sum())
                 negative = net_exports.agg(lambda x: x[x<0].sum())
@@ -2104,17 +2308,16 @@ class MPlot(object):
                 # unitconversion based off peak export hour, only checked once
                 if scenario == self.Scenarios[0]:
                     max_val = max(positive['Net Export'].max(),abs(negative['Net Export']).max())
-                    unitconversion = mfunc.capacity_energy_unitconversion(max_val)
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max_val)
 
-                both = pd.concat([positive,negative],axis = 1)
-                both.columns = [f"Total Export",
-                                f"Total Import"]
+                both = pd.concat([positive,negative], axis=1)
+                both.columns = ["Total Export", "Total Import"]
                 both = both / unitconversion['divisor']
                 net_exports_all.append(both)
 
                 #Add scenario column to output table.
-                scenario_names = pd.Series([scenario] * len(both),name = 'Scenario')
-                data_table = both.set_index([scenario_names],append = True)
+                scenario_names = pd.Series([scenario] * len(both), name='Scenario')
+                data_table = both.set_index([scenario_names], append=True)
                 data_table = data_table.add_suffix(f" ({unitconversion['units']})")
                 data_out_chunk.append(data_table)
 
@@ -2123,9 +2326,12 @@ class MPlot(object):
             #Make scenario/color dictionary.
             color_dict = dict(zip(self.Scenarios, self.color_list))
             
-            mfunc.create_clustered_stacked_bar_plot(net_exports_all, ax, labels=self.Scenarios, color_dict=color_dict)
-            ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
-            ax.set_ylabel(f"Interchange ({unitconversion['units']}h)",  color='black', rotation='vertical')
+            plotlib.create_clustered_stacked_bar_plot(net_exports_all, ax, labels=self.Scenarios, 
+                                                      color_dict=color_dict)
+            ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
+                      linestyle=':')
+            ax.set_ylabel(f"Interchange ({unitconversion['units']}h)", color='black', 
+                          rotation='vertical')
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
 
@@ -2133,35 +2339,49 @@ class MPlot(object):
 
         return outputs
 
-    def total_int_flow_ind(self,figure_name=None, prop=None, start=None,
-                    end=None, timezone="", start_date_range=None,
-                    end_date_range=None):
-        
-        """
-        This method plots the total flow for a specific interface, separated by positive and negative flows.
-        Specify the interface of interest in column C of Marmot_plot_select.csv. 
-        Figures and data tables are returned to plot_main.
+    def total_int_flow_ind(self, prop: str = None, 
+                           start_date_range: str = None,
+                           end_date_range: str = None, **_):
+        """Creates a clustered barplot of the total flow for a specific interface, separated by positive and negative flows.
+
+        Specify the interface(s) of interest by providing a comma separated 
+        string to the property entry.
+        Scenarios are clustered together as different colored bars.
+        If multiple interfaces are provided, each will be plotted as a 
+        separate group of clustered bar.
+
+        Args:
+            prop (str, optional): Comma separated string of interfaces to plot. 
+                Defaults to None.
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+
+        Returns:
+            DataSavedInModule: DataSavedInModule exception.
         """
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios)]
         
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return MissingInputData()
 
         #Select only interfaces specified in Marmot_plot_select.csv.
         select_ints = prop.split(",")
         if select_ints == None:
-            return mfunc.InputSheetError()
+            return InputSheetError()
 
         self.logger.info('Plotting only the interfaces specified in Marmot_plot_select.csv')
         self.logger.info(select_ints) 
 
-        fig, axs = mfunc.setup_plot(1,1,sharey = True)
+        fig, axs = plotlib.setup_plot(1, 1, sharey=True)
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
         # flatten object
         ax = axs[0]
@@ -2173,9 +2393,9 @@ class MPlot(object):
         for i, scenario in enumerate(self.Scenarios):
             
             self.logger.info(f"Scenario = {str(scenario)}")
-            flow_all = self.mplot_data_dict["interface_Flow"][scenario]
-            pos = pd.Series(name = 'Total Export')
-            neg = pd.Series(name = 'Total Import')
+            flow_all = self["interface_Flow"][scenario]
+            pos = pd.Series(name='Total Export')
+            neg = pd.Series(name='Total Import')
             
             available_inter = select_ints.copy()
             
@@ -2189,12 +2409,12 @@ class MPlot(object):
                 if inter[0] == ' ':
                     inter = inter[1:]
 
-                flow = flow_all.xs(inter,level = 'interface_name')
+                flow = flow_all.xs(inter, level='interface_name')
                 flow = flow.reset_index()
                  
                 if pd.notna(start_date_range):
                     self.logger.info("Plotting specific date range: \
-                    {} to {}".format(str(start_date_range),str(end_date_range)))
+                    {} to {}".format(str(start_date_range), str(end_date_range)))
                     flow = flow[start_date_range : end_date_range]
             
                 flow = flow[0]
@@ -2206,7 +2426,7 @@ class MPlot(object):
                 
             if scenario == self.Scenarios[0]:
                 max_val = max(pos.max(),abs(neg.max()))
-                unitconversion = mfunc.capacity_energy_unitconversion(max_val)
+                unitconversion = PlotDataHelper.capacity_energy_unitconversion(max_val)
 
             both = pd.concat([pos,neg],axis = 1)
             both.columns = ['Total Export','Total Import']
@@ -2225,26 +2445,32 @@ class MPlot(object):
         #Make scenario/color dictionary.
         color_dict = dict(zip(self.Scenarios, self.color_list))
         
-        mfunc.create_clustered_stacked_bar_plot(net_flows_all, ax, labels=self.Scenarios, color_dict=color_dict)
-        ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
-        ax.set_ylabel('Flow ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
+        plotlib.create_clustered_stacked_bar_plot(net_flows_all, ax, labels=self.Scenarios, 
+                                                  color_dict=color_dict)
+        ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
+                  linestyle=':')
+        ax.set_ylabel('Flow ({}h)'.format(unitconversion['units']), color='black', 
+                      rotation='vertical')
         ax.set_xlabel('')
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Total_Flow.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Total_Flow.csv'))
-        outputs = mfunc.DataSavedInModule()
+        fig.savefig(os.path.join(self.Marmot_Solutions_folder, "Figures_Output", f"{self.AGG_BY }_transmission",
+                                "Individual_Interface_Total_Flow.svg"), 
+                    dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, "Figures_Output", f"{self.AGG_BY }_transmission",
+                                           "Individual_Interface_Total_Flow.csv"))
+        outputs = DataSavedInModule()
         return outputs
                 
     ### Archived Code ####
 
     # def line_util_agged(self):
 
-    #     self.mplot_data_dict["line_Flow"] = {}
+    #     self["line_Flow"] = {}
     #     interface_flow_collection = {}
     #     line_limit_collection = {}
     #     interface_limit_collection = {}
 
     #     #Load data
-    #     self._getdata(self.mplot_data_dict["line_Flow"],"line_Flow")
+    #     self._getdata(self["line_Flow"],"line_Flow")
     #     self._getdata(interface_flow_collection,"interface_Flow")
     #     self._getdata(line_limit_collection,"line_Export_Limit")
     #     self._getdata(interface_limit_collection,"interface_Export_Limit")
@@ -2259,7 +2485,7 @@ class MPlot(object):
     #         for scenario in self.Scenarios:
     #             self.logger.info("Scenario = " + str(scenario))
 
-    #             lineflow = self.mplot_data_dict["line_Flow"].get(scenario)
+    #             lineflow = self["line_Flow"].get(scenario)
     #             linelim = line_limit_collection.get(scenario)
     #             linelim = linelim.reset_index().drop('timestamp', axis = 1).set_index('line_name')
 

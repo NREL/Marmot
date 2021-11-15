@@ -1,9 +1,8 @@
 # -*- coding: utf-8 -*-
-"""
-First Created on Wed May 22 14:29:48 2019
+"""Main formatting source code to format modelling results for plotting.
 
 This code was written to process PLEXOS HDF5 outputs to get them ready for plotting.
-Once the data is processed it is outputed as an intermediary HDF5 file format so that
+Once the data is processed it is outputted as an intermediary HDF5 file format so that
 it can be read into the marmot_plot_main.py file
 
 
@@ -16,6 +15,7 @@ it can be read into the marmot_plot_main.py file
 import os
 import sys
 import pathlib
+
 FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 if __name__ == '__main__':  # Add Marmot directory to sys path if running from __main__
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
@@ -23,11 +23,13 @@ if __name__ == '__main__':  # Add Marmot directory to sys path if running from _
         os.chdir(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import time
 import re
-import pandas as pd
-import h5py
 import logging
 import logging.config
+import pandas as pd
+import h5py
 import yaml
+from typing import Union
+
 try:
     from marmot.meta_data import MetaData
 except ModuleNotFoundError:
@@ -45,45 +47,61 @@ try:
 except ModuleNotFoundError:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 
-# ============================================================================
 
 # A bug in pandas requires this to be included,
 # otherwise df.to_string truncates long strings. Fix available in Pandas 1.0
 # but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
 
+# Conversion units dict, key values is a tuple of new unit name and conversion multiplier
+UNITS_CONVERSION = {
+                    'kW': ('MW', 1e-3),
+                    'MW': ('MW', 1),
+                    'GW': ('MW', 1e3),
+                    'TW': ('MW', 1e6),
+                    'kWh': ('MWh', 1e-3),
+                    'MWh': ('MWh', 1),
+                    'GWh': ('MWh', 1e3),
+                    'TWh': ('MWh', 1e6),
+                    'lb': ('kg', 0.453592),
+                    'ton': ('kg', 907.18474),
+                    'kg': ('kg', 1),
+                    'tonne': ('kg', 1000),
+                    '$': ('$', 1),
+                    '$000': ('$', 1000),
+                    'h': ('h', 1),
+                    'MMBTU': ('MMBTU', 1),
+                    'GBTU': ('MMBTU', 1000),
+                    'GJ"': ('MMBTU', 0.947817),
+                    'TJ': ('MMBTU', 947.817120),
+                    '$/MW': ('$/MW', 1),
+                    'lb/MWh' : ('kg/MWh', 0.453592),
+                    'Kg/MWh': ('Kg/MWh', 1)
+                    }
+
+
 class SetupLogger():
     """Sets up the python logger.
 
-    Allows an optional suffix to be included which will be appended to the
-    end of the log file name, this is useful when running multiple
-    processes in parallel to allow logging to seperate files.
+    This class handles the following.
 
-    Allows log_directory to be changed from default
+    1. Configures logger from marmot_logging_config.yml file.
+    2. Handles rollover of log file on each instantiation.
+    3. Sets log_directory.
+    4. Append optional suffix to the end of the log file name
 
-    SetupLogger is a subclass of all other module classes
+    Optional suffix is useful when running multiple processes in parallel to 
+    allow logging to separate files.
     """
 
-    def __init__(self, log_directory='logs', log_suffix=None):
-        """Setuplogger __init__ method.
-
-        Formats log filename,
-        configures logger from marmot_logging_config.yml file,
-        handles rollover of log file on each instantiation.
-
-        Allows log_directory to be changed from default
-
-        Parameters
-        ----------
-        log_directory : string, optional
-            log directory to save logs, The default is 'logs'
-        log_suffix : string, optional
-            optional suffix to add to end of log file. The default is None.
-
-        Returns
-        -------
-        None.
-
+    def __init__(self, log_directory: str = 'logs', 
+                 log_suffix: str = None):
+        """
+        Args:
+            log_directory (str, optional): log directory to save logs. 
+                Defaults to 'logs'.
+            log_suffix (str, optional): Optional suffix to add to end of log file. 
+                Defaults to None.
         """
         if log_suffix is None:
             self.log_suffix = ''
@@ -119,64 +137,52 @@ class SetupLogger():
 
 
 class Process(SetupLogger):
-    """Conatins methods for processing h5plexos query data.
+    """Process PLEXOS class specific data from h5plexos database.
 
-    All methods are PLEXOS Class specific
-    e.g generator, region, zone, line etc.
+    All methods are PLEXOS Class specific e.g generator, region, zone, line etc.
     """
 
-    def __init__(self, df, metadata, Region_Mapping, gen_names, emit_names, logger):
-        """Process __init__ method.
-
-        Parameters
-        ----------
-        df : pd.DataFrame
-            Unprocessed h5plexos dataframe containing
-            class and property specifc data.
-        metadata : meta_data.MetaData (class instantiation)
-            Instantiation of MetaData for specific h5plexos file.
-        Region_Mapping : pd.DataFrame
-            DataFrame to map custom regions/zones to create custom aggregations.
-        gen_names : pd.DataFrame
-            DataFrame with 2 columns to rename generator technologies.
-        emit_names : pd.DataFrame
-            DataFrame with 2 columns to rename emmission names.
-        logger : logger object.
-            logger object from SetupLOgger.
-
-        Returns
-        -------
-        None.
+    def __init__(self, df: pd.DataFrame, metadata: MetaData, 
+                 model: str, Region_Mapping: pd.DataFrame, 
+                 emit_names: pd.DataFrame, logger: logging.Logger):
         """
-
+        Args:
+            df (pd.DataFrame): Unprocessed h5plexos dataframe containing
+                class and property specifc data.
+            metadata (MetaData): Instantiation of MetaData for specific 
+                h5plexos file.
+            model (str): Name of specific PLEXOS model partition
+            Region_Mapping (pd.DataFrame): DataFrame to map custom 
+                regions/zones to create custom aggregations.
+            emit_names (pd.DataFrame): DataFrame with 2 columns to rename 
+                emission names.
+            logger (logging.Logger): logger object from SetupLogger.
+        """
         # certain methods require information from metadata.  metadata is now
         # passed in as an instance of MetaData class for the appropriate model
         self.df = df
         self.metadata = metadata
+        self.model = model
         self.Region_Mapping = Region_Mapping
-        self.gen_names = gen_names
         self.emit_names = emit_names
         self.logger = logger
 
         if not self.emit_names.empty:
-            self.emit_names_dict = self.emit_names[['Original', 'New']].set_index("Original").to_dict()["New"]
+            self.emit_names_dict = (self.emit_names[['Original', 'New']]
+                                       .set_index("Original").to_dict()["New"])
 
-        self.gen_names_dict = self.gen_names[['Original', 'New']].set_index("Original").to_dict()["New"]
+    def df_process_generator(self) -> pd.DataFrame:
+        """Format PLEXOS Generator Class data.
 
-    def df_process_generator(self):
-        """Format data which comes form the PLEXOS Generator Class.
-
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['tech', 'gen_name'], level=['category', 'name'], inplace=True)
 
-        if self.metadata.region_generator_category().empty is False:
-            region_gen_idx = pd.CategoricalIndex(self.metadata.region_generator_category().index.get_level_values(0))
+        if self.metadata.region_generator_category(self.model).empty is False:
+            region_gen_idx = pd.CategoricalIndex(self.metadata.region_generator_category(self.model)
+                                                     .index.get_level_values(0))
             region_gen_idx = region_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
             idx_region = pd.MultiIndex(levels=df.index.levels + [region_gen_idx.categories],
@@ -185,8 +191,9 @@ class Process(SetupLogger):
         else:
             idx_region = df.index
 
-        if self.metadata.zone_generator_category().empty is False:
-            zone_gen_idx = pd.CategoricalIndex(self.metadata.zone_generator_category().index.get_level_values(0))
+        if self.metadata.zone_generator_category(self.model).empty is False:
+            zone_gen_idx = pd.CategoricalIndex(self.metadata.zone_generator_category(self.model)
+                                                   .index.get_level_values(0))
             zone_gen_idx = zone_gen_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
 
             idx_zone = pd.MultiIndex(levels=idx_region.levels + [zone_gen_idx.categories],
@@ -196,7 +203,7 @@ class Process(SetupLogger):
             idx_zone = idx_region
 
         if not self.Region_Mapping.empty:
-            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.metadata.region_generator_category()
+            region_gen_mapping_idx = pd.MultiIndex.from_frame(self.metadata.region_generator_category(self.model)
                                                               .merge(self.Region_Mapping,
                                                                      how="left",
                                                                      on='region')
@@ -211,40 +218,25 @@ class Process(SetupLogger):
         else:
             idx_map = idx_zone
 
-        idx_map = idx_map.droplevel(level=["tech"])
-        df_tech = pd.CategoricalIndex(df.index.get_level_values('tech')
-                                      .map(lambda x: self.gen_names_dict.get(x, x))
-                                      )
-
-        idx = pd.MultiIndex(levels=[df_tech.categories] + idx_map.levels,
-                            codes=[df_tech.codes] + idx_map.codes,
-                            names=df_tech.names + idx_map.names)
-
-        df = pd.DataFrame(data=df.values.reshape(-1), index=idx)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
         df_col = list(df.index.names)  # Gets names of all columns in df and places in list
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast='float')
 
-        # Checks if all generator tech categorieses have been identified and matched. If not, lists categories that need a match
-        if set(df.index.unique(level="tech")).issubset(self.gen_names["New"].unique()) is False:
-            missing_gen_cat = list((set(df.index.unique(level="tech"))) - (set(self.gen_names["New"].unique())))
-            self.logger.warning(f"The Following Generators do not have a correct category mapping: {missing_gen_cat}\n", )
         return df
 
-    def df_process_region(self):
-        """Format data which comes from the PLEXOS Region Class.
+    def df_process_region(self) -> pd.DataFrame:
+        """Format PLEXOS Region Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('region', level='name', inplace=True)
-        if not self.Region_Mapping.empty:  # checks if Region_Mapping contains data to merge, skips if empty
-            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions()
+        # checks if Region_Mapping contains data to merge, skips if empty
+        if not self.Region_Mapping.empty:  
+            mapping_idx = pd.MultiIndex.from_frame(self.metadata.regions(self.model)
                                                    .merge(self.Region_Mapping,
                                                           how="left",
                                                           on='region')
@@ -264,15 +256,11 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_zone(self):
-        """
-        Method for formating data which comes from the PLEXOS Zone Class
+    def df_process_zone(self) -> pd.DataFrame:
+        """Format PLEXOS Zone Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('zone', level='name', inplace=True)
@@ -283,15 +271,11 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_line(self):
-        """
-        Method for formatting data which comes form the PLEXOS Line Class
+    def df_process_line(self) -> pd.DataFrame:
+        """Format PLEXOS Line Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('line_name', level='name', inplace=True)
@@ -302,18 +286,15 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_interface(self):
-        """
-        Method for formatting data which comes form the PLEXOS Interface Class
+    def df_process_interface(self) -> pd.DataFrame:
+        """Format PLEXOS PLEXOS Interface Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
-        df.index.rename(['interface_name', 'interface_category'], level=['name', 'category'], inplace=True)
+        df.index.rename(['interface_name', 'interface_category'], 
+                            level=['name', 'category'], inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names)  # Gets names of all columns in df and places in list
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
@@ -321,58 +302,62 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_reserve(self):
-        """
-        Method for formatting data which comes form the PLEXOS Reserve Class
+    def df_process_reserve(self) -> pd.DataFrame:
+        """Format PLEXOS Reserve Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['parent', 'Type'], level=['name', 'category'], inplace=True)
         df = df.reset_index()  # unzip the levels in index
-        if self.metadata.reserves_regions().empty is False:
-            df = df.merge(self.metadata.reserves_regions(), how='left', on='parent')  # Merges in regions where reserves are located
-        if self.metadata.reserves_zones().empty is False:
-            df = df.merge(self.metadata.reserves_zones(), how='left', on='parent')  # Merges in zones where reserves are located
+        if self.metadata.reserves_regions(self.model).empty is False:
+            # Merges in regions where reserves are located
+            df = df.merge(self.metadata.reserves_regions(self.model), 
+                            how='left', on='parent')  
+        if self.metadata.reserves_zones(self.model).empty is False:
+            # Merges in zones where reserves are located
+            df = df.merge(self.metadata.reserves_zones(self.model), 
+                            how='left', on='parent')  
         df_col = list(df.columns)  # Gets names of all columns in df and places in list
         df_col.remove(0)
-        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        # move timestamp to start of df
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  
         df.set_index(df_col, inplace=True)
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_reserves_generators(self):
-        """
-        Method for formatting data which comes form the PLEXOS Reserve_Generators Relational Class
+    def df_process_reserves_generators(self) -> pd.DataFrame:
+        """Format PLEXOS Reserve_Generators Relational Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df = df.reset_index()  # unzip the levels in index
-        df = df.merge(self.metadata.generator_category(), how='left', on='gen_name')
+        df = df.merge(self.metadata.generator_category(self.model), 
+                        how='left', on='gen_name')
 
-        # merging in generator region/zones first prevents double counting in cases where multiple model regions are within a reserve region
-        if self.metadata.region_generators().empty is False:
-            df = df.merge(self.metadata.region_generators(), how='left', on='gen_name')
-        if self.metadata.zone_generators().empty is False:
-            df = df.merge(self.metadata.zone_generators(), how='left', on='gen_name')
+        # merging in generator region/zones first prevents double 
+        # counting in cases where multiple model regions are within a reserve region
+        if self.metadata.region_generators(self.model).empty is False:
+            df = df.merge(self.metadata.region_generators(self.model), 
+                            how='left', on='gen_name')
+        if self.metadata.zone_generators(self.model).empty is False:
+            df = df.merge(self.metadata.zone_generators(self.model), 
+                            how='left', on='gen_name')
 
         # now merge in reserve regions/zones
-        if self.metadata.reserves_regions().empty is False:
-            df = df.merge(self.metadata.reserves_regions(), how='left', on=['parent', 'region'])  # Merges in regions where reserves are located
-        if self.metadata.reserves_zones().empty is False:
-            df = df.merge(self.metadata.reserves_zones(), how='left', on=['parent', 'zone'])  # Merges in zones where reserves are located
+        if self.metadata.reserves_regions(self.model).empty is False:
+            # Merges in regions where reserves are located
+            df = df.merge(self.metadata.reserves_regions(self.model), 
+                            how='left', on=['parent', 'region'])  
+        if self.metadata.reserves_zones(self.model).empty is False:
+            # Merges in zones where reserves are located
+            df = df.merge(self.metadata.reserves_zones(self.model), 
+                            how='left', on=['parent', 'zone'])  
 
-        df['tech'] = df['tech'].map(lambda x: self.gen_names_dict.get(x, x))
         df_col = list(df.columns)  # Gets names of all columns in df and places in list
         df_col.remove(0)
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
@@ -380,15 +365,11 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_fuel(self):
-        """
-        Methodfor formatting data which comes form the PLEXOS Fuel Class
+    def df_process_fuel(self) -> pd.DataFrame:
+        """Format PLEXOS Fuel Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('fuel_type', level='name', inplace=True)
@@ -399,18 +380,15 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_constraint(self):
-        """
-        Method for formatting data which comes form the PLEXOS Constraint Class
+    def df_process_constraint(self) -> pd.DataFrame:
+        """Format PLEXOS Constraint Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
-        df.index.rename(['constraint_category', 'constraint'], level=['category', 'name'], inplace=True)
+        df.index.rename(['constraint_category', 'constraint'], 
+                            level=['category', 'name'], inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names)  # Gets names of all columns in df and places in list
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
@@ -418,15 +396,11 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_emission(self):
-        """
-        Method for formatting data which comes form the PLEXOS Emission Class
+    def df_process_emission(self) -> pd.DataFrame:
+        """Format PLEXOS Emission Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename('emission_type', level='name', inplace=True)
@@ -437,35 +411,31 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_emissions_generators(self):
-        """
-        Method for formatting data which comes from the PLEXOS Emissions_Generators Relational Class
+    def df_process_emissions_generators(self) -> pd.DataFrame:
+        """Format PLEXOS Emissions_Generators Relational Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename(['gen_name'], level=['child'], inplace=True)
         df.index.rename(['pollutant'], level=['parent'], inplace=True)
 
         df = df.reset_index()  # unzip the levels in index
-        df = df.merge(self.metadata.generator_category(), how='left', on='gen_name') # merge in tech information
-
+        # merge in tech information
+        df = df.merge(self.metadata.generator_category(self.model), 
+                        how='left', on='gen_name') 
         # merge in region and zone information
-        if self.metadata.region_generator_category().empty is False:
+        if self.metadata.region_generator_category(self.model).empty is False:
             # merge in region information
-            df = df.merge(self.metadata.region_generator_category().reset_index(), how='left', on=['gen_name', 'tech'])
-        if self.metadata.zone_generator_category().empty is False:
-            df = df.merge(self.metadata.zone_generator_category().reset_index(), how='left', on=['gen_name', 'tech'])  # Merges in zones where reserves are located
-
+            df = df.merge(self.metadata.region_generator_category(self.model).reset_index(), 
+                                how='left', on=['gen_name', 'tech'])
+        if self.metadata.zone_generator_category(self.model).empty is False:
+            # Merges in zones where reserves are located
+            df = df.merge(self.metadata.zone_generator_category(self.model).reset_index(), 
+                                how='left', on=['gen_name', 'tech'])  
         if not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
-
-        # reclassify gen tech categories
-        df['tech'] = pd.Categorical(df['tech'].map(lambda x: self.gen_names_dict.get(x, x)))
 
         if not self.emit_names.empty:
             # reclassify emissions as specified by user in mapping
@@ -474,7 +444,8 @@ class Process(SetupLogger):
         # remove categoricals (otherwise h5 save will fail)
         df = df.astype({'tech': 'object', 'pollutant': 'object'})
 
-        # Checks if all emissions categorieses have been identified and matched. If not, lists categories that need a match
+        # Checks if all emissions categories have been identified and matched. 
+        # If not, lists categories that need a match
         if not self.emit_names.empty:
             if self.emit_names_dict != {} and (set(df['pollutant'].unique()).issubset(self.emit_names["New"].unique())) is False:
                 missing_emit_cat = list((set(df['pollutant'].unique())) - (set(self.emit_names["New"].unique())))
@@ -490,25 +461,28 @@ class Process(SetupLogger):
         df.columns = pd.RangeIndex(0, 1, step=1)
         return df
 
-    def df_process_storage(self):
-        """
-        Method for formatting data which comes form the PLEXOS Storage Class
+    def df_process_storage(self) -> pd.DataFrame:
+        """Format PLEXOS Storage Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df = df.reset_index()  # unzip the levels in index
-        df = df.merge(self.metadata.generator_storage(), how='left', on='name')
-        if self.metadata.region_generators().empty is False:
-            df = df.merge(self.metadata.region_generators(), how='left', on='gen_name')  # Merges in regions where generators are located
-        if self.metadata.zone_generators().empty is False:
-            df = df.merge(self.metadata.zone_generators(), how='left', on='gen_name')  # Merges in zones where generators are located
-        if not self.Region_Mapping.empty:  # checks if Region_Maping contains data to merge, skips if empty (Default)
-            df = df.merge(self.Region_Mapping, how='left', on='region')  # Merges in all Region Mappings
+        df = df.merge(self.metadata.generator_storage(self.model), 
+                        how='left', on='name')
+        if self.metadata.region_generators(self.model).empty is False:
+            # Merges in regions where generators are located
+            df = df.merge(self.metadata.region_generators(self.model),
+                            how='left', on='gen_name')  
+        if self.metadata.zone_generators(self.model).empty is False:
+            # Merges in zones where generators are located
+            df = df.merge(self.metadata.zone_generators(self.model), 
+                            how='left', on='gen_name')  
+        # checks if Region_Maping contains data to merge, skips if empty (Default)
+        if not self.Region_Mapping.empty:
+            # Merges in all Region Mappings
+            df = df.merge(self.Region_Mapping, how='left', on='region')  
         df.rename(columns={'name': 'storage_resource'}, inplace=True)
         df_col = list(df.columns)  # Gets names of all columns in df and places in list
         df_col.remove(0)  # Removes 0, the data column from the list
@@ -517,15 +491,11 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_region_regions(self):
-        """
-        Method for formatting data which comes form the PLEXOS Region_Regions Relational Class
+    def df_process_region_regions(self) -> pd.DataFrame:
+        """Format PLEXOS Region_Regions Relational Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
@@ -535,29 +505,25 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
-    def df_process_node(self):
-        """
-        Method for formatting data which comes form the PLEXOS Node Class
+    def df_process_node(self) -> pd.DataFrame:
+        """Format PLEXOS Node Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property", "category"])
         df.index.rename('node', level='name', inplace=True)
         df.sort_index(level=['node'], inplace=True)
-        if self.metadata.node_region().empty is False:
-            node_region_idx = pd.CategoricalIndex(self.metadata.node_region().index.get_level_values(0))
+        if self.metadata.node_region(self.model).empty is False:
+            node_region_idx = pd.CategoricalIndex(self.metadata.node_region(self.model).index.get_level_values(0))
             node_region_idx = node_region_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
             idx_region = pd.MultiIndex(levels=df.index.levels + [node_region_idx.categories],
                                        codes=df.index.codes + [node_region_idx.codes],
                                        names=df.index.names + node_region_idx.names)
         else:
             idx_region = df.index
-        if self.metadata.node_zone().empty is False:
-            node_zone_idx = pd.CategoricalIndex(self.metadata.node_zone().index.get_level_values(0))
+        if self.metadata.node_zone(self.model).empty is False:
+            node_zone_idx = pd.CategoricalIndex(self.metadata.node_zone(self.model).index.get_level_values(0))
             node_zone_idx = node_zone_idx.repeat(len(df.index.get_level_values('timestamp').unique()))
             idx_zone = pd.MultiIndex(levels=idx_region.levels + [node_zone_idx.categories],
                                      codes=idx_region.codes + [node_zone_idx.codes],
@@ -565,7 +531,7 @@ class Process(SetupLogger):
         else:
             idx_zone = idx_region
         if not self.Region_Mapping.empty:
-            region_mapping_idx = pd.MultiIndex.from_frame(self.metadata.node_region()
+            region_mapping_idx = pd.MultiIndex.from_frame(self.metadata.node_region(self.model)
                                                           .merge(self.Region_Mapping,
                                                                  how="left",
                                                                  on='region')
@@ -587,14 +553,10 @@ class Process(SetupLogger):
         return df
 
     def df_process_abatement(self):
-        """
-        Method for formatting data which comes form the PLEXOS Abatement Class
+        """Format PLEXOS Abatement Class data.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Processed Output, single value column with multiindex.
-
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
         """
         df = self.df.droplevel(level=["band", "property"])
         df.index.rename('abatement_name', level='name', inplace=True)
@@ -633,44 +595,33 @@ class MarmotFormat(SetupLogger):
     which can then be read into the Marmot plotting code
     """
 
-    def __init__(self, Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
-                 Marmot_Solutions_folder=None,
-                 mapping_folder='mapping_folder',
-                 Region_Mapping=pd.DataFrame(),
-                 emit_names=pd.DataFrame(),
-                 VoLL=10000,
+    def __init__(self, Scenario_name: str, 
+                 PLEXOS_Solutions_folder: str, 
+                 Plexos_Properties: Union[str, pd.DataFrame],
+                 Marmot_Solutions_folder: str = None,
+                 mapping_folder: str = 'mapping_folder',
+                 Region_Mapping: Union[str, pd.DataFrame] = pd.DataFrame(),
+                 emit_names: Union[str, pd.DataFrame] = pd.DataFrame(),
+                 VoLL: int = 10000,
                  **kwargs):
-        """Marmotformat class __init__ method.
-
-        Parameters
-        ----------
-        Scenario_name : string
-            Name of sceanrio to process.
-        PLEXOS_Solutions_folder : string directory
-            Folder containing h5plexos results files.
-        gen_names : string directory/pd.DataFrame
-            Mapping file to rename generator technologies.
-        Plexos_Properties : string directory/pd.DataFrame
-            PLEXOS properties to process, must follow format seen in Marmot directory.
-        Marmot_Solutions_folder : string directory, optional
-            Folder to save Marmot solution files. The default is None.
-        mapping_folder : string directory, optional
-            The location of the Marmot mapping folder. The default is 'mapping_folder'.
-        Region_Mapping : string directory/pd.DataFrame, optional
-            Mapping file to map custom regions/zones to create custom aggregations.
-            Aggregations are created by grouping PLEXOS regions.
-            The default is pd.DataFrame().
-        emit_names : string directory/pd.DataFrame, optional
-            Mapping file to reanme emissions types.
-            The default is pd.DataFrame().
-        VoLL : int, optional
-            Value of lost load, used to calculate cost of unserved energy.
-            The default is 10000.
-
-        Returns
-        -------
-        None.
-
+        """
+        Args:
+            Scenario_name (str): Name of scenario to process.
+            PLEXOS_Solutions_folder (str): Folder containing h5plexos results files.
+            Plexos_Properties (Union[str, pd.DataFrame]): PLEXOS properties to process, 
+                must follow format seen in Marmot directory.
+            Marmot_Solutions_folder (str, optional): Folder to save Marmot solution files.
+                Defaults to None.
+            mapping_folder (str, optional): The location of the Marmot mapping folder.
+                Defaults to 'mapping_folder'.
+            Region_Mapping (Union[str, pd.DataFrame], optional): Mapping file to map custom 
+                regions/zones to create custom aggregations.
+                Aggregations are created by grouping PLEXOS regions.
+                Defaults to pd.DataFrame().
+            emit_names (Union[str, pd.DataFrame], optional): Mapping file to rename 
+                emissions types. Defaults to pd.DataFrame().
+            VoLL (int, optional): Value of lost load, used to calculate cost of 
+                unserved energy. Defaults to 10000.
         """
         super().__init__(**kwargs) # Instantiation of SetupLogger
 
@@ -683,34 +634,15 @@ class MarmotFormat(SetupLogger):
         if self.Marmot_Solutions_folder is None:
             self.Marmot_Solutions_folder = self.PLEXOS_Solutions_folder
 
-        if isinstance(gen_names, str):
-            try:
-                gen_names = pd.read_csv(gen_names)
-                self.gen_names = gen_names.rename(columns={gen_names.columns[0]: 'Original',
-                                                           gen_names.columns[1]: 'New'})
-            except FileNotFoundError:
-                self.logger.warning('Could not find specified gen_names file; check file name. This is required to run Marmot, system will now exit')
-                sys.exit()
-        elif isinstance(gen_names, pd.DataFrame):
-            self.gen_names = gen_names.rename(columns={gen_names.columns[0]: 'Original',
-                                                       gen_names.columns[1]: 'New'})
-
         if isinstance(Plexos_Properties, str):
             try:
                 self.Plexos_Properties = pd.read_csv(Plexos_Properties)
             except FileNotFoundError:
-                self.logger.warning('Could not find specified Plexos_Properties file; check file name. This is required to run Marmot, system will now exit')
+                self.logger.warning("Could not find specified Plexos_Properties file; "
+                        "check file name. This is required to run Marmot, system will now exit")
                 sys.exit()
         elif isinstance(Plexos_Properties, pd.DataFrame):
             self.Plexos_Properties = Plexos_Properties
-
-        try:
-            self.vre_gen_cat = pd.read_csv(os.path.join(self.mapping_folder,
-                                                        mconfig.parser('category_file_names', 'vre_gen_cat')),
-                                           squeeze=True).str.strip().tolist()
-        except FileNotFoundError:
-            self.logger.warning(f'Could not find "{os.path.join(self.mapping_folder, "vre_gen_cat.csv")}"; Check file name in config file. This is required to calculate Curtailment')
-            self.vre_gen_cat = []
 
         if isinstance(Region_Mapping, str):
             try:
@@ -718,14 +650,16 @@ class MarmotFormat(SetupLogger):
                 if not self.Region_Mapping.empty:
                     self.Region_Mapping = self.Region_Mapping.astype(str)
             except FileNotFoundError:
-                self.logger.warning('Could not find specified Region Mapping file; check file name\n')
+                self.logger.warning("Could not find specified Region Mapping file; "
+                        "check file name\n")
                 self.Region_Mapping = pd.DataFrame()
         elif isinstance(Region_Mapping, pd.DataFrame):
             self.Region_Mapping = Region_Mapping
             if not self.Region_Mapping.empty:
                 self.Region_Mapping = self.Region_Mapping.astype('string')
         try:
-            self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)  # delete category columns if exists
+            # delete category columns if exists
+            self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)  
         except KeyError:
             pass
 
@@ -746,13 +680,19 @@ class MarmotFormat(SetupLogger):
                                                 self.emit_names.columns[1]: 'New'},
                                        inplace=True)
 
+    def output_metadata(self, files_list: list, hdf_out_folder: str, 
+                        HDF5_output: str, HDF5_folder_in: str) -> None:
+        """Transfers metadata from original PLEXOS solutions file to processed HDF5 file.  
+        
+        For each partition in a given scenario, the metadata from that partition 
+        is copied over and saved in the processed output file.
 
-    def output_metadata(self, files_list, hdf_out_folder, HDF5_output, HDF5_folder_in):
-        """ This function is used to output metadata from the original PLEXOS solutions
-        file to the processed HDF5 file.  For each partition in a given scenario,
-        the metadata from that partition is copied over and saved in the processed output file.
-        This function is called within the run_formatter method of this class."""
-
+        Args:
+            files_list (list): List of all h5 files in hdf5 folder in alpha numeric order
+            hdf_out_folder (str): Location of formatted output h5 files 
+            HDF5_output (str): Name of formatted hdf5 output file 
+            HDF5_folder_in (str): Location of original PLEXOS solutions h5 files 
+        """
         for partition in files_list:
             f = h5py.File(os.path.join(HDF5_folder_in, partition),'r')
             meta_keys = [key for key in f['metadata'].keys()]
@@ -782,88 +722,111 @@ class MarmotFormat(SetupLogger):
                         dset = s_dict[key2]
                         subgrp.create_dataset(name=key2,data=dset)
             f.close()
-        return
 
-    def _get_data(self, plexos_class, plexos_prop, timescale, db, metadata):
-        """
-        This method handles the pulling of the data from the H5plexos hdf5
+    def _get_data(self, plexos_class: str, plexos_prop: str, 
+                  timescale: str, db: PLEXOSSolution, metadata: MetaData) -> pd.DataFrame:
+        """Handles the pulling of data from the H5plexos hdf5
         file and then passes the data to one of the formating functions
 
-        Parameters
-        ----------
-        plexos_class : string
-            PLEXOS class e.g Region, Generator, Zone etc.
-        plexos_prop : string
-            PLEXOS property e.g Max Capacity, Generation etc.
-        timescale : string
-            Data timescale, e.g Hourly, Monthly, 5 minute etc.
-        db : h5plexos.query.solution.PLEXOSSolution (class instantiation)
-            Instantiation of h5plexos PLEXOSSolution for specific h5plexos file.
-        metadata : meta_data.MetaData (class instantiation)
-            Instantiation of MetaData for specific h5plexos file.
+        Args:
+            plexos_class (str): PLEXOS class e.g Region, Generator, Zone etc
+            plexos_prop (str): PLEXOS property e.g Max Capacity, Generation etc.
+            timescale (str): Data timescale, e.g Hourly, Monthly, 5 minute etc.
+            db (PLEXOSSolution): PLEXOSSolution instance for specific h5plexos file.
+            metadata (MetaData): MetaData instance
 
-        Returns
-        -------
-        df : pd.DataFrame()
-            Formatted results dataframe.
-
+        Returns:
+            pd.DataFrame: Formatted results dataframe.
         """
         try:
             if "_" in plexos_class:
-                df = db.query_relation_property(plexos_class, plexos_prop, timescale=timescale)
+                df = db.query_relation_property(plexos_class, plexos_prop, 
+                                                timescale=timescale)
+                object_class = plexos_class
             else:
-                df = db.query_object_property(plexos_class, plexos_prop, timescale=timescale)
+                df = db.query_object_property(plexos_class, plexos_prop, 
+                                                timescale=timescale)
+                if ((0,6,0) <= db.version and db.version < (0,7,0)):
+                    object_class = f"{plexos_class}s"
+                else:
+                    object_class = plexos_class
 
-        except KeyError:
+        except (ValueError, KeyError):
             df = self._report_prop_error(plexos_prop, plexos_class)
             return df
+        
+        # handles h5plexos naming discrepency 
+        if ((0,6,0) <= db.version and db.version < (0,7,0)):
+            # Get original units from h5plexos file 
+            df_units = (db.h5file[f'/data/ST/{timescale}/{object_class}/{plexos_prop}']
+                      .attrs['units'].decode('UTF-8'))
+        else:
+            df_units = (db.h5file[f'/data/ST/{timescale}/{object_class}/{plexos_prop}']
+                      .attrs['unit'])
+
+        # find unit conversion values
+        converted_units = UNITS_CONVERSION.get(df_units, (df_units, 1))
 
         # Instantiate instance of Process Class
-        # metadata is used as a paramter to initialize process_cl
-        process_cl = Process(df, metadata, self.Region_Mapping, self.gen_names, self.emit_names, self.logger)
+        # metadata is used as a parameter to initialize process_cl
+        process_cl = Process(df, metadata, db.h5file.filename, self.Region_Mapping, 
+                                self.emit_names, self.logger)
         # Instantiate Method of Process Class
         process_att = getattr(process_cl, f'df_process_{plexos_class}')
         # Process attribute and return to df
         df = process_att()
+        
+        # Convert units and add unit column to index 
+        df = df*converted_units[1]
+        units_index = pd.Index([converted_units[0]] *len(df), name='units')
+        df.set_index(units_index, append=True, inplace=True)
+
         if plexos_class == 'region' and plexos_prop == "Unserved Energy" and int(df.sum(axis=0)) > 0:
             self.logger.warning(f"Scenario contains Unserved Energy: {int(df.sum(axis=0))} MW\n")
         return df
 
-    def _report_prop_error(self, plexos_prop, plexos_class):
-        '''
-        This method prints a warning message when the _get_data method
+    def _report_prop_error(self, plexos_prop: str, 
+                           plexos_class: str) -> pd.DataFrame:
+        """Outputs a warning message when the _get_data method
         cannot find the specified PLEXOS property in the h5plexos hdf5 file
 
-        Parameters
-        ----------
-        plexos_class : string
-            PLEXOS calss e.g Region, Generator, Zone etc.
-        plexos_prop : string
-            PLEXOS property e.g Max Capacity, Generation etc.
+        Args:
+            plexos_prop (str): PLEXOS class e.g Region, Generator, Zone etc.
+            plexos_class (str): PLEXOS property e.g Max Capacity, Generation etc.
 
-        Returns
-        -------
-        df : pd.DataFrame
-            Empty DataFrame.
-
-        '''
+        Returns:
+            pd.DataFrame: Empty DataFrame.
+        """
         self.logger.warning(f'CAN NOT FIND "{plexos_class} {plexos_prop}". "{plexos_prop}" DOES NOT EXIST')
         self.logger.info('SKIPPING PROPERTY\n')
         df = pd.DataFrame()
         return df
 
-    def run_formatter(self):
-        '''
+    @staticmethod
+    def _save_to_h5(df: pd.DataFrame, file_name: str, key: str, 
+                    mode: str = "a", complevel: int = 9, 
+                    complib: str ='blosc:zlib', **kwargs) -> None:
+        """Saves data to formatted hdf5 file
 
-        Main method to call to begin processing h5plexos files, this method takes
-        no input variables, all required varibales are passed in via the __init__ method.
+        Args:
+            df (pd.DataFrame): Dataframe to save 
+            file_name (str): name of hdf5 file
+            key (str): formatted property identifier, e.g generator_Generation
+            mode (str, optional): file access mode. Defaults to "a".
+            complevel (int, optional): compression level. Defaults to 9.
+            complib (str, optional): compression library. Defaults to 'blosc:zlib'.
+        """
+        df.to_hdf(file_name, key=key, mode=mode,
+                    complevel=complevel,
+                    complib=complib,
+                    **kwargs)
 
-        Returns
-        -------
-        None.
+    def run_formatter(self) -> None:
+        """Main method to call to begin processing h5plexos files
 
-        '''
-
+        This method takes no input variables, all required variables 
+        are passed in via the __init__ method.
+        """
         self.logger.info(f"#### Processing {self.Scenario_name} PLEXOS Results ####")
 
         # ===============================================================================
@@ -899,18 +862,17 @@ class MarmotFormat(SetupLogger):
 
         os.chdir(startdir)
 
-        #self.output_metadata(files_list[0], hdf_out_folder, HDF5_output, HDF5_folder_in)
-
         # Read in all HDF5 files into dictionary
         self.logger.info("Loading all HDF5 files to prepare for processing")
         hdf5_collection = {}
         for file in files_list:
             hdf5_collection[file] = PLEXOSSolution(os.path.join(HDF5_folder_in, file))
+
         # ===================================================================================
         # Process the Outputs
         # ===================================================================================
 
-        # Creates Initial HDF5 file for ouputing formated data
+        # Creates Initial HDF5 file for outputting formated data
         Processed_Data_Out = pd.DataFrame()
         if os.path.isfile(os.path.join(hdf_out_folder, HDF5_output)) is True:
             self.logger.info(f"'{hdf_out_folder}\{HDF5_output}' already exists: New variables will be added\n")
@@ -918,8 +880,8 @@ class MarmotFormat(SetupLogger):
             with h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') as f:
                 existing_keys = [key for key in f.keys()]
 
-# The processed HDF5 output file already exists.  If metadata is already in
-# this file, leave as is.  Otherwise, append it to the file.
+            # The processed HDF5 output file already exists.  If metadata is already in
+            # this file, leave as is.  Otherwise, append it to the file.
             if 'metadata' not in existing_keys:
                 self.logger.info('Adding metadata to processed HDF5 file.')
                 self.output_metadata(files_list, hdf_out_folder, HDF5_output, HDF5_folder_in)
@@ -927,26 +889,30 @@ class MarmotFormat(SetupLogger):
             if not mconfig.parser('skip_existing_properties'):
                 existing_keys = []
 
-# The processed HDF5 file does not exist.  Create the file and add metadata to it.
+        # The processed HDF5 file does not exist.  Create the file and add metadata to it.
         else:
             existing_keys = []
-            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                      key="generator_Generation",
-                                      mode="w",
-                                      complevel=9,
-                                      complib='blosc:zlib')
+            
+            # Create empty hdf5 file 
+            f = h5py.File(os.path.join(hdf_out_folder, HDF5_output), "w")
+            f.close()
+
             self.output_metadata(files_list, hdf_out_folder, HDF5_output, HDF5_folder_in)
 
         process_properties = self.Plexos_Properties.loc[self.Plexos_Properties["collect_data"] == True]
-        start = time.time()
-
+        
+        # Create an instance of metadata, and pass that as a variable to get data.
+        meta = MetaData(HDF5_folder_in, read_from_formatted_h5=False, Region_Mapping=self.Region_Mapping)
+                    
         if not self.Region_Mapping.empty:
             # if any(meta.regions()['region'] not in Region_Mapping['region']):
-            if set(MetaData(HDF5_folder_in, False, self.Region_Mapping).regions()['region']).issubset(self.Region_Mapping['region']) is False:
-                missing_regions = list(set(MetaData(HDF5_folder_in, False, self.Region_Mapping).regions()['region']) - set(self.Region_Mapping['region']))
+            if set(meta.regions(files_list[0])['region']).issubset(self.Region_Mapping['region']) is False:
+                missing_regions = list(set(meta.regions(files_list[0])['region']) - set(self.Region_Mapping['region']))
+
                 self.logger.warning(f'The Following PLEXOS REGIONS are missing from the "region" column of your mapping file: {missing_regions}\n',)
 
-        # Main loop to process each ouput and pass data to functions
+        start = time.time()
+        # Main loop to process each output and pass data to functions
         for index, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
             data_chunks = []
@@ -959,36 +925,23 @@ class MarmotFormat(SetupLogger):
                 for model in files_list:
                     self.logger.info(f"      {model}")
 
-                    # Create an instance of metadata, and pass that as a variable to get data.
-                    meta = MetaData(HDF5_folder_in, False, self.Region_Mapping, model)
-
                     db = hdf5_collection.get(model)
                     processed_data = self._get_data(row["group"], row["data_set"], row["data_type"], db, meta)
 
                     if processed_data.empty is True:
                         break
-
-                    # special units processing for emissions
-                    if row["group"] == "emissions_generators":
-                        if (row["Units"] == "lb") | (row["Units"] == "lbs"):
-                            # convert lbs to kg
-                            kg_per_lb = 0.453592
-                            processed_data = processed_data*kg_per_lb
-                        # convert kg to metric tons
-                        kg_per_metric_ton = 1E3
-                        data_chunks.append(processed_data/kg_per_metric_ton)
-
-                    # other unit multipliers
+                    
+                    # Check if data is for year interval and of type capacity
                     if (row["data_type"] == "year") & (
                             (row["data_set"] == "Installed Capacity")
                             | (row["data_set"] == "Export Limit")
                             | (row["data_set"] == "Import Limit")
                             ):
-                        data_chunks.append(processed_data*row["unit_multiplier"])
+                        data_chunks.append(processed_data)
                         self.logger.info(f"{row['data_set']} Year property reported from only the first partition")
                         break
                     else:
-                        data_chunks.append(processed_data*row["unit_multiplier"])
+                        data_chunks.append(processed_data)
 
                 if data_chunks:
                     Processed_Data_Out = pd.concat(data_chunks, copy=False)
@@ -1007,37 +960,21 @@ class MarmotFormat(SetupLogger):
                             self.logger.info(f'Drop duplicates removed {oldsize-Processed_Data_Out.size} rows')
 
                     row["data_set"] = row["data_set"].replace(' ', '_')
-                    try:
-                        self.logger.info("Saving data to h5 file...")
-                        Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                                  key=f'{row["group"]}_{row["data_set"]}',
-                                                  mode="a",
-                                                  complevel=9,
-                                                  complib='blosc:zlib')
-                        self.logger.info("Data saved to h5 file successfully\n")
-                    except:
-                        self.logger.warning("h5 File is probably in use, waiting to attempt save for a second time")
-                        time.sleep(120)
+                    
+                    save_attempt=1
+                    while save_attempt<=3:
                         try:
-                            Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                                      key=f'{row["group"]}_{row["data_set"]}',
-                                                      mode="a",
-                                                      complevel=9,
-                                                      complib='blosc:zlib')
-                            self.logger.info("h5 File save succeded on second attempt")
+                            self.logger.info("Saving data to h5 file...")
+                            MarmotFormat._save_to_h5(Processed_Data_Out,
+                                        os.path.join(hdf_out_folder, HDF5_output), 
+                                        key=f'{row["group"]}_{row["data_set"]}')
+
+                            self.logger.info("Data saved to h5 file successfully\n")
+                            save_attempt=4
                         except:
-                            self.logger.warning("h5 File is probably in use, waiting to attempt save for a third time")
-                            time.sleep(240)
-                            try:
-                                Processed_Data_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                                          key=f'{row["group"]}_{row["data_set"]}',
-                                                          mode="a",
-                                                          complevel=9,
-                                                          complib='blosc:zlib')
-                                self.logger.info("h5 File save succeded on third attempt")
-                            except:
-                                self.logger.warning("h5 Save failed on third try; will not attempt again\n")
-                    # del Processed_Data_Out
+                            self.logger.warning("h5 File is probably in use, waiting to attempt to save again")
+                            time.sleep(60)
+                            save_attempt+=1
                 else:
                     continue
             else:
@@ -1046,7 +983,7 @@ class MarmotFormat(SetupLogger):
                 continue
 
         # ===================================================================================
-        # Calculate Extra Ouputs
+        # Calculate Extra Outputs
         # ===================================================================================
         if "generator_Curtailment" not in h5py.File(os.path.join(hdf_out_folder, HDF5_output), 'r') or not mconfig.parser('skip_existing_properties'):
             try:
@@ -1063,23 +1000,18 @@ class MarmotFormat(SetupLogger):
                 except KeyError:
                     self.logger.warning("generator_Available_Capacity & generator_Generation are required for Curtailment calculation")
 
-                # Adjust list of values to drop from vre_gen_cat depending on if it exhists in processed techs
-                adjusted_vre_gen_list = [name for name in self.vre_gen_cat if name in Avail_Gen_Out.index.unique(level="tech")]
+                Curtailment_Out = Avail_Gen_Out - Total_Gen_Out
 
-                if not adjusted_vre_gen_list:
-                    self.logger.warning("vre_gen_cat.csv is not set up correctly with your gen_names.csv")
-                    self.logger.warning("To Process Curtailment add correct names to vre_gen_cat.csv. \
-                    For more information see Marmot Readme under 'Mapping Files'")
+                Upward_Available_Capacity = Curtailment_Out
 
-                # Output Curtailment#
-                Curtailment_Out = ((Avail_Gen_Out.loc[(slice(None), adjusted_vre_gen_list), :])
-                                   - (Total_Gen_Out.loc[(slice(None), adjusted_vre_gen_list), :]))
+                MarmotFormat._save_to_h5(Curtailment_Out,
+                                    os.path.join(hdf_out_folder, HDF5_output), 
+                                    key="generator_Curtailment")
 
-                Curtailment_Out.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                       key="generator_Curtailment",
-                                       mode="a",
-                                       complevel=9,
-                                       complib='blosc:zlib')
+                MarmotFormat._save_to_h5(Upward_Available_Capacity,
+                                    os.path.join(hdf_out_folder, HDF5_output), 
+                                    key="generator_Upward_Available_Capacity")
+
                 self.logger.info("Data saved to h5 file successfully\n")
                 # Clear Some Memory
                 del Total_Gen_Out
@@ -1094,12 +1026,12 @@ class MarmotFormat(SetupLogger):
                 Cost_Unserved_Energy = pd.read_hdf(os.path.join(hdf_out_folder,
                                                                 HDF5_output),
                                                    'region_Unserved_Energy')
+                                                   
                 Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
-                Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                            key="region_Cost_Unserved_Energy",
-                                            mode="a",
-                                            complevel=9,
-                                            complib='blosc:zlib')
+
+                MarmotFormat._save_to_h5(Cost_Unserved_Energy,
+                                    os.path.join(hdf_out_folder, HDF5_output), 
+                                    key="region_Cost_Unserved_Energy")
             except KeyError:
                 self.logger.warning("NOTE!! Regional Unserved Energy not available to process, processing skipped\n")
                 pass
@@ -1111,11 +1043,10 @@ class MarmotFormat(SetupLogger):
                                                                 HDF5_output),
                                                    'zone_Unserved_Energy')
                 Cost_Unserved_Energy = Cost_Unserved_Energy * self.VoLL
-                Cost_Unserved_Energy.to_hdf(os.path.join(hdf_out_folder, HDF5_output),
-                                            key="zone_Cost_Unserved_Energy",
-                                            mode="a",
-                                            complevel=9,
-                                            complib='blosc:zlib')
+
+                MarmotFormat._save_to_h5(Cost_Unserved_Energy,
+                                    os.path.join(hdf_out_folder, HDF5_output), 
+                                    key="zone_Cost_Unserved_Energy")
             except KeyError:
                 self.logger.warning("NOTE!! Zonal Unserved Energy not available to process, processing skipped\n")
                 pass
@@ -1127,10 +1058,7 @@ class MarmotFormat(SetupLogger):
 
 
 def main():
-    '''
-    The following code is run if the formatter is run directly,
-    it does not run if the formatter is imported as a module.
-    '''
+    """Run the formatting code and format desired properties based on user input files."""
 
     # ===============================================================================
     # Input Properties
@@ -1167,14 +1095,8 @@ def main():
     else:
         Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['Region_Mapping.csv_name'].to_string(index=False).strip()))
 
-    # Value of Lost Load for calculatinhg cost of unserved energy
+    # Value of Lost Load for calculating cost of unserved energy
     VoLL = pd.to_numeric(Marmot_user_defined_inputs.loc['VoLL'].to_string(index=False))
-
-    # ===============================================================================
-    # Standard Naming of Generation Data
-    # ===============================================================================
-
-    gen_names = pd.read_csv(os.path.join(Mapping_folder, Marmot_user_defined_inputs.loc['gen_names.csv_name'].to_string(index=False).strip()))
 
     # ===============================================================================
     # Standard Naming of Emissions types (optional)
@@ -1188,9 +1110,9 @@ def main():
 
     for Scenario_name in Scenario_List:
 
-        initiate = MarmotFormat(Scenario_name, PLEXOS_Solutions_folder, gen_names, Plexos_Properties,
+        initiate = MarmotFormat(Scenario_name, PLEXOS_Solutions_folder, Plexos_Properties,
                                 Marmot_Solutions_folder=Marmot_Solutions_folder,
-                                mapping_folder='mapping_folder',
+                                mapping_folder=Mapping_folder,
                                 Region_Mapping=Region_Mapping,
                                 emit_names=emit_names,
                                 VoLL=VoLL)
@@ -1204,7 +1126,6 @@ if __name__ == '__main__':
 #===============================================================================
 # Code that can be used to test PLEXOS_H5_results_formatter
 #===============================================================================
-# test = pd.read_hdf(file, 'generator_Generation')
 # test = test.xs("p60",level='region')
 # test = test.xs("gas-ct",level='tech')
 # test = test.reset_index(['timestamp','node'])
