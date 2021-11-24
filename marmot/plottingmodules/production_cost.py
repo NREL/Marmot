@@ -54,7 +54,8 @@ class MPlot(PlotDataHelper):
         
         
     def prod_cost(self, start_date_range: str = None, 
-                  end_date_range: str = None, **_):
+                  end_date_range: str = None, custom_data_file_path: str = None,
+                  **_):
         """Plots total system net revenue and cost normalized by the installed capacity of the area.
 
         Total revenue is made up of reserve and energy revenues which are displayed in a stacked
@@ -109,14 +110,14 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 Total_Gen_Cost = self.df_process_gen_inputs(Total_Gen_Cost)
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)*-1
-                Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/MW-year
+                # Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/MW-year
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
 
                 Pool_Revenues = self["generator_Pool_Revenue"].get(scenario)
                 Pool_Revenues = Pool_Revenues.xs(zone_input,level=self.AGG_BY)
                 Pool_Revenues = self.df_process_gen_inputs(Pool_Revenues)
                 Pool_Revenues = Pool_Revenues.sum(axis=0)
-                Pool_Revenues = Pool_Revenues/Total_Installed_Capacity #Change to $/MW-year
+                # Pool_Revenues = Pool_Revenues/Total_Installed_Capacity #Change to $/MW-year
                 Pool_Revenues.rename("Energy_Revenues", inplace=True)
 
                 ### Might change to Net Reserve Revenue at later date
@@ -124,7 +125,7 @@ class MPlot(PlotDataHelper):
                 Reserve_Revenues = Reserve_Revenues.xs(zone_input,level=self.AGG_BY)
                 Reserve_Revenues = self.df_process_gen_inputs(Reserve_Revenues)
                 Reserve_Revenues = Reserve_Revenues.sum(axis=0)
-                Reserve_Revenues = Reserve_Revenues/Total_Installed_Capacity #Change to $/MW-year
+                # Reserve_Revenues = Reserve_Revenues/Total_Installed_Capacity #Change to $/MW-year
                 Reserve_Revenues.rename("Reserve_Revenues", inplace=True)
 
                 Total_Systems_Cost = pd.concat([Total_Systems_Cost, Total_Gen_Cost, Pool_Revenues, Reserve_Revenues], axis=1, sort=False)
@@ -140,7 +141,14 @@ class MPlot(PlotDataHelper):
             Total_Systems_Cost_Out = Total_Systems_Cost_Out.T
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
                         
-            Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000 #Change to $/kW-year
+            # Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000 #Change to $/kW-year
+            Total_Systems_Cost_Out = Total_Systems_Cost_Out/1e6 #Convert cost to millions
+            
+            if pd.notna(custom_data_file_path):
+                Total_Systems_Cost_Out = self.insert_custom_data_columns(
+                                                        Total_Systems_Cost_Out, 
+                                                        custom_data_file_path)
+
             Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
 
             #Checks if Net_Revenue contains data, if not skips zone and does not return a plot
@@ -150,7 +158,7 @@ class MPlot(PlotDataHelper):
                 continue
 
             # Data table of values to return to main program
-            Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" ($/KW-yr)")
+            Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
 
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
             
@@ -159,7 +167,7 @@ class MPlot(PlotDataHelper):
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Total System Net Rev, Rev, & Cost ($/KW-yr)',  color='black', rotation='vertical')
+            ax.set_ylabel('Total System Net Rev, Rev, & Cost (Million $)',  color='black', rotation='vertical')
             
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:

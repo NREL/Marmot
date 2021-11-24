@@ -519,4 +519,59 @@ class PlotDataHelper(dict):
             
         return {'units':units, 'divisor':divisor}
 
+    @staticmethod
+    def insert_custom_data_columns(existing_df: pd.DataFrame, 
+                                   custom_data_file_path: str) -> pd.DataFrame:
+        """Insert custom columns into existing DataFrame before plotting.
+
+        Custom data is loaded from passed custom_data_file_path, 
+        the custom data file must be a csv. 
+        Default position of new columns is at the end of the existing DataFrame.
+        Specific positions can be selected by including a row with index label 
+        'column_position'. 
+        Corresponding column positions can then be included.
+        -1 can be passed to insert the column at the end of the DataFrame (rightmost position).
+
+        New rows can also be included but their position can not be changed and are 
+        appended to end of DataFrame.
+
+        NaN values are returned as 0
+
+        Args:
+            existing_df (pd.DataFrame): DataFrame to modify 
+            custom_data_file_path (str): path to custom data file
+            inplace (bool, optional): Modify the DataFrame in place 
+                (do not create a new object). 
+                Defaults to False.
+
+        Returns:
+            pd.DataFrame: DataFrame with the newly inserted columns
+        """
+        
+        if not os.path.basename(custom_data_file_path).endswith('csv'):
+            logger.warning("Custom datafile must be a csv, returning " 
+                           "unmodified DataFrame")
+            return existing_df
+
+        custom_input_df = pd.read_csv(custom_data_file_path, index_col=0) 
+        
+        modifed_df = pd.concat([existing_df, custom_input_df], axis=1, copy=False)
+        modifed_df.fillna(0, inplace=True)
+
+        if 'column_position' in custom_input_df.index:
+            col_pos = custom_input_df.loc['column_position']
+
+            new_col_order = list(modifed_df.columns)
+            for col in custom_input_df:
+                if col_pos[col] == -1:
+                    new_col_order.append(new_col_order.pop(new_col_order.index(col)))
+                else:
+                    new_col_order.remove(col)
+                    new_col_order.insert(int(col_pos[col]), col)
+
+            modifed_df.reindex(new_col_order)
+            modifed_df.drop('column_position', inplace=True)
+        
+        return modifed_df
+
 

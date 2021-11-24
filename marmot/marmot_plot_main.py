@@ -623,7 +623,8 @@ class MarmotPlot(SetupLogger):
                                            end = float(row.iloc[5]),
                                            timezone = row.iloc[6],
                                            start_date_range = row.iloc[7],
-                                           end_date_range = row.iloc[8])
+                                           end_date_range = row.iloc[8],
+                                           custom_data_file_path = row['Custom Data File'])
                 
                 if isinstance(Figure_Out, MissingInputData):
                     self.logger.info("Add Inputs With Formatter Before "
