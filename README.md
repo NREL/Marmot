@@ -88,13 +88,13 @@ Before you use the **marmot_h5_formatter** you will need to adjust and set the i
 
 Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the formatter include:
 
-- `PLEXOS_Solutions_folder` **Required** The directory that contains all h5plexos files that have come from PLEXOS. This directory should include a sub-folder for each scenario in the `Scenarios`, each of which holds the individual h5plexos solution files. Here's an example of how that would look:
+- `Model_Solutions_folder` **Required** The directory that contains all h5plexos files that have come from PLEXOS. This directory should include a sub-folder for each scenario in the `Scenarios`, each of which holds the individual h5plexos solution files. Here's an example of how that would look:
 
   ![marmot folder structure](https://user-images.githubusercontent.com/43964549/132605149-fd088a10-8c4a-49f1-b8b7-d3d31e3f5a30.png)
 
    Multiple h5plexos files within a single scenario sub-folder will be combined to form a single timeseries, with any overlapping periods trimmed.
 
-- `Marmot_Solutions_folder` **Optional** This is the base directory for saving outputs. When **marmot_h5_formatter** is run it will create a `Processed_HDF5 folder` here, and will save all the processed results with the extension "*_formatted.h5*". Including a folder path here allows the user to save outputs in a different location from inputs if desired. If left blank all data and plots will be saved in `PLEXOS_Solutions_folder`.
+- `Marmot_Solutions_folder` **Optional** This is the base directory for saving outputs. When **marmot_h5_formatter** is run it will create a `Processed_HDF5 folder` here, and will save all the processed results with the extension "*_formatted.h5*". Including a folder path here allows the user to save outputs in a different location from inputs if desired. If left blank all data and plots will be saved in `Model_Solutions_folder`.
 
 - `Scenario_process_list` **Required** This is the list of scenarios to process. The h5plexos hdf5 results files should be saved in folders with these names. The list must contain at least one entry. Using the above example, this list would be "*Scenario_name_1, Scenario_name_2*"
 
@@ -126,7 +126,7 @@ As with the Marmot Formatter, users will need to adjust the input settings in th
 
 Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the plotting code include:
 
-- `PLEXOS_Solutions_folder` **Required** Same as described [above](https://github.com/NREL/Marmot#marmot-formatter)
+- `Model_Solutions_folder` **Required** Same as described [above](https://github.com/NREL/Marmot#marmot-formatter)
 
 - `Marmot_Solutions_folder` **Optional** Same as described [above](https://github.com/NREL/Marmot#marmot-formatter)
 

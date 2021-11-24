@@ -14,8 +14,9 @@ generation_stack.py, curtailment.py etc.
 #========================================================================================
 
 import os
-import sys
 import pathlib
+import sys
+
 FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 # Add Marmot directory to sys path if running from __main__
 if __name__ == '__main__': 
@@ -24,14 +25,15 @@ if __name__ == '__main__':
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
         os.chdir(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import importlib
-import time
-import logging 
+import logging
 import logging.config
-import yaml
-import pandas as pd
+import time
+from typing import Union
+
 import matplotlib as mpl
 import matplotlib.pyplot as plt
-from typing import Union
+import pandas as pd
+import yaml
 
 try:
     from marmot.meta_data import MetaData
@@ -43,10 +45,10 @@ except ModuleNotFoundError:
           "see ReadME for details.\nSystem will now exit")
     sys.exit()
 import marmot.config.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
-            DataSavedInModule,UnderDevelopment, InputSheetError, MissingMetaData, 
-            UnsupportedAggregation, MissingZoneData)
-                        
+from marmot.plottingmodules.plotutils.plot_exceptions import (
+    DataSavedInModule, InputSheetError, MissingInputData, MissingMetaData,
+    MissingZoneData, UnderDevelopment, UnsupportedAggregation)
+
 #A bug in pandas requires this to be included, otherwise df.to_string truncates 
 # long strings.
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date

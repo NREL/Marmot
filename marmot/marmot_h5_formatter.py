@@ -14,22 +14,23 @@ it can be read into the marmot_plot_main.py file
 # =======================================================================================
 
 import os
-import sys
 import pathlib
+import sys
 
 FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
 if __name__ == '__main__':  # Add Marmot directory to sys path if running from __main__
     if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
         sys.path.append(os.path.dirname(os.path.dirname(__file__)))
         os.chdir(pathlib.Path(__file__).parent.absolute().parent.absolute())
-import time
-import re
 import logging
 import logging.config
+import re
+import time
+from typing import Union
+
 import pandas as pd
 import h5py
 import yaml
-from typing import Union
 
 try:
     from marmot.meta_data import MetaData
@@ -381,9 +382,9 @@ class ProcessPLEXOS(Process):
 
         block_mapping = db.blocks[self.plexos_block]
         block_mapping.index.rename('timestamp', inplace=True)
-        df = df.reset_index(level='block')
+        df = df.reset_index()
 
-        merged_data = df.reset_index().merge(block_mapping.reset_index(), on='block')
+        merged_data = df.merge(block_mapping.reset_index(), on='block')
         merged_data.drop('block', axis=1, inplace=True)
         index_cols = list(merged_data.columns)
         index_cols.remove(0)
