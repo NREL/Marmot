@@ -569,7 +569,7 @@ class PlotDataHelper(dict):
                     new_col_order.remove(col)
                     new_col_order.insert(int(col_pos[col]), col)
 
-            modifed_df.reindex(new_col_order)
+            modifed_df = modifed_df.reindex(columns=new_col_order)
             modifed_df.drop('column_position', inplace=True)
         
         return modifed_df
