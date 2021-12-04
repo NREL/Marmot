@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*- 
 """Main formatting source code to format modelling results for plotting.
 
 This code was orginally written to process PLEXOS HDF5 outputs to get them ready for plotting,
@@ -30,6 +30,7 @@ import pandas as pd
 import h5py
 import yaml
 from typing import Union
+import json
 
 try:
     from marmot.meta_data import MetaData
@@ -927,6 +928,512 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
+######################################################################################################
+
+class ProcessEGRET(Process):
+    """Process Egret specific data from a json file.
+    """
+    def __init__(self,
+                 input_folder: str,
+                 Region_Mapping: pd.DataFrame, 
+                *args,
+                 plexos_block: str ='',
+                 **kwargs):
+        """
+        Args:
+            input_folder (str): Folder containing EGRET json files.
+            Region_Mapping (pd.DataFrame): DataFrame to map custom 
+                regions/zones to create custom aggregations.
+            plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
+        """
+        self.plexos_block = plexos_block
+        self.hdf5_collection = {}
+        self.metadata = MetaData(input_folder, read_from_formatted_h5=False, Region_Mapping=Region_Mapping)
+        # Instantiation of Process Base class
+        super().__init__(input_folder, Region_Mapping, *args, **kwargs) 
+
+    # I think the default method works for Egret
+    # def get_input_files(self) -> list:
+    #     """Gets a list of Egret input files within the scenario folders
+
+    #     Returns:
+    #         list: list of Egret input filenames to process
+    #     """
+    #     return files_list
+
+    # I think the default method works for Egret
+    # def output_metadata(self, files_list: list, output_file_path: str) -> None:
+    #     """
+
+    #     Args:
+    #         files_list (list): List of all h5 files in hdf5 folder in alpha numeric order
+    #         output_file_path (str): Location of formatted output h5 file 
+    #     """
+
+    def get_processed_data(self, plexos_class: str, plexos_prop: str, 
+                  timescale: str, model_filename: str) -> pd.DataFrame:
+        """Handles the pulling of data from the egret json
+        file and then passes the data to one of the formating functions
+
+        Args:
+            plexos_class (str): PLEXOS class e.g Region, Generator, Zone etc
+            plexos_prop (str): PLEXOS property e.g Max Capacity, Generation etc.
+            timescale (str): Data timescale, e.g Hourly, Monthly, 5 minute etc.
+            model_filename (str): name of model to process.
+
+        Returns:
+            pd.DataFrame: Formatted results dataframe.
+        """
+        # db = self.hdf5_collection.get(model_filename)
+        # try:
+        #     if "_" in plexos_class:
+        #         df = db.query_relation_property(plexos_class, 
+        #                                         plexos_prop, 
+        #                                         timescale=timescale,
+        #                                         phase=self.plexos_block)
+        #         object_class = plexos_class
+        #     else:
+        #         df = db.query_object_property(plexos_class, 
+        #                                       plexos_prop, 
+        #                                       timescale=timescale,
+        #                                       phase=self.plexos_block)
+        #         if ((0,6,0) <= db.version and db.version < (0,7,0)):
+        #             object_class = f"{plexos_class}s"
+        #         else:
+        #             object_class = plexos_class
+
+        # except (ValueError, KeyError):
+        #     df = self.report_prop_error(plexos_prop, plexos_class)
+        #     return df
+        
+        # if self.plexos_block != 'ST':
+        #     df = self.merge_timeseries_block_data(db, df)
+
+        # # handles h5plexos naming discrepency 
+        # if ((0,6,0) <= db.version and db.version < (0,7,0)):
+        #     # Get original units from h5plexos file 
+        #     df_units = (db.h5file[f'/data/{self.plexos_block}/{timescale}'
+        #                           f'/{object_class}/{plexos_prop}'].attrs['units']
+        #                                                            .decode('UTF-8'))
+        # else:
+        #     df_units = (db.h5file[f'/data/{self.plexos_block}/{timescale}'
+        #                           f'/{object_class}/{plexos_prop}'].attrs['unit'])
+        
+        # # find unit conversion values
+        # converted_units = UNITS_CONVERSION.get(df_units, (df_units, 1))
+
+        # Read json file
+        f = open(model_filename, 'r')
+        data = json.load(f)
+        f.close()
+        
+        # Get desired method
+        process_att = getattr(self, f'df_process_{plexos_class}')
+        # Process attribute and return to df
+        df = process_att(data)
+        
+        # # Convert units and add unit column to index 
+        # df = df*converted_units[1]
+        # units_index = pd.Index([converted_units[0]] *len(df), name='units')
+        # df.set_index(units_index, append=True, inplace=True)
+
+        # if plexos_class == 'region' and \
+        #    plexos_prop == "Unserved Energy" and \
+        #    int(df.sum(axis=0)) > 0:
+        #     self.logger.warning(f"Scenario contains Unserved Energy: "
+        #                         f"{int(df.sum(axis=0))} MW\n")
+        return df
+
+
+    # def merge_timeseries_block_data(self, db: PLEXOSSolution, 
+    #                                 df: pd.DataFrame) -> pd.DataFrame:
+    #     """Merge timeseries and block data found in LT, MT and PASA results
+
+    #     Args:
+    #         db (PLEXOSSolution): PLEXOSSolution instance for specific h5plexos file.
+    #         df (pd.DataFrame): h5plexos dataframe 
+
+    #     Returns:
+    #         pd.DataFrame: df with merged in timeseries data 
+    #     """
+
+    #     block_mapping = db.blocks[self.plexos_block]
+    #     block_mapping.index.rename('timestamp', inplace=True)
+    #     df = df.reset_index(level='block')
+
+    #     merged_data = df.reset_index().merge(block_mapping.reset_index(), on='block')
+    #     merged_data.drop('block', axis=1, inplace=True)
+    #     index_cols = list(merged_data.columns)
+    #     index_cols.remove(0)
+    #     merged_data.set_index(index_cols, inplace=True)
+    #     return merged_data
+
+    
+    def df_process_generator(self, data, egret_property) -> pd.DataFrame:
+        """Format PLEXOS Generator Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+            egret_property (string): Egret property name; key of json file
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        # Initialize dataframe column lists
+        timestamp = []
+        tech = []
+        gen_name = []
+        region = []
+        zone = []
+        superzone = []
+        Midwest_Agg = []
+        Usual = []
+        Country = []
+        Interconnection = []
+        CountryInterconnect = []
+        Summary = []
+        values = []
+
+        # Loop through generators 
+        for generator in data['elements'][egret_property].keys():
+            
+            # Get generator time series values
+            vals = data['elements'][egret_property][generator]['pg']['values']
+
+            # Get zone and area labels if they exists
+            if 'zone' in data['elements'][egret_property][generator].keys():
+                zone_val = data['elements'][egret_property][generator]['zone']
+            else:
+                zone_val = '0'
+            if 'area' in data['elements'][egret_property][generator].keys():
+                area_val = data['elements'][egret_property][generator]['area']
+            else:
+                area_val = '0'
+
+            timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(vals))]
+            tech += ['NaN']*len(vals)
+            gen_name += [generator]*len(vals)
+            region += [area_val]*len(vals)
+            zone += [zone_val]*len(vals)
+            superzone += ['NaN']*len(vals)
+            Midwest_Agg += ['NaN']*len(vals)
+            Usual += ['NaN']*len(vals)
+            Country += ['NaN']*len(vals)
+            Interconnection += ['NaN']*len(vals)
+            CountryInterconnect += ['NaN']*len(vals)
+            Summary += ['NaN']*len(vals)
+            values += vals
+
+        # Put data into pandas dataframe
+        gen_df = pd.DataFrame({'timestamp':timestamp,
+                             'tech':tech,
+                             'gen_name':gen_name,
+                             'region':region,
+                             'zone':zone,
+                             'superzone':superzone,
+                             'Midwest_Agg':Midwest_Agg,
+                             'Usual':Usual,
+                             'Country':Country,
+                             'Interconnection':Interconnection,
+                             'CountryInterconnect':CountryInterconnect,
+                             'Summary':Summary,
+                             '0':values})
+
+        # Set dataframe column indices
+        gen_df = gen_df.set_index(['timestamp',
+                        'tech',
+                        'gen_name',
+                        'region',
+                        'zone',
+                        'superzone',
+                        'Midwest_Agg',
+                        'Usual',
+                        'Country',
+                        'Interconnection',
+                        'CountryInterconnect',
+                        'Summary'])
+
+        return gen_df
+
+
+    def df_process_region(self, data, egret_property) -> pd.DataFrame:
+        """Format EGRET region data. I think currently this will only work for load.
+
+        Args:
+            data (dictionary): EGRET json data read into a nested dictionary
+            egret_property (string): Egret property name; key of json file
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        # If there is no region information, demand is the only key
+        if 'demand' in data['elements'][egret_property].keys():
+            values = data['elements'][egret_property]['demand']['p_load']['values']
+            timestamp = [i for i in range(len(values))]
+            region = [0]*len(values)
+            superzone = ['NaN']*len(values)
+            Midwest_Agg = ['NaN']*len(values)
+            Usual = ['NaN']*len(values)
+            Country = ['NaN']*len(values)
+            Interconnection = ['NaN']*len(values)
+            CountryInterconnect = ['NaN']*len(values)
+            Summary = ['NaN']*len(values)
+
+        # If there is region information, aggregate by region
+        else:
+            values_dict = {}
+            for key in data['elements'][egret_property].keys():
+                area = data['elements'][egret_property][key]['area']
+                # Creat new key 
+                if area not in values_dict.keys():
+                    values_dict[area] = np.array(data['elements'][egret_property][key]['p_load']['values'])
+                # Add values if key already exists
+                else:
+                    values_dict[area] += np.array(data['elements'][egret_property][key]['p_load']['values'])
+
+            # Create actual columns        
+            values = []
+            timestamp = []
+            region = [] # this is area in Egret
+            superzone = []
+            Midwest_Agg = []
+            Usual = []
+            Country = []
+            Interconnection = []
+            CountryInterconnect = []
+            Summary = []
+            for key in values_dict.keys():
+                values += list(values_dict[key])
+                timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                region += [key]*len(values_dict[key])
+                superzone += ['NaN']*len(values_dict[key])
+                Midwest_Agg += ['NaN']*len(values_dict[key])
+                Usual += ['NaN']*len(values_dict[key])
+                Country += ['NaN']*len(values_dict[key])
+                Interconnection += ['NaN']*len(values_dict[key])
+                CountryInterconnect += ['NaN']*len(values_dict[key])
+                Summary += ['NaN']*len(values_dict[key])
+
+        # Create dataframe
+        region_df = pd.DataFrame({'timestamp':timestamp,
+                                  'region':region,
+                                  'superzone':superzone,
+                                  'Midwest_Agg':Midwest_Agg,
+                                  'Usual':Usual,
+                                  'Country':Country,
+                                  'Interconnection':Interconnection,
+                                  'CountryInterconnect':CountryInterconnect,
+                                  'Summary':Summary,
+                                  '0':values})
+
+        # Set index
+        region_df = region_df.set_index(['timestamp',
+                                       'region',
+                                       'superzone',
+                                       'Midwest_Agg',
+                                       'Usual',
+                                       'Country',
+                                       'Interconnection',
+                                       'CountryInterconnect',
+                                       'Summary'])
+
+        return region_df
+    
+
+    def df_process_zone(self, data, egret_property) -> pd.DataFrame:
+        """Format EGRET zone data. I think currently this will only work for load.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+            egret_property (string): Egret property name; key of json file
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        # If there is no zone information, demand is the only key
+        if 'demand' in data['elements'][egret_property].keys():
+            values = data['elements'][egret_property]['demand']['p_load']['values']
+            timestamp = [i for i in range(len(values))]
+            zone = [0]*len(values)
+
+        # If there is zone information, aggregate by zone
+        else:
+            values_dict = {}
+            for key in data['elements'][egret_property].keys():
+                zone = data['elements'][egret_property][key]['zone']
+                # Creat new key 
+                if zone not in values_dict.keys():
+                    values_dict[zone] = np.array(data['elements'][egret_property][key]['p_load']['values'])
+                # Add values if key already exists
+                else:
+                    values_dict[zone] += np.array(data['elements'][egret_property][key]['p_load']['values'])
+
+            # Create actual columns        
+            values = []
+            timestamp = []
+            zone = []
+            for key in values_dict.keys():
+                values += list(values_dict[key])
+                timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                zone += [key]*len(values_dict[key])
+
+        # Create dataframe
+        zone_df = pd.DataFrame({'timestamp':timestamp,
+                                'zone':zone,
+                                '0':values})
+        # Set index
+        zone_df = zone_df.set_index(['timestamp','zone'])
+        return zone_df
+
+
+    def df_process_line(self, data) -> pd.DataFrame:
+        """Format PLEXOS Line Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_interface(self, data) -> pd.DataFrame:
+        """Format PLEXOS PLEXOS Interface Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_reserve(self, data) -> pd.DataFrame:
+        """Format PLEXOS Reserve Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_reserves_generators(self, data) -> pd.DataFrame:
+        """Format PLEXOS Reserve_Generators Relational Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_fuel(self, data) -> pd.DataFrame:
+        """Format PLEXOS Fuel Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_constraint(self, data) -> pd.DataFrame:
+        """Format PLEXOS Constraint Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_emission(self, data) -> pd.DataFrame:
+        """Format PLEXOS Emission Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_emissions_generators(self, data) -> pd.DataFrame:
+        """Format PLEXOS Emissions_Generators Relational Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_storage(self, data) -> pd.DataFrame:
+        """Format PLEXOS Storage Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_region_regions(self, data) -> pd.DataFrame:
+        """Format PLEXOS Region_Regions Relational Class data.
+
+        Args:
+           data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_node(self, data) -> pd.DataFrame:
+        """Format PLEXOS Node Class data.
+
+        Args:
+           data (dictionary): Egret json data read into a nested dictionary
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+    def df_process_abatement(self, data) -> pd.DataFrame:
+        """Format PLEXOS Abatement Class data.
+
+        Args:
+            data (dictionary): Egret json data read into a nested dictionary 
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = pd.DataFrame()
+        return df
+
+######################################################################################################
+
+
+    
 
 class MarmotFormat(SetupLogger):
     """Main module class to be instantiated to run the formatter.
