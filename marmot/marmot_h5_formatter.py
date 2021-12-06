@@ -1030,7 +1030,7 @@ class ProcessEGRET(Process):
         # Get desired method
         process_att = getattr(self, f'df_process_{plexos_class}')
         # Process attribute and return to df
-        df = process_att(data)
+        df = process_att(data, plexos_prop)
         
         # # Convert units and add unit column to index 
         # df = df*converted_units[1]
