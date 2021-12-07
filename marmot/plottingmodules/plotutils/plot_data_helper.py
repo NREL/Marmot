@@ -85,13 +85,14 @@ class PlotDataHelper(dict):
             
             # If set is not empty add data to dict
             if scen_list:
-                # Read data in with multi threading
+                #Read data in with multi threading
                 executor_func_setup = functools.partial(self.read_processed_h5file, plx_prop_name)
-                with concurrent.futures.ThreadPoolExecutor(max_workers=16) as executor:
+                with concurrent.futures.ThreadPoolExecutor(max_workers=mconfig.parser("multithreading_workers")) as executor:
                     data_files = executor.map(executor_func_setup, scen_list)
                 # Save data to dict
                 for scenario, df in zip(scen_list, data_files):
                     self[f"{plx_prop_name}"][scenario] = df
+
             # If any of the dataframes are empty for given property log warning
             if True in [df.empty for df in self[f"{plx_prop_name}"].values()]:
                 logger.warning(f"{plx_prop_name} is MISSING from the Marmot formatted h5 files")
