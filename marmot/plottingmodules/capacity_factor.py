@@ -216,7 +216,7 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            CF_all_scenarios = pd.DataFrame()
+            cf_scen_chunks = []
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
@@ -259,8 +259,10 @@ class MPlot(PlotDataHelper):
                 #Calculate CF
                 CF = Total_Gen/(Cap * duration_hours)
                 CF.rename(scenario, inplace = True)
-                CF_all_scenarios = pd.concat([CF_all_scenarios, CF], axis=1, sort=False)
-                CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
+                cf_scen_chunks.append(CF)
+
+            CF_all_scenarios = pd.concat(cf_scen_chunks, axis=1, sort=False)
+            CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
 
             CF_all_scenarios.columns = CF_all_scenarios.columns.str.replace('_',' ')
 
@@ -284,6 +286,7 @@ class MPlot(PlotDataHelper):
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
+            ax.set_xlabel('')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             

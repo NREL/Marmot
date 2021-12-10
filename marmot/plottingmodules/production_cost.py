@@ -128,7 +128,9 @@ class MPlot(PlotDataHelper):
                 # Reserve_Revenues = Reserve_Revenues/Total_Installed_Capacity #Change to $/MW-year
                 Reserve_Revenues.rename("Reserve_Revenues", inplace=True)
 
-                Total_Systems_Cost = pd.concat([Total_Systems_Cost, Total_Gen_Cost, Pool_Revenues, Reserve_Revenues], axis=1, sort=False)
+                Total_Systems_Cost = pd.concat([Total_Systems_Cost, Total_Gen_Cost, 
+                                                Pool_Revenues, Reserve_Revenues], 
+                                               axis=1, sort=False)
 
                 Total_Systems_Cost.columns = Total_Systems_Cost.columns.str.replace('_',' ')
                 Total_Systems_Cost = Total_Systems_Cost.sum(axis=0)
@@ -167,7 +169,7 @@ class MPlot(PlotDataHelper):
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Total System Net Rev, Rev, & Cost (Million $)',  color='black', rotation='vertical')
+            ax.set_ylabel('Total System Net Rev,\nRev, & Cost (Million $)',  color='black', rotation='vertical')
             
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
@@ -505,7 +507,8 @@ class MPlot(PlotDataHelper):
 
 
     def sys_cost_type(self, start_date_range: str = None, 
-                      end_date_range: str = None, **_):
+                      end_date_range: str = None, custom_data_file_path: str = None,
+                      **_):
         """Creates stacked bar plot of total generation cost by generator technology type.
 
         Another way to represent total generation cost, this time by tech type,
@@ -570,7 +573,11 @@ class MPlot(PlotDataHelper):
             if Total_Generation_Stack_Out.empty:
                 outputs[zone_input] = MissingZoneData()
                 continue
-
+            
+            if pd.notna(custom_data_file_path):
+                Total_Generation_Stack_Out = self.insert_custom_data_columns(
+                                                    Total_Generation_Stack_Out,
+                                                    custom_data_file_path)
             # Data table of values to return to main program
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 
