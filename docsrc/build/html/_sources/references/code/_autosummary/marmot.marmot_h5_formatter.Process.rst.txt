@@ -1,4 +1,4 @@
-.. raw:: html
+﻿.. raw:: html
 
    <script>
       var arr = document.getElementsByClassName('reference internal');
@@ -25,6 +25,7 @@ marmot.marmot\_h5\_formatter.Process
    .. autosummary::
    
         ~Process.df_process_abatement
+        ~Process.df_process_batterie
         ~Process.df_process_constraint
         ~Process.df_process_emission
         ~Process.df_process_emissions_generators
