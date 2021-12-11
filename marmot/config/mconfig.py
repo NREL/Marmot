@@ -164,6 +164,7 @@ def createConfig(configfile_path: str):
             include_total_pumped_load_line = True,
             include_timeseries_pumped_load_line = True),
 
+        multithreading_workers = 16,
         figure_file_format = 'svg',
         
         shift_leapday = False,

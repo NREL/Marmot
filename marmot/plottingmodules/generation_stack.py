@@ -394,7 +394,6 @@ class MPlot(PlotDataHelper):
                 unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
 
             elif prop == "Min Net Load":
-                print(type(end))
                 min_net_load_t = Net_Load.idxmin()
                 end_date = min_net_load_t + dt.timedelta(days=end)
                 start_date = min_net_load_t - dt.timedelta(days=start)
@@ -420,7 +419,7 @@ class MPlot(PlotDataHelper):
                 re_gen_cat = [name for name in self.re_gen_cat if name in Stacked_Gen.columns]
                 all_gen = [name for name in Stacked_Gen.columns]
                 if len(re_gen_cat) == 0:
-                    re_total = pd.DataFrame()
+                    return None
                 else:
                     re_total = Stacked_Gen[re_gen_cat[0]]
                     i = 1
@@ -465,6 +464,10 @@ class MPlot(PlotDataHelper):
                 while j < len(all_gen):
                     gen_total = gen_total + Stacked_Gen[all_gen[j]]
                     j += 1
+
+                curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+                if curtailment_name not in Stacked_Gen:
+                    return None
                 curtailment = Stacked_Gen['Curtailment']
                 peak_curt_t = curtailment.idxmax()
                 peak_curt = curtailment[peak_curt_t]
@@ -542,7 +545,7 @@ class MPlot(PlotDataHelper):
                 data = data_prop(data)
                 
                 # if no Generation return empty dataframe
-                if data["Stacked_Gen"].empty == True:
+                if not data or data["Stacked_Gen"].empty == True:
                     self.logger.warning(f'No generation during time period in {zone_input}')
                     out = MissingZoneData()
                     return out

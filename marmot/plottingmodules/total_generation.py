@@ -224,6 +224,10 @@ class MPlot(PlotDataHelper):
                 total_demand_chunk.append(Total_Demand)
                 unserved_energy_chunk.append(Unserved_Energy)
             
+            if not gen_chunks:
+                outputs[zone_input] = MissingZoneData()
+                continue
+
             Total_Generation_Stack_Out = pd.concat(gen_chunks, axis=1, sort=False).fillna(0)
             Total_Load_Out = pd.concat(load_chunk, axis=0, sort=False)
             Pump_Load_Out = pd.concat(pumped_load_chunk, axis=0, sort=False)
@@ -238,11 +242,6 @@ class MPlot(PlotDataHelper):
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
-            if Total_Generation_Stack_Out.empty:
-                out = MissingZoneData()
-                outputs[zone_input] = out
-                continue
-            
             # unit conversion return divisor and energy units
             unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum(axis=1)))
 
@@ -406,6 +405,10 @@ class MPlot(PlotDataHelper):
                 
                 gen_chunks.append(Total_Gen_Stack)
             
+            if not gen_chunks:
+                outputs[zone_input] = MissingZoneData()
+                continue
+
             Total_Generation_Stack_Out = pd.concat(gen_chunks, axis=1, sort=False).fillna(0)
 
             Total_Generation_Stack_Out = self.create_categorical_tech_index(Total_Generation_Stack_Out)
@@ -417,15 +420,13 @@ class MPlot(PlotDataHelper):
                 #Change to a diff on first scenario
                 Total_Generation_Stack_Out = Total_Generation_Stack_Out-Total_Generation_Stack_Out.xs(self.Scenarios[0]) 
             except KeyError:
-                out = MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = MissingZoneData()
                 continue
 
             Total_Generation_Stack_Out.drop(self.Scenarios[0],inplace=True) #Drop base entry
 
             if Total_Generation_Stack_Out.empty == True:
-                out = MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(abs(Total_Generation_Stack_Out.sum(axis=1))))
@@ -617,7 +618,7 @@ class MPlot(PlotDataHelper):
 
                 if Total_Gen_Stack.empty:
                     if vre_only:
-                        self.logger.warning(f"No vre in current selection: {zone_input}")
+                        self.logger.warning(f"No vre in: {zone_input}")
                     gen_chunks.append(pd.DataFrame())
                     continue
 
@@ -691,6 +692,11 @@ class MPlot(PlotDataHelper):
                 load_chunk.append(monthly_total_load)
                 pumped_load_chunk.append(monthly_pumped_load)
                 total_demand_chunk.append(monthly_total_demand)
+
+            if not gen_chunks:
+                # If no generation in select zone/region
+                outputs[zone_input] = MissingZoneData()
+                continue
 
             # Concat all data into single data-frames
             Gen_Out = pd.concat(gen_chunks,axis=0, sort=False)
@@ -855,7 +861,6 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Generation",self.Scenarios), 
                       (False,f"generator_{self.curtailment_prop}",self.Scenarios)]
 
-
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
@@ -894,7 +899,6 @@ class MPlot(PlotDataHelper):
     
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
                 
-    
                 #Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                 if not Stacked_Curt.empty:
@@ -915,14 +919,16 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Stack.rename(scenario, inplace=True)
                 Total_Gen_Stack = (Total_Gen_Stack/sum(Total_Gen_Stack))*100
                 gen_chunks.append(Total_Gen_Stack)
-                
+            
+            if not gen_chunks:
+                outputs[zone_input] = MissingZoneData()
+                continue
+
             Total_Gen_Out = pd.concat(gen_chunks, axis=1, sort=False).fillna(0)
-                
             Total_Gen_Out = Total_Gen_Out.loc[:, (Total_Gen_Out != 0).any(axis=0)]
             
             if Total_Gen_Out.empty:
-                out = MissingZoneData()
-                outputs[zone_input] = out
+                outputs[zone_input] = MissingZoneData()
                 continue
             
             unique_tech_names = []

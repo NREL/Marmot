@@ -567,6 +567,25 @@ class Process(SetupLogger):
         df[0] = pd.to_numeric(df[0], downcast='float')
         return df
 
+    def df_process_batterie(self):
+        """
+        Method for formatting data which comes form the PLEXOS Batteries Class
+
+        Returns
+        -------
+        df : pd.DataFrame
+            Processed Output, single value column with multiindex.
+
+        """
+        df = self.df.droplevel(level=["band", "property"])
+        df.index.rename('battery_name', level='name', inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df_col = list(df.index.names)  # Gets names of all columns in df and places in list
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))  # move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast='float')
+        return df
+
 class MarmotFormat(SetupLogger):
     """Main module class to be instantiated to run the formatter.
 
@@ -727,21 +746,26 @@ class MarmotFormat(SetupLogger):
             else:
                 df = db.query_object_property(plexos_class, plexos_prop, 
                                                 timescale=timescale)
-                
-                # handles h5plexos naming discrepency 
                 if ((0,6,0) <= db.version and db.version < (0,7,0)):
                     object_class = f"{plexos_class}s"
-        
-        except KeyError:
+                else:
+                    object_class = plexos_class
+
+        except (ValueError, KeyError):
             df = self._report_prop_error(plexos_prop, plexos_class)
             return df
         
-        # Get original units from h5plexos file 
-        df_units = (db.h5file[f'/data/ST/{timescale}/{object_class}/{plexos_prop}']
+        # handles h5plexos naming discrepency 
+        if ((0,6,0) <= db.version and db.version < (0,7,0)):
+            # Get original units from h5plexos file 
+            df_units = (db.h5file[f'/data/ST/{timescale}/{object_class}/{plexos_prop}']
                       .attrs['units'].decode('UTF-8'))
+        else:
+            df_units = (db.h5file[f'/data/ST/{timescale}/{object_class}/{plexos_prop}']
+                      .attrs['unit'])
+
         # find unit conversion values
         converted_units = UNITS_CONVERSION.get(df_units, (df_units, 1))
-
 
         # Instantiate instance of Process Class
         # metadata is used as a parameter to initialize process_cl

@@ -756,7 +756,12 @@ class MPlot(PlotDataHelper):
                 self.logger.info(f"Scenario = {scenario}")
     
                 price = self["node_Price"][scenario]
-                price = price.xs(node, level='node')
+                try:
+                    price = price.xs(node, level='node')
+                except KeyError:
+                    self.logger.info(f"{node} not found")
+                    continue
+        
                 # price = price.loc[(slice(None), select_nodes),:]
                 price = price.groupby(["timestamp"]).sum()
                 price.rename(columns={0:scenario}, inplace=True)
@@ -768,7 +773,11 @@ class MPlot(PlotDataHelper):
                 
                 price.reset_index('timestamp',drop=True,inplace=True)                
                 all_prices.append(price)
-    
+
+            if not all_prices:
+                self.logger.info(f"Nodes not found in database, input sheet error likely!")
+                return InputSheetError()
+
             p_hist = pd.concat(all_prices,axis=1)
             
             if diff_plot:

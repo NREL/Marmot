@@ -1,6 +1,8 @@
 # Marmot
 Marmot is a data formatting and visualization tool for PLEXOS production cost modelling results. It provides an efficient way to view PLEXOS results, while also creating publication ready figures and data tables.
 
+[![Documentation](https://img.shields.io/badge/docs-ready-blue.svg)](https://nrel.github.io/Marmot/index.html)
+
 ![Yellow-bellied marmot](https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg)
 
 Click the following to quickly navigate to the main sections of the ReadME:
