@@ -45,9 +45,9 @@ import marmot.config.mconfig as mconfig
 
 # Import as Submodule
 try:
-    from h5plexos.query import PLEXOSSolution
-except ModuleNotFoundError:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
+except ModuleNotFoundError:
+    from h5plexos.query import PLEXOSSolution
 
 
 # A bug in pandas requires this to be included,
@@ -336,7 +336,7 @@ class ProcessPLEXOS(Process):
             df = self.report_prop_error(plexos_prop, plexos_class)
             return df
         
-        if self.plexos_block != 'ST':
+        if self.plexos_block != 'ST' and timescale == 'interval':
             df = self.merge_timeseries_block_data(db, df)
 
         # handles h5plexos naming discrepency 
@@ -361,7 +361,7 @@ class ProcessPLEXOS(Process):
         units_index = pd.Index([converted_units[0]] *len(df), name='units')
         df.set_index(units_index, append=True, inplace=True)
 
-        if plexos_class == 'region' and \
+        if plexos_class == "region" and \
            plexos_prop == "Unserved Energy" and \
            int(df.sum(axis=0)) > 0:
             self.logger.warning(f"Scenario contains Unserved Energy: "
@@ -370,7 +370,7 @@ class ProcessPLEXOS(Process):
 
     def merge_timeseries_block_data(self, db: PLEXOSSolution, 
                                     df: pd.DataFrame) -> pd.DataFrame:
-        """Merge timeseries and block data found in LT, MT and PASA results
+        """Merge chronological time intervals and block data found in LT, MT and PASA results
 
         Args:
             db (PLEXOSSolution): PLEXOSSolution instance for specific h5plexos file.
@@ -389,6 +389,7 @@ class ProcessPLEXOS(Process):
         index_cols = list(merged_data.columns)
         index_cols.remove(0)
         merged_data.set_index(index_cols, inplace=True)
+        merged_data = merged_data.sort_index(level=['category', 'name'])
         return merged_data
 
     def df_process_generator(self, df: pd.DataFrame, 
