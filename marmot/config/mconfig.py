@@ -167,7 +167,9 @@ def createConfig(configfile_path: str):
         plot_data = dict(
             curtailment_property = 'Curtailment',
             include_total_pumped_load_line = True,
-            include_timeseries_pumped_load_line = True),
+            include_timeseries_pumped_load_line = True,
+            include_total_net_imports = False,
+            include_timeseries_net_imports = False),
 
         figure_file_format = 'svg',
         

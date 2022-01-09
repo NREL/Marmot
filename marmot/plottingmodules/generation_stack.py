@@ -592,6 +592,10 @@ class MPlot(PlotDataHelper):
                 Total_Demand = Total_Demand.rename('Total Demand')
                 unserved_eng_data_table = unserved_eng_data_table.rename("Unserved Energy")
                 
+                # Add Net Imports if desired
+                if mconfig.parser("plot_data","include_timeseries_net_imports"):
+                    Stacked_Gen = self.include_net_imports(Stacked_Gen, Load)
+                    
                 # Data table of values to return to main program
                 single_scen_out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], 
                                             axis=1, sort=False)

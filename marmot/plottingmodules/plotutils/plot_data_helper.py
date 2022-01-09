@@ -373,6 +373,38 @@ class PlotDataHelper(dict):
                     continue
                 k=k+1
 
+    def include_net_imports(self, gen_df: pd.DataFrame, 
+                            load_series: pd.Series) -> pd.DataFrame:
+        """Adds net imports to total and timeseries generation plots.
+
+        Net imports are calculated as load - total generation 
+
+        Args:
+            gen_df (pd.DataFrame): generation dataframe
+            load_series (pd.Series): load series 
+
+        Returns:
+            pd.DataFrame: Dataframe with net imports included 
+        """
+        # Check if generators are in columns, if yes transpose gen_df
+        if any(gen_type in self.ordered_gen for gen_type in gen_df.columns):
+            gen_df = gen_df.T
+            transpose_df = True
+        else:
+            transpose_df = False
+        curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+        if curtailment_name in gen_df.index:
+            total_gen = gen_df.drop(curtailment_name).sum()
+        else:
+            total_gen = gen_df.sum()
+        net_imports = load_series.squeeze() - total_gen
+        net_imports = net_imports.rename("Net Imports")
+        gen_df = gen_df.append(net_imports)
+        gen_df = self.create_categorical_tech_index(gen_df)
+        if transpose_df:
+           gen_df = gen_df.T 
+        return gen_df
+
     @staticmethod
     def set_plot_timeseries_format(axs, n: int = 0,
                                    minticks: int = mconfig.parser("axes_options","x_axes_minticks"),

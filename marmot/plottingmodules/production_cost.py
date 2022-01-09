@@ -164,12 +164,15 @@ class MPlot(PlotDataHelper):
 
             fig1, ax = plt.subplots(figsize=(self.x,self.y))
             
-            net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', linestyle='None', marker='o')
-            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
+            net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', 
+                               linestyle='None', marker='o')
+            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', 
+                                            linewidth='0.1', ax=ax)
 
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Total System Net Rev,\nRev, & Cost (Million $)',  color='black', rotation='vertical')
+            ax.set_ylabel('Total System Net Rev,\nRev, & Cost (Million $)', 
+                          color='black', rotation='vertical')
             
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
@@ -180,19 +183,21 @@ class MPlot(PlotDataHelper):
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: 
+                                         format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
 
             handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='upper center',bbox_to_anchor=(0.5,-0.15),
-                         facecolor='inherit', frameon=True, ncol=3)
+            ax.legend(reversed(handles), reversed(labels), loc='upper center', 
+                      bbox_to_anchor=(0.5,-0.15), facecolor='inherit', 
+                      frameon=True, ncol=3)
 
             #Legend 1
-            leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',
+                             bbox_to_anchor=(1,0), facecolor='inherit', frameon=True)
             #Legend 2
             ax.legend(net_rev, ['Net Revenue'], loc='center left',bbox_to_anchor=(1, 0.9),
-                          facecolor='inherit', frameon=True)
+                      facecolor='inherit', frameon=True)
 
             # Manually add the first legend back
             ax.add_artist(leg1)
@@ -203,7 +208,8 @@ class MPlot(PlotDataHelper):
         return outputs
 
     def sys_cost(self, start_date_range: str = None, 
-                 end_date_range: str = None, **_):
+                 end_date_range: str = None, custom_data_file_path: str = None,
+                 **_):
         """Creates a stacked bar plot of Total Generation Cost and Cost of Unserved Energy.
 
         Plot only shows totals and is NOT broken down into technology or cost type 
@@ -288,16 +294,23 @@ class MPlot(PlotDataHelper):
             if Total_Systems_Cost_Out.empty:
                 outputs[zone_input] = MissingZoneData()
                 continue
+            
+            if pd.notna(custom_data_file_path):
+                Total_Systems_Cost_Out = self.insert_custom_data_columns(
+                                                        Total_Systems_Cost_Out, 
+                                                        custom_data_file_path)
 
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
             
             fig2, ax = plt.subplots(figsize=(self.x,self.y))
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
+            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', 
+                                            linewidth='0.1', ax=ax)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
+            ax.set_ylabel('Total System Cost (Million $)', color='black', 
+                          rotation='vertical')
             
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
@@ -349,7 +362,8 @@ class MPlot(PlotDataHelper):
         return outputs
 
     def detailed_gen_cost(self, start_date_range: str = None, 
-                          end_date_range: str = None, **_):
+                          end_date_range: str = None, custom_data_file_path: str = None,
+                          **_):
         """Creates stacked bar plot of total generation cost by cost type (fuel, emission, start cost etc.)
 
         Creates a more deatiled system cost plot.
@@ -445,6 +459,11 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
             
+            if pd.notna(custom_data_file_path):
+                Total_Systems_Cost_Out = self.insert_custom_data_columns(
+                                                        Total_Systems_Cost_Out, 
+                                                        custom_data_file_path)
+                                                        
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
             
