@@ -398,6 +398,8 @@ class PlotDataHelper(dict):
         else:
             total_gen = gen_df.sum()
         net_imports = load_series.squeeze() - total_gen
+        # Remove negative values (i.e exports)
+        net_imports = net_imports.clip(lower=0)
         net_imports = net_imports.rename("Net Imports")
         gen_df = gen_df.append(net_imports)
         gen_df = self.create_categorical_tech_index(gen_df)
