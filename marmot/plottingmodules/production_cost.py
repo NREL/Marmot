@@ -67,6 +67,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -221,6 +223,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -374,6 +378,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -539,6 +545,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.

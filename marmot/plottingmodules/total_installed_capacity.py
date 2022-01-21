@@ -381,7 +381,7 @@ class MPlot(PlotDataHelper):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_', ' ')
 
             # Remove any suffixes from column names
-            Total_Generation_Stack_Out.columns = [re.sub('[\s (]|GWh|TWh|MWh|kWh|\)', '', i) 
+            Total_Generation_Stack_Out.columns = [re.sub('[(]|GWh|TWh|MWh|kWh|\)', '', i).strip() 
                                                   for i in Total_Generation_Stack_Out.columns]
 
             Total_Generation_Stack_Out.plot.bar(stacked=True, ax=axs[1],
