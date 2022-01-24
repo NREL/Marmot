@@ -590,7 +590,7 @@ class MPlot(PlotDataHelper):
                     y+height + 0.05*max(ax.get_ylim()),
                     '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
                     horizontalalignment='center',
-                    verticalalignment='center', fontsize=11, color='red')
+                    verticalalignment='center', fontsize=7, color='red')
                 
                 if k>=len(vre_pct_curt)-1:
                     break
