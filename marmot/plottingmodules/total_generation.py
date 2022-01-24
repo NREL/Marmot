@@ -242,6 +242,9 @@ class MPlot(PlotDataHelper):
             # Add Net Imports if desired
             if mconfig.parser("plot_data","include_total_net_imports"):
                 Total_Generation_Stack_Out = self.include_net_imports(Total_Generation_Stack_Out, Total_Load_Out)
+                print(Total_Generation_Stack_Out)
+                Total_Generation_Stack_Out.loc["Net Imports",:] -= Unserved_Energy_Out
+                print(Total_Generation_Stack_Out)
 
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
