@@ -73,7 +73,8 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                    Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
@@ -727,7 +728,8 @@ class MPlot(PlotDataHelper):
                 max_value = max(Gen_Out.sum())
             
             # Add Net Imports if desired
-            if mconfig.parser("plot_data","include_total_net_imports"):
+            if mconfig.parser("plot_data","include_total_net_imports") and \
+                not vre_only:
                 Gen_Out = self.include_net_imports(Gen_Out, Total_Load_Out)
 
             if not plot_as_percnt:

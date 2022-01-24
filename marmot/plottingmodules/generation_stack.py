@@ -50,7 +50,8 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                    Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
@@ -331,10 +332,8 @@ class MPlot(PlotDataHelper):
             Pump_Load = Pump_Load.squeeze() #Convert to Series
             if (Pump_Load == 0).all() == False:
                 Total_Demand = Load - Pump_Load
-                #Load = Total_Demand + Pump_Load
             else:
                 Total_Demand = Load
-                #Load = Total_Demand
 
             Unserved_Energy = self[f'{agg}_Unserved_Energy'][scenario].copy()
             if Unserved_Energy.empty:

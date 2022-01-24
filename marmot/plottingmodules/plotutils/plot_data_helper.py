@@ -34,7 +34,7 @@ class PlotDataHelper(dict):
 
     def __init__(self, Marmot_Solutions_folder: str, AGG_BY: str, ordered_gen: list, 
                  PLEXOS_color_dict: dict, Scenarios: list, ylabels: list, 
-                 xlabels: list, gen_names_dict: dict,
+                 xlabels: list, gen_names_dict: dict, TECH_SUBSET: str,
                  Region_Mapping: pd.DataFrame = pd.DataFrame()):
         """
         Args:
@@ -59,6 +59,7 @@ class PlotDataHelper(dict):
         self.ylabels = ylabels
         self.xlabels = xlabels
         self.gen_names_dict = gen_names_dict
+        self.TECH_SUBSET = TECH_SUBSET
         self.Region_Mapping = Region_Mapping
 
     def get_formatted_data(self, properties: list) -> list:
@@ -172,10 +173,9 @@ class PlotDataHelper(dict):
             logger.warning("Curtailment techs could not be identified correctly for Marmot's Curtailment property. "
             "This is likely happening as the 'vre' column was not present in the ordered_gen_categories.csv or there "
             "are no vre generators in the selected region")
-            return df
-        else: 
-            # Retrun df with just vre techs
-            return df[df.columns.intersection(self.vre_gen_cat)]
+ 
+        # Retrun df with just vre techs
+        return df[df.columns.intersection(self.vre_gen_cat)]
 
     def df_process_gen_inputs(self, df: pd.DataFrame) -> pd.DataFrame:
         """Processes generation data into a pivot table. 
@@ -386,6 +386,10 @@ class PlotDataHelper(dict):
         Returns:
             pd.DataFrame: Dataframe with net imports included 
         """
+        # Do not calculate net imports if using a subset of techs
+        if self.TECH_SUBSET:
+            logger.info("Net Imports can not be calculated when using TECH_SUBSET")
+            return gen_df
         # Check if generators are in columns, if yes transpose gen_df
         if any(gen_type in self.ordered_gen for gen_type in gen_df.columns):
             gen_df = gen_df.T
