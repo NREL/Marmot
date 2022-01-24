@@ -374,7 +374,8 @@ class PlotDataHelper(dict):
                 k=k+1
 
     def include_net_imports(self, gen_df: pd.DataFrame, 
-                            load_series: pd.Series) -> pd.DataFrame:
+                            load_series: pd.Series,
+                            unsereved_energy: pd.Series = pd.Series(dtype='float64')) -> pd.DataFrame:
         """Adds net imports to total and timeseries generation plots.
 
         Net imports are calculated as load - total generation 
@@ -382,6 +383,8 @@ class PlotDataHelper(dict):
         Args:
             gen_df (pd.DataFrame): generation dataframe
             load_series (pd.Series): load series 
+            unsereved_energy (pd.Series) : unsereved energy series,
+                (optional)
 
         Returns:
             pd.DataFrame: Dataframe with net imports included 
@@ -404,6 +407,8 @@ class PlotDataHelper(dict):
         net_imports = load_series.squeeze() - total_gen
         # Remove negative values (i.e exports)
         net_imports = net_imports.clip(lower=0)
+        if not unsereved_energy.empty:
+            net_imports -= unsereved_energy.squeeze()
         net_imports = net_imports.rename("Net Imports")
         gen_df = gen_df.append(net_imports)
         gen_df = self.create_categorical_tech_index(gen_df)

@@ -593,8 +593,8 @@ class MPlot(PlotDataHelper):
                 
                 # Add Net Imports if desired
                 if mconfig.parser("plot_data","include_timeseries_net_imports"):
-                    Stacked_Gen = self.include_net_imports(Stacked_Gen, Load)
-                    Stacked_Gen["Net Imports"] -= Unserved_Energy
+                    Stacked_Gen = self.include_net_imports(Stacked_Gen, Load,
+                                                           Unserved_Energy)
                     
                 # Data table of values to return to main program
                 single_scen_out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], 
