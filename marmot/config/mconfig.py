@@ -98,6 +98,11 @@ def createConfig(configfile_path: str):
     *Toggles whether existing properties are skipped or overwritten if they already contained in 
     a previous processed_h5 file, the default is to skip*
 
+    - **append_plexos_block_name:** true
+
+    *Toggles whether to append PLEXOS block name to formatted results e.g ST, MT, LT, PASA.
+    defaults to append.
+
     - **auto_convert_units:** true
 
     *If True automatically converts Energy and Capacity units so that no number exceeds 1000. 
@@ -169,6 +174,7 @@ def createConfig(configfile_path: str):
         
         shift_leapday = False,
         skip_existing_properties = True,
+        append_plexos_block_name = True,
         auto_convert_units = True,
         plot_title_as_region = True,
         

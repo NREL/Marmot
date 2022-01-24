@@ -112,7 +112,7 @@ class MetaData():
                                     "Marmot is looking for a h5plexos solution file.\n"
                                     f"It is looking in {self.HDF5_folder_in}, but it cannot "
                                     "find any *.h5 files there.\n"
-                                    "Please check the 'PLEXOS_Solutions_folder' input in row 2 of your "
+                                    "Please check the 'PLEXOS_Solutions_folder' input in your "
                                     "'Marmot_user_defined_inputs.csv'.\n"
                                     "Ensure that it matches the filepath containing the *.h5 files "
                                     "created by h5plexos.\n\nMarmot will now quit.")
