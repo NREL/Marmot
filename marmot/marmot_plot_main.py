@@ -576,7 +576,8 @@ class MarmotPlot(SetupLogger):
                 "Region_Mapping": self.Region_Mapping,
                 "figure_folder": figure_folder,
                 "meta": meta,
-                "shift_leapday": shift_leapday
+                "shift_leapday": shift_leapday,
+                "TECH_SUBSET": self.TECH_SUBSET
                 }
             
             # Create output folder for each plotting module
