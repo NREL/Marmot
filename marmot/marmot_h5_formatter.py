@@ -32,6 +32,9 @@ import yaml
 from typing import Union
 import json
 
+import datetime
+import numpy as np
+
 try:
     from marmot.meta_data import MetaData
 except ModuleNotFoundError:
@@ -952,14 +955,27 @@ class ProcessEGRET(Process):
         # Instantiation of Process Base class
         super().__init__(input_folder, Region_Mapping, *args, **kwargs) 
 
-    # I think the default method works for Egret
-    # def get_input_files(self) -> list:
-    #     """Gets a list of Egret input files within the scenario folders
+        
+    def get_input_files(self) -> list:
+        """Gets a list of Egret input files within the scenario folders
 
-    #     Returns:
-    #         list: list of Egret input filenames to process
-    #     """
-    #     return files_list
+        Returns:
+            list: list of Egret input filenames to process
+        """
+
+        startdir = os.getcwd()
+        os.chdir(self.input_folder) 
+        
+        files = []
+        for names in os.listdir():
+            if names.endswith(".json"):
+                files.append(self.input_folder + '/' + names)  # Creates a list of only the json files
+
+        # List of all files in alpha numeric order
+        files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
+        os.chdir(startdir)
+
+        return files_list
 
     # I think the default method works for Egret
     # def output_metadata(self, files_list: list, output_file_path: str) -> None:
@@ -970,14 +986,14 @@ class ProcessEGRET(Process):
     #         output_file_path (str): Location of formatted output h5 file 
     #     """
 
-    def get_processed_data(self, plexos_class: str, plexos_prop: str, 
+    def get_processed_data(self, egret_class: str, egret_prop: str, 
                   timescale: str, model_filename: str) -> pd.DataFrame:
         """Handles the pulling of data from the egret json
         file and then passes the data to one of the formating functions
 
         Args:
-            plexos_class (str): PLEXOS class e.g Region, Generator, Zone etc
-            plexos_prop (str): PLEXOS property e.g Max Capacity, Generation etc.
+            egret_class (str): EGRET class e.g Region, Generator, Zone etc
+            egret_prop (str): EGRET property e.g Max Capacity, Generation etc.
             timescale (str): Data timescale, e.g Hourly, Monthly, 5 minute etc.
             model_filename (str): name of model to process.
 
@@ -1028,9 +1044,9 @@ class ProcessEGRET(Process):
         f.close()
         
         # Get desired method
-        process_att = getattr(self, f'df_process_{plexos_class}')
+        process_att = getattr(self, f'df_process_{egret_class}')
         # Process attribute and return to df
-        df = process_att(data, plexos_prop)
+        df = process_att(data, egret_prop)
         
         # # Convert units and add unit column to index 
         # df = df*converted_units[1]
@@ -1094,6 +1110,14 @@ class ProcessEGRET(Process):
         Summary = []
         values = []
 
+        # Get time information specified by user in egret configs file
+        f = open("egret_configs.txt")
+        start_day = int(f.readline().split("=")[-1].strip())
+        start_month = int(f.readline().split("=")[-1].strip())
+        start_year = int(f.readline().split("=")[-1].strip())
+        resolution = int(f.readline().split("=")[-1].strip())
+        f.close()
+
         # Loop through generators 
         for generator in data['elements'][egret_property].keys():
             
@@ -1110,7 +1134,8 @@ class ProcessEGRET(Process):
             else:
                 area_val = '0'
 
-            timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(vals))]
+            timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(vals))]
+            # timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(vals))]
             tech += ['NaN']*len(vals)
             gen_name += [generator]*len(vals)
             region += [area_val]*len(vals)
@@ -1166,10 +1191,19 @@ class ProcessEGRET(Process):
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
         """
+        # Get time information specified by user in egret configs file
+        f = open("egret_configs.txt")
+        start_day = int(f.readline().split("=")[-1].strip())
+        start_month = int(f.readline().split("=")[-1].strip())
+        start_year = int(f.readline().split("=")[-1].strip())
+        resolution = int(f.readline().split("=")[-1].strip())
+        f.close()
+        
         # If there is no region information, demand is the only key
         if 'demand' in data['elements'][egret_property].keys():
             values = data['elements'][egret_property]['demand']['p_load']['values']
-            timestamp = [i for i in range(len(values))]
+            timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
+            # timestamp = [i for i in range(len(values))]
             region = [0]*len(values)
             superzone = ['NaN']*len(values)
             Midwest_Agg = ['NaN']*len(values)
@@ -1204,7 +1238,8 @@ class ProcessEGRET(Process):
             Summary = []
             for key in values_dict.keys():
                 values += list(values_dict[key])
-                timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                # timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
                 region += [key]*len(values_dict[key])
                 superzone += ['NaN']*len(values_dict[key])
                 Midwest_Agg += ['NaN']*len(values_dict[key])
@@ -1250,10 +1285,19 @@ class ProcessEGRET(Process):
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
         """
+        # Get time information specified by user in egret configs file
+        f = open("egret_configs.txt")
+        start_day = int(f.readline().split("=")[-1].strip())
+        start_month = int(f.readline().split("=")[-1].strip())
+        start_year = int(f.readline().split("=")[-1].strip())
+        resolution = int(f.readline().split("=")[-1].strip())
+        f.close()
+        
         # If there is no zone information, demand is the only key
         if 'demand' in data['elements'][egret_property].keys():
             values = data['elements'][egret_property]['demand']['p_load']['values']
-            timestamp = [i for i in range(len(values))]
+            timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
+            # timestamp = [i for i in range(len(values))]
             zone = [0]*len(values)
 
         # If there is zone information, aggregate by zone
@@ -1274,7 +1318,8 @@ class ProcessEGRET(Process):
             zone = []
             for key in values_dict.keys():
                 values += list(values_dict[key])
-                timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                # timestamp += [(datetime.datetime(2020,1,1) + datetime.timedelta(hours=i)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
                 zone += [key]*len(values_dict[key])
 
         # Create dataframe
@@ -1700,10 +1745,16 @@ class MarmotFormat(SetupLogger):
                     while save_attempt<=3:
                         try:
                             self.logger.info("Saving data to h5 file...")
+
+                            # Read in mapping csv file
+                            mapping_df = pd.read_csv("data_set_mapping.csv")
+                            # Get common name of dataset to use, using PLEXOS for now
+                            data_set_common = mapping_df[mapping_df[sim_model]==dataset]['PLEXOS'].values[0]
+                            
                             MarmotFormat._save_to_h5(Processed_Data_Out,
                                                      output_file_path, 
                                                      key=(f'{row["group"]}_'
-                                                          f'{row["data_set"]}'))
+                                                          + data_set_common))
 
                             self.logger.info("Data saved to h5 file successfully\n")
                             save_attempt=4

@@ -1,0 +1,108 @@
+group,PLEXOS,EGRET
+generator,Available Capacity,Available Capacity
+generator,Capacity Curtailed,Capacity Curtailed
+generator,Curtailment Factor,Curtailment Factor
+generator,Emissions Cost,Emissions Cost
+generator,Forced Outage,Forced Outage
+generator,Fuel Cost,Fuel Cost
+generator,Fuel Offtake,Fuel Offtake
+generator,Generation,generator
+generator,Maintenance,Maintenance
+generator,Price Received,Price Received
+generator,Pump Load,Pump Load
+generator,Pump Price Paid,Pump Price Paid
+generator,Ramp Down Price,Ramp Down Price
+generator,Ramp Up Price,Ramp Up Price
+generator,Reserves Revenue,Reserves Revenue
+generator,SRMC,SRMC
+generator,Start & Shutdown Cost,Start & Shutdown Cost
+generator,Total Generation Cost,Total Generation Cost
+generator,Units Generating,Units Generating
+generator,Units Out,Units Out
+generator,VO&M Cost,VO&M Cost
+generator,Pool Revenue,Pool Revenue
+generator,Net Revenue,Net Revenue
+constraint,Activity,Activity
+constraint,Violation,Violation
+constraint,Price,Price
+constraint,Hours Binding,Hours Binding
+emission,Cost,Cost
+emission,Production,Production
+emissions_generators,Production,Production
+fuel,Cost,Cost
+fuel,Offtake,Offtake
+fuel,Price,Price
+line,Flow,Flow
+line,Hours Congested,Hours Congested
+line,Shadow Price,Shadow Price
+line,Violation,Violation
+region,Exports,Exports
+region,Fixed Load,Fixed Load
+region,Generation,Generation
+region,Imports,Imports
+region,Load,load
+region,Price,Price
+region,Unserved Energy,Unserved Energy
+region,Dump Energy,Dump Energy
+reserve,Price,Price
+reserve,Provision,Provision
+reserve,Shortage,Shortage
+reserve,Risk,Risk
+reserves_generators,Provision,Provision
+reserves_generators,Revenue,Revenue
+storage,End Volume,End Volume
+storage,Generation,Generation
+storage,Inflow,Inflow
+storage,Initial Volume,Initial Volume
+storage,Pump Load,Pump Load
+storage,Spill,Spill
+storage,Release,Release
+zone,Generation,Generation
+zone,Load,load
+zone,Price,Price
+zone,Unserved Energy,Unserved Energy
+zone,Dump Energy,Dump Energy
+generator,Installed Capacity,Installed Capacity
+line,Export Limit,Export Limit
+line,Import Limit,Import Limit
+region,Net Interchange,Net Interchange
+zone,Net Interchange,Net Interchange
+interface,Flow,Flow
+interface,Shadow Price,Shadow Price
+interface,Violation,Violation
+interface,Hours Congested,Hours Congested
+region_regions,Net Interchange,Net Interchange
+interface,Import Limit,Import Limit
+interface,Export Limit,Export Limit
+generator,Hours at Minimum,Hours at Minimum
+generator,Emissions Cost,Emissions Cost
+generator,Fuel Cost,Fuel Cost
+generator,Start & Shutdown Cost,Start & Shutdown Cost
+generator,VO&M Cost,VO&M Cost
+interface,Hours Congested,Hours Congested
+interface,Import Limit,Import Limit
+interface,Export Limit,Export Limit
+generator,Total Generation Cost,Total Generation Cost
+generator,Net Reserves Revenue,Net Reserves Revenue
+generator,Reserves VO&M Cost,Reserves VO&M Cost
+emission,Intensity,Intensity
+reserve,Cost,Cost
+region,Total Generation Cost,Total Generation Cost
+zone,Cost to Load,Cost to Load
+zone,Emissions Cost,Emissions Cost
+zone,Generator FO&M Cost,Generator FO&M Cost
+zone,Generator Net Profit,Generator Net Profit
+zone,Generator Net Revenue,Generator Net Revenue
+zone,Generator Pool Revenue,Generator Pool Revenue
+zone,Import Revenue,Import Revenue
+zone,Net Cost of Exports,Net Cost of Exports
+zone,Settlement Surplus,Settlement Surplus
+zone,Total Fixed Costs,Total Fixed Costs
+zone,Total Generation Cost,Total Generation Cost
+node,Price,Price
+node,Load,Load
+node,Generation,Generation
+node,Dump Energy,Dump Energy
+line,Export Limit,Export Limit
+line,Import Limit,Import Limit
+abatement,Abatement,Abatement
