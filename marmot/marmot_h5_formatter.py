@@ -1739,22 +1739,22 @@ class MarmotFormat(SetupLogger):
                             self.logger.info("Drop duplicates removed "
                                              f"{oldsize-Processed_Data_Out.size} rows")
 
-                    row["data_set"] = row["data_set"].replace(' ', '_')
                     
                     save_attempt=1
                     while save_attempt<=3:
                         try:
                             self.logger.info("Saving data to h5 file...")
-
+                            
                             # Read in mapping csv file
                             mapping_df = pd.read_csv("data_set_mapping.csv")
                             # Get common name of dataset to use, using PLEXOS for now
-                            data_set_common = mapping_df[mapping_df[sim_model]==dataset]['PLEXOS'].values[0]
+                            data_set_common = mapping_df[mapping_df[sim_model]==row["data_set"]]['PLEXOS'].values[0]
                             
+                            data_set_common = data_set_common.replace(' ', '_')
                             MarmotFormat._save_to_h5(Processed_Data_Out,
                                                      output_file_path, 
                                                      key=(f'{row["group"]}_'
-                                                          + data_set_common))
+                                                          f'{data_set_common}'))
 
                             self.logger.info("Data saved to h5 file successfully\n")
                             save_attempt=4
