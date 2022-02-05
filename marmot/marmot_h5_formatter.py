@@ -1202,7 +1202,7 @@ class ProcessEGRET(Process):
         # If there is no region information, demand is the only key
         if 'demand' in data['elements'][egret_property].keys():
             values = data['elements'][egret_property]['demand']['p_load']['values']
-            timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
+            timestamp = [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
             # timestamp = [i for i in range(len(values))]
             region = [0]*len(values)
             superzone = ['NaN']*len(values)
@@ -1296,7 +1296,7 @@ class ProcessEGRET(Process):
         # If there is no zone information, demand is the only key
         if 'demand' in data['elements'][egret_property].keys():
             values = data['elements'][egret_property]['demand']['p_load']['values']
-            timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
+            timestamp = [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
             # timestamp = [i for i in range(len(values))]
             zone = [0]*len(values)
 

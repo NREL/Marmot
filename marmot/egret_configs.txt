@@ -1,4 +1,4 @@
 start_day = 1
 start_month = 1
 start_year = 2022
-period = 24
+resolution = 60
