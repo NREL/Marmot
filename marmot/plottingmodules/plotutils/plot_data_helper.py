@@ -14,6 +14,7 @@ import numpy as np
 import matplotlib.dates as mdates
 import functools
 import concurrent.futures
+from matplotlib.axes import Axes
 from typing import Tuple
 
 import marmot.config.mconfig as mconfig
@@ -373,6 +374,41 @@ class PlotDataHelper(dict):
                     logger.warning(f"Warning: ylabel missing for subplot y{k}")
                     continue
                 k=k+1
+
+    @staticmethod
+    def set_legend_position(axs: Axes, handles=None, labels=None, 
+                            loc=mconfig.parser("axes_options", "legend_position"),
+                            ncol=mconfig.parser("axes_options", "legend_columns"),
+                            reverse_legend=True, bbox_to_anchor=None,
+                            facecolor='inherit', frameon=True, **kwargs):
+        
+        loc_anchor = {'lower right': ('lower left', (1.05, 0.0)),
+                      'center right': ('center left', (1.05, 0.5)),
+                      'upper right': ('upper left', (1.05, 1.0)),
+                      'upper center': ('lower center', (0.5, 1.25)),
+                      'lower center': ('upper center', (0.5, -0.25)),
+                      'lower left': ('lower right', (-0.2, 0.0)),
+                      'center left': ('center right', (-0.2, 0.5)),
+                      'upper left': ('upper right', (-0.2, 1.0))}
+
+        if handles == None or labels == None:
+            handles, labels = axs.get_legend_handles_labels()
+        if reverse_legend:
+            handles = reversed(handles)
+            labels = reversed(labels)
+
+        if loc in loc_anchor:
+            bbox_to_anchor = loc_anchor.get(loc, None)[1]
+            new_loc = loc_anchor.get(loc, None)[0]
+        else:
+            bbox_to_anchor = bbox_to_anchor
+            new_loc = loc
+
+        axs.legend(handles, labels, loc=new_loc, ncol=ncol,
+                    bbox_to_anchor=bbox_to_anchor, facecolor=facecolor, 
+                    frameon=frameon, **kwargs)
+
+
 
     @staticmethod
     def set_plot_timeseries_format(axs, n: int = 0,

@@ -686,14 +686,14 @@ class MPlot(PlotDataHelper):
                 handles.append(custom_legend_elements)
                 labels += ['Unserved Energy']
 
-            axs[grid_size-1].legend(reversed(handles),reversed(labels),
-                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
-                                    facecolor='inherit', frameon=True)
-
+        
             # add facet labels
             self.add_facet_labels(fig1)
 
-            fig1.add_subplot(111, frameon=False)
+            exaxs = fig1.add_subplot(111, frameon=False)
+            # add legend
+            self.set_legend_position(exaxs, handles, labels)
+
             plt.tick_params(labelcolor='none', top=False, bottom=False, 
                             left=False, right=False)
             if mconfig.parser('plot_title_as_region'):

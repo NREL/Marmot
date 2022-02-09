@@ -316,8 +316,8 @@ class MPlot(PlotDataHelper):
                 handles.append(custom_legend_elements)
                 labels += ['Unserved Energy']
 
-            ax.legend(reversed(handles),reversed(labels), loc='lower left',
-                      bbox_to_anchor=(1.05,0), facecolor='inherit', frameon=True)
+            # Add legend
+            self.set_legend_position(ax, handles, labels)
 
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
@@ -478,9 +478,9 @@ class MPlot(PlotDataHelper):
             handles.append(net_line[0])
             labels += ['Net Gen Change']
 
-            #Main legend
-            ax.legend(reversed(handles), reversed(labels), loc='lower left', 
-                      bbox_to_anchor=(1,0), facecolor='inherit', frameon=True)
+            # Add legend
+            self.set_legend_position(ax, handles, labels)
+
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
@@ -808,14 +808,13 @@ class MPlot(PlotDataHelper):
                     handles.append(lp1[0])
                     labels += ['Demand']
 
-            axs[grid_size-1].legend(reversed(handles),reversed(labels),
-                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
-                                    facecolor='inherit', frameon=True)
-
             # add facet labels
             self.add_facet_labels(fig)
             
-            fig.add_subplot(111, frameon=False)
+            exaxs = fig.add_subplot(111, frameon=False)
+            # Add legend
+            self.set_legend_position(exaxs, handles, labels)
+
             plt.tick_params(labelcolor='none', top=False, bottom=False, 
                             left=False, right=False)
             
@@ -959,14 +958,12 @@ class MPlot(PlotDataHelper):
                             alpha=1.0)
                 handles.append(gen_legend_patches)
 
-            axs[grid_size-1].legend(reversed(handles) ,reversed(labels),
-                                    loc = 'lower left', bbox_to_anchor=(1.05,0),
-                                    facecolor='inherit', frameon=True)
-
             # add facet labels
             self.add_facet_labels(fig)
             
-            fig.add_subplot(111, frameon=False)
+            exaxs = fig.add_subplot(111, frameon=False)
+            # Add legend
+            self.set_legend_position(exaxs, handles, labels)
             plt.tick_params(labelcolor='none', top=False, bottom=False, 
                             left=False, right=False)
             plt.ylabel(f"Total Generation (%)",  color='black', rotation='vertical')
