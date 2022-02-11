@@ -450,90 +450,97 @@ class MarmotPlot(SetupLogger):
         
         # Create an instance of MetaData.
         meta = MetaData(metadata_HDF5_folder_in, Region_Mapping=self.Region_Mapping)
-        
-        if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
-            self.AGG_BY = 'zone'
-            zones = pd.concat([meta.zones(scenario) for scenario in self.Scenarios])
-            if zones.empty == True:
-                self.logger.warning("Input Sheet Data Incorrect! Your model does "
-                                    "not contain Zones, enter a different aggregation")
-                sys.exit()
-            Zones = zones['name'].unique()
-        
-            if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
-                zsub = []
-                for zone in self.zone_region_sublist:
-                    if zone in Zones:
-                        zsub.append(zone)
-                    else:
-                        self.logger.info("metadata does not contain zone: "
-                                         f"{zone}, SKIPPING ZONE")
-                if zsub:
-                    Zones = zsub
-                else:
-                    self.logger.warning(f"None of: {self.zone_region_sublist} "
-                                        "in model Zones. Plotting all Zones")
-        
-        elif self.AGG_BY in {"region", "regions", "Region", "Regions"}:
-            self.AGG_BY = 'region'
-            regions = pd.concat([meta.regions(scenario) for scenario in self.Scenarios])
-            if regions.empty == True:
-                self.logger.warning("Input Sheet Data Incorrect! Your model does "
-                                    "not contain Regions, enter a different aggregation")
-                sys.exit()
 
-            Zones = regions['region'].unique()
-            if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
-                zsub = []
-                for region in self.zone_region_sublist:
-                    if region in Zones:
-                        zsub.append(region)
-                    else:
-                        self.logger.info("metadata does not contain region: "
-                                         f"{region}, SKIPPING REGION")
-                if zsub:
-                    Zones = zsub
-                else:
-                    self.logger.warning(f"None of: {self.zone_region_sublist} "
-                                        "in model Regions. Plotting all Regions")
+
+        # Temporarily commenting out
+        # if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
+        #     self.AGG_BY = 'zone'
+        #     zones = pd.concat([meta.zones(scenario) for scenario in self.Scenarios])
+        #     if zones.empty == True:
+        #         self.logger.warning("Input Sheet Data Incorrect! Your model does "
+        #                             "not contain Zones, enter a different aggregation")
+        #         sys.exit()
+        #     Zones = zones['name'].unique()
         
-        elif not self.Region_Mapping.empty:
-            self.logger.info("Plotting Custom region aggregation from "
-                             "Region_Mapping File")
-            regions = pd.concat([meta.regions(scenario) for scenario in self.Scenarios])
-            self.Region_Mapping = regions.merge(self.Region_Mapping, 
-                                                how='left', 
-                                                on='region')
-            self.Region_Mapping.dropna(axis=1, how='all', inplace=True)
+        #     if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
+        #         zsub = []
+        #         for zone in self.zone_region_sublist:
+        #             if zone in Zones:
+        #                 zsub.append(zone)
+        #             else:
+        #                 self.logger.info("metadata does not contain zone: "
+        #                                  f"{zone}, SKIPPING ZONE")
+        #         if zsub:
+        #             Zones = zsub
+        #         else:
+        #             self.logger.warning(f"None of: {self.zone_region_sublist} "
+        #                                 "in model Zones. Plotting all Zones")
+        
+        # elif self.AGG_BY in {"region", "regions", "Region", "Regions"}:
+        #     self.AGG_BY = 'region'
+        #     regions = pd.concat([meta.regions(scenario) for scenario in self.Scenarios])
+        #     if regions.empty == True:
+        #         self.logger.warning("Input Sheet Data Incorrect! Your model does "
+        #                             "not contain Regions, enter a different aggregation")
+        #         sys.exit()
+
+        #     Zones = regions['region'].unique()
+        #     if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
+        #         zsub = []
+        #         for region in self.zone_region_sublist:
+        #             if region in Zones:
+        #                 zsub.append(region)
+        #             else:
+        #                 self.logger.info("metadata does not contain region: "
+        #                                  f"{region}, SKIPPING REGION")
+        #         if zsub:
+        #             Zones = zsub
+        #         else:
+        #             self.logger.warning(f"None of: {self.zone_region_sublist} "
+        #                                 "in model Regions. Plotting all Regions")
+        
+        # elif not self.Region_Mapping.empty:
+        #     self.logger.info("Plotting Custom region aggregation from "
+        #                      "Region_Mapping File")
+        #     regions = pd.concat([meta.regions(scenario) for scenario in self.Scenarios])
+        #     self.Region_Mapping = regions.merge(self.Region_Mapping, 
+        #                                         how='left', 
+        #                                         on='region')
+        #     self.Region_Mapping.dropna(axis=1, how='all', inplace=True)
             
-            try:
-                Zones = self.Region_Mapping[self.AGG_BY].unique()
-            except KeyError:
-                self.logger.warning(f"AGG_BY = '{self.AGG_BY}' is not in the "
-                                    "Region_Mapping File, enter a different aggregation")
-                sys.exit()
+        #     try:
+        #         Zones = self.Region_Mapping[self.AGG_BY].unique()
+        #     except KeyError:
+        #         self.logger.warning(f"AGG_BY = '{self.AGG_BY}' is not in the "
+        #                             "Region_Mapping File, enter a different aggregation")
+        #         sys.exit()
             
-            # remove any nan that might end  up in list
-            Zones = [x for x in Zones if str(x) != 'nan']
+        #     # remove any nan that might end  up in list
+        #     Zones = [x for x in Zones if str(x) != 'nan']
             
-            if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
-                zsub = []
-                for region in self.zone_region_sublist:
-                    if region in Zones:
-                        zsub.append(region)
-                    else:
-                        self.logger.info("Region_Mapping File does not contain region: "
-                                         f"{region}, SKIPPING REGION")
-                if zsub:
-                    Zones = zsub
-                else:
-                    self.logger.warning(f"None of: {self.zone_region_sublist} "
-                                        "in Region_Mapping File. Plotting all "
-                                        f"Regions of aggregation '{self.AGG_BY}'")
-        else:
-            self.logger.warning("AGG_BY is not defined correctly, aggregation "
-                                "specified was not found, system will now exit")
-            sys.exit()
+        #     if self.zone_region_sublist != ['nan'] and self.zone_region_sublist !=[]:
+        #         zsub = []
+        #         for region in self.zone_region_sublist:
+        #             if region in Zones:
+        #                 zsub.append(region)
+        #             else:
+        #                 self.logger.info("Region_Mapping File does not contain region: "
+        #                                  f"{region}, SKIPPING REGION")
+        #         if zsub:
+        #             Zones = zsub
+        #         else:
+        #             self.logger.warning(f"None of: {self.zone_region_sublist} "
+        #                                 "in Region_Mapping File. Plotting all "
+        #                                 f"Regions of aggregation '{self.AGG_BY}'")
+        # else:
+        #     self.logger.warning("AGG_BY is not defined correctly, aggregation "
+        #                         "specified was not found, system will now exit")
+        #     sys.exit()
+
+        
+        # add code to custom define zones
+        Zones = ['11.0', '12.0', '13.0', '14.0', '15.0', '16.0', '17.0', '21.0','22.0', '23.0', '24.0', '25.0', '26.0', '27.0', '31.0', '32.0','33.0', '34.0', '35.0', '36.0', '37.0']
+        
         
         #================================================================================
         # Start Main plotting loop
