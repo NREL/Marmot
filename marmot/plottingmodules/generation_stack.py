@@ -15,7 +15,7 @@ from matplotlib.patches import Patch
 
 import marmot.config.mconfig as mconfig
 import marmot.plottingmodules.plotutils.plot_library as plotlib
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper, SetupSubplot
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, InputSheetError, MissingZoneData)
 
@@ -520,13 +520,13 @@ class MPlot(PlotDataHelper):
             plot_number = len(all_scenarios)
             excess_axs = grid_size - plot_number
 
-            fig1, axs = plt.subplots(ydimension, xdimension, 
-                                     figsize=((self.x*xdimension),(self.y*ydimension)), 
-                                     sharey=True, squeeze=False)
+            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
+
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
-            axs = axs.ravel()
+            
             data_tables = []
-            unique_tech_names = []
 
             for i, scenario in enumerate(all_scenarios):
                 self.logger.info(f"Scenario = {scenario}")
@@ -600,22 +600,24 @@ class MPlot(PlotDataHelper):
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
                 data_tables.append(single_scen_out)
 
-                
                 plotlib.create_stackplot(axs, Stacked_Gen, self.PLEXOS_color_dict, 
                                          labels=Stacked_Gen.columns, n=i)
 
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].plot(Unserved_Energy,
                                       #color='#EE1289'  OLD MARMOT COLOR
-                                      color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
-                                      )
-
-                lp = axs[i].plot(Load, color='black')
+                                      color = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                                      label='Unserved Energy')
 
                 if (Pump_Load == 0).all() == False:
-                    lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
+                    axs[i].plot(Load, color='black', 
+                                     label='Demand + \n Storage Charging')
+                    axs[i].plot(Total_Demand, color='black', linestyle="--",
+                                        label='Demand')
+                else:
+                    axs[i].plot(Load, color='black', label='Demand')
 
-                PlotDataHelper.set_plot_timeseries_format(axs,i)
+                mplt.set_plot_timeseries_format(n=i)
 
                 if prop == "Min Net Load":
                     axs[i].annotate(f"Min Net Load: \n{str(format(Min_Net_Load, '.2f'))} {unitconversion['units']}",
@@ -658,44 +660,14 @@ class MPlot(PlotDataHelper):
                                         facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
                                         alpha=0.5)
 
-                # create list of gen technologies
-                l1 = Stacked_Gen.columns.tolist()
-                unique_tech_names.extend(l1)
-
-            # create labels list of unique tech names then order
-            labels = np.unique(np.array(unique_tech_names)).tolist()
-            labels.sort(key = lambda i:self.ordered_gen.index(i))
-
-            handles = []
-            # create custom gen_tech legend
-            for tech in labels:
-                gen_legend_patches = Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0)
-                handles.append(gen_legend_patches)
-
-            if (Pump_Load == 0).all() == False:
-                handles.append(lp3[0])
-                handles.append(lp[0])
-                labels += ['Demand','Demand + \n Storage Charging']
-
-            else:
-                handles.append(lp[0])
-                labels += ['Demand']
-
-            if (Unserved_Energy == 0).all() == False:
-                handles.append(custom_legend_elements)
-                labels += ['Unserved Energy']
-
-        
-            # add facet labels
-            self.add_facet_labels(fig1)
-
-            exaxs = fig1.add_subplot(111, frameon=False)
-            # add legend
-            self.set_legend_position(exaxs, handles, labels)
-
-            plt.tick_params(labelcolor='none', top=False, bottom=False, 
-                            left=False, right=False)
+            # Add facet labels
+            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
+                                  alternative_ylabels = self.ylabels)
+            # Add legend
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # Remove extra axes
+            mplt.remove_excess_axs(excess_axs, grid_size)
+    
             if mconfig.parser('plot_title_as_region'):
                 plt.title(zone_input)
 
@@ -705,11 +677,8 @@ class MPlot(PlotDataHelper):
             plt.ylabel(f"Generation ({unitconversion['units']})", color='black', 
                        rotation='vertical', labelpad=labelpad)
 
-            #Remove extra axes
-            if excess_axs != 0:
-                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
             Data_Table_Out = pd.concat(data_tables)
-            out = {'fig':fig1, 'data_table':Data_Table_Out}
+            out = {'fig':fig, 'data_table':Data_Table_Out}
             return out
 
         #TODO: combine data_prop(), setup_data(), mkplot(), into gen_stack()
@@ -982,7 +951,7 @@ class MPlot(PlotDataHelper):
     #             # Data table of values to return to main program
     #             Data_Table_Out = pd.concat([Load_Period, Total_Demand_Period, unserved_eng_data_table_period, Stacked_Gen_Period], axis=1, sort=False)
 
-    #             fig1, ax = plt.subplots(figsize=(9,6))
+    #             fig, ax = plt.subplots(figsize=(9,6))
     #             ax.stackplot(Stacked_Gen_Period.index.values, Stacked_Gen_Period.values.T, labels=Stacked_Gen_Period.columns, linewidth=5,colors=[self.PLEXOS_color_dict.get(x, '#333333') for x in Stacked_Gen_Period.T.index])
 
     #             if (Unserved_Energy_Period == 0).all() == False:
@@ -1043,9 +1012,9 @@ class MPlot(PlotDataHelper):
     #                                     loc = 'lower left',bbox_to_anchor=(1.05,0),
     #                                     facecolor='inherit', frameon=True)
 
-    #             fig1.savefig(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Scenarios[0]+"_period_"+str(wk)), dpi=600, bbox_inches='tight')
+    #             fig.savefig(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Scenarios[0]+"_period_"+str(wk)), dpi=600, bbox_inches='tight')
     #             Data_Table_Out.to_csv(os.path.join(gen_stack_figures, zone_input + "_" + "Stacked_Gen_All_Periods" + "_" + self.Scenarios[0]+"_period_"+str(wk)+ ".csv"))
-    #             del fig1
+    #             del fig
     #             del Data_Table_Out
     #             mpl.pyplot.close('all')
 

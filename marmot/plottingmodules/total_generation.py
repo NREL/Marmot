@@ -16,7 +16,7 @@ import matplotlib.ticker as mtick
 
 import marmot.config.mconfig as mconfig
 import marmot.plottingmodules.plotutils.plot_library as plotlib
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper, SetupSubplot
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             MissingZoneData)
 
@@ -260,12 +260,15 @@ class MPlot(PlotDataHelper):
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             
-            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            mplt = SetupSubplot()
+            fig, ax = mplt.get_figure()
 
             Total_Generation_Stack_Out.plot.bar(stacked=True, ax=ax,
                                                 color=[self.PLEXOS_color_dict.get(x, '#333333') 
                                                        for x in Total_Generation_Stack_Out.columns], 
-                                                edgecolor='black', linewidth='0.1')
+                                                edgecolor='black', linewidth='0.1',
+                                                legend=False)
+
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Total Generation ({unitconversion['units']}h)", 
@@ -278,7 +281,7 @@ class MPlot(PlotDataHelper):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
+            mplt.set_barplot_xticklabels(tick_labels)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -288,38 +291,29 @@ class MPlot(PlotDataHelper):
             for n, scenario in enumerate(self.Scenarios):
 
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
+                
                 height1 = [float(Total_Load_Out[scenario].sum())]*2
-                lp1 = plt.plot(x,height1, c='black', linewidth=3)
                 if Pump_Load_Out[scenario] > 0:
+                    ax.plot(x, height1, c='black', linewidth=3,
+                                  label='Demand + \n Storage Charging')
                     height2 = [float(Total_Demand_Out[scenario])]*2
-                    lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)
+                    ax.plot(x, height2, 'r--', c='black', linewidth=1.5, 
+                                  label='Demand')
+                else:
+                    ax.plot(x, height1, c='black', linewidth=3, 
+                           label='Demand')
 
                 if Unserved_Energy_Out[scenario] > 0:
                     height3 = [float(Unserved_Energy_Out[scenario])]*2
-                    plt.plot(x,height3, c='#DD0200', linewidth=1.5)
+                    ax.plot(x, height3, c='#DD0200', linewidth=1.5,
+                            label='Unserved Energy')
                     ax.fill_between(x, height3, height1,
                                 facecolor = '#DD0200',
                                 alpha=0.5)
-
-            handles, labels = ax.get_legend_handles_labels()
-
-            #Combine all legends into one.
-            if Pump_Load_Out.values.sum() > 0:
-                handles.append(lp2[0])
-                handles.append(lp1[0])
-                labels += ['Demand','Demand + \n Storage Charging']
-            else:
-                handles.append(lp1[0])
-                labels += ['Demand']
-
-            if Unserved_Energy_Out.values.sum() > 0:
-                handles.append(custom_legend_elements)
-                labels += ['Unserved Energy']
-
             # Add legend
-            self.set_legend_position(ax, handles, labels)
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
         return outputs
 
@@ -444,11 +438,14 @@ class MPlot(PlotDataHelper):
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             
-            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            mplt = SetupSubplot()
+            fig, ax = mplt.get_figure()
+
             Total_Generation_Stack_Out.plot.bar(stacked=True,
                                                 color=[self.PLEXOS_color_dict.get(x, '#333333') 
                                                         for x in Total_Generation_Stack_Out.columns],
-                                                edgecolor='black', linewidth='0.1', ax=ax)
+                                                edgecolor='black', linewidth='0.1', ax=ax,
+                                                legend=False)
             ax.spines['right'].set_visible(False)
             ax.spines['top'].set_visible(False)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
@@ -456,7 +453,7 @@ class MPlot(PlotDataHelper):
             
             # Set x-tick labels 
             tick_labels = Total_Generation_Stack_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
+            mplt.set_barplot_xticklabels(tick_labels)
 
             ax.tick_params(axis='y', which='major', length=5, width=1)
             ax.tick_params(axis='x', which='major', length=5, width=1)
@@ -465,25 +462,20 @@ class MPlot(PlotDataHelper):
             for n, scenario in enumerate(self.Scenarios[1:]):
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 y_net = [net_diff.loc[scenario]] * 2
-                net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
+                ax.plot(x,y_net, c='black', linewidth=1.5, 
+                        label='Net Gen Change')
 
             ax.set_ylabel((f"Generation Change ({format(unitconversion['units'])}h) \n "
                           f"relative to {self.Scenarios[0].replace('_',' ')}"), 
                           color='black', rotation='vertical')
             
-            plt.axhline(linewidth=0.5, linestyle='--', color='grey')
-
-            handles, labels = ax.get_legend_handles_labels()
-
-            handles.append(net_line[0])
-            labels += ['Net Gen Change']
-
+            ax.axhline(linewidth=0.5, linestyle='--', color='grey')
             # Add legend
-            self.set_legend_position(ax, handles, labels)
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
 
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
     def total_gen_monthly(self, **kwargs):
@@ -736,10 +728,11 @@ class MPlot(PlotDataHelper):
             else:
                 Data_Table_Out = Gen_Out.add_suffix(f" (%-Gen)") * 100
 
-            fig, axs = plotlib.setup_plot(xdimension, ydimension, sharey=True)
+            mplt = SetupSubplot(ydimension, xdimension, sharey=True,
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
 
-            unique_tech_names = []
             for i, scenario in enumerate(self.Scenarios):
 
                 month_gen = Gen_Out.xs(scenario, level="Scenario")
@@ -769,55 +762,35 @@ class MPlot(PlotDataHelper):
                 
                 # Set x-tick labels 
                 tick_labels = month_gen.index
-                PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=axs[i])
+                mplt.set_barplot_xticklabels(tick_labels, n=i)
 
                 axs[i].tick_params(axis='y', which='major', length=5, width=1)
                 axs[i].tick_params(axis='x', which='major', length=5, width=1)
 
-                # create list of gen technologies
-                l1 = month_gen.columns.tolist()
-                unique_tech_names.extend(l1)
-
                 if not vre_only:
                     for n, _m in enumerate(month_total_load.index):
-                        x = [axs[i].patches[n].get_x(), axs[i].patches[n].get_x() + axs[i].patches[n].get_width()]
+                        x = [axs[i].patches[n].get_x(), axs[i].patches[n].get_x() +\
+                             axs[i].patches[n].get_width()]
                         height1 = [float(month_total_load.loc[_m])]*2
-                        lp1 = axs[i].plot(x, height1, c='black', linewidth=3)
+                        
                         if month_pumped_load.loc[_m].values.sum() > 0:
+                            axs[i].plot(x, height1, c='black', linewidth=3,
+                                                label='Demand + \n Storage Charging')
                             height2 = [float(month_total_demand.loc[_m])]*2
-                            lp2 = axs[i].plot(x,height2, 'r--', c='black', linewidth=1.5)
-
-            # create labels list of unique tech names then order
-            labels = np.unique(np.array(unique_tech_names)).tolist()
-            labels.sort(key = lambda i:self.ordered_gen.index(i))
-
-            handles = []
-            # create custom gen_tech legend
-            for tech in labels:
-                gen_legend_patches = Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0)
-                handles.append(gen_legend_patches)
-
-            if not vre_only:
-                #Combine all legends into one.
-                if Pump_Load_Out.values.sum() > 0:
-                    handles.append(lp2[0])
-                    handles.append(lp1[0])
-                    labels += ['Demand','Demand + \n Storage Charging']
-                else:
-                    handles.append(lp1[0])
-                    labels += ['Demand']
+                            axs[i].plot(x,height2, 'r--', c='black', linewidth=1.5,
+                                                label='Demand')
+                        else:
+                            axs[i].plot(x, height1, c='black', linewidth=3,
+                                               label='Demand')
 
             # add facet labels
-            self.add_facet_labels(fig)
-            
-            exaxs = fig.add_subplot(111, frameon=False)
+            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
+                                  alternative_ylabels = self.ylabels)
             # Add legend
-            self.set_legend_position(exaxs, handles, labels)
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            #Remove extra axes
+            mplt.remove_excess_axs(excess_axs, grid_size)
 
-            plt.tick_params(labelcolor='none', top=False, bottom=False, 
-                            left=False, right=False)
-            
             #Y-label should change if there are facet labels, leave at 40 for now, works for all values in spacing
             labelpad = 40
             if plot_as_percnt:
@@ -828,10 +801,6 @@ class MPlot(PlotDataHelper):
 
             if mconfig.parser('plot_title_as_region'):
                 plt.title(zone_input)
-
-            #Remove extra axes
-            if excess_axs != 0:
-                PlotDataHelper.remove_excess_axs(axs, excess_axs, grid_size)
             
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
@@ -879,9 +848,9 @@ class MPlot(PlotDataHelper):
             Total_Gen_Out = pd.DataFrame()
             self.logger.info(f"Zone = {zone_input}")
 
-            fig, axs = plotlib.setup_plot(xdimension, ydimension)
-            plt.subplots_adjust(wspace=0.05, hspace=0.5)
-            axs = axs.ravel()
+            mplt = SetupSubplot(ydimension, xdimension, sharey=True,
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
             
             gen_chunks = []
             for i, scenario in enumerate(self.Scenarios):
@@ -929,8 +898,6 @@ class MPlot(PlotDataHelper):
             if Total_Gen_Out.empty:
                 outputs[zone_input] = MissingZoneData()
                 continue
-            
-            unique_tech_names = []
 
             for i, scenario in enumerate(self.Scenarios):
                 
@@ -940,39 +907,21 @@ class MPlot(PlotDataHelper):
                                        shadow=True, startangle=90, labeldistance=None,
                                        colors=[self.PLEXOS_color_dict.get(x, '#333333') 
                                                for x in scenario_data.index])
-                
-                # create list of gen technologies
-                l1 = scenario_data.index.tolist()
-                unique_tech_names.extend(l1)
-
                 axs[i].legend().set_visible(False)
-            
-             # create labels list of unique tech names then order
-            labels = np.unique(np.array(unique_tech_names)).tolist()
-            labels.sort(key = lambda i:self.ordered_gen.index(i))
-
-            handles = []
-            # create custom gen_tech legend
-            for tech in labels:
-                gen_legend_patches = Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0)
-                handles.append(gen_legend_patches)
 
             # add facet labels
-            self.add_facet_labels(fig)
-            
-            exaxs = fig.add_subplot(111, frameon=False)
+            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
+                                  alternative_ylabels = self.ylabels)          
             # Add legend
-            self.set_legend_position(exaxs, handles, labels)
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            #Remove extra axes
+            mplt.remove_excess_axs(excess_axs, grid_size)
+
             plt.tick_params(labelcolor='none', top=False, bottom=False, 
                             left=False, right=False)
             plt.ylabel(f"Total Generation (%)",  color='black', rotation='vertical')
             if mconfig.parser('plot_title_as_region'):
                 plt.title(zone_input)
-
-            #Remove extra axes
-            if excess_axs != 0:
-                PlotDataHelper.remove_excess_axs(axs, excess_axs, grid_size)
             
             outputs[zone_input] = {'fig': fig, 'data_table': Total_Gen_Out}
 

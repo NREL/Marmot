@@ -15,7 +15,9 @@ import matplotlib.dates as mdates
 import functools
 import concurrent.futures
 from matplotlib.axes import Axes
-from typing import Tuple
+from matplotlib.figure import Figure
+import matplotlib.pyplot as plt
+from typing import Tuple, List, Union
 
 import marmot.config.mconfig as mconfig
 
@@ -376,7 +378,7 @@ class PlotDataHelper(dict):
                 k=k+1
 
     @staticmethod
-    def set_legend_position(axs: Axes, handles=None, labels=None, 
+    def add_legend(axs: Axes, handles=None, labels=None, 
                             loc=mconfig.parser("axes_options", "legend_position"),
                             ncol=mconfig.parser("axes_options", "legend_columns"),
                             reverse_legend=True, bbox_to_anchor=None,
@@ -398,8 +400,7 @@ class PlotDataHelper(dict):
             labels = reversed(labels)
 
         if loc in loc_anchor:
-            bbox_to_anchor = loc_anchor.get(loc, None)[1]
-            new_loc = loc_anchor.get(loc, None)[0]
+            new_loc, bbox_to_anchor = loc_anchor.get(loc, None)
         else:
             bbox_to_anchor = bbox_to_anchor
             new_loc = loc
@@ -557,3 +558,246 @@ class PlotDataHelper(dict):
         return {'units':units, 'divisor':divisor}
 
 
+
+
+
+class SetupSubplot():
+
+    def __init__(self, ydimension=1, xdimension=1, 
+                 figsize: Tuple[int, int] = (mconfig.parser("figure_size","xdimension"), 
+                                            mconfig.parser("figure_size","ydimension")), 
+                 sharey=False, squeeze=True, ravel_axs=False, **kwargs):
+        
+        x=figsize[0]
+        y=figsize[1]
+        
+        fig, axs = plt.subplots(ydimension, xdimension, 
+                                figsize=((x*xdimension),(y*ydimension)), 
+                                sharey=sharey, squeeze=squeeze, **kwargs)
+        if ravel_axs:
+            axs = axs.ravel()
+
+        self.fig = fig
+        self.axs = axs
+        self.exax = fig.add_subplot(111, frameon=False)
+        self.exax.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
+
+    def get_figure(self) -> Tuple[Figure, Union[Axes, List[Axes]]]: 
+
+
+        return self.fig, self.axs
+
+    def _check_if_array(self, n):
+        if isinstance(self.axs, Axes):
+            ax = self.axs
+        else:
+            ax = self.axs[n]
+        return ax
+
+    def add_legend(self, handles=None, labels=None, 
+                        loc=mconfig.parser("axes_options", "legend_position"),
+                        ncol=mconfig.parser("axes_options", "legend_columns"),
+                        reverse_legend=False, sort_by=None, bbox_to_anchor=None,
+                        facecolor='inherit', frameon=True, n=0, **kwargs):
+    
+        loc_anchor = {'lower right': ('lower left', (1.05, 0.0)),
+                        'center right': ('center left', (1.05, 0.5)),
+                        'upper right': ('upper left', (1.05, 1.0)),
+                        'upper center': ('lower center', (0.5, 1.25)),
+                        'lower center': ('upper center', (0.5, -0.25)),
+                        'lower left': ('lower right', (-0.2, 0.0)),
+                        'center left': ('center right', (-0.2, 0.5)),
+                        'upper left': ('upper right', (-0.2, 1.0))}
+
+        if handles == None or labels == None:
+            
+            if isinstance(self.axs, Axes):
+                handles_list, labels_list = self.axs.get_legend_handles_labels()
+            else:
+                handles_list = []
+                labels_list = []
+                print(self.axs)
+                for ax in self.axs:
+                    print(ax)
+                    h, l = ax.get_legend_handles_labels()
+                    handles_list.extend(h)
+                    labels_list.extend(l)
+
+            # Ensure there are unique labels and handle pairs
+            labels_handles = dict(zip(labels_list, handles_list))
+        
+            if sort_by:
+                sorted_list = list(sort_by.copy())
+                extra_values = list(labels_handles.keys() - sorted_list)
+                sorted_list.extend(extra_values)
+                labels_handles = dict(sorted(labels_handles.items(), 
+                            key=lambda pair: sorted_list.index(pair[0])))
+
+            labels = labels_handles.keys()
+            handles = labels_handles.values()
+        
+        print(handles)
+        print(labels)
+        if reverse_legend:
+            handles = reversed(handles)
+            labels = reversed(labels)
+
+        if loc in loc_anchor:
+            new_loc, bbox_to_anchor = loc_anchor.get(loc, None)
+        else:
+            bbox_to_anchor = bbox_to_anchor
+            new_loc = loc
+
+        self.exax.legend(handles, labels, loc=new_loc, ncol=ncol,
+                    bbox_to_anchor=bbox_to_anchor, facecolor=facecolor, 
+                    frameon=frameon, **kwargs)
+
+    def set_plot_timeseries_format(self, n: int = 0,
+                                minticks: int = mconfig.parser("axes_options","x_axes_minticks"),
+                                maxticks: int = mconfig.parser("axes_options","x_axes_maxticks")
+                                ) -> None:
+        """Auto sets timeseries format.
+
+        Args:
+            axs (matplotlib.axes): matplotlib.axes
+            n (int, optional): Counter for facet plot. Defaults to 0.
+            minticks (int, optional): Minimum tick marks. 
+                Defaults to mconfig.parser("axes_options","x_axes_minticks").
+            maxticks (int, optional): Max tick marks. 
+                Defaults to mconfig.parser("axes_options","x_axes_maxticks").
+        """
+        ax = self._check_if_array(n)
+
+        locator = mdates.AutoDateLocator(minticks=minticks, maxticks=maxticks)
+        formatter = mdates.ConciseDateFormatter(locator)
+        formatter.formats[2] = '%d\n %b'
+        formatter.zero_formats[1] = '%b\n %Y'
+        formatter.zero_formats[2] = '%d\n %b'
+        formatter.zero_formats[3] = '%H:%M\n %d-%b'
+        formatter.offset_formats[3] = '%b %Y'
+        formatter.show_offset = False
+        ax.xaxis.set_major_locator(locator)
+        ax.xaxis.set_major_formatter(formatter)
+
+    def remove_excess_axs(self, excess_axs: int, grid_size: int) -> None:
+        """Removes excess axes spins + tick marks.
+
+        Args:
+            excess_axs (int): # of excess axes.
+            grid_size (int): Size of facet grid.
+        """
+        while excess_axs > 0:
+            self.axs[(grid_size)-excess_axs].spines['right'].set_visible(False)
+            self.axs[(grid_size)-excess_axs].spines['left'].set_visible(False)
+            self.axs[(grid_size)-excess_axs].spines['bottom'].set_visible(False)
+            self.axs[(grid_size)-excess_axs].spines['top'].set_visible(False)
+            self.axs[(grid_size)-excess_axs].tick_params(axis='both',
+                                                    which='both',
+                                                    colors='white')
+            excess_axs-=1
+
+    def set_barplot_xticklabels(self, labels: list, n: int = 0, 
+                                rotate: bool = mconfig.parser("axes_label_options", "rotate_x_labels"),
+                                num_labels: int = mconfig.parser("axes_label_options", "rotate_at_num_labels"),
+                                angle: float = mconfig.parser("axes_label_options", "rotation_angle"),
+                                **kwargs) -> None:
+        """Set the xticklabels on bar plots and determine whether they will be rotated.
+
+        Wrapper around matplotlib set_xticklabels
+        
+        Checks to see if the number of labels is greater than or equal to the default
+        number set in config.yml. If this is the case, rotate
+        specify whether or not to rotate the labels and angle specifies what angle they should 
+        be rotated to.
+
+        Args:
+            labels (list): Labels to apply to xticks
+            ax (matplotlib.axes): matplotlib.axes
+            rotate (bool, optional): rotate labels True/False. 
+                Defaults to mconfig.parser("axes_label_options", "rotate_x_labels").
+            num_labels (int, optional): Number of labels to rotate at. 
+                Defaults to mconfig.parser("axes_label_options", "rotate_at_num_labels").
+            angle (float, optional): Angle of rotation. 
+                Defaults to mconfig.parser("axes_label_options", "rotation_angle").
+        """
+        ax = self._check_if_array(n)
+        if rotate:
+            if (len(labels)) >= num_labels:
+                ax.set_xticklabels(labels, rotation=angle, ha="right", **kwargs)
+            else:
+                labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
+                ax.set_xticklabels(labels, rotation=0, **kwargs)
+        else:
+            labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
+            ax.set_xticklabels(labels, rotation=0, **kwargs)
+
+    def add_facet_labels(self, 
+                         xlabels_bottom: bool = True,
+                         alternative_xlabels: list = None,
+                         alternative_ylabels: list = None,
+                         **kwargs) -> None:
+        """Adds labels to outside of Facet plot.
+
+        Args:
+            fig (matplotlib.fig): matplotlib figure.
+            xlabels_bottom (bool, optional): If True labels are placed under bottom. 
+                Defaults to True.
+            alternative_xlabels (list, optional): Alteranative xlabels. 
+                Defaults to None.
+            alternative_ylabels (list, optional): Alteranative ylabels. 
+                Defaults to None.
+        """
+        font_defaults = mconfig.parser("font_settings")
+
+        if alternative_xlabels:
+            xlabel = alternative_xlabels
+        else:
+            xlabel = self.xlabels
+
+        if alternative_ylabels:
+            ylabel = alternative_ylabels
+        else:
+            ylabel = self.ylabels
+
+
+        if isinstance(self.axs, Axes):
+            all_axes = [self.axs]
+        else:
+            all_axes = self.axs
+        j=0
+        k=0
+        for ax in all_axes:
+            if xlabels_bottom:
+                if ax.is_last_row():
+                    try:
+                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
+                    except IndexError:
+                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                        continue
+                    j=j+1
+            else:
+                if ax.is_first_row():
+                    try:
+                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
+                        ax.xaxis.set_label_position('top')
+                    except IndexError:
+                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                        continue
+                    j=j+1
+            if ax.is_first_col():
+                try:
+                    ax.set_ylabel(ylabel=(ylabel[k]), color='black', rotation='vertical', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
+                except IndexError:
+                    logger.warning(f"Warning: ylabel missing for subplot y{k}")
+                    continue
+                k=k+1
+
+# mplt = SetupSubplot(1,2, sharey=True)
+# fig, axs = mplt.get_figure()
+# axs[0].plot([1, 2, 3], label='Inline label Up')
+# axs[1].plot([3, 2, 1], label='Inline label Down')
+# mplt.add_legend()
