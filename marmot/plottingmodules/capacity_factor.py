@@ -13,6 +13,7 @@ import matplotlib.pyplot as plt
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 
@@ -159,29 +160,24 @@ class MPlot(PlotDataHelper):
                 continue
             
             Data_Table_Out = CF_all_scenarios.T
-            fig2, ax = plt.subplots(figsize=(self.x,self.y))
-            CF_all_scenarios.T.plot.bar(stacked = False,
-                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
+
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
             
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
+            mplt.create_bar_plot(CF_all_scenarios.T, color=self.color_list,
+                                edgecolor='black', linewidth='0.1', 
+                                custom_tick_labels=list(CF_all_scenarios.columns))
+
             ax.set_ylabel('Average Output When Committed',  color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             
-            # Set x-tick labels 
-            tick_labels = CF_all_scenarios.columns
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
-
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
-
-            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            # Add legend
+            mplt.add_legend()
             
-            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 
@@ -262,48 +258,27 @@ class MPlot(PlotDataHelper):
                 CF_all_scenarios = pd.concat([CF_all_scenarios, CF], axis=1, sort=False)
                 CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
 
-            CF_all_scenarios.columns = CF_all_scenarios.columns.str.replace('_',' ')
-
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = MissingZoneData()
                 continue
             
             Data_Table_Out = CF_all_scenarios.T
-
-            fig1,ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
-            #TODO: rewrite with mfunc functions.
-
-            CF_all_scenarios.plot.bar(stacked = False, 
-                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax = ax)
             
-            # This code would be used to create the bar plot using plotlib.create_bar_plot()
-            # fig1, axs = plotlib.setup_plot()
-            # #flatten object
-            # ax=axs[0]
-            # plotlib.create_bar_plot(CF_all_scenarios, ax, self.color_list, angle)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
+            mplt = PlotLibrary(figsize=(self.x*1.5, self.y*1.5))
+            fig, ax = mplt.get_figure()
+
+            mplt.create_bar_plot(CF_all_scenarios, color=self.color_list,
+                                edgecolor='black', linewidth='0.1')
+
             ax.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            
-            # Set x-tick labels 
-            tick_labels = CF_all_scenarios.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
-
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-
-            handles, labels = ax.get_legend_handles_labels()
-
-            #Legend 1
-            ax.legend(handles, labels, loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            # Add legend
+            mplt.add_legend()
+            # Add title
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
         return outputs
 
@@ -405,27 +380,22 @@ class MPlot(PlotDataHelper):
             
             Data_Table_Out = time_at_min.T
             
-            fig3, ax = plt.subplots(figsize=(self.x*1.5,self.y*1.5))
-            time_at_min.T.plot.bar(stacked = False, 
-                                  color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
+            mplt = PlotLibrary(figsize=(self.x*1.5, self.y*1.5))
+            fig, ax = mplt.get_figure()
+
+            mplt.create_bar_plot(time_at_min.T, color=self.color_list, 
+                                 edgecolor='black', linewidth='0.1', 
+                                 custom_tick_labels=list(time_at_min.columns))
             
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Percentage of time online at minimum generation',  color='black', rotation='vertical')
+            ax.set_ylabel('Percentage of time online at minimum generation', 
+                          color='black', rotation='vertical')
             #adds % to y axis data
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
-            
-            # Set x-tick labels 
-            tick_labels = time_at_min.columns
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
-
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-
+            # Add legend
+            mplt.add_legend()
+            # Add title
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
 
-            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs

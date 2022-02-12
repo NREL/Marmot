@@ -16,6 +16,7 @@ import matplotlib.dates as mdates
 import marmot.plottingmodules.plotutils.plot_library as plotlib
 
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, MissingZoneData)
@@ -98,11 +99,12 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {str(zone_input)}')
 
-            fig2, axs = plt.subplots(ydimension,xdimension, 
-                                     figsize=((self.x*xdimension),(self.y*ydimension)),
-                                     sharex=True, sharey='row', squeeze=False)
+            mplt = PlotLibrary(ydimension, xdimension, sharex=True,
+                                sharey='row', 
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
+
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
-            axs = axs.ravel()
 
             chunks = []
             i=-1
@@ -139,7 +141,7 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak outage hour, only checked once 
                 if i == 0:
-                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(cap_out.sum(axis=1)))
+                    unitconversion = self.capacity_energy_unitconversion(max(cap_out.sum(axis=1)))
                
                 cap_out = cap_out / unitconversion['divisor']
 
@@ -147,10 +149,9 @@ class MPlot(PlotDataHelper):
                 single_scen_out = cap_out.set_index([scenario_names],append = True)
                 chunks.append(single_scen_out)
                 
-                plotlib.create_stackplot(axs=axs, data=cap_out, color_dict=self.PLEXOS_color_dict, 
-                                         labels=cap_out.columns, n=i)
-                PlotDataHelper.set_plot_timeseries_format(axs, n=i)
-                axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0), facecolor='inherit', frameon=True)
+                mplt.create_stackplot(data=cap_out, color_dict=self.PLEXOS_color_dict, 
+                                      labels=cap_out.columns, n=i)
+                mplt.set_plot_timeseries_format(n=i)
             
             if not chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -159,19 +160,19 @@ class MPlot(PlotDataHelper):
             Data_Table_Out = pd.concat(chunks,axis = 0)
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
-            fig2.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            # Add legend
+            mplt.add_legend()
             plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', 
                        rotation='vertical', labelpad=30)
             # Looks better for a one scenario plot
             #plt.tight_layout(rect=[0, 0.03, 1.25, 0.97])
             
             plt.tight_layout(rect=[0,0.03,1,0.97])
-            
+            # Add title
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
 
-            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 

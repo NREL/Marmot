@@ -7,7 +7,6 @@ This module plots figures of total generation for a year, month etc.
 """
 
 import logging
-import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib as mpl
@@ -15,8 +14,8 @@ from matplotlib.patches import Patch
 import matplotlib.ticker as mtick
 
 import marmot.config.mconfig as mconfig
-import marmot.plottingmodules.plotutils.plot_library as plotlib
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper, SetupSubplot
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             MissingZoneData)
 
@@ -260,33 +259,23 @@ class MPlot(PlotDataHelper):
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             
-            mplt = SetupSubplot()
+            mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True, ax=ax,
-                                                color=[self.PLEXOS_color_dict.get(x, '#333333') 
-                                                       for x in Total_Generation_Stack_Out.columns], 
-                                                edgecolor='black', linewidth='0.1',
-                                                legend=False)
-
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.set_ylabel(f"Total Generation ({unitconversion['units']}h)", 
-                          color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            
             # Set x-tick labels 
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
-            mplt.set_barplot_xticklabels(tick_labels)
+            
+            mplt.create_bar_plot(Total_Generation_Stack_Out, color=self.PLEXOS_color_dict,
+                                 stacked=True, custom_tick_labels=tick_labels, edgecolor='black', 
+                                 linewidth='0.1')
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+            ax.set_ylabel(f"Total Generation ({unitconversion['units']}h)", 
+                          color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             for n, scenario in enumerate(self.Scenarios):
 
@@ -312,6 +301,9 @@ class MPlot(PlotDataHelper):
                                 alpha=0.5)
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # Add title
+            if mconfig.parser("plot_title_as_region"):
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
@@ -435,19 +427,14 @@ class MPlot(PlotDataHelper):
             except KeyError:
                 pass
             net_diff = net_diff.sum(axis = 1)
-
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             
-            mplt = SetupSubplot()
+            mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True,
-                                                color=[self.PLEXOS_color_dict.get(x, '#333333') 
-                                                        for x in Total_Generation_Stack_Out.columns],
-                                                edgecolor='black', linewidth='0.1', ax=ax,
-                                                legend=False)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
+            mplt.create_bar_plot(Total_Generation_Stack_Out, stacked=True, 
+                                 color=self.PLEXOS_color_dict, edgecolor='black', 
+                                 linewidth='0.1')
+            
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
                                          lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
@@ -455,14 +442,11 @@ class MPlot(PlotDataHelper):
             tick_labels = Total_Generation_Stack_Out.index
             mplt.set_barplot_xticklabels(tick_labels)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-
             #Add net gen difference line.
             for n, scenario in enumerate(self.Scenarios[1:]):
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 y_net = [net_diff.loc[scenario]] * 2
-                ax.plot(x,y_net, c='black', linewidth=1.5, 
+                ax.plot(x, y_net, c='black', linewidth=1.5, 
                         label='Net Gen Change')
 
             ax.set_ylabel((f"Generation Change ({format(unitconversion['units'])}h) \n "
@@ -728,7 +712,7 @@ class MPlot(PlotDataHelper):
             else:
                 Data_Table_Out = Gen_Out.add_suffix(f" (%-Gen)") * 100
 
-            mplt = SetupSubplot(ydimension, xdimension, sharey=True,
+            mplt = PlotLibrary(ydimension, xdimension, sharey=True,
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
@@ -745,12 +729,10 @@ class MPlot(PlotDataHelper):
                 else:
                     stack = True
 
-                month_gen.plot.bar(stacked=stack, ax=axs[i],
-                                   color=[self.PLEXOS_color_dict.get(x, '#333333') 
-                                          for x in month_gen.columns], 
-                                   edgecolor='black', linewidth='0.1', legend=False)
-                axs[i].spines['right'].set_visible(False)
-                axs[i].spines['top'].set_visible(False)
+                mplt.create_bar_plot(month_gen, color=self.PLEXOS_color_dict,
+                                     stacked=stack, edgecolor='black', linewidth='0.1',
+                                     n=i)
+
                 axs[i].margins(x=0.01)
                 axs[i].set_xlabel("")
                 
@@ -760,13 +742,6 @@ class MPlot(PlotDataHelper):
                     axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
                                                      lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 
-                # Set x-tick labels 
-                tick_labels = month_gen.index
-                mplt.set_barplot_xticklabels(tick_labels, n=i)
-
-                axs[i].tick_params(axis='y', which='major', length=5, width=1)
-                axs[i].tick_params(axis='x', which='major', length=5, width=1)
-
                 if not vre_only:
                     for n, _m in enumerate(month_total_load.index):
                         x = [axs[i].patches[n].get_x(), axs[i].patches[n].get_x() +\

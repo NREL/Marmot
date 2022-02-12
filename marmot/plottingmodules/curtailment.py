@@ -9,14 +9,12 @@ This module creates plots are related to the curtailment of generators.
 import os
 import logging
 import pandas as pd
-from collections import OrderedDict
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.dates as mdates
 import matplotlib.ticker as mtick
 
 import marmot.config.mconfig as mconfig
-import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, MissingZoneData)
@@ -88,7 +86,6 @@ class MPlot(PlotDataHelper):
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
-
         if 1 in check_input_data:
             return MissingInputData()
 
@@ -124,7 +121,6 @@ class MPlot(PlotDataHelper):
                 re_curt = re_curt.squeeze() #Convert to Series
                 pv_curt = pv_curt.squeeze() #Convert to Series
                 
-                
                 if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
@@ -159,7 +155,8 @@ class MPlot(PlotDataHelper):
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
 
-            fig2, ax = plt.subplots(figsize=(self.x,self.y))
+            mplt = SetupSubplot()
+            fig, ax = mplt.get_figure()
 
             if prop == "PV":
                 
@@ -177,9 +174,8 @@ class MPlot(PlotDataHelper):
                 for column in PV_Curtailment_DC:
                     ax.plot(PV_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
                             label=column)
-                    ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                    ax.set_ylabel(f"PV Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
+                    ax.set_ylabel(f"PV Curtailment ({unitconversion['units']})", 
+                                    color='black', rotation='vertical')
 
             if prop == "PV+Wind":
                 
@@ -197,25 +193,23 @@ class MPlot(PlotDataHelper):
                 for column in RE_Curtailment_DC:
                     ax.plot(RE_Curtailment_DC[column], linewidth=3, color=colour_dict[column],
                             label=column)
-                    ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                    ax.set_ylabel(f"PV + Wind Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
+                    ax.set_ylabel(f"PV + Wind Curtailment ({unitconversion['units']})", 
+                                    color='black', rotation='vertical')
 
             ax.set_xlabel('Hours',  color='black', rotation='horizontal')
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             #ax.set_xlim(0, 9490)
             ax.set_xlim(0,x_axis_lim)
-            
             ax.set_ylim(bottom=0)
+            # Add legend
+            mplt.add_legend()
+            # Set title
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 
@@ -388,7 +382,7 @@ class MPlot(PlotDataHelper):
             marker_dict = dict(zip(VG_index.unique(), self.marker_style))
             colour_dict = dict(zip(VG_index.unique(), self.color_list))
 
-            Penetration_Curtailment_out["colour"] = [colour_dict.get(x, '#333333') for x in Penetration_Curtailment_out.Scenario]
+            Penetration_Curtailment_out["color"] = [colour_dict.get(x, '#333333') for x in Penetration_Curtailment_out.Scenario]
             Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
             
             if Penetration_Curtailment_out.empty:
@@ -397,34 +391,36 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
             
-            fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            for index, row in Penetration_Curtailment_out.iterrows():
+            mplt = SetupSubplot()
+            fig, ax = mplt.get_figure()
+
+            for _, row in Penetration_Curtailment_out.iterrows():
                 if prop == "PV":
                     ax.scatter(row["% PV Penetration"], row["% PV Curtailment"],
-                          marker=row["marker"],  c=row["colour"], s=100, label = row["Scenario"])
-                    ax.set_ylabel('% PV Curtailment',  color='black', rotation='vertical')
-                    ax.set_xlabel('% PV Penetration',  color='black', rotation='horizontal')
+                               marker=row["marker"], c=row["color"], s=100,
+                               label=row["Scenario"])
+                    ax.set_ylabel('% PV Curtailment', color='black',
+                                    rotation='vertical')
+                    ax.set_xlabel('% PV Penetration', color='black',
+                                    rotation='horizontal')
 
                 elif prop == "PV+Wind":
                     ax.scatter(row["% RE Penetration"], row["% RE Curtailment"],
-                          marker=row["marker"],  c=row["colour"], s=40, label = row["Scenario"])
-                    ax.set_ylabel('% PV + Wind Curtailment',  color='black', rotation='vertical')
-                    ax.set_xlabel('% PV + Wind Penetration',  color='black', rotation='horizontal')
+                                marker=row["marker"], c=row["color"], s=40, 
+                                label=row["Scenario"])
+                    ax.set_ylabel('% PV + Wind Curtailment', color='black',
+                                    rotation='vertical')
+                    ax.set_xlabel('% PV + Wind Penetration', color='black',
+                                    rotation='horizontal')
 
             ax.set_ylim(bottom=0)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
+            # Add legend
+            mplt.add_legend()
 
-            handles, labels = plt.gca().get_legend_handles_labels()
-            by_label = OrderedDict(zip(labels, handles))
-            plt.legend(by_label.values(), by_label.keys(), loc = 'lower right')
-
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
     def curt_total(self, start_date_range: str = None, end_date_range: str = None, **_):
@@ -545,7 +541,6 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
             
-            
             # unit conversion return divisor and energy units
             unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
@@ -554,31 +549,30 @@ class MPlot(PlotDataHelper):
             Data_Table_Out = Total_Curtailment_out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
             
-            fig3, ax = plt.subplots(figsize=(self.x,self.y))
-            Total_Curtailment_out.plot.bar(stacked=True, 
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
-                             edgecolor='black', linewidth='0.1', ax=ax)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)",  color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
+
             # Set x-tick labels 
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Curtailment_out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            mplt.create_bar_plot(Total_Curtailment_out, 
+                                 color=self.PLEXOS_color_dict,
+                                 stacked=True, edgecolor='black', 
+                                 linewidth='0.1',
+                                 custom_tick_labels=tick_labels)
+
+            ax.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)", 
+                            color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
+            # Add legend
+            mplt.add_legend(reverse_legend=True)
+            # Add title
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
-
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
 
             curt_totals = Total_Curtailment_out.sum(axis=1)
             #inserts total bar value above each bar
@@ -595,7 +589,7 @@ class MPlot(PlotDataHelper):
                 if k>=len(vre_pct_curt)-1:
                     break
 
-            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
     def curt_total_diff(self, start_date_range: str = None, end_date_range: str = None, **_):
@@ -709,7 +703,7 @@ class MPlot(PlotDataHelper):
             unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
             
-            fig3, ax= plt.subplots(figsize=(self.x,self.y))
+            fig, ax= plt.subplots(figsize=(self.x,self.y))
             Total_Curtailment_out.plot.bar(stacked=True,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1',ax=ax)
@@ -753,7 +747,7 @@ class MPlot(PlotDataHelper):
                 if k>=len(vre_pct_curt):
                     break
 
-            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
     def curt_ind(self, figure_name: str = None, prop: str = None,
@@ -794,7 +788,6 @@ class MPlot(PlotDataHelper):
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
-
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -843,8 +836,6 @@ class MPlot(PlotDataHelper):
 
                     levels2drop = [level for level in gen_site.index.names if level != 'timestamp']
                     gen_site = gen_site.droplevel(levels2drop)
-
-
                 else:
                     curt_perc = pd.Series([0])
                     curt_tot = pd.Series([0])
@@ -882,21 +873,16 @@ class MPlot(PlotDataHelper):
         Total_Gen = Total_Gen / 1000000
         Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.csv'))
         Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
-                
-        fig1, ax = plt.subplots(figsize=(9,6))
-        Total_Curtailment_Out_perc.plot.bar(stacked = False, edgecolor='black', linewidth='0.1',ax=ax)
-        ax.spines['right'].set_visible(False)
-        ax.spines['top'].set_visible(False)
+        
+        mplt = PlotLibrary(figsize=(9,6))
+        fig, ax = mplt.get_figure()
+
+        mplt.create_bar_plot(Total_Curtailment_Out_perc, 
+                             edgecolor='black', linewidth='0.1')
+
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
         ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
-        
-        # Set x-tick labels 
-        tick_labels = Total_Curtailment_Out_perc.index
-        PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
-        ax.tick_params(axis='y', which='major', length=5, width=1)
-        ax.tick_params(axis='x', which='major', length=5, width=1)
-        
         unitconversion = PlotDataHelper.capacity_energy_unitconversion(Total_Curt.values.max())
         Total_Curt = Total_Curt/unitconversion['divisor'] 
         
@@ -918,7 +904,7 @@ class MPlot(PlotDataHelper):
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11)
 
-        fig1.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
+        fig.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
         outputs = DataSavedInModule()
         return outputs
 
@@ -1011,9 +997,8 @@ class MPlot(PlotDataHelper):
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
 
-            fig, axs = plotlib.setup_plot(squeeze=False)
-            # flatten object
-            ax = axs[0]
+            mplt = SetupSubplot()
+            fig, ax = mplt.get_figure()
 
             unitconversion = PlotDataHelper.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
             RE_Curtailment_DC = RE_Curtailment_DC / unitconversion['divisor']
@@ -1022,29 +1007,20 @@ class MPlot(PlotDataHelper):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
             
             for column in RE_Curtailment_DC:
-                ax.plot(RE_Curtailment_DC[column], linewidth=2, color=colour_dict[column],
+                ax.plot(RE_Curtailment_DC[column], linewidth=2, 
+                        color=colour_dict[column],
                         label=column)
-                
-            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-            ax.set_ylabel(f"Average Diurnal Curtailment ({unitconversion['units']})",  color='black', rotation='vertical')
+            # Add legend
+            mplt.add_legend()
+            # Set time ticks
+            mplt.set_plot_timeseries_format()
+            ax.set_ylabel(f"Average Diurnal Curtailment ({unitconversion['units']})", 
+                            color='black', rotation='vertical')
             
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            
-            # Set time ticks
-            locator = mdates.AutoDateLocator(minticks=8, maxticks=12)
-            formatter = mdates.ConciseDateFormatter(locator)
-            formatter.zero_formats[3] = '%H:%M'
-            formatter.show_offset = False
-            ax.xaxis.set_major_locator(locator)
-            ax.xaxis.set_major_formatter(formatter)
-        
             ax.set_ylim(bottom=0)
+            # Add title
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
 

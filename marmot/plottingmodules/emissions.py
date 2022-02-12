@@ -13,9 +13,9 @@ TO DO:
 import logging
 import pandas as pd
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary 
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, InputSheetError,
                 MissingZoneData)
@@ -142,41 +142,32 @@ class MPlot(PlotDataHelper):
             try:
                 emitPlot = emitOut.xs(prop, level="pollutant").T
                 dataOut = emitPlot.copy()
-
-                # formatting for plot
-                emitPlot.index = emitPlot.index.str.replace('_',' ')
                 
                 # single pollutant plot
-                fig1, ax = plt.subplots(figsize=(self.x,self.y))
-                emitPlot.plot.bar(stacked=True,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in emitPlot.columns.values], edgecolor='black', linewidth='0.1',ax=ax)
+                mplt = PlotLibrary()
+                fig, ax = mplt.get_figure()
 
-                # plot formatting
-                ax.spines['right'].set_visible(False)
-                ax.spines['top'].set_visible(False)
-                ax.set_ylabel('Annual ' + prop + ' Emissions\n(million metric tons)',  color='black', rotation='vertical')
-                #adds comma to y axis data
-                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                
                 # Set x-tick labels 
                 if len(self.custom_xticklabels) > 1:
                     tick_labels = self.custom_xticklabels
                 else:
                     tick_labels = emitPlot.index
-                PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
-                
-                ax.tick_params(axis='y', which='major', length=5, width=1)
-                ax.tick_params(axis='x', which='major', length=5, width=1)
 
-                # legend formatting
-                handles, labels = ax.get_legend_handles_labels()
-                leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                ax.add_artist(leg1)
+                mplt.create_bar_plot(emitPlot, color=self.PLEXOS_color_dict,
+                                     stacked=True, edgecolor='black', linewidth='0.1',
+                                     custom_tick_labels=tick_labels)
+
+                ax.set_ylabel(f'Annual {prop} Emissions\n(million metric tons)', 
+                                color='black', rotation='vertical')
+                #adds comma to y axis data
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                # Add legend
+                mplt.add_legend(reverse_legend=True)
+                # Add title
                 if mconfig.parser("plot_title_as_region"):
                     ax.set_title(zone_input)
 
-                outputs[zone_input] = {'fig': fig1, 'data_table': dataOut}
+                outputs[zone_input] = {'fig': fig, 'data_table': dataOut}
 
             except KeyError:
                 self.logger.warning(prop+ " emissions not found")
