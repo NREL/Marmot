@@ -8,16 +8,13 @@ and region level.
 """
 
 import logging
-import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.patches import Patch
-from matplotlib.lines import Line2D
 
 import marmot.config.mconfig as mconfig
-import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
@@ -127,12 +124,13 @@ class MPlot(PlotDataHelper):
             xdimension, ydimension = self.setup_facet_xy_dimensions(facet,multi_scenario=Scenarios)
             grid_size = xdimension*ydimension
             excess_axs = grid_size - len(Scenarios)
-
-            fig1, axs = plotlib.setup_plot(xdimension,ydimension)
+            
+            mplt = PlotLibrary(ydimension, xdimension, sharey=True, 
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             data_tables = []
-            unique_tech_names = []
             for n, scenario in enumerate(Scenarios):
                 self.logger.info(f"Scenario = {scenario}")
 
@@ -177,8 +175,11 @@ class MPlot(PlotDataHelper):
                 data_table = data_table.set_index([scenario_names],append = True)
                 data_tables.append(data_table)
                 
-                plotlib.create_stackplot(axs, reserve_provision_timeseries, self.PLEXOS_color_dict, labels=reserve_provision_timeseries.columns,n=n)
-                PlotDataHelper.set_plot_timeseries_format(axs,n=n,minticks=4, maxticks=8)
+                mplt.stackplot(reserve_provision_timeseries, 
+                               color_dict=self.PLEXOS_color_dict, 
+                               labels=reserve_provision_timeseries.columns,
+                               n=n)
+                mplt.set_plot_timeseries_format(n=n)
 
                 if prop == "Peak Demand":
                     axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), '.2f')) + ' {}'.format(unitconversion['units']), 
@@ -186,49 +187,27 @@ class MPlot(PlotDataHelper):
                             xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
-                # create list of gen technologies
-                l1 = reserve_provision_timeseries.columns.tolist()
-                unique_tech_names.extend(l1)
-            
             if not data_tables:
                 self.logger.warning(f'No reserves in {region}')
                 out = MissingZoneData()
                 outputs[region] = out
                 continue
-                
-            # create handles list of unique tech names then order
-            handles = np.unique(np.array(unique_tech_names)).tolist()
-            handles.sort(key = lambda i:self.ordered_gen.index(i))
-            handles = reversed(handles)
-
-            # create custom gen_tech legend
-            gen_tech_legend = []
-            for tech in handles:
-                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0,
-                         label=tech)]
-                gen_tech_legend.extend(legend_handles)
-
+            
+            # Add facet labels
+            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
+                                  alternative_ylabels = self.ylabels)
             # Add legend
-            axs[grid_size-1].legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
-                     facecolor='inherit', frameon=True)
-
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             #Remove extra axes
-            if excess_axs != 0:
-                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
-
-            # add facet labels
-            self.add_facet_labels(fig1)
-
-            fig1.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            mplt.remove_excess_axs(excess_axs,grid_size)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(region)
-            plt.ylabel(f"Reserve Provision ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=40)
+            plt.ylabel(f"Reserve Provision ({unitconversion['units']})", 
+                        color='black', rotation='vertical', labelpad=40)
 
             data_table_out = pd.concat(data_tables)
 
-            outputs[region] = {'fig': fig1, 'data_table': data_table_out}
+            outputs[region] = {'fig': fig, 'data_table': data_table_out}
         return outputs
 
     def total_reserves_by_gen(self, start_date_range: str = None, 
@@ -264,7 +243,6 @@ class MPlot(PlotDataHelper):
             self.logger.info(f"Zone = {region}")
 
             Total_Reserves_Out = pd.DataFrame()
-            unique_tech_names = []
             for scenario in self.Scenarios:
                 self.logger.info(f"Scenario = {scenario}")
 
@@ -309,38 +287,28 @@ class MPlot(PlotDataHelper):
             
             data_table_out = Total_Reserves_Out.add_suffix(f" ({unitconversion['units']}h)")
             
-            # create figure
-            fig1, axs = plotlib.create_stacked_bar_plot(Total_Reserves_Out, self.PLEXOS_color_dict, 
-                                                        custom_tick_labels=self.custom_xticklabels)
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
 
-            # additional figure formatting
-            #fig1.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
-            axs.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)",  color='black', rotation='vertical')
+            # Set x-tick labels
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
+            else:
+                tick_labels = Total_Reserves_Out.index
 
-            # create list of gen technologies
-            l1 = Total_Reserves_Out.columns.tolist()
-            unique_tech_names.extend(l1)
+            mplt.barplot(Total_Reserves_Out, color=self.PLEXOS_color_dict,
+                         stacked=True,
+                         edgecolor='black', linewidth='0.1',
+                         custom_tick_labels=tick_labels)
 
-            # create handles list of unique tech names then order
-            handles = np.unique(np.array(unique_tech_names)).tolist()
-            handles.sort(key = lambda i:self.ordered_gen.index(i))
-            handles = reversed(handles)
-
-            # create custom gen_tech legend
-            gen_tech_legend = []
-            for tech in handles:
-                legend_handles = [Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0,label=tech)]
-                gen_tech_legend.extend(legend_handles)
-
+            ax.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)", 
+                            color='black', rotation='vertical')
             # Add legend
-            axs.legend(handles=gen_tech_legend, loc='lower left',bbox_to_anchor=(1,0),
-                     facecolor='inherit', frameon=True)
-
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             if mconfig.parser("plot_title_as_region"):
-                axs.set_title(region)
+                ax.set_title(region)
 
-            outputs[region] = {'fig': fig1, 'data_table': data_table_out}
+            outputs[region] = {'fig': fig, 'data_table': data_table_out}
         return outputs
 
     def reg_reserve_shortage(self, **kwargs):
@@ -479,18 +447,24 @@ class MPlot(PlotDataHelper):
             # create color dictionary
             color_dict = dict(zip(reserve_out.columns,self.color_list))
             
-            fig2,axs = plotlib.create_grouped_bar_plot(reserve_out, color_dict)
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
+
+            mplt.barplot(reserve_out, color=color_dict,
+                         stacked=False,
+                         edgecolor='black', linewidth='0.1')
+
             if count_hours == False:
-                axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                axs.set_ylabel(f"Reserve {data_set} [{unitconversion['units']}h]",  color='black', rotation='vertical')
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                ax.set_ylabel(f"Reserve {data_set} [{unitconversion['units']}h]", 
+                               color='black', rotation='vertical')
             elif count_hours == True:
-                axs.set_ylabel(f"Reserve {data_set} Hours",  color='black', rotation='vertical')
-            handles, labels = axs.get_legend_handles_labels()
-            axs.legend(handles,labels, loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+                ax.set_ylabel(f"Reserve {data_set} Hours", 
+                              color='black', rotation='vertical')
+            mplt.add_legend()
             if mconfig.parser("plot_title_as_region"):
-                axs.set_title(region)
-            outputs[region] = {'fig': fig2,'data_table': Data_Table_Out}
+                ax.set_title(region)
+            outputs[region] = {'fig': fig,'data_table': Data_Table_Out}
         return outputs
 
     def reg_reserve_shortage_timeseries(self, figure_name: str = None,
@@ -552,7 +526,9 @@ class MPlot(PlotDataHelper):
             grid_size = xdimension*ydimension
             excess_axs = grid_size - len(Scenarios)
 
-            fig3, axs = plotlib.setup_plot(xdimension,ydimension)
+            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             data_tables = []
@@ -593,59 +569,33 @@ class MPlot(PlotDataHelper):
                 data_tables.append(data_table)
 
                 for column in reserve_timeseries:
-                    plotlib.create_line_plot(axs,reserve_timeseries,column,color_dict=color_dict,label=column, n=n)
+                    axs[n].plot(reserve_timeseries.index.values, reserve_timeseries[column], 
+                                linewidth=2,
+                                color=color_dict[column],
+                                label=column)
+
                 axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
-                PlotDataHelper.set_plot_timeseries_format(axs,n=n,minticks=6, maxticks=12)
+                mplt.set_plot_timeseries_format(n=n)
 
-                # scenario_names = pd.Series([scenario]*len(reserve_timeseries),name='Scenario')
-                # reserve_timeseries = reserve_timeseries.set_index([scenario_names],append=True)
-                # reserve_timeseries_chunk.append(reserve_timeseries)
-
-                # create list of gen technologies
-                l1 = reserve_timeseries.columns.tolist()
-                unique_reserve_types.extend(l1)
-            
             if not data_tables:
                 out = MissingZoneData()
                 outputs[region] = out
                 continue
-                
-            # create handles list of unique reserve names
-            handles = np.unique(np.array(unique_reserve_types)).tolist()
-
-            # create color dictionary
-            color_dict = dict(zip(handles,self.color_list))
-
-            # create custom gen_tech legend
-            reserve_legend = []
-            for Type in handles:
-                legend_handles = [Line2D([0], [0], color=color_dict[Type], lw=2, label=Type)]
-                reserve_legend.extend(legend_handles)
-
-            axs[grid_size-1].legend(handles=reserve_legend, loc='lower left', 
-                                    bbox_to_anchor=(1,0), facecolor='inherit', 
-                                    frameon=True)
-
-            #Remove extra axes
-            if excess_axs != 0:
-                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
-
+            
             # add facet labels
-            self.add_facet_labels(fig3)
-
-            fig3.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, 
-                            left=False, right=False)
-            # plt.xlabel(timezone,  color='black', rotation='horizontal',labelpad = 30)
+            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
+                                  alternative_ylabels = self.ylabels)
+            mplt.add_legend()
+            #Remove extra axes
+            mplt.remove_excess_axs(excess_axs,grid_size)
             plt.ylabel('Reserve Shortage [MW]',  color='black', 
                        rotation='vertical',labelpad = 40)
-            
             if mconfig.parser("plot_title_as_region"):
                plt.title(region)
             
             data_table_out = pd.concat(data_tables)
             
-            outputs[region] =  {'fig': fig3, 'data_table': data_table_out}
+            outputs[region] =  {'fig': fig, 'data_table': data_table_out}
 
         return outputs

@@ -591,7 +591,7 @@ class MPlot(PlotDataHelper):
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
                 data_tables.append(single_scen_out)
 
-                mplt.create_stackplot(Stacked_Gen, self.PLEXOS_color_dict, 
+                mplt.stackplot(Stacked_Gen, self.PLEXOS_color_dict, 
                                       labels=Stacked_Gen.columns, n=i)
                 mplt.set_plot_timeseries_format(n=i)
 

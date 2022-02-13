@@ -14,7 +14,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 import marmot.config.mconfig as mconfig
-import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
            InputSheetError)
@@ -102,7 +102,9 @@ class MPlot(PlotDataHelper):
         excess_axs = grid_size - region_number
 
         #setup plot
-        fig2, axs = plotlib.setup_plot(xdimension,ydimension)
+        mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                            squeeze=False, ravel_axs=True)
+        fig, axs = mplt.get_figure()
         plt.subplots_adjust(wspace=0.1, hspace=0.50)
         
         data_table = []
@@ -130,26 +132,18 @@ class MPlot(PlotDataHelper):
             color_dict = dict(zip(duration_curve.columns,self.color_list))
 
             for column in duration_curve:
-                plotlib.create_line_plot(axs,duration_curve, column, color_dict,
-                                         n=n, label=column)
+                axs[n].plot(duration_curve[column], linewidth=1,
+                         color=color_dict[column],
+                         label=column, alpha=1)
                 if pd.notna(y_axis_max):
                     axs[n].set_ylim(bottom=0, top=float(y_axis_max))
                 axs[n].set_xlim(0,len(duration_curve))
                 axs[n].set_title(zone_input.replace('_',' '))
 
-                handles, labels = axs[n].get_legend_handles_labels()
-                #Legend
-                axs[grid_size-1].legend((handles), (labels), loc='lower left',
-                                        bbox_to_anchor=(1,0), facecolor='inherit', 
-                                        frameon=True)
-        
+        mplt.add_legend()
         # Remove extra axes
-        if excess_axs != 0:
-            PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
+        mplt.remove_excess_axs(excess_axs,grid_size)
         
-        fig2.add_subplot(111, frameon=False)
-        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, 
-                        right=False)
         plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', 
                    labelpad=30)
         plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
@@ -158,7 +152,7 @@ class MPlot(PlotDataHelper):
 
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
-        fig2.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), 
+        fig.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), 
                      dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
         outputs = DataSavedInModule()
@@ -247,30 +241,29 @@ class MPlot(PlotDataHelper):
             color_dict = dict(zip(duration_curve.columns,self.color_list))
 
             #setup plot
-            fig1, axs = plotlib.setup_plot(xdimension,ydimension)
+            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             n=0
             for column in duration_curve:
-                plotlib.create_line_plot(axs, duration_curve, column, color_dict, 
-                                         n=n, label=column)
+                axs[n].plot(duration_curve[column], linewidth=1,
+                         color=color_dict[column],
+                         label=column, alpha=1)
                 if pd.notna(y_axis_max):
                     axs[n].set_ylim(bottom=0,top=float(y_axis_max))
                 axs[n].set_xlim(0,len(duration_curve))
-                axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
                 if facet:
                     n+=1
 
-            fig1.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, 
-                            right=False)
+            mplt.add_legend()
             plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', 
                        labelpad=20)
             plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
-            outputs[zone_input] = {'fig': fig1, 'data_table':Data_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table':Data_Out}
         return outputs
 
 
@@ -357,32 +350,32 @@ class MPlot(PlotDataHelper):
             color_dict = dict(zip(timeseries.columns,self.color_list))
 
             #setup plot
-            fig3, axs = plotlib.setup_plot(xdimension,ydimension)
+            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             n=0 #Counter for scenario subplots
             for column in timeseries:
-                plotlib.create_line_plot(axs, timeseries, column, 
-                                         color_dict, n=n, label=column)
+                axs[n].plot(timeseries[column], linewidth=1,
+                         color=color_dict[column],
+                         label=column, alpha=1)
                 if pd.notna(y_axis_max):
                     axs[n].set_ylim(bottom=0,top=float(y_axis_max))
-                axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-                
-                PlotDataHelper.set_plot_timeseries_format(axs,n)
+                mplt.set_plot_timeseries_format(n=n)
                 if facet:
                     n+=1
 
-            fig3.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, 
-                            left=False, right=False)
+            # Add legend
+            mplt.add_legend()
+            # Add title
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             plt.ylabel(f"{self.AGG_BY} Price ($/MWh)", color='black', 
                        rotation='vertical', labelpad=20)
             plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
 
-            outputs[zone_input] = {'fig': fig3, 'data_table':Data_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table':Data_Out}
         return outputs
 
     def timeseries_price_all_regions(self, y_axis_max: float = None,
@@ -438,7 +431,10 @@ class MPlot(PlotDataHelper):
         excess_axs = grid_size - region_number
 
         #setup plot
-        fig4, axs = plotlib.setup_plot(xdimension,ydimension)
+        mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                            squeeze=False, ravel_axs=True)
+        fig, axs = mplt.get_figure()
+
         plt.subplots_adjust(wspace=0.1, hspace=0.70)
 
         data_table = []
@@ -466,24 +462,19 @@ class MPlot(PlotDataHelper):
             color_dict = dict(zip(timeseries.columns,self.color_list))
 
             for column in timeseries:
-                plotlib.create_line_plot(axs,timeseries,column,color_dict,n=n,label=column)
+                axs[n].plot(timeseries[column], linewidth=1,
+                         color=color_dict[column],
+                         label=column, alpha=1)
                 axs[n].set_title(zone_input.replace('_',' '))
                 if pd.notna(y_axis_max):
                     axs[n].set_ylim(bottom=0,top=float(y_axis_max))
-                PlotDataHelper.set_plot_timeseries_format(axs,n)
+                mplt.set_plot_timeseries_format(n=n)
 
-                handles, labels = axs[n].get_legend_handles_labels()
-                #Legend
-                axs[grid_size-1].legend((handles), (labels), loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-        
+        # Add legend
+        mplt.add_legend()
         # Remove extra axes
-        if excess_axs != 0:
-            PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
+        mplt.remove_excess_axs(excess_axs,grid_size)
         
-        fig4.add_subplot(111, frameon=False)
-        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, 
-                        right=False)
         plt.ylabel(f"{self.AGG_BY} Price ($/MWh)",  color='black', rotation='vertical', 
                    labelpad=30)
         plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
@@ -492,7 +483,7 @@ class MPlot(PlotDataHelper):
 
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
-        fig4.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), 
+        fig.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), 
                      dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
         outputs = DataSavedInModule()
@@ -610,7 +601,9 @@ class MPlot(PlotDataHelper):
         xdimension, ydimension =  self.set_x_y_dimension(len(select_nodes))
         
         #setup plot
-        fig, axs = plotlib.setup_plot(xdimension,ydimension)
+        mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                            squeeze=False, ravel_axs=True)
+        fig, axs = mplt.get_figure()
         plt.subplots_adjust(wspace=0.1, hspace=0.70)
         
         color_dict = dict(zip(pdc.columns, self.color_list))
@@ -632,26 +625,16 @@ class MPlot(PlotDataHelper):
                     continue
             
             for column in node_pdc:
-                plotlib.create_line_plot(axs,node_pdc, column, color_dict, 
-                                       n=n, label=column)
+                axs[n].plot(node_pdc[column], linewidth=1,
+                            color=color_dict[column],
+                            label=column, alpha=1)
                 if pd.notna(y_axis_max):
                     axs[n].set_ylim(bottom=0, top=float(y_axis_max))
                 if not PDC:
-                    PlotDataHelper.set_plot_timeseries_format(axs,n)
+                    mplt.set_plot_timeseries_format(n=n)
                 # axs[n].set_xlim(0,len(node_pdc))
-                
-                handles, labels = axs[n].get_legend_handles_labels()
-                #Legend
-                axs[len(select_nodes)-1].legend((handles), (labels),
-                                                loc='lower left', 
-                                                bbox_to_anchor=(1,0),
-                                                facecolor='inherit', 
-                                                frameon=True)
-                axs[n].set_title(node)
-            
-        fig.add_subplot(111, frameon=False)
-        plt.tick_params(labelcolor='none', top=False, bottom=False, 
-                        left=False, right=False)
+        
+        mplt.add_legend()
         plt.ylabel('Node Price ($/MWh)',  color='black', rotation='vertical', 
                    labelpad=30)
         if PDC:
@@ -793,8 +776,9 @@ class MPlot(PlotDataHelper):
             excess_axs = grid_size - plot_number
         
             #setup plot
-            fig, axs = plotlib.setup_plot(xdimension,ydimension, sharey=True)
-            axs = axs.ravel()
+            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                            squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.1, hspace=0.25)
             
             color_dict = dict(zip(p_hist.columns, self.color_list))
@@ -833,17 +817,12 @@ class MPlot(PlotDataHelper):
                 # sets x_tick spacing
                 axs[n].set_xticks(xticks)
                 axs[n].set_xticklabels(xlabels)
-                axs[n].spines['right'].set_visible(False)
-                axs[n].spines['top'].set_visible(False)
             
             # Remove extra axes
-            if excess_axs != 0:
-                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
-            
-            self.add_facet_labels(fig)
-            fig.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, 
-                            left=False, right=False)
+            mplt.remove_excess_axs(excess_axs,grid_size)
+            # Add Facet Labels
+            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
+                                  alternative_ylabels = self.ylabels)
             plt.ylabel('Occurrence',  color='black', rotation='vertical', 
                        labelpad=60, fontsize=24)
             plt.title(node)

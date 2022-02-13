@@ -153,7 +153,7 @@ class MPlot(PlotDataHelper):
                 else:
                     tick_labels = emitPlot.index
 
-                mplt.create_bar_plot(emitPlot, color=self.PLEXOS_color_dict,
+                mplt.barplot(emitPlot, color=self.PLEXOS_color_dict,
                                      stacked=True, edgecolor='black', linewidth='0.1',
                                      custom_tick_labels=tick_labels)
 

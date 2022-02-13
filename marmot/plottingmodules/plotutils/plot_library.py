@@ -53,7 +53,6 @@ class SetupSubplot():
         mpl.rc('ytick.major', size=axes_options['major_y_tick_length'],
                               width=1)
 
-
         x=figsize[0]
         y=figsize[1]
         
@@ -103,9 +102,7 @@ class SetupSubplot():
             else:
                 handles_list = []
                 labels_list = []
-                print(self.axs)
                 for ax in self.axs.ravel():
-                    print(ax)
                     h, l = ax.get_legend_handles_labels()
                     handles_list.extend(h)
                     labels_list.extend(l)
@@ -123,8 +120,6 @@ class SetupSubplot():
             labels = labels_handles.keys()
             handles = labels_handles.values()
         
-        print(handles)
-        print(labels)
         if reverse_legend:
             handles = reversed(handles)
             labels = reversed(labels)
@@ -246,7 +241,6 @@ class SetupSubplot():
         else:
             ylabel = self.ylabels
 
-
         if isinstance(self.axs, Axes):
             all_axes = [self.axs]
         else:
@@ -286,7 +280,7 @@ class SetupSubplot():
 class PlotLibrary(SetupSubplot):
     
     
-    def create_stackplot(self, data: pd.DataFrame, color_dict: dict = None, 
+    def stackplot(self, data: pd.DataFrame, color_dict: dict = None, 
                     labels: list = None, n: int = 0, **kwargs):
         """Creates a stacked area plot
 
@@ -316,7 +310,7 @@ class PlotLibrary(SetupSubplot):
         ax.margins(x=0.01)
     
 
-    def create_bar_plot(self, df: pd.DataFrame, color: Union[dict, list] = None,
+    def barplot(self, df: pd.DataFrame, color: Union[dict, list] = None,
                         stacked: bool = False, n: int = 0, custom_tick_labels=None,
                         legend=False,
                         **kwargs):
@@ -393,7 +387,7 @@ def setup_plot(xdimension: int = 1,
     return fig, axs
 
 
-def create_bar_plot(df: pd.DataFrame, axs, color: dict,  
+def barplot(df: pd.DataFrame, axs, color: dict,  
                     stacked: bool = False, **kwargs):
     """Creates a bar plot
 
@@ -629,7 +623,7 @@ def create_hist_plot(axs, data: pd.DataFrame, color_dict: dict,
     axs[n].tick_params(axis='y', which='major', length=5, width=1)
 
 
-def create_stackplot(axs, data: pd.DataFrame, color_dict: dict, 
+def stackplot(axs, data: pd.DataFrame, color_dict: dict, 
                         labels: list = None, n: int = 0, **kwargs):
     """Creates a stacked area plot
 

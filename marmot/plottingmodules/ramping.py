@@ -12,6 +12,7 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData, UnderDevelopment)
 
@@ -181,27 +182,25 @@ class MPlot(PlotDataHelper):
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
             cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
-                        
-            fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            cap_started_all_scenarios.T.plot.bar(stacked = False,
-                                 color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
+            # transpose, sets scenarios as columns
+            cap_started_all_scenarios = cap_started_all_scenarios.T
             
-            tick_labels = cap_started_all_scenarios.columns
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
+            mplt.barplot(cap_started_all_scenarios, color=self.color_list,
+                         edgecolor='black', linewidth='0.1')
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)", 
+                          color='black', rotation='vertical')
+
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            
+            mplt.add_legend()
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 

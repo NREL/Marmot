@@ -149,7 +149,7 @@ class MPlot(PlotDataHelper):
                 single_scen_out = cap_out.set_index([scenario_names],append = True)
                 chunks.append(single_scen_out)
                 
-                mplt.create_stackplot(data=cap_out, color_dict=self.PLEXOS_color_dict, 
+                mplt.stackplot(data=cap_out, color_dict=self.PLEXOS_color_dict, 
                                       labels=cap_out.columns, n=i)
                 mplt.set_plot_timeseries_format(n=i)
             

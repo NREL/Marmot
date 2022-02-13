@@ -558,7 +558,7 @@ class MPlot(PlotDataHelper):
             else:
                 tick_labels = Total_Curtailment_out.index
 
-            mplt.create_bar_plot(Total_Curtailment_out, 
+            mplt.barplot(Total_Curtailment_out, 
                                  color=self.PLEXOS_color_dict,
                                  stacked=True, edgecolor='black', 
                                  linewidth='0.1',
@@ -877,7 +877,7 @@ class MPlot(PlotDataHelper):
         mplt = PlotLibrary(figsize=(9,6))
         fig, ax = mplt.get_figure()
 
-        mplt.create_bar_plot(Total_Curtailment_Out_perc, 
+        mplt.barplot(Total_Curtailment_Out_perc, 
                              edgecolor='black', linewidth='0.1')
 
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')

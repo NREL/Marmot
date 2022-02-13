@@ -164,7 +164,7 @@ class MPlot(PlotDataHelper):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
             
-            mplt.create_bar_plot(CF_all_scenarios.T, color=self.color_list,
+            mplt.barplot(CF_all_scenarios.T, color=self.color_list,
                                 edgecolor='black', linewidth='0.1', 
                                 custom_tick_labels=list(CF_all_scenarios.columns))
 
@@ -267,7 +267,7 @@ class MPlot(PlotDataHelper):
             mplt = PlotLibrary(figsize=(self.x*1.5, self.y*1.5))
             fig, ax = mplt.get_figure()
 
-            mplt.create_bar_plot(CF_all_scenarios, color=self.color_list,
+            mplt.barplot(CF_all_scenarios, color=self.color_list,
                                 edgecolor='black', linewidth='0.1')
 
             ax.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
@@ -383,7 +383,7 @@ class MPlot(PlotDataHelper):
             mplt = PlotLibrary(figsize=(self.x*1.5, self.y*1.5))
             fig, ax = mplt.get_figure()
 
-            mplt.create_bar_plot(time_at_min.T, color=self.color_list, 
+            mplt.barplot(time_at_min.T, color=self.color_list, 
                                  edgecolor='black', linewidth='0.1', 
                                  custom_tick_labels=list(time_at_min.columns))
             

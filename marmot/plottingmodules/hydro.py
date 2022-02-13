@@ -13,12 +13,11 @@ import os
 import logging
 import pandas as pd
 import datetime as dt
-import matplotlib.pyplot as plt
 import matplotlib as mpl
-import matplotlib.dates as mdates
 from matplotlib.patches import Patch
 
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             MissingZoneData)
@@ -129,39 +128,29 @@ class MPlot(PlotDataHelper):
             del Stacked_Gen
 
             #Scatter plot by season
-            fig2, ax2 = plt.subplots(figsize=(9,6))
+            mplt = SetupSubplot()
+            fig, ax = mplt.get_figure()
 
-            ax2.scatter(Net_Load[end_date_range:start_date_range],
+            ax.scatter(Net_Load[end_date_range:start_date_range],
                         Hydro_Gen[end_date_range:start_date_range], color='black',
                         s=5, label='Non-winter')
-            ax2.scatter(Net_Load[start_date_range:],Hydro_Gen[start_date_range:],
+            ax.scatter(Net_Load[start_date_range:],Hydro_Gen[start_date_range:],
                         color='blue', s=5, label='Winter', alpha=0.5)
-            ax2.scatter(Net_Load[:end_date_range],Hydro_Gen[:end_date_range],
+            ax.scatter(Net_Load[:end_date_range],Hydro_Gen[:end_date_range],
                         color='blue', s=5, alpha=0.5)
 
-
-            ax2.set_ylabel('In Region Hydro Generation (MW)',  color='black', rotation='vertical')
-            ax2.set_xlabel('Continent Net Load (MW)',  color='black', rotation='horizontal')
-            ax2.spines['right'].set_visible(False)
-            ax2.spines['top'].set_visible(False)
-            ax2.tick_params(axis='y', which='major', length=5, width=1)
-            ax2.tick_params(axis='x', which='major', length=5, width=1)
-            ax2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+            ax.set_ylabel('In Region Hydro Generation (MW)',  color='black', rotation='vertical')
+            ax.set_xlabel('Continent Net Load (MW)',  color='black', rotation='horizontal')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
                                                 lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-            ax2.margins(x=0.01)
+            ax.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.margins(x=0.01)
+            # Add title
             if mconfig.parser("plot_title_as_region"):
-                ax2.set_title(zone_input)
-
-            handles, labels = ax2.get_legend_handles_labels()
-
-            leg1 = ax2.legend(reversed(handles), reversed(labels), 
-                              loc='lower left', bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-
-            ax2.add_artist(leg1)
+                ax.set_title(zone_input)
+            mplt.add_legend(reverse_legend=True)
             
-            fig2.savefig(os.path.join(hydro_figures, zone_input + 
+            fig.savefig(os.path.join(hydro_figures, zone_input + 
                                       f"_Hydro_Versus_Continent_Net_Load_{self.Scenarios[0]}"), 
                          dpi=600, bbox_inches='tight')
         
@@ -243,87 +232,61 @@ class MPlot(PlotDataHelper):
                 self.logger.info(str(period_start)+" and next "+str(end)+" days.")
                 Hydro_Period = Hydro_Gen[period_start:period_end]
                 Net_Load_Period = Net_Load[period_start:period_end]
-                #print(Net_Load_Period)
 
                 # Data table of values to return to main program
                 Data_Table_Out = pd.concat([Net_Load_Period, Hydro_Period], axis=1, sort=False)
 
-                fig1, ax = plt.subplots(figsize=(9,6))
+                #Scatter plot by season
+                mplt = SetupSubplot()
+                fig, ax = mplt.get_figure()
 
                 ax.plot(Hydro_Period, linewidth=2,
-                       color=self.PLEXOS_color_dict.get('Hydro','#333333'),label='Hydro')
+                       color=self.PLEXOS_color_dict.get('Hydro','#333333'),
+                       label='Hydro')
 
                 ax.plot(Net_Load_Period, color='black',label='Load')
 
                 ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
-                ax.spines['right'].set_visible(False)
-                ax.spines['top'].set_visible(False)
-                ax.tick_params(axis='y', which='major', length=5, width=1)
-                ax.tick_params(axis='x', which='major', length=5, width=1)
                 ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
                                                     lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
 
-                locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
-                formatter = mdates.ConciseDateFormatter(locator)
-                formatter.formats[2] = '%d\n %b'
-                formatter.zero_formats[1] = '%b\n %Y'
-                formatter.zero_formats[2] = '%d\n %b'
-                formatter.zero_formats[3] = '%H:%M\n %d-%b'
-                formatter.offset_formats[3] = '%b %Y'
-                formatter.show_offset = False
-                ax.xaxis.set_major_locator(locator)
-                ax.xaxis.set_major_formatter(formatter)
-                
+                mplt.set_plot_timeseries_format()
+
+                # Add title                
                 if mconfig.parser("plot_title_as_region"):
                     ax.set_title(zone_input)
+                # Add legend
+                mplt.add_legend(reverse_legend=True)
 
-                handles, labels = ax.get_legend_handles_labels()
-
-                #Legend 1
-                leg1 = ax.legend(reversed(handles), reversed(labels), 
-                                 loc='lower left',bbox_to_anchor=(1,0),
-                                 facecolor='inherit', frameon=True)
-
-                # Manually add the first legend back
-                ax.add_artist(leg1)
-
-                fig1.savefig(os.path.join(hydro_figures, zone_input + 
+                fig.savefig(os.path.join(hydro_figures, zone_input + 
                                           f"_Hydro_And_Net_Load_{self.Scenarios[0]}_period_{str(wk)}"),
                              dpi=600, bbox_inches='tight')
                 Data_Table_Out.to_csv(os.path.join(hydro_figures, zone_input + 
                                           f"_Hydro_And_Net_Load_{self.Scenarios[0]}_period_{str(wk)}.csv"))
-                del fig1
+                del fig
                 del Data_Table_Out
                 mpl.pyplot.close('all')
             #end weekly loop
             #Scatter plot
-            fig2, ax2 = plt.subplots(figsize=(9,6))
+            
+            mplt = SetupSubplot()
+            fig, ax = mplt.get_figure()
+            ax.scatter(Net_Load, Hydro_Gen, color='black', s=5)
 
-            ax2.scatter(Net_Load,Hydro_Gen,color='black',s=5)
-
-            ax2.set_ylabel('In-Region Hydro Generation (MW)',  color='black', rotation='vertical')
-            ax2.set_xlabel('In-Region Net Load (MW)',  color='black', rotation='horizontal')
-            ax2.spines['right'].set_visible(False)
-            ax2.spines['top'].set_visible(False)
-            ax2.tick_params(axis='y', which='major', length=5, width=1)
-            ax2.tick_params(axis='x', which='major', length=5, width=1)
-            ax2.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+            ax.set_ylabel('In-Region Hydro Generation (MW)',  color='black', rotation='vertical')
+            ax.set_xlabel('In-Region Net Load (MW)',  color='black', rotation='horizontal')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax2.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
-            ax2.margins(x=0.01)
+            ax.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            ax.margins(x=0.01)
 
-            handles, labels = ax2.get_legend_handles_labels()
-
-            leg1 = ax2.legend(reversed(handles), reversed(labels), 
-                              loc='lower left',bbox_to_anchor=(1,0),
-                              facecolor='inherit', frameon=True)
-
-            ax2.add_artist(leg1)
+            mplt.add_legend(reverse_legend=True)
+            
             if mconfig.parser("plot_title_as_region"):
-                ax2.set_title(zone_input)
-            fig2.savefig(os.path.join(hydro_figures, zone_input +
+                ax.set_title(zone_input)
+            fig.savefig(os.path.join(hydro_figures, zone_input +
                                       f"_Hydro_Versus_Net_Load_{self.Scenarios[0]}"),
                          dpi=600, bbox_inches='tight')
         

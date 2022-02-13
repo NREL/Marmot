@@ -268,7 +268,7 @@ class MPlot(PlotDataHelper):
             else:
                 tick_labels = Total_Generation_Stack_Out.index
             
-            mplt.create_bar_plot(Total_Generation_Stack_Out, color=self.PLEXOS_color_dict,
+            mplt.barplot(Total_Generation_Stack_Out, color=self.PLEXOS_color_dict,
                                  stacked=True, custom_tick_labels=tick_labels, edgecolor='black', 
                                  linewidth='0.1')
 
@@ -431,7 +431,7 @@ class MPlot(PlotDataHelper):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            mplt.create_bar_plot(Total_Generation_Stack_Out, stacked=True, 
+            mplt.barplot(Total_Generation_Stack_Out, stacked=True, 
                                  color=self.PLEXOS_color_dict, edgecolor='black', 
                                  linewidth='0.1')
             
@@ -729,7 +729,7 @@ class MPlot(PlotDataHelper):
                 else:
                     stack = True
 
-                mplt.create_bar_plot(month_gen, color=self.PLEXOS_color_dict,
+                mplt.barplot(month_gen, color=self.PLEXOS_color_dict,
                                      stacked=stack, edgecolor='black', linewidth='0.1',
                                      n=i)
 

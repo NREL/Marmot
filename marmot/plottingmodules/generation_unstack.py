@@ -5,14 +5,13 @@ This code creates generation non-stacked line plots.
 @author: Daniel Levie
 """
 import logging
-import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import matplotlib as mpl
-from matplotlib.patches import Patch
 import marmot.config.mconfig as mconfig
 
+from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
@@ -157,16 +156,15 @@ class MPlot(PlotDataHelper):
             self.logger.info(f"Zone = {zone_input}")
         
             excess_axs = grid_size - plot_number
-        
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((self.x*xdimension),(self.y*ydimension)), sharey=True, squeeze=False)
+            
+            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
-            axs = axs.ravel()
             data_tables = []
-            unique_tech_names = []
 
             for i, scenario in enumerate(all_scenarios):
                 self.logger.info(f"Scenario = {scenario}")
-                # Pump_Load = pd.Series() # Initiate pump load
 
                 try:
                     Stacked_Gen = self["generator_Generation"].get(scenario).copy()
@@ -263,20 +261,18 @@ class MPlot(PlotDataHelper):
                     Unserved_Energy = Unserved_Energy[start_date : end_date]
                     Pump_Load = Pump_Load[start_date : end_date]
 
-                elif prop == 'Date Range':
-                	self.logger.info(f"Plotting specific date range: \
-                	{str(start_date_range)} to {str(end_date_range)}")
-
-	                Stacked_Gen = Stacked_Gen[start_date_range : end_date_range]
-	                Load = Load[start_date_range : end_date_range]
-	                Unserved_Energy = Unserved_Energy[start_date_range : end_date_range]
-
+                elif pd.notna(start_date_range):
+                    self.logger.info(f"Plotting specific date range: \
+                    {str(start_date_range)} to {str(end_date_range)}")
+                    Stacked_Gen = Stacked_Gen[start_date_range : end_date_range]
+                    Load = Load[start_date_range : end_date_range]
+                    Unserved_Energy = Unserved_Energy[start_date_range : end_date_range]
                 else:
                     self.logger.info("Plotting graph for entire timeperiod")
                 
                 # unitconversion based off peak generation hour, only checked once 
                 if i == 0:
-                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Stacked_Gen.max()))
+                    unitconversion = self.capacity_energy_unitconversion(max(Stacked_Gen.max()))
                 Stacked_Gen = Stacked_Gen/unitconversion['divisor']
                 Unserved_Energy = Unserved_Energy/unitconversion['divisor']
                 
@@ -286,65 +282,41 @@ class MPlot(PlotDataHelper):
                 data_tables.append(data_table)
                 
                 for column in Stacked_Gen.columns:
-                    axs[i].plot(Stacked_Gen.index.values,Stacked_Gen[column], linewidth=2,
-                       color=self.PLEXOS_color_dict.get(column,'#333333'),label=column)
+                    axs[i].plot(Stacked_Gen.index.values, Stacked_Gen[column], 
+                                linewidth=2,
+                                color=self.PLEXOS_color_dict.get(column,'#333333'),
+                                label=column)
 
                 if (Unserved_Energy == 0).all() == False:
-                    lp2 = axs[i].plot(Unserved_Energy, color='#DD0200')
+                    axs[i].plot(Unserved_Energy, color='#DD0200',
+                                label='Unserved Energy')
 
-                axs[i].spines['right'].set_visible(False)
-                axs[i].spines['top'].set_visible(False)
-                axs[i].tick_params(axis='y', which='major', length=5, width=1)
-                axs[i].tick_params(axis='x', which='major', length=5, width=1)
                 axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[i].margins(x=0.01)
-                PlotDataHelper.set_plot_timeseries_format(axs,i)
+                mplt.set_plot_timeseries_format(n=i)
 
-                # create list of gen technologies
-                l1 = Stacked_Gen.columns.tolist()
-                unique_tech_names.extend(l1)
-            
             if not data_tables:
                 self.logger.warning(f'No generation in {zone_input}')
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            
-            # create handles list of unique tech names then order
-            labels = np.unique(np.array(unique_tech_names)).tolist()
-            labels.sort(key = lambda i:self.ordered_gen.index(i))
-            
-            # create custom gen_tech legend
-            handles = []
-            for tech in labels:
-                gen_tech_legend = Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0)
-                handles.append(gen_tech_legend)
-            
-            if (Unserved_Energy == 0).all() == False:
-                handles.append(lp2[0])
-                labels += ['Unserved Energy']
-                
 
-            axs[grid_size-1].legend(reversed(handles),reversed(labels),
-                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
-                                    facecolor='inherit', frameon=True)
-            
+            data_table_out = pd.concat(data_tables)
+
             # add facet labels
-            self.add_facet_labels(fig1)
-                        
-            fig1.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
+                                  alternative_ylabels = self.ylabels)
+            # Add legend
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # Remove extra supl
+            if excess_axs != 0:
+                mplt.remove_excess_axs(excess_axs,grid_size)
+            # Add title
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
             labelpad = 40
-            plt.ylabel(f"Generation ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=labelpad)
-            
-             #Remove extra axis
-            if excess_axs != 0:
-                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
-
-            data_table_out = pd.concat(data_tables)
-                
-            outputs[zone_input] = {'fig':fig1, 'data_table':data_table_out}
+            plt.ylabel(f"Generation ({unitconversion['units']})", 
+                        color='black', rotation='vertical', labelpad=labelpad)
+ 
+            outputs[zone_input] = {'fig':fig, 'data_table':data_table_out}
         return outputs
