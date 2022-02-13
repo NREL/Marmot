@@ -703,12 +703,11 @@ class MPlot(PlotDataHelper):
             unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
             
-            fig, ax= plt.subplots(figsize=(self.x,self.y))
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
             Total_Curtailment_out.plot.bar(stacked=True,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
                              edgecolor='black', linewidth='0.1',ax=ax)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
             ax.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
@@ -717,10 +716,8 @@ class MPlot(PlotDataHelper):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Curtailment_out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
+            mplt.set_barplot_xticklabels(tick_labels)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)

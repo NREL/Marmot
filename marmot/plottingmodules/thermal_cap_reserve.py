@@ -13,7 +13,6 @@ import matplotlib.pyplot as plt
 import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
-import marmot.plottingmodules.plotutils.plot_library as plotlib
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)

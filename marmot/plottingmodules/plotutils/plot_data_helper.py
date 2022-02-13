@@ -6,12 +6,10 @@
 
 import os
 import math
-import textwrap
 import logging
 import datetime as dt
 import pandas as pd
 import numpy as np
-import matplotlib.dates as mdates
 import functools
 import concurrent.futures
 from typing import Tuple
@@ -313,148 +311,6 @@ class PlotDataHelper(dict):
             xdimension = 2
             ydimension = 2
         return xdimension,ydimension
-
-    def add_facet_labels(self, fig, 
-                         xlabels_bottom: bool = True,
-                         alternative_xlabels: list = None,
-                         alternative_ylabels: list = None,
-                         **kwargs) -> None:
-        """Adds labels to outside of Facet plot.
-
-        Args:
-            fig (matplotlib.fig): matplotlib figure.
-            xlabels_bottom (bool, optional): If True labels are placed under bottom. 
-                Defaults to True.
-            alternative_xlabels (list, optional): Alteranative xlabels. 
-                Defaults to None.
-            alternative_ylabels (list, optional): Alteranative ylabels. 
-                Defaults to None.
-        """
-        font_defaults = mconfig.parser("font_settings")
-
-        if alternative_xlabels:
-            xlabel = alternative_xlabels
-        else:
-            xlabel = self.xlabels
-
-        if alternative_ylabels:
-            ylabel = alternative_ylabels
-        else:
-            ylabel = self.ylabels
-
-        all_axes = fig.get_axes()
-        j=0
-        k=0
-        for ax in all_axes:
-            if xlabels_bottom:
-                if ax.is_last_row():
-                    try:
-                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
-                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
-                    except IndexError:
-                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
-                        continue
-                    j=j+1
-            else:
-                if ax.is_first_row():
-                    try:
-                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
-                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
-                        ax.xaxis.set_label_position('top')
-                    except IndexError:
-                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
-                        continue
-                    j=j+1
-            if ax.is_first_col():
-                try:
-                    ax.set_ylabel(ylabel=(ylabel[k]), color='black', rotation='vertical', 
-                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
-                except IndexError:
-                    logger.warning(f"Warning: ylabel missing for subplot y{k}")
-                    continue
-                k=k+1
-
-
-
-    @staticmethod
-    def set_plot_timeseries_format(axs, n: int = 0,
-                                   minticks: int = mconfig.parser("axes_options","x_axes_minticks"),
-                                   maxticks: int = mconfig.parser("axes_options","x_axes_maxticks")
-                                   ) -> None:
-        """Auto sets timeseries format.
-
-        Args:
-            axs (matplotlib.axes): matplotlib.axes
-            n (int, optional): Counter for facet plot. Defaults to 0.
-            minticks (int, optional): Minimum tick marks. 
-                Defaults to mconfig.parser("axes_options","x_axes_minticks").
-            maxticks (int, optional): Max tick marks. 
-                Defaults to mconfig.parser("axes_options","x_axes_maxticks").
-        """
-        locator = mdates.AutoDateLocator(minticks=minticks, maxticks=maxticks)
-        formatter = mdates.ConciseDateFormatter(locator)
-        formatter.formats[2] = '%d\n %b'
-        formatter.zero_formats[1] = '%b\n %Y'
-        formatter.zero_formats[2] = '%d\n %b'
-        formatter.zero_formats[3] = '%H:%M\n %d-%b'
-        formatter.offset_formats[3] = '%b %Y'
-        formatter.show_offset = False
-        axs[n].xaxis.set_major_locator(locator)
-        axs[n].xaxis.set_major_formatter(formatter)
-
-    @staticmethod
-    def set_barplot_xticklabels(labels: list, ax, 
-                                rotate: bool = mconfig.parser("axes_label_options", "rotate_x_labels"),
-                                num_labels: int = mconfig.parser("axes_label_options", "rotate_at_num_labels"),
-                                angle: float = mconfig.parser("axes_label_options", "rotation_angle"),
-                                **kwargs) -> None:
-        """Set the xticklabels on bar plots and determine whether they will be rotated.
-
-        Wrapper around matplotlib set_xticklabels
-        
-        Checks to see if the number of labels is greater than or equal to the default
-        number set in config.yml. If this is the case, rotate
-        specify whether or not to rotate the labels and angle specifies what angle they should 
-        be rotated to.
-
-        Args:
-            labels (list): Labels to apply to xticks
-            ax (matplotlib.axes): matplotlib.axes
-            rotate (bool, optional): rotate labels True/False. 
-                Defaults to mconfig.parser("axes_label_options", "rotate_x_labels").
-            num_labels (int, optional): Number of labels to rotate at. 
-                Defaults to mconfig.parser("axes_label_options", "rotate_at_num_labels").
-            angle (float, optional): Angle of rotation. 
-                Defaults to mconfig.parser("axes_label_options", "rotation_angle").
-        """
-        if rotate:
-            if (len(labels)) >= num_labels:
-                ax.set_xticklabels(labels, rotation=angle, ha="right", **kwargs)
-            else:
-                labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
-                ax.set_xticklabels(labels, rotation=0, **kwargs)
-        else:
-            labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
-            ax.set_xticklabels(labels, rotation=0, **kwargs)
-
-    @staticmethod
-    def remove_excess_axs(axs, excess_axs: int, grid_size: int) -> None:
-        """Removes excess axes spins + tick marks.
-
-        Args:
-            axs (matplotlib.axes): matplotlib.axes
-            excess_axs (int): # of excess axes.
-            grid_size (int): Size of facet grid.
-        """
-        while excess_axs > 0:
-            axs[(grid_size)-excess_axs].spines['right'].set_visible(False)
-            axs[(grid_size)-excess_axs].spines['left'].set_visible(False)
-            axs[(grid_size)-excess_axs].spines['bottom'].set_visible(False)
-            axs[(grid_size)-excess_axs].spines['top'].set_visible(False)
-            axs[(grid_size)-excess_axs].tick_params(axis='both',
-                                                    which='both',
-                                                    colors='white')
-            excess_axs-=1
 
     @staticmethod
     def get_sub_hour_interval_count(df: pd.DataFrame) -> int:

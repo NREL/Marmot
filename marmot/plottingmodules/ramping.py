@@ -304,21 +304,18 @@ class MPlot(PlotDataHelper):
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
-                        
-            fig2, ax = plt.subplots(figsize=(self.x,self.y))
+
+            mplt = PlotLibrary()       
+            fig2, ax = mplt.get_figure()
             cap_started_all_scenarios.T.plot.bar(stacked = False,
                                   color = self.color_list,edgecolor='black', linewidth='0.1',ax=ax)
 
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
             ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)",  color='black', rotation='vertical')
             
             # Set x-tick labels 
             tick_labels = cap_started_all_scenarios.columns
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
+            mplt.set_barplot_xticklabels(tick_labels)
             
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
             ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
