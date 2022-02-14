@@ -28,8 +28,10 @@ axes_options = mconfig.parser("axes_options")
 class SetupSubplot():
 
     def __init__(self, ydimension=1, xdimension=1, 
-                 figsize: Tuple[int, int] = (mconfig.parser("figure_size","xdimension"), 
-                                            mconfig.parser("figure_size","ydimension")), 
+                 figsize: Tuple[int, int] = (mconfig.parser("figure_size",
+                                                            "xdimension"), 
+                                            mconfig.parser("figure_size",
+                                                           "ydimension")), 
                  sharey=False, squeeze=True, ravel_axs=False, **kwargs):
         
 
@@ -83,7 +85,8 @@ class SetupSubplot():
     def add_legend(self, handles=None, labels=None, 
                         loc=mconfig.parser("axes_options", "legend_position"),
                         ncol=mconfig.parser("axes_options", "legend_columns"),
-                        reverse_legend=False, sort_by=None, bbox_to_anchor=None, **kwargs):
+                        reverse_legend=False, sort_by=None, bbox_to_anchor=None, 
+                        **kwargs):
     
         loc_anchor = {'lower right': ('lower left', (1.05, 0.0)),
                         'center right': ('center left', (1.05, 0.5)),
@@ -134,8 +137,10 @@ class SetupSubplot():
                     **kwargs)
 
     def set_plot_timeseries_format(self, n: int = 0,
-                                minticks: int = mconfig.parser("axes_options","x_axes_minticks"),
-                                maxticks: int = mconfig.parser("axes_options","x_axes_maxticks")
+                                minticks: int = mconfig.parser("axes_options",
+                                                                "x_axes_minticks"),
+                                maxticks: int = mconfig.parser("axes_options",
+                                                                "x_axes_maxticks")
                                 ) -> None:
         """Auto sets timeseries format.
 
@@ -214,8 +219,8 @@ class SetupSubplot():
 
     def add_facet_labels(self, 
                          xlabels_bottom: bool = True,
-                         alternative_xlabels: list = None,
-                         alternative_ylabels: list = None,
+                         xlabels: list = None,
+                         ylabels: list = None,
                          **kwargs) -> None:
         """Adds labels to outside of Facet plot.
 
@@ -223,22 +228,12 @@ class SetupSubplot():
             fig (matplotlib.fig): matplotlib figure.
             xlabels_bottom (bool, optional): If True labels are placed under bottom. 
                 Defaults to True.
-            alternative_xlabels (list, optional): Alteranative xlabels. 
+            xlabels (list, optional): labels. 
                 Defaults to None.
-            alternative_ylabels (list, optional): Alteranative ylabels. 
+            ylabels (list, optional): ylabels. 
                 Defaults to None.
         """
         font_settings = mconfig.parser("font_settings")
-
-        if alternative_xlabels:
-            xlabel = alternative_xlabels
-        else:
-            xlabel = self.xlabels
-
-        if alternative_ylabels:
-            ylabel = alternative_ylabels
-        else:
-            ylabel = self.ylabels
 
         if isinstance(self.axs, Axes):
             all_axes = [self.axs]
@@ -250,8 +245,9 @@ class SetupSubplot():
             if xlabels_bottom:
                 if ax.is_last_row():
                     try:
-                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
-                                    fontsize=font_settings['axes_label_size']-2, **kwargs)
+                        ax.set_xlabel(xlabel=(xlabels[j]), color='black', 
+                                    fontsize=font_settings['axes_label_size']-2,
+                                    **kwargs)
                     except IndexError:
                         logger.warning(f"Warning: xlabel missing for subplot x{j}")
                         continue
@@ -259,8 +255,9 @@ class SetupSubplot():
             else:
                 if ax.is_first_row():
                     try:
-                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
-                                    fontsize=font_settings['axes_label_size']-2, **kwargs)
+                        ax.set_xlabel(xlabel=(xlabels[j]), color='black', 
+                                    fontsize=font_settings['axes_label_size']-2,
+                                    **kwargs)
                         ax.xaxis.set_label_position('top')
                     except IndexError:
                         logger.warning(f"Warning: xlabel missing for subplot x{j}")
@@ -268,8 +265,10 @@ class SetupSubplot():
                     j=j+1
             if ax.is_first_col():
                 try:
-                    ax.set_ylabel(ylabel=(ylabel[k]), color='black', rotation='vertical', 
-                                    fontsize=font_settings['axes_label_size']-2, **kwargs)
+                    ax.set_ylabel(ylabel=(ylabels[k]), color='black', 
+                                  rotation='vertical', 
+                                  fontsize=font_settings['axes_label_size']-2,
+                                  **kwargs)
                 except IndexError:
                     logger.warning(f"Warning: ylabel missing for subplot y{k}")
                     continue
@@ -379,7 +378,7 @@ class PlotLibrary(SetupSubplot):
             color = color
         else:
             color=None
-
+        
         ax.plot(plot_data, linewidth=1, 
                 linestyle=linestyle,
                 color=color,

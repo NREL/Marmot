@@ -205,8 +205,8 @@ class MPlot(PlotDataHelper):
             #Remove extra axes
             mplt.remove_excess_axs(excess_axs,grid_size)
             # add facet labels
-            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
-                                  alternative_ylabels = self.ylabels)
+            mplt.add_facet_labels(xlabels=self.xlabels,
+                                  ylabels = self.ylabels)
             if hist == True:
                 if pd.notna(prop):
                     prop_name = 'All Lines'
@@ -1606,8 +1606,8 @@ class MPlot(PlotDataHelper):
 
             # if plotting all scenarios add facet labels
             if plot_scenario == True:
-                mplt.add_facet_labels(alternative_xlabels=self.xlabels,
-                                      alternative_ylabels = self.ylabels)
+                mplt.add_facet_labels(xlabels=self.xlabels,
+                                      ylabels = self.ylabels)
 
             #Remove extra axes
             mplt.remove_excess_axs(excess_axs, grid_size)
@@ -2130,8 +2130,8 @@ class MPlot(PlotDataHelper):
                 net_exports = net_exports.set_index([scenario_names], append=True)
                 net_exports_all.append(net_exports)
 
-            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
-                                  alternative_ylabels = self.ylabels)
+            mplt.add_facet_labels(xlabels=self.xlabels,
+                                  ylabels = self.ylabels)
             mplt.add_legend()
             #Remove extra axes
             mplt.remove_excess_axs(excess_axs,grid_size)

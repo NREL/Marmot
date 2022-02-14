@@ -304,8 +304,8 @@ class MPlot(PlotDataHelper):
             data_table_out = pd.concat(data_tables)
 
             # add facet labels
-            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
-                                  alternative_ylabels = self.ylabels)
+            mplt.add_facet_labels(xlabels=self.xlabels,
+                                  ylabels = self.ylabels)
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             # Remove extra supl

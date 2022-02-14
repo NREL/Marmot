@@ -189,8 +189,8 @@ class MPlot(PlotDataHelper):
                     axs[j,i].margins(x=0.01)
                     mplt.set_plot_timeseries_format(n=(j,i))
 
-            mplt.add_facet_labels(xlabels_bottom=False, alternative_xlabels=self.Scenarios,
-                                    alternative_ylabels=tech_list_sort)
+            mplt.add_facet_labels(xlabels_bottom=False, xlabels=self.Scenarios,
+                                    ylabels=tech_list_sort)
             
             if mconfig.parser("plot_title_as_region"):
                 plt.title(zone_input)
@@ -649,8 +649,8 @@ class MPlot(PlotDataHelper):
                                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
             # Add facet labels
-            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
-                                  alternative_ylabels = self.ylabels)
+            mplt.add_facet_labels(xlabels=self.xlabels,
+                                  ylabels = self.ylabels)
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             # Remove extra axes

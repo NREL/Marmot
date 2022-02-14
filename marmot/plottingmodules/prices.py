@@ -821,8 +821,8 @@ class MPlot(PlotDataHelper):
             # Remove extra axes
             mplt.remove_excess_axs(excess_axs,grid_size)
             # Add Facet Labels
-            mplt.add_facet_labels(alternative_xlabels=self.xlabels,
-                                  alternative_ylabels = self.ylabels)
+            mplt.add_facet_labels(xlabels=self.xlabels,
+                                  ylabels = self.ylabels)
             plt.ylabel('Occurrence',  color='black', rotation='vertical', 
                        labelpad=60, fontsize=24)
             plt.title(node)
