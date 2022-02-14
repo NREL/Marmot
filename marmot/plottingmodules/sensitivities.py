@@ -9,18 +9,12 @@ import os
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib.patches import Patch
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, InputSheetError)
 
-
-custom_legend_elements = [Patch(facecolor='#DD0200',
-                            alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')]
 
 class MPlot(PlotDataHelper):
     """sensitivities MPlot class.
@@ -52,7 +46,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
@@ -251,7 +244,6 @@ class MPlot(PlotDataHelper):
                 axs[0].tick_params(axis='x', which='major', length=5, width=1)
                 axs[0].set_ylabel('Generation (MW)',  color='black', rotation='vertical')
                 axs[0].set_xlabel(timezone,  color='black', rotation='horizontal')
-                axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].margins(x=0.01)
                 PlotDataHelper.set_plot_timeseries_format(axs)
                 handles, labels = axs[0].get_legend_handles_labels()

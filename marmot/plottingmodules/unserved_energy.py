@@ -9,7 +9,6 @@ plots and is called from marmot_plot_main.py
 
 import logging
 import pandas as pd
-import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
@@ -46,9 +45,7 @@ class MPlot(PlotDataHelper):
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)        
 
     def unserved_energy_timeseries(self, timezone: str = "",
                                    start_date_range: str = None, 
@@ -137,8 +134,6 @@ class MPlot(PlotDataHelper):
             ax.set_ylabel(f"Unserved Energy ({unitconversion['units']})", 
                           color='black', rotation='vertical')
             ax.set_ylim(bottom=0)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             mplt.set_plot_timeseries_format()
             if mconfig.parser("plot_title_as_region"):
@@ -245,8 +240,6 @@ class MPlot(PlotDataHelper):
 
             ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)", 
                           color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.xaxis.set_visible(False)
             ax.margins(x=0.01)
             
@@ -361,8 +354,6 @@ class MPlot(PlotDataHelper):
             mplt.add_legend()
             ax.set_ylabel(f"Average Diurnal Unserved Energy ({unitconversion['units']})", 
                           color='black', rotation='vertical')            
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)            
             ax.set_ylim(bottom=0)
 

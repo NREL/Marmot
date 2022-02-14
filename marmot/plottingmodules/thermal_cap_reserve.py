@@ -10,7 +10,6 @@ available but not committed (i.e in reserve)
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
@@ -47,9 +46,7 @@ class MPlot(PlotDataHelper):
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)        
         
     def thermal_cap_reserves(self, start_date_range: str = None, 
                              end_date_range: str = None, **_):
@@ -152,7 +149,6 @@ class MPlot(PlotDataHelper):
                 mplt.stackplot(thermal_reserve, color_dict=self.PLEXOS_color_dict,
                                 labels=thermal_reserve.columns, n=i)
 
-                axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[i].margins(x=0.01)
                 mplt.set_plot_timeseries_format(n=i)
             

@@ -13,8 +13,7 @@ import os
 import logging
 import pandas as pd
 import datetime as dt
-import matplotlib as mpl
-from matplotlib.patches import Patch
+import matplotlib.ticker as mtick
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
@@ -22,10 +21,6 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             MissingZoneData)
 
-
-custom_legend_elements = [Patch(facecolor='#DD0200',
-                            alpha=0.5, edgecolor='#DD0200',
-                         label='Unserved Energy')]
 
 class MPlot(PlotDataHelper):
     """hydro MPlot class.
@@ -56,10 +51,7 @@ class MPlot(PlotDataHelper):
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
         
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)        
 
     def hydro_continent_net_load(self, start_date_range: str = None, 
                              end_date_range: str = None, **_):
@@ -141,9 +133,8 @@ class MPlot(PlotDataHelper):
 
             ax.set_ylabel('In Region Hydro Generation (MW)',  color='black', rotation='vertical')
             ax.set_xlabel('Continent Net Load (MW)',  color='black', rotation='horizontal')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                                lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            mplt.set_yaxis_major_tick_format()
+            ax.xaxis.set_major_formatter(mtick.StrMethodFormatter('{x:,.0f}'))
             ax.margins(x=0.01)
             # Add title
             if mconfig.parser("plot_title_as_region"):
@@ -248,8 +239,7 @@ class MPlot(PlotDataHelper):
 
                 ax.set_ylabel('Generation (MW)',  color='black', rotation='vertical')
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
-                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                                    lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                mplt.set_yaxis_major_tick_format()
                 ax.margins(x=0.01)
 
                 mplt.set_plot_timeseries_format()
@@ -267,7 +257,6 @@ class MPlot(PlotDataHelper):
                                           f"_Hydro_And_Net_Load_{self.Scenarios[0]}_period_{str(wk)}.csv"))
                 del fig
                 del Data_Table_Out
-                mpl.pyplot.close('all')
             #end weekly loop
             #Scatter plot
             
@@ -277,9 +266,8 @@ class MPlot(PlotDataHelper):
 
             ax.set_ylabel('In-Region Hydro Generation (MW)',  color='black', rotation='vertical')
             ax.set_xlabel('In-Region Net Load (MW)',  color='black', rotation='horizontal')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                            lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.xaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
+            mplt.set_yaxis_major_tick_format()
+            ax.xaxis.set_major_formatter(mtick.StrMethodFormatter('{x:,.0f}'))
             ax.margins(x=0.01)
 
             mplt.add_legend(reverse_legend=True)

@@ -9,9 +9,6 @@ This module creates plots are related to the curtailment of generators.
 import os
 import logging
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib as mpl
-import matplotlib.ticker as mtick
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
@@ -50,9 +47,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
                     
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
         
         
@@ -198,7 +192,7 @@ class MPlot(PlotDataHelper):
 
             ax.set_xlabel('Hours',  color='black', rotation='horizontal')
 
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            mplt.set_yaxis_major_tick_format()
             ax.margins(x=0.01)
             #ax.set_xlim(0, 9490)
             ax.set_xlim(0,x_axis_lim)
@@ -559,14 +553,12 @@ class MPlot(PlotDataHelper):
                 tick_labels = Total_Curtailment_out.index
 
             mplt.barplot(Total_Curtailment_out, 
-                                 color=self.PLEXOS_color_dict,
-                                 stacked=True, edgecolor='black', 
-                                 linewidth='0.1',
-                                 custom_tick_labels=tick_labels)
+                        color=self.PLEXOS_color_dict,
+                        stacked=True,
+                        custom_tick_labels=tick_labels)
 
             ax.set_ylabel(f"Total Curtailment ({unitconversion['units']}h)", 
                             color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             # Add legend
             mplt.add_legend(reverse_legend=True)
@@ -707,9 +699,8 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
             Total_Curtailment_out.plot.bar(stacked=True,
                              color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Curtailment_out.columns],
-                             edgecolor='black', linewidth='0.1',ax=ax)
+                             ax=ax)
             ax.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             # Set x-tick labels 
             if len(self.custom_xticklabels) > 1:
@@ -874,11 +865,9 @@ class MPlot(PlotDataHelper):
         mplt = PlotLibrary(figsize=(9,6))
         fig, ax = mplt.get_figure()
 
-        mplt.barplot(Total_Curtailment_Out_perc, 
-                             edgecolor='black', linewidth='0.1')
+        mplt.barplot(Total_Curtailment_Out_perc)
 
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
-        ax.yaxis.set_major_formatter(mtick.PercentFormatter(1,decimals = 0))         #adds % to y axis data
 
         unitconversion = PlotDataHelper.capacity_energy_unitconversion(Total_Curt.values.max())
         Total_Curt = Total_Curt/unitconversion['divisor'] 
@@ -1007,6 +996,8 @@ class MPlot(PlotDataHelper):
                 ax.plot(RE_Curtailment_DC[column], linewidth=2, 
                         color=colour_dict[column],
                         label=column)
+
+            mplt.set_yaxis_major_tick_format()
             # Add legend
             mplt.add_legend()
             # Set time ticks
@@ -1014,7 +1005,6 @@ class MPlot(PlotDataHelper):
             ax.set_ylabel(f"Average Diurnal Curtailment ({unitconversion['units']})", 
                             color='black', rotation='vertical')
             
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             ax.set_ylim(bottom=0)
             # Add title

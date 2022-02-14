@@ -8,8 +8,6 @@ This module creates bar plot of the total volume of generator starts in MW,GW,et
 
 import logging
 import pandas as pd
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
@@ -47,10 +45,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
     
     def capacity_started(self, start_date_range: str = None, 
                          end_date_range: str = None, **_):
@@ -188,13 +182,10 @@ class MPlot(PlotDataHelper):
             
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
-            mplt.barplot(cap_started_all_scenarios, color=self.color_list,
-                         edgecolor='black', linewidth='0.1')
+            mplt.barplot(cap_started_all_scenarios, color=self.color_list)
 
             ax.set_ylabel(f"Capacity Started ({unitconversion['units']}-starts)", 
                           color='black', rotation='vertical')
-
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             mplt.add_legend()
             if mconfig.parser("plot_title_as_region"):
@@ -316,7 +307,6 @@ class MPlot(PlotDataHelper):
             tick_labels = cap_started_all_scenarios.columns
             mplt.set_barplot_xticklabels(tick_labels)
             
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.legend(loc='lower left',bbox_to_anchor=(1,0),
                           facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):

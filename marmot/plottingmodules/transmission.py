@@ -11,7 +11,8 @@ import logging
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib as mpl
+import matplotlib.cm as cm
+import matplotlib.colors as mcolors
 import matplotlib.dates as mdates
 
 import marmot.config.mconfig as mconfig
@@ -51,7 +52,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.font_defaults = mconfig.parser("font_settings")
         
 
@@ -1591,7 +1591,6 @@ class MPlot(PlotDataHelper):
 
                         mplt.lineplot(single_parent,column,label=column,n=n)
                         axs[n].set_title(parent)
-                        axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                         axs[n].margins(x=0.01)
                         mplt.set_plot_timeseries_format(n=n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
@@ -1721,10 +1720,10 @@ class MPlot(PlotDataHelper):
         #Remove extra axes
         mplt.remove_excess_axs(excess_axs,grid_size)
 
-        cmap = mpl.cm.inferno
-        norm = mpl.colors.Normalize(vmin=0, vmax=max(max_flow_group))
+        cmap = cm.inferno
+        norm = mcolors.Normalize(vmin=0, vmax=max(max_flow_group))
         cax = plt.axes([0.90, 0.1, 0.035, 0.8])
-        fig.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
+        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
         cax=cax, label='Total Net Interchange [GWh]')
         plt.xlabel('To Region', color='black', rotation='horizontal',
                    labelpad=40)
@@ -1856,7 +1855,6 @@ class MPlot(PlotDataHelper):
             else:
                 for column in all_scenarios:
                     mplt.lineplot(all_scenarios,column,color_dict=color_dict,label=column)
-                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
                 mplt.set_plot_timeseries_format(minticks=6,maxticks=12)
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
@@ -1952,8 +1950,6 @@ class MPlot(PlotDataHelper):
                 ax.set_ylabel(f'Net exports ({unitconversion["units"]})', color='black', 
                               rotation='vertical')
                 ax.set_xlabel(timezone, color='black', rotation='horizontal')
-                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
                 ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
                           linestyle=':')
@@ -2115,8 +2111,6 @@ class MPlot(PlotDataHelper):
                     mplt.lineplot(net_exports, column=column, label=column,
                                              n=n, linestyle=linestyle)
 
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                                 lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
                 #Add horizontal line at 0.
                 axs[n].hlines(y=0, xmin=axs[n].get_xlim()[0], xmax=axs[n].get_xlim()[1],
@@ -2538,7 +2532,6 @@ class MPlot(PlotDataHelper):
     #         ax.spines['top'].set_visible(False)
     #         ax.tick_params(axis='y', which='major', length=5, width=1)
     #         ax.tick_params(axis='x', which='major', length=5, width=1)
-    #         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     #         ax.margins(x=0.01)
 
     #         locator = mdates.AutoDateLocator(minticks=6, maxticks=12)

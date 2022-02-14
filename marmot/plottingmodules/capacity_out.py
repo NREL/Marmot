@@ -11,9 +11,7 @@ import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import matplotlib.dates as mdates
-import marmot.plottingmodules.plotutils.plot_library as plotlib
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
@@ -52,10 +50,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-
 
     def capacity_out_stack(self, start_date_range: str = None, 
                              end_date_range: str = None, **_):
@@ -161,7 +155,7 @@ class MPlot(PlotDataHelper):
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
             # Add legend
-            mplt.add_legend()
+            mplt.add_legend(reverse_legend=True)
             plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', 
                        rotation='vertical', labelpad=30)
             # Looks better for a one scenario plot
@@ -254,7 +248,6 @@ class MPlot(PlotDataHelper):
                     axs[i].spines['top'].set_visible(False)
                     axs[i].tick_params(axis='y', which='major', length=5, width=1)
                     axs[i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                     axs[i].margins(x=0.01)
                     axs[i].xaxis.set_major_locator(locator)
                     axs[i].xaxis.set_major_formatter(formatter)
@@ -271,7 +264,6 @@ class MPlot(PlotDataHelper):
                     axs.spines['top'].set_visible(False)
                     axs.tick_params(axis='y', which='major', length=5, width=1)
                     axs.tick_params(axis='x', which='major', length=5, width=1)
-                    axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                     axs.margins(x=0.01)
                     axs.xaxis.set_major_locator(locator)
                     axs.xaxis.set_major_formatter(formatter)

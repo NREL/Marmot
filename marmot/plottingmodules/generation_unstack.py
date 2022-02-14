@@ -8,7 +8,6 @@ import logging
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 import marmot.config.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
@@ -47,9 +46,6 @@ class MPlot(PlotDataHelper):
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         
@@ -137,15 +133,6 @@ class MPlot(PlotDataHelper):
         if not facet:
             xdimension = 1
             ydimension = 1
-
-        # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
-        if xdimension > 1:
-            font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-            plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-            plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-            plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-            plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-            plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
         
         grid_size = xdimension*ydimension
             
@@ -161,6 +148,16 @@ class MPlot(PlotDataHelper):
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
+
+            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+            if xdimension > 1:
+                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
+                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
+                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
+                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+                plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
+
             data_tables = []
 
             for i, scenario in enumerate(all_scenarios):
@@ -291,7 +288,7 @@ class MPlot(PlotDataHelper):
                     axs[i].plot(Unserved_Energy, color='#DD0200',
                                 label='Unserved Energy')
 
-                axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                mplt.set_yaxis_major_tick_format(n=i)
                 axs[i].margins(x=0.01)
                 mplt.set_plot_timeseries_format(n=i)
 

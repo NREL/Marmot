@@ -7,7 +7,6 @@ This module creates energy storage plots.
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
@@ -44,9 +43,7 @@ class MPlot(PlotDataHelper):
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)        
 
     def storage_volume(self, timezone: str = "", 
                        start_date_range: str = None, 
@@ -181,7 +178,7 @@ class MPlot(PlotDataHelper):
 
                 axs[0].set_ylabel('Head Storage Volume (GWh)', 
                                   color='black', rotation='vertical')
-                axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                mplt.set_yaxis_major_tick_format(n=0)
                 axs[0].margins(x=0.01)
                 mplt.set_plot_timeseries_format(n=0)
                 axs[0].set_ylim(ymin = 0)
@@ -197,10 +194,11 @@ class MPlot(PlotDataHelper):
                                   color='black', rotation='vertical')
                 axs[1].set_xlabel(timezone,  color='black', 
                                     rotation='horizontal')
-                axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                mplt.set_yaxis_major_tick_format(n=1)
                 axs[1].margins(x=0.01)
                 mplt.set_plot_timeseries_format(n=1)
             
+            mplt.set_yaxis_major_tick_format()
             axs[0].axhline(y=max_volume, linestyle=':', label='Max Volume')
             axs[0].legend(loc='lower left', bbox_to_anchor = (1.15,0))
             axs[1].legend(loc='lower left', bbox_to_anchor = (1.15,0.2))

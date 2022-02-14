@@ -9,9 +9,6 @@ This module plots figures of total generation for a year, month etc.
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib.patches import Patch
-import matplotlib.ticker as mtick
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
@@ -19,14 +16,6 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             MissingZoneData)
 
-
-custom_legend_elements = Patch(facecolor='#DD0200',
-                               alpha=0.5, edgecolor='#DD0200',
-                               label='Unserved Energy')
-
-custom_legend_elements_month = Patch(facecolor='#DD0200',alpha=0.7,
-                                     edgecolor='#DD0200',
-                                     label='Unserved_Energy')
 
 class MPlot(PlotDataHelper):
     """total_generation MPlot class.
@@ -75,12 +64,7 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
-
         
     def total_gen(self, start_date_range: str = None, 
                   end_date_range: str = None, **_):
@@ -269,13 +253,10 @@ class MPlot(PlotDataHelper):
                 tick_labels = Total_Generation_Stack_Out.index
             
             mplt.barplot(Total_Generation_Stack_Out, color=self.PLEXOS_color_dict,
-                                 stacked=True, custom_tick_labels=tick_labels, edgecolor='black', 
-                                 linewidth='0.1')
+                         stacked=True, custom_tick_labels=tick_labels)
 
             ax.set_ylabel(f"Total Generation ({unitconversion['units']}h)", 
                           color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             for n, scenario in enumerate(self.Scenarios):
 
@@ -432,11 +413,7 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(Total_Generation_Stack_Out, stacked=True, 
-                                 color=self.PLEXOS_color_dict, edgecolor='black', 
-                                 linewidth='0.1')
-            
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                         color=self.PLEXOS_color_dict)
             
             # Set x-tick labels 
             tick_labels = Total_Generation_Stack_Out.index
@@ -556,14 +533,6 @@ class MPlot(PlotDataHelper):
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
         excess_axs = grid_size - plot_number
-        
-        if xdimension > 1:
-            font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-            plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-            plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-            plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-            plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-            plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
          
         for zone_input in self.Zones:
             
@@ -717,6 +686,14 @@ class MPlot(PlotDataHelper):
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
 
+            if xdimension > 1:
+                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
+                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
+                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
+                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
+                plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
+
             for i, scenario in enumerate(self.Scenarios):
 
                 month_gen = Gen_Out.xs(scenario, level="Scenario")
@@ -730,17 +707,14 @@ class MPlot(PlotDataHelper):
                     stack = True
 
                 mplt.barplot(month_gen, color=self.PLEXOS_color_dict,
-                                     stacked=stack, edgecolor='black', linewidth='0.1',
-                                     n=i)
+                            stacked=stack,
+                            n=i)
 
                 axs[i].margins(x=0.01)
                 axs[i].set_xlabel("")
                 
                 if plot_as_percnt:
-                    axs[i].yaxis.set_major_formatter(mtick.PercentFormatter(1, decimals=0))  
-                else:
-                    axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                                     lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                    mplt.set_yaxis_major_tick_format(tick_format='percent', n=i)     
                 
                 if not vre_only:
                     for n, _m in enumerate(month_total_load.index):

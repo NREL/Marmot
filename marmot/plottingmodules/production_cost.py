@@ -9,7 +9,6 @@ Plots can be broken down by cost categories, generator types etc.
 
 import logging
 import pandas as pd
-import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
@@ -47,12 +46,7 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
-        
+                
     def prod_cost(self, start_date_range: str = None, 
                   end_date_range: str = None, **_):
         """Plots total system net revenue and cost normalized by the installed capacity of the area.
@@ -162,14 +156,12 @@ class MPlot(PlotDataHelper):
                 tick_labels = Total_Systems_Cost_Out.index
 
             mplt.barplot(Total_Systems_Cost_Out, stacked=True, 
-                         edgecolor='black', linewidth='0.1',
                          custom_tick_labels=tick_labels)
             ax.plot(Net_Revenue.index, Net_Revenue.values, 
                     color='black', linestyle='None', marker='o',
                     label='Net Revenue')
             
             ax.set_ylabel('Total System Net Rev, Rev, & Cost ($/KW-yr)',  color='black', rotation='vertical')            
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
 
             mplt.add_legend(reverse_legend=True)
@@ -279,12 +271,9 @@ class MPlot(PlotDataHelper):
                 tick_labels = Total_Systems_Cost_Out.index
 
             mplt.barplot(Total_Systems_Cost_Out, stacked=True, 
-                         edgecolor='black', linewidth='0.1',
                          custom_tick_labels=tick_labels)
             ax.set_ylabel('Total System Cost (Million $)', 
-                            color='black', rotation='vertical')
-        
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                            color='black', rotation='vertical')        
             ax.margins(x=0.01)
 
             mplt.add_legend(reverse_legend=True)
@@ -431,13 +420,10 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(Detailed_Gen_Cost_Out, stacked=True, 
-                         edgecolor='black', linewidth='0.1',
                          custom_tick_labels=tick_labels)
-            ax.axhline(y = 0)
+            ax.axhline(y=0)
             ax.set_ylabel('Total Generation Cost (Million $)', 
                           color='black', rotation='vertical')
-
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
@@ -557,12 +543,9 @@ class MPlot(PlotDataHelper):
 
             mplt.barplot(Total_Generation_Stack_Out, 
                         color=self.PLEXOS_color_dict, stacked=True, 
-                        custom_tick_labels=tick_labels, 
-                        edgecolor='black', linewidth='0.1')
+                        custom_tick_labels=tick_labels)
 
-            ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
-            
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')            
             ax.margins(x=0.01)
 
             mplt.add_legend(reverse_legend=True)
@@ -671,14 +654,11 @@ class MPlot(PlotDataHelper):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            mplt.barplot(Total_Systems_Cost_Out, stacked=True, 
-                         edgecolor='black', linewidth='0.1')
+            mplt.barplot(Total_Systems_Cost_Out, stacked=True)
 
-            ax.axhline(y = 0, color = 'black')
+            ax.axhline(y=0, color='black')
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0], 
                             color='black', rotation='vertical')
-
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
             # plt.ylim((0,600))
             mplt.add_legend()
@@ -772,10 +752,8 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(Total_Generation_Stack_Out, 
-                        color=self.PLEXOS_color_dict, stacked=True, 
-                        edgecolor='black', linewidth='0.1')
+                        color=self.PLEXOS_color_dict, stacked=True)
 
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.axhline(y=0)
             ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0], 
                             color='black', rotation='vertical')
@@ -909,16 +887,13 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(Detailed_Gen_Cost_Out,
-                        stacked=True, 
-                        edgecolor='black', linewidth='0.1')
+                         stacked=True)
 
             ax.axhline(y=0, linewidth=0.5, linestyle='--', color='grey')
             # ax.axhline(y = 65.4, linewidth = 1, linestyle = ':',color = 'orange',label = 'Avg 2032 LCOE')
             
             ax.set_ylabel('Generation Cost Change \n relative to '+ self.Scenarios[0] + ' (Million $)', 
                             color='black', rotation='vertical') #TODO: Add $ unit conversion.
-
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
 
             #Add net cost line.

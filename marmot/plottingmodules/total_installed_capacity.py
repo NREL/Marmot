@@ -11,8 +11,6 @@ import re
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib.patches import Patch
 
 import marmot.plottingmodules.total_generation as gen
 import marmot.config.mconfig as mconfig
@@ -20,9 +18,6 @@ from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
-
-custom_legend_elements = Patch(facecolor='#DD0200',
-                               alpha=0.5, edgecolor='#DD0200')
 
 class MPlot(PlotDataHelper):
     """total_installed_capacity MPlot class.
@@ -55,11 +50,7 @@ class MPlot(PlotDataHelper):
 
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)        
 
     def total_cap(self, **_):
         """Creates a stacked barplot of total installed capacity.
@@ -139,13 +130,11 @@ class MPlot(PlotDataHelper):
                 tick_labels = Total_Installed_Capacity_Out.index
             
             mplt.barplot(Total_Installed_Capacity_Out, color=self.PLEXOS_color_dict,
-                         stacked=True, edgecolor='black', linewidth='0.1',
+                         stacked=True,
                          custom_tick_labels=tick_labels)
 
             ax.set_ylabel(f"Total Installed Capacity ({unitconversion['units']})",
                           color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
@@ -249,13 +238,10 @@ class MPlot(PlotDataHelper):
 
             mplt.barplot(Total_Installed_Capacity_Out, 
                          color=self.PLEXOS_color_dict,
-                         stacked=True, edgecolor='black', 
-                         linewidth='0.1')
+                         stacked=True)
 
             ax.set_ylabel((f"Capacity Change ({unitconversion['units']}) \n "
                            f"relative to {self.Scenarios[0]}"), color='black', rotation='vertical')
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
@@ -316,14 +302,11 @@ class MPlot(PlotDataHelper):
 
             mplt.barplot(Total_Installed_Capacity_Out, 
                          color=self.PLEXOS_color_dict,
-                         stacked=True, edgecolor='black', 
-                         linewidth='0.1', n=0,
+                         stacked=True, n=0,
                          custom_tick_labels=tick_labels)
 
             axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})", 
                               color='black', rotation='vertical')
-            axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
@@ -367,14 +350,11 @@ class MPlot(PlotDataHelper):
 
             mplt.barplot(Total_Generation_Stack_Out, 
                          color=self.PLEXOS_color_dict,
-                         stacked=True, edgecolor='black', 
-                         linewidth='0.1', n=1,
+                         stacked=True, n=1,
                          custom_tick_labels=tick_labels)
                          
             axs[1].set_ylabel(f"Total Generation ({energy_units})", 
                               color='black', rotation='vertical')
-            axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
 
             data_tables = []
             for n, scenario in enumerate(self.Scenarios):

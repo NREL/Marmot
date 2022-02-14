@@ -8,8 +8,6 @@ of generators and average output plots
 import logging
 import numpy as np
 import pandas as pd
-import matplotlib.ticker as mtick
-import matplotlib.pyplot as plt
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
@@ -164,13 +162,11 @@ class MPlot(PlotDataHelper):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
             
-            mplt.barplot(CF_all_scenarios.T, color=self.color_list,
-                                edgecolor='black', linewidth='0.1', 
-                                custom_tick_labels=list(CF_all_scenarios.columns))
+            mplt.barplot(CF_all_scenarios.T, color=self.color_list, 
+                                custom_tick_labels=list(CF_all_scenarios.columns),
+                                ytick_major_fmt='percent')
 
             ax.set_ylabel('Average Output When Committed',  color='black', rotation='vertical')
-            #adds % to y axis data
-            ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             
             if mconfig.parser("plot_title_as_region"):
                 ax.set_title(zone_input)
@@ -268,11 +264,9 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(CF_all_scenarios, color=self.color_list,
-                                edgecolor='black', linewidth='0.1')
+                         ytick_major_fmt='percent')
 
             ax.set_ylabel('Capacity Factor',  color='black', rotation='vertical')
-            #adds % to y axis data
-            ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             # Add legend
             mplt.add_legend()
             # Add title
@@ -384,13 +378,11 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(time_at_min.T, color=self.color_list, 
-                                 edgecolor='black', linewidth='0.1', 
-                                 custom_tick_labels=list(time_at_min.columns))
+                         custom_tick_labels=list(time_at_min.columns),
+                         ytick_major_fmt='percent')
             
             ax.set_ylabel('Percentage of time online at minimum generation', 
                           color='black', rotation='vertical')
-            #adds % to y axis data
-            ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
             # Add legend
             mplt.add_legend()
             # Add title

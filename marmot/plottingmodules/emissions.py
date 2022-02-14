@@ -12,7 +12,6 @@ TO DO:
 
 import logging
 import pandas as pd
-import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary 
@@ -52,10 +51,6 @@ class MPlot(PlotDataHelper):
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
 
     # function to collect total emissions by fuel type
     def total_emissions_by_type(self, prop: str = None, start_date_range: str = None,
@@ -154,13 +149,11 @@ class MPlot(PlotDataHelper):
                     tick_labels = emitPlot.index
 
                 mplt.barplot(emitPlot, color=self.PLEXOS_color_dict,
-                                     stacked=True, edgecolor='black', linewidth='0.1',
-                                     custom_tick_labels=tick_labels)
+                            stacked=True, 
+                            custom_tick_labels=tick_labels)
 
                 ax.set_ylabel(f'Annual {prop} Emissions\n(million metric tons)', 
                                 color='black', rotation='vertical')
-                #adds comma to y axis data
-                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 # Add legend
                 mplt.add_legend(reverse_legend=True)
                 # Add title

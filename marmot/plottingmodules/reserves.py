@@ -11,7 +11,6 @@ import logging
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
@@ -49,7 +48,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         
     def reserve_gen_timeseries(self, figure_name: str = None, prop: str = None,
                                start: float = None, end: float= None,
@@ -298,7 +296,6 @@ class MPlot(PlotDataHelper):
 
             mplt.barplot(Total_Reserves_Out, color=self.PLEXOS_color_dict,
                          stacked=True,
-                         edgecolor='black', linewidth='0.1',
                          custom_tick_labels=tick_labels)
 
             ax.set_ylabel(f"Total Reserve Provision ({unitconversion['units']}h)", 
@@ -451,14 +448,13 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(reserve_out, color=color_dict,
-                         stacked=False,
-                         edgecolor='black', linewidth='0.1')
+                         stacked=False)
 
             if count_hours == False:
-                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.set_ylabel(f"Reserve {data_set} [{unitconversion['units']}h]", 
                                color='black', rotation='vertical')
             elif count_hours == True:
+                mplt.set_yaxis_major_tick_format(decimal_accuracy=0)
                 ax.set_ylabel(f"Reserve {data_set} Hours", 
                               color='black', rotation='vertical')
             mplt.add_legend()
@@ -521,8 +517,7 @@ class MPlot(PlotDataHelper):
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
 
-            xdimension, ydimension = self.setup_facet_xy_dimensions(facet,multi_scenario = Scenarios)
-
+            xdimension, ydimension = self.setup_facet_xy_dimensions(facet, multi_scenario=Scenarios)
             grid_size = xdimension*ydimension
             excess_axs = grid_size - len(Scenarios)
 
@@ -532,7 +527,6 @@ class MPlot(PlotDataHelper):
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             data_tables = []
-            unique_reserve_types = []
 
             for n, scenario in enumerate(Scenarios):
 
@@ -574,7 +568,7 @@ class MPlot(PlotDataHelper):
                                 color=color_dict[column],
                                 label=column)
 
-                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                mplt.set_yaxis_major_tick_format(n=n)
                 axs[n].margins(x=0.01)
                 mplt.set_plot_timeseries_format(n=n)
 

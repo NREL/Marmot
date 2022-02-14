@@ -11,6 +11,7 @@ import pandas as pd
 import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.ticker as mtick
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Patch
@@ -136,6 +137,38 @@ class SetupSubplot():
                     bbox_to_anchor=bbox_to_anchor,
                     **kwargs)
 
+    def set_yaxis_major_tick_format(self, tick_format='standard',
+                                    decimal_accuracy = mconfig.parser("axes_options", 
+                                                                    "y_axes_decimalpt"),
+                                    n=0):
+        """Sets the y axis major tick format of numbers.
+
+        The decimal point accuracy of the numbers can be further adjusted 
+        using the config file "y_axes_decimalpt" input.
+
+        Args:
+            tick_format (str, optional): Format options. 
+                Opinions available are:
+
+                - standard
+                - percent
+                - log
+
+                Defaults to 'standard'.
+            decimal_accuracy (int, optional): Number of decimal 
+                points to use. Default set in config file.
+            n (int, optional): Counter for facet plot. Defaults to 0.
+        """
+        ax = self._check_if_array(n)
+
+        if tick_format == 'standard':
+            ax.yaxis.set_major_formatter(mtick.FuncFormatter(lambda x, pos: 
+                        format(x, f',.{decimal_accuracy}f')))
+        elif tick_format == 'percent':
+            ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
+        elif tick_format == 'log':
+            pass
+
     def set_plot_timeseries_format(self, n: int = 0,
                                 minticks: int = mconfig.parser("axes_options",
                                                                 "x_axes_minticks"),
@@ -145,7 +178,6 @@ class SetupSubplot():
         """Auto sets timeseries format.
 
         Args:
-            axs (matplotlib.axes): matplotlib.axes
             n (int, optional): Counter for facet plot. Defaults to 0.
             minticks (int, optional): Minimum tick marks. 
                 Defaults to mconfig.parser("axes_options","x_axes_minticks").
@@ -279,7 +311,7 @@ class PlotLibrary(SetupSubplot):
     
     
     def stackplot(self, data: pd.DataFrame, color_dict: dict = None, 
-                 n: int = 0, **kwargs):
+                 n: int = 0, ytick_major_fmt='standard', **kwargs):
         """Creates a stacked area plot
 
         Wrapper around matplotlib.stackplot.
@@ -293,7 +325,6 @@ class PlotLibrary(SetupSubplot):
         """
 
         ax = self._check_if_array(n)
-        y_axes_decimalpt = axes_options["y_axes_decimalpt"]
         
         if color_dict:
             color_list = [color_dict.get(x, '#333333') for x in data.columns]
@@ -303,14 +334,15 @@ class PlotLibrary(SetupSubplot):
         ax.stackplot(data.index.values, data.values.T, linewidth=0,
                      colors=color_list, **kwargs)
 
-        ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{y_axes_decimalpt}f')))
+        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, n=n)
         ax.margins(x=0.01)
     
 
     def barplot(self, df: pd.DataFrame, color: Union[dict, list] = None,
-                        stacked: bool = False, n: int = 0, custom_tick_labels=None,
-                        legend=False,
-                        **kwargs):
+                stacked: bool = False, n: int = 0, custom_tick_labels=None,
+                legend=False, ytick_major_fmt='standard',
+                edgecolor='black', linewidth='0.1',
+                **kwargs):
         """Creates a bar plot
 
         Wrapper around pandas.plot.bar
@@ -337,8 +369,12 @@ class PlotLibrary(SetupSubplot):
         df.plot.bar(stacked=stacked,
                     color=color_list, 
                     ax=ax, legend=legend,
+                    edgecolor=edgecolor,
+                    linewidth=linewidth,
                     **kwargs)
         
+        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, n=n)
+
         # Set x-tick labels 
         if custom_tick_labels and len(custom_tick_labels) > 1:
             tick_labels = custom_tick_labels
@@ -349,7 +385,8 @@ class PlotLibrary(SetupSubplot):
     def lineplot(self, data: pd.Series, column=None,
                  color: Union[dict, str] = None,
                  linestyle: str = 'solid',
-                 n: int = 0, alpha:int = 1, **kwargs):
+                 n: int = 0, alpha:int = 1, 
+                 ytick_major_fmt='standard', **kwargs):
         """Creates a line plot
 
         Wrapper around matplotlib.plot
@@ -384,6 +421,8 @@ class PlotLibrary(SetupSubplot):
                 color=color,
                 alpha=alpha, **kwargs)
 
+        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, n=n)
+
     def histogram(self, data: pd.DataFrame, color_dict: dict,
                   label=None,
                   n: int = 0, **kwargs):
@@ -408,7 +447,7 @@ class PlotLibrary(SetupSubplot):
     def clustered_stacked_barplot(self, df_list: List[pd.DataFrame], 
                                           labels: list, color_dict: dict, 
                                           title: str = "",  H: str = "//", n=0,
-                                          **kwargs):
+                                          ytick_major_fmt='standard', **kwargs):
         """Creates a clustered stacked barplot.
 
         Args:
@@ -474,6 +513,7 @@ class PlotLibrary(SetupSubplot):
         for i, c_name in enumerate(column_names):
             handles.append(Patch(facecolor='gray', hatch=H*i))
             label_list.append(c_name)
-            
+        
+        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, n=n)
         self.add_legend(handles, label_list)
 
