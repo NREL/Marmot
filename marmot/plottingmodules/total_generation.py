@@ -284,7 +284,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             # Add title
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
@@ -435,7 +435,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
 
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
@@ -688,11 +688,11 @@ class MPlot(PlotDataHelper):
 
             if xdimension > 1:
                 font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-                plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
+                plt.rcParams['xtick.labelsize'] *= font_scaling_ratio
+                plt.rcParams['ytick.labelsize'] *= font_scaling_ratio
+                plt.rcParams['legend.fontsize'] *= font_scaling_ratio
+                plt.rcParams['axes.labelsize'] *= font_scaling_ratio
+                plt.rcParams['axes.titlesize'] *= font_scaling_ratio
 
             for i, scenario in enumerate(self.Scenarios):
 
@@ -749,7 +749,7 @@ class MPlot(PlotDataHelper):
                            rotation='vertical', labelpad=labelpad)
 
             if mconfig.parser('plot_title_as_region'):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
@@ -870,7 +870,7 @@ class MPlot(PlotDataHelper):
                             left=False, right=False)
             plt.ylabel(f"Total Generation (%)",  color='black', rotation='vertical')
             if mconfig.parser('plot_title_as_region'):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             
             outputs[zone_input] = {'fig': fig, 'data_table': Total_Gen_Out}
 

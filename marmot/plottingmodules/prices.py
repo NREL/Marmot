@@ -262,7 +262,7 @@ class MPlot(PlotDataHelper):
                        labelpad=20)
             plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table':Data_Out}
         return outputs
 
@@ -370,7 +370,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend()
             # Add title
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             plt.ylabel(f"{self.AGG_BY} Price ($/MWh)", color='black', 
                        rotation='vertical', labelpad=20)
             plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad=20)
@@ -825,7 +825,7 @@ class MPlot(PlotDataHelper):
                                   ylabels = self.ylabels)
             plt.ylabel('Occurrence',  color='black', rotation='vertical', 
                        labelpad=60, fontsize=24)
-            plt.title(node)
+            mplt.add_main_title(node)
             if diff_plot:
                 plt.xlabel(f"Node LMP Change ($/MWh) relative to {self.Scenarios[0].replace('_',' ')}",
                            color='black', labelpad=40)

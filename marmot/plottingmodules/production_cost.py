@@ -166,7 +166,7 @@ class MPlot(PlotDataHelper):
 
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -278,7 +278,7 @@ class MPlot(PlotDataHelper):
 
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             cost_totals = Total_Systems_Cost_Out.sum(axis=1) #holds total of each bar
 
@@ -427,7 +427,7 @@ class MPlot(PlotDataHelper):
             ax.margins(x=0.01)
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
                 
             cost_totals = Detailed_Gen_Cost_Out.sum(axis=1) #holds total of each bar
 
@@ -550,7 +550,7 @@ class MPlot(PlotDataHelper):
 
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -664,7 +664,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend()
 
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -762,7 +762,7 @@ class MPlot(PlotDataHelper):
 
             mplt.add_legend()
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -906,7 +906,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend()
 
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs

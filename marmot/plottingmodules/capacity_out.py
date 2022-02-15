@@ -164,7 +164,7 @@ class MPlot(PlotDataHelper):
             plt.tight_layout(rect=[0,0.03,1,0.97])
             # Add title
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -295,7 +295,7 @@ class MPlot(PlotDataHelper):
             plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad = 40)
             plt.ylabel('Capacity out (MW)',  color='black', rotation='vertical', labelpad = 60)
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
 
 
             outputs[zone_input] = {'fig' : fig1, 'data_table' : Data_Table_Out}

@@ -169,7 +169,7 @@ class MPlot(PlotDataHelper):
             ax.set_ylabel('Average Output When Committed',  color='black', rotation='vertical')
             
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
             # Add legend
             mplt.add_legend()
             
@@ -271,7 +271,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend()
             # Add title
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
         return outputs
@@ -387,7 +387,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend()
             # Add title
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs

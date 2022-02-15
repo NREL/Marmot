@@ -138,7 +138,7 @@ class MPlot(PlotDataHelper):
             ax.margins(x=0.01)
             # Add title
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
             mplt.add_legend(reverse_legend=True)
             
             fig.savefig(os.path.join(hydro_figures, zone_input + 
@@ -246,7 +246,7 @@ class MPlot(PlotDataHelper):
 
                 # Add title                
                 if mconfig.parser("plot_title_as_region"):
-                    ax.set_title(zone_input)
+                    mplt.add_main_title(zone_input)
                 # Add legend
                 mplt.add_legend(reverse_legend=True)
 
@@ -273,7 +273,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend(reverse_legend=True)
             
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
             fig.savefig(os.path.join(hydro_figures, zone_input +
                                       f"_Hydro_Versus_Net_Load_{self.Scenarios[0]}"),
                          dpi=600, bbox_inches='tight')

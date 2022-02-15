@@ -226,7 +226,7 @@ class MPlot(PlotDataHelper):
                 plt.xlabel('Intervals',  color='black', 
                            rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             try:
                 del annual_util, 
             except:
@@ -452,7 +452,7 @@ class MPlot(PlotDataHelper):
                 plt.xlabel('Sorted hour of the year', color='black', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs 
@@ -669,7 +669,7 @@ class MPlot(PlotDataHelper):
             fig.text(0.58,0.98,'Winter',fontsize = 16)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)            
+                mplt.add_main_title(zone_input)            
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
 
@@ -879,7 +879,7 @@ class MPlot(PlotDataHelper):
                 plt.xlabel('Sorted hour of the year', color = 'black', labelpad = 30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)            
+                mplt.add_main_title(zone_input)            
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs
@@ -1957,7 +1957,7 @@ class MPlot(PlotDataHelper):
 
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)            
+                mplt.add_main_title(zone_input)            
                 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -2131,7 +2131,7 @@ class MPlot(PlotDataHelper):
             mplt.remove_excess_axs(excess_axs,grid_size)
 
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             plt.ylabel(f"Net export ({unitconversion['units']})", color='black', 
                        rotation='vertical', labelpad=40)
             if duration_curve:
@@ -2283,7 +2283,7 @@ class MPlot(PlotDataHelper):
             ax.set_ylabel(f"Interchange ({unitconversion['units']}h)", color='black', 
                           rotation='vertical')
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig,'data_table': Data_Table_Out}
 

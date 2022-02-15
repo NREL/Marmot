@@ -162,7 +162,7 @@ class MPlot(PlotDataHelper):
             plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})", 
                         color='black', rotation='vertical', labelpad=40)
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             # If data_table_chunks is empty, does not return data or figure
             if not data_table_chunks:
                 outputs[zone_input] = MissingZoneData()

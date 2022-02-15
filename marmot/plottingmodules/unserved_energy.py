@@ -137,7 +137,7 @@ class MPlot(PlotDataHelper):
             ax.margins(x=0.01)
             mplt.set_plot_timeseries_format()
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
         return outputs
@@ -245,7 +245,7 @@ class MPlot(PlotDataHelper):
             
             mplt.add_legend()
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)  
+                mplt.add_main_title(zone_input)  
             for patch in ax.patches:
                 width, height = patch.get_width(), patch.get_height()
                 if height<=1:
@@ -358,7 +358,7 @@ class MPlot(PlotDataHelper):
             ax.set_ylim(bottom=0)
 
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs

@@ -84,10 +84,21 @@ class SetupSubplot():
 
 
     def add_legend(self, handles=None, labels=None, 
-                        loc=mconfig.parser("axes_options", "legend_position"),
-                        ncol=mconfig.parser("axes_options", "legend_columns"),
-                        reverse_legend=False, sort_by=None, bbox_to_anchor=None, 
-                        **kwargs):
+                    loc=mconfig.parser("axes_options", "legend_position"),
+                    ncol=mconfig.parser("axes_options", "legend_columns"),
+                    reverse_legend=False, sort_by=None, bbox_to_anchor=None, 
+                    **kwargs):
+        """[summary]
+
+        Args:
+            handles ([type], optional): [description]. Defaults to None.
+            labels ([type], optional): [description]. Defaults to None.
+            loc ([type], optional): [description]. Defaults to mconfig.parser("axes_options", "legend_position").
+            ncol ([type], optional): [description]. Defaults to mconfig.parser("axes_options", "legend_columns").
+            reverse_legend (bool, optional): [description]. Defaults to False.
+            sort_by ([type], optional): [description]. Defaults to None.
+            bbox_to_anchor ([type], optional): [description]. Defaults to None.
+        """
     
         loc_anchor = {'lower right': ('lower left', (1.05, 0.0)),
                         'center right': ('center left', (1.05, 0.5)),
@@ -136,6 +147,16 @@ class SetupSubplot():
         self.exax.legend(handles, labels, loc=new_loc, ncol=ncol,
                     bbox_to_anchor=bbox_to_anchor,
                     **kwargs)
+
+    def add_main_title(self, label: str, **kwargs):
+        """Adds a title centered above the main figure 
+
+        Wrapper for matplotlib.axes.Axes.set_title
+
+        Args:
+            label (str): Title of figure.
+        """
+        self.exax.set_title(label, **kwargs)
 
     def set_yaxis_major_tick_format(self, tick_format='standard',
                                     decimal_accuracy = mconfig.parser("axes_options", 
@@ -222,7 +243,7 @@ class SetupSubplot():
                                 **kwargs) -> None:
         """Set the xticklabels on bar plots and determine whether they will be rotated.
 
-        Wrapper around matplotlib set_xticklabels
+        Wrapper around matplotlib.axes.Axes.set_xticklabels
         
         Checks to see if the number of labels is greater than or equal to the default
         number set in config.yml. If this is the case, rotate
@@ -231,6 +252,7 @@ class SetupSubplot():
 
         Args:
             labels (list): Labels to apply to xticks
+            n (int, optional): Counter for facet plot. Defaults to 0.
             rotate (bool, optional): rotate labels True/False. 
                 Defaults to mconfig.parser("axes_label_options", "rotate_x_labels").
             num_labels (int, optional): Number of labels to rotate at. 
@@ -257,7 +279,6 @@ class SetupSubplot():
         """Adds labels to outside of Facet plot.
 
         Args:
-            fig (matplotlib.fig): matplotlib figure.
             xlabels_bottom (bool, optional): If True labels are placed under bottom. 
                 Defaults to True.
             xlabels (list, optional): labels. 

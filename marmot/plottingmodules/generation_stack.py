@@ -184,7 +184,7 @@ class MPlot(PlotDataHelper):
                                     ylabels=tech_list_sort)
             
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})", 
                        color='black', rotation='vertical', labelpad=60)
 
@@ -511,11 +511,11 @@ class MPlot(PlotDataHelper):
             # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
             if xdimension > 1:
                 font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-                plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
+                plt.rcParams['xtick.labelsize'] *= font_scaling_ratio
+                plt.rcParams['ytick.labelsize'] *= font_scaling_ratio
+                plt.rcParams['legend.fontsize'] *= font_scaling_ratio
+                plt.rcParams['axes.labelsize'] *= font_scaling_ratio
+                plt.rcParams['axes.titlesize'] *= font_scaling_ratio
                 
             data_tables = []
 
@@ -655,9 +655,9 @@ class MPlot(PlotDataHelper):
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             # Remove extra axes
             mplt.remove_excess_axs(excess_axs, grid_size)
-    
+            # Add title
             if mconfig.parser('plot_title_as_region'):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
 
             #Ylabel should change if there are facet labels, leave at 40 for now, 
             # works for all values in spacing
@@ -800,7 +800,7 @@ class MPlot(PlotDataHelper):
                 ax.plot(Gen_Stack_Out[column], linewidth=3, 
                         color=self.PLEXOS_color_dict[column], label=column)
 
-            ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
+            mplt.add_main_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
             ax.set_ylabel(f"Generation Difference ({unitconversion['units']})",  color='black', rotation='vertical')
             ax.set_xlabel(timezone,  color='black', rotation='horizontal')
             mplt.set_yaxis_major_tick_format()

@@ -152,11 +152,11 @@ class MPlot(PlotDataHelper):
             # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
             if xdimension > 1:
                 font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-                plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-                plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-                plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-                plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-                plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
+                plt.rcParams['xtick.labelsize'] *= font_scaling_ratio
+                plt.rcParams['ytick.labelsize'] *= font_scaling_ratio
+                plt.rcParams['legend.fontsize'] *= font_scaling_ratio
+                plt.rcParams['axes.labelsize'] *= font_scaling_ratio
+                plt.rcParams['axes.titlesize'] *= font_scaling_ratio
 
             data_tables = []
 
@@ -306,11 +306,10 @@ class MPlot(PlotDataHelper):
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             # Remove extra supl
-            if excess_axs != 0:
-                mplt.remove_excess_axs(excess_axs,grid_size)
+            mplt.remove_excess_axs(excess_axs, grid_size)
             # Add title
-            if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+            mplt.add_main_title(zone_input)
+            
             labelpad = 40
             plt.ylabel(f"Generation ({unitconversion['units']})", 
                         color='black', rotation='vertical', labelpad=labelpad)

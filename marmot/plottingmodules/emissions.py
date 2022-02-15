@@ -158,7 +158,7 @@ class MPlot(PlotDataHelper):
                 mplt.add_legend(reverse_legend=True)
                 # Add title
                 if mconfig.parser("plot_title_as_region"):
-                    ax.set_title(zone_input)
+                    mplt.add_main_title(zone_input)
 
                 outputs[zone_input] = {'fig': fig, 'data_table': dataOut}
 

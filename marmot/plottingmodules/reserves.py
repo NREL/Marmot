@@ -199,7 +199,7 @@ class MPlot(PlotDataHelper):
             #Remove extra axes
             mplt.remove_excess_axs(excess_axs,grid_size)
             if mconfig.parser("plot_title_as_region"):
-                plt.title(region)
+                mplt.add_main_title(region)
             plt.ylabel(f"Reserve Provision ({unitconversion['units']})", 
                         color='black', rotation='vertical', labelpad=40)
 
@@ -303,7 +303,7 @@ class MPlot(PlotDataHelper):
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(region)
+                mplt.add_main_title(region)
 
             outputs[region] = {'fig': fig, 'data_table': data_table_out}
         return outputs
@@ -459,7 +459,7 @@ class MPlot(PlotDataHelper):
                               color='black', rotation='vertical')
             mplt.add_legend()
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(region)
+                mplt.add_main_title(region)
             outputs[region] = {'fig': fig,'data_table': Data_Table_Out}
         return outputs
 
@@ -586,7 +586,7 @@ class MPlot(PlotDataHelper):
             plt.ylabel('Reserve Shortage [MW]',  color='black', 
                        rotation='vertical',labelpad = 40)
             if mconfig.parser("plot_title_as_region"):
-               plt.title(region)
+               mplt.add_main_title(region)
             
             data_table_out = pd.concat(data_tables)
             

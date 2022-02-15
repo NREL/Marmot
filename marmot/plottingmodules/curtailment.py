@@ -201,7 +201,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend()
             # Set title
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -410,7 +410,7 @@ class MPlot(PlotDataHelper):
             ax.set_ylim(bottom=0)
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
             # Add legend
             mplt.add_legend()
 
@@ -564,7 +564,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend(reverse_legend=True)
             # Add title
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             curt_totals = Total_Curtailment_out.sum(axis=1)
             #inserts total bar value above each bar
@@ -711,7 +711,7 @@ class MPlot(PlotDataHelper):
 
             ax.margins(x=0.01)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             handles, labels = ax.get_legend_handles_labels()
             ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
@@ -1009,7 +1009,7 @@ class MPlot(PlotDataHelper):
             ax.set_ylim(bottom=0)
             # Add title
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs

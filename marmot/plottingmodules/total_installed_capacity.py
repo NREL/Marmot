@@ -138,7 +138,7 @@ class MPlot(PlotDataHelper):
             
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -245,7 +245,7 @@ class MPlot(PlotDataHelper):
             
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
                 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -389,7 +389,7 @@ class MPlot(PlotDataHelper):
                              loc='left', pad=4)
             
             if mconfig.parser('plot_title_as_region'):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
 
             # output figure
             outputs[zone_input] = {'fig': fig, 'data_table': data_tables}
