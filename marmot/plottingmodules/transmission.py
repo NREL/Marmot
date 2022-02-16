@@ -123,9 +123,9 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         # sets up x, y dimensions of plot
-        xdimension, ydimension = self.setup_facet_xy_dimensions(facet=True, 
+        ncols, nrows = self.set_facet_col_row_dimensions(facet=True, 
                                                                 multi_scenario=self.Scenarios)
-        grid_size = xdimension*ydimension
+        grid_size = ncols*nrows
 
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
@@ -134,7 +134,7 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             self.logger.info(f"For all lines touching Zone = {zone_input}")
 
-            mplt = PlotLibrary(ydimension, xdimension, sharey=True, 
+            mplt = PlotLibrary(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.1, hspace=0.25)
@@ -192,12 +192,12 @@ class MPlot(PlotDataHelper):
 
                 color_dict = dict(zip(self.Scenarios,self.color_list))
                 if hist == True:
-                    mplt.histogram(annual_util, color_dict,label=scenario,n=n)
+                    mplt.histogram(annual_util, color_dict,label=scenario, sub_pos=n)
                 else:
                     for line in top_utilization.index.get_level_values(level='line_name').unique():
                         duration_curve = flow.loc[line].sort_values(by='Util', 
                                                                     ascending=False).reset_index(drop=True)
-                        mplt.lineplot(duration_curve, 'Util' ,label=line, n=n)
+                        mplt.lineplot(duration_curve, 'Util' ,label=line, sub_pos=n)
                         axs[n].set_ylim((0,1.1))
                 data_table.append(annual_util)
 
@@ -397,7 +397,7 @@ class MPlot(PlotDataHelper):
 
                         mplt.lineplot(single_int, interf, 
                                                 label=f"{scenario}\n interface flow",
-                                                n=n)
+                                                sub_pos=n)
 
                         # Only print limits if it doesn't change monthly or if you are plotting a time series. 
                         # Otherwise the limit lines could be misleading.
@@ -407,10 +407,10 @@ class MPlot(PlotDataHelper):
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
                                 mplt.lineplot(limits, 'export limit',
                                                          label='export limit', color_dict=limits_color_dict,
-                                                         linestyle='--', n=n)
+                                                         linestyle='--', sub_pos=n)
                                 mplt.lineplot(limits, 'import limit', 
                                                          label='import limit', color_dict=limits_color_dict,
-                                                         linestyle='--', n=n)
+                                                         linestyle='--', sub_pos=n)
 
                         #For output time series .csv
                         scenario_names = pd.Series([scenario] * len(single_int), name='Scenario')
@@ -430,7 +430,7 @@ class MPlot(PlotDataHelper):
 
                 axs[n].set_title(interf)
                 if not duration_curve:
-                    mplt.set_plot_timeseries_format(n=n)
+                    mplt.set_subplot_timeseries_format(sub_pos=n)
                 if missing_ints == len(interf_list):
                     outputs = MissingInputData()
                     return outputs
@@ -776,7 +776,7 @@ class MPlot(PlotDataHelper):
             self.logger.info('Plotting full time series results.')
             xdim,ydim = self.set_x_y_dimension(len(interf_list))
 
-            mplt = PlotLibrary(ydimension, xdimension,
+            mplt = PlotLibrary(nrows, ncols,
                               squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
 
@@ -827,15 +827,15 @@ class MPlot(PlotDataHelper):
                             single_int = self.sort_duration(single_int,interf)
                             
 
-                        mplt.lineplot(single_int,interf,label = scenario + '\n interface flow', n = n)
+                        mplt.lineplot(single_int,interf,label = scenario + '\n interface flow', sub_pos = n)
                         
                         #Only print limits if it doesn't change monthly or if you are plotting a time series. Otherwise the limit lines could be misleading.
                         if not duration_curve or identical[0]: 
                             if scenario == self.Scenarios[-1]:
                                 #Only plot limits for last scenario.
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
-                                mplt.lineplot(limits,'export limit',label = 'export limit',color_dict = limits_color_dict,linestyle = '--', n = n)
-                                mplt.lineplot(limits,'import limit',label = 'import limit',color_dict = limits_color_dict,linestyle = '--', n = n)
+                                mplt.lineplot(limits,'export limit',label = 'export limit',color_dict = limits_color_dict,linestyle = '--', sub_pos = n)
+                                mplt.lineplot(limits,'import limit',label = 'import limit',color_dict = limits_color_dict,linestyle = '--', sub_pos = n)
 
                         #For output time series .csv
                         scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
@@ -855,7 +855,7 @@ class MPlot(PlotDataHelper):
                 axs[n].set_title(interf)
                 handles, labels = axs[n].get_legend_handles_labels()
                 if not duration_curve:
-                    self.set_plot_timeseries_format(axs, n=n)
+                    self.set_subplot_timeseries_format(axs, sub_pos=n)
                 if n == len(interf_list) - 1:
                     axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
 
@@ -1008,7 +1008,7 @@ class MPlot(PlotDataHelper):
                     if duration_curve:
                         single_line = self.sort_duration(single_line,line)
 
-                    mplt.lineplot(single_line, line, label = scenario + '\n line flow', n = n)
+                    mplt.lineplot(single_line, line, label = scenario + '\n line flow', sub_pos=n)
 
                     #Add %congested number to plot.
                     if scenario == self.Scenarios[0]:
@@ -1044,7 +1044,7 @@ class MPlot(PlotDataHelper):
 
             axs[n].set_title(line)
             if not duration_curve:
-                mplt.set_plot_timeseries_format(n=n)
+                mplt.set_subplot_timeseries_format(sub_pos=n)
 
         if missing_lines == len(select_lines):
             outputs = MissingInputData()
@@ -1143,8 +1143,8 @@ class MPlot(PlotDataHelper):
                 if duration_curve:
                     single_line = self.sort_duration(single_line,line)
                                         
-                #mplt.lineplot(single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', n = n)
-                mplt.lineplot(single_line,line, label = 'BESS - no BESS \n line flow', n = n)
+                #mplt.lineplot(single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', sub_pos = n)
+                mplt.lineplot(single_line,line, label = 'BESS - no BESS \n line flow', sub_pos=n)
 
 
             else:
@@ -1156,7 +1156,7 @@ class MPlot(PlotDataHelper):
             mplt.remove_excess_axs(excess_axs,grid_size)     
             axs[n].set_title(line)
             if not duration_curve:
-                mplt.set_plot_timeseries_format(n=n)
+                mplt.set_subplot_timeseries_format(sub_pos=n)
 
             chunks.append(single_line_out)
 
@@ -1513,9 +1513,9 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
 
-            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=scenario_type)
+            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=scenario_type)
 
-            mplt = PlotLibrary(ydimension, xdimension, sharey=True,
+            mplt = PlotLibrary(nrows, ncols, sharey=True,
                               squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()            
             plt.subplots_adjust(wspace=0.6, hspace=0.3)
@@ -1552,8 +1552,8 @@ class MPlot(PlotDataHelper):
                     #Make a facet plot, one panel for each parent zone.
                     parent_region = rr_int_agg['parent'].unique()
                     plot_number = len(parent_region)
-                    xdimension, ydimension =  self.set_x_y_dimension(plot_number)
-                    mplt = PlotLibrary(ydimension, xdimension,
+                    ncols, nrows =  self.set_x_y_dimension(plot_number)
+                    mplt = PlotLibrary(nrows, ncols,
                                         squeeze=False, ravel_axs=True)
                     fig, axs = mplt.get_figure()
                     plt.subplots_adjust(wspace=0.6, hspace=0.7)
@@ -1562,7 +1562,7 @@ class MPlot(PlotDataHelper):
                     parent_region = [zone_input]
                     plot_number = len(scenario_type)
 
-                grid_size = xdimension*ydimension
+                grid_size = ncols*nrows
                 excess_axs = grid_size - plot_number
 
                 for parent in parent_region:
@@ -1589,10 +1589,10 @@ class MPlot(PlotDataHelper):
 
                     for column in single_parent.columns:
 
-                        mplt.lineplot(single_parent,column,label=column,n=n)
+                        mplt.lineplot(single_parent, column, label=column, sub_pos=n)
                         axs[n].set_title(parent)
                         axs[n].margins(x=0.01)
-                        mplt.set_plot_timeseries_format(n=n)
+                        mplt.set_subplot_timeseries_format(sub_pos=n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
                         axs[n].legend(loc='lower left',bbox_to_anchor=(1,0))
 
@@ -1656,11 +1656,11 @@ class MPlot(PlotDataHelper):
         if 1 in check_input_data:
             return MissingInputData()
 
-        xdimension, ydimension = self.set_x_y_dimension(len(self.Scenarios))
-        grid_size = xdimension*ydimension
+        ncols, nrows = self.set_x_y_dimension(len(self.Scenarios))
+        grid_size = ncols*nrows
         excess_axs = grid_size - len(self.Scenarios)
 
-        mplt = PlotLibrary(ydimension, xdimension,
+        mplt = PlotLibrary(nrows, ncols,
                               squeeze=False, ravel_axs=True)
         fig, axs = mplt.get_figure()
         plt.subplots_adjust(wspace=0.02, hspace=0.4)
@@ -1856,7 +1856,7 @@ class MPlot(PlotDataHelper):
                 for column in all_scenarios:
                     mplt.lineplot(all_scenarios,column,color_dict=color_dict,label=column)
                 ax.margins(x=0.01)
-                mplt.set_plot_timeseries_format(minticks=6,maxticks=12)
+                mplt.set_subplot_timeseries_format(minticks=6,maxticks=12)
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
                 mplt.add_legend()
 
@@ -1953,7 +1953,7 @@ class MPlot(PlotDataHelper):
                 ax.margins(x=0.01)
                 ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
                           linestyle=':')
-                mplt.set_plot_timeseries_format()
+                mplt.set_subplot_timeseries_format()
 
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
@@ -2006,8 +2006,8 @@ class MPlot(PlotDataHelper):
         outputs = {}
 
         # sets up x, y dimensions of plot
-        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
-        grid_size = xdimension*ydimension
+        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+        grid_size = ncols*nrows
 
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
@@ -2017,7 +2017,7 @@ class MPlot(PlotDataHelper):
 
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
-            mplt = PlotLibrary(ydimension, xdimension, sharey=True,
+            mplt = PlotLibrary(nrows, ncols, sharey=True,
                               squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
 
@@ -2109,14 +2109,14 @@ class MPlot(PlotDataHelper):
                 for column in net_exports:
                     linestyle = '--' if column == 'Net export' else 'solid'
                     mplt.lineplot(net_exports, column=column, label=column,
-                                             n=n, linestyle=linestyle)
+                                    sub_pos=n, linestyle=linestyle)
 
                 axs[n].margins(x=0.01)
                 #Add horizontal line at 0.
                 axs[n].hlines(y=0, xmin=axs[n].get_xlim()[0], xmax=axs[n].get_xlim()[1],
                               linestyle=':') 
                 if not duration_curve:
-                    mplt.set_plot_timeseries_format(n=n)
+                    mplt.set_subplot_timeseries_format(sub_pos=n)
 
                 #Add scenario column to output table.
                 scenario_names = pd.Series([scenario] * len(net_exports), name='Scenario')
@@ -2276,8 +2276,8 @@ class MPlot(PlotDataHelper):
             color_dict = dict(zip(self.Scenarios, self.color_list))
             
             mplt.clustered_stacked_barplot(net_exports_all, 
-                                                   labels=self.Scenarios, 
-                                                    color_dict=color_dict)
+                                            labels=self.Scenarios, 
+                                            color_dict=color_dict)
             ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
                       linestyle=':')
             ax.set_ylabel(f"Interchange ({unitconversion['units']}h)", color='black', 
@@ -2395,8 +2395,8 @@ class MPlot(PlotDataHelper):
         color_dict = dict(zip(self.Scenarios, self.color_list))
         
         mplt.clustered_stacked_barplot(net_flows_all, 
-                                               labels=self.Scenarios, 
-                                               color_dict=color_dict)
+                                        labels=self.Scenarios, 
+                                        color_dict=color_dict)
         ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
                   linestyle=':')
         ax.set_ylabel('Flow ({}h)'.format(unitconversion['units']), color='black', 

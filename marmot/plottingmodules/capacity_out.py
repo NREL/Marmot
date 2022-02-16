@@ -82,9 +82,9 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         # sets up x, y dimensions of plot
-        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
+        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
 
-        grid_size = xdimension*ydimension
+        grid_size = ncols*nrows
 
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
@@ -93,7 +93,7 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {str(zone_input)}')
 
-            mplt = PlotLibrary(ydimension, xdimension, sharex=True,
+            mplt = PlotLibrary(nrows, ncols, sharex=True,
                                 sharey='row', 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
@@ -143,9 +143,9 @@ class MPlot(PlotDataHelper):
                 single_scen_out = cap_out.set_index([scenario_names],append = True)
                 chunks.append(single_scen_out)
                 
-                mplt.stackplot(data=cap_out, color_dict=self.PLEXOS_color_dict, 
-                                      labels=cap_out.columns, n=i)
-                mplt.set_plot_timeseries_format(n=i)
+                mplt.stackplot(df=cap_out, color_dict=self.PLEXOS_color_dict, 
+                                      labels=cap_out.columns, sub_pos=i)
+                mplt.set_subplot_timeseries_format(sub_pos=i)
             
             if not chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -182,14 +182,14 @@ class MPlot(PlotDataHelper):
             
             self.logger.info('Zone = ' + str(zone_input))
 
-            xdimension=len(self.xlabels)
-            if xdimension == 0:
-                xdimension = 1
-            ydimension=len(self.ylabels)
-            if ydimension == 0:
-                ydimension = 1
-            grid_size = xdimension*ydimension
-            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharey=True)
+            ncols=len(self.xlabels)
+            if ncols == 0:
+                ncols = 1
+            nrows=len(self.ylabels)
+            if nrows == 0:
+                nrows = 1
+            grid_size = ncols*nrows
+            fig1, axs = plt.subplots(nrows,ncols, figsize=((8*ncols),(4*nrows)), sharey=True)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             if len(self.Multi_Scenario) > 1:
                 axs = axs.ravel()

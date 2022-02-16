@@ -95,14 +95,14 @@ class MPlot(PlotDataHelper):
 
         region_number = len(self.Zones)
         # determine x,y length for plot
-        xdimension, ydimension =  self.set_x_y_dimension(region_number)
+        ncols, nrows =  self.set_x_y_dimension(region_number)
         
-        grid_size = xdimension*ydimension
+        grid_size = ncols*nrows
         # Used to calculate any excess axis to delete
         excess_axs = grid_size - region_number
 
         #setup plot
-        mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+        mplt = SetupSubplot(nrows, ncols, sharey=True, 
                             squeeze=False, ravel_axs=True)
         fig, axs = mplt.get_figure()
         plt.subplots_adjust(wspace=0.1, hspace=0.50)
@@ -226,22 +226,22 @@ class MPlot(PlotDataHelper):
 
             Data_Out = duration_curve.add_suffix(" ($/MWh)")
 
-            xdimension=len(self.xlabels)
-            if xdimension == 0:
-                xdimension = 1
-            ydimension=len(self.ylabels)
-            if ydimension == 0:
-                ydimension = 1
+            ncols=len(self.xlabels)
+            if ncols == 0:
+                ncols = 1
+            nrows=len(self.ylabels)
+            if nrows == 0:
+                nrows = 1
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not facet:
-                xdimension = 1
-                ydimension = 1
+                ncols = 1
+                nrows = 1
 
             color_dict = dict(zip(duration_curve.columns,self.color_list))
 
             #setup plot
-            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+            mplt = SetupSubplot(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -335,22 +335,22 @@ class MPlot(PlotDataHelper):
 
             Data_Out = timeseries.add_suffix(" ($/MWh)")
 
-            xdimension=len(self.xlabels)
-            if xdimension == 0:
-                xdimension = 1
-            ydimension=len(self.ylabels)
-            if ydimension == 0:
-                ydimension = 1
+            ncols=len(self.xlabels)
+            if ncols == 0:
+                ncols = 1
+            nrows=len(self.ylabels)
+            if nrows == 0:
+                nrows = 1
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not facet:
-                xdimension = 1
-                ydimension = 1
+                ncols = 1
+                nrows = 1
 
             color_dict = dict(zip(timeseries.columns,self.color_list))
 
             #setup plot
-            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+            mplt = SetupSubplot(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -362,7 +362,7 @@ class MPlot(PlotDataHelper):
                          label=column, alpha=1)
                 if pd.notna(y_axis_max):
                     axs[n].set_ylim(bottom=0,top=float(y_axis_max))
-                mplt.set_plot_timeseries_format(n=n)
+                mplt.set_subplot_timeseries_format(sub_pos=n)
                 if facet:
                     n+=1
 
@@ -424,14 +424,14 @@ class MPlot(PlotDataHelper):
         outputs = {}
 
         region_number = len(self.Zones)
-        xdimension, ydimension =  self.set_x_y_dimension(region_number)
+        ncols, nrows =  self.set_x_y_dimension(region_number)
         
-        grid_size = xdimension*ydimension
+        grid_size = ncols*nrows
         # Used to calculate any excess axis to delete
         excess_axs = grid_size - region_number
 
         #setup plot
-        mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+        mplt = SetupSubplot(nrows, ncols, sharey=True, 
                             squeeze=False, ravel_axs=True)
         fig, axs = mplt.get_figure()
 
@@ -468,7 +468,7 @@ class MPlot(PlotDataHelper):
                 axs[n].set_title(zone_input.replace('_',' '))
                 if pd.notna(y_axis_max):
                     axs[n].set_ylim(bottom=0,top=float(y_axis_max))
-                mplt.set_plot_timeseries_format(n=n)
+                mplt.set_subplot_timeseries_format(sub_pos=n)
 
         # Add legend
         mplt.add_legend()
@@ -598,10 +598,10 @@ class MPlot(PlotDataHelper):
 
         Data_Out = pdc.add_suffix(" ($/MWh)")
         
-        xdimension, ydimension =  self.set_x_y_dimension(len(select_nodes))
+        ncols, nrows =  self.set_x_y_dimension(len(select_nodes))
         
         #setup plot
-        mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+        mplt = SetupSubplot(nrows, ncols, sharey=True, 
                             squeeze=False, ravel_axs=True)
         fig, axs = mplt.get_figure()
         plt.subplots_adjust(wspace=0.1, hspace=0.70)
@@ -631,7 +631,7 @@ class MPlot(PlotDataHelper):
                 if pd.notna(y_axis_max):
                     axs[n].set_ylim(bottom=0, top=float(y_axis_max))
                 if not PDC:
-                    mplt.set_plot_timeseries_format(n=n)
+                    mplt.set_subplot_timeseries_format(sub_pos=n)
                 # axs[n].set_xlim(0,len(node_pdc))
         
         mplt.add_legend()
@@ -769,14 +769,14 @@ class MPlot(PlotDataHelper):
             p_hist.columns = p_hist.columns.str.replace('_',' ')
             data_out = p_hist.add_suffix(" ($/MWh)")
             
-            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
-            grid_size = xdimension*ydimension
+            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+            grid_size = ncols*nrows
              # Used to calculate any excess axis to delete
             plot_number = len(self.Scenarios)
             excess_axs = grid_size - plot_number
         
             #setup plot
-            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+            mplt = SetupSubplot(nrows, ncols, sharey=True, 
                             squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.1, hspace=0.25)

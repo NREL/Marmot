@@ -527,8 +527,8 @@ class MPlot(PlotDataHelper):
             outputs = MissingInputData()
             return outputs
         
-        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
-        grid_size = xdimension*ydimension
+        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+        grid_size = ncols*nrows
 
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
@@ -681,13 +681,13 @@ class MPlot(PlotDataHelper):
             else:
                 Data_Table_Out = Gen_Out.add_suffix(f" (%-Gen)") * 100
 
-            mplt = PlotLibrary(ydimension, xdimension, sharey=True,
+            mplt = PlotLibrary(nrows, ncols, sharey=True,
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
 
-            if xdimension > 1:
-                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+            if ncols > 1:
+                font_scaling_ratio = 1 + ((ncols-1)*0.09)
                 plt.rcParams['xtick.labelsize'] *= font_scaling_ratio
                 plt.rcParams['ytick.labelsize'] *= font_scaling_ratio
                 plt.rcParams['legend.fontsize'] *= font_scaling_ratio
@@ -708,13 +708,13 @@ class MPlot(PlotDataHelper):
 
                 mplt.barplot(month_gen, color=self.PLEXOS_color_dict,
                             stacked=stack,
-                            n=i)
+                            sub_pos=i)
 
                 axs[i].margins(x=0.01)
                 axs[i].set_xlabel("")
                 
                 if plot_as_percnt:
-                    mplt.set_yaxis_major_tick_format(tick_format='percent', n=i)     
+                    mplt.set_yaxis_major_tick_format(tick_format='percent', sub_pos=i)     
                 
                 if not vre_only:
                     for n, _m in enumerate(month_total_load.index):
@@ -786,8 +786,8 @@ class MPlot(PlotDataHelper):
             outputs = MissingInputData()
             return outputs
         
-        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
-        grid_size = xdimension*ydimension
+        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+        grid_size = ncols*nrows
 
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
@@ -797,7 +797,7 @@ class MPlot(PlotDataHelper):
             Total_Gen_Out = pd.DataFrame()
             self.logger.info(f"Zone = {zone_input}")
 
-            mplt = SetupSubplot(ydimension, xdimension, sharey=True,
+            mplt = SetupSubplot(nrows, ncols, sharey=True,
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             

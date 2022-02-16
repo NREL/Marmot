@@ -114,10 +114,10 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
 
-            xdimension = len(self.Scenarios)
-            ydimension = len(tech_list_sort)
+            ncols = len(self.Scenarios)
+            nrows = len(tech_list_sort)
             
-            mplt = SetupSubplot(ydimension, xdimension, sharex=True,
+            mplt = SetupSubplot(nrows, ncols, sharex=True,
                                 sharey='row', squeeze=False)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
@@ -176,9 +176,9 @@ class MPlot(PlotDataHelper):
                     if tech != 'Hydro':
                         axs[j,i].plot(commit_cap, color=self.PLEXOS_color_dict[tech])
 
-                    mplt.set_yaxis_major_tick_format(n=(j,i))
+                    mplt.set_yaxis_major_tick_format(sub_pos=(j,i))
                     axs[j,i].margins(x=0.01)
-                    mplt.set_plot_timeseries_format(n=(j,i))
+                    mplt.set_subplot_timeseries_format(sub_pos=(j,i))
 
             mplt.add_facet_labels(xlabels_bottom=False, xlabels=self.Scenarios,
                                     ylabels=tech_list_sort)
@@ -489,28 +489,28 @@ class MPlot(PlotDataHelper):
         def mkplot(outputs, zone_input, all_scenarios):
 
             # sets up x, y dimensions of plot
-            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=all_scenarios)
+            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=all_scenarios)
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not facet:
-                xdimension = 1
-                ydimension = 1
+                ncols = 1
+                nrows = 1
 
-            grid_size = xdimension*ydimension
+            grid_size = ncols*nrows
 
             # Used to calculate any excess axis to delete
             plot_number = len(all_scenarios)
             excess_axs = grid_size - plot_number
 
-            mplt = PlotLibrary(ydimension, xdimension, sharey=True, 
+            mplt = PlotLibrary(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
 
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
             
             # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
-            if xdimension > 1:
-                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+            if ncols > 1:
+                font_scaling_ratio = 1 + ((ncols-1)*0.09)
                 plt.rcParams['xtick.labelsize'] *= font_scaling_ratio
                 plt.rcParams['ytick.labelsize'] *= font_scaling_ratio
                 plt.rcParams['legend.fontsize'] *= font_scaling_ratio
@@ -592,8 +592,8 @@ class MPlot(PlotDataHelper):
                 data_tables.append(single_scen_out)
 
                 mplt.stackplot(Stacked_Gen, self.PLEXOS_color_dict, 
-                                      labels=Stacked_Gen.columns, n=i)
-                mplt.set_plot_timeseries_format(n=i)
+                                      labels=Stacked_Gen.columns, sub_pos=i)
+                mplt.set_subplot_timeseries_format(sub_pos=i)
 
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].plot(Unserved_Energy,
@@ -683,13 +683,13 @@ class MPlot(PlotDataHelper):
             outputs = MissingInputData()
             return outputs
 
-        xdimension=len(self.xlabels)
-        if xdimension == 0:
-                xdimension = 1
+        ncols=len(self.xlabels)
+        if ncols == 0:
+                ncols = 1
 
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
-            xdimension = 1
+            ncols = 1
 
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
@@ -805,7 +805,7 @@ class MPlot(PlotDataHelper):
             ax.set_xlabel(timezone,  color='black', rotation='horizontal')
             mplt.set_yaxis_major_tick_format()
             ax.margins(x=0.01)
-            mplt.set_plot_timeseries_format()
+            mplt.set_subplot_timeseries_format()
             mplt.add_legend()
             
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}

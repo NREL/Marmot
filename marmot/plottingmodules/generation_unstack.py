@@ -127,14 +127,14 @@ class MPlot(PlotDataHelper):
             return outputs
             
         # sets up x, y dimensions of plot
-        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=all_scenarios)
+        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=all_scenarios)
 
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
-            xdimension = 1
-            ydimension = 1
+            ncols = 1
+            nrows = 1
         
-        grid_size = xdimension*ydimension
+        grid_size = ncols*nrows
             
         # Used to calculate any excess axis to delete
         plot_number = len(all_scenarios)
@@ -144,14 +144,14 @@ class MPlot(PlotDataHelper):
         
             excess_axs = grid_size - plot_number
             
-            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+            mplt = SetupSubplot(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
 
             # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
-            if xdimension > 1:
-                font_scaling_ratio = 1 + ((xdimension-1)*0.09)
+            if ncols > 1:
+                font_scaling_ratio = 1 + ((ncols-1)*0.09)
                 plt.rcParams['xtick.labelsize'] *= font_scaling_ratio
                 plt.rcParams['ytick.labelsize'] *= font_scaling_ratio
                 plt.rcParams['legend.fontsize'] *= font_scaling_ratio
@@ -288,9 +288,9 @@ class MPlot(PlotDataHelper):
                     axs[i].plot(Unserved_Energy, color='#DD0200',
                                 label='Unserved Energy')
 
-                mplt.set_yaxis_major_tick_format(n=i)
+                mplt.set_yaxis_major_tick_format(sub_pos=i)
                 axs[i].margins(x=0.01)
-                mplt.set_plot_timeseries_format(n=i)
+                mplt.set_subplot_timeseries_format(sub_pos=i)
 
             if not data_tables:
                 self.logger.warning(f'No generation in {zone_input}')
@@ -309,7 +309,7 @@ class MPlot(PlotDataHelper):
             mplt.remove_excess_axs(excess_axs, grid_size)
             # Add title
             mplt.add_main_title(zone_input)
-            
+
             labelpad = 40
             plt.ylabel(f"Generation ({unitconversion['units']})", 
                         color='black', rotation='vertical', labelpad=labelpad)

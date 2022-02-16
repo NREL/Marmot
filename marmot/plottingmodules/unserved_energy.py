@@ -135,7 +135,7 @@ class MPlot(PlotDataHelper):
                           color='black', rotation='vertical')
             ax.set_ylim(bottom=0)
             ax.margins(x=0.01)
-            mplt.set_plot_timeseries_format()
+            mplt.set_subplot_timeseries_format()
             if mconfig.parser("plot_title_as_region"):
                 mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
@@ -350,7 +350,7 @@ class MPlot(PlotDataHelper):
                 mplt.lineplot(unserved_energy_out[column], color=colour_dict,
                              linewidth=3, label=column)
 
-            mplt.set_plot_timeseries_format()
+            mplt.set_subplot_timeseries_format()
             mplt.add_legend()
             ax.set_ylabel(f"Average Diurnal Unserved Energy ({unitconversion['units']})", 
                           color='black', rotation='vertical')            

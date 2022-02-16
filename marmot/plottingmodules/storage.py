@@ -159,7 +159,7 @@ class MPlot(PlotDataHelper):
             #Make scenario/color dictionary.
             color_dict = dict(zip(storage_volume_all_scenarios.columns,self.color_list))
 
-            mplt = SetupSubplot(ydimension=2, squeeze=False, 
+            mplt = SetupSubplot(nrows=2, squeeze=False, 
                                 ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -178,9 +178,9 @@ class MPlot(PlotDataHelper):
 
                 axs[0].set_ylabel('Head Storage Volume (GWh)', 
                                   color='black', rotation='vertical')
-                mplt.set_yaxis_major_tick_format(n=0)
+                mplt.set_yaxis_major_tick_format(sub_pos=0)
                 axs[0].margins(x=0.01)
-                mplt.set_plot_timeseries_format(n=0)
+                mplt.set_subplot_timeseries_format(sub_pos=0)
                 axs[0].set_ylim(ymin = 0)
                 axs[0].set_title(zone_input)
 
@@ -194,16 +194,16 @@ class MPlot(PlotDataHelper):
                                   color='black', rotation='vertical')
                 axs[1].set_xlabel(timezone,  color='black', 
                                     rotation='horizontal')
-                mplt.set_yaxis_major_tick_format(n=1)
+                mplt.set_yaxis_major_tick_format(sub_pos=1)
                 axs[1].margins(x=0.01)
-                mplt.set_plot_timeseries_format(n=1)
+                mplt.set_subplot_timeseries_format(sub_pos=1)
             
             mplt.set_yaxis_major_tick_format()
             axs[0].axhline(y=max_volume, linestyle=':', label='Max Volume')
             axs[0].legend(loc='lower left', bbox_to_anchor = (1.15,0))
             axs[1].legend(loc='lower left', bbox_to_anchor = (1.15,0.2))
             if mconfig.parser("plot_title_as_region"):
-                fig.title(zone_input)
+                mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs

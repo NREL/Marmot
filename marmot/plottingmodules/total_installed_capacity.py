@@ -302,7 +302,7 @@ class MPlot(PlotDataHelper):
 
             mplt.barplot(Total_Installed_Capacity_Out, 
                          color=self.PLEXOS_color_dict,
-                         stacked=True, n=0,
+                         stacked=True, sub_pos=0,
                          custom_tick_labels=tick_labels)
 
             axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})", 
@@ -350,7 +350,7 @@ class MPlot(PlotDataHelper):
 
             mplt.barplot(Total_Generation_Stack_Out, 
                          color=self.PLEXOS_color_dict,
-                         stacked=True, n=1,
+                         stacked=True, sub_pos=1,
                          custom_tick_labels=tick_labels)
                          
             axs[1].set_ylabel(f"Total Generation ({energy_units})", 

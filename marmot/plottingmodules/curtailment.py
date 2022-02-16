@@ -1001,7 +1001,7 @@ class MPlot(PlotDataHelper):
             # Add legend
             mplt.add_legend()
             # Set time ticks
-            mplt.set_plot_timeseries_format()
+            mplt.set_subplot_timeseries_format()
             ax.set_ylabel(f"Average Diurnal Curtailment ({unitconversion['units']})", 
                             color='black', rotation='vertical')
             

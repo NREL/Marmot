@@ -242,7 +242,7 @@ class MPlot(PlotDataHelper):
                 mplt.set_yaxis_major_tick_format()
                 ax.margins(x=0.01)
 
-                mplt.set_plot_timeseries_format()
+                mplt.set_subplot_timeseries_format()
 
                 # Add title                
                 if mconfig.parser("plot_title_as_region"):

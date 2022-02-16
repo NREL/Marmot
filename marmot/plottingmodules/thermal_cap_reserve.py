@@ -82,15 +82,15 @@ class MPlot(PlotDataHelper):
             self.logger.info(f"Zone = {zone_input}")
                 
             # sets up x, y dimensions of plot
-            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
+            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
             
-            grid_size = xdimension*ydimension
+            grid_size = ncols*nrows
 
             # Used to calculate any excess axis to delete
             plot_number = len(self.Scenarios)
             excess_axs = grid_size - plot_number
             
-            mplt = PlotLibrary(ydimension, xdimension, sharey=True, 
+            mplt = PlotLibrary(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -147,10 +147,10 @@ class MPlot(PlotDataHelper):
                 data_table_chunks.append(data_table)
                 
                 mplt.stackplot(thermal_reserve, color_dict=self.PLEXOS_color_dict,
-                                labels=thermal_reserve.columns, n=i)
+                                labels=thermal_reserve.columns, sub_pos=i)
 
                 axs[i].margins(x=0.01)
-                mplt.set_plot_timeseries_format(n=i)
+                mplt.set_subplot_timeseries_format(sub_pos=i)
             
             # add facet labels
             mplt.add_facet_labels(xlabels=self.xlabels,

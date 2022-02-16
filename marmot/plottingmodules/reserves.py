@@ -119,11 +119,11 @@ class MPlot(PlotDataHelper):
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
 
-            xdimension, ydimension = self.setup_facet_xy_dimensions(facet,multi_scenario=Scenarios)
-            grid_size = xdimension*ydimension
+            ncols, nrows = self.set_facet_col_row_dimensions(facet,multi_scenario=Scenarios)
+            grid_size = ncols*nrows
             excess_axs = grid_size - len(Scenarios)
             
-            mplt = PlotLibrary(ydimension, xdimension, sharey=True, 
+            mplt = PlotLibrary(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -176,8 +176,8 @@ class MPlot(PlotDataHelper):
                 mplt.stackplot(reserve_provision_timeseries, 
                                color_dict=self.PLEXOS_color_dict, 
                                labels=reserve_provision_timeseries.columns,
-                               n=n)
-                mplt.set_plot_timeseries_format(n=n)
+                               sub_pos=n)
+                mplt.set_subplot_timeseries_format(sub_pos=n)
 
                 if prop == "Peak Demand":
                     axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), '.2f')) + ' {}'.format(unitconversion['units']), 
@@ -517,11 +517,11 @@ class MPlot(PlotDataHelper):
         for region in self.Zones:
             self.logger.info(f"Zone = {region}")
 
-            xdimension, ydimension = self.setup_facet_xy_dimensions(facet, multi_scenario=Scenarios)
-            grid_size = xdimension*ydimension
+            ncols, nrows = self.set_facet_col_row_dimensions(facet, multi_scenario=Scenarios)
+            grid_size = ncols*nrows
             excess_axs = grid_size - len(Scenarios)
 
-            mplt = SetupSubplot(ydimension, xdimension, sharey=True, 
+            mplt = SetupSubplot(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
             fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
@@ -568,9 +568,9 @@ class MPlot(PlotDataHelper):
                                 color=color_dict[column],
                                 label=column)
 
-                mplt.set_yaxis_major_tick_format(n=n)
+                mplt.set_yaxis_major_tick_format(sub_pos=n)
                 axs[n].margins(x=0.01)
-                mplt.set_plot_timeseries_format(n=n)
+                mplt.set_subplot_timeseries_format(sub_pos=n)
 
             if not data_tables:
                 out = MissingZoneData()
