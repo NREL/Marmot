@@ -51,7 +51,8 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                    Region_Mapping=self.Region_Mapping) 
 
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
@@ -381,7 +382,7 @@ class MPlot(PlotDataHelper):
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_', ' ')
 
             # Remove any suffixes from column names
-            Total_Generation_Stack_Out.columns = [re.sub('[\s (]|GWh|TWh|MWh|kWh|\)', '', i) 
+            Total_Generation_Stack_Out.columns = [re.sub('[(]|GWh|TWh|MWh|kWh|\)', '', i).strip() 
                                                   for i in Total_Generation_Stack_Out.columns]
 
             Total_Generation_Stack_Out.plot.bar(stacked=True, ax=axs[1],

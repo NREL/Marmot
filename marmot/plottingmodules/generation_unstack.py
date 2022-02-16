@@ -254,6 +254,7 @@ class MPlot(PlotDataHelper):
                     Pump_Load = Pump_Load[start_date : end_date]
 
                 elif prop == "Min Net Load":
+                    
                     min_net_load_t = Net_Load.idxmin()
                     end_date = min_net_load_t + dt.timedelta(days=end)
                     start_date = min_net_load_t - dt.timedelta(days=start)
@@ -265,7 +266,7 @@ class MPlot(PlotDataHelper):
 
                 elif prop == 'Date Range':
                 	self.logger.info(f"Plotting specific date range: \
-                	{str(start_date_range)} to {str(end_date_range)}")
+                    {str(start_date_range)} to {str(end_date_range)}")
 
 	                Stacked_Gen = Stacked_Gen[start_date_range : end_date_range]
 	                Load = Load[start_date_range : end_date_range]

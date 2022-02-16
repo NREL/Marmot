@@ -73,7 +73,8 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                    Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
@@ -238,7 +239,13 @@ class MPlot(PlotDataHelper):
             Total_Demand_Out = Total_Demand_Out.rename('Total Demand')
             Unserved_Energy_Out = Unserved_Energy_Out.rename('Unserved Energy')
 
-            Total_Generation_Stack_Out = self.create_categorical_tech_index(Total_Generation_Stack_Out)
+            # Add Net Imports if desired
+            if mconfig.parser("plot_data","include_total_net_imports"):
+                Total_Generation_Stack_Out =\
+                    self.include_net_imports(Total_Generation_Stack_Out, 
+                                             Total_Load_Out,
+                                             Unserved_Energy_Out)
+
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.T
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
@@ -723,6 +730,11 @@ class MPlot(PlotDataHelper):
             else:
                 max_value = max(Gen_Out.sum())
             
+            # Add Net Imports if desired
+            if mconfig.parser("plot_data","include_total_net_imports") and \
+                not vre_only:
+                Gen_Out = self.include_net_imports(Gen_Out, Total_Load_Out)
+
             if not plot_as_percnt:
                 # unit conversion return divisor and energy units
                 unitconversion = PlotDataHelper.capacity_energy_unitconversion(max_value)
