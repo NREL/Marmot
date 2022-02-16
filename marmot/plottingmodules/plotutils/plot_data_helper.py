@@ -23,8 +23,7 @@ class PlotDataHelper(dict):
     """Methods used to assist with the creation of Marmot plots
 
     Collection of Methods to assist with creation of figures,
-    including getting and formatting data, setting up plot sizes and adding 
-    elements to plots such as labels.
+    including getting and formatting data, setting up plot sizes.
 
     PlotDataHelper inherits the python class 'dict' so acts like a dictionary and stores the
     formatted data when retrieved by the get_formatted_data method.
@@ -262,9 +261,9 @@ class PlotDataHelper(dict):
 
         return df
 
-    def setup_facet_xy_dimensions(self, facet: bool = True, 
+    def set_facet_col_row_dimensions(self, facet: bool = True, 
                                   multi_scenario: list = None) -> Tuple[int, int]:
-        """Sets facet plot x,y dimensions based on user defined labeles
+        """Sets facet plot col and row dimensions based on user defined labeles
 
         Args:
             facet (bool, optional): Trigger for plotting facet plots. 
@@ -275,22 +274,22 @@ class PlotDataHelper(dict):
         Returns:
             Tuple[int, int]: Facet x,y dimensions.
         """
-        xdimension=len(self.xlabels)
+        ncols=len(self.xlabels)
         if self.xlabels == ['']:
-            xdimension = 1
-        ydimension=len(self.ylabels)
+            ncols = 1
+        nrows=len(self.ylabels)
         if self.ylabels == ['']:
-            ydimension = 1
+            nrows = 1
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
-            xdimension = 1
-            ydimension = 1
-            return xdimension, ydimension
+            ncols = 1
+            nrows = 1
+            return ncols, nrows
         # If no labels were provided or dimensions less than len scenarios use Marmot default dimension settings
-        if self.xlabels == [''] and self.ylabels == [''] or xdimension*ydimension<len(multi_scenario):
+        if self.xlabels == [''] and self.ylabels == [''] or ncols*nrows<len(multi_scenario):
             logger.info("Dimensions could not be determined from x & y labels - Using Marmot default dimensions")
-            xdimension, ydimension = self.set_x_y_dimension(len(multi_scenario))
-        return xdimension, ydimension
+            ncols, nrows = self.set_x_y_dimension(len(multi_scenario))
+        return ncols, nrows
 
     def set_x_y_dimension(self, region_number: int) -> Tuple[int, int]:
         """Sets X,Y dimension of plots without x,y labels.
@@ -302,15 +301,15 @@ class PlotDataHelper(dict):
             Tuple[int, int]: Facet x,y dimensions.
         """
         if region_number >= 5:
-            xdimension = 3
-            ydimension = math.ceil(region_number/3)
+            ncols = 3
+            nrows = math.ceil(region_number/3)
         if region_number <= 3:
-            xdimension = region_number
-            ydimension = 1
+            ncols = region_number
+            nrows = 1
         if region_number == 4:
-            xdimension = 2
-            ydimension = 2
-        return xdimension,ydimension
+            ncols = 2
+            nrows = 2
+        return ncols,nrows
 
     @staticmethod
     def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
