@@ -30,7 +30,7 @@ import logging.config
 import time
 from typing import Union
 
-import matplotlib as mpl
+import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 import pandas as pd
 import yaml
@@ -429,7 +429,7 @@ class MarmotPlot(SetupLogger):
             cmap = plt.cm.get_cmap(lut=len(ordered_gen))
             colors = []
             for i in range(cmap.N):
-                colors.append(mpl.colors.rgb2hex(cmap(i)))  
+                colors.append(mcolors.rgb2hex(cmap(i)))  
             PLEXOS_color_dict = dict(zip(ordered_gen,colors))
         
         
@@ -593,18 +593,8 @@ class MarmotPlot(SetupLogger):
             
             # Main loop to process each figure and pass 
             # plot specific variables to methods
-            for index, row in module_plots.iterrows(): 
-                
-                # Set Plot defaults
-                mpl.rc('xtick', labelsize=font_defaults['xtick_size'])
-                mpl.rc('ytick', labelsize=font_defaults['ytick_size'])
-                mpl.rc('axes', labelsize=font_defaults['axes_label_size'])
-                mpl.rc('legend', fontsize=font_defaults['legend_size'])
-                mpl.rc('font', family=font_defaults['font_family'])
-                mpl.rc('figure', max_open_warning = 0)
-                mpl.rc('axes', titlesize=font_defaults['title_size'], 
-                       titlepad=text_position['title_height'])
-                
+            for _, row in module_plots.iterrows(): 
+                                
                 print("\n\n\n")
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
@@ -680,7 +670,7 @@ class MarmotPlot(SetupLogger):
                 self.logger.info('Plotting Completed for '
                                  f'{row["Figure Output Name"]}\n')
 
-                mpl.pyplot.close('all')
+                plt.close('all')
         
         end_timer = time.time()
         time_elapsed = end_timer - start_timer
