@@ -111,7 +111,6 @@ class SetupSubplot():
         self.exax.tick_params(labelcolor='none', top=False, bottom=False, 
                             left=False, right=False)
 
-
     def _check_if_array(self, sub_pos):
         if isinstance(self.axs, Axes):
             ax = self.axs
@@ -255,7 +254,7 @@ class SetupSubplot():
         self.exax.set_title(label, **kwargs)
 
     def set_yaxis_major_tick_format(self, tick_format: str = 'standard',
-                                    decimal_accuracy: int  = mconfig.parser("axes_options", 
+                                    decimal_accuracy: int = mconfig.parser("axes_options", 
                                                                     "y_axes_decimalpt"),
                                     sub_pos: Union[int, Tuple[int, int]] = 0) -> None:
         """Sets the y axis major tick format of numbers.
@@ -341,9 +340,12 @@ class SetupSubplot():
             excess_axs-=1
 
     def set_barplot_xticklabels(self, labels: list, 
-                                rotate: bool = mconfig.parser("axes_label_options", "rotate_x_labels"),
-                                num_labels: int = mconfig.parser("axes_label_options", "rotate_at_num_labels"),
-                                angle: float = mconfig.parser("axes_label_options", "rotation_angle"),
+                                rotate: bool = mconfig.parser("axes_label_options", 
+                                                              "rotate_x_labels"),
+                                num_labels: int = mconfig.parser("axes_label_options", 
+                                                                 "rotate_at_num_labels"),
+                                angle: float = mconfig.parser("axes_label_options", 
+                                                              "rotation_angle"),
                                 sub_pos: Union[int, Tuple[int, int]] = 0, 
                                 **kwargs) -> None:
         """Set the xticklabels on bar plots and determine whether they will be rotated.
@@ -442,7 +444,7 @@ class PlotLibrary(SetupSubplot):
     Inherits the SetupSubplot class and takes all the 
     same arguments as it.
     """
-    
+
     def stackplot(self, df: pd.DataFrame, color_dict: dict = None, 
                  sub_pos: Union[int, Tuple[int, int]] = 0, 
                  ytick_major_fmt: str = 'standard', **kwargs):
@@ -475,7 +477,6 @@ class PlotLibrary(SetupSubplot):
 
         self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, sub_pos=sub_pos)
         ax.margins(x=0.01)
-    
 
     def barplot(self, df: pd.DataFrame, color: Union[dict, list] = None,
                 stacked: bool = False, sub_pos: Union[int, Tuple[int, int]] = 0, 
@@ -521,14 +522,15 @@ class PlotLibrary(SetupSubplot):
                     linewidth=linewidth,
                     **kwargs)
         
-        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, sub_pos=sub_pos)
+        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, 
+                                            sub_pos=sub_pos)
 
         # Set x-tick labels 
         if custom_tick_labels and len(custom_tick_labels) > 1:
             tick_labels = custom_tick_labels
         else:
             tick_labels = df.index
-        self.set_barplot_xticklabels(tick_labels, sub_pos)
+        self.set_barplot_xticklabels(tick_labels, sub_pos=sub_pos)
 
     def lineplot(self, data: pd.Series, column=None,
                  color: Union[dict, str] = None,
@@ -572,12 +574,13 @@ class PlotLibrary(SetupSubplot):
         else:
             color=None
         
-        ax.plot(plot_data, linewidth=1, 
+        ax.plot(plot_data, 
                 linestyle=linestyle,
                 color=color,
                 alpha=alpha, **kwargs)
 
-        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, sub_pos=sub_pos)
+        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, 
+                                            sub_pos=sub_pos)
 
     def histogram(self, df: pd.DataFrame, color_dict: dict,
                   label=None,
@@ -600,7 +603,6 @@ class PlotLibrary(SetupSubplot):
 
         ax.hist(df, bins=20, range=(0,1), color=color_dict[label], zorder=2, 
                     rwidth=0.8, label=label, **kwargs)
-
 
     def clustered_stacked_barplot(self, df_list: List[pd.DataFrame], 
                                     labels: list, color_dict: dict, 
@@ -678,6 +680,7 @@ class PlotLibrary(SetupSubplot):
             handles.append(Patch(facecolor='gray', hatch=H*i))
             label_list.append(c_name)
         
-        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, sub_pos=sub_pos)
+        self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, 
+                                            sub_pos=sub_pos)
         self.add_legend(handles, label_list)
 

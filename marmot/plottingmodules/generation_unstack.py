@@ -42,7 +42,8 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET,
+                    Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         
@@ -249,6 +250,7 @@ class MPlot(PlotDataHelper):
                     Pump_Load = Pump_Load[start_date : end_date]
 
                 elif prop == "Min Net Load":
+                    
                     min_net_load_t = Net_Load.idxmin()
                     end_date = min_net_load_t + dt.timedelta(days=end)
                     start_date = min_net_load_t - dt.timedelta(days=start)

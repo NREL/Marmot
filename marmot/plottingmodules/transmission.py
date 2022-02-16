@@ -49,7 +49,8 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                    Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.font_defaults = mconfig.parser("font_settings")
@@ -406,10 +407,10 @@ class MPlot(PlotDataHelper):
                                 #Only plot limits for last scenario.
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
                                 mplt.lineplot(limits, 'export limit',
-                                                         label='export limit', color_dict=limits_color_dict,
+                                                         label='export limit', color=limits_color_dict,
                                                          linestyle='--', sub_pos=n)
                                 mplt.lineplot(limits, 'import limit', 
-                                                         label='import limit', color_dict=limits_color_dict,
+                                                         label='import limit', color=limits_color_dict,
                                                          linestyle='--', sub_pos=n)
 
                         #For output time series .csv
@@ -834,8 +835,8 @@ class MPlot(PlotDataHelper):
                             if scenario == self.Scenarios[-1]:
                                 #Only plot limits for last scenario.
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
-                                mplt.lineplot(limits,'export limit',label = 'export limit',color_dict = limits_color_dict,linestyle = '--', sub_pos = n)
-                                mplt.lineplot(limits,'import limit',label = 'import limit',color_dict = limits_color_dict,linestyle = '--', sub_pos = n)
+                                mplt.lineplot(limits,'export limit',label = 'export limit',color = limits_color_dict,linestyle = '--', sub_pos = n)
+                                mplt.lineplot(limits,'import limit',label = 'import limit',color = limits_color_dict,linestyle = '--', sub_pos = n)
 
                         #For output time series .csv
                         scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
@@ -1854,7 +1855,7 @@ class MPlot(PlotDataHelper):
                                             linewidth='0.1', width=0.35, ax=ax)
             else:
                 for column in all_scenarios:
-                    mplt.lineplot(all_scenarios,column,color_dict=color_dict,label=column)
+                    mplt.lineplot(all_scenarios,column,color=color_dict,label=column)
                 ax.margins(x=0.01)
                 mplt.set_subplot_timeseries_format(minticks=6,maxticks=12)
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')

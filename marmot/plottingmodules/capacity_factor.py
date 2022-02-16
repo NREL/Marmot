@@ -42,7 +42,8 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                    Region_Mapping=self.Region_Mapping) 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
@@ -208,7 +209,7 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            CF_all_scenarios = pd.DataFrame()
+            cf_scen_chunks = []
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
@@ -251,8 +252,10 @@ class MPlot(PlotDataHelper):
                 #Calculate CF
                 CF = Total_Gen/(Cap * duration_hours)
                 CF.rename(scenario, inplace = True)
-                CF_all_scenarios = pd.concat([CF_all_scenarios, CF], axis=1, sort=False)
-                CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
+                cf_scen_chunks.append(CF)
+
+            CF_all_scenarios = pd.concat(cf_scen_chunks, axis=1, sort=False)
+            CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
 
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = MissingZoneData()

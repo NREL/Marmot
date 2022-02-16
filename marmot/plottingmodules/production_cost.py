@@ -43,12 +43,14 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                    Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
                 
     def prod_cost(self, start_date_range: str = None, 
-                  end_date_range: str = None, **_):
+                  end_date_range: str = None, custom_data_file_path: str = None,
+                  **_):
         """Plots total system net revenue and cost normalized by the installed capacity of the area.
 
         Total revenue is made up of reserve and energy revenues which are displayed in a stacked
@@ -60,6 +62,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -103,14 +107,14 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 Total_Gen_Cost = self.df_process_gen_inputs(Total_Gen_Cost)
                 Total_Gen_Cost = Total_Gen_Cost.sum(axis=0)*-1
-                Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/MW-year
+                # Total_Gen_Cost = Total_Gen_Cost/Total_Installed_Capacity #Change to $/MW-year
                 Total_Gen_Cost.rename("Total_Gen_Cost", inplace=True)
 
                 Pool_Revenues = self["generator_Pool_Revenue"].get(scenario)
                 Pool_Revenues = Pool_Revenues.xs(zone_input,level=self.AGG_BY)
                 Pool_Revenues = self.df_process_gen_inputs(Pool_Revenues)
                 Pool_Revenues = Pool_Revenues.sum(axis=0)
-                Pool_Revenues = Pool_Revenues/Total_Installed_Capacity #Change to $/MW-year
+                # Pool_Revenues = Pool_Revenues/Total_Installed_Capacity #Change to $/MW-year
                 Pool_Revenues.rename("Energy_Revenues", inplace=True)
 
                 ### Might change to Net Reserve Revenue at later date
@@ -118,10 +122,12 @@ class MPlot(PlotDataHelper):
                 Reserve_Revenues = Reserve_Revenues.xs(zone_input,level=self.AGG_BY)
                 Reserve_Revenues = self.df_process_gen_inputs(Reserve_Revenues)
                 Reserve_Revenues = Reserve_Revenues.sum(axis=0)
-                Reserve_Revenues = Reserve_Revenues/Total_Installed_Capacity #Change to $/MW-year
+                # Reserve_Revenues = Reserve_Revenues/Total_Installed_Capacity #Change to $/MW-year
                 Reserve_Revenues.rename("Reserve_Revenues", inplace=True)
 
-                Total_Systems_Cost = pd.concat([Total_Systems_Cost, Total_Gen_Cost, Pool_Revenues, Reserve_Revenues], axis=1, sort=False)
+                Total_Systems_Cost = pd.concat([Total_Systems_Cost, Total_Gen_Cost, 
+                                                Pool_Revenues, Reserve_Revenues], 
+                                               axis=1, sort=False)
 
                 Total_Systems_Cost.columns = Total_Systems_Cost.columns.str.replace('_',' ')
                 Total_Systems_Cost = Total_Systems_Cost.sum(axis=0)
@@ -134,7 +140,14 @@ class MPlot(PlotDataHelper):
             Total_Systems_Cost_Out = Total_Systems_Cost_Out.T
             Total_Systems_Cost_Out.index = Total_Systems_Cost_Out.index.str.replace('_',' ')
                         
-            Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000 #Change to $/kW-year
+            # Total_Systems_Cost_Out = Total_Systems_Cost_Out/1000 #Change to $/kW-year
+            Total_Systems_Cost_Out = Total_Systems_Cost_Out/1e6 #Convert cost to millions
+            
+            if pd.notna(custom_data_file_path):
+                Total_Systems_Cost_Out = self.insert_custom_data_columns(
+                                                        Total_Systems_Cost_Out, 
+                                                        custom_data_file_path)
+
             Net_Revenue = Total_Systems_Cost_Out.sum(axis=1)
 
             #Checks if Net_Revenue contains data, if not skips zone and does not return a plot
@@ -144,7 +157,7 @@ class MPlot(PlotDataHelper):
                 continue
 
             # Data table of values to return to main program
-            Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" ($/KW-yr)")
+            Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
 
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
@@ -172,7 +185,8 @@ class MPlot(PlotDataHelper):
         return outputs
 
     def sys_cost(self, start_date_range: str = None, 
-                 end_date_range: str = None, **_):
+                 end_date_range: str = None, custom_data_file_path: str = None,
+                 **_):
         """Creates a stacked bar plot of Total Generation Cost and Cost of Unserved Energy.
 
         Plot only shows totals and is NOT broken down into technology or cost type 
@@ -184,6 +198,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -257,6 +273,11 @@ class MPlot(PlotDataHelper):
             if Total_Systems_Cost_Out.empty:
                 outputs[zone_input] = MissingZoneData()
                 continue
+            
+            if pd.notna(custom_data_file_path):
+                Total_Systems_Cost_Out = self.insert_custom_data_columns(
+                                                        Total_Systems_Cost_Out, 
+                                                        custom_data_file_path)
 
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
@@ -311,7 +332,8 @@ class MPlot(PlotDataHelper):
         return outputs
 
     def detailed_gen_cost(self, start_date_range: str = None, 
-                          end_date_range: str = None, **_):
+                          end_date_range: str = None, custom_data_file_path: str = None,
+                          **_):
         """Creates stacked bar plot of total generation cost by cost type (fuel, emission, start cost etc.)
 
         Creates a more deatiled system cost plot.
@@ -322,6 +344,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -407,6 +431,11 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
             
+            if pd.notna(custom_data_file_path):
+                Total_Systems_Cost_Out = self.insert_custom_data_columns(
+                                                        Total_Systems_Cost_Out, 
+                                                        custom_data_file_path)
+                                                        
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
             
@@ -461,7 +490,8 @@ class MPlot(PlotDataHelper):
 
 
     def sys_cost_type(self, start_date_range: str = None, 
-                      end_date_range: str = None, **_):
+                      end_date_range: str = None, custom_data_file_path: str = None,
+                      **_):
         """Creates stacked bar plot of total generation cost by generator technology type.
 
         Another way to represent total generation cost, this time by tech type,
@@ -473,6 +503,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -526,7 +558,11 @@ class MPlot(PlotDataHelper):
             if Total_Generation_Stack_Out.empty:
                 outputs[zone_input] = MissingZoneData()
                 continue
-
+            
+            if pd.notna(custom_data_file_path):
+                Total_Generation_Stack_Out = self.insert_custom_data_columns(
+                                                    Total_Generation_Stack_Out,
+                                                    custom_data_file_path)
             # Data table of values to return to main program
             Data_Table_Out = Total_Generation_Stack_Out.add_suffix(" (Million $)")
 

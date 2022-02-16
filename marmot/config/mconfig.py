@@ -77,6 +77,8 @@ def createConfig(configfile_path: str):
         - curtailment_property: Curtailment
         - include_total_pumped_load_line: false
         - include_timeseries_pumped_load_line: true
+        - include_total_net_imports: true
+        - include_timeseries_net_imports: true
 
     *Controls certain plot data settings. `curtailment_property` source of Curtailment data. 
     The code defaults to Marmot's calculated Curtailment property. `include_total_pumped_load_line` 
@@ -176,7 +178,9 @@ def createConfig(configfile_path: str):
         plot_data = dict(
             curtailment_property = 'Curtailment',
             include_total_pumped_load_line = True,
-            include_timeseries_pumped_load_line = True),
+            include_timeseries_pumped_load_line = True,
+            include_total_net_imports = True,
+            include_timeseries_net_imports = True),
 
         multithreading_workers = 16,
         figure_file_format = 'svg',

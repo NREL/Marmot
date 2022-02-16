@@ -576,7 +576,8 @@ class MarmotPlot(SetupLogger):
                 "Region_Mapping": self.Region_Mapping,
                 "figure_folder": figure_folder,
                 "meta": meta,
-                "shift_leapday": shift_leapday
+                "shift_leapday": shift_leapday,
+                "TECH_SUBSET": self.TECH_SUBSET
                 }
             
             # Create output folder for each plotting module
@@ -613,7 +614,8 @@ class MarmotPlot(SetupLogger):
                                            end = float(row.iloc[5]),
                                            timezone = row.iloc[6],
                                            start_date_range = row.iloc[7],
-                                           end_date_range = row.iloc[8])
+                                           end_date_range = row.iloc[8],
+                                           custom_data_file_path = row['Custom Data File'])
                 
                 if isinstance(Figure_Out, MissingInputData):
                     self.logger.info("Add Inputs With Formatter Before "

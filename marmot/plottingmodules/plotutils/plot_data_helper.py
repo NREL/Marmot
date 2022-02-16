@@ -31,7 +31,7 @@ class PlotDataHelper(dict):
 
     def __init__(self, Marmot_Solutions_folder: str, AGG_BY: str, ordered_gen: list, 
                  PLEXOS_color_dict: dict, Scenarios: list, ylabels: list, 
-                 xlabels: list, gen_names_dict: dict,
+                 xlabels: list, gen_names_dict: dict, TECH_SUBSET: str,
                  Region_Mapping: pd.DataFrame = pd.DataFrame()):
         """
         Args:
@@ -56,6 +56,7 @@ class PlotDataHelper(dict):
         self.ylabels = ylabels
         self.xlabels = xlabels
         self.gen_names_dict = gen_names_dict
+        self.TECH_SUBSET = TECH_SUBSET
         self.Region_Mapping = Region_Mapping
 
     def get_formatted_data(self, properties: list) -> list:
@@ -170,10 +171,9 @@ class PlotDataHelper(dict):
             logger.warning("Curtailment techs could not be identified correctly for Marmot's Curtailment property. "
             "This is likely happening as the 'vre' column was not present in the ordered_gen_categories.csv or there "
             "are no vre generators in the selected region")
-            return df
-        else: 
-            # Retrun df with just vre techs
-            return df[df.columns.intersection(self.vre_gen_cat)]
+ 
+        # Retrun df with just vre techs
+        return df[df.columns.intersection(self.vre_gen_cat)]
 
     def df_process_gen_inputs(self, df: pd.DataFrame) -> pd.DataFrame:
         """Processes generation data into a pivot table. 
@@ -311,6 +311,49 @@ class PlotDataHelper(dict):
             nrows = 2
         return ncols,nrows
 
+    def include_net_imports(self, gen_df: pd.DataFrame, 
+                            load_series: pd.Series,
+                            unsereved_energy: pd.Series = pd.Series(dtype='float64')) -> pd.DataFrame:
+        """Adds net imports to total and timeseries generation plots.
+
+        Net imports are calculated as load - total generation 
+
+        Args:
+            gen_df (pd.DataFrame): generation dataframe
+            load_series (pd.Series): load series 
+            unsereved_energy (pd.Series) : unsereved energy series,
+                (optional)
+
+        Returns:
+            pd.DataFrame: Dataframe with net imports included 
+        """
+        # Do not calculate net imports if using a subset of techs
+        if self.TECH_SUBSET:
+            logger.info("Net Imports can not be calculated when using TECH_SUBSET")
+            return gen_df
+        # Check if generators are in columns, if yes transpose gen_df
+        if any(gen_type in self.ordered_gen for gen_type in gen_df.columns):
+            gen_df = gen_df.T
+            transpose_df = True
+        else:
+            transpose_df = False
+        curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
+        if curtailment_name in gen_df.index:
+            total_gen = gen_df.drop(curtailment_name).sum()
+        else:
+            total_gen = gen_df.sum()
+        net_imports = load_series.squeeze() - total_gen
+        # Remove negative values (i.e exports)
+        net_imports = net_imports.clip(lower=0)
+        if not unsereved_energy.empty:
+            net_imports -= unsereved_energy.squeeze()
+        net_imports = net_imports.rename("Net Imports")
+        gen_df = gen_df.append(net_imports)
+        gen_df = self.create_categorical_tech_index(gen_df)
+        if transpose_df:
+           gen_df = gen_df.T 
+        return gen_df
+
     @staticmethod
     def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
         """Detects the interval spacing of timeseries data. 
@@ -377,3 +420,57 @@ class PlotDataHelper(dict):
             
         return {'units':units, 'divisor':divisor}
 
+    @staticmethod
+    def insert_custom_data_columns(existing_df: pd.DataFrame, 
+                                   custom_data_file_path: str) -> pd.DataFrame:
+        """Insert custom columns into existing DataFrame before plotting.
+
+        Custom data is loaded from passed custom_data_file_path, 
+        the custom data file must be a csv. 
+        Default position of new columns is at the end of the existing DataFrame.
+        Specific positions can be selected by including a row with index label 
+        'column_position'. 
+        Corresponding column positions can then be included.
+        -1 can be passed to insert the column at the end of the DataFrame (rightmost position).
+
+        New rows can also be included but their position can not be changed and are 
+        appended to end of DataFrame.
+
+        NaN values are returned as 0
+
+        Args:
+            existing_df (pd.DataFrame): DataFrame to modify 
+            custom_data_file_path (str): path to custom data file
+            inplace (bool, optional): Modify the DataFrame in place 
+                (do not create a new object). 
+                Defaults to False.
+
+        Returns:
+            pd.DataFrame: DataFrame with the newly inserted columns
+        """
+        
+        if not os.path.basename(custom_data_file_path).endswith('csv'):
+            logger.warning("Custom datafile must be a csv, returning " 
+                           "unmodified DataFrame")
+            return existing_df
+
+        custom_input_df = pd.read_csv(custom_data_file_path, index_col=0) 
+        
+        modifed_df = pd.concat([existing_df, custom_input_df], axis=1, copy=False)
+        modifed_df.fillna(0, inplace=True)
+
+        if 'column_position' in custom_input_df.index:
+            col_pos = custom_input_df.loc['column_position']
+
+            new_col_order = list(modifed_df.columns)
+            for col in custom_input_df:
+                if col_pos[col] == -1:
+                    new_col_order.append(new_col_order.pop(new_col_order.index(col)))
+                else:
+                    new_col_order.remove(col)
+                    new_col_order.insert(int(col_pos[col]), col)
+
+            modifed_df = modifed_df.reindex(columns=new_col_order)
+            modifed_df.drop('column_position', inplace=True)
+        
+        return modifed_df

@@ -47,14 +47,16 @@ class MPlot(PlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, Region_Mapping=self.Region_Mapping) 
+                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                    Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
 
     # function to collect total emissions by fuel type
     def total_emissions_by_type(self, prop: str = None, start_date_range: str = None,
-                                end_date_range: str = None, **_):
+                                end_date_range: str = None, custom_data_file_path: str = None,
+                                **_):
         """Creates a stacked bar plot of emissions by generator tech type.
 
         The emission type to plot is defined using the prop argument.
@@ -68,6 +70,8 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+                data. Index and column format should be consistent with output data csv.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -108,7 +112,6 @@ class MPlot(PlotDataHelper):
                 emit = self.rename_gen_techs(emit)
                 # summarize annual emissions by pollutant and tech
                 emit = emit.groupby(['pollutant', 'tech']).sum()
-
                 # rename column based on scenario
                 emit.rename(columns={0:scenario}, inplace=True)
                 emitList.append(emit)
@@ -123,48 +126,53 @@ class MPlot(PlotDataHelper):
                 continue
 
             # format results
-            emitOut = emitOut.T/1E9 # Convert from kg to million metric tons
-            emitOut = emitOut.loc[:, (emitOut != 0).any(axis=0)] # drop any generators with no emissions
+            emitOut = emitOut/1E9 # Convert from kg to million metric tons
+            emitOut = emitOut.loc[(emitOut != 0).any(axis=1), :] # drop any generators with no emissions
             emitOut = emitOut.T  # transpose back (easier for slicing by pollutant later)
-
-            # Checks if emitOut contains data, if not skips zone and does not return a plot
-            if emitOut.empty:
-                out = MissingZoneData()
-                outputs[zone_input] = out
-                continue
 
             # subset to relevant pollutant (specified by user as property)
             try:
-                emitPlot = emitOut.xs(prop, level="pollutant").T
-                dataOut = emitPlot.copy()
-                
-                # single pollutant plot
-                mplt = PlotLibrary()
-                fig, ax = mplt.get_figure()
-
-                # Set x-tick labels 
-                if len(self.custom_xticklabels) > 1:
-                    tick_labels = self.custom_xticklabels
-                else:
-                    tick_labels = emitPlot.index
-
-                mplt.barplot(emitPlot, color=self.PLEXOS_color_dict,
-                            stacked=True, 
-                            custom_tick_labels=tick_labels)
-
-                ax.set_ylabel(f'Annual {prop} Emissions\n(million metric tons)', 
-                                color='black', rotation='vertical')
-                # Add legend
-                mplt.add_legend(reverse_legend=True)
-                # Add title
-                if mconfig.parser("plot_title_as_region"):
-                    mplt.add_main_title(zone_input)
-
-                outputs[zone_input] = {'fig': fig, 'data_table': dataOut}
-
+                emitPlot = emitOut.xs(prop, level="pollutant", axis=1)
             except KeyError:
                 self.logger.warning(prop+ " emissions not found")
                 outputs = InputSheetError()
                 return outputs
+
+            if pd.notna(custom_data_file_path):
+                emitPlot = self.insert_custom_data_columns(
+                                                        emitPlot, 
+                                                        custom_data_file_path)
+
+            # Checks if emitOut contains data, if not skips zone and does not return a plot
+            if emitPlot.empty:
+                out = MissingZoneData()
+                outputs[zone_input] = out
+                continue
+        
+            dataOut = emitPlot
+                
+            # single pollutant plot
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
+
+            # Set x-tick labels 
+            if len(self.custom_xticklabels) > 1:
+                tick_labels = self.custom_xticklabels
+            else:
+                tick_labels = emitPlot.index
+
+            mplt.barplot(emitPlot, color=self.PLEXOS_color_dict,
+                        stacked=True, 
+                        custom_tick_labels=tick_labels)
+
+            ax.set_ylabel(f'Annual {prop} Emissions\n(million metric tons)', 
+                                color='black', rotation='vertical')
+            # Add legend
+            mplt.add_legend(reverse_legend=True)
+            # Add title
+            if mconfig.parser("plot_title_as_region"):
+                mplt.add_main_title(zone_input)
+
+            outputs[zone_input] = {'fig': fig, 'data_table': dataOut}
 
         return outputs
