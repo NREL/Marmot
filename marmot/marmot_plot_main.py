@@ -275,8 +275,8 @@ class MarmotPlot(SetupLogger):
             # delete category columns if exists
             self.Region_Mapping = self.Region_Mapping.drop(["category"],axis=1) 
         except KeyError:
-            pass     
-                        
+            pass
+                       
     def run_plotter(self):
         """Main method to call to begin plotting figures. 
         
@@ -606,6 +606,7 @@ class MarmotPlot(SetupLogger):
                 mpl.rc('axes', titlesize=font_defaults['title_size'], 
                        titlepad=text_position['title_height'])
                 
+                
                 print("\n\n\n")
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
                 
@@ -627,6 +628,7 @@ class MarmotPlot(SetupLogger):
                                            end_date_range = row.iloc[8],
                                            custom_data_file_path = row['Custom Data File'])
                 
+
                 if isinstance(Figure_Out, MissingInputData):
                     self.logger.info("Add Inputs With Formatter Before "
                                      "Attempting to Plot!\n")

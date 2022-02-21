@@ -87,7 +87,6 @@ class MetaData():
         
         try:  
             if self.read_from_formatted_h5:
-
                 filename = processed_file_format.format(filename)
                 self.h5_data = h5py.File(os.path.join(self.HDF5_folder_in, filename), 'r')
                 partitions = [key for key in self.h5_data['metadata'].keys()]

@@ -237,7 +237,7 @@ def create_clustered_stacked_bar_plot(df_list: List[pd.DataFrame],
 
 
 def create_line_plot(axs, data: pd.DataFrame, column: str, color_dict: dict = None,
-                        label: list = None, linestyle: str = 'solid',
+                        label: list = None, linestyle: str = 'solid',linewidth: int = 1,
                         n: int = 0, alpha:int = 1, **kwargs):
     """Creates a line plot
 
@@ -257,10 +257,10 @@ def create_line_plot(axs, data: pd.DataFrame, column: str, color_dict: dict = No
         alpha (int, optional): Line opacity. Defaults to 1.
     """
     if color_dict==None:
-        axs[n].plot(data[column], linewidth=1, linestyle=linestyle, 
+        axs[n].plot(data[column], linewidth=linewidth, linestyle=linestyle, 
                         label=label, alpha=alpha)
     else:
-        axs[n].plot(data[column], linewidth=1, linestyle=linestyle,
+        axs[n].plot(data[column], linewidth=linewidth, linestyle=linestyle,
                          color=color_dict[column],
                          label=label, alpha=alpha)
     axs[n].spines['right'].set_visible(False)

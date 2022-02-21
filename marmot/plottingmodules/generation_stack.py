@@ -276,7 +276,9 @@ class MPlot(PlotDataHelper):
                           (False,f"generator_{self.curtailment_prop}",scenario_list),
                           (False,"generator_Pump_Load",scenario_list),
                           (True,f"{agg}_Load",scenario_list),
-                          (False,f"{agg}_Unserved_Energy",scenario_list)]
+                          (False,f"{agg}_Unserved_Energy",scenario_list),
+                          (False,"batterie_Generation",scenario_list),
+                          (False,"batterie_Load",scenario_list)]
 
             # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -306,6 +308,17 @@ class MPlot(PlotDataHelper):
                     vre_gen_cat = self.vre_gen_cat
             else:
                 vre_gen_cat = self.vre_gen_cat
+
+            # Insert battery generation into gen stack.
+            batt_gen = self["batterie_Generation"].get(scenario).copy()
+            if not batt_gen.empty:
+                if self.shift_leapday == True:
+                    batt_gen = self.adjust_for_leapday(batt_gen)
+            #if zone_input in batt_gen.index.get_level_values(self.AGG_BY).unique():
+            #batt_gen = batt_gen.xs(zone_input,level=self.AGG_BY)
+            batt_gen = batt_gen.groupby(level = ['timestamp']).sum()
+            Stacked_Gen.insert(len(Stacked_Gen.columns),column='BESS discharging', value=batt_gen)
+
             # Adjust list of values to drop depending on if it exists in Stacked_Gen df
             vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
             Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
@@ -317,7 +330,7 @@ class MPlot(PlotDataHelper):
             Load = self[f'{agg}_Load'].get(scenario).copy()
             if self.shift_leapday == True:
                 Load = self.adjust_for_leapday(Load)
-            Load = Load.xs(zone_input,level=self.AGG_BY)
+            Load = Load.xs(zone_input,level=self.AGG_BY)       
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
 
@@ -330,10 +343,18 @@ class MPlot(PlotDataHelper):
             Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
             Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
             Pump_Load = Pump_Load.squeeze() #Convert to Series
+
+            batt_load = self['batterie_Load'][scenario].copy()
+            if self.shift_leapday == True: batt_load = self.adjust_for_leapday(batt_load)
+            batt_load = batt_load.groupby('timestamp').sum().squeeze()
+
             if (Pump_Load == 0).all() == False:
                 Total_Demand = Load - Pump_Load
+
+            elif (batt_load == 0).all() == False:
+                Total_Demand = Load - batt_load
             else:
-                Total_Demand = Load
+                Total_Demand = Load.copy()
 
             Unserved_Energy = self[f'{agg}_Unserved_Energy'][scenario].copy()
             if Unserved_Energy.empty:
@@ -353,6 +374,7 @@ class MPlot(PlotDataHelper):
                     "Load": Load,
                     "Net_Load": Net_Load,
                     "Pump_Load": Pump_Load,
+                    "batt_load" : batt_load,
                     "Total_Demand": Total_Demand,
                     "Unserved_Energy": Unserved_Energy,
                     "ue_data_table": unserved_eng_data_table}
@@ -364,6 +386,7 @@ class MPlot(PlotDataHelper):
             Load = data["Load"]
             Net_Load = data["Net_Load"]
             Pump_Load = data["Pump_Load"]
+            batt_load = data["batt_load"]
             Total_Demand = data["Total_Demand"]
             Unserved_Energy = data["Unserved_Energy"]
             unserved_eng_data_table = data["ue_data_table"]
@@ -371,6 +394,8 @@ class MPlot(PlotDataHelper):
             Peak_Demand = 0
             min_net_load_t = None
             Min_Net_Load = 0
+            max_net_load_t = None
+            Max_Net_Load = 0
             peak_re_t = None
             peak_re = 0
             gen_peak_re = 0
@@ -397,6 +422,18 @@ class MPlot(PlotDataHelper):
                 end_date = min_net_load_t + dt.timedelta(days=end)
                 start_date = min_net_load_t - dt.timedelta(days=start)
                 Min_Net_Load = Net_Load[min_net_load_t]
+                Stacked_Gen = Stacked_Gen[start_date : end_date]
+                Load = Load[start_date : end_date]
+                Unserved_Energy = Unserved_Energy[start_date : end_date]
+                Total_Demand = Total_Demand[start_date : end_date]
+
+                unserved_eng_data_table = unserved_eng_data_table[start_date : end_date]
+
+            elif prop == "Max Net Load":
+                max_net_load_t = Net_Load.idxmax()
+                end_date = max_net_load_t + dt.timedelta(days=end)
+                start_date = max_net_load_t - dt.timedelta(days=start)
+                Max_Net_Load = Net_Load[max_net_load_t]
                 Stacked_Gen = Stacked_Gen[start_date : end_date]
                 Load = Load[start_date : end_date]
                 Unserved_Energy = Unserved_Energy[start_date : end_date]
@@ -484,7 +521,8 @@ class MPlot(PlotDataHelper):
 
             data = {"Stacked_Gen": Stacked_Gen, 
                     "Load": Load, 
-                    "Pump_Load": Pump_Load, 
+                    "Pump_Load": Pump_Load,
+                    "batt_load" : batt_load, 
                     "Total_Demand": Total_Demand, 
                     "Unserved_Energy": Unserved_Energy,
                     "ue_data_table": unserved_eng_data_table}
@@ -493,6 +531,8 @@ class MPlot(PlotDataHelper):
             data["Peak_Demand"] = Peak_Demand
             data["min_net_load_t"] = min_net_load_t
             data["Min_Net_Load"] = Min_Net_Load
+            data["max_net_load_t"] = max_net_load_t
+            data["Max_Net_Load"] = Max_Net_Load
             data["peak_re_t"] = peak_re_t
             data["Peak_RE"] = peak_re
             data["Gen_peak_re"] = gen_peak_re
@@ -529,14 +569,19 @@ class MPlot(PlotDataHelper):
 
             for i, scenario in enumerate(all_scenarios):
                 self.logger.info(f"Scenario = {scenario}")
-
                 try:
                     Stacked_Gen = self['generator_Generation'].get(scenario).copy()
+                except KeyError:
+                    self.logger.info(f'{scenario} is missing from your data dictionary. \n' 
+                                    'Check the inputs in your Marmot_user_defined_inputs.csv. \n'
+                                    'If these are correct, you will have to re-run the formatter.')
+                    return 
+                try:
                     if self.shift_leapday == True:
                         Stacked_Gen = self.adjust_for_leapday(Stacked_Gen)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning(f'No generation in {zone_input}')
+                    self.logger.warning(f'No generation in {zone_input}. Check ')
                     out = MissingZoneData()
                     return out
                 Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen)
@@ -552,6 +597,7 @@ class MPlot(PlotDataHelper):
                 Stacked_Gen = data["Stacked_Gen"]
                 Load = data["Load"]
                 Pump_Load = data["Pump_Load"]
+                batt_load = data["batt_load"]
                 Total_Demand = data["Total_Demand"]
                 Unserved_Energy = data["Unserved_Energy"]
                 unserved_eng_data_table = data["ue_data_table"]
@@ -559,6 +605,8 @@ class MPlot(PlotDataHelper):
                 peak_demand_t = data["peak_demand_t"]
                 min_net_load_t = data["min_net_load_t"]
                 Min_Net_Load = data["Min_Net_Load"]
+                max_net_load_t = data["max_net_load_t"]
+                Max_Net_Load = data["Max_Net_Load"]
                 Peak_RE = data["Peak_RE"]
                 peak_re_t = data["peak_re_t"]
                 gen_peak_re2 = data["Gen_peak_re"]
@@ -576,6 +624,7 @@ class MPlot(PlotDataHelper):
                 Stacked_Gen = Stacked_Gen / unitconversion['divisor']
                 Load = Load / unitconversion['divisor']
                 Pump_Load = Pump_Load / unitconversion['divisor']
+                batt_load = batt_load / unitconversion['divisor']
                 Total_Demand = Total_Demand / unitconversion['divisor']
                 Unserved_Energy = Unserved_Energy / unitconversion['divisor']
                 unserved_eng_data_table = unserved_eng_data_table / unitconversion['divisor']
@@ -586,6 +635,7 @@ class MPlot(PlotDataHelper):
                 peak_ue = peak_ue/ unitconversion['divisor']
                 peak_curt = peak_curt/ unitconversion['divisor']
                 Min_Net_Load = Min_Net_Load / unitconversion['divisor']
+                Max_Net_Load = Max_Net_Load / unitconversion['divisor']
 
                 Load = Load.rename('Total Load \n (Demand + Storage Charging)')
                 Total_Demand = Total_Demand.rename('Total Demand')
@@ -604,7 +654,6 @@ class MPlot(PlotDataHelper):
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
                 data_tables.append(single_scen_out)
 
-                
                 plotlib.create_stackplot(axs, Stacked_Gen, self.PLEXOS_color_dict, 
                                          labels=Stacked_Gen.columns, n=i)
 
@@ -613,10 +662,10 @@ class MPlot(PlotDataHelper):
                                       #color='#EE1289'  OLD MARMOT COLOR
                                       color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
                                       )
-
+                #(Load)
                 lp = axs[i].plot(Load, color='black')
-
-                if (Pump_Load == 0).all() == False:
+                #print(Total_Demand)
+                if (Pump_Load == 0).all() == False or (batt_load == 0).all() == False:
                     lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
 
                 PlotDataHelper.set_plot_timeseries_format(axs,i)
@@ -625,6 +674,12 @@ class MPlot(PlotDataHelper):
                     axs[i].annotate(f"Min Net Load: \n{str(format(Min_Net_Load, '.2f'))} {unitconversion['units']}",
                                     xy=(min_net_load_t, Min_Net_Load), 
                                     xytext=((min_net_load_t + dt.timedelta(days=0.1)), (max(Load))),
+                                    fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
+
+                if prop == "Max Net Load":
+                    axs[i].annotate(f"Max Net Load: \n{str(format(Max_Net_Load, '.2f'))} {unitconversion['units']}",
+                                    xy=(max_net_load_t, Max_Net_Load), 
+                                    xytext=((max_net_load_t + dt.timedelta(days=0.1)), (max(Load))),
                                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
                 # Peak Demand label overlaps other labels on a facet plot
@@ -681,6 +736,11 @@ class MPlot(PlotDataHelper):
                 handles.append(lp3[0])
                 handles.append(lp[0])
                 labels += ['Demand','Demand + \n Storage Charging']
+
+            elif (batt_load == 0).all() == False:
+                handles.append(lp3[0])
+                handles.append(lp[0])
+                labels += ['Demand','Demand + \n BESS Charging']
 
             else:
                 handles.append(lp[0])
@@ -971,7 +1031,7 @@ class MPlot(PlotDataHelper):
 
 
     #         first_date=Stacked_Gen.index[0]
-    #         for wk in range(1,53): #assumes weekly, could be something else if user changes end Marmot_plot_select
+    #         for wk in range(1,53): #assumes weekly, `cold be something else if user changes end Marmot_plot_select
 
     #             period_start=first_date+dt.timedelta(days=(wk-1)*7)
     #             period_end=period_start+dt.timedelta(days=end)

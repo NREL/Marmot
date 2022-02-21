@@ -522,7 +522,7 @@ class MPlot(PlotDataHelper):
                 x, y = patch.get_xy()
                 ax.text(x+width/2,
                     y+height + 0.05*max(ax.get_ylim()),
-                    '{:,.0f}'.format(height),
+                    '{:,.1f}'.format(height),
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=15, color='red')
                 if k>=len(cost_totals)-1:

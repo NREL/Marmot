@@ -106,3 +106,6 @@ interval,node,Dump Energy,TRUE,
 interval,line,Export Limit,TRUE,Transmission capacity
 interval,line,Import Limit,TRUE,Transmission capacity
 interval,abatement,Abatement,TRUE,
+interval,batterie,Generation,TRUE,
+interval,batterie,Load,TRUE,
+interval,batterie,SoC,TRUE,

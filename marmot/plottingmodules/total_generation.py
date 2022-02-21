@@ -112,7 +112,9 @@ class MPlot(PlotDataHelper):
                       (False,f"generator_{self.curtailment_prop}",self.Scenarios),
                       (False,"generator_Pump_Load",self.Scenarios),
                       (True,f"{agg}_Load",self.Scenarios),
-                      (False,f"{agg}_Unserved_Energy",self.Scenarios)]
+                      (False,f"{agg}_Unserved_Energy",self.Scenarios),
+                      (False,"batterie_Generation",self.Scenarios),
+                      (False,"batterie_Load",self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -130,6 +132,7 @@ class MPlot(PlotDataHelper):
             pumped_load_chunk = []
             total_demand_chunk = []
             unserved_energy_chunk = []
+            batt_load_chunk = []
 
             self.logger.info(f"Zone = {zone_input}")
 
@@ -164,8 +167,19 @@ class MPlot(PlotDataHelper):
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Total_Gen_Stack.insert(len(Total_Gen_Stack.columns), 
                                                column=curtailment_name, value=Stacked_Curt) #Insert curtailment into
-                        Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
+
+                # Insert battery generation into gen stack.
+                batt_gen = self["batterie_Generation"].get(scenario).copy()
+                if not batt_gen.empty:
+                    if self.shift_leapday == True:
+                        batt_gen = self.adjust_for_leapday(batt_gen)
+                #if zone_input in batt_gen.index.get_level_values(self.AGG_BY).unique():
+                #batt_gen = batt_gen.xs(zone_input,level=self.AGG_BY)
+                batt_gen = batt_gen.groupby(level = ['timestamp']).sum()
+                Total_Gen_Stack.insert(len(Total_Gen_Stack.columns),column='BESS discharging', value=batt_gen)
+                
+                Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
                 Total_Gen_Stack = Total_Gen_Stack/interval_count
 
                 if pd.notna(start_date_range):
@@ -214,17 +228,29 @@ class MPlot(PlotDataHelper):
                 
                 Pump_Load = Pump_Load.rename(columns={0:scenario}).sum(axis=0)
                 Pump_Load = Pump_Load/interval_count
+
+                batt_load = self['batterie_Load'][scenario].copy()
+                if self.shift_leapday == True: batt_load = self.adjust_for_leapday(batt_load)
+                batt_load = batt_load.groupby('timestamp').sum().squeeze()
+
                 if (Pump_Load == 0).all() == False:
                     Total_Demand = Total_Load - Pump_Load
+                elif (batt_load == 0).all() == False:
+                    Total_Demand = Total_Load - batt_load
                 else:
-                    Total_Demand = Total_Load
+                    Total_Demand = Total_Load.copy()
+
+                batt_load = pd.DataFrame(batt_load)
+                batt_load.rename(columns = {0:scenario},inplace = True)
+                batt_load = batt_load.sum(axis = 0)
 
                 gen_chunks.append(Total_Gen_Stack)
                 load_chunk.append(Total_Load)
                 pumped_load_chunk.append(Pump_Load)
                 total_demand_chunk.append(Total_Demand)
                 unserved_energy_chunk.append(Unserved_Energy)
-            
+                batt_load_chunk.append(batt_load)
+
             if not gen_chunks:
                 outputs[zone_input] = MissingZoneData()
                 continue
@@ -234,6 +260,7 @@ class MPlot(PlotDataHelper):
             Pump_Load_Out = pd.concat(pumped_load_chunk, axis=0, sort=False)
             Total_Demand_Out = pd.concat(total_demand_chunk, axis=0, sort=False)
             Unserved_Energy_Out = pd.concat(unserved_energy_chunk, axis=0, sort=False)
+            batt_load_out = pd.concat(batt_load_chunk, axis = 0,sort = False)
 
             Total_Load_Out = Total_Load_Out.rename('Total Load (Demand + \n Storage Charging)')
             Total_Demand_Out = Total_Demand_Out.rename('Total Demand')
@@ -257,13 +284,14 @@ class MPlot(PlotDataHelper):
             Pump_Load_Out = Pump_Load_Out.T/unitconversion['divisor']
             Total_Demand_Out = Total_Demand_Out.T/unitconversion['divisor']
             Unserved_Energy_Out = Unserved_Energy_Out.T/unitconversion['divisor']
+            batt_load_out = batt_load_out.T/unitconversion['divisor']
 
             # Data table of values to return to main program
-            Data_Table_Out = pd.concat([Total_Load_Out.T,
-                                        Total_Demand_Out.T,
-                                        Unserved_Energy_Out.T,
-                                        Total_Generation_Stack_Out],  axis=1, sort=False)
-            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
+            # Data_Table_Out = pd.concat([Total_Load_Out.T,
+            #                             Total_Demand_Out.T,
+            #                             Unserved_Energy_Out.T,
+            #                             Total_Generation_Stack_Out],  axis=1, sort=False)
+            # Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             
@@ -297,7 +325,7 @@ class MPlot(PlotDataHelper):
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 height1 = [float(Total_Load_Out[scenario].sum())]*2
                 lp1 = plt.plot(x,height1, c='black', linewidth=3)
-                if Pump_Load_Out[scenario] > 0:
+                if batt_load_out[scenario] > 0:
                     height2 = [float(Total_Demand_Out[scenario])]*2
                     lp2 = plt.plot(x,height2, 'r--', c='black', linewidth=1.5)
 
@@ -311,7 +339,8 @@ class MPlot(PlotDataHelper):
             handles, labels = ax.get_legend_handles_labels()
 
             #Combine all legends into one.
-            if Pump_Load_Out.values.sum() > 0:
+            #if batt_load.values.sum() > 0:
+            if False:
                 handles.append(lp2[0])
                 handles.append(lp1[0])
                 labels += ['Demand','Demand + \n Storage Charging']
@@ -326,6 +355,7 @@ class MPlot(PlotDataHelper):
             ax.legend(reversed(handles),reversed(labels), loc='lower left',
                       bbox_to_anchor=(1.05,0), facecolor='inherit', frameon=True)
 
+            Data_Table_Out = pd.DataFrame()
             outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
         return outputs

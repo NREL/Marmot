@@ -43,7 +43,7 @@ except ModuleNotFoundError:
     sys.exit()
 import marmot.config.mconfig as mconfig
 
-# Import as Submodule
+
 try:
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
@@ -1421,6 +1421,13 @@ if __name__ == '__main__':
 #===============================================================================
 # Code that can be used to test PLEXOS_H5_results_formatter
 #===============================================================================
+#import pandas as pd
+#fn = 'test_formatted.h5'
+# gen = pd.read_hdf(fn,'generator_Generation')
+# gen = gen.xs("gas-cc",level = "tech")
+# reg = gen.xs('p101',level = 'region')
+# hour = reg.xs('2035-07-26 20:00:00',level = 'timestamp')
+
 # test = test.xs("p60",level='region')
 # test = test.xs("gas-ct",level='tech')
 # test = test.reset_index(['timestamp','node'])

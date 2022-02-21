@@ -247,6 +247,8 @@ XcelBattery,Storage
 OSW_BESS,OSW-Battery
 Battery,Battery
 Solar,PV
+Solar PV,PV
+CCS,Storage discharge
 Liquid Fuel,Oil-Gas-Steam
 Natural Gas,Oil-Gas-Steam
 Biopower,Biopower
@@ -257,3 +259,11 @@ Gas-CT,Gas-CT
 Coal,Coal
 Curtailment,Curtailment
 Curtailment,Curtailment
+Geothermal,Geothermal
+Gas-IC,Gas-CT
+Oil,Oil
+Tidal,Tidal
+Biomass,Biomass
+Landfill gas,Landfill gas
+Hydro_dam,Hydro storage
+Hydro_runofriver,Hydro run-of-river

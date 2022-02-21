@@ -945,7 +945,7 @@ class MPlot(PlotDataHelper):
         self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         self.logger.info(select_lines)
 
-        scenario = self.Scenarios[0] #Select single scenario for purpose of extracting limits.
+        scenario = self.Scenarios[1] #Select single scenario for purpose of extracting limits.
 
         export_limits = self["line_Export_Limit"].get(scenario).droplevel('timestamp')
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
@@ -1022,22 +1022,24 @@ class MPlot(PlotDataHelper):
                     if duration_curve:
                         single_line = PlotDataHelper.sort_duration(single_line,line)
 
-                    plotlib.create_line_plot(axs, single_line, line, label = scenario + '\n line flow', n = n)
+                    #plotlib.create_line_plot(axs, single_line, line, label = scenario + '\n line flow', n = n)
+                    plotlib.create_line_plot(axs, single_line, line, label = scenario, n = n,linewidth = 2)
+
 
                     #Add %congested number to plot.
-                    if scenario == self.Scenarios[0]:
+                    # if scenario == self.Scenarios[0]:
 
-                        viol_exp = single_line[single_line[line] > single_exp_lim].count()
-                        viol_imp = single_line[single_line[line] < single_imp_lim].count()
-                        viol_perc = 100 * (viol_exp + viol_imp) / len(single_line)
-                        viol_perc = round(viol_perc.squeeze(),3)
-                        axs[n].annotate('Violation = ' + str(viol_perc) + '% of hours', xy = (0.1,0.15),xycoords='axes fraction')
+                    #     viol_exp = single_line[single_line[line] > single_exp_lim].count()
+                    #     viol_imp = single_line[single_line[line] < single_imp_lim].count()
+                    #     viol_perc = 100 * (viol_exp + viol_imp) / len(single_line)
+                    #     viol_perc = round(viol_perc.squeeze(),3)
+                    #     axs[n].annotate('Violation = ' + str(viol_perc) + '% of hours', xy = (0.1,0.15),xycoords='axes fraction')
 
-                        cong_exp = single_line[single_line[line] == single_exp_lim].count()
-                        cong_imp = single_line[single_line[line] == single_imp_lim].count()
-                        cong_perc = 100 * (cong_exp + cong_imp) / len(single_line)
-                        cong_perc = round(cong_perc.squeeze(),0)
-                        axs[n].annotate('Congestion = ' + str(cong_perc) + '% of hours', xy = (0.1,0.1),xycoords='axes fraction')
+                    #     cong_exp = single_line[single_line[line] == single_exp_lim].count()
+                    #     cong_imp = single_line[single_line[line] == single_imp_lim].count()
+                    #     cong_perc = 100 * (cong_exp + cong_imp) / len(single_line)
+                    #     cong_perc = round(cong_perc.squeeze(),0)
+                    #     axs[n].annotate('Congestion = ' + str(cong_perc) + '% of hours', xy = (0.1,0.1),xycoords='axes fraction')
 
                     #For output time series .csv
                     scenario_names = pd.Series([scenario] * len(single_line_out),name = 'Scenario')
@@ -1053,15 +1055,15 @@ class MPlot(PlotDataHelper):
                 continue
 
             PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
-            axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit',color = 'red')
-            axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit', color = 'green')
+            axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit',color = 'red',linewidth = 2)
+            axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit', color = 'green',linewidth = 2)
 
-            axs[n].set_title(line)
+            #axs[n].set_title(line)
             handles, labels = axs[n].get_legend_handles_labels()
             if not duration_curve:
                 PlotDataHelper.set_plot_timeseries_format(axs, n=n)
             if n == len(select_lines) - 1:
-                axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
+                axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,0))
 
         if missing_lines == len(select_lines):
             outputs = MissingInputData()
@@ -1073,7 +1075,10 @@ class MPlot(PlotDataHelper):
 
         fig2.add_subplot(111, frameon=False)
         plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-        plt.ylabel('Flow (MW)',  color='black', rotation='vertical', labelpad=30)
+        plt.ylabel('Alaska Intertie Flow (MW)',  color='black', rotation='vertical', labelpad=30)
+
+        if duration_curve:
+            plt.xlabel('Hour of the year', color='black', labelpad=30)
         #plt.tight_layout(rect=[0, 0.03, 1, 0.97])
         plt.tight_layout()
 
