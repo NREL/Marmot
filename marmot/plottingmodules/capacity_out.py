@@ -136,7 +136,8 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak outage hour, only checked once 
                 if i == 0:
-                    unitconversion = self.capacity_energy_unitconversion(max(cap_out.sum(axis=1)))
+                    unitconversion = self.capacity_energy_unitconversion(cap_out,
+                                                                            sum_values=True)
                
                 cap_out = cap_out / unitconversion['divisor']
 

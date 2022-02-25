@@ -131,7 +131,7 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
+                interval_count = self.get_sub_hour_interval_count(Total_Gen_Stack)
 
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
 
@@ -233,7 +233,8 @@ class MPlot(PlotDataHelper):
             Total_Generation_Stack_Out = Total_Generation_Stack_Out.loc[:, (Total_Generation_Stack_Out != 0).any(axis=0)]
 
             # unit conversion return divisor and energy units
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Generation_Stack_Out.sum(axis=1)))
+            unitconversion = self.capacity_energy_unitconversion(Total_Generation_Stack_Out,
+                                                                    sum_values=True)
 
             Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
             Total_Load_Out = Total_Load_Out.T/unitconversion['divisor']
@@ -351,7 +352,7 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
+                interval_count = self.get_sub_hour_interval_count(Total_Gen_Stack)
 
                 # Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
@@ -403,7 +404,8 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
             
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(abs(Total_Generation_Stack_Out.sum(axis=1))))
+            unitconversion = self.capacity_energy_unitconversion(Total_Generation_Stack_Out,
+                                                                            sum_values=True)
             Total_Generation_Stack_Out = Total_Generation_Stack_Out/unitconversion['divisor']
 
             # Data table of values to return to main program
@@ -577,7 +579,7 @@ class MPlot(PlotDataHelper):
                 Total_Gen_Stack.columns = Total_Gen_Stack.columns.add_categories('timestamp')
     
                 # Calculates interval step to correct for MWh of generation if data is subhourly
-                interval_count = PlotDataHelper.get_sub_hour_interval_count(Total_Gen_Stack)
+                interval_count = self.get_sub_hour_interval_count(Total_Gen_Stack)
     
                 #Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
@@ -668,13 +670,7 @@ class MPlot(PlotDataHelper):
             Pump_Load_Out.rename(columns={0:'Pump Load'}, inplace=True)
             Total_Demand_Out.rename(columns={0:'Total Demand'}, inplace=True)
             Total_Load_Out.rename(columns={0:'Total Load (Demand + \n Storage Charging)'}, inplace=True)
-            
-            # Determine max value of data-frame 
-            if vre_only:
-                max_value = Gen_Out.to_numpy().max()
-            else:
-                max_value = max(Gen_Out.sum())
-            
+
             # Add Net Imports if desired
             if mconfig.parser("plot_data","include_total_net_imports") and \
                 not vre_only:
@@ -682,7 +678,11 @@ class MPlot(PlotDataHelper):
 
             if not plot_as_percnt:
                 # unit conversion return divisor and energy units
-                unitconversion = PlotDataHelper.capacity_energy_unitconversion(max_value)
+                if vre_only:
+                    unitconversion = self.capacity_energy_unitconversion(Gen_Out)
+                else:
+                    unitconversion = self.capacity_energy_unitconversion(Gen_Out,
+                                                                            sum_values=True)                
                 Gen_Out = Gen_Out/unitconversion['divisor']
                 Total_Demand_Out = Total_Demand_Out/unitconversion['divisor']
                 Total_Load_Out = Total_Load_Out/unitconversion['divisor']

@@ -127,7 +127,8 @@ class MPlot(PlotDataHelper):
                 
                 #Convert units
                 if i == 0:
-                    unitconversion = self.capacity_energy_unitconversion(max(thermal_reserve.sum(axis=1)))
+                    unitconversion = self.capacity_energy_unitconversion(thermal_reserve,
+                                                                            sum_values=True)
                 thermal_reserve = thermal_reserve / unitconversion['divisor']
 
                 # Check if thermal_reserve contains data, if not skips

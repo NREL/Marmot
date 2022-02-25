@@ -171,7 +171,7 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            unitconversion = self.capacity_energy_unitconversion(cap_started_all_scenarios)
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
@@ -292,7 +292,7 @@ class MPlot(PlotDataHelper):
             
             cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
 
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(cap_started_all_scenarios.values.max())
+            unitconversion = self.capacity_energy_unitconversion(cap_started_all_scenarios)
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")

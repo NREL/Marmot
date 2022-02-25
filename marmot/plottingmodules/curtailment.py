@@ -160,7 +160,7 @@ class MPlot(PlotDataHelper):
                     outputs[zone_input] = out
                     continue
                 # unit conversion return divisor and energy units
-                unitconversion = PlotDataHelper.capacity_energy_unitconversion(PV_Curtailment_DC.values.max())
+                unitconversion = self.capacity_energy_unitconversion(PV_Curtailment_DC)
                 PV_Curtailment_DC = PV_Curtailment_DC/unitconversion['divisor'] 
                 Data_Table_Out = PV_Curtailment_DC
                 Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
@@ -179,7 +179,7 @@ class MPlot(PlotDataHelper):
                     outputs[zone_input] = out
                     continue
                 # unit conversion return divisor and energy units
-                unitconversion = PlotDataHelper.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
+                unitconversion = self.capacity_energy_unitconversion(RE_Curtailment_DC)
                 RE_Curtailment_DC = RE_Curtailment_DC/unitconversion['divisor'] 
                 Data_Table_Out = RE_Curtailment_DC
                 Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
@@ -530,14 +530,13 @@ class MPlot(PlotDataHelper):
             
             vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
             
-            Total_Curtailment_out.index = Total_Curtailment_out.index.str.replace('_',' ')
-            
             if Total_Curtailment_out.empty == True:
                 outputs[zone_input] = MissingZoneData()
                 continue
             
             # unit conversion return divisor and energy units
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
+            unitconversion = self.capacity_energy_unitconversion(Total_Curtailment_out, 
+                                                                    sum_values=True)
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
             
             # Data table of values to return to main program            
@@ -693,7 +692,8 @@ class MPlot(PlotDataHelper):
                 continue
             
             # unit conversion return divisor and energy units
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Curtailment_out.sum()))
+            unitconversion = self.capacity_energy_unitconversion(Total_Curtailment_out,
+                                                                    sum_values=True)
             Total_Curtailment_out = Total_Curtailment_out/unitconversion['divisor'] 
             
             mplt = PlotLibrary()
@@ -870,7 +870,7 @@ class MPlot(PlotDataHelper):
 
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
 
-        unitconversion = PlotDataHelper.capacity_energy_unitconversion(Total_Curt.values.max())
+        unitconversion = self.capacity_energy_unitconversion(Total_Curt)
         Total_Curt = Total_Curt/unitconversion['divisor'] 
         
         Total_Curt = round(Total_Curt,2)
@@ -961,7 +961,7 @@ class MPlot(PlotDataHelper):
                         self.logger.warning('No data in selected Date Range')
                         continue
                 
-                interval_count = PlotDataHelper.get_sub_hour_interval_count(re_curt)
+                interval_count = self.get_sub_hour_interval_count(re_curt)
                 re_curt = re_curt/interval_count
                 # Group data by hours and find mean across entire range 
                 re_curt = re_curt.groupby([re_curt.index.hour]).mean()
@@ -987,7 +987,7 @@ class MPlot(PlotDataHelper):
             mplt = SetupSubplot()
             fig, ax = mplt.get_figure()
 
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(RE_Curtailment_DC.values.max())
+            unitconversion = self.capacity_energy_unitconversion(RE_Curtailment_DC)
             RE_Curtailment_DC = RE_Curtailment_DC / unitconversion['divisor']
             Data_Table_Out = RE_Curtailment_DC.copy()
             Data_Table_Out.index = pd.date_range("2024-01-01", periods=24, freq="H").time

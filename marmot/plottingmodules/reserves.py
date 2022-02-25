@@ -148,7 +148,8 @@ class MPlot(PlotDataHelper):
                     continue
                 # unitconversion based off peak generation hour, only checked once 
                 if n == 0:
-                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(reserve_provision_timeseries.sum(axis=1)))
+                    unitconversion = self.capacity_energy_unitconversion(reserve_provision_timeseries,
+                                                                            sum_values=True)
 
                 if prop == "Peak Demand":
                     self.logger.info("Plotting Peak Demand period")
@@ -259,7 +260,7 @@ class MPlot(PlotDataHelper):
                     continue
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = PlotDataHelper.get_sub_hour_interval_count(reserve_provision_timeseries)
+                interval_count = self.get_sub_hour_interval_count(reserve_provision_timeseries)
 
                 # sum totals by fuel types
                 reserve_provision_timeseries = reserve_provision_timeseries/interval_count
@@ -281,7 +282,8 @@ class MPlot(PlotDataHelper):
             Total_Reserves_Out.index = Total_Reserves_Out.index.str.wrap(5, break_long_words=False)
             
             # Convert units
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Reserves_Out.sum()))
+            unitconversion = self.capacity_energy_unitconversion(Total_Reserves_Out,
+                                                                    sum_values=True)
             Total_Reserves_Out = Total_Reserves_Out/unitconversion['divisor']
             
             data_table_out = Total_Reserves_Out.add_suffix(f" ({unitconversion['units']}h)")
@@ -403,7 +405,7 @@ class MPlot(PlotDataHelper):
                     self.logger.info(f"No reserves deployed in {scenario}")
                     continue
 
-                interval_count = PlotDataHelper.get_sub_hour_interval_count(reserve_timeseries)
+                interval_count = self.get_sub_hour_interval_count(reserve_timeseries)
 
                 reserve_timeseries = reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False)
                 # Drop duplicates to remove double counting
@@ -436,7 +438,7 @@ class MPlot(PlotDataHelper):
             
             if count_hours == False:
                 # Convert units
-                unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(reserve_out.sum()))
+                unitconversion = self.capacity_energy_unitconversion(reserve_out)
                 reserve_out = reserve_out/unitconversion['divisor'] 
                 Data_Table_Out = reserve_out.add_suffix(f" ({unitconversion['units']}h)")
             else:

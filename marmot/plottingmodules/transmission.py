@@ -1585,7 +1585,7 @@ class MPlot(PlotDataHelper):
 
                     #Convert units
                     if n == 0:
-                        unitconversion = self.capacity_energy_unitconversion(single_parent.abs().values.max())
+                        unitconversion = self.capacity_energy_unitconversion(single_parent)
                     single_parent = single_parent / unitconversion['divisor']
 
                     for column in single_parent.columns:
@@ -1837,7 +1837,7 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
             
-            unitconversion = self.capacity_energy_unitconversion(all_scenarios.values.max())
+            unitconversion = self.capacity_energy_unitconversion(all_scenarios)
             all_scenarios = all_scenarios/unitconversion['divisor']
 
             Data_Table_Out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
@@ -1929,7 +1929,7 @@ class MPlot(PlotDataHelper):
                 net_export_all_scenarios = pd.concat([net_export_all_scenarios,net_export], axis = 1)
                 net_export_all_scenarios.columns = net_export_all_scenarios.columns.str.replace('_', ' ')
 
-            unitconversion = self.capacity_energy_unitconversion(net_export_all_scenarios.abs().max().max())
+            unitconversion = self.capacity_energy_unitconversion(net_export_all_scenarios)
 
             net_export_all_scenarios = net_export_all_scenarios/unitconversion["divisor"]
             # Data table of values to return to main program
@@ -2100,7 +2100,7 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak export hour, only checked once
                 if zone_input == self.Zones[0] and scenario == self.Scenarios[0]:
-                    unitconversion = self.capacity_energy_unitconversion(net_exports.max().max())
+                    unitconversion = self.capacity_energy_unitconversion(net_exports)
 
                 net_exports = net_exports / unitconversion['divisor']
 
@@ -2255,13 +2255,13 @@ class MPlot(PlotDataHelper):
                 positive = net_exports.agg(lambda x: x[x>0].sum())
                 negative = net_exports.agg(lambda x: x[x<0].sum())
 
-                # unitconversion based off peak export hour, only checked once
-                if scenario == self.Scenarios[0]:
-                    max_val = max(positive['Net Export'].max(),abs(negative['Net Export']).max())
-                    unitconversion = self.capacity_energy_unitconversion(max_val)
-
                 both = pd.concat([positive,negative], axis=1)
                 both.columns = ["Total Export", "Total Import"]
+
+                # unitconversion based off peak export hour, only checked once
+                if scenario == self.Scenarios[0]:
+                    unitconversion = self.capacity_energy_unitconversion(both)
+
                 both = both / unitconversion['divisor']
                 net_exports_all.append(both)
 
@@ -2373,13 +2373,13 @@ class MPlot(PlotDataHelper):
                 pos = pos.append(pos_sing)
                 neg_sing = pd.Series(flow.where(flow < 0).sum())
                 neg = neg.append(neg_sing)
-                
-            if scenario == self.Scenarios[0]:
-                max_val = max(pos.max(),abs(neg.max()))
-                unitconversion = self.capacity_energy_unitconversion(max_val)
 
             both = pd.concat([pos,neg],axis = 1)
             both.columns = ['Total Export','Total Import']
+
+            if scenario == self.Scenarios[0]:
+                unitconversion = self.capacity_energy_unitconversion(both)
+
             both = both / unitconversion['divisor']
             both.index = available_inter
             net_flows_all.append(both)

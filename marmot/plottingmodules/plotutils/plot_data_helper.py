@@ -354,6 +354,69 @@ class PlotDataHelper(dict):
            gen_df = gen_df.T 
         return gen_df
 
+    def capacity_energy_unitconversion(self, df: pd.DataFrame, 
+                                        sum_values: bool = False) -> dict:
+        """Unitconversion for capacity and energy figures.
+
+        Takes a pd.DataFrame as input and will then determine the max value
+        in the frame. 
+        
+        If sum_values is True, either rows or columns will be summated before
+        determining max value. The axis is chosen automatically based on where 
+        the scenario entries or datetime index is located. If correct axis 
+        cannot be determined axis 0 (rows) will be summed.
+        This setting should mainly be set to True when potting stacked bar 
+        and area plots.
+
+        Args:
+            df (pd.DataFrame): pandas dataframe
+            sum_values (bool, optional): Sum axis values if True. 
+                Should be set to True for stacked bar and area plots.
+                Defaults to False.
+
+        Returns:
+            dict: Dictionary containing divisor and units.
+        """
+        if mconfig.parser("auto_convert_units"):
+            if sum_values:
+                # Check if scenarios are in index sum across columns
+                if any(scen in self.Scenarios for scen in df.index):
+                    sum_axis=1
+                elif isinstance(df.index, pd.MultiIndex) and\
+                    'Scenario' in df.index.names:
+                    sum_axis=1
+                # If index datetime sum across columns
+                elif isinstance(df.index, pd.DatetimeIndex):
+                    sum_axis=1  
+                elif any(scen in self.Scenarios for scen in df.columns):
+                    sum_axis=0
+                else:
+                    logger.warning("Could not determine axis to sum across, "
+                                   "defaulting to axis 0 (rows)")
+                    sum_axis=0
+                max_value = df.abs().sum(axis=sum_axis).max()
+            else:
+                max_value = df.abs().to_numpy().max()
+
+            if max_value < 1000 and max_value > 1:
+                divisor = 1
+                units = 'MW'
+            elif max_value < 1:
+                divisor = 0.001
+                units = 'kW'
+            elif max_value > 999999.9:
+                divisor = 1000000
+                units = 'TW'
+            else:
+                divisor = 1000
+                units = 'GW'
+        else:
+            # Disables auto unit conversion, all values in MW
+            divisor = 1
+            units = 'MW'
+
+        return {'units':units, 'divisor':divisor}
+
     @staticmethod
     def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
         """Detects the interval spacing of timeseries data. 
@@ -389,36 +452,6 @@ class PlotDataHelper(dict):
                         .drop(columns=['timestamp']))
         
         return sorted_duration
-
-    @staticmethod
-    def capacity_energy_unitconversion(max_value: float) -> dict:
-        """Auto unitconversion for capacity and energy figures.
-
-        Args:
-            max_value (float): Value used to determine divisor and units.
-
-        Returns:
-            dict: Dictionary containing divisor and units.
-        """
-        if max_value < 1000 and max_value > 1:
-            divisor = 1
-            units = 'MW'
-        elif max_value < 1:
-            divisor = 0.001
-            units = 'kW'
-        elif max_value > 999999.9:
-            divisor = 1000000
-            units = 'TW'
-        else:
-            divisor = 1000
-            units = 'GW'
-        
-        # Disables auto unit conversion, all values in MW
-        if mconfig.parser("auto_convert_units") == False:
-            divisor = 1
-            units = 'MW'
-            
-        return {'units':units, 'divisor':divisor}
 
     @staticmethod
     def insert_custom_data_columns(existing_df: pd.DataFrame, 

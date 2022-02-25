@@ -141,7 +141,7 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
-                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(thermal_commit_cap.values.max())
+                    unitconversion = self.capacity_energy_unitconversion(thermal_commit_cap)
                 thermal_commit_cap = thermal_commit_cap/unitconversion['divisor']
 
                 #Process generation.
@@ -561,7 +561,8 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
-                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Stacked_Gen.sum(axis=1)))
+                    unitconversion = self.capacity_energy_unitconversion(Stacked_Gen, 
+                                                                            sum_values=True)
 
                 #Convert units
                 Stacked_Gen = Stacked_Gen / unitconversion['divisor']
@@ -791,7 +792,7 @@ class MPlot(PlotDataHelper):
             # Reverses order of columns
             Gen_Stack_Out = Gen_Stack_Out.iloc[:, ::-1]
 
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Gen_Stack_Out.sum(axis=1)))
+            unitconversion = self.capacity_energy_unitconversion(Gen_Stack_Out)
             Gen_Stack_Out = Gen_Stack_Out/unitconversion['divisor']
 
             # Data table of values to return to main program

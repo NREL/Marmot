@@ -116,7 +116,7 @@ class MPlot(PlotDataHelper):
                 continue
             
             # Determine auto unit coversion
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(Unserved_Energy_Timeseries_Out.values.max())
+            unitconversion = self.capacity_energy_unitconversion(Unserved_Energy_Timeseries_Out)
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/unitconversion['divisor'] 
             
             # Data table of values to return to main program
@@ -189,7 +189,7 @@ class MPlot(PlotDataHelper):
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
                 
                 # correct sum for non-hourly runs
-                interval_count = PlotDataHelper.get_sub_hour_interval_count(unserved_eng_timeseries)
+                interval_count = self.get_sub_hour_interval_count(unserved_eng_timeseries)
 
                 if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
@@ -217,7 +217,7 @@ class MPlot(PlotDataHelper):
                 continue
             
             # Determine auto unit coversion
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(Total_Unserved_Energy_Out.values.max())
+            unitconversion = self.capacity_energy_unitconversion(Total_Unserved_Energy_Out)
             Total_Unserved_Energy_Out = Total_Unserved_Energy_Out/unitconversion['divisor']
             
             # Data table of values to return to main program
@@ -321,7 +321,7 @@ class MPlot(PlotDataHelper):
                         self.logger.warning('No data in selected Date Range')
                         continue
                 
-                interval_count = PlotDataHelper.get_sub_hour_interval_count(unserved_energy)
+                interval_count = self.get_sub_hour_interval_count(unserved_energy)
                 unserved_energy = unserved_energy/interval_count
                 # Group data by hours and find mean across entire range 
                 unserved_energy = unserved_energy.groupby([unserved_energy.index.hour]).mean()
@@ -342,7 +342,7 @@ class MPlot(PlotDataHelper):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out.values.max())
+            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out)
             unserved_energy_out = unserved_energy_out / unitconversion['divisor']
             Data_Table_Out = unserved_energy_out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")

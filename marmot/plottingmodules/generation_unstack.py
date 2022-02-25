@@ -271,7 +271,7 @@ class MPlot(PlotDataHelper):
                 
                 # unitconversion based off peak generation hour, only checked once 
                 if i == 0:
-                    unitconversion = self.capacity_energy_unitconversion(max(Stacked_Gen.max()))
+                    unitconversion = self.capacity_energy_unitconversion(Stacked_Gen)
                 Stacked_Gen = Stacked_Gen/unitconversion['divisor']
                 Unserved_Energy = Unserved_Energy/unitconversion['divisor']
                 

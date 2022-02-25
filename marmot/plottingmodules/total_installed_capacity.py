@@ -113,7 +113,8 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            unitconversion = self.capacity_energy_unitconversion(Total_Installed_Capacity_Out,
+                                                                            sum_values=True)
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor']
 
             Data_Table_Out = Total_Installed_Capacity_Out
@@ -226,7 +227,8 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
+            unitconversion = self.capacity_energy_unitconversion(Total_Installed_Capacity_Out,
+                                                                    sum_values=True)
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor']
 
             Data_Table_Out = Total_Installed_Capacity_Out
