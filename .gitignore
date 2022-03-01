@@ -1,5 +1,13 @@
-# Ignore byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-
-
+logs/
+marmot/__pycache__/
+marmot/utils/__pycache__/
+marmot/formatters/__pycache__/
+marmot/metamanagers/__pycache__/
+marmot/plottingmodules/__pycache__/
+marmot/plottingmodules/plotutils/__pycache__/
+marmot/input_files/*
+!marmot/input_files/mapping_folder
+!marmot/input_files/Marmot_user_defined_inputs.csv
+!marmot/input_files/plexos_properties.csv
+!marmot/input_files/Marmot_plot_select.csv
+config.yml
