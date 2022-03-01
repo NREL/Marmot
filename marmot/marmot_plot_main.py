@@ -13,38 +13,23 @@ generation_stack.py, curtailment.py etc.
 # Import Python Libraries
 #========================================================================================
 
-import os
-import pathlib
 import sys
-
-FILE_DIR = pathlib.Path(__file__).parent.absolute() # Location of this module
-# Add Marmot directory to sys path if running from __main__
-if __name__ == '__main__': 
-    #If running from top level of repo.
-    if os.path.dirname(os.path.dirname(__file__)) not in sys.path:
-        sys.path.append(os.path.dirname(os.path.dirname(__file__)))
-        os.chdir(pathlib.Path(__file__).parent.absolute().parent.absolute())
 import importlib
-import logging
-import logging.config
 import time
+import pandas as pd
+from pathlib import Path
 from typing import Union
-
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
-import pandas as pd
-import yaml
-
 try:
-    from marmot.meta_data import MetaData
+    import marmot.utils.mconfig as mconfig
 except ModuleNotFoundError:
-    print("Attempted import of Marmot as a module from a Git directory. "
-          "Import of Marmot will not function in this way. "
-          "To import Marmot as a module use the preferred method of pip "
-          "installing Marmot, or add the Marmot directory to the system path, "
-          "see ReadME for details.\nSystem will now exit")
+    from utils.definitions import INCORRECT_ENTRY_POINT
+    print(INCORRECT_ENTRY_POINT.format(Path(__file__).name))
     sys.exit()
-import marmot.config.mconfig as mconfig
+from marmot.utils.loggersetup import SetupLogger
+from marmot.utils.definitions import INPUT_DIR
+from marmot.metamanagers.meta_data import MetaData
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     DataSavedInModule, InputSheetError, MissingInputData, MissingMetaData,
     MissingZoneData, UnderDevelopment, UnsupportedAggregation)
@@ -53,60 +38,6 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 # long strings.
 #Fix available in Pandas 1.0 but leaving here in case user version not up to date
 pd.set_option("display.max_colwidth", 1000)
-
-
-class SetupLogger():
-    """Sets up the python logger.
-
-    This class handles the following.
-
-    1. Configures logger from marmot_logging_config.yml file.
-    2. Handles rollover of log file on each instantiation.
-    3. Sets log_directory.
-    4. Append optional suffix to the end of the log file name
-
-    Optional suffix is useful when running multiple processes in parallel to 
-    allow logging to separate files.
-    """
-
-    def __init__(self, log_directory: str = 'logs', log_suffix: str = None):
-        """
-        Args:
-            log_directory (str, optional): log directory to save logs. 
-                Defaults to 'logs'.
-            log_suffix (str, optional): Optional suffix to add to end of log file. 
-                Defaults to None.
-        """
-        if log_suffix is None:
-            self.log_suffix = ''
-        else:
-             self.log_suffix = f'_{log_suffix}'
-                 
-        current_dir = os.getcwd()
-        os.chdir(FILE_DIR)
-
-        try:
-            os.makedirs(log_directory)
-        except FileExistsError:
-            # log directory already exists
-            pass
-        
-        with open('config/marmot_logging_config.yml', 'rt') as f:
-            conf = yaml.safe_load(f.read())
-            conf['handlers']['warning_handler']['filename'] = \
-                (conf['handlers']['warning_handler']['filename']
-                .format(log_directory, 'plotter', self.log_suffix))
-            conf['handlers']['info_handler']['filename'] = \
-                (conf['handlers']['info_handler']['filename']
-                .format(log_directory, 'plotter', self.log_suffix))
-            logging.config.dictConfig(conf)
-            
-        self.logger = logging.getLogger('marmot_plot')
-        # Creates a new log file for next run 
-        self.logger.handlers[1].doRollover()
-        self.logger.handlers[2].doRollover()
-        
-        os.chdir(current_dir)
 
 
 class MarmotPlot(SetupLogger):
@@ -119,17 +50,17 @@ class MarmotPlot(SetupLogger):
     
     def __init__(self, Scenarios: Union[str, list],
                  AGG_BY: str, 
-                 Model_Solutions_folder: str, 
-                 gen_names: Union[str, pd.DataFrame],
-                 Marmot_plot_select: Union[str, pd.DataFrame], 
-                 Marmot_Solutions_folder: str = None,
-                 mapping_folder: str = 'mapping_folder',
+                 Model_Solutions_folder: Union[str, Path], 
+                 gen_names: Union[str, Path, pd.DataFrame],
+                 Marmot_plot_select: Union[str, Path, pd.DataFrame], 
+                 Marmot_Solutions_folder: Union[str, Path] = None,
+                 mapping_folder: Union[str, Path] = 'mapping_folder',
                  Scenario_Diff: Union[str, list] = None,
                  zone_region_sublist: Union[str, list] = None,
                  xlabels: Union[str, list] = None,
                  ylabels: Union[str, list] = None,
                  ticklabels: Union[str, list] = None,
-                 Region_Mapping: Union[str, pd.DataFrame] = pd.DataFrame(),
+                 Region_Mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
                  TECH_SUBSET: Union[str, list] = None,
                  **kwargs):
         """
@@ -138,16 +69,16 @@ class MarmotPlot(SetupLogger):
                 to process.
             AGG_BY (str): Informs region type to aggregate by 
                 when creating plots.
-            Model_Solutions_folder (str): Folder containing model 
+            Model_Solutions_folder (Union[str, Path]): Folder containing model 
                 simulation results subfolders and their files.
-            gen_names (Union[str, pd.DataFrame]): Mapping file to rename 
+            gen_names (Union[str, Path, pd.DataFrame]): Mapping file to rename 
                 generator technologies.
-            Marmot_plot_select (Union[str, pd.DataFrame]): Selection of plots 
+            Marmot_plot_select (Union[str, Path, pd.DataFrame]): Selection of plots 
                 to plot.
-            Marmot_Solutions_folder (str, optional): Folder to save 
+            Marmot_Solutions_folder (Union[str, Path], optional): Folder to save 
                 Marmot solution files.
                 Defaults to None.
-            mapping_folder (str, optional): The location of the 
+            mapping_folder (Union[str, Path], optional): The location of the 
                 Marmot mapping folder.
                 Defaults to 'mapping_folder'.
             Scenario_Diff (Union[str, list], optional): 2 value string 
@@ -163,7 +94,7 @@ class MarmotPlot(SetupLogger):
             ticklabels (Union[str, list], optional): custom ticklabels for plots, 
                 not available for every plot type.
                 Defaults to None.
-            Region_Mapping (Union[str, pd.DataFrame], optional): Mapping file 
+            Region_Mapping (Union[str, Path, pd.DataFrame], optional): Mapping file 
                 to map custom regions/zones to create custom aggregations. 
                 Aggregations are created by grouping PLEXOS regions. 
                 Defaults to pd.DataFrame().
@@ -172,7 +103,7 @@ class MarmotPlot(SetupLogger):
                 ordered_gen_categories.csv. If left None all techs will be plotted
                 Defaults to None.
         """
-        super().__init__(**kwargs) # Instantiation of SetupLogger
+        super().__init__("marmot_plot", **kwargs) # Instantiation of SetupLogger
         
         if isinstance(Scenarios, str):
             self.Scenarios = pd.Series(Scenarios.split(",")).str.strip().tolist()
@@ -181,9 +112,9 @@ class MarmotPlot(SetupLogger):
         
         self.AGG_BY = AGG_BY
         self.TECH_SUBSET = TECH_SUBSET
-        self.Model_Solutions_folder = Model_Solutions_folder
+        self.Model_Solutions_folder = Path(Model_Solutions_folder)
         
-        if isinstance(gen_names, str):
+        if isinstance(gen_names, (str, Path)):
             try:
                 gen_names = pd.read_csv(gen_names) 
                 self.gen_names = gen_names.rename(columns=
@@ -199,7 +130,7 @@ class MarmotPlot(SetupLogger):
                                              {gen_names.columns[0]:'Original',
                                              gen_names.columns[1]:'New'})
         
-        if isinstance(Marmot_plot_select, str):
+        if isinstance(Marmot_plot_select, (str, Path)):
             try:
                 self.Marmot_plot_select = pd.read_csv(Marmot_plot_select)   
             except FileNotFoundError:
@@ -210,12 +141,12 @@ class MarmotPlot(SetupLogger):
         elif isinstance(Marmot_plot_select, pd.DataFrame):
             self.Marmot_plot_select = Marmot_plot_select
         
-        self.Marmot_Solutions_folder = Marmot_Solutions_folder
-        
-        if self.Marmot_Solutions_folder is None:
+        if Marmot_Solutions_folder is None:
             self.Marmot_Solutions_folder = self.Model_Solutions_folder
-            
-        self.mapping_folder = mapping_folder
+        else:
+            self.Marmot_Solutions_folder = Path(Marmot_Solutions_folder)
+        
+        self.mapping_folder = Path(mapping_folder)
         
         if isinstance(Scenario_Diff, str):
             self.Scenario_Diff = (pd.Series(Scenario_Diff.split(","))
@@ -258,7 +189,7 @@ class MarmotPlot(SetupLogger):
         if ticklabels == ['nan'] or ticklabels is None:
             self.custom_xticklabels = [""]
 
-        if isinstance(Region_Mapping, str):
+        if isinstance(Region_Mapping, (str, Path)):
             try:
                 self.Region_Mapping = pd.read_csv(Region_Mapping)
                 if not self.Region_Mapping.empty:  
@@ -291,7 +222,7 @@ class MarmotPlot(SetupLogger):
             self.logger.info(f"Only plotting {self.AGG_BY}: "
                             f"{self.zone_region_sublist}")
 
-        metadata_HDF5_folder_in = os.path.join(self.Marmot_Solutions_folder,
+        metadata_HDF5_folder_in = self.Marmot_Solutions_folder.joinpath(
                                                'Processed_HDF5_folder')
         
         figure_format = mconfig.parser("figure_file_format")
@@ -299,22 +230,16 @@ class MarmotPlot(SetupLogger):
             figure_format = 'png'
         
         shift_leapday = str(mconfig.parser("shift_leapday")).upper()
-        font_defaults = mconfig.parser("font_settings")
-        text_position = mconfig.parser("text_position")
         
         #================================================================================
         # Input and Output Directories
         #================================================================================
         
-        figure_folder = os.path.join(self.Marmot_Solutions_folder,
+        figure_folder = self.Marmot_Solutions_folder.joinpath(
                                      'Figures_Output')
-        try:
-            os.makedirs(figure_folder)
-        except FileExistsError:
-            # directory already exists
-            pass
+        figure_folder.mkdir(exist_ok=True)
         
-        hdf_out_folder = os.path.join(self.Marmot_Solutions_folder,
+        hdf_out_folder = self.Marmot_Solutions_folder.joinpath(
                                       'Processed_HDF5_folder')
         
         #================================================================================
@@ -322,11 +247,11 @@ class MarmotPlot(SetupLogger):
         #================================================================================
         
         try:
-            ordered_gen_categories = pd.read_csv(os.path.join(self.mapping_folder,
+            ordered_gen_categories = pd.read_csv(self.mapping_folder.joinpath(
                                                  mconfig.parser('ordered_gen_categories')))
         except FileNotFoundError:
             self.logger.warning('Could not find '
-                                f'"{os.path.join(self.mapping_folder, "ordered_gen.csv")}"; '
+                                f'"{self.mapping_folder.joinpath("ordered_gen.csv")}"; '
                                 'Check file name in config file. This is required to '
                                 'run Marmot, system will now exit')
             sys.exit()
@@ -408,7 +333,7 @@ class MarmotPlot(SetupLogger):
             thermal_gen_cat = thermal_gen_cat['Ordered_Gen'].str.strip().tolist()
         
         try:
-            PLEXOS_color_dict = pd.read_csv(os.path.join(self.mapping_folder,
+            PLEXOS_color_dict = pd.read_csv(self.mapping_folder.joinpath(
                                             mconfig.parser('color_dictionary_file')))
 
             PLEXOS_color_dict = PLEXOS_color_dict.rename(columns=
@@ -424,7 +349,7 @@ class MarmotPlot(SetupLogger):
                                                                           .to_dict()["Colour"])
         except FileNotFoundError:
             self.logger.warning('Could not find '
-                                f'"{os.path.join(self.mapping_folder, "colour_dictionary.csv")}"; '
+                                f'"{self.mapping_folder.joinpath("colour_dictionary.csv")}"; '
                                 'Check file name in config file. Random colors will now be used')
             cmap = plt.cm.get_cmap(lut=len(ordered_gen))
             colors = []
@@ -581,11 +506,8 @@ class MarmotPlot(SetupLogger):
                 }
             
             # Create output folder for each plotting module
-            figures = os.path.join(figure_folder, f"{self.AGG_BY}_{module}")
-            try:
-                os.makedirs(figures)
-            except FileExistsError:
-                pass
+            figures = figure_folder.joinpath(f"{self.AGG_BY}_{module}")
+            figures.mkdir(exist_ok=True)
             
             # Import plot module from plottingmodules package
             plot_module = importlib.import_module('marmot.plottingmodules.' + module)
@@ -653,25 +575,26 @@ class MarmotPlot(SetupLogger):
 
                     else:
                         # Save figures
-                        Figure_Out[zone_input]["fig"].savefig(os.path.join(figures,
+                        Figure_Out[zone_input]["fig"].savefig(figures.joinpath(
                                                               f'{zone_input}_'
                                                               f'{row["Figure Output Name"]}'
                                                               f'.{figure_format}'),
                                                               dpi=600,
                                                               bbox_inches='tight')
-
                         # Save .csv's.
                         if Figure_Out[zone_input]['data_table'].empty:
                             self.logger.info(f'{row["Figure Output Name"]} '
                                              'does not return a data table')
                         else:
-                            Figure_Out[zone_input]["data_table"].to_csv(os.path.join(figures,
+                            Figure_Out[zone_input]["data_table"].to_csv(figures.joinpath(
                                                                         f'{zone_input}_'
                                                                         f'{row["Figure Output Name"]}.csv'))
 
                 self.logger.info('Plotting Completed for '
                                  f'{row["Figure Output Name"]}\n')
-
+                
+                # plt.tight_layout()
+                # plt.show()
                 plt.close('all')
         
         end_timer = time.time()
@@ -688,14 +611,11 @@ def main():
     # Load Input Properties
     #====================================================================================
     
-    #changes working directory to location of this python file
-    os.chdir(FILE_DIR)
-
-    Marmot_user_defined_inputs = pd.read_csv(mconfig.parser("user_defined_inputs_file"), 
+    Marmot_user_defined_inputs = pd.read_csv(INPUT_DIR.joinpath(mconfig.parser("user_defined_inputs_file")), 
                                              usecols=['Input','User_defined_value'],
                                              index_col='Input', skipinitialspace=True)
 
-    Marmot_plot_select = pd.read_csv(mconfig.parser("plot_select_file"))
+    Marmot_plot_select = pd.read_csv(INPUT_DIR.joinpath(mconfig.parser("plot_select_file")))
     
     # Folder to save your processed solutions
     if pd.isna(Marmot_user_defined_inputs.loc['Marmot_Solutions_folder',
@@ -718,19 +638,19 @@ def main():
                             'Scenario_Diff_plot'].squeeze()).split(",")).str.strip().tolist()
     if Scenario_Diff == ['nan']: Scenario_Diff = [""]
     
-    Mapping_folder = 'mapping_folder'
+    Mapping_folder = INPUT_DIR.joinpath('mapping_folder')
     
     if pd.isna(Marmot_user_defined_inputs.loc['Region_Mapping.csv_name', 
                                               'User_defined_value']) is True:
         Region_Mapping = pd.DataFrame()
     else:
-        Region_Mapping = pd.read_csv(os.path.join(Mapping_folder, 
+        Region_Mapping = pd.read_csv(INPUT_DIR.joinpath(Mapping_folder, 
                                      Marmot_user_defined_inputs.loc[
                                          'Region_Mapping.csv_name'].to_string(index=False).strip()))
 
         Region_Mapping = Region_Mapping.astype(str)
     
-    gen_names = pd.read_csv(os.path.join(Mapping_folder, 
+    gen_names = pd.read_csv(INPUT_DIR.joinpath(Mapping_folder, 
                             Marmot_user_defined_inputs.loc[
                                 'gen_names.csv_name'].to_string(index=False).strip()))
     
