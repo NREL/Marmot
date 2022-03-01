@@ -8,7 +8,8 @@ import logging
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
-import marmot.config.mconfig as mconfig
+import marmot.utils.mconfig as mconfig
+
 
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper

@@ -18,7 +18,8 @@ from matplotlib.figure import Figure
 from matplotlib.patches import Patch
 from typing import Tuple, List, Union
 
-import marmot.config.mconfig as mconfig
+import marmot.utils.mconfig as mconfig
+
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 

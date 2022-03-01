@@ -13,7 +13,8 @@ TO DO:
 import logging
 import pandas as pd
 
-import marmot.config.mconfig as mconfig
+import marmot.utils.mconfig as mconfig
+
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary 
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, InputSheetError,

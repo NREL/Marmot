@@ -14,7 +14,8 @@ import functools
 import concurrent.futures
 from typing import Tuple
 
-import marmot.config.mconfig as mconfig
+import marmot.utils.mconfig as mconfig
+
 
 logger = logging.getLogger('marmot_plot.'+__name__)
 
