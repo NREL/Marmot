@@ -1,0 +1,18 @@
+Input,Input_type,Importance,User_defined_value
+Simulation_model,str,required,PLEXOS
+PLEXOS_data_blocks,list,optional,ST
+Model_Solutions_folder,folder,required,C:\Users\DLEVIE\Documents\marmot-tutorials\hourly
+Marmot_Solutions_folder,folder,optional,C:\Users\DLEVIE\Documents\marmot-tutorials\results-test-reeds_formatter
+Scenario_process_list,List,required,"Base DA, High VG DA"
+VoLL,int,required,10000
+Region_Mapping.csv_name,string,optional(default),Regions_Zones_Mapping_Full.csv
+gen_names.csv_name,string,required(default),gen_names.csv
+emit_names.csv_name,string,required(default),emit_names.csv
+Scenarios,string or List,required,"Base DA, High VG DA"
+Scenario_Diff_plot,List,optional,"Base DA, High VG DA"
+AGG_BY,string,required,zone
+zone_region_sublist,List,optional,
+TECH_SUBSET,string,optional,
+Facet_ylabels,List,optional,
+Facet_xlabels,List,optional,"Base, High VG"
+Tick_labels,List,optional,"Base, High VG"
