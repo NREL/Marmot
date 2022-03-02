@@ -231,8 +231,8 @@ class SetupSubplot():
             handles = labels_handles.values()
         
         if reverse_legend:
-            handles = reversed(handles)
-            labels = reversed(labels)
+            handles = reversed(list(handles))
+            labels = reversed(list(labels))
 
         if loc in loc_anchor:
             new_loc, bbox_to_anchor = loc_anchor.get(loc, None)

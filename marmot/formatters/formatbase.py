@@ -1,8 +1,8 @@
 
-import os
 import re
 import logging
 import pandas as pd
+from pathlib import Path
 
 logger = logging.getLogger('marmot_format.'+__name__)
 
@@ -38,11 +38,11 @@ class Process():
                             }
 
 
-    def __init__(self, input_folder: str, Region_Mapping: pd.DataFrame, 
+    def __init__(self, input_folder: Path, Region_Mapping: pd.DataFrame, 
                  emit_names: pd.DataFrame, **kwargs):
         """
         Args:
-            input_folder (str): Folder containing model input files.
+            input_folder (Path): Folder containing model input files.
             Region_Mapping (pd.DataFrame): DataFrame to map custom 
                 regions/zones to create custom aggregations.
             emit_names (pd.DataFrame): DataFrame with 2 columns to rename 
@@ -60,17 +60,14 @@ class Process():
     def get_input_files(self) -> list:
         """Gets a list of input files within the scenario folders
         """
-        startdir = os.getcwd()
-        os.chdir(self.input_folder)
 
         files = []
-        for names in os.listdir():
-            files.append(names)  
+        for names in self.input_folder.iterdir():
+            files.append(names.name)  
 
         # List of all files in input folder in alpha numeric order
         files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
 
-        os.chdir(startdir)
 
         return files_list
 

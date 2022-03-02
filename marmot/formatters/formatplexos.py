@@ -1,15 +1,14 @@
 
-import os
 import re
 import pandas as pd
 import h5py
 import logging
+from pathlib import Path
 
 from marmot.metamanagers.meta_data import MetaData
 from marmot.formatters.formatbase import Process
-
-# Import as Submodule
 try:
+    # Import as Submodule
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
     from h5plexos.query import PLEXOSSolution
@@ -21,11 +20,11 @@ logger = logging.getLogger('marmot_format.'+__name__)
 class ProcessPLEXOS(Process):
     """Process PLEXOS class specific data from a h5plexos database.
     """
-    def __init__(self, input_folder: str, Region_Mapping: pd.DataFrame, 
+    def __init__(self, input_folder: Path, Region_Mapping: pd.DataFrame, 
                 *args, plexos_block: str ='ST', **kwargs):
         """
         Args:
-            input_folder (str): Folder containing h5plexos h5 files.
+            input_folder (Path): Folder containing h5plexos h5 files.
             Region_Mapping (pd.DataFrame): DataFrame to map custom 
                 regions/zones to create custom aggregations.
             plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
@@ -43,23 +42,20 @@ class ProcessPLEXOS(Process):
         Returns:
             list: list of h5plexos input filenames to process
         """
-        startdir = os.getcwd()
-        os.chdir(self.input_folder) 
         
         files = []
-        for names in os.listdir():
-            if names.endswith(".h5"):
-                files.append(names)  # Creates a list of only the hdf5 files
+        for names in self.input_folder.iterdir():
+            if names.suffix == ".h5":
+                files.append(names.name)  # Creates a list of only the hdf5 files
 
         # List of all hf files in hdf5 folder in alpha numeric order
         files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
-        os.chdir(startdir)
 
         # Read in all HDF5 files into dictionary
         logger.info("Loading all HDF5 files to prepare for processing")
         regions = set()
         for file in files_list:                
-            self.hdf5_collection[file] = PLEXOSSolution(os.path.join(self.input_folder, 
+            self.hdf5_collection[file] = PLEXOSSolution(self.input_folder.joinpath(
                                                                      file))
             if not self.Region_Mapping.empty:
                 regions.update(list(self.metadata.regions(file)['region']))
@@ -83,7 +79,7 @@ class ProcessPLEXOS(Process):
             output_file_path (str): Location of formatted output h5 file 
         """
         for partition in files_list:
-            f = h5py.File(os.path.join(self.input_folder, partition),'r')
+            f = h5py.File(self.input_folder.joinpath(partition),'r')
             meta_keys = [key for key in f['metadata'].keys()]
 
             group_dict = {}
