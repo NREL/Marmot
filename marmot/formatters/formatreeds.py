@@ -20,7 +20,7 @@ class ProcessReEDS(Process):
                 regions/zones to create custom aggregations.
             plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
         """
-        self.gdx_collection = {}
+        self.gdx_datafiles = {}
         self.gdx_data_units = {}
 
         # Instantiation of Process Base class
@@ -39,20 +39,20 @@ class ProcessReEDS(Process):
             if names.suffix == ".gdx":
                 files.append(names.name)
                 
-                names = str(names)
-                symbol_list = gdxpds.list_symbols(names)
-                if names not in self.gdx_data_units:
-                    self.gdx_data_units[names] = {}
+                symbol_list = gdxpds.list_symbols(str(names))
+                if names.name not in self.gdx_data_units:
+                    self.gdx_data_units[names.name] = {}
                 for symbol in symbol_list:
                     unit = re.search(symbol_marker, symbol.description)
                     if unit:
                         unit = unit.group(1)
-                    self.gdx_data_units[names][symbol.name] = unit
+                    self.gdx_data_units[names.name][symbol.name] = unit
                 
 
         # List of all files in input folder in alpha numeric order
         files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
-
+        for file in files_list:
+            self.gdx_datafiles[file] = str(reeds_outputs_dir.joinpath(file))
         return files_list
 
     def get_processed_data(self, data_class: str, prop: str, 
@@ -69,9 +69,9 @@ class ProcessReEDS(Process):
         Returns:
             pd.DataFrame: Formatted results dataframe.
         """
-        model_filename = str(model_filename)
+        gdx_file = self.gdx_datafiles.get(model_filename)
 
-        df = gdxpds.to_dataframe(model_filename, prop)
+        df = gdxpds.to_dataframe(gdx_file, prop)
 
         # Get desired method
         process_att = getattr(self, f'df_process_{data_class}')
@@ -84,7 +84,7 @@ class ProcessReEDS(Process):
 
         # Convert units and add unit column to index 
         df = df*converted_units[1]
-        units_index = pd.Index([converted_units[0]] *len(df), name='units')
+        units_index = pd.Index([converted_units[0]] * len(df), name='units')
         df.set_index(units_index, append=True, inplace=True) 
 
     def df_process_generator(self, df: pd.DataFrame, 
