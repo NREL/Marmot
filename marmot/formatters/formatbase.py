@@ -25,7 +25,9 @@ class Process():
                             'ton': ('kg', 907.18474),
                             'kg': ('kg', 1),
                             'tonne': ('kg', 1000),
+                            'metric tons': ('kg', 1000),
                             '$': ('$', 1),
+                            '2004$': ('$', 1),
                             '$000': ('$', 1000),
                             'h': ('h', 1),
                             'MMBTU': ('MMBTU', 1),
@@ -33,8 +35,17 @@ class Process():
                             'GJ"': ('MMBTU', 0.947817),
                             'TJ': ('MMBTU', 947.817120),
                             '$/MW': ('$/MW', 1),
+                            '$/MWh': ('$/MWh', 1),
                             'lb/MWh' : ('kg/MWh', 0.453592),
-                            'Kg/MWh': ('Kg/MWh', 1)
+                            'Kg/MWh': ('Kg/MWh', 1),
+                            'Quads': ('Quads', 1),
+                            'MW/yr': ('MW/yr', 1),
+                            'frac': ('fraction', 1),
+                            'fraction': ('fraction', 1),
+                            None: ('unitless', 1),
+                            'unitless': ('unitless', 1),
+                            
+
                             }
 
 

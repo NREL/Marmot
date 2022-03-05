@@ -142,14 +142,14 @@ class MarmotFormat(SetupLogger):
                                        inplace=True)
 
     @staticmethod
-    def _save_to_h5(df: pd.DataFrame, file_name: str, key: str, 
+    def _save_to_h5(df: pd.DataFrame, file_name: Path, key: str, 
                     mode: str = "a", complevel: int = 9, 
                     complib: str ='blosc:zlib', **kwargs) -> None:
         """Saves data to formatted hdf5 file
 
         Args:
             df (pd.DataFrame): Dataframe to save 
-            file_name (str): name of hdf5 file
+            file_name (Path): name of hdf5 file
             key (str): formatted property identifier, 
                 e.g generator_Generation
             mode (str, optional): file access mode. 
