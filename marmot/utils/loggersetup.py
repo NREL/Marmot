@@ -1,4 +1,9 @@
 
+"""Contains logger class used by Marmot
+
+@author: Daniel Levie
+"""
+
 from pathlib import Path
 import yaml
 import logging
