@@ -12,9 +12,7 @@ from typing import Union
 from marmot.utils.definitions import ROOT_DIR
 
 CONFIGFILE_NAME = "config.yml"
-
 configfile_path = ROOT_DIR.parent.joinpath(CONFIGFILE_NAME)
-
 
 def createConfig(configfile_path: Path):
     """Creates config.yml file using default values.
@@ -181,12 +179,16 @@ def createConfig(configfile_path: Path):
             include_total_net_imports = True,
             include_timeseries_net_imports = True),
 
+        formatter_settings = dict( 
+            VoLL = 10000,
+            skip_existing_properties = True,
+            append_plexos_block_name = False,
+            split_years_into_individual_files = False),
+
         multithreading_workers = 16,
         figure_file_format = 'svg',
         
         shift_leapday = False,
-        skip_existing_properties = True,
-        append_plexos_block_name = True,
         auto_convert_units = True,
         plot_title_as_region = True,
         
@@ -201,7 +203,7 @@ def createConfig(configfile_path: Path):
         )
 
     with open(configfile_path, "w") as cfgfile:
-        yaml.safe_dump(data, cfgfile,default_flow_style=False, sort_keys=False)
+        yaml.safe_dump(data, cfgfile, default_flow_style=False, sort_keys=False)
 
 
 # Check if there is already a configuration file
@@ -255,7 +257,7 @@ def edit_value(new_value: str, top_level: str,
         cfg[top_level][second_level] = new_value  
             
     with open(configfile_path,'w') as f:
-            yaml.safe_dump(cfg,f,default_flow_style=False, sort_keys=False)
+            yaml.safe_dump(cfg, f, default_flow_style=False, sort_keys=False)
             
 
 def reset_defaults():   
