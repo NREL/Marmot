@@ -1,3 +1,7 @@
+"""
+Execute and run the Marmot plotter 
+"""
+
 import sys
 from pathlib import Path
 run_path = Path(__file__).parent.resolve().parent
