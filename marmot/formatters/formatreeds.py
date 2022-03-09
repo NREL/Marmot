@@ -1,4 +1,11 @@
 
+"""Main formatting module for ReEDS results,
+Contains classes and methods specific to ReEDS outputs.
+Inherits the Process class.
+
+@author: Daniel Levie
+"""
+
 import logging
 import re
 import gdxpds
@@ -6,36 +13,81 @@ import pandas as pd
 from pathlib import Path
 from typing import List
 from dataclasses import dataclass, field
+
+from marmot.metamanagers.meta_data import MetaData
 from marmot.formatters.formatbase import Process
+from marmot.formatters.formatextra import ExtraProperties
 
 logger = logging.getLogger('marmot_format.'+__name__)
 
-    
-
 class ProcessReEDS(Process):
-    """Process ReEDS  specific data from a ReEDS result set.
+    """Process ReEDS specific data from a ReEDS result set.
     """
-    def __init__(self, input_folder: Path, Region_Mapping: pd.DataFrame, 
-                *args, subset_years: list=None, **kwargs):
+    # Maps ReEDS property names to Marmot names 
+    PROPERTY_MAPPING: dict = {
+        'generator_gen_out': 'generator_Generation',
+        'generator_cap_out': 'generator_Installed_Capacity',
+        'generator_curt_out': 'generator_Curtailment',
+        'region_load_rt': 'region_Load',
+        'line_losses_tran_h': 'line_Losses',
+        'line_tran_flow_power': 'line_Flow',
+        'line_tran_out': 'line_Import_Limit',
+        'generator_stor_in': 'generator_Pumped_Load',
+        'storage_stor_energy_cap': 'storage_Max_Volume',
+        'emission_emit_r': 'emission_Production',
+        'reserves_generators_opRes_supply_h': 'reserves_generators_Provision',
+        'generator_systemcost_techba': 'generator_Total_Generation_Cost'
+    }
+    # Extra custom properties that are created based off existing properties. 
+    # The dictionary keys are the existing properties and the values are the new
+    # property names and methods used to create it.
+    EXTRA_MARMOT_PROPERTIES: dict = {
+        'generator_Total_Generation_Cost': [('generator_VO&M_Cost', 
+                                                ExtraProperties.reeds_generator_vom_cost),
+                                            ('generator_Fuel_Cost', 
+                                                ExtraProperties.reeds_generator_fuel_cost),
+                                            ('generator_Reserves_VO&M_Cost', 
+                                                ExtraProperties.reeds_generator_reserve_vom_cost),
+                                            ('generator_FO&M_Cost', 
+                                                ExtraProperties.reeds_generator_fom_cost)],
+        'reserves_generators_Provision': [('reserve_Provision', 
+                                                ExtraProperties.reeds_reserve_provision)]
+        }
+
+    def __init__(self, input_folder: Path, output_file_path: Path, 
+                 Region_Mapping: pd.DataFrame, 
+                *args, process_subset_years: list=None, **kwargs):
         """
         Args:
             input_folder (Path): Folder containing csv files.
+            output_file_path (Path): Path to formatted h5 output file.
             Region_Mapping (pd.DataFrame): DataFrame to map custom 
                 regions/zones to create custom aggregations.
-            plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
+            process_subset_years (list, optional): If provided only process 
+                years specified. Defaults to None.
         """
-
-        self.gdx_datafiles: dict = {}
+        self.file_collection: dict = {}
         # Internal cached data is saved to the following variables.
         # To access the values use the public api e.g self.property_units
         self._property_units: dict = {}
+        self._wind_resource_to_pca = None
 
-        self.subset_years = subset_years
+        self.metadata = MetaData(output_file_path.parent, 
+                                read_from_formatted_h5=True, 
+                                Region_Mapping=Region_Mapping)
+        
+        if process_subset_years:
+            # Ensure values are ints
+            process_subset_years = list(map(int, process_subset_years)) 
+            logger.info(f"Processing subset of ReEDS years: {process_subset_years}")
+        self.process_subset_years = process_subset_years
+
         # Instantiation of Process Base class
-        super().__init__(input_folder, Region_Mapping, *args, **kwargs) 
+        super().__init__(input_folder, output_file_path, 
+                        Region_Mapping, *args, **kwargs) 
 
     @property
-    def property_units(self):
+    def property_units(self) -> dict:
         """Gets the property units from data, e.g MW, MWh
 
         Returns:
@@ -61,15 +113,53 @@ class ProcessReEDS(Process):
             if symbol.name not in self._property_units:
                 self._property_units[symbol.name] = unit
 
+    @property
+    def wind_resource_to_pca(self) -> dict:
+        """Get the wind resource (s) to pca/region mapping
+
+        Returns:
+            dict: wind_resource_to_pca mapping
+        """
+        return self._wind_resource_to_pca
+
+    @wind_resource_to_pca.setter
+    def wind_resource_to_pca(self, h5_filename: str):
+        """Sets the wind_resource_to_pca mapping
+
+        Args:
+            h5_filename (str): formatted h5 filename
+        """
+        if self.metadata.filename != h5_filename or \
+        self._wind_resource_to_pca is None:
+            regions = self.metadata.regions(h5_filename)
+            self._wind_resource_to_pca = (regions[['s','region']]
+                                            .set_index("s")
+                                            .to_dict()["region"])
+
+    def output_metadata(self, files_list: list) -> None:
+        """Add ReEDS specific metadata to formatted h5 file .  
+
+        Args:
+            files_list (list): List of all gdx files in inputs 
+                folder in alpha numeric order.
+        """
+        for partition in files_list:
+            region_df = pd.read_csv(self.input_folder.joinpath('inputs_case', 
+                                                    'regions.csv'))
+            region_df.rename(columns={'p': 'name',
+                                      'transreg': 'category'},
+                                      inplace=True)
+            region_df.to_hdf(self.output_file_path, 
+                            key=f'metadata/{partition}/objects/regions', 
+                            mode='a')
 
     def get_input_files(self) -> list:
         """Gets a list of input files within the scenario folders
         """
-
         reeds_outputs_dir = self.input_folder.joinpath('outputs')
         files = []
         for names in reeds_outputs_dir.iterdir():
-            if names.name == f"rep_{input_folder.name}.gdx":
+            if names.name == f"rep_{self.input_folder.name}.gdx":
                 files.append(names.name)
                 
                 self.property_units = str(names)                
@@ -77,7 +167,7 @@ class ProcessReEDS(Process):
         # List of all files in input folder in alpha numeric order
         files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
         for file in files_list:
-            self.gdx_datafiles[file] = str(reeds_outputs_dir.joinpath(file))
+            self.file_collection[file] = str(reeds_outputs_dir.joinpath(file))
         return files_list
 
     def get_processed_data(self, data_class: str, prop: str, 
@@ -94,23 +184,26 @@ class ProcessReEDS(Process):
         Returns:
             pd.DataFrame: Formatted results dataframe.
         """
-        gdx_file = self.gdx_datafiles.get(model_filename)
+        # Set wind_resource_to_pca dict
+        self.wind_resource_to_pca = self.input_folder.name
+
+        gdx_file = self.file_collection.get(model_filename)
 
         df = gdxpds.to_dataframe(gdx_file, prop)[prop]
-
+        # Get column names 
         reeds_prop_cols = PropertyColumns()
         df.columns = getattr(reeds_prop_cols, prop)
-        df.year = df.year.astype(int)
-        if self.subset_years:
-            df = df.loc[df.year.isin(self.subset_years)]
 
-        if timescale == 'interval':
-            df = self.merge_timeseries_block_data(df)
-        else:
-            df['timestamp'] = pd.to_datetime(df.year.astype(str))
-            
-        if 'year' in df.columns:
-            df = df.drop(['year'], axis=1)
+        if 'region' in df.columns:
+            df.region = df.region.map(lambda x: self.wind_resource_to_pca.get(x, x))
+            if not self.Region_Mapping.empty:
+                # Merge in region mapping, drop any na columns
+                df = df.merge(self.Region_Mapping, how='left', on='region')
+                df.dropna(axis=1, how='all', inplace=True)
+        
+        df.year = df.year.astype(int)
+        if self.process_subset_years:
+            df = df.loc[df.year.isin(self.process_subset_years)]
 
         # Get desired method, used for extra processing if needed
         process_att = getattr(self, f'df_process_{data_class}', None)
@@ -118,10 +211,18 @@ class ProcessReEDS(Process):
             # Process attribute and return to df
             df = process_att(df)
 
+        if timescale == 'interval':
+            df = self.merge_timeseries_block_data(df)
+        else:
+            df['timestamp'] = pd.to_datetime(df.year)
+            
+        if 'year' in df.columns:
+            df = df.drop(['year'], axis=1)
+
         df_col = list(df.columns)
         df_col.remove('Value')
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))
-        df = df.set_index(df_col)
+        df = df.groupby(df_col).sum()
         df = df.sort_index(level=['timestamp'])
 
         df_units = self.property_units[prop]
@@ -131,11 +232,19 @@ class ProcessReEDS(Process):
         # Convert units and add unit column to index 
         df = df*converted_units[1]
         units_index = pd.Index([converted_units[0]] * len(df), name='units')
-        df.set_index(units_index, append=True, inplace=True) 
+        df.set_index(units_index, append=True, inplace=True)
+        df.rename(columns={"Value": 0}, inplace=True)
         return df
 
     def merge_timeseries_block_data(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Merge chronological time intervals with reeds timeslices
+        
+        Args:
+            df (pd.DataFrame): input dataframe 
 
+        Returns:
+            pd.DataFrame: df with merged in timeseries data 
+        """
         timeslice_mapping_file = pd.read_csv(self.input_folder.joinpath('inputs_case', 
                                                     'h_dt_szn.csv'))
 
@@ -164,26 +273,33 @@ class ProcessReEDS(Process):
         df_merged =  df.merge(datetime_block, on=['year', 'h'])
         return df_merged.drop(['h','hour', 'year'], axis=1)  
 
-
     def df_process_generator(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Does any additional processing for generator properties
+        """
         
         if 'tech' not in df.columns:
             df['tech'] = 'reeds_vre'
+        df['gen_name'] = df.tech + "_" + df.region
         return df
 
     def df_process_line(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Does any additional processing for line properties
+        """
 
         df['line_name'] = df['region_from'] + "_" + df['region_to']
         return df
 
-    def def_process_reserve(self, df: pd.DataFrame) -> pd.DataFrame:
-
+    def df_process_reserves_generators(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Does any additional processing for reserves_generators properties
+        """
         df['Type'] = '-'
         return df
 
+
 @dataclass
 class PropertyColumns():
-
+    """Column names of properties based on ReEDS input property
+    """
     gen_out: List = field(default_factory=lambda: ['tech', 'region', 'h', 
                                                     'year', 'Value'])  #Marmot generator_Generation
     cap_out: List = field(default_factory=lambda: ['tech', 'region', 'year', 
@@ -204,38 +320,4 @@ class PropertyColumns():
     emit_nat_tech: List = field(default_factory=lambda: ['emission_type', 'tech', 'year', 'Value'])
     emit_r: List = field(default_factory=lambda: ['emission_type', 'region', 'year', 'Value']) # Marmot emission_Production (year)
     opRes_supply_h: List = field(default_factory=lambda: ['parent', 'tech', 'region', 'h', 'year', 'Value']) # Marmot reserves_generators_Provision
-    systemcost_tech_ba: List = field(default_factory=lambda: ['cost_type', 'tech', 'region', 'year', 'Value']) # Marmot generator_Total Generation Cost
-
-
-@dataclass
-class MarmotPropertyMapping():
-
-    gen_out: str = 'generator_Generation'
-    cap_out: str = 'generator_Installed_Capacity'
-    curt_out: str = 'generator_Curtailment'
-    load_rt: str = 'region_Load'
-    losses_tran_h: str = 'line_Losses'
-    tran_flow_power: str = 'line_Flow'
-    tran_out: str = 'line_Import_Limit'
-    stor_in: str = 'generator_Pumped_Load'
-    stor_energy_cap: str = 'storage_Max_Volume'
-    emit_nat_tech: str = ''
-    emit_r: str = 'emission_Production'
-    opRes_supply_h: str = 'reserves_generators_Provision'
-
-
-input_folder = Path(r"\\nrelnas01\ReEDS\Users\pbrown\ReEDSruns\20220223_bokeh\v20220223_bokehspurD0_ref_seq")
-Region_Mapping = pd.DataFrame()
-emit_names = pd.DataFrame()
-subset_years = [2050]
-model = ProcessReEDS(input_folder, Region_Mapping, emit_names, subset_years=subset_years)
-print(model.get_input_files())
-# prop = 'gen_out'
-model_filename = 'rep_v20220223_bokehspurD0_ref_seq.gdx'
-# gen_df = model.get_processed_data('generator', prop, 'interval', model_filename)
-prop = 'losses_tran_h'
-df = model.get_processed_data('generator', prop, 'interval', model_filename)
-
-
-
-# gen_df.xs(slice('2045-01-01', '2045-12-31'), level='timestamp', drop_level=False)
+    systemcost_techba: List = field(default_factory=lambda: ['cost_type', 'tech', 'region', 'year', 'Value']) # Marmot generator_Total Generation Cost

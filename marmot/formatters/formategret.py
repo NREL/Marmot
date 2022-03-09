@@ -7,4 +7,10 @@ logger = logging.getLogger('marmot_format.'+__name__)
 
 
 class ProcessEGRET(Process):
+    """Process EGRET class specific data from a json database.
+    """
+    # Maps EGRET property names to Marmot names, 
+    # unchanged names not included  
+    PROPERTY_MAPPING: dict = {}
+
     pass

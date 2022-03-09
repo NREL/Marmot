@@ -1,4 +1,11 @@
 
+"""Main formatting module for PLEXOS results,
+Contains classes and methods specific to PLEXOS outputs.
+Inherits the Process class.
+
+@author: Daniel Levie
+"""
+
 import re
 import pandas as pd
 import h5py
@@ -7,34 +14,50 @@ from pathlib import Path
 
 from marmot.metamanagers.meta_data import MetaData
 from marmot.formatters.formatbase import Process
+from marmot.formatters.formatextra import ExtraProperties
 try:
     # Import as Submodule
     from marmot.h5plexos.h5plexos.query import PLEXOSSolution
 except ModuleNotFoundError:
     from h5plexos.query import PLEXOSSolution
 
-
 logger = logging.getLogger('marmot_format.'+__name__)
-
 
 class ProcessPLEXOS(Process):
     """Process PLEXOS class specific data from a h5plexos database.
     """
-    def __init__(self, input_folder: Path, Region_Mapping: pd.DataFrame, 
+    # Maps PLEXOS property names to Marmot names, 
+    # unchanged names not included  
+    PROPERTY_MAPPING: dict = {}
+    # Extra custom properties that are created based off existing properties. 
+    # The dictionary keys are the existing properties and the values are the new
+    # property names and methods used to create it.
+    EXTRA_MARMOT_PROPERTIES: dict = {
+        'generator_Generation': [('generator_Curtailment', 
+                                    ExtraProperties.plexos_generator_curtailment)],
+        'region_Unserved_Energy': [('region_Cost_Unserved_Energy', 
+                                    ExtraProperties.plexos_cost_unserved_energy)],
+        'zone_Unserved_Energy': [('zone_Cost_Unserved_Energy', 
+                                    ExtraProperties.plexos_cost_unserved_energy)]
+        }
+
+    def __init__(self, input_folder: Path, output_file_path: Path,
+                Region_Mapping: pd.DataFrame, 
                 *args, plexos_block: str ='ST', **kwargs):
         """
         Args:
             input_folder (Path): Folder containing h5plexos h5 files.
+            output_file_path (Path): Path to formatted h5 output file.
             Region_Mapping (pd.DataFrame): DataFrame to map custom 
                 regions/zones to create custom aggregations.
             plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
         """
         self.plexos_block = plexos_block
-        self.hdf5_collection = {}
+        self.file_collection = {}
         self.metadata = MetaData(input_folder, read_from_formatted_h5=False, 
                                  Region_Mapping=Region_Mapping)
         # Instantiation of Process Base class
-        super().__init__(input_folder, Region_Mapping, *args, **kwargs) 
+        super().__init__(input_folder, output_file_path, Region_Mapping, *args, **kwargs) 
         
     def get_input_files(self) -> list:
         """Gets a list of h5plexos input files within the scenario folders
@@ -55,7 +78,7 @@ class ProcessPLEXOS(Process):
         logger.info("Loading all HDF5 files to prepare for processing")
         regions = set()
         for file in files_list:                
-            self.hdf5_collection[file] = PLEXOSSolution(self.input_folder.joinpath(
+            self.file_collection[file] = PLEXOSSolution(self.input_folder.joinpath(
                                                                      file))
             if not self.Region_Mapping.empty:
                 regions.update(list(self.metadata.regions(file)['region']))
@@ -68,7 +91,7 @@ class ProcessPLEXOS(Process):
                                     f"{missing_regions}\n")
         return files_list
 
-    def output_metadata(self, files_list: list, output_file_path: str) -> None:
+    def output_metadata(self, files_list: list) -> None:
         """Transfers metadata from original PLEXOS solutions file to processed HDF5 file.  
         
         For each partition in a given scenario, the metadata from that partition 
@@ -91,7 +114,7 @@ class ProcessPLEXOS(Process):
                     sub_dict[sub] = dset
                 group_dict[key] = sub_dict
 
-            with h5py.File(output_file_path,"a") as g:
+            with h5py.File(self.output_file_path,"a") as g:
                 # check if metadata group already exists
                 existing_groups = [key for key in g.keys()]
                 if 'metadata' not in existing_groups:
@@ -122,7 +145,7 @@ class ProcessPLEXOS(Process):
         Returns:
             pd.DataFrame: Formatted results dataframe.
         """
-        db = self.hdf5_collection.get(model_filename)
+        db = self.file_collection.get(model_filename)
         try:
             if "_" in plexos_class:
                 df = db.query_relation_property(plexos_class, 
