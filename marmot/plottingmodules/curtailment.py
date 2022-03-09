@@ -547,7 +547,7 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             # Set x-tick labels 
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Curtailment_out.index
@@ -704,7 +704,7 @@ class MPlot(PlotDataHelper):
             ax.set_ylabel('Total Curtailment ({}h)'.format(unitconversion['units']),  color='black', rotation='vertical')
             
             # Set x-tick labels 
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Curtailment_out.index

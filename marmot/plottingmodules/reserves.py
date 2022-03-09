@@ -293,7 +293,7 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             # Set x-tick labels
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Reserves_Out.index

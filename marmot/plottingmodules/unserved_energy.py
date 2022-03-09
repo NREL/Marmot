@@ -232,7 +232,7 @@ class MPlot(PlotDataHelper):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
             
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Unserved_Energy_Out.index

@@ -127,7 +127,7 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             # Set x-tick labels
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
@@ -299,7 +299,7 @@ class MPlot(PlotDataHelper):
             Total_Installed_Capacity_Out.columns = [re.sub('[\s (]|GW|TW|MW|kW|\)', '', i) 
                                                     for i in Total_Installed_Capacity_Out.columns]
 
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
@@ -347,7 +347,7 @@ class MPlot(PlotDataHelper):
             # Remove any suffixes from column names
             Total_Generation_Stack_Out.columns = [re.sub('[(]|GWh|TWh|MWh|kWh|\)', '', i).strip() 
                                                   for i in Total_Generation_Stack_Out.columns]
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index

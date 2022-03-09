@@ -164,7 +164,7 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             # Set x-tick labels
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Systems_Cost_Out.index
@@ -287,7 +287,7 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             # Set x-tick labels
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Systems_Cost_Out.index
@@ -441,7 +441,7 @@ class MPlot(PlotDataHelper):
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
             
             # Set x-tick labels
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Detailed_Gen_Cost_Out.index
@@ -573,7 +573,7 @@ class MPlot(PlotDataHelper):
             fig, ax = mplt.get_figure()
 
             # Set x-tick labels
-            if len(self.custom_xticklabels) > 1:
+            if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index

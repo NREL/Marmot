@@ -527,7 +527,7 @@ class PlotLibrary(SetupSubplot):
                                             sub_pos=sub_pos)
 
         # Set x-tick labels 
-        if custom_tick_labels and len(custom_tick_labels) > 1:
+        if custom_tick_labels:
             tick_labels = custom_tick_labels
         else:
             tick_labels = df.index
