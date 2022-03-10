@@ -12,7 +12,7 @@ import h5py
 import logging
 from pathlib import Path
 
-from marmot.metamanagers.meta_data import MetaData
+from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraProperties
 try:
@@ -65,7 +65,6 @@ class ProcessPLEXOS(Process):
         Returns:
             list: list of h5plexos input filenames to process
         """
-        
         files = []
         for names in self.input_folder.iterdir():
             if names.suffix == ".h5":
@@ -274,22 +273,27 @@ class ProcessPLEXOS(Process):
             idx_zone = idx_region
 
         if not self.Region_Mapping.empty:
-            region_gen_mapping_idx = pd.MultiIndex.from_frame(region_gen_cat_meta
-                                                  .merge(self.Region_Mapping,
-                                                         how="left",
-                                                         on='region')
-                                                  .sort_values(by=['tech', 'gen_name'])
-                                                  .drop(['region', 'tech', 'gen_name'], 
-                                                        axis=1))
+            region_gen_mapping = (region_gen_cat_meta
+                                    .merge(self.Region_Mapping,
+                                            how="left",
+                                            on='region')
+                                    .sort_values(by=['tech', 'gen_name'])
+                                    .drop(['region', 'tech', 'gen_name'], 
+                                        axis=1))
+            region_gen_mapping.dropna(axis=1, how='all', inplace=True)
 
-            region_gen_mapping_idx = region_gen_mapping_idx.repeat(timeseries_len)
+            if not region_gen_mapping.empty:
+                region_gen_mapping_idx = pd.MultiIndex.from_frame(region_gen_mapping)
+                region_gen_mapping_idx = region_gen_mapping_idx.repeat(timeseries_len)
 
-            idx_map = pd.MultiIndex(levels=idx_zone.levels 
-                                    + region_gen_mapping_idx.levels,
-                                    codes=idx_zone.codes 
-                                    + region_gen_mapping_idx.codes,
-                                    names=idx_zone.names 
-                                    + region_gen_mapping_idx.names)
+                idx_map = pd.MultiIndex(levels=idx_zone.levels 
+                                        + region_gen_mapping_idx.levels,
+                                        codes=idx_zone.codes 
+                                        + region_gen_mapping_idx.codes,
+                                        names=idx_zone.names 
+                                        + region_gen_mapping_idx.names)
+            else:
+                idx_map = idx_zone
         else:
             idx_map = idx_zone
 
@@ -320,22 +324,28 @@ class ProcessPLEXOS(Process):
         timeseries_len = len(df.index.get_level_values('timestamp').unique())
 
         # checks if Region_Mapping contains data to merge, skips if empty
-        if not self.Region_Mapping.empty:  
-            mapping_idx = pd.MultiIndex.from_frame(self.metadata
-                                       .regions(model_filename)
-                                       .merge(self.Region_Mapping,
-                                              how="left",
-                                              on='region')
-                                       .drop(['region', 'category'], axis=1))
+        if not self.Region_Mapping.empty:
+            region_gen_mapping = (self.metadata
+                                    .regions(model_filename)
+                                    .merge(self.Region_Mapping,
+                                            how="left",
+                                            on='region')
+                                    .drop(['region', 'category'], 
+                                            axis=1))
+            region_gen_mapping.dropna(axis=1, how='all', inplace=True)
 
-            mapping_idx = mapping_idx.repeat(timeseries_len)
+            if not region_gen_mapping.empty:
+                mapping_idx = pd.MultiIndex.from_frame(region_gen_mapping)
+                mapping_idx = mapping_idx.repeat(timeseries_len)
 
-            idx = pd.MultiIndex(levels=df.index.levels 
-                                + mapping_idx.levels,
-                                codes=df.index.codes 
-                                + mapping_idx.codes,
-                                names=df.index.names 
-                                + mapping_idx.names)
+                idx = pd.MultiIndex(levels=df.index.levels 
+                                    + mapping_idx.levels,
+                                    codes=df.index.codes 
+                                    + mapping_idx.codes,
+                                    names=df.index.names 
+                                    + mapping_idx.names)
+            else:
+                idx = df.index
         else:
             idx = df.index
 
@@ -581,6 +591,7 @@ class ProcessPLEXOS(Process):
 
         if not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
+            df.dropna(axis=1, how='all', inplace=True)
 
         if not self.emit_names.empty:
             # reclassify emissions as specified by user in mapping
@@ -638,7 +649,9 @@ class ProcessPLEXOS(Process):
         # checks if Region_Maping contains data to merge, skips if empty (Default)
         if not self.Region_Mapping.empty:
             # Merges in all Region Mappings
-            df = df.merge(self.Region_Mapping, how='left', on='region')  
+            df = df.merge(self.Region_Mapping, how='left', on='region') 
+            df.dropna(axis=1, how='all', inplace=True)
+
         df.rename(columns={'name': 'storage_resource'}, inplace=True)
         df_col = list(df.columns)
         df_col.remove(0)
@@ -716,20 +729,25 @@ class ProcessPLEXOS(Process):
             idx_zone = idx_region
 
         if not self.Region_Mapping.empty:
-            region_mapping_idx = pd.MultiIndex.from_frame(node_region_meta
-                                              .merge(self.Region_Mapping,
-                                                     how="left",
-                                                     on='region')
-                                              .drop(['region', 'node'], axis=1))
-                                
-            region_mapping_idx = region_mapping_idx.repeat(timeseries_len)
+            region_mapping = (node_region_meta
+                            .merge(self.Region_Mapping,
+                                    how="left",
+                                    on='region')
+                            .drop(['region', 'node'], axis=1))
+            region_mapping.dropna(axis=1, how='all', inplace=True)     
 
-            idx_map = pd.MultiIndex(levels=idx_zone.levels 
-                                    + region_mapping_idx.levels,
-                                    codes=idx_zone.codes 
-                                    + region_mapping_idx.codes,
-                                    names=idx_zone.names 
-                                    + region_mapping_idx.names)
+            if not region_mapping.empty:
+                region_mapping_idx = pd.MultiIndex.from_frame(region_mapping)
+                region_mapping_idx = region_mapping_idx.repeat(timeseries_len)
+
+                idx_map = pd.MultiIndex(levels=idx_zone.levels 
+                                        + region_mapping_idx.levels,
+                                        codes=idx_zone.codes 
+                                        + region_mapping_idx.codes,
+                                        names=idx_zone.names 
+                                        + region_mapping_idx.names)
+            else:
+                idx_map = idx_zone
         else:
             idx_map = idx_zone
 
