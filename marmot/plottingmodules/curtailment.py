@@ -437,7 +437,7 @@ class MPlot(PlotDataHelper):
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios),
-                      (True, "generator_Available_Capacity", self.Scenarios)]
+                      (False, "generator_Available_Capacity", self.Scenarios)]
         
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -474,6 +474,9 @@ class MPlot(PlotDataHelper):
                     vre_curt = self.assign_curtailment_techs(vre_curt)
 
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
+                if avail_gen.empty:
+                    avail_gen = self[f"generator_{self.curtailment_prop}"][scenario].copy()
+                    avail_gen.iloc[:,0] = 0
                 try: #Check for regions missing all generation.
                     avail_gen = avail_gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
@@ -528,9 +531,14 @@ class MPlot(PlotDataHelper):
             Total_Curtailment_out = pd.concat(vre_curt_chunks, axis=0, sort=False)
             Total_Available_gen = pd.concat(avail_gen_chunks, axis=0, sort=False)
             
-            vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
+            # if Total_Available_gen not included and all 0, 
+            # vre_pct_curt set to empty DataFrame
+            if Total_Available_gen.to_numpy().sum() == 0:
+                vre_pct_curt = pd.DataFrame()
+            else:
+                vre_pct_curt = Total_Curtailment_out.sum(axis=1)/Total_Available_gen.sum(axis=1)
             
-            if Total_Curtailment_out.empty == True:
+            if Total_Curtailment_out.empty:
                 outputs[zone_input] = MissingZoneData()
                 continue
             
@@ -566,20 +574,21 @@ class MPlot(PlotDataHelper):
             if mconfig.parser("plot_title_as_region"):
                 mplt.add_main_title(zone_input)
 
-            curt_totals = Total_Curtailment_out.sum(axis=1)
-            #inserts total bar value above each bar
-            for k, patch in enumerate(ax.patches):
-                height = curt_totals[k]
-                width = patch.get_width()
-                x, y = patch.get_xy()
-                ax.text(x+width/2,
-                    y+height + 0.05*max(ax.get_ylim()),
-                    '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
-                    horizontalalignment='center',
-                    verticalalignment='center', fontsize=7, color='red')
-                
-                if k>=len(vre_pct_curt)-1:
-                    break
+            if not vre_pct_curt.empty:
+                curt_totals = Total_Curtailment_out.sum(axis=1)
+                #inserts total bar value above each bar
+                for k, patch in enumerate(ax.patches):
+                    height = curt_totals[k]
+                    width = patch.get_width()
+                    x, y = patch.get_xy()
+                    ax.text(x+width/2,
+                        y+height + 0.05*max(ax.get_ylim()),
+                        '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
+                        horizontalalignment='center',
+                        verticalalignment='center', fontsize=7, color='red')
+                    
+                    if k>=len(vre_pct_curt)-1:
+                        break
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -965,7 +974,10 @@ class MPlot(PlotDataHelper):
                 re_curt = re_curt/interval_count
                 # Group data by hours and find mean across entire range 
                 re_curt = re_curt.groupby([re_curt.index.hour]).mean()
-                
+                # If hours are missing, fill with 0
+                if len(re_curt) < 24:
+                    re_idx = range(0,24)
+                    re_curt = re_curt.reindex(re_idx, fill_value=0)
                 # reset index to datetime 
                 re_curt.index = pd.date_range("2024-01-01", periods=24, freq="H")
                 re_curt.rename(scenario, inplace=True)
@@ -1002,7 +1014,7 @@ class MPlot(PlotDataHelper):
             # Add legend
             mplt.add_legend()
             # Set time ticks
-            mplt.set_subplot_timeseries_format()
+            mplt.set_subplot_timeseries_format(zero_formats_3='%H:%M')
             ax.set_ylabel(f"Average Diurnal Curtailment ({unitconversion['units']})", 
                             color='black', rotation='vertical')
             

@@ -102,20 +102,23 @@ class MPlot(PlotDataHelper):
                 Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = Cap.reset_index()
-                Cap = Cap.drop(columns = ['timestamp','tech'])
-                Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
-                Gen = pd.merge(Gen,Cap, on = 'gen_name')
-                Gen.set_index('timestamp',inplace=True)
-                
+                Cap.set_index('timestamp',inplace=True)
                 if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
+                    Cap = Cap[start_date_range : end_date_range]
+                    if Cap.empty is True:
+                        self.logger.warning('No data in selected Date Range')
+                        continue
+                Cap = Cap.drop(columns = ['tech'])
+                Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
+                Gen = pd.merge(Gen,Cap, on = 'gen_name')
+                Gen.set_index('timestamp',inplace=True)
+                if pd.notna(start_date_range):
                     # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
                     Gen = Gen.sort_index()[start_date_range : end_date_range]
                     if Gen.empty is True:
-                        self.logger.warning('No data in selected Date Range')
                         continue
-
                 #Calculate CF individually for each plant, since we need to take out all zero rows.
                 tech_names = Gen['tech'].unique()
                 CF = pd.DataFrame(columns = tech_names,index = [scenario])
@@ -231,7 +234,6 @@ class MPlot(PlotDataHelper):
                     if Gen.empty is True:
                         self.logger.warning('No data in selected Date Range')
                         continue
-                        
                 # Calculates interval step to correct for MWh of generation
                 time_delta = Gen.index[1] - Gen.index[0]
                 duration = Gen.index[len(Gen)-1] - Gen.index[0]
@@ -243,13 +245,15 @@ class MPlot(PlotDataHelper):
                 Gen = Gen/interval_count
                 Total_Gen = Gen.sum(axis=0)
                 Total_Gen.rename(scenario, inplace = True)
-                
                 Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Cap = self.df_process_gen_inputs(Cap)
+                if pd.notna(start_date_range):
+                    Cap = Cap[start_date_range : end_date_range]
+                    if Cap.empty is True:
+                        continue
                 Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
                 Cap.rename(scenario, inplace = True)
-
                 #Calculate CF
                 CF = Total_Gen/(Cap * duration_hours)
                 CF.rename(scenario, inplace = True)

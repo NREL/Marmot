@@ -296,7 +296,10 @@ class SetupSubplot():
                                                                 "x_axes_minticks"),
                                    maxticks: int = mconfig.parser("axes_options",
                                                                 "x_axes_maxticks"),
-                                   sub_pos: Union[int, Tuple[int, int]] = 0) -> None:
+                                   sub_pos: Union[int, Tuple[int, int]] = 0,
+                                   zero_formats_1: str = '%b\n %Y', 
+                                   zero_formats_2: str = '%d\n %b', 
+                                   zero_formats_3: str = '%H:%M\n %d-%b') -> None:
         """Auto sets timeseries format of subplot.
 
         Args:
@@ -314,9 +317,9 @@ class SetupSubplot():
         locator = mdates.AutoDateLocator(minticks=minticks, maxticks=maxticks)
         formatter = mdates.ConciseDateFormatter(locator)
         formatter.formats[2] = '%d\n %b'
-        formatter.zero_formats[1] = '%b\n %Y'
-        formatter.zero_formats[2] = '%d\n %b'
-        formatter.zero_formats[3] = '%H:%M\n %d-%b'
+        formatter.zero_formats[1] = zero_formats_1
+        formatter.zero_formats[2] = zero_formats_2
+        formatter.zero_formats[3] = zero_formats_3
         formatter.offset_formats[3] = '%b %Y'
         formatter.show_offset = False
         ax.xaxis.set_major_locator(locator)
@@ -526,7 +529,9 @@ class PlotLibrary(SetupSubplot):
         self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, 
                                             sub_pos=sub_pos)
 
-        # Set x-tick labels 
+        # Set x-tick labels
+        if isinstance(custom_tick_labels, pd.Index):
+            custom_tick_labels = list(custom_tick_labels)
         if custom_tick_labels:
             tick_labels = custom_tick_labels
         else:
