@@ -89,8 +89,9 @@ class MetaData():
 
                 filename = processed_file_format.format(filename)
                 self.h5_filepath = self.HDF5_folder_in.joinpath(filename)
-                self.h5_data = h5py.File(self.HDF5_folder_in.joinpath(filename), 'r+')
-                partitions = [key for key in self.h5_data['metadata'].keys()]
+                with h5py.File(self.HDF5_folder_in.joinpath(filename), 'r') as f:
+                    self.h5_data = f
+                    partitions = [key for key in self.h5_data['metadata'].keys()]
                 if self.partition_number > len(partitions):
                     logger.warning(f"\nYou have chosen to use metadata partition_number {self.partition_number}, "
                                     f"But there are only {len(partitions)} partitions in your formatted h5 file.\n"
@@ -100,7 +101,8 @@ class MetaData():
                 self.start_index = f"metadata/{partitions[self.partition_number]}/"
             else:
                 self.h5_filepath = self.HDF5_folder_in.joinpath(filename)
-                self.h5_data = h5py.File(self.HDF5_folder_in.joinpath(filename), 'r+')
+                with h5py.File(self.HDF5_folder_in.joinpath(filename), 'r') as f:
+                    self.h5_data = f
                 self.start_index = "metadata/"
 
         except OSError:

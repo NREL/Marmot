@@ -29,7 +29,7 @@ except ModuleNotFoundError:
     sys.exit()
 from marmot.utils.loggersetup import SetupLogger
 from marmot.utils.definitions import INPUT_DIR
-from marmot.metamanagers.meta_data import MetaData
+from marmot.metamanagers.read_metadata import MetaData
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     DataSavedInModule, InputSheetError, MissingInputData, MissingMetaData,
     MissingZoneData, UnderDevelopment, UnsupportedAggregation)
@@ -54,7 +54,7 @@ class MarmotPlot(SetupLogger):
                  gen_names: Union[str, Path, pd.DataFrame],
                  Marmot_plot_select: Union[str, Path, pd.DataFrame], 
                  Marmot_Solutions_folder: Union[str, Path] = None,
-                 mapping_folder: Union[str, Path] = 'mapping_folder',
+                 mapping_folder: Union[str, Path] = INPUT_DIR.joinpath('mapping_folder'),
                  Scenario_Diff: Union[str, list] = None,
                  zone_region_sublist: Union[str, list] = None,
                  xlabels: Union[str, list] = None,
@@ -80,7 +80,7 @@ class MarmotPlot(SetupLogger):
                 Defaults to None.
             mapping_folder (Union[str, Path], optional): The location of the 
                 Marmot mapping folder.
-                Defaults to 'mapping_folder'.
+                Defaults to INPUT_DIR.joinpath('mapping_folder').
             Scenario_Diff (Union[str, list], optional): 2 value string 
                 or list, used to compare 2 scenarios. 
                 Defaults to None.
@@ -187,7 +187,7 @@ class MarmotPlot(SetupLogger):
         elif isinstance(ticklabels, list):
             self.custom_xticklabels = ticklabels
         if ticklabels == ['nan'] or ticklabels is None:
-            self.custom_xticklabels = [""]
+            self.custom_xticklabels = None
 
         if isinstance(Region_Mapping, (str, Path)):
             try:
@@ -673,9 +673,12 @@ def main():
     if xlabels == ['nan']: xlabels = [""]
     
     # option to change tick labels on plot
-    ticklabels = pd.Series(str(Marmot_user_defined_inputs.loc[
-                    'Tick_labels'].squeeze()).split(",")).str.strip().tolist()
-    if ticklabels == ['nan']: ticklabels = [""]
+    if pd.isna(Marmot_user_defined_inputs.loc['Tick_labels', 
+                                              'User_defined_value']):
+        ticklabels = None
+    else:                                     
+        ticklabels = pd.Series(str(Marmot_user_defined_inputs.loc[
+                        'Tick_labels'].squeeze()).split(",")).str.strip().tolist()
     
     initiate = MarmotPlot(Scenarios, AGG_BY, Model_Solutions_folder, 
                           gen_names, Marmot_plot_select,

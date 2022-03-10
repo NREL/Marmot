@@ -14,7 +14,7 @@ from pathlib import Path
 from typing import List
 from dataclasses import dataclass, field
 
-from marmot.metamanagers.meta_data import MetaData
+from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraProperties
 
@@ -214,8 +214,7 @@ class ProcessReEDS(Process):
         if timescale == 'interval':
             df = self.merge_timeseries_block_data(df)
         else:
-            df['timestamp'] = pd.to_datetime(df.year)
-            
+            df['timestamp'] = pd.to_datetime(df.year.astype(str))
         if 'year' in df.columns:
             df = df.drop(['year'], axis=1)
 
