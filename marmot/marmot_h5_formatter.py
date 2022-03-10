@@ -138,8 +138,7 @@ class MarmotFormat(SetupLogger):
                                                 self.emit_names.columns[1]: 'New'},
                                        inplace=True)
 
-    @staticmethod
-    def save_to_h5(df: pd.DataFrame, file_name: Path, key: str, 
+    def save_to_h5(self, df: pd.DataFrame, file_name: Path, key: str, 
                     mode: str = "a", complevel: int = 9, 
                     complib: str ='blosc:zlib', **kwargs) -> None:
         """Saves data to formatted hdf5 file
@@ -156,10 +155,14 @@ class MarmotFormat(SetupLogger):
             complib (str, optional): compression library. 
                 Defaults to 'blosc:zlib'.
         """
+        self.logger.info("Saving data to h5 file...")
+
         df.to_hdf(file_name, key=key, mode=mode,
                     complevel=complevel,
                     complib=complib,
                     **kwargs)
+        
+        self.logger.info("Data saved to h5 file successfully\n")
 
     def run_formatter(self, sim_model: str='PLEXOS', plexos_block: str='ST', 
                       append_block_name: bool=False, 
@@ -309,12 +312,9 @@ class MarmotFormat(SetupLogger):
                     save_attempt=1
                     while save_attempt<=3:
                         try:
-                            self.logger.info("Saving data to h5 file...")
                             self.save_to_h5(Processed_Data_Out,
                                             output_file_path, 
                                             key=property_key_name)
-
-                            self.logger.info("Data saved to h5 file successfully\n")
                             save_attempt=4
                         except:
                             self.logger.warning("h5 File is probably in use, "
