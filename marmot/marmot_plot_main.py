@@ -527,6 +527,12 @@ class MarmotPlot(SetupLogger):
                 else:
                     row.iloc[6] = f"Date ({row.iloc[6]})"
 
+                if pd.notna(row['Plot Annual Resolution']) and \
+                    row['Plot Annual Resolution'] is True:
+                    data_resolution = '_Annual'
+                else:
+                    data_resolution = ''
+
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
@@ -537,7 +543,8 @@ class MarmotPlot(SetupLogger):
                                            timezone = row.iloc[6],
                                            start_date_range = row.iloc[7],
                                            end_date_range = row.iloc[8],
-                                           custom_data_file_path = row['Custom Data File'])
+                                           custom_data_file_path = row['Custom Data File'],
+                                           data_resolution = data_resolution)
                 
                 if isinstance(Figure_Out, MissingInputData):
                     self.logger.info("Add Inputs With Formatter Before "

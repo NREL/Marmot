@@ -138,5 +138,21 @@ class ExtraProperties():
         """
         return df.xs('op_fom_costs', level='cost_type')
 
+    def annualize_property(self, df: pd.DataFrame, **_):
+        """Annualizes any property, groups by year
+
+        Args:
+            df (pd.DataFrame): multiindex dataframe with timestamp level.
+
+        Returns:
+            pd.DataFrame: df with timestamp grouped by year.
+        """
+        index_names = list(df.index.names)
+        index_names.remove('timestamp')
+        timestamp_annualized = [pd.to_datetime(df.index.get_level_values('timestamp')
+                                                .year.astype(str))]
+        timestamp_annualized.extend(index_names)
+        return df.groupby(timestamp_annualized).sum()
+
 
             

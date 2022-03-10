@@ -205,7 +205,7 @@ class PlotDataHelper(dict):
         df.tech.cat.set_categories(self.ordered_gen, inplace=True)
         df = df.sort_values(["tech"])
         df = df.pivot(index='timestamp', columns='tech', values=0)
-        return df
+        return df.fillna(0)
 
     def create_categorical_tech_index(self, df: pd.DataFrame) -> pd.DataFrame:
         """Creates categorical index based on generators.
@@ -349,6 +349,7 @@ class PlotDataHelper(dict):
         if not unsereved_energy.empty:
             net_imports -= unsereved_energy.squeeze()
         net_imports = net_imports.rename("Net Imports")
+        net_imports = net_imports.fillna(0)
         gen_df = gen_df.append(net_imports)
         gen_df = self.create_categorical_tech_index(gen_df)
         if transpose_df:

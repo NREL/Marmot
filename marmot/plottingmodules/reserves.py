@@ -54,7 +54,8 @@ class MPlot(PlotDataHelper):
     def reserve_gen_timeseries(self, figure_name: str = None, prop: str = None,
                                start: float = None, end: float= None,
                                timezone: str = "", start_date_range: str = None,
-                               end_date_range: str = None, **_):
+                               end_date_range: str = None, 
+                               data_resolution: str = "", **_):
         """Creates a generation timeseries stackplot of total cumulative reserve provision by tech type.
         
         The code will create either a facet plot or a single plot depending on 
@@ -108,7 +109,7 @@ class MPlot(PlotDataHelper):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"reserves_generators_Provision",self.Scenarios)]
+        properties = [(True,f"reserves_generators_Provision{data_resolution}",self.Scenarios)]
         
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -134,7 +135,7 @@ class MPlot(PlotDataHelper):
             for n, scenario in enumerate(Scenarios):
                 self.logger.info(f"Scenario = {scenario}")
 
-                reserve_provision_timeseries = self["reserves_generators_Provision"].get(scenario)
+                reserve_provision_timeseries = self[f"reserves_generators_Provision{data_resolution}"].get(scenario)
                 
                 #Check if zone has reserves, if not skips
                 try:

@@ -198,7 +198,8 @@ class MPlot(PlotDataHelper):
     def gen_stack(self, figure_name: str = None, prop: str = None,
                   start: float = None, end: float= None,
                   timezone: str = "", start_date_range: str = None,
-                  end_date_range: str = None, **_):
+                  end_date_range: str = None,
+                  data_resolution: str = "", **_):
         """Creates a timeseries stacked area plot of generation by technology.
 
         The stack order of technologies is determined by the ordered_gen_categories.csv
@@ -255,11 +256,11 @@ class MPlot(PlotDataHelper):
 
             # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
             # required True/False, property name and scenarios required, scenarios must be a list.
-            properties = [(True,"generator_Generation",scenario_list),
-                          (False,f"generator_{self.curtailment_prop}",scenario_list),
-                          (False,"generator_Pump_Load",scenario_list),
-                          (True,f"{agg}_Load",scenario_list),
-                          (False,f"{agg}_Unserved_Energy",scenario_list)]
+            properties = [(True,f"generator_Generation{data_resolution}",scenario_list),
+                          (False,f"generator_{self.curtailment_prop}{data_resolution}",scenario_list),
+                          (False,f"generator_Pump_Load{data_resolution}",scenario_list),
+                          (True,f"{agg}_Load{data_resolution}",scenario_list),
+                          (False,f"{agg}_Unserved_Energy{data_resolution}",scenario_list)]
 
             # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -268,7 +269,7 @@ class MPlot(PlotDataHelper):
         def setup_data(zone_input, scenario, Stacked_Gen):
 
             # Insert Curtailment into gen stack if it exists in database
-            Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario).copy()
+            Stacked_Curt = self[f"generator_{self.curtailment_prop}{data_resolution}"].get(scenario).copy()
             if not Stacked_Curt.empty:
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
                 if self.shift_leapday == True:
@@ -281,8 +282,10 @@ class MPlot(PlotDataHelper):
                         Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
                     Stacked_Curt = Stacked_Curt.sum(axis=1)
                     Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
+                    #Insert curtailment into
                     Stacked_Gen.insert(len(Stacked_Gen.columns), 
-                                       column=curtailment_name, value=Stacked_Curt) #Insert curtailment into
+                                       column=curtailment_name, value=Stacked_Curt)
+                    Stacked_Gen = Stacked_Gen.fillna(0) 
                     # Calculates Net Load by removing variable gen + curtailment
                     vre_gen_cat = self.vre_gen_cat + [curtailment_name]
                 else:
@@ -294,19 +297,16 @@ class MPlot(PlotDataHelper):
             Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)
 
-            # Removes columns that only contain 0
-            Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
-
-            Load = self[f'{agg}_Load'].get(scenario).copy()
+            Load = self[f"{agg}_Load{data_resolution}"].get(scenario).copy()
             if self.shift_leapday == True:
                 Load = self.adjust_for_leapday(Load)
             Load = Load.xs(zone_input,level=self.AGG_BY)
             Load = Load.groupby(["timestamp"]).sum()
             Load = Load.squeeze() #Convert to Series
 
-            Pump_Load = self["generator_Pump_Load"][scenario]
+            Pump_Load = self[f"generator_Pump_Load{data_resolution}"][scenario]
             if Pump_Load.empty or not mconfig.parser("plot_data","include_timeseries_pumped_load_line"):
-                Pump_Load = self['generator_Generation'][scenario].copy()
+                Pump_Load = self[f"generator_Generation{data_resolution}"][scenario].copy()
                 Pump_Load.iloc[:,0] = 0
             if self.shift_leapday == True:
                 Pump_Load = self.adjust_for_leapday(Pump_Load)
@@ -318,9 +318,9 @@ class MPlot(PlotDataHelper):
             else:
                 Total_Demand = Load
 
-            Unserved_Energy = self[f'{agg}_Unserved_Energy'][scenario].copy()
+            Unserved_Energy = self[f"{agg}_Unserved_Energy{data_resolution}"][scenario].copy()
             if Unserved_Energy.empty:
-                Unserved_Energy = self[f'{agg}_Load'][scenario].copy()
+                Unserved_Energy = self[f"{agg}_Load{data_resolution}"][scenario].copy()
                 Unserved_Energy.iloc[:,0] = 0
             if self.shift_leapday == True:
                 Unserved_Energy = self.adjust_for_leapday(Unserved_Energy)
@@ -523,7 +523,7 @@ class MPlot(PlotDataHelper):
                 self.logger.info(f"Scenario = {scenario}")
 
                 try:
-                    Stacked_Gen = self['generator_Generation'].get(scenario).copy()
+                    Stacked_Gen = self[f"generator_Generation{data_resolution}"].get(scenario).copy()
                     if self.shift_leapday == True:
                         Stacked_Gen = self.adjust_for_leapday(Stacked_Gen)
                     Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
@@ -588,7 +588,9 @@ class MPlot(PlotDataHelper):
                 if mconfig.parser("plot_data","include_timeseries_net_imports"):
                     Stacked_Gen = self.include_net_imports(Stacked_Gen, Load,
                                                            Unserved_Energy)
-                    
+                # Remove any all 0 columns
+                Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
+
                 # Data table of values to return to main program
                 single_scen_out = pd.concat([Load, Total_Demand, unserved_eng_data_table, Stacked_Gen], 
                                             axis=1, sort=False)
@@ -616,7 +618,7 @@ class MPlot(PlotDataHelper):
                                      label='Demand + \n Storage Charging')
                     axs[i].plot(Total_Demand, color='black', linestyle="--",
                                         label='Demand')
-                else:
+                elif (Load == 0).all() == False:
                     axs[i].plot(Load, color='black', label='Demand')                    
 
                 if prop == "Min Net Load":

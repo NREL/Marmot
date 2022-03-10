@@ -26,16 +26,18 @@ class ProcessReEDS(Process):
     # Maps ReEDS property names to Marmot names 
     PROPERTY_MAPPING: dict = {
         'generator_gen_out': 'generator_Generation',
+        'generator_gen_out_ann': 'generator_Generation_Annual',
         'generator_cap_out': 'generator_Installed_Capacity',
         'generator_curt_out': 'generator_Curtailment',
         'region_load_rt': 'region_Load',
         'line_losses_tran_h': 'line_Losses',
         'line_tran_flow_power': 'line_Flow',
         'line_tran_out': 'line_Import_Limit',
-        'generator_stor_in': 'generator_Pumped_Load',
+        'generator_stor_in': 'generator_Pump_Load',
         'storage_stor_energy_cap': 'storage_Max_Volume',
         'emission_emit_r': 'emission_Production',
         'reserves_generators_opRes_supply_h': 'reserves_generators_Provision',
+        'reserves_generators_opRes_supply': 'reserves_generators_Provision_Annual',
         'generator_systemcost_techba': 'generator_Total_Generation_Cost'
     }
     # Extra custom properties that are created based off existing properties. 
@@ -51,7 +53,12 @@ class ProcessReEDS(Process):
                                             ('generator_FO&M_Cost', 
                                                 ExtraProperties.reeds_generator_fom_cost)],
         'reserves_generators_Provision': [('reserve_Provision', 
-                                                ExtraProperties.reeds_reserve_provision)]
+                                                ExtraProperties.reeds_reserve_provision)],
+        'region_Load': [('region_Load_Annual', ExtraProperties.annualize_property)],
+        'generator_Curtailment': [('generator_Curtailment_Annual', 
+                                                ExtraProperties.annualize_property)],
+        'generator_Pump_Load': [('generator_Pump_Load_Annual', 
+                                                ExtraProperties.annualize_property)]
         }
 
     def __init__(self, input_folder: Path, output_file_path: Path, 
@@ -301,6 +308,8 @@ class PropertyColumns():
     """
     gen_out: List = field(default_factory=lambda: ['tech', 'region', 'h', 
                                                     'year', 'Value'])  #Marmot generator_Generation
+    gen_out_ann: List = field(default_factory=lambda: ['tech', 'region', 'year', 
+                                                    'Value']) 
     cap_out: List = field(default_factory=lambda: ['tech', 'region', 'year', 
                                                     'Value']) #Marmot generator_Installed_Capacity
     curt_out: List = field(default_factory=lambda: ['region', 'h', 'year', 
@@ -319,4 +328,5 @@ class PropertyColumns():
     emit_nat_tech: List = field(default_factory=lambda: ['emission_type', 'tech', 'year', 'Value'])
     emit_r: List = field(default_factory=lambda: ['emission_type', 'region', 'year', 'Value']) # Marmot emission_Production (year)
     opRes_supply_h: List = field(default_factory=lambda: ['parent', 'tech', 'region', 'h', 'year', 'Value']) # Marmot reserves_generators_Provision
+    opRes_supply: List = field(default_factory=lambda: ['parent', 'tech', 'region', 'year', 'Value'])
     systemcost_techba: List = field(default_factory=lambda: ['cost_type', 'tech', 'region', 'year', 'Value']) # Marmot generator_Total Generation Cost
