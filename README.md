@@ -67,7 +67,8 @@ After all required prerequisites are installed, you are ready to install and run
 - To pip install Marmot:
   1. Open a cmd window that is setup with Python and change directory to your desired install location.
   2. Type the following `pip3 install --user -e git+https://github.com/NREL/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit or tagged release if desired by adding **@comit_id** after Marmot.git and before the **#** symbol.
-For example, the following can be used to install Marmot release v0.7.0 `git+https://github.com/NREL/Marmot.git@v0.7.0#egg=marmot`  
+For example, the following can be used to install Marmot release v0.7.0 `git+https://github.com/NREL/Marmot.git@v0.7.0#egg=marmot`
+You may have to run `pip` instead of `pip3`.
   3. If no error messages appeared Marmot has been installed correctly. To import the formatter or plotter, use the following import commands:
 
  ```python
