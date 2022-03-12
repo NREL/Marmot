@@ -15,6 +15,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)
 
 class MPlot(PlotDataHelper):
     """capacity_factor MPlot class.
@@ -45,14 +46,14 @@ class MPlot(PlotDataHelper):
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        
         self.x = mconfig.parser("figure_size","xdimension")
         self.y = mconfig.parser("figure_size","ydimension")
         
-        
     def avg_output_when_committed(self,
                                   start_date_range: str = None, 
-                                  end_date_range: str = None, **_):
+                                  end_date_range: str = None, 
+                                  barplot_groupby: str = 'Scenario', **_):
         """Creates barplots of the percentage average generation output when committed by technology type. 
 
         Each scenario is plotted by a different colored grouped bar. 
@@ -66,7 +67,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -82,82 +83,89 @@ class MPlot(PlotDataHelper):
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
-                self.logger.info(f"Scenario = {str(scenario)}")
-                Gen = self["generator_Generation"].get(scenario)
-                try: #Check for regions missing all generation.
-                    Gen = Gen.xs(zone_input,level = self.AGG_BY)
+                logger.info(f"Scenario = {str(scenario)}")
+                
+                Gen : pd.DataFrame = self["generator_Generation"].get(scenario)
+                try:
+                    Gen = Gen.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
-                        self.logger.warning(f'No data in {zone_input}')
-                        continue
+                    logger.warning(f'No data in {zone_input}')
+                    continue
                 Gen = Gen.reset_index()
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
-                Gen = Gen.rename(columns = {0:"Output (MWh)"})
-                # techs = list(Gen['tech'].unique())
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]
-                Cap = self["generator_Installed_Capacity"].get(scenario)
-                Cap = Cap.xs(zone_input,level = self.AGG_BY)
-                Cap = Cap.reset_index()
-                Cap.set_index('timestamp',inplace=True)
-                if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                    Cap = Cap[start_date_range : end_date_range]
-                    if Cap.empty is True:
-                        self.logger.warning('No data in selected Date Range')
-                        continue
-                Cap = Cap.drop(columns = ['tech'])
-                Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
-                Gen = pd.merge(Gen,Cap, on = 'gen_name')
                 Gen.set_index('timestamp',inplace=True)
+                Gen = Gen.rename(columns={0: "Output (MWh)"})
+                
+                Cap : pd.DataFrame = self["generator_Installed_Capacity"].get(scenario)
+                Cap = Cap.xs(zone_input,level = self.AGG_BY)
+                Cap = Cap.rename(columns={0: "Installed Capacity (MW)"})
+
                 if pd.notna(start_date_range):
-                    # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
-                    Gen = Gen.sort_index()[start_date_range : end_date_range]
+                    Cap, Gen = self.set_timestamp_date_range([Cap, Gen],
+                                    start_date_range, end_date_range)
                     if Gen.empty is True:
+                        logger.warning('No data in selected Date Range')
                         continue
-                #Calculate CF individually for each plant, since we need to take out all zero rows.
-                tech_names = Gen['tech'].unique()
-                CF = pd.DataFrame(columns = tech_names,index = [scenario])
-                for tech_name in tech_names:
-                    stt = Gen.loc[Gen['tech'] == tech_name]
-                    if not all(stt['Output (MWh)'] == 0):
+                
+                Gen['year'] = Gen.index.year.astype(str)
+                Cap['year'] = Cap.index.get_level_values('timestamp').year.astype(str)
+                Gen = Gen.reset_index()
+                Gen = pd.merge(Gen, Cap, on=['gen_name', 'year'])
+                Gen.set_index('timestamp',inplace=True)
 
-                        gen_names = stt['gen_name'].unique()
-                        cfs = []
-                        caps = []
-                        for gen in gen_names:
-                            sgt = stt.loc[stt['gen_name'] == gen]
-                            if not all(sgt['Output (MWh)'] == 0):
-                                
-                                # Calculates interval step to correct for MWh of generation
-                                time_delta = sgt.index[1] - sgt.index[0]
-                                duration = sgt.index[len(sgt)-1] - sgt.index[0]
-                                duration = duration + time_delta #Account for last timestep.
-                                # Finds intervals in 60 minute period
-                                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
-                                duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
-                                                     
-                                sgt = sgt[sgt['Output (MWh)'] !=0] #Remove time intervals when output is zero.
-                                total_gen = sgt['Output (MWh)'].sum()/interval_count
-                                cap = sgt['Installed Capacity (MW)'].mean()
 
-                                #Calculate CF
-                                cf = total_gen/(cap * duration_hours)
-                                cfs.append(cf)
-                                caps.append(cap)
+                if barplot_groupby == 'Year-Scenario':
+                    Gen['Scenario'] = \
+                         Gen.index.year.astype(str) + f'_{scenario}'
+                else:
+                    Gen['Scenario'] = scenario
 
-                        #Find average "CF" (average output when committed) for this technology, weighted by capacity.
-                        cf = np.average(cfs,weights = caps)
-                        CF[tech_name] = cf
+                year_scen = Gen['Scenario'].unique()
+                for scen in year_scen:
+                    Gen_scen = Gen.loc[Gen['Scenario'] == scen]
+                    # Calculate CF individually for each plant, 
+                    # since we need to take out all zero rows.
+                    tech_names = Gen_scen.sort_values(["tech"])['tech'].unique()
+                    CF = pd.DataFrame(columns=tech_names, index=[scen])
+                    for tech_name in tech_names:
+                        stt = Gen_scen.loc[Gen_scen['tech'] == tech_name]
+                        if not all(stt['Output (MWh)'] == 0):
 
-                CF_all_scenarios = CF_all_scenarios.append(CF)
-            
-            CF_all_scenarios.index = CF_all_scenarios.index.str.replace('_',' ')
-            
+                            gen_names = stt['gen_name'].unique()
+                            cfs = []
+                            caps = []
+                            for gen in gen_names:
+                                sgt = stt.loc[stt['gen_name'] == gen]
+                                if not all(sgt['Output (MWh)'] == 0):
+                                    # Calculates interval step to correct for MWh of generation
+                                    time_delta = sgt.index[1] - sgt.index[0]
+                                    duration = sgt.index[len(sgt)-1] - sgt.index[0]
+                                    duration = duration + time_delta #Account for last timestep.
+                                    # Finds intervals in 60 minute period
+                                    interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
+                                    #Get length of time series in hours for CF calculation.
+                                    duration_hours = min(8760, duration/np.timedelta64(1, 'h'))
+                                    #Remove time intervals when output is zero.
+                                    sgt = sgt[sgt['Output (MWh)'] != 0] 
+                                    total_gen = sgt['Output (MWh)'].sum()/interval_count
+                                    cap = sgt['Installed Capacity (MW)'].mean()
+                                    #Calculate CF
+                                    cf = total_gen/(cap * duration_hours)
+                                    cfs.append(cf)
+                                    caps.append(cap)
+
+                            #Find average "CF" (average output when committed) 
+                            # for this technology, weighted by capacity.
+                            cf = np.average(cfs, weights=caps)
+                            CF[tech_name] = cf
+                    CF_all_scenarios = CF_all_scenarios.append(CF)
+                        
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = MissingZoneData()
                 continue
@@ -181,9 +189,9 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
-
     def cf(self, start_date_range: str = None, 
-           end_date_range: str = None, **_):
+           end_date_range: str = None, 
+           barplot_groupby: str = 'Scenario', **_):
         """Creates barplots of generator capacity factors by technology type. 
 
         Each scenario is plotted by a different colored grouped bar. 
@@ -198,7 +206,7 @@ class MPlot(PlotDataHelper):
             dict: dictionary containing the created plot and its data table.
         """
         
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -214,52 +222,50 @@ class MPlot(PlotDataHelper):
         
         for zone_input in self.Zones:
             cf_scen_chunks = []
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
 
-                self.logger.info(f"Scenario = {str(scenario)}")
+                logger.info(f"Scenario = {str(scenario)}")
                 Gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.warning(f'No data in {zone_input}')
+                        logger.warning(f'No data in {zone_input}')
                         continue
                 Gen = self.df_process_gen_inputs(Gen)
                 
+                Cap = self["generator_Installed_Capacity"].get(scenario)
+                Cap = Cap.xs(zone_input,level = self.AGG_BY)
+                Cap = self.df_process_gen_inputs(Cap)
+                
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                    Gen = Gen[start_date_range : end_date_range]
+                    Cap, Gen = self.set_timestamp_date_range([Cap, Gen],
+                                    start_date_range, end_date_range)
                     if Gen.empty is True:
-                        self.logger.warning('No data in selected Date Range')
+                        logger.warning('No data in selected Date Range')
                         continue
+
                 # Calculates interval step to correct for MWh of generation
                 time_delta = Gen.index[1] - Gen.index[0]
                 duration = Gen.index[len(Gen)-1] - Gen.index[0]
                 duration = duration + time_delta #Account for last timestep.
                 # Finds intervals in 60 minute period
-                interval_count = 60/(time_delta/np.timedelta64(1, 'm'))
-                duration_hours = duration/np.timedelta64(1,'h')     #Get length of time series in hours for CF calculation.
+                interval_count : int = 60/(time_delta/np.timedelta64(1, 'm'))
+                #Get length of time series in hours for CF calculation.
+                duration_hours : int = min(8760, duration/np.timedelta64(1,'h'))
 
                 Gen = Gen/interval_count
-                Total_Gen = Gen.sum(axis=0)
-                Total_Gen.rename(scenario, inplace = True)
-                Cap = self["generator_Installed_Capacity"].get(scenario)
-                Cap = Cap.xs(zone_input,level = self.AGG_BY)
-                Cap = self.df_process_gen_inputs(Cap)
-                if pd.notna(start_date_range):
-                    Cap = Cap[start_date_range : end_date_range]
-                    if Cap.empty is True:
-                        continue
-                Cap = Cap.T.sum(axis = 1)  #Rotate and force capacity to a series.
-                Cap.rename(scenario, inplace = True)
+
+                Total_Gen = self.year_scenario_grouper(Gen, scenario, 
+                                                groupby=barplot_groupby).sum()
+                Cap = self.year_scenario_grouper(Cap, scenario, 
+                                                groupby=barplot_groupby).sum()
                 #Calculate CF
                 CF = Total_Gen/(Cap * duration_hours)
-                CF.rename(scenario, inplace = True)
                 cf_scen_chunks.append(CF)
 
-            CF_all_scenarios = pd.concat(cf_scen_chunks, axis=1, sort=False)
+            CF_all_scenarios = pd.concat(cf_scen_chunks, axis=0, sort=False).T
             CF_all_scenarios = CF_all_scenarios.fillna(0, axis = 0)
 
             if CF_all_scenarios.empty == True:
@@ -286,7 +292,8 @@ class MPlot(PlotDataHelper):
 
 
     def time_at_min_gen(self, start_date_range: str = None, 
-                        end_date_range: str = None, **_):
+                        end_date_range: str = None,
+                        barplot_groupby: str = 'Scenario', **_):
         """Creates barplots of generator percentage time at min-gen by technology type. 
 
         Each scenario is plotted by a different colored grouped bar. 
@@ -301,7 +308,7 @@ class MPlot(PlotDataHelper):
             dict: dictionary containing the created plot and its data table.
         """
         
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -317,40 +324,45 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             time_at_min = pd.DataFrame()
 
             for scenario in self.Scenarios:
-                self.logger.info(f"Scenario = {str(scenario)}")
+                logger.info(f"Scenario = {str(scenario)}")
 
                 Min = self["generator_Hours_at_Minimum"].get(scenario)
                 try:
                     Min = Min.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
                     continue
-                
-                Min = Min.reset_index()
-                Min = Min.set_index('gen_name')
-                Min = Min.rename(columns = {0:"Hours at Minimum"})
-
                 Gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.warning(f'No data in {zone_input}')
+                        logger.warning(f'No data in {zone_input}')
                         continue
+                Cap = self["generator_Installed_Capacity"].get(scenario)
+                Cap = Cap.xs(zone_input,level = self.AGG_BY)
+
+                if pd.notna(start_date_range):
+                    Min, Gen, Cap = self.set_timestamp_date_range([Min, Gen, Cap],
+                                    start_date_range, end_date_range)
+                    if Gen.empty is True:
+                        logger.warning('No data in selected Date Range')
+                        continue
+
+                Min = Min.reset_index()
+                Min = Min.set_index('gen_name')
+                Min = Min.rename(columns = {0:"Hours at Minimum"})
+
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
-
-
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[~Gen['tech'].isin(self.vre_gen_cat)]
                 Gen.index = Gen.timestamp
 
-                Cap = self["generator_Installed_Capacity"].get(scenario)
-                Cap = Cap.xs(zone_input,level = self.AGG_BY)
                 Caps = Cap.groupby('gen_name').mean()
                 Caps.reset_index()
                 Caps = Caps.rename(columns = {0: 'Installed Capacity (MW)'})

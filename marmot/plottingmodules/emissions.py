@@ -20,6 +20,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, InputSheetError,
                 MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)
 
 class MPlot(PlotDataHelper):
     """emissions MPlot class.
@@ -51,10 +52,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-
-
-    # function to collect total emissions by fuel type
     def total_emissions_by_type(self, prop: str = None, start_date_range: str = None,
                                 end_date_range: str = None, custom_data_file_path: str = None,
                                 **_):
@@ -93,12 +90,12 @@ class MPlot(PlotDataHelper):
 
         for zone_input in self.Zones:
             emitList = []
-            self.logger.info(f"Zone = {zone_input}")
+            logger.info(f"Zone = {zone_input}")
 
             # collect data for all scenarios and pollutants
             for scenario in self.Scenarios:
 
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
 
                 emit = self["emissions_generators_Production"].get(scenario)
 
@@ -106,9 +103,16 @@ class MPlot(PlotDataHelper):
                 try:
                     emit = emit.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning(f"No emissions in Scenario : {scenario}")
+                    logger.warning(f"No {prop} emissions in Scenario : {scenario}")
                     continue
                 
+                if pd.notna(start_date_range):
+                    emit = self.set_timestamp_date_range(emit, 
+                                        start_date_range, end_date_range)
+                    if emit.empty:
+                        emit.warning(f"No {prop} emissions in selected Date Range")
+                        continue
+
                 # Rename generator technologies
                 emit = self.rename_gen_techs(emit)
                 # summarize annual emissions by pollutant and tech
@@ -121,7 +125,7 @@ class MPlot(PlotDataHelper):
             try:
                 emitOut = pd.concat(emitList, axis=1)
             except ValueError:
-                self.logger.warning(f"No emissions found for : {zone_input}")
+                logger.warning(f"No emissions found for : {zone_input}")
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
@@ -135,7 +139,7 @@ class MPlot(PlotDataHelper):
             try:
                 emitPlot = emitOut.xs(prop, level="pollutant", axis=1)
             except KeyError:
-                self.logger.warning(prop+ " emissions not found")
+                logger.warning(prop+ " emissions not found")
                 outputs = InputSheetError()
                 return outputs
 

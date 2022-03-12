@@ -21,7 +21,7 @@ from typing import Tuple, List, Union
 import marmot.utils.mconfig as mconfig
 
 
-logger = logging.getLogger('marmot_plot.'+__name__)
+logger = logging.getLogger('plotter.'+__name__)
 
 font_settings = mconfig.parser("font_settings")
 text_position = mconfig.parser("text_position")

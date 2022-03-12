@@ -18,6 +18,7 @@ from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibr
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)
 
 class MPlot(PlotDataHelper):
     """reserves MPlot class.
@@ -48,8 +49,6 @@ class MPlot(PlotDataHelper):
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
-
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
         
     def reserve_gen_timeseries(self, figure_name: str = None, prop: str = None,
                                start: float = None, end: float= None,
@@ -74,7 +73,6 @@ class MPlot(PlotDataHelper):
                 Opinions available are:
 
                 - Peak Demand
-                - Date Range
                 
                 Defaults to None.
             start (float, optional): Used in conjunction with the prop argument.
@@ -105,7 +103,7 @@ class MPlot(PlotDataHelper):
         else:
             Scenarios = self.Scenarios
             
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -120,9 +118,9 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         for region in self.Zones:
-            self.logger.info(f"Zone = {region}")
+            logger.info(f"Zone = {region}")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(facet,multi_scenario=Scenarios)
+            ncols, nrows = self.set_facet_col_row_dimensions(facet, multi_scenario=Scenarios)
             grid_size = ncols*nrows
             excess_axs = grid_size - len(Scenarios)
             
@@ -133,7 +131,7 @@ class MPlot(PlotDataHelper):
 
             data_tables = []
             for n, scenario in enumerate(Scenarios):
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
 
                 reserve_provision_timeseries = self[f"reserves_generators_Provision{data_resolution}"].get(scenario)
                 
@@ -141,20 +139,24 @@ class MPlot(PlotDataHelper):
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.info(f"No reserves deployed in: {scenario}")
+                    logger.info(f"No reserves deployed in: {scenario}")
                     continue
                 reserve_provision_timeseries = self.df_process_gen_inputs(reserve_provision_timeseries)
 
-                if reserve_provision_timeseries.empty is True:
-                    self.logger.info(f"No reserves deployed in: {scenario}")
-                    continue
+                if pd.notna(start_date_range):
+                    reserve_provision_timeseries = self.set_timestamp_date_range(
+                                    reserve_provision_timeseries,
+                                    start_date_range, end_date_range)
+                    if reserve_provision_timeseries.empty is True:
+                        logger.warning('No reserves in selected Date Range')
+                        continue
+
                 # unitconversion based off peak generation hour, only checked once 
                 if n == 0:
                     unitconversion = self.capacity_energy_unitconversion(reserve_provision_timeseries,
                                                                             sum_values=True)
-
                 if prop == "Peak Demand":
-                    self.logger.info("Plotting Peak Demand period")
+                    logger.info("Plotting Peak Demand period")
 
                     total_reserve = reserve_provision_timeseries.sum(axis=1)/unitconversion['divisor']
                     peak_reserve_t =  total_reserve.idxmax()
@@ -162,16 +164,8 @@ class MPlot(PlotDataHelper):
                     end_date = peak_reserve_t + dt.timedelta(days=end)
                     reserve_provision_timeseries = reserve_provision_timeseries[start_date : end_date]
                     Peak_Reserve = total_reserve[peak_reserve_t]
-
-                elif prop == 'Date Range':
-                    self.logger.info(f"Plotting specific date range: \
-                        {str(start_date_range)} to {str(end_date_range)}")
-                    reserve_provision_timeseries = reserve_provision_timeseries[start_date_range : end_date_range]
-                else:
-                    self.logger.info("Plotting graph for entire timeperiod")
                 
                 reserve_provision_timeseries = reserve_provision_timeseries/unitconversion['divisor']
-                
                 scenario_names = pd.Series([scenario] * len(reserve_provision_timeseries),name = 'Scenario')
                 data_table = reserve_provision_timeseries.add_suffix(f" ({unitconversion['units']})")
                 data_table = data_table.set_index([scenario_names],append = True)
@@ -190,7 +184,7 @@ class MPlot(PlotDataHelper):
                             fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
             if not data_tables:
-                self.logger.warning(f'No reserves in {region}')
+                logger.warning(f'No reserves in {region}')
                 out = MissingZoneData()
                 outputs[region] = out
                 continue
@@ -213,7 +207,8 @@ class MPlot(PlotDataHelper):
         return outputs
 
     def total_reserves_by_gen(self, start_date_range: str = None, 
-                              end_date_range: str = None, **_):
+                              end_date_range: str = None, 
+                              barplot_groupby: str = 'Scenario', **_):
         """Creates a generation stacked barplot of total reserve provision by generator tech type.
 
         A separate bar is created for each scenario.
@@ -227,7 +222,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -242,64 +237,64 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         for region in self.Zones:
-            self.logger.info(f"Zone = {region}")
+            logger.info(f"Zone = {region}")
 
-            Total_Reserves_Out = pd.DataFrame()
+            reserve_chunks = []
             for scenario in self.Scenarios:
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
 
                 reserve_provision_timeseries = self["reserves_generators_Provision"].get(scenario)
                 #Check if zone has reserves, if not skips
                 try:
                     reserve_provision_timeseries = reserve_provision_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.info(f"No reserves deployed in {scenario}")
+                    logger.info(f"No reserves deployed in {scenario}")
                     continue
                 reserve_provision_timeseries = self.df_process_gen_inputs(reserve_provision_timeseries)
 
-                if reserve_provision_timeseries.empty is True:
-                    self.logger.info(f"No reserves deployed in: {scenario}")
-                    continue
+                if pd.notna(start_date_range):
+                    reserve_provision_timeseries = self.set_timestamp_date_range(
+                                    reserve_provision_timeseries,
+                                    start_date_range, end_date_range)
+                    if reserve_provision_timeseries.empty is True:
+                        logger.warning('No data in selected Date Range')
+                        continue
 
                 # Calculates interval step to correct for MWh of generation
                 interval_count = self.get_sub_hour_interval_count(reserve_provision_timeseries)
-
-                # sum totals by fuel types
                 reserve_provision_timeseries = reserve_provision_timeseries/interval_count
-                reserve_provision = reserve_provision_timeseries.sum(axis=0)
-                reserve_provision.rename(scenario, inplace=True)
-                Total_Reserves_Out = pd.concat([Total_Reserves_Out, reserve_provision], axis=1, sort=False).fillna(0)
+                
+                reserve_provision = self.year_scenario_grouper(
+                                                    reserve_provision_timeseries, 
+                                                    scenario, 
+                                                    groupby=barplot_groupby).sum()
+                
+                reserve_chunks.append(reserve_provision)
 
+            total_reserves_out = pd.concat(reserve_chunks, axis=0, sort=False).fillna(0)
 
-            Total_Reserves_Out = self.create_categorical_tech_index(Total_Reserves_Out)
-            Total_Reserves_Out = Total_Reserves_Out.T
-            Total_Reserves_Out = Total_Reserves_Out.loc[:, (Total_Reserves_Out != 0).any(axis=0)]
+            total_reserves_out = total_reserves_out.loc[:, (total_reserves_out != 0).any(axis=0)]
             
-            if Total_Reserves_Out.empty:
+            if total_reserves_out.empty:
                 out = MissingZoneData()
                 outputs[region] = out
                 continue
             
-            Total_Reserves_Out.index = Total_Reserves_Out.index.str.replace('_',' ')
-            Total_Reserves_Out.index = Total_Reserves_Out.index.str.wrap(5, break_long_words=False)
-            
             # Convert units
-            unitconversion = self.capacity_energy_unitconversion(Total_Reserves_Out,
+            unitconversion = self.capacity_energy_unitconversion(total_reserves_out,
                                                                     sum_values=True)
-            Total_Reserves_Out = Total_Reserves_Out/unitconversion['divisor']
-            
-            data_table_out = Total_Reserves_Out.add_suffix(f" ({unitconversion['units']}h)")
+            total_reserves_out = total_reserves_out/unitconversion['divisor']
+            data_table_out = total_reserves_out.add_suffix(f" ({unitconversion['units']}h)")
             
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
-
             # Set x-tick labels
             if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
-                tick_labels = Total_Reserves_Out.index
+                tick_labels = total_reserves_out.index
 
-            mplt.barplot(Total_Reserves_Out, color=self.PLEXOS_color_dict,
+            mplt.barplot(total_reserves_out, color=self.PLEXOS_color_dict,
                          stacked=True,
                          custom_tick_labels=tick_labels)
 
@@ -357,7 +352,8 @@ class MPlot(PlotDataHelper):
 
     def _reserve_bar_plots(self, data_set: str, count_hours: bool = False, 
                            start_date_range: str = None, 
-                           end_date_range: str = None, **_):
+                           end_date_range: str = None,
+                           barplot_groupby: str = 'Scenario', **_):
         """internal _reserve_bar_plots method, creates 'Shortage', 'Provision' and 'Shortage' bar 
         plots
 
@@ -376,7 +372,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -391,45 +387,56 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         for region in self.Zones:
-            self.logger.info(f"Zone = {region}")
+            logger.info(f"Zone = {region}")
 
             Data_Table_Out=pd.DataFrame()
             reserve_total_chunk = []
             for scenario in self.Scenarios:
 
-                self.logger.info(f'Scenario = {scenario}')
+                logger.info(f'Scenario = {scenario}')
 
                 reserve_timeseries = self[f"reserve_{data_set}"].get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.info(f"No reserves deployed in {scenario}")
+                    logger.info(f"No reserves deployed in {scenario}")
                     continue
 
-                interval_count = self.get_sub_hour_interval_count(reserve_timeseries)
+                if pd.notna(start_date_range):
+                    reserve_timeseries = self.set_timestamp_date_range(reserve_timeseries,
+                                    start_date_range, end_date_range)
+                    if reserve_timeseries.empty is True:
+                        logger.warning('No data in selected Date Range')
+                        continue
 
                 reserve_timeseries = reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False)
                 # Drop duplicates to remove double counting
                 reserve_timeseries.drop_duplicates(inplace=True)
                 # Set Type equal to parent value if Type equals '-'
-                reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', reserve_timeseries['parent'])
-                reserve_timeseries.set_index(["timestamp","Type","parent"],append=True,inplace=True)
+                reserve_timeseries['Type'] = reserve_timeseries['Type'].mask(reserve_timeseries['Type'] == '-', 
+                                                                        reserve_timeseries['parent'])
+                reserve_timeseries.set_index(["timestamp","Type","parent"], append=True, inplace=True)
 
+                interval_count = self.get_sub_hour_interval_count(reserve_timeseries)
                 # Groupby Type
                 if count_hours == False:
-                    reserve_total = reserve_timeseries.groupby(["Type"]).sum()/interval_count
+                    reserve_total = self.year_scenario_grouper(
+                                        reserve_timeseries, scenario, 
+                                        groupby=barplot_groupby,
+                                        additional_groups=["Type"]).sum()/interval_count
+
                 elif count_hours == True:
                     reserve_total = reserve_timeseries[reserve_timeseries[0]>0] #Filter for non zero values
-                    reserve_total = reserve_total.groupby("Type").count()/interval_count
-
-                reserve_total.rename(columns={0:scenario},inplace=True)
+                    reserve_total = self.year_scenario_grouper(
+                                        reserve_timeseries, scenario, 
+                                        groupby=barplot_groupby,
+                                        additional_groups=["Type"]).count()/interval_count
 
                 reserve_total_chunk.append(reserve_total)
             
             if reserve_total_chunk:
-                reserve_out = pd.concat(reserve_total_chunk,axis=1, sort='False')
-                reserve_out.columns = reserve_out.columns.str.replace('_',' ')
+                reserve_out = pd.concat(reserve_total_chunk, axis=0, sort='False')
             else:
                 reserve_out=pd.DataFrame()
             # If no reserves return nothing
@@ -437,7 +444,8 @@ class MPlot(PlotDataHelper):
                 out = MissingZoneData()
                 outputs[region] = out
                 continue
-            
+
+            reserve_out = reserve_out.reset_index().pivot(index="Type", columns='Scenario', values=0)
             if count_hours == False:
                 # Convert units
                 unitconversion = self.capacity_energy_unitconversion(reserve_out)
@@ -505,7 +513,7 @@ class MPlot(PlotDataHelper):
         else:
             Scenarios = self.Scenarios
 
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -520,7 +528,7 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         for region in self.Zones:
-            self.logger.info(f"Zone = {region}")
+            logger.info(f"Zone = {region}")
 
             ncols, nrows = self.set_facet_col_row_dimensions(facet, multi_scenario=Scenarios)
             grid_size = ncols*nrows
@@ -535,14 +543,14 @@ class MPlot(PlotDataHelper):
 
             for n, scenario in enumerate(Scenarios):
 
-                self.logger.info(f'Scenario = {scenario}')
+                logger.info(f'Scenario = {scenario}')
 
                 reserve_timeseries = self["reserve_Shortage"].get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.info(f"No reserves deployed in {scenario}")
+                    logger.info(f"No reserves deployed in {scenario}")
                     continue
                 
                 reserve_timeseries.reset_index(["timestamp","Type","parent"],drop=False,inplace=True)
@@ -553,11 +561,11 @@ class MPlot(PlotDataHelper):
                 reserve_timeseries = reserve_timeseries.pivot(index='timestamp', columns='Type', values=0)
 
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                    reserve_timeseries = reserve_timeseries[start_date_range : end_date_range]
-                else:
-                    self.logger.info("Plotting graph for entire timeperiod")
+                    reserve_timeseries = self.set_timestamp_date_range(reserve_timeseries,
+                                    start_date_range, end_date_range)
+                    if reserve_timeseries.empty is True:
+                        logger.warning('No data in selected Date Range')
+                        continue
 
                 # create color dictionary
                 color_dict = dict(zip(reserve_timeseries.columns,self.color_list))

@@ -20,6 +20,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)
 
 class MPlot(PlotDataHelper):
     """capacity_out MPlot class.
@@ -51,8 +52,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-
     def capacity_out_stack(self, start_date_range: str = None, 
                              end_date_range: str = None, **_):
         """Creates Timeseries stacked area plots of generation on outage by technology.
@@ -68,7 +67,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -78,7 +77,6 @@ class MPlot(PlotDataHelper):
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
-
 
         if 1 in check_input_data:
             return MissingInputData()
@@ -93,7 +91,7 @@ class MPlot(PlotDataHelper):
         excess_axs = grid_size - plot_number
 
         for zone_input in self.Zones:
-            self.logger.info(f'Zone = {str(zone_input)}')
+            logger.info(f'Zone = {str(zone_input)}')
 
             mplt = PlotLibrary(nrows, ncols, sharex=True,
                                 sharey='row', 
@@ -105,7 +103,7 @@ class MPlot(PlotDataHelper):
             chunks = []
             i=-1
             for scenario in (self.Scenarios):
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
                 i+=1
                 
                 install_cap = self["generator_Installed_Capacity"].get(scenario).copy()
@@ -115,14 +113,14 @@ class MPlot(PlotDataHelper):
                 if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():
                     avail_cap = avail_cap.xs(zone_input,level=self.AGG_BY)
                 else:
-                    self.logger.warning(f"No Generation in: {zone_input}")
+                    logger.warning(f"No Generation in: {zone_input}")
                     outputs[zone_input] = MissingZoneData()
                     continue
                 avail_cap.columns = ['avail']
                 install_cap.columns = ['cap']
                 avail_cap.reset_index(inplace = True)
                 
-                cap_out = avail_cap.merge(install_cap,left_on = ['gen_name'],right_on = ['gen_name'])
+                cap_out = avail_cap.merge(install_cap, left_on='gen_name', right_on='gen_name')
                 cap_out[0] = cap_out['cap'] - cap_out['avail']
                 
                 cap_out = self.df_process_gen_inputs(cap_out)
@@ -132,8 +130,15 @@ class MPlot(PlotDataHelper):
                 cap_out = cap_out[thermal_gens]
                 
                 if cap_out.empty is True:
-                    self.logger.warning(f"No Thermal Generation in: {zone_input}")
+                    logger.warning(f"No Thermal Generation in: {zone_input}")
                     continue
+                
+                if pd.notna(start_date_range):
+                    cap_out = self.set_timestamp_date_range(cap_out,
+                                    start_date_range, end_date_range)
+                    if cap_out.empty is True:
+                        logger.warning('No generation in selected Date Range')
+                        continue
 
                 # unitconversion based off peak outage hour, only checked once 
                 if i == 0:
@@ -177,13 +182,13 @@ class MPlot(PlotDataHelper):
                                 end: float= None, timezone: str = "", **_):
         
         outputs = UnderDevelopment()
-        self.logger.warning('capacity_out_stack_PASA requires PASA files, and is under development. Skipping plot.')
+        logger.warning('capacity_out_stack_PASA requires PASA files, and is under development. Skipping plot.')
         return outputs 
     
-        outputs = {}
+        outputs : dict = {}
         for zone_input in self.Zones:
             
-            self.logger.info('Zone = ' + str(zone_input))
+            logger.info('Zone = ' + str(zone_input))
 
             ncols=len(self.xlabels)
             if ncols == 0:
@@ -201,7 +206,7 @@ class MPlot(PlotDataHelper):
             met_year = self.Marmot_Solutions_folder[-4:] #Extract met year from PLEXOS parent scenario.
 
             for scenario in self.Multi_Scenario:
-                self.logger.info("Scenario = " + str(scenario))
+                logger.info("Scenario = " + str(scenario))
 
                 infra_year = scenario[-4:] #Extract infra year from scenario name.
                 capacity_out = pd.read_csv(os.path.join('/projects/continental/pcm/Outage Profiles/capacity out for plotting/',infra_year + '_' + met_year + '_capacity out.csv'))
@@ -221,7 +226,7 @@ class MPlot(PlotDataHelper):
 
                #OR select only time period of interest.
                 if self.prop == 'Date Range':
-                    self.logger.info("Plotting specific date range: \
+                    logger.info("Plotting specific date range: \
                     {} to {}".format(str(self.start_date),str(self.end_date)))
                     one_zone = one_zone[self.start_date : self.end_date]
                 else:

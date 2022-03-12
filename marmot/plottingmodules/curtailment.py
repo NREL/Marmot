@@ -16,6 +16,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)
 
 class MPlot(PlotDataHelper):
     """curtailment MPlot class.
@@ -47,12 +48,12 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
                     
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
+        self.curtailment_prop : str = mconfig.parser("plot_data","curtailment_property")
         
         
     def curt_duration_curve(self, prop: str = None, 
-                            start_date_range: str = None, end_date_range: str = None, **_):
+                            start_date_range: str = None, 
+                            end_date_range: str = None, **_):
         """Curtailment duration curve (line plot)
         
         Displays curtailment sorted from highest occurrence to lowest 
@@ -71,7 +72,7 @@ class MPlot(PlotDataHelper):
             dict: dictionary containing the created plot and its data table.
         """
         
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -85,13 +86,13 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
             
             RE_Curtailment_DC = pd.DataFrame()
             PV_Curtailment_DC = pd.DataFrame()
             
             for scenario in self.Scenarios:
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
 
                 re_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
 
@@ -99,7 +100,7 @@ class MPlot(PlotDataHelper):
                 try: #Check for regions missing all generation.
                     re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.info(f'No curtailment in {zone_input}')
+                        logger.info(f'No curtailment in {zone_input}')
                         continue
                 
                 re_curt = self.df_process_gen_inputs(re_curt)
@@ -117,17 +118,11 @@ class MPlot(PlotDataHelper):
                 pv_curt = pv_curt.squeeze() #Convert to Series
                 
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                    re_curt = re_curt[start_date_range : end_date_range]
-                    pv_curt = pv_curt[start_date_range : end_date_range]
-                    
-                    if re_curt.empty is True and prop == "PV+Wind": 
-                        self.logger.warning('No data in selected Date Range')
-                        continue
-                    
-                    if pv_curt.empty is True and prop == "PV":
-                        self.logger.warning('No data in selected Date Range')
+                    re_curt, pv_curt = self.set_timestamp_date_range(
+                                            [re_curt, pv_curt],
+                                            start_date_range, end_date_range)
+                    if re_curt.empty or pv_curt.empty:
+                        logger.warning('No curtailment in selected Date Range')
                         continue
                 
                 # Sort from larget to smallest
@@ -209,7 +204,8 @@ class MPlot(PlotDataHelper):
 
 
     def curt_pen(self, prop: str = None, 
-                 start_date_range: str = None, end_date_range: str = None, **_):
+                 start_date_range: str = None, 
+                 end_date_range: str = None, **_):
         """Plot of curtailment vs penetration.
 
         Each scenario is represented by a different symbel on a x, y axis
@@ -227,7 +223,7 @@ class MPlot(PlotDataHelper):
             dict: dictionary containing the created plot and its data table.
         """
         
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -247,17 +243,17 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             Penetration_Curtailment_out = pd.DataFrame()
 
-            self.logger.info(f"{self.AGG_BY } = {zone_input}")
+            logger.info(f"{self.AGG_BY } = {zone_input}")
 
             for scenario in self.Scenarios:
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
 
                 gen = self["generator_Generation"].get(scenario)
                 try: #Check for regions missing all generation.
                     gen = gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.info(f'No generation in {zone_input}')
-                        continue
+                    logger.info(f'No generation in {zone_input}')
+                    continue
 
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
                 avail_gen = avail_gen.xs(zone_input,level=self.AGG_BY)
@@ -266,13 +262,26 @@ class MPlot(PlotDataHelper):
                 try:
                     re_curt = re_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                        self.logger.info(f'No curtailment in {zone_input}')
-                        continue
+                    logger.info(f'No curtailment in {zone_input}')
+                    continue
                 
                 re_curt = self.df_process_gen_inputs(re_curt)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == 'Curtailment':
                     re_curt = self.assign_curtailment_techs(re_curt)
+
+                # Total generation cost
+                Total_Gen_Cost = self["generator_Total_Generation_Cost"].get(scenario)
+                Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
+
+                if pd.notna(start_date_range):
+                    gen, avail_gen, re_curt, Total_Gen_Cost = \
+                        self.set_timestamp_date_range(
+                            [gen, avail_gen, re_curt, Total_Gen_Cost],
+                            start_date_range, end_date_range)
+                    if re_curt.empty:
+                        logger.warning('No curtailment in selected Date Range')
+                        continue
 
                 # Finds the number of unique hours in the year
                 no_hours_year = len(gen.index.unique(level="timestamp"))
@@ -344,9 +353,6 @@ class MPlot(PlotDataHelper):
                 else:
                     Prct_PV_curt = (total_pv_curt/total_pv_avail)*100
 
-                # Total generation cost
-                Total_Gen_Cost = self["generator_Total_Generation_Cost"].get(scenario)
-                Total_Gen_Cost = Total_Gen_Cost.xs(zone_input,level=self.AGG_BY)
                 
                 Total_Gen_Cost = float(Total_Gen_Cost.sum())
 
@@ -377,11 +383,13 @@ class MPlot(PlotDataHelper):
             marker_dict = dict(zip(VG_index.unique(), self.marker_style))
             colour_dict = dict(zip(VG_index.unique(), self.color_list))
 
-            Penetration_Curtailment_out["color"] = [colour_dict.get(x, '#333333') for x in Penetration_Curtailment_out.Scenario]
-            Penetration_Curtailment_out["marker"] = [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
+            Penetration_Curtailment_out["color"] = \
+                [colour_dict.get(x, '#333333') for x in Penetration_Curtailment_out.Scenario]
+            Penetration_Curtailment_out["marker"] = \
+                [marker_dict.get(x, '.') for x in Penetration_Curtailment_out.Scenario]
             
             if Penetration_Curtailment_out.empty:
-                self.logger.warning(f'No Generation in {zone_input}')
+                logger.warning(f'No Generation in {zone_input}')
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
@@ -418,7 +426,9 @@ class MPlot(PlotDataHelper):
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
-    def curt_total(self, start_date_range: str = None, end_date_range: str = None, **_):
+    def curt_total(self, start_date_range: str = None, 
+                    end_date_range: str = None, 
+                    barplot_groupby: str = 'Scenario', **_):
         """Creates stacked barplots of total curtailment by technology.
 
         A separate bar is created for each scenario.
@@ -432,7 +442,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -447,25 +457,19 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
-            Total_Curtailment_out = pd.DataFrame()
-            Total_Available_gen = pd.DataFrame()
             vre_curt_chunks = []
             avail_gen_chunks = []
 
             for scenario in self.Scenarios:
-
-                self.logger.info(f"Scenario = {scenario}")
-
-                vre_collection = {}
-                avail_vre_collection = {}
+                logger.info(f"Scenario = {scenario}")
 
                 vre_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.info(f'No curtailment in {zone_input}')
+                    logger.info(f'No curtailment in {zone_input}')
                     continue
 
                 vre_curt = self.df_process_gen_inputs(vre_curt)
@@ -480,7 +484,7 @@ class MPlot(PlotDataHelper):
                 try: #Check for regions missing all generation.
                     avail_gen = avail_gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.info(f'No available generation in {zone_input}')
+                        logger.info(f'No available generation in {zone_input}')
                         continue
 
                 avail_gen = self.df_process_gen_inputs(avail_gen)
@@ -488,46 +492,31 @@ class MPlot(PlotDataHelper):
                 if self.curtailment_prop == 'Curtailment':
                     avail_gen = self.assign_curtailment_techs(avail_gen)
 
-                
-                all_empty = True
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                for vre_type in self.vre_gen_cat:
-                    try:
-                        vre_curt_type = vre_curt[vre_type]
-                        # vre_curt_type = vre_curt.xs(vre_type,level='tech')
-                    except KeyError:
-                        self.logger.info(f'No {vre_type} in {zone_input}')
+                    vre_curt, avail_gen = \
+                        self.set_timestamp_date_range(
+                            [vre_curt, avail_gen],
+                            start_date_range, end_date_range)
+                    if vre_curt.empty:
+                        logger.warning('No curtailment in selected Date Range')
                         continue
-                    
-                    avail_gen_type = avail_gen[vre_type]
-                    
-                    # Code to index data by date range, if a date range is listed in marmot_plot_select.csv
-                    if pd.notna(start_date_range):
-                        avail_gen_type = avail_gen_type.groupby(['timestamp']).sum()
-                        vre_curt_type = vre_curt_type.groupby(['timestamp']).sum()
-                        vre_curt_type = vre_curt_type[start_date_range : end_date_range]
-                        avail_gen_type = avail_gen_type[start_date_range : end_date_range]
-                    
-                    if vre_curt_type.empty is False and avail_gen_type.empty is False:
-                        all_empty = False
-                    vre_collection[vre_type] = float(vre_curt_type.sum())
-                    avail_vre_collection[vre_type] = float(avail_gen_type.sum())
-                if all_empty:
-                    self.logger.warning('No data in selected Date Range')
-                    continue
                 
-                vre_table = pd.DataFrame(vre_collection,index=[scenario])
-                avail_gen_table = pd.DataFrame(avail_vre_collection,index=[scenario])
-
+                # Calculates interval step to correct for MWh
+                interval_count = self.get_sub_hour_interval_count(vre_curt)
+                vre_curt = vre_curt/interval_count
+                avail_gen = avail_gen/interval_count
+                vre_table = self.year_scenario_grouper(vre_curt, scenario, 
+                                                        groupby=barplot_groupby).sum()
+                avail_gen_table = self.year_scenario_grouper(avail_gen, scenario, 
+                                                        groupby=barplot_groupby).sum()
+                
                 vre_curt_chunks.append(vre_table)
                 avail_gen_chunks.append(avail_gen_table)
             
             if not vre_curt_chunks:
                 outputs[zone_input] = MissingZoneData()
                 continue
-                
+            
             Total_Curtailment_out = pd.concat(vre_curt_chunks, axis=0, sort=False)
             Total_Available_gen = pd.concat(avail_gen_chunks, axis=0, sort=False)
             
@@ -574,21 +563,27 @@ class MPlot(PlotDataHelper):
             if mconfig.parser("plot_title_as_region"):
                 mplt.add_main_title(zone_input)
 
-            if not vre_pct_curt.empty:
-                curt_totals = Total_Curtailment_out.sum(axis=1)
-                #inserts total bar value above each bar
-                for k, patch in enumerate(ax.patches):
-                    height = curt_totals[k]
-                    width = patch.get_width()
-                    x, y = patch.get_xy()
+            curt_totals = Total_Curtailment_out.sum(axis=1)
+            #inserts total bar value above each bar
+            for k, patch in enumerate(ax.patches):
+                height = curt_totals[k]
+                width = patch.get_width()
+                x, y = patch.get_xy()
+                if not vre_pct_curt.empty:
                     ax.text(x+width/2,
                         y+height + 0.05*max(ax.get_ylim()),
                         '{:.2%}\n|{:,.2f}|'.format(vre_pct_curt[k],curt_totals[k]),
                         horizontalalignment='center',
                         verticalalignment='center', fontsize=7, color='red')
-                    
-                    if k>=len(vre_pct_curt)-1:
-                        break
+                else:
+                    ax.text(x+width/2,
+                        y+height + 0.05*max(ax.get_ylim()),
+                        '|{:,.2f}|'.format(curt_totals[k]),
+                        horizontalalignment='center',
+                        verticalalignment='center', fontsize=7, color='red')
+                
+                if k>=len(curt_totals)-1:
+                    break
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
@@ -610,7 +605,7 @@ class MPlot(PlotDataHelper):
         """
         return UnderDevelopment()
 
-        outputs = {}
+        outputs : dict = {}
         properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios)]
         
@@ -625,7 +620,7 @@ class MPlot(PlotDataHelper):
             return outputs
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY +  " = " + zone_input)
+            logger.info(self.AGG_BY +  " = " + zone_input)
 
             Total_Curtailment_out = pd.DataFrame()
             Total_Available_gen = pd.DataFrame()
@@ -634,7 +629,7 @@ class MPlot(PlotDataHelper):
 
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + scenario)
+                logger.info("Scenario = " + scenario)
                 # Adjust list of values to drop from vre_gen_cat depending on if it exists in processed techs
                 #self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
 
@@ -645,7 +640,7 @@ class MPlot(PlotDataHelper):
                 try:
                     vre_curt = vre_curt.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    self.logger.info('No curtailment in ' + zone_input)
+                    logger.info('No curtailment in ' + zone_input)
                     continue
                 vre_curt = self.df_process_gen_inputs(vre_curt)
                 # If using Marmot's curtailment property
@@ -656,7 +651,7 @@ class MPlot(PlotDataHelper):
                 try: #Check for regions missing all generation.
                     avail_gen = avail_gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.info('No available generation in ' + zone_input)
+                        logger.info('No available generation in ' + zone_input)
                         continue
                 
                 avail_gen = self.df_process_gen_inputs(avail_gen)
@@ -668,7 +663,7 @@ class MPlot(PlotDataHelper):
                     try:
                         vre_curt_type = vre_curt[vre_type]
                     except KeyError:
-                        self.logger.info('No ' + vre_type + ' in ' + zone_input)
+                        logger.info('No ' + vre_type + ' in ' + zone_input)
                         continue
                     vre_collection[vre_type] = float(vre_curt_type.sum())
 
@@ -775,12 +770,11 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
-                      (True, "generator_Available_Capacity", self.Scenarios),
                       (True, f"generator_{self.curtailment_prop}", self.Scenarios)]
         
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
@@ -793,40 +787,44 @@ class MPlot(PlotDataHelper):
         Total_Curtailment_Out_perc = pd.DataFrame()
         Total_Curt = pd.DataFrame()
         Total_Gen = pd.DataFrame()
-        Gen_8760 = pd.DataFrame()
         scen_idx = -1
 
         chunks = []
 
         for scenario in self.Scenarios:
             scen_idx += 1
-            self.logger.info(f"Scenario = {scenario}")
+            logger.info(f"Scenario = {scenario}")
 
-            vre_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
-            gen = self["generator_Generation"].get(scenario)
-            cap = self["generator_Available_Capacity"].get(scenario)
+            vre_curt : pd.DataFrame = self[f"generator_{self.curtailment_prop}"].get(scenario)
+            gen : pd.DataFrame = self["generator_Generation"].get(scenario)
             
             #Select only lines specified in Marmot_plot_select.csv.
             select_sites = prop.split(",") 
             select_sites = [site[1:] if site[0] == ' ' else site for site in select_sites]
-            self.logger.info('Plotting curtailment only for sites specified in Marmot_plot_select.csv')
-
-            ti = gen.index.get_level_values('timestamp').unique()
+            logger.info('Plotting curtailment only for sites specified in Marmot_plot_select.csv')
 
             site_idx = -1
             sites = pd.Series()
             sites_gen = pd.Series()
             curt_tots = pd.Series()
             chunks_scen = []
-            #vre_curt = vre_curt.reset_index()
 
             for site in select_sites:
                 if site in gen.index.get_level_values('gen_name').unique():
                     site_idx += 1
-                    gen_site = gen.xs(site,level = 'gen_name')
-                    cap_site = cap.xs(site,level = 'gen_name') 
-                    curt = cap_site - gen_site
-                    curt = vre_curt.xs(site,level = 'gen_name')
+                    gen_site = gen.xs(site, level='gen_name')
+                    curt = vre_curt.xs(site, level='gen_name')
+
+                    if pd.notna(start_date_range):
+                        gen_site, curt = \
+                            self.set_timestamp_date_range(
+                                [gen_site, curt],
+                                start_date_range, end_date_range)
+                        if curt.empty:
+                            logger.warning('No curtailment in selected Date Range')
+                            continue
+                    
+                    ti = gen_site.index.get_level_values('timestamp').unique()
 
                     curt_tot = curt.sum()
                     gen_tot = gen_site.sum()
@@ -838,7 +836,7 @@ class MPlot(PlotDataHelper):
                     curt_perc = pd.Series([0])
                     curt_tot = pd.Series([0])
                     gen_tot = pd.Series([0])
-                    curt = pd.Series([0] * len(ti),name = site,index = ti)
+                    curt = pd.Series([0] * len(ti), name=site, index=ti)
 
                 gen_tot.columns = [site]
                 curt_perc.columns = [site]
@@ -850,6 +848,9 @@ class MPlot(PlotDataHelper):
                 curt_tots = curt_tots.append(curt_tot)
                 chunks_scen.append(curt)
 
+            if not chunks_scen:
+                outputs = MissingInputData()
+                continue
             curt_8760_scen = pd.concat(chunks_scen,axis = 1)
             scen_name = pd.Series([scenario] * len(curt_8760_scen),name = 'Scenario')
             curt_8760_scen = curt_8760_scen.set_index([scen_name],append = True)
@@ -865,6 +866,9 @@ class MPlot(PlotDataHelper):
             Total_Gen = pd.concat([Total_Gen,sites_gen],axis = 1)
             Total_Curt = pd.concat([Total_Curt,curt_tots],axis = 1)
 
+        if not chunks:
+            return MissingInputData()
+
         Curt_8760 = pd.concat(chunks,axis = 0, copy = False)
         Curt_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_8760.csv'))
 
@@ -875,7 +879,7 @@ class MPlot(PlotDataHelper):
         mplt = PlotLibrary(figsize=(9,6))
         fig, ax = mplt.get_figure()
 
-        mplt.barplot(Total_Curtailment_Out_perc)
+        mplt.barplot(Total_Curtailment_Out_perc, color=self.color_list)
 
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
 
@@ -906,7 +910,8 @@ class MPlot(PlotDataHelper):
 
 
     def average_diurnal_curt(self, timezone: str = None, start_date_range: str = None,
-                             end_date_range: str = None, **_):
+                             end_date_range: str = None,
+                             barplot_groupby: str = 'Scenario', **_):
         """Average diurnal renewable curtailment plot. 
 
         Each scenario is plotted as a separate line and shows the average 
@@ -924,7 +929,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -938,50 +943,49 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
                         
             chunks = []
             for scenario in self.Scenarios:
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
 
                 re_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
-
-                # Timeseries [MW] RE curtailment [MWh]
-                try: #Check for regions missing all generation.
+                try:
                     re_curt = re_curt.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                        self.logger.info(f'No curtailment in {zone_input}')
+                        logger.info(f'No curtailment in {zone_input}')
                         continue
                 
                 re_curt = self.df_process_gen_inputs(re_curt)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == 'Curtailment':
                     re_curt = self.assign_curtailment_techs(re_curt)
+                # Sum across technologies
+                re_curt = re_curt.sum(axis=1)
 
-                re_curt = re_curt.groupby(["timestamp"]).sum().sum(axis=1)
-                re_curt = re_curt.squeeze() #Convert to Series
-                
-                if pd.isna(start_date_range) == False:
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                    re_curt = re_curt[start_date_range : end_date_range]
-                    
-                    if re_curt.empty is True: 
-                        self.logger.warning('No data in selected Date Range')
+                if pd.notna(start_date_range):
+                    re_curt = self.set_timestamp_date_range(re_curt, 
+                                        start_date_range, end_date_range)
+                    if re_curt.empty:
+                        logger.warning('No curtailment in selected Date Range')
                         continue
                 
                 interval_count = self.get_sub_hour_interval_count(re_curt)
                 re_curt = re_curt/interval_count
+
                 # Group data by hours and find mean across entire range 
-                re_curt = re_curt.groupby([re_curt.index.hour]).mean()
-                # If hours are missing, fill with 0
-                if len(re_curt) < 24:
-                    re_idx = range(0,24)
-                    re_curt = re_curt.reindex(re_idx, fill_value=0)
-                # reset index to datetime 
-                re_curt.index = pd.date_range("2024-01-01", periods=24, freq="H")
-                re_curt.rename(scenario, inplace=True)
-                chunks.append(re_curt)
+                re_curt = self.year_scenario_grouper(re_curt, scenario, groupby=barplot_groupby,
+                                                    additional_groups=[re_curt.index.hour]).mean()
+                for scen in re_curt.index.get_level_values('Scenario').unique():
+                    re_curt_scen = re_curt.xs(scen, level='Scenario')
+                    # If hours are missing, fill with 0
+                    if len(re_curt_scen) < 24:
+                        re_idx = range(0,24)
+                        re_curt_scen = re_curt_scen.reindex(re_idx, fill_value=0)
+                    # reset index to datetime 
+                    re_curt_scen.index = pd.date_range("2024-01-01", periods=24, freq="H")
+                    re_curt_scen.rename(scen, inplace=True)
+                    chunks.append(re_curt_scen)
             
             # No curtailment data in zone
             if not chunks:
@@ -989,9 +993,6 @@ class MPlot(PlotDataHelper):
                 continue
 
             RE_Curtailment_DC = pd.concat(chunks, axis=1, sort=False)
-
-            # Replace _ with white space
-            RE_Curtailment_DC.columns = RE_Curtailment_DC.columns.str.replace('_',' ')
 
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(RE_Curtailment_DC.columns, self.color_list))
