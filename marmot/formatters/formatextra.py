@@ -10,7 +10,7 @@ import logging
 import marmot.utils.mconfig as mconfig
 from marmot.formatters.formatbase import Process
 
-logger = logging.getLogger('marmot_format.'+__name__)
+logger = logging.getLogger('formatter.'+__name__)
 
 class ExtraProperties():
     """Creates extra properties required by Marmots plotter.

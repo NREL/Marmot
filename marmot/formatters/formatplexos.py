@@ -21,7 +21,7 @@ try:
 except ModuleNotFoundError:
     from h5plexos.query import PLEXOSSolution
 
-logger = logging.getLogger('marmot_format.'+__name__)
+logger = logging.getLogger('formatter.'+__name__)
 
 class ProcessPLEXOS(Process):
     """Process PLEXOS class specific data from a h5plexos database.

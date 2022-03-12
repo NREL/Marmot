@@ -47,7 +47,7 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)        
+        self.logger = logging.getLogger('plotter.'+__name__)        
 
     def unserved_energy_timeseries(self, timezone: str = "",
                                    start_date_range: str = None, 

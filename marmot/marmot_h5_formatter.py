@@ -75,7 +75,7 @@ class MarmotFormat(SetupLogger):
                 to rename emissions types. 
                 Defaults to pd.DataFrame().
         """
-        super().__init__('marmot_format', **kwargs) # Instantiation of SetupLogger
+        super().__init__('formatter', **kwargs) # Instantiation of SetupLogger
 
         self.Scenario_name = Scenario_name
         self.Model_Solutions_folder = Path(Model_Solutions_folder)

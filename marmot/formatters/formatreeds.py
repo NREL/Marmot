@@ -18,7 +18,7 @@ from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraProperties
 
-logger = logging.getLogger('marmot_format.'+__name__)
+logger = logging.getLogger('formatter.'+__name__)
 
 class ProcessReEDS(Process):
     """Process ReEDS specific data from a ReEDS result set.

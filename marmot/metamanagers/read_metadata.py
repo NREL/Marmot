@@ -12,7 +12,7 @@ import pandas as pd
 from pathlib import Path
 import logging
 
-logger = logging.getLogger('marmot_format.'+__name__)  
+logger = logging.getLogger('formatter.'+__name__)  
 
 class MetaData():
     """Handle the retrieval of metadata from the formatted or

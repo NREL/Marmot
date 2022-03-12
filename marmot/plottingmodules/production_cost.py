@@ -47,7 +47,7 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.logger = logging.getLogger('plotter.'+__name__)
                 
     def prod_cost(self, start_date_range: str = None, 
                   end_date_range: str = None, custom_data_file_path: str = None,

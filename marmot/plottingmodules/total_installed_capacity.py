@@ -52,7 +52,7 @@ class MPlot(PlotDataHelper):
 
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
-        self.logger = logging.getLogger('marmot_plot.'+__name__)        
+        self.logger = logging.getLogger('plotter.'+__name__)        
 
     def total_cap(self, **_):
         """Creates a stacked barplot of total installed capacity.

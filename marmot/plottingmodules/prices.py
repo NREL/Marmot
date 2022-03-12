@@ -51,7 +51,7 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.logger = logging.getLogger('plotter.'+__name__)
 
 
     def pdc_all_regions(self, y_axis_max: float = None, 

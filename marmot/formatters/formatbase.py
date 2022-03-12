@@ -10,7 +10,7 @@ import logging
 import pandas as pd
 from pathlib import Path
 
-logger = logging.getLogger('marmot_format.'+__name__)
+logger = logging.getLogger('formatter.'+__name__)
 
 class Process():
     """Base class for processing simulation model data.

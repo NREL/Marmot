@@ -40,15 +40,15 @@ class SetupLogger():
             self.log_suffix = ''
         else:
              self.log_suffix = f'_{log_suffix}'
-
+        
         with open(ROOT_DIR.joinpath('utils/marmot_logging_config.yml'), 'rt') as f:
             conf = yaml.safe_load(f.read())
             conf['handlers']['warning_handler']['filename'] = \
                 (conf['handlers']['warning_handler']['filename']
-                .format(log_directory, 'formatter', self.log_suffix))
+                .format(log_directory, logger_type, self.log_suffix))
             conf['handlers']['info_handler']['filename'] = \
                 (conf['handlers']['info_handler']['filename']
-                .format(log_directory, 'formatter', self.log_suffix))
+            .format(log_directory, logger_type, self.log_suffix))
 
             logging.config.dictConfig(conf)
 
