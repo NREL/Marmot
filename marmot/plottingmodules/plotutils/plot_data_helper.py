@@ -12,12 +12,12 @@ import pandas as pd
 import numpy as np
 import functools
 import concurrent.futures
-from typing import Tuple
+from typing import Tuple, Union, List
 
 import marmot.utils.mconfig as mconfig
 
 
-logger = logging.getLogger('marmot_plot.'+__name__)
+logger = logging.getLogger('plotter.'+__name__)
 
 
 class PlotDataHelper(dict):
@@ -418,6 +418,108 @@ class PlotDataHelper(dict):
             units = 'MW'
 
         return {'units':units, 'divisor':divisor}
+
+    @staticmethod
+    def set_timestamp_date_range(dfs: Union[pd.DataFrame, List[pd.DataFrame]],
+                        start_date: str, end_date: str) -> Tuple[pd.DataFrame, ...]:
+        """Sets the timestamp date range based on start_date and end_date strings
+
+        Takes either a single df or a list of dfs as input. 
+        The index must be a pd.DatetimeIndex or a multiindex with level timestamp.
+
+        Args:
+            dfs (Union[pd.DataFrame, List[pd.DataFrame]]): df(s) to set date range for
+            start_date (str): start date 
+            end_date (str): end date
+
+        Raises:
+            ValueError: If df.index is not of type type pd.DatetimeIndex or
+                            type pd.MultiIndex with level timestamp.
+
+        Returns:
+            Tuple[pd.DataFrame]: adjusted dataframes
+        """
+
+        logger.info(f"Plotting specific date range: \
+                    {str(start_date)} to {str(end_date)}")
+
+        df_list = []
+        if isinstance(dfs, list):
+            for df in dfs:
+                if isinstance(df.index, pd.DatetimeIndex):
+                    df = df.loc[start_date : end_date]
+                elif isinstance(df.index, pd.MultiIndex):
+                    df = df.xs(slice(start_date, end_date), level='timestamp', 
+                                    drop_level=False)
+                else:
+                    raise ValueError("'df.index' must be of type pd.DatetimeIndex or "
+                                 "type pd.MultiIndex with level 'timestamp'")
+                df_list.append(df)
+            return tuple(df_list)
+        else:
+            if isinstance(dfs.index, pd.DatetimeIndex):
+                df = dfs.loc[start_date : end_date]
+            elif isinstance(dfs.index, pd.MultiIndex):
+                df = dfs.xs(slice(start_date, end_date), level='timestamp', 
+                                    drop_level=False)
+            else:
+                raise ValueError("'df.index' must be of type pd.DatetimeIndex or "
+                                "type pd.MultiIndex with level 'timestamp'")
+            return df
+
+    @staticmethod
+    def year_scenario_grouper(df: pd.DataFrame, scenario: str, 
+                                groupby: str='Scenario',
+                                additional_groups: list=None,
+                                **kwargs) -> pd.DataFrame.groupby:
+        """Special groupby method to group dataframes by Scenario or Year-Scenario.
+
+        Grouping by Year-Scenario is useful for multi year results sets 
+        where examining results by year is of interest. 
+
+        This method is a wrapper around pd.DataFrame.groupby and takes all the 
+        same arguments.
+        
+        Args:
+            df (pd.DataFrame): DataFrame to group
+            scenario (str): name of the scenario to groupby
+            groupby (str, optional): Groupby 'Scenario' or 'Year-Scenario'.
+                If Year-Scenario is chosen the year is extracted from the 
+                DatetimeIndex and appended to the scenario name. 
+                Defaults to 'Scenario'.
+            additional_groups (list, optional): List of any additional columns 
+                to groupby. Defaults to None.
+
+        Raises:
+            ValueError: If df.index is not of type type pd.DatetimeIndex or
+                            type pd.MultiIndex with level timestamp.
+            ValueError: If additional_groups is not a list
+
+        Returns:
+            DataFrameGroupBy: Returns a groupby object that contains 
+                information about the groups. 
+        """
+        
+        if groupby == 'Year-Scenario':
+            if isinstance(df.index, pd.MultiIndex):
+                grouper = [(df.index.get_level_values('timestamp').year.astype(str) 
+                                + f': {scenario}').rename('Scenario')]
+            elif isinstance(df.index, pd.DatetimeIndex):
+                grouper = [(df.index.year.astype(str) + f'_{scenario}').rename('Scenario')]
+            else:
+                raise ValueError("'df.index' must be of type pd.DatetimeIndex or "
+                                 "type pd.MultiIndex with level 'timestamp'")
+        elif groupby == 'Scenario':
+            grouper = [pd.Index([scenario] * len(df.index), name='Scenario')]
+        else:
+            grouper = [groupby]
+
+        if additional_groups:
+            if isinstance(additional_groups, list):
+                grouper.extend(additional_groups)
+            else:
+                raise ValueError("'additional_groups' must be a list")
+        return df.groupby(grouper, **kwargs)
 
     @staticmethod
     def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
