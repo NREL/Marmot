@@ -448,7 +448,8 @@ class MetaData():
             region_interregionallines = region_interregionallines.applymap(lambda x: x.decode("utf-8") if isinstance(x, bytes) else x)
             region_interregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
             if not self.Region_Mapping.empty:
-                region_interregionallines=pd.merge(region_interregionallines,self.Region_Mapping,how='left',on="region") 
+                region_interregionallines=pd.merge(region_interregionallines,self.Region_Mapping,how='left',on="region")
+                region_interregionallines.dropna(axis=1, how='all', inplace=True)
         except KeyError:
             region_interregionallines = pd.DataFrame()
             logger.warning("Region Interregionallines data not included in h5plexos results")
@@ -477,6 +478,7 @@ class MetaData():
             region_intraregionallines.rename(columns={"parent":"region","child":"line_name"},inplace=True)
             if not self.Region_Mapping.empty:
                 region_intraregionallines=pd.merge(region_intraregionallines,self.Region_Mapping,how='left',on="region")
+                region_intraregionallines.dropna(axis=1, how='all', inplace=True)
         except KeyError: 
             region_intraregionallines = pd.DataFrame()
             logger.warning("Region Intraregionallines Lines data not included in h5plexos results")  
@@ -501,6 +503,7 @@ class MetaData():
             region_exportinglines = region_exportinglines.rename(columns={'parent':'region','child':'line_name'})
             if not self.Region_Mapping.empty:
                 region_exportinglines=pd.merge(region_exportinglines,self.Region_Mapping,how='left',on="region")
+                region_exportinglines.dropna(axis=1, how='all', inplace=True)
         except KeyError:
             logger.warning("Region Exporting Lines data not included in h5plexos results") 
 
@@ -524,6 +527,7 @@ class MetaData():
             region_importinglines = region_importinglines.rename(columns={'parent':'region','child':'line_name'})
             if not self.Region_Mapping.empty:
                 region_importinglines=pd.merge(region_importinglines,self.Region_Mapping,how='left',on="region")
+                region_importinglines.dropna(axis=1, how='all', inplace=True)
         except KeyError:
             logger.warning("Region Importing Lines data not included in h5plexos results") 
 
@@ -721,7 +725,8 @@ class MetaData():
             logger.warning("Reserves Region data not available in h5plexos results") 
             return pd.DataFrame()
         if not self.Region_Mapping.empty:
-            reserves_regions=pd.merge(reserves_regions,self.Region_Mapping,how='left',on="region")
+            reserves_regions = pd.merge(reserves_regions,self.Region_Mapping,how='left',on="region")
+            reserves_regions.dropna(axis=1, how='all', inplace=True)
         reserves_regions.drop('gen_name', axis=1, inplace=True)
         reserves_regions.drop_duplicates(inplace=True)
         reserves_regions.reset_index(drop=True,inplace=True)
