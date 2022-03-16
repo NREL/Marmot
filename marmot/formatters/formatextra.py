@@ -36,7 +36,7 @@ class ExtraProperties():
         self.files_list = files_list
 
     def plexos_generator_curtailment(self, df: pd.DataFrame, 
-                                    timescale: str='interval'):
+                                    timescale: str='interval') -> pd.DataFrame:
         """Creates a generator_Curtailment property for PLEXOS result sets 
 
         Args:
@@ -71,7 +71,7 @@ class ExtraProperties():
         
         return avail_gen - df        
 
-    def plexos_cost_unserved_energy(self, df: pd.DataFrame, **_):
+    def plexos_cost_unserved_energy(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a region_Cost_Unserved_Energy property for PLEXOS result sets 
 
         Args:
@@ -82,7 +82,7 @@ class ExtraProperties():
         """
         return df * mconfig.parser("formatter_settings", 'VoLL')
 
-    def reeds_reserve_provision(self, df: pd.DataFrame, **_):
+    def reeds_reserve_provision(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a reserve_Provision property for ReEDS result sets 
 
         Args:
@@ -94,7 +94,7 @@ class ExtraProperties():
         return df.groupby(['timestamp', 'Type', 'parent',
                             'region', 'season', 'units']).sum()
 
-    def reeds_generator_vom_cost(self, df: pd.DataFrame, **_):
+    def reeds_generator_vom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a generator_VO&M property for ReEDS result sets 
 
         Args:
@@ -105,7 +105,7 @@ class ExtraProperties():
         """
         return df.xs('op_vom_costs', level='cost_type')
 
-    def reeds_generator_fuel_cost(self, df: pd.DataFrame, **_):
+    def reeds_generator_fuel_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a generator_Fuel_Cost property for ReEDS result sets 
 
         Args:
@@ -116,7 +116,7 @@ class ExtraProperties():
         """
         return df.xs('op_fuelcosts_objfn', level='cost_type')
 
-    def reeds_generator_reserve_vom_cost(self, df: pd.DataFrame, **_):
+    def reeds_generator_reserve_vom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a generator_Reserves_VO&M_Cost property for ReEDS result sets 
 
         Args:
@@ -127,7 +127,7 @@ class ExtraProperties():
         """
         return df.xs('op_operating_reserve_costs', level='cost_type')
 
-    def reeds_generator_fom_cost(self, df: pd.DataFrame, **_):
+    def reeds_generator_fom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a generator_FO&M_Cost property for ReEDS result sets 
 
         Args:
@@ -138,7 +138,7 @@ class ExtraProperties():
         """
         return df.xs('op_fom_costs', level='cost_type')
 
-    def annualize_property(self, df: pd.DataFrame, **_):
+    def annualize_property(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Annualizes any property, groups by year
 
         Args:

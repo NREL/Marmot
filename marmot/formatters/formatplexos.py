@@ -34,11 +34,21 @@ class ProcessPLEXOS(Process):
     # property names and methods used to create it.
     EXTRA_MARMOT_PROPERTIES: dict = {
         'generator_Generation': [('generator_Curtailment', 
-                                    ExtraProperties.plexos_generator_curtailment)],
+                                    ExtraProperties.plexos_generator_curtailment),
+                                  ('generator_Generation_Annual', 
+                                    ExtraProperties.annualize_property)],
         'region_Unserved_Energy': [('region_Cost_Unserved_Energy', 
                                     ExtraProperties.plexos_cost_unserved_energy)],
         'zone_Unserved_Energy': [('zone_Cost_Unserved_Energy', 
-                                    ExtraProperties.plexos_cost_unserved_energy)]
+                                    ExtraProperties.plexos_cost_unserved_energy)],
+        'region_Load': [('region_Load_Annual', ExtraProperties.annualize_property)],
+        'zone_Load': [('zone_Load_Annual', ExtraProperties.annualize_property)],
+        'generator_Curtailment': [('generator_Curtailment_Annual', 
+                                    ExtraProperties.annualize_property)],
+        'generator_Pump_Load': [('generator_Pump_Load_Annual', 
+                                    ExtraProperties.annualize_property)],
+        'reserves_generators_Provision': [('reserves_generators_Provision_Annual', 
+                                    ExtraProperties.annualize_property)]
         }
 
     def __init__(self, input_folder: Path, output_file_path: Path,

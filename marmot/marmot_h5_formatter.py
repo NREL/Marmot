@@ -344,6 +344,31 @@ class MarmotFormat(SetupLogger):
                                     self.save_to_h5(prop,
                                                     output_file_path, 
                                                     key=prop_name)
+
+                            # Run again to check for properties based of new properties
+                            if prop_name in \
+                                process_sim_model.EXTRA_MARMOT_PROPERTIES:
+
+                                extra2_prop_functions = \
+                                    process_sim_model.EXTRA_MARMOT_PROPERTIES[prop_name]
+                                for prop_function_tup2 in extra2_prop_functions:
+                                    prop_name2, prop_function2 = prop_function_tup2
+                                    
+                                    if prop_name2 not in \
+                                        h5py.File(output_file_path, 'r') or not \
+                                        formatter_settings['skip_existing_properties']:
+
+                                        self.logger.info(f'Processing {prop_name2}')
+                                        prop2 = prop_function2(extraprops_init, 
+                                                                prop, 
+                                                                timescale = row["data_type"])
+
+                                        if prop2.empty is False:
+                                            self.save_to_h5(prop2,
+                                                            output_file_path, 
+                                                            key=prop_name2)
+
+
                 else:
                     continue
 
