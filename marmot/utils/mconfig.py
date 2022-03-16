@@ -7,6 +7,9 @@ instead edit the values directly in the config.yml file once created.
 """
 
 import yaml
+import logging
+import traceback
+import sys
 from pathlib import Path
 from typing import Union
 from marmot.utils.definitions import ROOT_DIR
@@ -174,6 +177,9 @@ def createConfig(configfile_path: Path):
         
         plot_data = dict(
             curtailment_property = 'Curtailment',
+            plot_title_as_region = True,
+            include_barplot_load_line = True,
+            include_stackplot_load_line = True,
             include_total_pumped_load_line = True,
             include_timeseries_pumped_load_line = True,
             include_total_net_imports = True,
@@ -190,7 +196,6 @@ def createConfig(configfile_path: Path):
         
         shift_leapday = False,
         auto_convert_units = True,
-        plot_title_as_region = True,
         
         user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
 
@@ -229,11 +234,18 @@ def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, fl
     with open(configfile_path, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile.read())
     
-    if not second_level:
-        value = cfg[top_level]
-    else:
-        value = cfg[top_level][second_level]
-    return value 
+    try:
+        if not second_level:
+            value = cfg[top_level]
+        else:
+            value = cfg[top_level][second_level]
+        return value 
+    except KeyError:
+        print(traceback.format_exc())
+        print("Config file read Error: New config settings have been added which "
+                "require the config.yml to be re-created. "
+                "To continue delete config.yml located in the top directory level of Marmot")
+        sys.exit()
     
 
 def edit_value(new_value: str, top_level: str, 
