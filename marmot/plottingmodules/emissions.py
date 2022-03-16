@@ -49,13 +49,15 @@ class MPlot(PlotDataHelper):
 
         # Instantiation of MPlotHelperFunctions
         super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
+                        self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
+                        self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
+                        Region_Mapping=self.Region_Mapping) 
 
-    def total_emissions_by_type(self, prop: str = None, start_date_range: str = None,
-                                end_date_range: str = None, custom_data_file_path: str = None,
-                                **_):
+    def total_emissions_by_type(self, prop: str = None, 
+                                start_date_range: str = None,
+                                end_date_range: str = None, 
+                                custom_data_file_path: str = None,
+                                barplot_groupby: str = 'Scenario', **_):
         """Creates a stacked bar plot of emissions by generator tech type.
 
         The emission type to plot is defined using the prop argument.
@@ -76,11 +78,11 @@ class MPlot(PlotDataHelper):
             dict: dictionary containing the created plot and its data table.
         """
         # Create Dictionary to hold Datframes for each scenario
-        outputs = {}
+        outputs : dict = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"emissions_generators_Production",self.Scenarios)]
+        properties = [(True, "emissions_generators_Production", self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -98,7 +100,7 @@ class MPlot(PlotDataHelper):
 
                 logger.info(f"Scenario = {scenario}")
 
-                emit = self["emissions_generators_Production"].get(scenario)
+                emit : pd.DataFrame = self["emissions_generators_Production"].get(scenario)
 
                 # Check if Total_Gen_Stack contains zone_input, skips if not
                 try:
@@ -117,32 +119,33 @@ class MPlot(PlotDataHelper):
                 # Rename generator technologies
                 emit = self.rename_gen_techs(emit)
                 # summarize annual emissions by pollutant and tech
-                emit = emit.groupby(['pollutant', 'tech']).sum()
-                # rename column based on scenario
-                emit.rename(columns={0:scenario}, inplace=True)
-                emitList.append(emit)
-
+                emitList.append(self.year_scenario_grouper(emit, scenario, 
+                                                        groupby=barplot_groupby,
+                                                        additional_groups=['pollutant', 'tech']
+                                                        ).sum())
             # concatenate chunks
             try:
-                emitOut = pd.concat(emitList, axis=1)
+                emitOut = pd.concat(emitList, axis=0)
             except ValueError:
                 logger.warning(f"No emissions found for : {zone_input}")
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
+            
             # format results
             emitOut = emitOut/1E9 # Convert from kg to million metric tons
             emitOut = emitOut.loc[(emitOut != 0).any(axis=1), :] # drop any generators with no emissions
-            emitOut = emitOut.T  # transpose back (easier for slicing by pollutant later)
 
             # subset to relevant pollutant (specified by user as property)
             try:
-                emitPlot = emitOut.xs(prop, level="pollutant", axis=1)
+                emitPlot = emitOut.xs(prop, level="pollutant")
             except KeyError:
-                logger.warning(prop+ " emissions not found")
+                logger.warning(f"{prop} emissions not found")
                 outputs = InputSheetError()
                 return outputs
+
+            emitPlot = emitPlot.reset_index()
+            emitPlot = emitPlot.pivot(index='Scenario', columns='tech', values=0)
 
             if pd.notna(custom_data_file_path):
                 emitPlot = self.insert_custom_data_columns(
