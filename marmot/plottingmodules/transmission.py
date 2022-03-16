@@ -22,6 +22,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """transmission MPlot class.
@@ -227,7 +228,7 @@ class MPlot(PlotDataHelper):
                            rotation='vertical', labelpad=60)
                 plt.xlabel('Intervals',  color='black', 
                            rotation='horizontal', labelpad=20)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             try:
                 del annual_util, 
@@ -453,7 +454,7 @@ class MPlot(PlotDataHelper):
             if duration_curve:
                 plt.xlabel('Sorted hour of the year', color='black', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
@@ -670,7 +671,7 @@ class MPlot(PlotDataHelper):
             fig.text(0.15,0.98,'Summer (' + start_date_range + ' to ' + end_date_range + ')',fontsize = 16)
             fig.text(0.58,0.98,'Winter',fontsize = 16)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
@@ -880,7 +881,7 @@ class MPlot(PlotDataHelper):
             if duration_curve:
                 plt.xlabel('Sorted hour of the year', color = 'black', labelpad = 30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
@@ -1862,7 +1863,7 @@ class MPlot(PlotDataHelper):
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
                 mplt.add_legend()
 
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 fig.set_title(zone_input)
             ax.set_ylabel(f"Line violations ({unitconversion['units']})",  color='black', rotation='vertical')
 
@@ -1958,7 +1959,7 @@ class MPlot(PlotDataHelper):
                 mplt.set_subplot_timeseries_format()
 
             mplt.add_legend(reverse_legend=True)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
                 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
@@ -2132,7 +2133,7 @@ class MPlot(PlotDataHelper):
             #Remove extra axes
             mplt.remove_excess_axs(excess_axs,grid_size)
 
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             plt.ylabel(f"Net export ({unitconversion['units']})", color='black', 
                        rotation='vertical', labelpad=40)
@@ -2284,7 +2285,7 @@ class MPlot(PlotDataHelper):
                       linestyle=':')
             ax.set_ylabel(f"Interchange ({unitconversion['units']}h)", color='black', 
                           rotation='vertical')
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig,'data_table': Data_Table_Out}

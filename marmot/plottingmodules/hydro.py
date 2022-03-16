@@ -22,6 +22,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             MissingZoneData)
 
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """hydro MPlot class.
@@ -139,7 +140,7 @@ class MPlot(PlotDataHelper):
             ax.xaxis.set_major_formatter(mtick.StrMethodFormatter('{x:,.0f}'))
             ax.margins(x=0.01)
             # Add title
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             mplt.add_legend(reverse_legend=True)
             
@@ -247,7 +248,7 @@ class MPlot(PlotDataHelper):
                 mplt.set_subplot_timeseries_format()
 
                 # Add title                
-                if mconfig.parser("plot_title_as_region"):
+                if plot_data_settings["plot_title_as_region"]:
                     mplt.add_main_title(zone_input)
                 # Add legend
                 mplt.add_legend(reverse_legend=True)
@@ -274,7 +275,7 @@ class MPlot(PlotDataHelper):
 
             mplt.add_legend(reverse_legend=True)
             
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             fig.savefig(os.path.join(hydro_figures, zone_input +
                                       f"_Hydro_Versus_Net_Load_{self.Scenarios[0]}"),

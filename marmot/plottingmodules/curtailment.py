@@ -17,6 +17,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """curtailment MPlot class.
@@ -196,7 +197,7 @@ class MPlot(PlotDataHelper):
             # Add legend
             mplt.add_legend()
             # Set title
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
@@ -418,7 +419,7 @@ class MPlot(PlotDataHelper):
 
             ax.set_ylim(bottom=0)
             ax.margins(x=0.01)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             # Add legend
             mplt.add_legend()
@@ -560,7 +561,7 @@ class MPlot(PlotDataHelper):
             # Add legend
             mplt.add_legend(reverse_legend=True)
             # Add title
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             curt_totals = Total_Curtailment_out.sum(axis=1)
@@ -715,7 +716,7 @@ class MPlot(PlotDataHelper):
             mplt.set_barplot_xticklabels(tick_labels)
 
             ax.margins(x=0.01)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             handles, labels = ax.get_legend_handles_labels()
@@ -1022,7 +1023,7 @@ class MPlot(PlotDataHelper):
             ax.margins(x=0.01)
             ax.set_ylim(bottom=0)
             # Add title
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}

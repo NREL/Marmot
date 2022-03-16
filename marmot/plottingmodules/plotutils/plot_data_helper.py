@@ -5,6 +5,7 @@
 """
 
 import os
+import re
 import math
 import logging
 import datetime as dt
@@ -12,6 +13,7 @@ import pandas as pd
 import numpy as np
 import functools
 import concurrent.futures
+from pathlib import Path
 from typing import Tuple, Union, List
 
 import marmot.utils.mconfig as mconfig
@@ -30,13 +32,13 @@ class PlotDataHelper(dict):
     formatted data when retrieved by the get_formatted_data method.
     """
 
-    def __init__(self, Marmot_Solutions_folder: str, AGG_BY: str, ordered_gen: list, 
+    def __init__(self, Marmot_Solutions_folder: Path, AGG_BY: str, ordered_gen: list, 
                  PLEXOS_color_dict: dict, Scenarios: list, ylabels: list, 
                  xlabels: list, gen_names_dict: dict, TECH_SUBSET: str,
                  Region_Mapping: pd.DataFrame = pd.DataFrame()):
         """
         Args:
-            Marmot_Solutions_folder (str): Folder to save Marmot solution files.
+            Marmot_Solutions_folder (Path): Folder to save Marmot solution files.
             AGG_BY (str): Informs region type to aggregate by when creating plots.
             ordered_gen (list): Ordered list of generator technologies to plot, 
                 order defines the generator technology position in stacked bar and area plots
@@ -110,7 +112,7 @@ class PlotDataHelper(dict):
             pd.DataFrame: Requested dataframe.
         """
         try:
-            with pd.HDFStore(os.path.join(self.Marmot_Solutions_folder, "Processed_HDF5_folder", 
+            with pd.HDFStore(self.Marmot_Solutions_folder.joinpath("Processed_HDF5_folder", 
                                             f"{scenario}_formatted.h5"), 'r') as file:
                 return file[plx_prop_name]
         except KeyError:
@@ -382,14 +384,14 @@ class PlotDataHelper(dict):
         if mconfig.parser("auto_convert_units"):
             if sum_values:
                 # Check if scenarios are in index sum across columns
-                if any(scen in self.Scenarios for scen in df.index):
-                    sum_axis=1
-                elif isinstance(df.index, pd.MultiIndex) and\
+                if isinstance(df.index, pd.MultiIndex) and \
                     'Scenario' in df.index.names:
                     sum_axis=1
                 # If index datetime sum across columns
                 elif isinstance(df.index, pd.DatetimeIndex):
-                    sum_axis=1  
+                    sum_axis=1
+                elif [x for x, y in zip(self.Scenarios, df.index) if re.search(x, y)]:
+                    sum_axis=1
                 elif any(scen in self.Scenarios for scen in df.columns):
                     sum_axis=0
                 else:
@@ -505,7 +507,7 @@ class PlotDataHelper(dict):
                 grouper = [(df.index.get_level_values('timestamp').year.astype(str) 
                                 + f': {scenario}').rename('Scenario')]
             elif isinstance(df.index, pd.DatetimeIndex):
-                grouper = [(df.index.year.astype(str) + f'_{scenario}').rename('Scenario')]
+                grouper = [(df.index.year.astype(str) + f': {scenario}').rename('Scenario')]
             else:
                 raise ValueError("'df.index' must be of type pd.DatetimeIndex or "
                                  "type pd.MultiIndex with level 'timestamp'")

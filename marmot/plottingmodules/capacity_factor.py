@@ -16,6 +16,7 @@ from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """capacity_factor MPlot class.
@@ -181,7 +182,7 @@ class MPlot(PlotDataHelper):
 
             ax.set_ylabel('Average Output When Committed',  color='black', rotation='vertical')
             
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             # Add legend
             mplt.add_legend()
@@ -284,7 +285,7 @@ class MPlot(PlotDataHelper):
             # Add legend
             mplt.add_legend()
             # Add title
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
@@ -406,7 +407,7 @@ class MPlot(PlotDataHelper):
             # Add legend
             mplt.add_legend()
             # Add title
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}

@@ -17,6 +17,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, InputSheetError, MissingZoneData)
 
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """generation_stack MPlot class.
@@ -185,7 +186,7 @@ class MPlot(PlotDataHelper):
             mplt.add_facet_labels(xlabels_bottom=False, xlabels=self.Scenarios,
                                     ylabels=tech_list_sort)
             
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})", 
                        color='black', rotation='vertical', labelpad=60)
@@ -256,14 +257,14 @@ class MPlot(PlotDataHelper):
 
             # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
             # required True/False, property name and scenarios required, scenarios must be a list.
-            properties = [(True,f"generator_Generation{data_resolution}",scenario_list),
-                          (False,f"generator_{self.curtailment_prop}{data_resolution}",scenario_list),
-                          (False,f"generator_Pump_Load{data_resolution}",scenario_list),
-                          (True,f"{agg}_Load{data_resolution}",scenario_list),
-                          (False,f"{agg}_Unserved_Energy{data_resolution}",scenario_list)]
+            properties = [(True, f"generator_Generation{data_resolution}", scenario_list),
+                          (False, f"generator_{self.curtailment_prop}{data_resolution}", scenario_list),
+                          (False, f"generator_Pump_Load{data_resolution}", scenario_list),
+                          (True, f"{agg}_Load{data_resolution}", scenario_list),
+                          (False, f"{agg}_Unserved_Energy{data_resolution}", scenario_list)]
 
             # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
-        # with all required properties, returns a 1 if required data is missing
+            # with all required properties, returns a 1 if required data is missing
             return self.get_formatted_data(properties)
 
         def setup_data(zone_input, scenario, Stacked_Gen):
@@ -664,14 +665,18 @@ class MPlot(PlotDataHelper):
             # Remove extra axes
             mplt.remove_excess_axs(excess_axs, grid_size)
             # Add title
-            if mconfig.parser('plot_title_as_region'):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             #Ylabel should change if there are facet labels, leave at 40 for now, 
             # works for all values in spacing
             labelpad = 40
-            plt.ylabel(f"Generation ({unitconversion['units']})", color='black', 
+            if data_resolution == '_Annual':
+                plt.ylabel(f"Annual Generation ({unitconversion['units']}h)", color='black', 
                        rotation='vertical', labelpad=labelpad)
+            else:
+                plt.ylabel(f"Generation ({unitconversion['units']})", color='black', 
+                        rotation='vertical', labelpad=labelpad)
 
             Data_Table_Out = pd.concat(data_tables)
             out = {'fig':fig, 'data_table':Data_Table_Out}

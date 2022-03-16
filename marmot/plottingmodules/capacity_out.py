@@ -21,6 +21,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """capacity_out MPlot class.
@@ -171,7 +172,7 @@ class MPlot(PlotDataHelper):
             
             plt.tight_layout(rect=[0,0.03,1,0.97])
             # Add title
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
@@ -302,7 +303,7 @@ class MPlot(PlotDataHelper):
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad = 40)
             plt.ylabel('Capacity out (MW)',  color='black', rotation='vertical', labelpad = 60)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
 

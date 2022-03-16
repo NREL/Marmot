@@ -16,6 +16,7 @@ from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """unserved_energy MPlot Class.
@@ -138,7 +139,7 @@ class MPlot(PlotDataHelper):
             ax.set_ylim(bottom=0)
             ax.margins(x=0.01)
             mplt.set_subplot_timeseries_format()
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
 
@@ -246,7 +247,7 @@ class MPlot(PlotDataHelper):
             ax.margins(x=0.01)
             
             mplt.add_legend()
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)  
             for patch in ax.patches:
                 width, height = patch.get_width(), patch.get_height()
@@ -359,7 +360,7 @@ class MPlot(PlotDataHelper):
             ax.margins(x=0.01)            
             ax.set_ylim(bottom=0)
 
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}

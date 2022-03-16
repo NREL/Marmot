@@ -16,6 +16,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, InputSheetError)
 
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """sensitivities MPlot class.
@@ -250,7 +251,7 @@ class MPlot(PlotDataHelper):
                 PlotDataHelper.set_subplot_timeseries_format(axs)
                 handles, labels = axs[0].get_legend_handles_labels()
                 axs[0].legend(reversed(handles), reversed(labels),facecolor='inherit', frameon=True,loc='lower left',bbox_to_anchor=(1,0))
-                if mconfig.parser("plot_title_as_region"):
+                if plot_data_settings["plot_title_as_region"]:
                 	fig2.title(zone_input)
                 outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
 

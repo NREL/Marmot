@@ -19,6 +19,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
+plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
     """reserves MPlot class.
@@ -196,7 +197,7 @@ class MPlot(PlotDataHelper):
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             #Remove extra axes
             mplt.remove_excess_axs(excess_axs,grid_size)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(region)
             plt.ylabel(f"Reserve Provision ({unitconversion['units']})", 
                         color='black', rotation='vertical', labelpad=40)
@@ -302,7 +303,7 @@ class MPlot(PlotDataHelper):
                             color='black', rotation='vertical')
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(region)
 
             outputs[region] = {'fig': fig, 'data_table': data_table_out}
@@ -471,7 +472,7 @@ class MPlot(PlotDataHelper):
                 ax.set_ylabel(f"Reserve {data_set} Hours", 
                               color='black', rotation='vertical')
             mplt.add_legend()
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(region)
             outputs[region] = {'fig': fig,'data_table': Data_Table_Out}
         return outputs
@@ -598,7 +599,7 @@ class MPlot(PlotDataHelper):
             mplt.remove_excess_axs(excess_axs,grid_size)
             plt.ylabel('Reserve Shortage [MW]',  color='black', 
                        rotation='vertical',labelpad = 40)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                mplt.add_main_title(region)
             
             data_table_out = pd.concat(data_tables)

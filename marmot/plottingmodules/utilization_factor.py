@@ -22,6 +22,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, MissingZoneData)
 
+plot_data_settings = mconfig.parser("plot_data")
 
 def df_process_gen_ind_inputs(df, self):
     df = df.reset_index(['timestamp','tech','gen_name'])
@@ -170,7 +171,7 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
 
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
             	ax3.set_title(zone_input)          
             outputs[zone_input] = {'fig': fig3, 'data_table': CF_all_scenarios}
         return outputs
@@ -263,7 +264,7 @@ class MPlot(PlotDataHelper):
                 continue
             
             CF_all_scenarios=pd.concat(th_gen_chunk, axis=1, sort=False)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 ax2.set_title(zone_input)
             fig2.add_subplot(111, frameon=False)
             plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
@@ -364,7 +365,7 @@ class MPlot(PlotDataHelper):
                 self.logger.warning("No generation in %s",zone_input)
                 outputs[zone_input] = MissingZoneData()
                 continue
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 ax3.set_title(zone_input)
             
             CF_all_scenarios = pd.concat(cf_chunk, axis=1, sort=False)
@@ -455,7 +456,7 @@ class MPlot(PlotDataHelper):
                 self.logger.warning("No generation in %s",zone_input)
                 outputs[zone_input] = MissingZoneData()
                 continue
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 ax3.set_title(zone_input)
 
             GW_all_scenarios = pd.concat(total_gen_chunks, axis=1, sort=False)
