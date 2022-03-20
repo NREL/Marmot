@@ -41,14 +41,20 @@ class ProcessPLEXOS(Process):
                                     ExtraProperties.plexos_cost_unserved_energy)],
         'zone_Unserved_Energy': [('zone_Cost_Unserved_Energy', 
                                     ExtraProperties.plexos_cost_unserved_energy)],
-        'region_Load': [('region_Load_Annual', ExtraProperties.annualize_property)],
-        'zone_Load': [('zone_Load_Annual', ExtraProperties.annualize_property)],
-        'generator_Curtailment': [('generator_Curtailment_Annual', 
-                                    ExtraProperties.annualize_property)],
+        'region_Load': [('region_Load_Annual', ExtraProperties.annualize_property),
+                        ('region_Demand', ExtraProperties.plexos_demand)],
+        'zone_Load': [('zone_Load_Annual', ExtraProperties.annualize_property),
+                      ('zone_Demand', ExtraProperties.plexos_demand)],
         'generator_Pump_Load': [('generator_Pump_Load_Annual', 
                                     ExtraProperties.annualize_property)],
         'reserves_generators_Provision': [('reserves_generators_Provision_Annual', 
-                                    ExtraProperties.annualize_property)]
+                                    ExtraProperties.annualize_property)],
+        'generator_Curtailment': [('generator_Curtailment_Annual', 
+                                    ExtraProperties.annualize_property)],
+        'region_Demand': [('region_Demand_Annual', 
+                            ExtraProperties.annualize_property)],
+        'zone_Demand': [('zone_Demand_Annual', 
+                            ExtraProperties.annualize_property)]
         }
 
     def __init__(self, input_folder: Path, output_file_path: Path,
@@ -81,7 +87,7 @@ class ProcessPLEXOS(Process):
                 files.append(names.name)  # Creates a list of only the hdf5 files
 
         # List of all hf files in hdf5 folder in alpha numeric order
-        files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
+        files_list = sorted(files, key=lambda x:int(re.sub('\D', '0', x)))
 
         # Read in all HDF5 files into dictionary
         logger.info("Loading all HDF5 files to prepare for processing")

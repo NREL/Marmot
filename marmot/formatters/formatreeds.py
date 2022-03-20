@@ -14,11 +14,13 @@ from pathlib import Path
 from typing import List
 from dataclasses import dataclass, field
 
+import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraProperties
 
 logger = logging.getLogger('formatter.'+__name__)
+formatter_settings = mconfig.parser("formatter_settings")
 
 class ProcessReEDS(Process):
     """Process ReEDS specific data from a ReEDS result set.
@@ -29,7 +31,7 @@ class ProcessReEDS(Process):
         'generator_gen_out_ann': 'generator_Generation_Annual',
         'generator_cap_out': 'generator_Installed_Capacity',
         'generator_curt_out': 'generator_Curtailment',
-        'region_load_rt': 'region_Load',
+        'region_load_rt': 'region_Demand',
         'line_losses_tran_h': 'line_Losses',
         'line_tran_flow_power': 'line_Flow',
         'line_tran_out': 'line_Import_Limit',
@@ -54,11 +56,13 @@ class ProcessReEDS(Process):
                                                 ExtraProperties.reeds_generator_fom_cost)],
         'reserves_generators_Provision': [('reserve_Provision', 
                                                 ExtraProperties.reeds_reserve_provision)],
-        'region_Load': [('region_Load_Annual', ExtraProperties.annualize_property)],
+        'region_Demand': [('region_Demand_Annual', ExtraProperties.annualize_property),
+                          ('region_Load', ExtraProperties.reeds_region_total_load)],
         'generator_Curtailment': [('generator_Curtailment_Annual', 
                                                 ExtraProperties.annualize_property)],
         'generator_Pump_Load': [('generator_Pump_Load_Annual', 
-                                                ExtraProperties.annualize_property)]
+                                                ExtraProperties.annualize_property)],
+        'region_Load': [('region_Load_Annual', ExtraProperties.annualize_property)]
         }
 
     def __init__(self, input_folder: Path, output_file_path: Path, 
@@ -139,8 +143,8 @@ class ProcessReEDS(Process):
         if self.metadata.filename != h5_filename or \
         self._wind_resource_to_pca is None:
             regions = self.metadata.regions(h5_filename)
-            self._wind_resource_to_pca = (regions[['s','region']]
-                                            .set_index("s")
+            self._wind_resource_to_pca = (regions[['category','region']]
+                                            .set_index("category")
                                             .to_dict()["region"])
 
     def output_metadata(self, files_list: list) -> None:
@@ -154,7 +158,7 @@ class ProcessReEDS(Process):
             region_df = pd.read_csv(self.input_folder.joinpath('inputs_case', 
                                                     'regions.csv'))
             region_df.rename(columns={'p': 'name',
-                                      'transreg': 'category'},
+                                      's': 'category'},
                                       inplace=True)
             region_df.to_hdf(self.output_file_path, 
                             key=f'metadata/{partition}/objects/regions', 
@@ -172,7 +176,8 @@ class ProcessReEDS(Process):
                 self.property_units = str(names)                
                 
         # List of all files in input folder in alpha numeric order
-        files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
+        files_list = sorted(files, key=lambda x:int(re.sub('\D', '0', x)))
+        files_list = sorted(files)
         for file in files_list:
             self.file_collection[file] = str(reeds_outputs_dir.joinpath(file))
         return files_list
@@ -196,27 +201,30 @@ class ProcessReEDS(Process):
 
         gdx_file = self.file_collection.get(model_filename)
 
-        df = gdxpds.to_dataframe(gdx_file, prop)[prop]
+        try:
+            df : pd.DataFrame = gdxpds.to_dataframe(gdx_file, prop)[prop]
+        except gdxpds.tools.Error:
+            df = self.report_prop_error(prop, data_class)
+            return df
         # Get column names 
         reeds_prop_cols = PropertyColumns()
         df.columns = getattr(reeds_prop_cols, prop)
-
         if 'region' in df.columns:
             df.region = df.region.map(lambda x: self.wind_resource_to_pca.get(x, x))
             if not self.Region_Mapping.empty:
                 # Merge in region mapping, drop any na columns
                 df = df.merge(self.Region_Mapping, how='left', on='region')
                 df.dropna(axis=1, how='all', inplace=True)
-        
-        df.year = df.year.astype(int)
-        if self.process_subset_years:
-            df = df.loc[df.year.isin(self.process_subset_years)]
 
         # Get desired method, used for extra processing if needed
         process_att = getattr(self, f'df_process_{data_class}', None)
         if process_att:
             # Process attribute and return to df
-            df = process_att(df)
+            df = process_att(df, prop, gdx_file)
+
+        df.year = df.year.astype(int)
+        if self.process_subset_years:
+            df = df.loc[df.year.isin(self.process_subset_years)]
 
         if timescale == 'interval':
             df = self.merge_timeseries_block_data(df)
@@ -279,23 +287,54 @@ class ProcessReEDS(Process):
         df_merged =  df.merge(datetime_block, on=['year', 'h'])
         return df_merged.drop(['h','hour', 'year'], axis=1)  
 
-    def df_process_generator(self, df: pd.DataFrame) -> pd.DataFrame:
+    def df_process_generator(self, df: pd.DataFrame, prop=None, 
+                                gdx_file=None) -> pd.DataFrame:
         """Does any additional processing for generator properties
         """
-        
         if 'tech' not in df.columns:
             df['tech'] = 'reeds_vre'
         df['gen_name'] = df.tech + "_" + df.region
+
+        if prop == 'gen_out' or prop == 'gen_out_ann' and \
+            formatter_settings["reeds_gen_out_storage_as_ouput_only"]:
+            if prop == 'gen_out':
+                stor_prop_name = 'stor_out'
+                group_list = ['tech', 'region', 'h', 'year']
+            else:
+                stor_prop_name = 'stor_inout'
+                group_list = ['tech', 'region', 'year'] 
+            try:
+                stor_out : pd.DataFrame = \
+                    gdxpds.to_dataframe(gdx_file, stor_prop_name)[stor_prop_name]
+            except gdxpds.tools.Error:
+                stor_out = self.report_prop_error(stor_prop_name, 'storage')
+                return df
+            reeds_prop_cols = PropertyColumns()
+            stor_out.columns = getattr(reeds_prop_cols, stor_prop_name)
+            if prop == 'gen_out_ann':
+                stor_out = stor_out.loc[stor_out.type == 'out']
+            stor_out = stor_out.groupby(group_list).sum()
+
+            df = df.merge(stor_out, 
+                            on=group_list, 
+                            how='outer')
+            df['Value'] = df['Value_y']
+            df['Value'] = df['Value'].fillna(df['Value_x'])
+            df['Value'].to_numpy()[df['Value'].to_numpy() < 0] = 0
+            df = df.drop(['Value_x', 'Value_y'], axis=1)
+
         return df
 
-    def df_process_line(self, df: pd.DataFrame) -> pd.DataFrame:
+    def df_process_line(self, df: pd.DataFrame, reeds_prop=None, 
+                                gdx_file=None) -> pd.DataFrame:
         """Does any additional processing for line properties
         """
 
         df['line_name'] = df['region_from'] + "_" + df['region_to']
         return df
 
-    def df_process_reserves_generators(self, df: pd.DataFrame) -> pd.DataFrame:
+    def df_process_reserves_generators(self, df: pd.DataFrame, reeds_prop=None, 
+                                        gdx_file=None) -> pd.DataFrame:
         """Does any additional processing for reserves_generators properties
         """
         df['Type'] = '-'
@@ -323,6 +362,10 @@ class PropertyColumns():
                                                     'category', 'year', 'Value']) #Marmot line_Import_Limit                                            
     stor_in: List = field(default_factory=lambda: ['tech', 'sub-tech', 'region', 'h', 
                                                     'year', 'Value']) #Marmot generator_Pumped_Load
+    stor_out: List = field(default_factory=lambda: ['tech', 'sub-tech', 'region', 'h', 
+                                                    'year', 'Value']) #Marmot storage_Generation
+    stor_inout: List = field(default_factory=lambda: ['tech', 'sub-tech', 'region', 
+                                                    'year', 'type', 'Value']) #Marmot storage_In_Out
     stor_energy_cap: List = field(default_factory=lambda: ['tech', 'sub-tech', 'region', 
                                                             'year', 'Value']) #Marmot storage_Max_Volume
     emit_nat_tech: List = field(default_factory=lambda: ['emission_type', 'tech', 'year', 'Value'])

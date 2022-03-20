@@ -69,7 +69,46 @@ class ExtraProperties():
                         [~avail_gen
                         .index.duplicated(keep='first')])           
         
-        return avail_gen - df        
+        return avail_gen - df
+
+    def plexos_demand(self, df: pd.DataFrame, 
+                        timescale: str='interval') -> pd.DataFrame:
+        """Creates a region_Demand / zone_Demand property for PLEXOS result sets 
+
+        PLEXOS includes generator_Pumped_Load in total load
+        This method subtracts generator_Pumped_Load from region_Demand / zone_Demand to get
+        region_Demand / zone_Demand
+
+        Args:
+            df (pd.DataFrame): region_Load df
+            timescale (str, optional): Data timescale, e.g Hourly, Monthly, 5 minute etc.
+                Defaults to 'interval'.
+
+        Returns:
+            pd.DataFrame: region_Demand / zone_Demand df
+        """
+        data_chunks = []
+        for file in self.files_list:
+            logger.info(f"      {file}")
+            processed_data = self.model.get_processed_data('generator', 
+                                                    'Pump Load',
+                                                    timescale,
+                                                    file)
+
+            if processed_data.empty is True:
+                logger.info("Total Demand will equal Total Load")
+                return pd.DataFrame()
+
+            data_chunks.append(processed_data)   
+
+        pump_load : pd.DataFrame = pd.concat(data_chunks, copy=False)
+        # Remove duplicates; keep first entry
+        pump_load = (pump_load.loc
+                        [~pump_load
+                        .index.duplicated(keep='first')])           
+        
+        pump_load = pump_load.groupby(df.index.names).sum()
+        return df - pump_load
 
     def plexos_cost_unserved_energy(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a region_Cost_Unserved_Energy property for PLEXOS result sets 
@@ -81,6 +120,52 @@ class ExtraProperties():
             pd.DataFrame: region_Cost_Unserved_Energy df
         """
         return df * mconfig.parser("formatter_settings", 'VoLL')
+
+
+    def reeds_region_total_load(self, df: pd.DataFrame, 
+                                    timescale: str='year') -> pd.DataFrame:
+        """Creates a region_Load property for ReEDS results sets
+
+        ReEDS does not include storage charging in total load
+        This is added to region_Demand to get region_Load
+
+        Args:
+            df (pd.DataFrame): region_Demand df
+            timescale (str, optional): Data timescale. 
+                Defaults to 'year'.
+
+        Returns:
+            pd.DataFrame: region_Load df
+        """
+        data_chunks = []
+        for file in self.files_list:
+            logger.info(f"      {file}")
+            processed_data = self.model.get_processed_data('region', 
+                                                    'stor_in',
+                                                    'interval',
+                                                    file)
+
+            if processed_data.empty is True:
+                logger.info("region_Load will equal region_Demand")
+                return df
+
+            data_chunks.append(processed_data)   
+
+        pump_load = pd.concat(data_chunks, copy=False)
+        if timescale == 'year':
+            pump_load = self.annualize_property(pump_load)
+            all_col = list(pump_load.index.names)
+            [all_col.remove(x) for x in ['tech', 'sub-tech', 'units', 'season']]
+        else:
+            all_col = list(pump_load.index.names)
+            [all_col.remove(x) for x in ['tech', 'sub-tech', 'units']]
+        pump_load = pump_load.groupby(all_col).sum()
+
+        load = df.merge(pump_load, on=all_col, how='outer')
+        load[0] = load['0_x'] + load['0_y']
+        load[0] = load[0].fillna(load['0_x'])
+        load = load.drop(['0_x', '0_y'], axis=1)
+        return load
 
     def reeds_reserve_provision(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a reserve_Provision property for ReEDS result sets 
