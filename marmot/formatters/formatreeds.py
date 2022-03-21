@@ -296,7 +296,7 @@ class ProcessReEDS(Process):
         df['gen_name'] = df.tech + "_" + df.region
 
         if prop == 'gen_out' or prop == 'gen_out_ann' and \
-            formatter_settings["reeds_gen_out_storage_as_ouput_only"]:
+            formatter_settings["exclude_pumping_from_reeds_storage_gen"]:
             if prop == 'gen_out':
                 stor_prop_name = 'stor_out'
                 group_list = ['tech', 'region', 'h', 'year']

@@ -244,6 +244,129 @@ class SetupSubplot():
                         bbox_to_anchor=bbox_to_anchor,
                         **kwargs)
 
+    def add_property_annotation(self, df: pd.DataFrame,
+                                prop: str,
+                                sub_pos: Union[int, Tuple[int, int]] = 0,
+                                curtailment_name: str = 'Curtailment',
+                                energy_unit: str = 'MW',
+                                re_gen_cat: list = None,
+                                gen_cols: list = None) -> pd.Timestamp:
+        """Adds a property annotation to the subplot.
+
+        The current supported properties are:
+
+            - Peak Demand
+            - Min Net Load
+            - Peak RE
+            - Peak Unserved Energy
+            - Peak Curtailment
+
+        Based on the property selected this method will locate the timestamp 
+        and corresponding value of the property. The value and an arrow pointing 
+        to the location of the property will be annotated.
+
+        Args:
+            df (pd.DataFrame): Dataframe with datetime index
+            prop (str): property
+            sub_pos (Union[int, Tuple[int, int]], optional): Position of subplot,
+                can be either a integer or a tuple of 2 integers depending on 
+                how SetupSubplot was instantiated. 
+                Defaults to 0
+            curtailment_name (str, optional): Name of curtailment column. 
+                Defaults to 'Curtailment'.
+            energy_unit (str, optional): units to add to prop annotation. 
+                Defaults to 'MW'.
+            re_gen_cat (list, optional): list of re techs, needed to for 
+                'Peak RE' property.
+                Defaults to None.
+            gen_cols (list, optional): list of gen columns, needed for 
+                'Peak RE' and 'Peak Curtailmnet' property. 
+                Defaults to None.
+
+        Returns:
+            pd.Timestamp: timstamp of property
+        """
+
+        ax = self._check_if_array(sub_pos)
+
+        # Ensure values are lists
+        if isinstance(re_gen_cat, pd.Index):
+                re_gen_cat = list(re_gen_cat)
+        if isinstance(gen_cols, pd.Index):
+            gen_cols = list(gen_cols)
+
+        if prop == "Peak Demand":
+            x_time_value = df["Total Demand"].idxmax()
+            y_mw_value = df.loc[x_time_value, "Total Demand"]
+            y_point_value = y_mw_value
+
+        elif prop == "Min Net Load":
+            x_time_value = df["Net Load"].idxmin()
+            y_mw_value = df.loc[x_time_value, "Net Load"]
+            y_point_value = y_mw_value
+        
+        elif prop == 'Peak RE':
+            if not re_gen_cat:
+                logger.warning(f"To plot a {prop} annotation a "
+                                "list of re gen names is required. "
+                                "Pass a list to the add_property_annotation " 
+                                "re_gen_cat argument.")
+                return None
+            if not gen_cols:
+                logger.warning(f"To plot a {prop} annotation a "
+                                "list of all generator names is required. "
+                                "Pass a list to the add_property_annotation " 
+                                "gen_cols argument.")
+                return None
+            re_df = df[df.columns.intersection(re_gen_cat)]
+            re_total = re_df.sum(axis=1)
+            gen_df = df[df.columns.intersection(gen_cols)]
+            if curtailment_name in gen_df.columns:
+                gen_df = gen_df.drop(curtailment_name, axis=1)
+            x_time_value = re_total.idxmax()
+            y_mw_value = re_total[x_time_value]
+            y_point_value = gen_df.loc[x_time_value].sum()
+            
+        elif prop == 'Peak Unserved Energy':
+            x_time_value = df["Unserved Energy"].idxmax()
+            y_mw_value = df.loc[x_time_value, "Unserved Energy"]
+            y_point_value = df.loc[x_time_value, "Total Demand"]
+ 
+        elif prop == 'Peak Curtailment':
+            if curtailment_name not in df:
+                logger.warning("No Curtailment in dataset")
+                return None
+            if not gen_cols:
+                logger.warning(f"To plot a {prop} annotation a "
+                                "list of generator names is required. "
+                                "Pass a list to the add_property_annotation " 
+                                "gen_cols argument.")
+                return None
+            curtailment = df[curtailment_name]
+            gen_df = df[df.columns.intersection(gen_cols)]
+            x_time_value = curtailment.idxmax()
+            y_mw_value = curtailment[x_time_value]
+            y_point_value = gen_df.loc[x_time_value].sum()
+        
+        elif prop == "Peak Reserve Requirement":
+            peak_re = df.sum(axis=1)
+            x_time_value = peak_re.idxmax()
+            y_mw_value = peak_re[x_time_value]
+            y_point_value = y_mw_value
+
+        else:
+            logger.warning(f"Property: {prop}, Not Supported!")
+            return None
+
+        ax.annotate(f"{prop}: \n{str(format(y_mw_value, '.2f'))} {energy_unit}",
+                    xy=(x_time_value, y_point_value), 
+                    xytext=(0.05, 1.0),
+                    textcoords='axes fraction',
+                    fontsize=13, 
+                    arrowprops=dict(facecolor='black', width=1.5, shrink=0.05))
+
+        return x_time_value
+
     def add_main_title(self, label: str, **kwargs) -> None:
         """Adds a title centered above the main figure 
 

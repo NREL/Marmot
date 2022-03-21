@@ -353,6 +353,8 @@ class PlotDataHelper(dict):
         net_imports = net_imports.rename("Net Imports")
         net_imports = net_imports.fillna(0)
         gen_df = gen_df.append(net_imports)
+        # In the event of two Net Imports rows combine here
+        gen_df = gen_df.groupby(level=0, axis=0).sum()
         gen_df = self.create_categorical_tech_index(gen_df)
         if transpose_df:
            gen_df = gen_df.T 
