@@ -31,3 +31,5 @@ Storage,,,,,TRUE
 Net Imports,,,,,
 Curtailment,,,,,
 curtailment,,,,,
+Demand,,,,,
+Deamand + Storage Charging,,,,,
