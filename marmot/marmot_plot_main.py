@@ -103,7 +103,7 @@ class MarmotPlot(SetupLogger):
                 ordered_gen_categories.csv. If left None all techs will be plotted
                 Defaults to None.
         """
-        super().__init__("marmot_plot", **kwargs) # Instantiation of SetupLogger
+        super().__init__("plotter", **kwargs) # Instantiation of SetupLogger
         
         if isinstance(Scenarios, str):
             self.Scenarios = pd.Series(Scenarios.split(",")).str.strip().tolist()
@@ -523,28 +523,43 @@ class MarmotPlot(SetupLogger):
                 
                 # Modifies timezone string before plotting
                 if pd.isna(row.iloc[6]):
-                    row.iloc[6] = "Date"
+                    timezone_string : str = "Date"
                 else:
-                    row.iloc[6] = f"Date ({row.iloc[6]})"
+                    timezone_string : str = f"Date ({row.iloc[6]})"
 
-                if pd.notna(row['Plot Annual Resolution']) and \
-                    row['Plot Annual Resolution'] is True:
-                    data_resolution = '_Annual'
+                if pd.isna(row.iloc[4]):
+                    days_before = 2
                 else:
-                    data_resolution = ''
+                    days_before = float(row.iloc[4])
+                if pd.isna(row.iloc[5]):
+                    days_after = 2
+                else:
+                    days_after = float(row.iloc[5])
+                    
+                if pd.notna(row['Timeseries Plot Resolution']) and \
+                    row['Timeseries Plot Resolution'] == 'Annual':
+                    data_resolution : str = '_Annual'
+                else:
+                    data_resolution : str = ''
+
+                if row['Barplots by Scenario or Year-Scenario'] == 'Year-Scenario':
+                    barplot_groupby : str = 'Year-Scenario'
+                else:
+                    barplot_groupby : str = 'Scenario'
 
                 # Get figure method and run plot
                 figure_method = getattr(instantiate_mplot, row['Method'])
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
                                            prop = row.iloc[2],
                                            y_axis_max = float(row.iloc[3]),
-                                           start = float(row.iloc[4]),
-                                           end = float(row.iloc[5]),
-                                           timezone = row.iloc[6],
+                                           start = days_before,
+                                           end = days_after,
+                                           timezone = timezone_string,
                                            start_date_range = row.iloc[7],
                                            end_date_range = row.iloc[8],
                                            custom_data_file_path = row['Custom Data File'],
-                                           data_resolution = data_resolution)
+                                           data_resolution = data_resolution,
+                                           barplot_groupby = barplot_groupby)
                 
                 if isinstance(Figure_Out, MissingInputData):
                     self.logger.info("Add Inputs With Formatter Before "

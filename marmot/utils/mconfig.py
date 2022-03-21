@@ -7,7 +7,6 @@ instead edit the values directly in the config.yml file once created.
 """
 
 import yaml
-import logging
 import traceback
 import sys
 from pathlib import Path
@@ -75,15 +74,15 @@ def createConfig(configfile_path: Path):
     - **plot_data:**
 
         - curtailment_property: Curtailment
-        - include_total_pumped_load_line: false
-        - include_timeseries_pumped_load_line: true
-        - include_total_net_imports: true
-        - include_timeseries_net_imports: true
+        - include_barplot_load_storage_charging_line: false
+        - include_timeseries_load_storage_charging_line: true
+        - include_barplot_net_imports: true
+        - include_stackplot_net_imports: true
 
     *Controls certain plot data settings. `curtailment_property` source of Curtailment data. 
-    The code defaults to Marmot's calculated Curtailment property. `include_total_pumped_load_line` 
+    The code defaults to Marmot's calculated Curtailment property. `include_barplot_load_storage_charging_line` 
     specifies whether to include the line representing pumped load in total generation bar plots. 
-    `include_timeseries_pumped_load_line` specifies whether to include the line representing pumped load 
+    `include_timeseries_load_storage_charging_line` specifies whether to include the line representing pumped load 
     in timeseries generation plots*
 
     - **figure_file_format:** svg
@@ -178,18 +177,18 @@ def createConfig(configfile_path: Path):
         plot_data = dict(
             curtailment_property = 'Curtailment',
             plot_title_as_region = True,
-            include_barplot_load_line = True,
-            include_stackplot_load_line = True,
-            include_total_pumped_load_line = True,
-            include_timeseries_pumped_load_line = True,
-            include_total_net_imports = True,
-            include_timeseries_net_imports = True),
+            include_barplot_load_lines = True,
+            include_stackplot_load_lines = True,
+            include_barplot_load_storage_charging_line = True,
+            include_timeseries_load_storage_charging_line = True,
+            include_barplot_net_imports = True,
+            include_stackplot_net_imports = True),
 
         formatter_settings = dict( 
             VoLL = 10000,
             skip_existing_properties = True,
             append_plexos_block_name = False,
-            split_years_into_individual_files = False),
+            exclude_pumping_from_reeds_storage_gen = True),
 
         multithreading_workers = 16,
         figure_file_format = 'svg',
