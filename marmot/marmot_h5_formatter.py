@@ -86,6 +86,7 @@ class MarmotFormat(SetupLogger):
             self.Marmot_Solutions_folder = self.Model_Solutions_folder
         else:
             self.Marmot_Solutions_folder = Path(Marmot_Solutions_folder)
+            self.Marmot_Solutions_folder.mkdir(exist_ok=True)
 
         if isinstance(Plexos_Properties, (str, Path)):
             try:
@@ -344,7 +345,8 @@ class MarmotFormat(SetupLogger):
                                     self.save_to_h5(prop,
                                                     output_file_path, 
                                                     key=prop_name)
-
+                                else:
+                                    self.logger.warning(f"{prop_name} was not saved")
                             # Run again to check for properties based of new properties
                             if prop_name in \
                                 process_sim_model.EXTRA_MARMOT_PROPERTIES:
@@ -367,6 +369,8 @@ class MarmotFormat(SetupLogger):
                                             self.save_to_h5(prop2,
                                                             output_file_path, 
                                                             key=prop_name2)
+                                        else:
+                                            self.logger.warning(f"{prop_name2} was not saved")
 
 
                 else:
