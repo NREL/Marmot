@@ -7,12 +7,11 @@ Prices plotted in $/MWh
 @author: adyreson and Daniel Levie
 """
 
-import os
 import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from pathlib import Path
 import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
@@ -20,8 +19,8 @@ from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
            InputSheetError)
 
+logger = logging.getLogger('plotter.'+__name__)
 plot_data_settings = mconfig.parser("plot_data")
-
 
 class MPlot(PlotDataHelper):
     """price MPlot class.
@@ -53,9 +52,6 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('plotter.'+__name__)
-
-
     def pdc_all_regions(self, y_axis_max: float = None, 
                         start_date_range: str = None,
                         end_date_range: str = None, **_):
@@ -81,7 +77,7 @@ class MPlot(PlotDataHelper):
         else:
             agg = 'region'
             
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -95,7 +91,7 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         #Location to save to
-        save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
+        save_figures : Path = self.figure_folder.joinpath(f"{self.AGG_BY}_prices")
 
         region_number = len(self.Zones)
         # determine x,y length for plot
@@ -116,14 +112,13 @@ class MPlot(PlotDataHelper):
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(self[f"{agg}_Price"],scenario,zone_input)
+                price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                      {str(start_date_range)} to {str(end_date_range)}")
-                    price = price[start_date_range:end_date_range]
-                price.sort_values(by=scenario,ascending=False,inplace=True)
-                price.reset_index(drop=True,inplace=True)
+                    price = self.set_timestamp_date_range(
+                                price, start_date_range, end_date_range)
+                price.sort_values(by=scenario, ascending=False, inplace=True)
+                price.reset_index(drop=True, inplace=True)
                 all_prices.append(price)
 
             duration_curve = pd.concat(all_prices, axis=1)
@@ -148,17 +143,17 @@ class MPlot(PlotDataHelper):
         # Remove extra axes
         mplt.remove_excess_axs(excess_axs,grid_size)
         
-        plt.ylabel(self.AGG_BY + ' Price ($/MWh)',  color='black', rotation='vertical', 
-                   labelpad=30)
-        plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
+        plt.ylabel(f"{self.AGG_BY} Price ($/MWh)", color='black', 
+                    rotation='vertical', labelpad=30)
+        plt.xlabel('Intervals', color='black', rotation='horizontal', 
+                    labelpad=20)
 
         Data_Table_Out = pd.concat(data_table, axis=1)
-
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
-        fig.savefig(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.svg"), 
+        fig.savefig(save_figures.joinpath("Price_Duration_Curve_All_Regions.svg"), 
                      dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Duration_Curve_All_Regions.csv"))
+        Data_Table_Out.to_csv(save_figures.joinpath("Price_Duration_Curve_All_Regions.csv"))
         outputs = DataSavedInModule()
         return outputs
     
@@ -171,7 +166,7 @@ class MPlot(PlotDataHelper):
         if the Facet argument is active.
         If a facet plot is created, each scenario is plotted on a separate facet, 
         otherwise all scenarios are plotted on a single plot.
-        To make a facet plot, ensure the work 'Facet' is found in the figure_name.
+        To make a facet plot, ensure the word 'Facet' is found in the figure_name.
 
         Args:
             figure_name (str, optional): User defined figure output name.
@@ -186,7 +181,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table
         """
-        outputs = {}
+        outputs : dict = {}
         
         facet=False
         if 'Facet' in figure_name:
@@ -209,18 +204,16 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
 
-                price = self._process_data(self[f"{agg}_Price"],scenario,zone_input)
+                price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                      {str(start_date_range)} to {str(end_date_range)}")
-                    price = price[start_date_range:end_date_range]
-                
+                    price = self.set_timestamp_date_range(
+                                price, start_date_range, end_date_range)
                 price.sort_values(by=scenario,ascending=False,inplace=True)
                 price.reset_index(drop=True,inplace=True)
                 all_prices.append(price)
@@ -297,7 +290,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table
         """
-        outputs = {}
+        outputs : dict = {}
         
         facet=False
         if 'Facet' in figure_name:
@@ -320,18 +313,15 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(self[f"{agg}_Price"],scenario,zone_input)
+                price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
-                
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                      {str(start_date_range)} to {str(end_date_range)}")
-                    price = price[start_date_range:end_date_range]
-                
+                    price = self.set_timestamp_date_range(
+                                price, start_date_range, end_date_range)
                 all_prices.append(price)
 
             timeseries = pd.concat(all_prices, axis=1)
@@ -404,7 +394,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         if self.AGG_BY == 'zone':
             agg = 'zone'
@@ -423,9 +413,7 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         #Location to save to
-        save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_prices')
-
-        outputs = {}
+        save_figures : Path = self.figure_folder.joinpath(f"{self.AGG_BY}_prices")
 
         region_number = len(self.Zones)
         ncols, nrows =  self.set_x_y_dimension(region_number)
@@ -443,17 +431,15 @@ class MPlot(PlotDataHelper):
 
         data_table = []
         for n, zone_input in enumerate(self.Zones):
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             all_prices=[]
             for scenario in self.Scenarios:
-                price = self._process_data(self[f"{agg}_Price"],scenario,zone_input)
+                price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
-                
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                      {str(start_date_range)} to {str(end_date_range)}")
-                    price = price[start_date_range:end_date_range]
+                    price = self.set_timestamp_date_range(
+                                price, start_date_range, end_date_range)
                 all_prices.append(price)
 
             timeseries = pd.concat(all_prices, axis=1)
@@ -487,9 +473,9 @@ class MPlot(PlotDataHelper):
 
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
-        fig.savefig(os.path.join(save_figures, "Price_Timeseries_All_Regions.svg"), 
+        fig.savefig(save_figures.joinpath("Price_Timeseries_All_Regions.svg"), 
                      dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(save_figures, "Price_Timeseries_All_Regions.csv"))
+        Data_Table_Out.to_csv(save_figures.joinpath("Price_Timeseries_All_Regions.csv"))
         outputs = DataSavedInModule()
         return outputs
     
@@ -563,34 +549,27 @@ class MPlot(PlotDataHelper):
         if 1 in check_input_data:
             return MissingInputData()
         
-        node_figure_folder = os.path.join(self.figure_folder, 'node_prices')
-        try:
-            os.makedirs(node_figure_folder)
-        except FileExistsError:
-            # directory already exists
-            pass
+        node_figure_folder : Path = self.figure_folder.joinpath('node_prices')
+        node_figure_folder.mkdir(exist_ok=True)
 
         #Select only node specified in Marmot_plot_select.csv.
         select_nodes = prop.split(",")
         if select_nodes == None:
             return InputSheetError()
         
-        self.logger.info(f'Plotting Prices for {select_nodes}')
+        logger.info(f'Plotting Prices for {select_nodes}')
         
         all_prices=[]
         for scenario in self.Scenarios:
-            self.logger.info(f"Scenario = {scenario}")
+            logger.info(f"Scenario = {scenario}")
 
-            price = self["node_Price"][scenario]
+            price : pd.DataFrame = self["node_Price"][scenario]
             price = price.loc[(slice(None), select_nodes),:]
             price = price.groupby(["timestamp","node"]).sum()
             price.rename(columns={0:scenario}, inplace=True)
-            
             if pd.notna(start_date_range):
-                self.logger.info(f"Plotting specific date range: \
-                                  {str(start_date_range)} to {str(end_date_range)}")
-                price = price[pd.to_datetime(start_date_range):pd.to_datetime(end_date_range)]
-                
+                    price = self.set_timestamp_date_range(
+                                price, start_date_range, end_date_range)  
             if PDC:
                 price.sort_values(by=['node',scenario], ascending=False,
                                   inplace=True)
@@ -619,13 +598,13 @@ class MPlot(PlotDataHelper):
                     node_pdc = pdc.xs(node)
                     node_pdc.reset_index(drop=True, inplace=True)
                 except KeyError:
-                    self.logger.info(f"{node} not found")
+                    logger.info(f"{node} not found")
                     continue
             else:
                 try:
                     node_pdc = pdc.xs(node, level='node')
                 except KeyError:
-                    self.logger.info(f"{node} not found")
+                    logger.info(f"{node} not found")
                     continue
             
             for column in node_pdc:
@@ -639,18 +618,18 @@ class MPlot(PlotDataHelper):
                 # axs[n].set_xlim(0,len(node_pdc))
         
         mplt.add_legend()
-        plt.ylabel('Node Price ($/MWh)',  color='black', rotation='vertical', 
+        plt.ylabel('Node Price ($/MWh)', color='black', rotation='vertical', 
                    labelpad=30)
         if PDC:
-            plt.xlabel('Intervals',  color='black', rotation='horizontal', 
+            plt.xlabel('Intervals', color='black', rotation='horizontal', 
                        labelpad=20)
         else:
-            plt.xlabel(timezone,  color='black', rotation='horizontal', 
+            plt.xlabel(timezone, color='black', rotation='horizontal', 
                        labelpad=20)
 
-        fig.savefig(os.path.join(node_figure_folder, figure_name + ".svg"), 
+        fig.savefig(node_figure_folder.joinpath(f"{figure_name}.svg"), 
                     dpi=600, bbox_inches='tight')
-        Data_Out.to_csv(os.path.join(node_figure_folder, figure_name + ".csv"))
+        Data_Out.to_csv(node_figure_folder.joinpath(f"{figure_name}.csv"))
         outputs = DataSavedInModule()
         return outputs
     
@@ -723,12 +702,8 @@ class MPlot(PlotDataHelper):
         if 1 in check_input_data:
             return MissingInputData()
         
-        node_figure_folder = os.path.join(self.figure_folder, 'node_prices')
-        try:
-            os.makedirs(node_figure_folder)
-        except FileExistsError:
-            # directory already exists
-            pass
+        node_figure_folder : Path = self.figure_folder.joinpath('node_prices')
+        node_figure_folder.mkdir(exist_ok=True)
         
         #Select only node specified in Marmot_plot_select.csv.
         select_nodes = prop.split(",")
@@ -736,33 +711,30 @@ class MPlot(PlotDataHelper):
             return InputSheetError()
         
         for node in select_nodes:
-            self.logger.info(f'Plotting Prices for Node: {node}')
+            logger.info(f'Plotting Prices for Node: {node}')
         
             all_prices=[]
             for scenario in self.Scenarios:
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
     
-                price = self["node_Price"][scenario]
+                price : pd.DataFrame = self["node_Price"][scenario]
                 try:
                     price = price.xs(node, level='node')
                 except KeyError:
-                    self.logger.info(f"{node} not found")
+                    logger.info(f"{node} not found")
                     continue
         
-                # price = price.loc[(slice(None), select_nodes),:]
                 price = price.groupby(["timestamp"]).sum()
                 price.rename(columns={0:scenario}, inplace=True)
-                
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                                      {str(start_date_range)} to {str(end_date_range)}")
-                    price = price[pd.to_datetime(start_date_range):pd.to_datetime(end_date_range)]
+                    price = self.set_timestamp_date_range(
+                                price, start_date_range, end_date_range)
                 
                 price.reset_index('timestamp',drop=True,inplace=True)                
                 all_prices.append(price)
 
             if not all_prices:
-                self.logger.info(f"Nodes not found in database, input sheet error likely!")
+                logger.info(f"Nodes not found in database, input sheet error likely!")
                 return InputSheetError()
 
             p_hist = pd.concat(all_prices,axis=1)
@@ -837,19 +809,18 @@ class MPlot(PlotDataHelper):
                 plt.xlabel("Node LMP ($/MWh)",
                            color='black', labelpad=40)
             
-            fig.savefig(os.path.join(node_figure_folder, 
-                                     f"{figure_name}_{node}.svg"), dpi=600, 
-                        bbox_inches='tight')
-            data_out.to_csv(os.path.join(node_figure_folder, 
-                                         f"{figure_name}_{node}.csv"))
+            fig.savefig(node_figure_folder.joinpath(f"{figure_name}_{node}.svg"),
+                        dpi=600, bbox_inches='tight')
+            data_out.to_csv(node_figure_folder.joinpath(f"{figure_name}_{node}.csv"))
             
         outputs = DataSavedInModule()
         return outputs
     
     
-    def _process_data(self, data_collection, scenario, zone_input):
-        df = data_collection.get(scenario)
-        df = df.xs(zone_input,level=self.AGG_BY)
+    def _process_data(self, data_collection: dict, 
+                     scenario: str, zone_input: str) -> pd.DataFrame:
+        df : pd.DataFrame = data_collection.get(scenario)
+        df = df.xs(zone_input, level=self.AGG_BY)
         df = df.rename(columns={0:scenario})
         return df
 
