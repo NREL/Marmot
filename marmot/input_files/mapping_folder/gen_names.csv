@@ -269,8 +269,14 @@ wind-ons_7,Wind
 wind-ons_8,Wind
 wind-ons_9,Wind
 wind-ons_10,Wind
+pvb1_2,PV
 pvb1_3,PV
 pvb1_4,PV
+pvb1_5,PV
+pvb1_6,PV
+pvb1_7,PV
+ReEDS_pvb1,PV
+ReEDS_vre-pvb1,PV
 upv_2,PV
 upv_3,PV
 upv_4,PV
@@ -290,15 +296,30 @@ battery_8,Battery
 battery_10,Battery
 reeds_vre,VRE
 csp-ns,CSP
+hydND,Hydro
+hydUD,Hydro
 hydUND,Hydro
 hydED,Hydro
 hydNPND,Hydro
 hydEND,Hydro
+ReEDS_hyded,Hydro
+ReEDS_hydend,Hydro
 CoalOldScr,Coal
 Coal-IGCC,Coal
 CoalOldUns,Coal
 geohydro_pbinary_1,Geothermal
 geohydro_pflash_1,Geothermal
+geohydro_pflash_2,Geothermal
+geohydro_pflash_3,Geothermal
+geohydro_pflash_4,Geothermal
+undisc_pflash_1,Geothermal
+NF-EGS_pflash_5,Geothermal
+NF-EGS_pbinary_1,Geothermal
+NF-EGS_pbinary_2,Geothermal
+NF-EGS_pbinary_3,Geothermal
+NF-EGS_pbinary_4,Geothermal
+NF-EGS_pbinary_5,Geothermal
+ReEDS_can-imports,Net Imports
 can-imports,Net Imports
 Curtailment,Curtailment
 Curtailment,Curtailment
