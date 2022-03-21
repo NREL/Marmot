@@ -8,6 +8,7 @@ and region level.
 """
 
 import logging
+import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
@@ -94,16 +95,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        # If not facet plot, only plot first scenario
-        facet=False
-        if 'Facet' in figure_name:
-            facet = True
-            
-        if not facet:
-            Scenarios = [self.Scenarios[0]]
-        else:
-            Scenarios = self.Scenarios
-            
+
         outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
@@ -121,9 +113,9 @@ class MPlot(PlotDataHelper):
         for region in self.Zones:
             logger.info(f"Zone = {region}")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(facet, multi_scenario=Scenarios)
+            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
             grid_size = ncols*nrows
-            excess_axs = grid_size - len(Scenarios)
+            excess_axs = grid_size - len(self.Scenarios)
             
             mplt = PlotLibrary(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
@@ -131,7 +123,7 @@ class MPlot(PlotDataHelper):
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
             data_tables = []
-            for n, scenario in enumerate(Scenarios):
+            for n, scenario in enumerate(self.Scenarios):
                 logger.info(f"Scenario = {scenario}")
 
                 reserve_provision_timeseries = self[f"reserves_generators_Provision{data_resolution}"].get(scenario)
@@ -156,17 +148,25 @@ class MPlot(PlotDataHelper):
                 if n == 0:
                     unitconversion = self.capacity_energy_unitconversion(reserve_provision_timeseries,
                                                                             sum_values=True)
-                if prop == "Peak Demand":
-                    logger.info("Plotting Peak Demand period")
-
-                    total_reserve = reserve_provision_timeseries.sum(axis=1)/unitconversion['divisor']
-                    peak_reserve_t =  total_reserve.idxmax()
-                    start_date = peak_reserve_t - dt.timedelta(days=start)
-                    end_date = peak_reserve_t + dt.timedelta(days=end)
-                    reserve_provision_timeseries = reserve_provision_timeseries[start_date : end_date]
-                    Peak_Reserve = total_reserve[peak_reserve_t]
-                
                 reserve_provision_timeseries = reserve_provision_timeseries/unitconversion['divisor']
+
+                # Adds property annotation
+                if pd.notna(prop):
+                    x_time_value = mplt.add_property_annotation(
+                                            reserve_provision_timeseries, 
+                                            prop,
+                                            sub_pos=n,
+                                            energy_unit=unitconversion['units'])
+
+                    if x_time_value is not None and len(reserve_provision_timeseries) > 1:
+                        # if timestamps are larger than hours time_delta will 
+                        # be the length of the interval in days, else time_delta == 1 day
+                        timestamps = reserve_provision_timeseries.index.unique()
+                        time_delta = max(1, (timestamps[1] - timestamps[0])/np.timedelta64(1, 'D'))
+                        end_date = x_time_value + dt.timedelta(days=end*time_delta)
+                        start_date = x_time_value - dt.timedelta(days=start*time_delta)
+                        reserve_provision_timeseries = reserve_provision_timeseries.loc[start_date : end_date]
+                
                 scenario_names = pd.Series([scenario] * len(reserve_provision_timeseries),name = 'Scenario')
                 data_table = reserve_provision_timeseries.add_suffix(f" ({unitconversion['units']})")
                 data_table = data_table.set_index([scenario_names],append = True)
@@ -177,12 +177,6 @@ class MPlot(PlotDataHelper):
                                labels=reserve_provision_timeseries.columns,
                                sub_pos=n)
                 mplt.set_subplot_timeseries_format(sub_pos=n)
-
-                if prop == "Peak Demand":
-                    axs[n].annotate('Peak Reserve: \n' + str(format(int(Peak_Reserve), '.2f')) + ' {}'.format(unitconversion['units']), 
-                                    xy=(peak_reserve_t, Peak_Reserve),
-                            xytext=((peak_reserve_t + dt.timedelta(days=0.25)), (Peak_Reserve + Peak_Reserve*0.05)),
-                            fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
             if not data_tables:
                 logger.warning(f'No reserves in {region}')

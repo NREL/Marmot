@@ -79,8 +79,8 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios),
                       (False, f"generator_{self.curtailment_prop}", self.Scenarios),
-                      (False, "generator_Pump_Load", self.Scenarios),
                       (False, f"{agg}_Load", self.Scenarios),
+                      (False, f"{agg}_Demand", self.Scenarios),
                       (False, f"{agg}_Unserved_Energy", self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
@@ -95,7 +95,7 @@ class MPlot(PlotDataHelper):
 
             # Will hold retrieved data for each scenario
             gen_chunks = []
-            load_chunk = []
+            extra_data_chunks = []
 
             logger.info(f"Zone = {zone_input}")
 
@@ -142,12 +142,12 @@ class MPlot(PlotDataHelper):
                 
                 # Extra optional properties 
                 extra_data_frames = []
-                extra_property_names = [f"{agg}_Load", f"{agg}_Unserved_Energy",
-                                            "generator_Pump_Load"]
+                extra_property_names = [f"{agg}_Load", f"{agg}_Demand", 
+                                        f"{agg}_Unserved_Energy"]
                 # Get and process extra properties
                 for ext_prop in extra_property_names:
                     df : pd.DataFrame = self[ext_prop].get(scenario)
-                    if df.empty or not plot_data_settings["include_barplot_load_line"]:
+                    if df.empty or not plot_data_settings["include_barplot_load_lines"]:
                         date_index = pd.date_range(start="2010-01-01", 
                                         periods=1,
                                         freq='H', name="timestamp")
@@ -159,23 +159,15 @@ class MPlot(PlotDataHelper):
                     extra_data_frames.append(df)
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
-                if not plot_data_settings["include_total_pumped_load_line"]:
-                    extra_plot_data["generator_Pump_Load"] = 0
 
-                if (extra_plot_data[f"{agg}_Unserved_Energy"] != 0).all():
-                    extra_plot_data[f"{agg}_Unserved_Energy"] = \
-                        extra_plot_data["{agg}_Load"] - extra_plot_data[f"{agg}_Unserved_Energy"]
-                
-                if (extra_plot_data["generator_Pump_Load"] != 0).all():
-                    extra_plot_data["Total_Demand"] = \
-                        extra_plot_data[f"{agg}_Load"] - extra_plot_data["generator_Pump_Load"]
-                else:
-                    extra_plot_data["Total_Demand"] = extra_plot_data[f"{agg}_Load"]
+                if (extra_plot_data[f"{agg}_Unserved_Energy"] == 0).all() == False:
+                    extra_plot_data["Load-Unserved_Energy"] = \
+                        extra_plot_data[f"{agg}_Demand"] - extra_plot_data[f"{agg}_Unserved_Energy"]                    
 
-                extra_plot_data = extra_plot_data.rename(columns={f"{agg}_Load": "Total Load (Demand + \n Storage Charging)",
-                                                                    f"{agg}_Unserved_Energy": "Unserved Energy",
-                                                                    "Total_Demand": "Total Demand",
-                                                                    "generator_Pump_Load": "Pump Load"})
+                extra_plot_data = extra_plot_data.rename(columns=
+                                            {f"{agg}_Load": "Total Load (Demand + \n Storage Charging)",
+                                            f"{agg}_Unserved_Energy": "Unserved Energy",
+                                            f"{agg}_Demand": "Total Demand"})
                 extra_plot_data = extra_plot_data/interval_count
                 
                 # Adjust extra data to generator date range
@@ -183,18 +175,18 @@ class MPlot(PlotDataHelper):
                                                         Total_Gen_Stack.index.max()]
                 gen_chunks.append(self.year_scenario_grouper(Total_Gen_Stack, scenario, 
                                                         groupby=barplot_groupby).sum())
-                load_chunk.append(self.year_scenario_grouper(extra_plot_data, scenario, 
+                extra_data_chunks.append(self.year_scenario_grouper(extra_plot_data, scenario, 
                                                         groupby=barplot_groupby).sum())
             
             if not gen_chunks:
                 outputs[zone_input] = MissingZoneData()
                 continue
 
-            total_generation_stack_out = pd.concat(gen_chunks, axis=0, sort=False).fillna(0)
-            extra_data_out = pd.concat(load_chunk, axis=0, sort=False)
+            total_generation_stack_out = pd.concat(gen_chunks, axis=0, sort=True).fillna(0)
+            extra_data_out = pd.concat(extra_data_chunks, axis=0, sort=False)
 
             # Add Net Imports if desired
-            if plot_data_settings["include_total_net_imports"]:
+            if plot_data_settings["include_barplot_net_imports"]:
                 total_generation_stack_out =\
                     self.include_net_imports(total_generation_stack_out, 
                                              extra_data_out['Total Load (Demand + \n Storage Charging)'],
@@ -210,7 +202,7 @@ class MPlot(PlotDataHelper):
             extra_data_out = extra_data_out/unitconversion['divisor']
 
             # Data table of values to return to main program
-            if plot_data_settings["include_barplot_load_line"]:
+            if plot_data_settings["include_barplot_load_lines"]:
                 Data_Table_Out = pd.concat([extra_data_out,
                                             total_generation_stack_out],  axis=1, sort=False)
             else:
@@ -232,31 +224,34 @@ class MPlot(PlotDataHelper):
             ax.set_ylabel(f"Total Generation ({unitconversion['units']}h)", 
                           color='black', rotation='vertical')
             
-            if plot_data_settings["include_barplot_load_line"]:
+            if plot_data_settings["include_barplot_load_lines"]:
                 for n, scenario in enumerate(total_generation_stack_out.index.unique()):
                     x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                     
                     height1 = [float(extra_data_out.loc[scenario, 
                                 "Total Load (Demand + \n Storage Charging)"].sum())]*2
-                    if extra_data_out.loc[scenario, "Pump Load"] > 0:
-                        ax.plot(x, height1, c='black', linewidth=3,
-                                    label='Demand + \n Storage Charging')
+                    
+                    if plot_data_settings["include_barplot_load_storage_charging_line"] and \
+                        extra_plot_data["Total Load (Demand + \n Storage Charging)"].sum() > \
+                            extra_plot_data["Total Demand"].sum():
+                        ax.plot(x, height1, c='black', linewidth=1.5,
+                                linestyle="--",
+                                label='Demand + \n Storage Charging')
                         height2 = [float(extra_data_out.loc[scenario, 
                                                         'Total Demand'])]*2
-                        ax.plot(x, height2, 'r--', c='black', linewidth=1.5, 
+                        ax.plot(x, height2, c='black', linewidth=1.5, 
                                     label='Demand')
-                    else:
-                        ax.plot(x, height1, c='black', linewidth=3, 
+                    elif extra_plot_data["Total Demand"].sum() > 0:
+                        ax.plot(x, height1, c='black', linewidth=1.5, 
                             label='Demand')
 
                     if extra_data_out.loc[scenario, 'Unserved Energy'] > 0:
                         height3 = [float(extra_data_out.loc[scenario, 
-                                                        'Unserved Energy'])]*2
-                        ax.plot(x, height3, c='#DD0200', linewidth=1.5,
-                                label='Unserved Energy')
+                                                        "Load-Unserved_Energy"])]*2
                         ax.fill_between(x, height3, height1,
-                                    facecolor = '#DD0200',
-                                    alpha=0.5)
+                                        facecolor='#DD0200',
+                                        alpha=0.5,
+                                        label='Unserved Energy')
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             # Add title
@@ -494,8 +489,8 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios),
                       (False,f"generator_{self.curtailment_prop}",self.Scenarios),
-                      (False,"generator_Pump_Load",self.Scenarios),
-                      (False,f"{agg}_Load",self.Scenarios)]
+                      (False,f"{agg}_Load",self.Scenarios),
+                      (False,f"{agg}_Demand",self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -518,7 +513,7 @@ class MPlot(PlotDataHelper):
             
             # Will hold retrieved data for each scenario
             gen_chunks = []
-            load_chunk = []
+            extra_data_chunks = []
 
             # Loop gets all data by scenario
             for i, scenario in enumerate(self.Scenarios):
@@ -564,11 +559,11 @@ class MPlot(PlotDataHelper):
                         Total_Gen_Stack = Total_Gen_Stack.loc[:, (Total_Gen_Stack != 0).any(axis=0)]
 
                 extra_data_frames = []
-                extra_property_names = [f"{agg}_Load", "generator_Pump_Load"]
+                extra_property_names = [f"{agg}_Load", f"{agg}_Demand"]
                 # Get and process extra properties
                 for ext_prop in extra_property_names:
                     df : pd.DataFrame = self[ext_prop].get(scenario)
-                    if df.empty or not plot_data_settings["include_barplot_load_line"]:
+                    if df.empty or not plot_data_settings["include_barplot_load_lines"]:
                         date_index = pd.date_range(start="2010-01-01", 
                                         periods=1,
                                         freq='H', name="timestamp")
@@ -581,18 +576,9 @@ class MPlot(PlotDataHelper):
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
 
-                if not plot_data_settings["include_total_pumped_load_line"]:
-                    extra_plot_data["generator_Pump_Load"] = 0
-                
-                if (extra_plot_data["generator_Pump_Load"] != 0).all():
-                    extra_plot_data["Total_Demand"] = \
-                        extra_plot_data[f"{agg}_Load"] - extra_plot_data["generator_Pump_Load"]
-                else:
-                    extra_plot_data["Total_Demand"] = extra_plot_data[f"{agg}_Load"]
-
-                extra_plot_data = extra_plot_data.rename(columns={f"{agg}_Load": "Total Load (Demand + \n Storage Charging)",
-                                                                    "Total_Demand": "Total Demand",
-                                                                    "generator_Pump_Load": "Pump Load"})
+                extra_plot_data = extra_plot_data.rename(columns={
+                                        f"{agg}_Load": "Total Load (Demand + \n Storage Charging)",
+                                        f"{agg}_Demand": "Total Demand"})
 
                 if pd.notna(start_date_range):
                     Total_Gen_Stack = self.set_timestamp_date_range(
@@ -636,7 +622,7 @@ class MPlot(PlotDataHelper):
                                                                     name='Scenario'), append = True)
                 # Add all data to lists
                 gen_chunks.append(monthly_gen_stack)
-                load_chunk.append(monthly_extra_plot_data)
+                extra_data_chunks.append(monthly_extra_plot_data)
 
             if not gen_chunks:
                 # If no generation in select zone/region
@@ -644,7 +630,7 @@ class MPlot(PlotDataHelper):
                 continue
 
             # Concat all data into single data-frames
-            Gen_Out = pd.concat(gen_chunks,axis=0, sort=False)
+            Gen_Out = pd.concat(gen_chunks,axis=0, sort=True)
             # Drop any technologies with 0 Gen
             Gen_Out = Gen_Out.loc[:, (Gen_Out != 0).any(axis=0)]
 
@@ -652,10 +638,10 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
             
-            extra_data_out = pd.concat(load_chunk, axis=0, sort=False)
+            extra_data_out = pd.concat(extra_data_chunks, axis=0, sort=False)
 
             # Add Net Imports if desired
-            if plot_data_settings["include_total_net_imports"] and \
+            if plot_data_settings["include_barplot_net_imports"] and \
                 not vre_only:
                 Gen_Out = self.include_net_imports(Gen_Out, 
                                     extra_data_out["Total Load (Demand + \n Storage Charging)"])
@@ -712,22 +698,28 @@ class MPlot(PlotDataHelper):
                 if plot_as_percnt:
                     mplt.set_yaxis_major_tick_format(tick_format='percent', sub_pos=i)     
                 
-                if not vre_only and plot_data_settings["include_barplot_load_line"]:
-                    month_extra = extra_data_out.xs(scenario, level="Scenario")
-                    for n, _m in enumerate(month_extra.index):
-                        x = [axs[i].patches[n].get_x(), axs[i].patches[n].get_x() +\
-                             axs[i].patches[n].get_width()]
-                        height1 = [float(month_extra.loc[_m, 'Total Load (Demand + \n Storage Charging)'])]*2
-                        
-                        if month_extra.loc[_m, "Pump Load"] > 0:
-                            axs[i].plot(x, height1, c='black', linewidth=3,
-                                                label='Demand + \n Storage Charging')
-                            height2 = [float(month_extra.loc[_m, 'Total Demand'])]*2
-                            axs[i].plot(x,height2, 'r--', c='black', linewidth=1.5,
-                                                label='Demand')
-                        else:
-                            axs[i].plot(x, height1, c='black', linewidth=3,
-                                               label='Demand')
+
+            if not vre_only and plot_data_settings["include_barplot_load_lines"]:
+                month_extra = extra_data_out.xs(scenario, level="Scenario")
+                for n, _m in enumerate(month_extra.index):
+                    x = [axs[i].patches[n].get_x(), axs[i].patches[n].get_x() +\
+                            axs[i].patches[n].get_width()]
+                    height1 = [float(month_extra.loc[_m, 'Total Load (Demand + \n Storage Charging)'])]*2
+                    
+                    if plot_data_settings["include_barplot_load_storage_charging_line"] and \
+                        month_extra.loc[_m, "Total Load (Demand + \n Storage Charging)"].sum() > \
+                            month_extra.loc[_m, "Total Demand"].sum():
+
+                        axs[i].plot(x, height1, c='black', linewidth=2,
+                                    linestyle="--",
+                                    label='Demand + \n Storage Charging')
+                        height2 = [float(month_extra.loc[_m, 
+                                                        'Total Demand'])]*2
+                        axs[i].plot(x, height2, c='black', linewidth=1.5, 
+                                    label='Demand')
+                    elif month_extra.loc[_m, "Total Demand"].sum() > 0:
+                        axs[i].plot(x, height1, c='black', linewidth=2, 
+                                    label='Demand')
 
             # add facet labels
             mplt.add_facet_labels(xlabels=self.xlabels,

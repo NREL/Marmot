@@ -5,6 +5,7 @@ This code creates generation non-stacked line plots.
 @author: Daniel Levie
 """
 import logging
+import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
@@ -15,6 +16,7 @@ from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 class MPlot(PlotDataHelper):
@@ -46,12 +48,9 @@ class MPlot(PlotDataHelper):
                     self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET,
                     Region_Mapping=self.Region_Mapping) 
-
-        self.logger = logging.getLogger('plotter.'+__name__)
         
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
-        
     def gen_unstack(self, figure_name: str = None, prop: str = None,
                     start: float = None, end: float= None,
                     timezone: str = "", start_date_range: str = None,
@@ -93,11 +92,7 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
-        outputs = {}  
-        
-        facet=False
-        if 'Facet' in figure_name:
-            facet = True
+        outputs : dict = {}  
             
         if self.AGG_BY == 'zone':
                 agg = 'zone'
@@ -108,22 +103,19 @@ class MPlot(PlotDataHelper):
             
             # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
             # required True/False, property name and scenarios required, scenarios must be a list.
-            properties = [(True,f"generator_Generation{data_resolution}",scenario_list),
-                          (False,f"generator_{self.curtailment_prop}{data_resolution}",scenario_list),
-                          (False,f"generator_Pump_Load{data_resolution}",scenario_list),
-                          (True,f"{agg}_Load{data_resolution}",scenario_list),
-                          (False,f"{agg}_Unserved_Energy{data_resolution}",scenario_list)]
+            properties = [(True, f"generator_Generation{data_resolution}", scenario_list),
+                            (False, f"generator_{self.curtailment_prop}{data_resolution}", scenario_list),
+                            (False, f"{agg}_Load{data_resolution}", scenario_list),
+                            (False, f"{agg}_Demand{data_resolution}", scenario_list),
+                            (False, f"{agg}_Unserved_Energy{data_resolution}", scenario_list)]
             
             # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
-        # with all required properties, returns a 1 if required data is missing
+            # with all required properties, returns a 1 if required data is missing
             return self.get_formatted_data(properties)
         
-        if facet:
-            check_input_data = getdata(self.Scenarios)
-            all_scenarios = self.Scenarios
-        else:
-            check_input_data = getdata([self.Scenarios[0]])  
-            all_scenarios = [self.Scenarios[0]]
+        check_input_data = getdata(self.Scenarios)
+        all_scenarios = self.Scenarios
+    
         
         # Checks if all data required by plot is available, if 1 in list required data is missing
         if 1 in check_input_data:
@@ -132,11 +124,6 @@ class MPlot(PlotDataHelper):
             
         # sets up x, y dimensions of plot
         ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=all_scenarios)
-
-        # If the plot is not a facet plot, grid size should be 1x1
-        if not facet:
-            ncols = 1
-            nrows = 1
         
         grid_size = ncols*nrows
             
@@ -144,7 +131,7 @@ class MPlot(PlotDataHelper):
         plot_number = len(all_scenarios)
         
         for zone_input in self.Zones:
-            self.logger.info(f"Zone = {zone_input}")
+            logger.info(f"Zone = {zone_input}")
         
             excess_axs = grid_size - plot_number
             
@@ -165,21 +152,21 @@ class MPlot(PlotDataHelper):
             data_tables = []
 
             for i, scenario in enumerate(all_scenarios):
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
 
                 try:
-                    Stacked_Gen = self[f"generator_Generation{data_resolution}"].get(scenario).copy()
+                    stacked_gen_df = self[f"generator_Generation{data_resolution}"].get(scenario).copy()
                     if self.shift_leapday == True:
-                        Stacked_Gen = self.adjust_for_leapday(Stacked_Gen)
-                    Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
+                        stacked_gen_df = self.adjust_for_leapday(stacked_gen_df)
+                    stacked_gen_df = stacked_gen_df.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
-                    # self.logger.info('No generation in %s',zone_input)
+                    logger.warning(f'No generation in {zone_input}')
                     continue
 
-                if Stacked_Gen.empty == True:
+                if stacked_gen_df.empty == True:
                     continue
 
-                Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen)
+                stacked_gen_df = self.df_process_gen_inputs(stacked_gen_df)
 
                 # Insert Curtailment into gen stack if it exists in database
                 Stacked_Curt = self[f"generator_{self.curtailment_prop}{data_resolution}"].get(scenario).copy()
@@ -196,104 +183,111 @@ class MPlot(PlotDataHelper):
                         Stacked_Curt = Stacked_Curt.sum(axis=1)
                         Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                         #Insert curtailment into
-                        Stacked_Gen.insert(len(Stacked_Gen.columns),
+                        stacked_gen_df.insert(len(stacked_gen_df.columns),
                                             column=curtailment_name,
                                             value=Stacked_Curt) 
-                        Stacked_Gen = Stacked_Gen.fillna(0)
+                        stacked_gen_df = stacked_gen_df.fillna(0)
                         # Calculates Net Load by removing variable gen + curtailment
                         vre_gen_cat = self.vre_gen_cat + [curtailment_name]
                     else:
                         vre_gen_cat = self.vre_gen_cat
                 else:
                     vre_gen_cat = self.vre_gen_cat
-                    
-                # Adjust list of values to drop depending on if it exists in Stacked_Gen df
-                vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
-                Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)
-                Net_Load = Net_Load.sum(axis=1)
 
-                Load = self[f"{agg}_Load{data_resolution}"].get(scenario).copy()
-                if self.shift_leapday == True:
-                    Load = self.adjust_for_leapday(Load)     
-                Load = Load.xs(zone_input,level=self.AGG_BY)
-                Load = Load.groupby(["timestamp"]).sum()
-                Load = Load.squeeze() #Convert to Series
+                if pd.notna(start_date_range):
+                    stacked_gen_df = self.set_timestamp_date_range(
+                                        stacked_gen_df,
+                                        start_date_range, end_date_range)
+                    if stacked_gen_df.empty is True:
+                        logger.warning('No Generation in selected Date Range')
+                        continue
 
-                Pump_Load = self[f"generator_Pump_Load{data_resolution}"][scenario].copy()
-                if Pump_Load.empty:
-                    Pump_Load = self[f"generator_Generation{data_resolution}"][scenario].copy()
-                    Pump_Load.iloc[:,0] = 0
-                if self.shift_leapday == True:
-                    Pump_Load = self.adjust_for_leapday(Pump_Load)                                
-                Pump_Load = Pump_Load.xs(zone_input,level=self.AGG_BY)
-                Pump_Load = Pump_Load.groupby(["timestamp"]).sum()
-                Pump_Load = Pump_Load.squeeze() #Convert to Series
-                if (Pump_Load == 0).all() == False:
-                    Pump_Load = Load - Pump_Load
-                else:
-                    Pump_Load = Load
-                
-                Unserved_Energy = self[f"{agg}_Unserved_Energy{data_resolution}"][scenario].copy()    
-                if Unserved_Energy.empty:
-                    Unserved_Energy = self[f"{agg}_Load{data_resolution}"][scenario].copy()
-                    Unserved_Energy.iloc[:,0] = 0           
-                if self.shift_leapday == True:
-                    Unserved_Energy = self.adjust_for_leapday(Unserved_Energy)                    
-                Unserved_Energy = Unserved_Energy.xs(zone_input,level=self.AGG_BY)
-                Unserved_Energy = Unserved_Energy.groupby(["timestamp"]).sum()
-                Unserved_Energy = Unserved_Energy.squeeze() #Convert to Series
+                # Adjust list of values to drop depending on if it exists in stacked_gen_df df
+                vre_gen_cat = [name for name in vre_gen_cat if name in stacked_gen_df.columns]
+                net_load = stacked_gen_df.drop(labels = vre_gen_cat, axis=1)
+                net_load = net_load.sum(axis=1)
+                net_load = net_load.rename("Net Load")
 
-                if prop == "Peak Demand":
-                    peak_pump_load_t = Pump_Load.idxmax()
-                    end_date = peak_pump_load_t + dt.timedelta(days=end)
-                    start_date = peak_pump_load_t - dt.timedelta(days=start)
-                    # Peak_Pump_Load = Pump_Load[peak_pump_load_t]
-                    Stacked_Gen = Stacked_Gen[start_date : end_date]
-                    Load = Load[start_date : end_date]
-                    Unserved_Energy = Unserved_Energy[start_date : end_date]
-                    Pump_Load = Pump_Load[start_date : end_date]
+                # Extra optional properties 
+                extra_data_frames = []
+                extra_property_names = [f"{agg}_Load{data_resolution}", 
+                                        f"{agg}_Demand{data_resolution}",
+                                        f"{agg}_Unserved_Energy{data_resolution}"]
+                # Get and process extra properties
+                for ext_prop in extra_property_names:
+                    df : pd.DataFrame = self[ext_prop].get(scenario)
+                    if df.empty or not plot_data_settings["include_stackplot_load_lines"]:
+                        date_index = pd.date_range(start="2010-01-01", 
+                                        periods=1,
+                                        freq='H', name="timestamp")
+                        df = pd.DataFrame(data=[0], index=date_index)
+                    else:
+                        df = df.xs(zone_input, level=self.AGG_BY)
+                        df = df.groupby(["timestamp"]).sum()
+                    df = df.rename(columns={0: ext_prop})
+                    extra_data_frames.append(df)
 
-                elif prop == "Min Net Load":
-                    
-                    min_net_load_t = Net_Load.idxmin()
-                    end_date = min_net_load_t + dt.timedelta(days=end)
-                    start_date = min_net_load_t - dt.timedelta(days=start)
-                    # Min_Net_Load = Net_Load[min_net_load_t]
-                    Stacked_Gen = Stacked_Gen[start_date : end_date]
-                    Load = Load[start_date : end_date]
-                    Unserved_Energy = Unserved_Energy[start_date : end_date]
-                    Pump_Load = Pump_Load[start_date : end_date]
+                extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
 
-                elif pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                    Stacked_Gen = Stacked_Gen[start_date_range : end_date_range]
-                    Load = Load[start_date_range : end_date_range]
-                    Unserved_Energy = Unserved_Energy[start_date_range : end_date_range]
-                else:
-                    self.logger.info("Plotting graph for entire timeperiod")
-                
-                # unitconversion based off peak generation hour, only checked once 
+                extra_plot_data = extra_plot_data.rename(columns=
+                                    {f"{agg}_Load{data_resolution}": "Total Load",
+                                    f"{agg}_Unserved_Energy{data_resolution}": "Unserved Energy",
+                                    f"{agg}_Demand{data_resolution}": "Total Demand"})
+
+                # Adjust extra data to generator date range
+                extra_plot_data = extra_plot_data.loc[stacked_gen_df.index.min(): 
+                                                        stacked_gen_df.index.max()]
+                # append net_load load to extra data, 
+                # fill na with 0 in the event of misaligned timeseries 
+                extra_plot_data = pd.concat([extra_plot_data, net_load], axis=1).fillna(0)
+
+                # unitconversion based off peak generation hour, only checked once
                 if i == 0:
-                    unitconversion = self.capacity_energy_unitconversion(Stacked_Gen)
-                Stacked_Gen = Stacked_Gen/unitconversion['divisor']
-                Unserved_Energy = Unserved_Energy/unitconversion['divisor']
-                # Remove any all 0 columns
-                Stacked_Gen = Stacked_Gen.loc[:, (Stacked_Gen != 0).any(axis=0)]
+                    unitconversion = self.capacity_energy_unitconversion(stacked_gen_df, 
+                                                                        sum_values=True)
+                #Convert units
+                stacked_gen_df = stacked_gen_df / unitconversion['divisor']
+                extra_plot_data = extra_plot_data / unitconversion['divisor']
 
-                scenario_names = pd.Series([scenario]*len(Stacked_Gen),name='Scenario')
-                data_table = Stacked_Gen.add_suffix(f" ({unitconversion['units']})")
+                # Adds property annotation and 
+                if pd.notna(prop):
+                    x_time_value = mplt.add_property_annotation(
+                                            pd.concat([stacked_gen_df, 
+                                                       extra_plot_data], axis=1), 
+                                            prop,
+                                            sub_pos=i,
+                                            curtailment_name=curtailment_name,
+                                            energy_unit=unitconversion['units'],
+                                            re_gen_cat=self.re_gen_cat,
+                                            gen_cols=stacked_gen_df.columns)
+
+                    if x_time_value is not None and len(stacked_gen_df) > 1:
+                        # if timestamps are larger than hours time_delta will 
+                        # be the length of the interval in days, else time_delta == 1 day
+                        timestamps = stacked_gen_df.index.unique()
+                        time_delta = max(1, (timestamps[1] - timestamps[0])/np.timedelta64(1, 'D'))
+                        end_date = x_time_value + dt.timedelta(days=end*time_delta)
+                        start_date = x_time_value - dt.timedelta(days=start*time_delta)
+                        stacked_gen_df = stacked_gen_df.loc[start_date : end_date]
+                        extra_plot_data = extra_plot_data.loc[start_date : end_date]
+
+                # Remove any all 0 columns
+                stacked_gen_df = stacked_gen_df.loc[:, (stacked_gen_df != 0).any(axis=0)]
+
+                scenario_names = pd.Series([scenario]*len(stacked_gen_df),name='Scenario')
+                data_table = stacked_gen_df.add_suffix(f" ({unitconversion['units']})")
                 data_table = data_table.set_index([scenario_names],append=True)
                 data_tables.append(data_table)
                 
-                for column in Stacked_Gen.columns:
-                    axs[i].plot(Stacked_Gen.index.values, Stacked_Gen[column], 
+                for column in stacked_gen_df.columns:
+                    axs[i].plot(stacked_gen_df.index.values, stacked_gen_df[column], 
                                 linewidth=2,
                                 color=self.PLEXOS_color_dict.get(column,'#333333'),
                                 label=column)
 
-                if (Unserved_Energy == 0).all() == False:
-                    axs[i].plot(Unserved_Energy, color='#DD0200',
+                if (extra_plot_data["Unserved Energy"] == 0).all() == False:
+                    axs[i].plot(extra_plot_data["Unserved Energy"], 
+                                color='#DD0200',
                                 label='Unserved Energy')
 
                 mplt.set_yaxis_major_tick_format(sub_pos=i)
@@ -301,7 +295,7 @@ class MPlot(PlotDataHelper):
                 mplt.set_subplot_timeseries_format(sub_pos=i)
 
             if not data_tables:
-                self.logger.warning(f'No generation in {zone_input}')
+                logger.warning(f'No generation in {zone_input}')
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue

@@ -337,35 +337,21 @@ class MPlot(PlotDataHelper):
             energy_units = [re.search('GWh|MWh|TWh|kWh', unit) for unit in Total_Gen_Results.columns]
             energy_units = [unit for unit in energy_units if unit is not None][0].group()
 
-            def check_column_substring(df, substring):
-                '''
-                Checks if df column contains substring and returns actual column name,
-                this is required as columns contain suffixes
-
-                '''
-                return [column for column in list(df.columns) if substring in column][0]
-
-            if plot_data_settings["include_barplot_load_line"]:
-                Total_Load_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
-                                                                                "Total Load (Demand + \n Storage Charging)")]
-                Total_Demand_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
-                                                                                "Total Demand")]
-                Unserved_Energy_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
-                                                                                    "Unserved Energy")]
-                Total_Generation_Stack_Out = Total_Gen_Results.drop([check_column_substring(Total_Gen_Results,
-                                                                                            "Total Load (Demand + \n Storage Charging)"),
-                                                                    check_column_substring(Total_Gen_Results, 
-                                                                                            "Total Demand"),
-                                                                    check_column_substring(Total_Gen_Results, 
-                                                                                            "Unserved Energy"),
-                                                                    check_column_substring(Total_Gen_Results, 
-                                                                                            "Pump Load")], axis=1)
-                Pump_Load_Out = Total_Load_Out - Total_Demand_Out
-            else:
-                Total_Generation_Stack_Out = Total_Gen_Results
             # Remove any suffixes from column names
-            Total_Generation_Stack_Out.columns = [re.sub('[(]|GWh|TWh|MWh|kWh|\)', '', i).strip() 
-                                                  for i in Total_Generation_Stack_Out.columns]
+            Total_Gen_Results.columns = [re.sub('[(]|GWh|TWh|MWh|kWh|\)', '', i).strip() 
+                                                  for i in Total_Gen_Results.columns]
+
+            if plot_data_settings["include_barplot_load_lines"]:
+                extra_plot_data = pd.DataFrame(Total_Gen_Results.loc[:, 
+                                                "Total Load Demand + \n Storage Charging"])
+                extra_plot_data["Total Demand"] = Total_Gen_Results.loc[:, f"Total Demand"]
+                extra_plot_data["Unserved Energy"] = Total_Gen_Results.loc[:, f"Unserved Energy"]
+
+            Total_Generation_Stack_Out = Total_Gen_Results.drop(
+                                            ["Total Load Demand + \n Storage Charging",
+                                            f"Total Demand",
+                                            f"Unserved Energy"], axis=1)
+            
             if self.custom_xticklabels:
                 tick_labels = self.custom_xticklabels
             else:
@@ -381,28 +367,35 @@ class MPlot(PlotDataHelper):
 
             data_tables = []
 
-            if plot_data_settings["include_barplot_load_line"]:
+            if plot_data_settings["include_barplot_load_lines"]:
                 for n, scenario in enumerate(Total_Generation_Stack_Out.index.unique()):
-
                     x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + 
                         axs[1].patches[n].get_width()]
-                    height1 = [float(Total_Load_Out[scenario])]*2
-                    if Pump_Load_Out[scenario] > 0:
+                    
+                    height1 = [float(extra_plot_data.loc[scenario, 
+                                "Total Load Demand + \n Storage Charging"].sum())]*2
+                    
+                    if plot_data_settings["include_barplot_load_storage_charging_line"] and \
+                        extra_plot_data.loc[scenario, "Total Load Demand + \n Storage Charging"].sum() > \
+                            extra_plot_data.loc[scenario, "Total Demand"].sum():
                         axs[1].plot(x, height1, c='black', linewidth=1.5,
-                                    label='Demand + \n Storage Charging')
-                        height2 = [float(Total_Demand_Out[scenario])]*2
-                        axs[1].plot(x, height2, 'r--', c='black', linewidth=1.5,
+                                linestyle="--",
+                                label='Demand + \n Storage Charging')
+                        height2 = [float(extra_plot_data.loc[scenario, 
+                                                        'Total Demand'])]*2
+                        axs[1].plot(x, height2, c='black', linewidth=1.5, 
                                     label='Demand')
-                    else:
-                        axs[1].plot(x, height1, c='black', linewidth=1.5,
-                                    label='Demand')
-                    if Unserved_Energy_Out[scenario].sum() > 0:
-                        height3 = [float(Unserved_Energy_Out[scenario])]*2
-                        axs[1].plot(x, height3, c='#DD0200', linewidth=1.5,
-                                    label= 'Unserved Energy')
+                    elif extra_plot_data[scenario, "Total Demand"].sum() > 0:
+                        axs[1].plot(x, height1, c='black', linewidth=1.5, 
+                            label='Demand')
+
+                    if extra_plot_data.loc[scenario, 'Unserved Energy'] > 0:
+                        height3 = [float(extra_plot_data.loc[scenario, 
+                                                        "Load-Unserved_Energy"])]*2
                         axs[1].fill_between(x, height3, height1,
-                                            facecolor='#DD0200',
-                                            alpha=0.5)
+                                        facecolor='#DD0200',
+                                        alpha=0.5,
+                                        label='Unserved Energy')
 
             data_tables = pd.DataFrame() #TODO pass output data back to plot main 
 
