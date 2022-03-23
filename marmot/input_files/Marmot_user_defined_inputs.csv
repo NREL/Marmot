@@ -1,18 +1,20 @@
 Input,Input_type,Importance,User_defined_value
-Simulation_model,str,required,ReEDS
+Simulation_model,str,required,PLEXOS
 PLEXOS_data_blocks,list,optional,ST
-Model_Solutions_folder,folder,required,\\nrelnas01\ReEDS\Users\pbrown\ReEDSruns\20220223_bokeh
-Marmot_Solutions_folder,folder,optional,C:\Users\DLEVIE\Documents\marmot-tutorials\results-test-reeds_formatter
-Scenario_process_list,List,required,v20220223_bokehspurD0_ref_seq
-process_subset_years,list,optional,"2020,2030,2040, 2050"
-Region_Mapping.csv_name,string,optional(default),Region_mapping_ReEDS.csv
+Model_Solutions_folder,folder,required,Marmot\example-data
+Marmot_Solutions_folder,folder,optional,Marmot\results
+Scenario_process_list,List,required,"Base DA, High VG DA"
+process_subset_years,List,optional,
+Region_Mapping.csv_name,string,optional(default),Region_mapping.csv
 gen_names.csv_name,string,required(default),gen_names.csv
+ordered_gen_categories_file,string,required(default),ordered_gen_categories.csv
 emit_names.csv_name,string,required(default),emit_names.csv
-Scenarios,string or List,required,v20220223_bokehspurD0_ref_seq
+color_dictionary_file,string,required(default),colour_dictionary.csv
+Scenarios,string or List,required,"Base DA, High VG DA"
 Scenario_Diff_plot,List,optional,"Base DA, High VG DA"
 AGG_BY,string,required,region
-zone_region_sublist,List,optional,"p67,p133,p122"
+zone_region_sublist,List,optional,
 TECH_SUBSET,string,optional,
 Facet_ylabels,List,optional,
-Facet_xlabels,List,optional,"Base, High VG"
-Tick_labels,List,optional,ReEDS_Run
+Facet_xlabels,List,optional,"Base , High VG"
+Tick_labels,List,optional,"Base , High VG"

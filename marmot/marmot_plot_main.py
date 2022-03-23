@@ -52,6 +52,8 @@ class MarmotPlot(SetupLogger):
                  AGG_BY: str, 
                  Model_Solutions_folder: Union[str, Path], 
                  gen_names: Union[str, Path, pd.DataFrame],
+                 ordered_gen_categories: Union[str, Path, pd.DataFrame],
+                 color_dictionary_file: Union[str, Path, pd.DataFrame],
                  Marmot_plot_select: Union[str, Path, pd.DataFrame], 
                  Marmot_Solutions_folder: Union[str, Path] = None,
                  mapping_folder: Union[str, Path] = INPUT_DIR.joinpath('mapping_folder'),
@@ -129,6 +131,30 @@ class MarmotPlot(SetupLogger):
             self.gen_names = gen_names.rename(columns=
                                              {gen_names.columns[0]:'Original',
                                              gen_names.columns[1]:'New'})
+
+        if isinstance(ordered_gen_categories, (str, Path)):
+            try:
+                self.ordered_gen_categories = pd.read_csv(ordered_gen_categories) 
+
+            except FileNotFoundError:
+                self.logger.warning('Could not find '
+                                f'"{ordered_gen_categories}"; '
+                                'Check file name. This is required to '
+                                'run Marmot, system will now exit')
+                sys.exit()
+        elif isinstance(ordered_gen_categories, pd.DataFrame):
+            self.ordered_gen_categories = ordered_gen_categories
+
+
+        if isinstance(color_dictionary_file, (str, Path)):
+            try:
+                self.color_dictionary_file = pd.read_csv(color_dictionary_file) 
+
+            except FileNotFoundError:
+                self.color_dictionary_file = None
+        elif isinstance(color_dictionary_file, pd.DataFrame):
+            self.color_dictionary_file = color_dictionary_file
+
         
         if isinstance(Marmot_plot_select, (str, Path)):
             try:
@@ -241,20 +267,10 @@ class MarmotPlot(SetupLogger):
         # Standard Generation Order, Gen Categorization Lists, Plotting Colors
         #================================================================================
         
-        try:
-            ordered_gen_categories = pd.read_csv(self.mapping_folder.joinpath(
-                                                 mconfig.parser('ordered_gen_categories')))
-        except FileNotFoundError:
-            self.logger.warning('Could not find '
-                                f'"{self.mapping_folder.joinpath("ordered_gen.csv")}"; '
-                                'Check file name in config file. This is required to '
-                                'run Marmot, system will now exit')
-            sys.exit()
-        
         if (set(self.gen_names["New"].unique())
-        .issubset(ordered_gen_categories['Ordered_Gen'].str.strip().tolist())) == False:
+        .issubset(self.ordered_gen_categories['Ordered_Gen'].str.strip().tolist())) == False:
             missing_gen = (set(self.gen_names.New.unique()) 
-                           - (set(ordered_gen_categories['Ordered_Gen'].str
+                           - (set(self.ordered_gen_categories['Ordered_Gen'].str
                                                                        .strip()
                                                                        .tolist())))
             self.logger.warning("The following tech categories from the "
@@ -264,77 +280,74 @@ class MarmotPlot(SetupLogger):
             
         # Subset ordered_gen to user desired generation
         if self.TECH_SUBSET:
-            if self.TECH_SUBSET not in ordered_gen_categories.columns:
+            if self.TECH_SUBSET not in self.ordered_gen_categories.columns:
                 self.logger.warning(f"{self.TECH_SUBSET} column was not found "
                                     "in the ordered_gen_categories.csv. "
                                     "All generator technologies will be plotted")
-                ordered_gen = (ordered_gen_categories['Ordered_Gen'].str
+                ordered_gen = (self.ordered_gen_categories['Ordered_Gen'].str
                                                                     .strip()
                                                                     .tolist())
             else:
-                ordered_gen = ordered_gen_categories.loc[
-                                ordered_gen_categories[self.TECH_SUBSET] == True]
+                ordered_gen = self.ordered_gen_categories.loc[
+                                self.ordered_gen_categories[self.TECH_SUBSET] == True]
                 ordered_gen = ordered_gen['Ordered_Gen'].str.strip().tolist()
                 self.logger.info(f"Tech Aggregation selected: {self.TECH_SUBSET}")
         else:
-            ordered_gen = ordered_gen_categories['Ordered_Gen'].str.strip().tolist()
+            ordered_gen = self.ordered_gen_categories['Ordered_Gen'].str.strip().tolist()
         
         # If Other category does not exist in ordered_gen, create entry 
         if 'Other' not in ordered_gen:
             ordered_gen.append('Other')
 
-        if 'pv' not in ordered_gen_categories.columns:
+        if 'pv' not in self.ordered_gen_categories.columns:
             pv_gen_cat = []
             self.logger.warning('"pv" column was not found in the '
                                 'ordered_gen_categories.csv. Check if the column '
                                 'exists in the csv file. This is required for '
                                 'certain plots to display correctly')
         else:
-            pv_gen_cat = ordered_gen_categories.loc[
-                            ordered_gen_categories['pv'] == True]
+            pv_gen_cat = self.ordered_gen_categories.loc[
+                            self.ordered_gen_categories['pv'] == True]
             pv_gen_cat = pv_gen_cat['Ordered_Gen'].str.strip().tolist()
             
-        if 're' not in ordered_gen_categories.columns:
+        if 're' not in self.ordered_gen_categories.columns:
             re_gen_cat = []
             self.logger.warning('"re" column was not found in the '
                                 'ordered_gen_categories.csv. Check if the column '
                                 'exists in the csv file. This is required for '
                                 'certain plots to display correctly')
         else:
-            re_gen_cat = ordered_gen_categories.loc[
-                            ordered_gen_categories['re'] == True]
+            re_gen_cat = self.ordered_gen_categories.loc[
+                            self.ordered_gen_categories['re'] == True]
             re_gen_cat = re_gen_cat['Ordered_Gen'].str.strip().tolist()
 
-        if 'vre' not in ordered_gen_categories.columns:
+        if 'vre' not in self.ordered_gen_categories.columns:
             vre_gen_cat = []
             self.logger.warning('"vre" column was not found in the '
                                 'ordered_gen_categories.csv. Check if the column '
                                 'exists in the csv file. This is required for '
                                 'certain plots to display correctly')
         else:
-            vre_gen_cat = ordered_gen_categories.loc[
-                            ordered_gen_categories['vre'] == True]
+            vre_gen_cat = self.ordered_gen_categories.loc[
+                            self.ordered_gen_categories['vre'] == True]
             vre_gen_cat = vre_gen_cat['Ordered_Gen'].str.strip().tolist()
 
-        if 'thermal' not in ordered_gen_categories.columns:
+        if 'thermal' not in self.ordered_gen_categories.columns:
             thermal_gen_cat = []
             self.logger.warning('"thermal" column was not found in the '
                                 'ordered_gen_categories.csv. Check if the column '
                                 'exists in the csv file. This is required for '
                                 'certain plots to display correctly')
         else:
-            thermal_gen_cat = ordered_gen_categories.loc[
-                                ordered_gen_categories['thermal'] == True]
+            thermal_gen_cat = self.ordered_gen_categories.loc[
+                                self.ordered_gen_categories['thermal'] == True]
             thermal_gen_cat = thermal_gen_cat['Ordered_Gen'].str.strip().tolist()
         
-        try:
-            PLEXOS_color_dict = pd.read_csv(self.mapping_folder.joinpath(
-                                            mconfig.parser('color_dictionary_file')))
-
-            PLEXOS_color_dict = PLEXOS_color_dict.rename(columns=
-                                                         {PLEXOS_color_dict.columns[0]: 
+        if self.color_dictionary_file is not None:
+            PLEXOS_color_dict = self.color_dictionary_file.rename(columns=
+                                                         {self.color_dictionary_file.columns[0]: 
                                                          'Generator',
-                                                         PLEXOS_color_dict.columns[1]:
+                                                         self.color_dictionary_file.columns[1]:
                                                          'Colour'})
 
             PLEXOS_color_dict["Generator"] = (PLEXOS_color_dict["Generator"].str
@@ -342,10 +355,9 @@ class MarmotPlot(SetupLogger):
             PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
             PLEXOS_color_dict = (PLEXOS_color_dict[['Generator','Colour']].set_index("Generator")
                                                                           .to_dict()["Colour"])
-        except FileNotFoundError:
-            self.logger.warning('Could not find '
-                                f'"{self.mapping_folder.joinpath("colour_dictionary.csv")}"; '
-                                'Check file name in config file. Random colors will now be used')
+        else:
+            self.logger.warning('Could not find "colour_dictionary.csv"; '
+                                'Check file name. Random colors will now be used')
             cmap = plt.cm.get_cmap(lut=len(ordered_gen))
             colors = []
             for i in range(cmap.N):
@@ -668,16 +680,21 @@ def main():
                                               'User_defined_value']) is True:
         Region_Mapping = pd.DataFrame()
     else:
-        Region_Mapping = pd.read_csv(INPUT_DIR.joinpath(Mapping_folder, 
-                                     Marmot_user_defined_inputs.loc[
-                                         'Region_Mapping.csv_name'].to_string(index=False).strip()))
+        Region_Mapping = pd.read_csv(Mapping_folder.joinpath(
+                                    Marmot_user_defined_inputs.loc[
+                                    'Region_Mapping.csv_name'].to_string(index=False).strip()))
 
         Region_Mapping = Region_Mapping.astype(str)
     
-    gen_names = pd.read_csv(INPUT_DIR.joinpath(Mapping_folder, 
+    gen_names = pd.read_csv(Mapping_folder.joinpath( 
                             Marmot_user_defined_inputs.loc[
                                 'gen_names.csv_name'].to_string(index=False).strip()))
     
+    ordered_gen_cat_file = Mapping_folder.joinpath(Marmot_user_defined_inputs.loc['ordered_gen_categories_file', 
+                                              'User_defined_value'])
+    color_dictionary_file = Mapping_folder.joinpath(Marmot_user_defined_inputs.loc['color_dictionary_file', 
+                                              'User_defined_value'])
+
     AGG_BY = Marmot_user_defined_inputs.loc['AGG_BY'].squeeze().strip()
 
     if pd.notna(Marmot_user_defined_inputs.loc['TECH_SUBSET', 'User_defined_value']):
@@ -705,7 +722,9 @@ def main():
                         'Tick_labels'].squeeze()).split(",")).str.strip().tolist()
     
     initiate = MarmotPlot(Scenarios, AGG_BY, Model_Solutions_folder, 
-                          gen_names, Marmot_plot_select,
+                          gen_names, ordered_gen_cat_file, 
+                          color_dictionary_file,
+                          Marmot_plot_select,
                           Marmot_Solutions_folder=Marmot_Solutions_folder,
                           mapping_folder=Mapping_folder,
                           Scenario_Diff=Scenario_Diff,

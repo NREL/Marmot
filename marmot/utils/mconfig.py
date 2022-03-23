@@ -125,13 +125,10 @@ def createConfig(configfile_path: Path):
 
     *Change the default plexos_properties_file.csv file, file must be created first*  
 
-    - **color_dictionary_file:** colour_dictionary.csv
+    - **reeds_properties_file:** reeds_properties.csv
 
-    *Change the default color dictionary file that lives within the Mapping Folder, file must be created first*  
+    *Change the default reeds_properties_file.csv file, file must be created first*  
 
-    - **ordered_gen_categories :** ordered_gen_categories.csv
-
-    *Change the default ordered_gen_categories file that lives within the Mapping Folder, file must be created first*  
 
     Args:
         configfile_path (Path): Path to config.yml file
@@ -199,9 +196,7 @@ def createConfig(configfile_path: Path):
         user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
         plot_select_file = 'Marmot_plot_select.csv',
         plexos_properties_file = 'plexos_properties.csv',
-        reeds_properties_file = 'reeds_properties.csv',
-        color_dictionary_file = 'colour_dictionary.csv',
-        ordered_gen_categories = 'ordered_gen_categories.csv'
+        reeds_properties_file = 'reeds_properties.csv'
         )
 
     with open(configfile_path, "w") as cfgfile:
