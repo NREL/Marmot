@@ -4,7 +4,6 @@
 @author: Daniel Levie
 """
 
-import os
 import re
 import math
 import logging
@@ -18,61 +17,111 @@ from typing import Tuple, Union, List
 
 import marmot.utils.mconfig as mconfig
 
-
 logger = logging.getLogger('plotter.'+__name__)
 
 
-class PlotDataHelper(dict):
+class MPlotDataHelper(dict):
     """Methods used to assist with the creation of Marmot plots
 
     Collection of Methods to assist with creation of figures,
     including getting and formatting data, setting up plot sizes.
 
-    PlotDataHelper inherits the python class 'dict' so acts like a dictionary and stores the
+    MPlotDataHelper inherits the python class 'dict' so acts like a dictionary and stores the
     formatted data when retrieved by the get_formatted_data method.
     """
 
-    def __init__(self, Marmot_Solutions_folder: Path, AGG_BY: str, ordered_gen: list, 
-                 PLEXOS_color_dict: dict, Scenarios: list, ylabels: list, 
-                 xlabels: list, gen_names_dict: dict, TECH_SUBSET: str,
-                 Region_Mapping: pd.DataFrame = pd.DataFrame()):
+    def __init__(self, Zones: List[str] = None, AGG_BY: str = None, 
+                ordered_gen: List[str] = None, PLEXOS_color_dict: dict = None,
+                Scenarios: List[str] = None, Scenario_Diff: List[str] = None,
+                processed_hdf5_folder: Path = None, figure_folder: Path = None,
+                ylabels: List[str] = None, xlabels: List[str] = None, 
+                custom_xticklabels: List[str] = None,
+                color_list: List[str] = None, marker_style: List[str] = None,
+                gen_names_dict: dict = None, pv_gen_cat: List[str] = None,
+                re_gen_cat: List[str] = None, vre_gen_cat: List[str] = None,
+                thermal_gen_cat: List[str] = None, 
+                Region_Mapping: pd.DataFrame = pd.DataFrame(),
+                TECH_SUBSET: List[str] = None ) -> None:
         """
         Args:
-            Marmot_Solutions_folder (Path): Folder to save Marmot solution files.
-            AGG_BY (str): Informs region type to aggregate by when creating plots.
-            ordered_gen (list): Ordered list of generator technologies to plot, 
-                order defines the generator technology position in stacked bar and area plots
-            PLEXOS_color_dict (dict): Dictionary of colors to use for generation technologies
-            Scenarios (list): Name of scenarios to process.
-            ylabels (list): y-axis labels for facet plots.
-            xlabels (list): x-axis labels for facet plots.
-            gen_names_dict (dict): Mapping dictionary to rename generator technologies.
+            Zones (List[str], optional): List of regions/zones to plot. 
+                Defaults to None.
+            AGG_BY (str, optional): Informs region type to aggregate by when creating plots. 
+                Defaults to None.
+            ordered_gen (List[str], optional): Ordered list of generator technologies to plot, 
+                order defines the generator technology position in stacked bar and area plots. 
+                Defaults to None.
+            PLEXOS_color_dict (dict, optional): Dictionary of colors to use for generation technologies. 
+                Defaults to None.
+            Scenarios (List[str], optional): List of scenarios to process.
+                Defaults to None.
+            Scenario_Diff (List[str], optional): 2 value list, used to compare 2 
+                scenarios.
+                Defaults to None.
+            processed_hdf5_folder (Path, optional): Directory containing Marmot solution files. 
+                Defaults to None.
+            figure_folder (Path, optional):  Directory containing resulting figures and csv files. 
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots. 
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots. 
+                Defaults to None.
+            custom_xticklabels (List[str], optional): List of custom x labels to apply to barplots. 
+                Values will overwite existing ones. Defaults to None.
+            color_list (List[str], optional): List of colors for plotting. 
+                Defaults to None.
+            marker_style (List[str], optional): List of markers for plotting. 
+                Defaults to None.
+            gen_names_dict (dict, optional): Mapping dictionary to rename generator technologies.
+                Defaults to None.
+            pv_gen_cat (List[str], optional): List of PV technologies. 
+                Defaults to None.
+            re_gen_cat (List[str], optional): List of RE technologies. 
+                Defaults to None.
+            vre_gen_cat (lList[str]ist, optional): List of VRE technologies. 
+                Defaults to None.
+            thermal_gen_cat (List[str], optional): List of thermal technologies. 
+                Defaults to None.
             Region_Mapping (pd.DataFrame, optional): Mapping file to map custom regions/zones 
                 to create custom aggregations. Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
+            TECH_SUBSET (List[str], optional): Tech subset category to plot.
+                The TECH_SUBSET value should be a column in the 
+                ordered_gen_categories.csv. If left None all techs will be plotted
+                Defaults to None.
         """
-        self.Marmot_Solutions_folder = Marmot_Solutions_folder
+        self.Zones = Zones
         self.AGG_BY = AGG_BY
         self.ordered_gen = ordered_gen
         self.PLEXOS_color_dict = PLEXOS_color_dict
         self.Scenarios = Scenarios
+        self.Scenario_Diff = Scenario_Diff
+        self.processed_hdf5_folder = processed_hdf5_folder
+        self.figure_folder = figure_folder
         self.ylabels = ylabels
         self.xlabels = xlabels
+        self.custom_xticklabels = custom_xticklabels
+        self.color_list = color_list
+        self.marker_style = marker_style
         self.gen_names_dict = gen_names_dict
-        self.TECH_SUBSET = TECH_SUBSET
+        self.pv_gen_cat = pv_gen_cat
+        self.re_gen_cat = re_gen_cat
+        self.vre_gen_cat = vre_gen_cat
+        self.thermal_gen_cat = thermal_gen_cat
         self.Region_Mapping = Region_Mapping
+        self.TECH_SUBSET = TECH_SUBSET
 
-    def get_formatted_data(self, properties: list) -> list:
+    def get_formatted_data(self, properties: List[tuple]) -> list:
         """Get data from formatted h5 file.
         
         Adds data to dictionary with scenario name as key
 
         Args:
-            properties (list): list of tuples containing required 
+            properties (List[tuple]): list of tuples containing required 
                 plexos property information
 
         Returns:
-            list: If 1 in list required data is missing .
+            list: If 1 in list required data is missing.
         """
         check_input_data = []
         
@@ -112,8 +161,8 @@ class PlotDataHelper(dict):
             pd.DataFrame: Requested dataframe.
         """
         try:
-            with pd.HDFStore(self.Marmot_Solutions_folder.joinpath("Processed_HDF5_folder", 
-                                            f"{scenario}_formatted.h5"), 'r') as file:
+            with pd.HDFStore(self.processed_hdf5_folder.joinpath(
+                f"{scenario}_formatted.h5"), 'r') as file:
                 return file[plx_prop_name]
         except KeyError:
             return pd.DataFrame()
@@ -249,8 +298,8 @@ class PlotDataHelper(dict):
         Returns:
             pd.DataFrame: Same dataframe, with time index shifted.
         """
-        if ('2008' not in self.Marmot_Solutions_folder 
-            and '2012' not in self.Marmot_Solutions_folder 
+        if ('2008' not in self.processed_hdf5_folder 
+            and '2012' not in self.processed_hdf5_folder 
             and df.index.get_level_values('timestamp')[0] > dt.datetime(2024,2,28,0,0)):
             
             df.index = df.index.set_levels(
@@ -392,6 +441,11 @@ class PlotDataHelper(dict):
                 # If index datetime sum across columns
                 elif isinstance(df.index, pd.DatetimeIndex):
                     sum_axis=1
+                # If any sceanrio is in the index 
+                elif any(scen in self.Scenarios for scen in df.index):
+                    sum_axis=0   
+                # If sceanrio is contained as a substring in the index 
+                # (only works for equal length lists scenario and index lists)
                 elif [x for x, y in zip(self.Scenarios, df.index) if re.search(x, y)]:
                     sum_axis=1
                 elif any(scen in self.Scenarios for scen in df.columns):
@@ -563,7 +617,7 @@ class PlotDataHelper(dict):
 
     @staticmethod
     def insert_custom_data_columns(existing_df: pd.DataFrame, 
-                                   custom_data_file_path: str) -> pd.DataFrame:
+                                   custom_data_file_path: Path) -> pd.DataFrame:
         """Insert custom columns into existing DataFrame before plotting.
 
         Custom data is loaded from passed custom_data_file_path, 
@@ -581,7 +635,7 @@ class PlotDataHelper(dict):
 
         Args:
             existing_df (pd.DataFrame): DataFrame to modify 
-            custom_data_file_path (str): path to custom data file
+            custom_data_file_path (Path): path to custom data file
             inplace (bool, optional): Modify the DataFrame in place 
                 (do not create a new object). 
                 Defaults to False.
@@ -590,7 +644,7 @@ class PlotDataHelper(dict):
             pd.DataFrame: DataFrame with the newly inserted columns
         """
         
-        if not os.path.basename(custom_data_file_path).endswith('csv'):
+        if not custom_data_file_path.suffix == '.csv':
             logger.warning("Custom datafile must be a csv, returning " 
                            "unmodified DataFrame")
             return existing_df
