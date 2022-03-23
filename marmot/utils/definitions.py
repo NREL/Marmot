@@ -36,6 +36,24 @@ ROOT_DIR: Path = get_project_root()
 LOG_DIR: Path = log_dir()
 INPUT_DIR: Path = input_dir()
 
+Module_CLASS_MAPPING = {"capacity_factor": "CapacityFactor",
+                        "capacity_out": "CapacityOut",
+                        "curtailment": "Curtailment",
+                        "emissions": "Emissions",
+                        "generation_stack": "GenerationStack",
+                        "generation_unstack": "GenerationUnStack",
+                        "hydro": "Hydro", 
+                        "prices": "Prices",
+                        "production_cost": "SystemCosts",
+                        "ramping": "Ramping",
+                        "reserves": "Reserves",
+                        "sensitivities": "Sensitivities",
+                        "thermal_cap_reserve": "ThermalReserve",
+                        "total_generation": "TotalGeneration",
+                        "total_installed_capacity": "InstalledCapacity",
+                        "transmission": "Transmission",
+                        "unserved_energy": "UnservedEnergy",
+                        "utilization_factor": "UtilizationFactor"}
 
 INCORRECT_ENTRY_POINT = ("Beginning in Marmot v0.10.0, the abilty to run "
     "'python {}' directly has been removed. To run "
