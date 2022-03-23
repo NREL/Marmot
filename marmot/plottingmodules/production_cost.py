@@ -9,48 +9,34 @@ Plots can be broken down by cost categories, generator types etc.
 
 import logging
 import pandas as pd
+from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 plot_data_settings = mconfig.parser("plot_data")
 logger = logging.getLogger('plotter.'+__name__)
 
-class MPlot(PlotDataHelper):
-    """production_cost MPlot class.
+class SystemCosts(MPlotDataHelper):
+    """System operating cost plots.
 
-    All the plotting modules use this same class name.
-    This class contains plotting methods that are grouped based on the
-    current module name.
-    
     The production_cost.py module contains methods that are
     related related to the cost of operating the power system. 
     
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    SystemCosts inherits from the MPlotDataHelper class to assist 
+    in creating figures.
     """
 
-    def __init__(self, argument_dict: dict):
-        """
-        Args:
-            argument_dict (dict): Dictionary containing all
-                arguments passed from MarmotPlot.
-        """
-        # iterate over items in argument_dict and set as properties of class
-        # see key_list in Marmot_plot_main for list of properties
-        for prop in argument_dict:
-            self.__setattr__(prop, argument_dict[prop])
-        
+    def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
+        super().__init__(**kwargs)
+        
                 
     def prod_cost(self, start_date_range: str = None, 
                   end_date_range: str = None, 
-                  custom_data_file_path: str = None,
+                  custom_data_file_path: Path= None,
                   barplot_groupby: str = 'Scenario', **_):
         """Plots total system net revenue and cost.
 
@@ -63,7 +49,7 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
-            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+            custom_data_file_path (Path, optional): Path to custom data file to concat extra 
                 data. Index and column format should be consistent with output data csv.
 
         Returns:
@@ -78,7 +64,7 @@ class MPlot(PlotDataHelper):
                       (True, "generator_Reserves_Revenue", self.Scenarios),
                       (True, "generator_Installed_Capacity", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -185,7 +171,7 @@ class MPlot(PlotDataHelper):
 
     def sys_cost(self, start_date_range: str = None, 
                  end_date_range: str = None, 
-                 custom_data_file_path: str = None,
+                 custom_data_file_path: Path= None,
                  barplot_groupby: str = 'Scenario', **_):
         """Creates a stacked bar plot of Total Generation Cost and Cost of Unserved Energy.
 
@@ -198,7 +184,7 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
-            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+            custom_data_file_path (Path, optional): Path to custom data file to concat extra 
                 data. Index and column format should be consistent with output data csv.
 
         Returns:
@@ -216,7 +202,7 @@ class MPlot(PlotDataHelper):
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios),
                       (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -254,9 +240,12 @@ class MPlot(PlotDataHelper):
                         logger.warning('No generation in selected Date Range')
                         continue
                 
-                system_cost = pd.concat([gen_cost, cost_unserved_energy], axis=1)
-                system_cost_chunk.append(self.year_scenario_grouper(system_cost, 
-                                            scenario, groupby=barplot_groupby).sum())
+                gen_cost = self.year_scenario_grouper(gen_cost, 
+                                            scenario, groupby=barplot_groupby).sum()
+                cost_unserved_energy = self.year_scenario_grouper(cost_unserved_energy, 
+                                            scenario, groupby=barplot_groupby).sum()
+
+                system_cost_chunk.append(pd.concat([gen_cost, cost_unserved_energy], axis=1))
 
             # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
             if not system_cost_chunk:
@@ -330,7 +319,7 @@ class MPlot(PlotDataHelper):
 
     def detailed_gen_cost(self, start_date_range: str = None, 
                           end_date_range: str = None, 
-                          custom_data_file_path: str = None,
+                          custom_data_file_path: Path= None,
                           barplot_groupby: str = 'Scenario', **_):
         """Creates stacked bar plot of total generation cost by cost type (fuel, emission, start cost etc.)
 
@@ -342,7 +331,7 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
-            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+            custom_data_file_path (Path, optional): Path to custom data file to concat extra 
                 data. Index and column format should be consistent with output data csv.
 
         Returns:
@@ -359,7 +348,7 @@ class MPlot(PlotDataHelper):
                       (False, "generator_Reserves_VO&M_Cost", self.Scenarios),
                       (False, "generator_Emissions_Cost", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
     
@@ -492,7 +481,7 @@ class MPlot(PlotDataHelper):
 
     def sys_cost_type(self, start_date_range: str = None, 
                       end_date_range: str = None, 
-                      custom_data_file_path: str = None,
+                      custom_data_file_path: Path = None,
                       barplot_groupby: str = 'Scenario', **_):
         """Creates stacked bar plot of total generation cost by generator technology type.
 
@@ -505,7 +494,7 @@ class MPlot(PlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
-            custom_data_file_path (str, optional): Path to custom data file to concat extra 
+            custom_data_file_path (Path, optional): Path to custom data file to concat extra 
                 data. Index and column format should be consistent with output data csv.
 
         Returns:
@@ -518,7 +507,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Total_Generation_Cost",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -628,7 +617,7 @@ class MPlot(PlotDataHelper):
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios),
                       (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -666,9 +655,11 @@ class MPlot(PlotDataHelper):
                         logger.warning('No generation in selected Date Range')
                         continue
                 
-                system_cost = pd.concat([gen_cost, cost_unserved_energy], axis=1)
-                system_cost_chunk.append(self.year_scenario_grouper(system_cost, 
-                                            scenario, groupby=barplot_groupby).sum())
+                gen_cost = self.year_scenario_grouper(gen_cost, 
+                                            scenario, groupby=barplot_groupby).sum()
+                cost_unserved_energy = self.year_scenario_grouper(cost_unserved_energy, 
+                                            scenario, groupby=barplot_groupby).sum()
+                system_cost_chunk.append(pd.concat([gen_cost, cost_unserved_energy], axis=1))
             
             # Checks if total_cost_chunk contains data, if not skips zone and does not return a plot
             if not system_cost_chunk:
@@ -741,7 +732,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost" ,self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         # Checks if all data required by plot is available, if 1 in list required data is missing
@@ -852,7 +843,7 @@ class MPlot(PlotDataHelper):
                       (False, "generator_Reserves_VO&M_Cost", self.Scenarios),
                       (False, "generator_Emissions_Cost", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 

@@ -6,49 +6,32 @@ This module creates plots are related to the curtailment of generators.
 @author: Daniel Levie
 """
 
-import os
 import logging
 import pandas as pd
 
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
 plot_data_settings = mconfig.parser("plot_data")
 
-class MPlot(PlotDataHelper):
-    """curtailment MPlot class.
+class Curtailment(MPlotDataHelper):
+    """Device curtailment plots.
 
-    All the plotting modules use this same class name.
-    This class contains plotting methods that are grouped based on the
-    current module name.
-    
     The curtailment.py module contains methods that are
     related to the curtailment of generators . 
 
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    Curtailment inherits from the MPlotDataHelper class to assist 
+    in creating figures.
     """
 
-    def __init__(self, argument_dict: dict):
-        """
-        Args:
-            argument_dict (dict): Dictionary containing all
-                arguments passed from MarmotPlot.
-        """
-        # iterate over items in argument_dict and set as properties of class
-        # see key_list in Marmot_plot_main for list of properties
-        for prop in argument_dict:
-            self.__setattr__(prop, argument_dict[prop])
-
+    def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
-                    
+        super().__init__(**kwargs)
+     
         self.curtailment_prop : str = mconfig.parser("plot_data","curtailment_property")
         
         
@@ -79,7 +62,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"generator_{self.curtailment_prop}",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -233,7 +216,7 @@ class MPlot(PlotDataHelper):
                       (True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Total_Generation_Cost", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -450,7 +433,7 @@ class MPlot(PlotDataHelper):
         properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (False, "generator_Available_Capacity", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -610,7 +593,7 @@ class MPlot(PlotDataHelper):
         properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios),
                       (True, "generator_Available_Capacity", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -778,7 +761,7 @@ class MPlot(PlotDataHelper):
         properties = [(True, "generator_Generation", self.Scenarios),
                       (True, f"generator_{self.curtailment_prop}", self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -810,6 +793,8 @@ class MPlot(PlotDataHelper):
             curt_tots = pd.Series()
             chunks_scen = []
 
+            ti = gen.index.get_level_values('timestamp').unique()
+
             for site in select_sites:
                 if site in gen.index.get_level_values('gen_name').unique():
                     site_idx += 1
@@ -824,8 +809,6 @@ class MPlot(PlotDataHelper):
                         if curt.empty:
                             logger.warning('No curtailment in selected Date Range')
                             continue
-                    
-                    ti = gen_site.index.get_level_values('timestamp').unique()
 
                     curt_tot = curt.sum()
                     gen_tot = gen_site.sum()
@@ -871,16 +854,17 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         Curt_8760 = pd.concat(chunks,axis = 0, copy = False)
-        Curt_8760.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_8760.csv'))
+        Curt_8760.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_curtailment',figure_name + '_8760.csv'))
 
         Total_Gen = Total_Gen / 1000000
-        Total_Curtailment_Out_perc.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.csv'))
-        Total_Gen.T.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
+        Total_Curtailment_Out_perc.T.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_curtailment',figure_name + '.csv'))
+        Total_Gen.T.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_curtailment',figure_name + '_gen.csv'))
         
         mplt = PlotLibrary(figsize=(9,6))
         fig, ax = mplt.get_figure()
 
         mplt.barplot(Total_Curtailment_Out_perc, color=self.color_list)
+        mplt.add_legend()
 
         ax.set_ylabel('Curtailment (%)',  color='black', rotation='vertical')
 
@@ -905,7 +889,7 @@ class MPlot(PlotDataHelper):
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=11)
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder,'Figures_Output',self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
+        fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_curtailment',figure_name + '.svg'),dpi=600, bbox_inches='tight')
         outputs = DataSavedInModule()
         return outputs
 
@@ -936,7 +920,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"generator_{self.curtailment_prop}",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 

@@ -14,42 +14,28 @@ import matplotlib.pyplot as plt
 import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, InputSheetError, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
 plot_data_settings = mconfig.parser("plot_data")
+shift_leapday : bool = mconfig.parser("shift_leapday")
 
-class MPlot(PlotDataHelper):
-    """generation_stack MPlot class.
+class GenerationStack(MPlotDataHelper):
+    """Timeseries generation stacked area plots.
 
-    All the plotting modules use this same class name.
-    This class contains plotting methods that are grouped based on the
-    current module name.
-    
     The generation_stack.py contains methods that are
-    related to the timeseries generation of generators, in a stacked area format.  
+    related to the timeseries generation of generators, 
+    in a stacked area format.  
     
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    GenerationStack inherits from the MPlotDataHelper class to assist 
+    in creating figures.
     """
 
-    def __init__(self, argument_dict: dict):
-        """
-        Args:
-            argument_dict (dict): Dictionary containing all
-                arguments passed from MarmotPlot.
-        """
-        # iterate over items in argument_dict and set as properties of class
-        # see key_list in Marmot_plot_main for list of properties
-        for prop in argument_dict:
-            self.__setattr__(prop, argument_dict[prop])
-
+    def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
+        super().__init__(**kwargs)
 
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
         
@@ -86,7 +72,7 @@ class MPlot(PlotDataHelper):
                       (True,"generator_Units_Generating",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
 
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -257,7 +243,7 @@ class MPlot(PlotDataHelper):
                       (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
                       (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios)]
 
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -299,7 +285,7 @@ class MPlot(PlotDataHelper):
                 try:
                     stacked_gen_df : pd.DataFrame = \
                          self[f"generator_Generation{data_resolution}"].get(scenario)
-                    if self.shift_leapday == True:
+                    if shift_leapday:
                         stacked_gen_df = self.adjust_for_leapday(stacked_gen_df)
                     stacked_gen_df = stacked_gen_df.xs(zone_input,level=self.AGG_BY)
                 except KeyError:
@@ -313,7 +299,7 @@ class MPlot(PlotDataHelper):
                     self[f"generator_{self.curtailment_prop}{data_resolution}"].get(scenario)
                 curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
                 if not stacked_curt_df.empty:
-                    if self.shift_leapday == True:
+                    if shift_leapday:
                         stacked_curt_df = self.adjust_for_leapday(stacked_curt_df)
                     if zone_input in stacked_curt_df.index.get_level_values(self.AGG_BY).unique():
                         stacked_curt_df = stacked_curt_df.xs(zone_input,level=self.AGG_BY)
@@ -512,7 +498,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios)]
 
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 

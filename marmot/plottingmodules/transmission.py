@@ -6,7 +6,6 @@ This code creates transmission line and interface plots.
 @author: Daniel Levie, Marty Schwarz
 """
 
-import os
 import logging
 import pandas as pd
 import numpy as np
@@ -16,47 +15,33 @@ import matplotlib.colors as mcolors
 import matplotlib.dates as mdates
 
 import marmot.utils.mconfig as mconfig
-
+from marmot.metamanagers.read_metadata import MetaData
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
 plot_data_settings = mconfig.parser("plot_data")
+shift_leapday : bool = mconfig.parser("shift_leapday")
 
-class MPlot(PlotDataHelper):
-    """transmission MPlot class.
+class Transmission(MPlotDataHelper):
+    """System transmission plots.
 
-    All the plotting modules use this same class name.
-    This class contains plotting methods that are grouped based on the
-    current module name.
-    
     The transmission.py module contains methods that are
     related to the transmission network. 
     
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    Transmission inherits from the MPlotDataHelper class to assist 
+    in creating figures.
     """
 
-    def __init__(self, argument_dict: dict):
-        """
-        Args:
-            argument_dict (dict): Dictionary containing all
-                arguments passed from MarmotPlot.
-        """
-        # iterate over items in argument_dict and set as properties of class
-        # see key_list in Marmot_plot_main for list of properties
-        for prop in argument_dict:
-            self.__setattr__(prop, argument_dict[prop])
-        
+    def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
-
+        super().__init__(**kwargs)
+        
         self.logger = logging.getLogger('plotter.'+__name__)
         self.font_defaults = mconfig.parser("font_settings")
-        
+        self.meta = MetaData(self.processed_hdf5_folder, 
+                            Region_Mapping=self.Region_Mapping)
 
     def line_util(self, **kwargs):
         """Creates a timeseries line plot of transmission lineflow utilization for each region.
@@ -118,7 +103,7 @@ class MPlot(PlotDataHelper):
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -169,7 +154,7 @@ class MPlot(PlotDataHelper):
                 #Limit to only lines touching to this zone
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] 
 
-                if self.shift_leapday == True:
+                if shift_leapday:
                     flow = self.adjust_for_leapday(flow)
                 limits = self["line_Import_Limit"].get(scenario).copy()
                 limits = limits.droplevel('timestamp').drop_duplicates()
@@ -276,7 +261,7 @@ class MPlot(PlotDataHelper):
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -390,7 +375,7 @@ class MPlot(PlotDataHelper):
                         single_int = single_int.reset_index().set_index('timestamp')
                         limits = limits.reset_index().set_index('timestamp')
 
-                        if self.shift_leapday == True:
+                        if shift_leapday:
                             single_int = self.adjust_for_leapday(single_int)
                         if pd.notna(start_date_range):
                             single_int = single_int[start_date_range : end_date_range]
@@ -457,7 +442,7 @@ class MPlot(PlotDataHelper):
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
-            #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
+            #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs 
 
     def int_flow_ind_seasonal(self, figure_name: str = None, prop: str = None, 
@@ -490,7 +475,7 @@ class MPlot(PlotDataHelper):
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -609,7 +594,7 @@ class MPlot(PlotDataHelper):
                     single_int = flow.xs(interf,level = 'interface_name') / 1000
                     single_int.index = single_int.index.droplevel('interface_category')
                     single_int.columns = [interf]
-                    if self.shift_leapday == True:
+                    if shift_leapday:
                         single_int = self.adjust_for_leapday(single_int)
                     summer = single_int[start_date_range:end_date_range]
                     winter = single_int.drop(summer.index)
@@ -674,7 +659,7 @@ class MPlot(PlotDataHelper):
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
-            #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
+            #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
 
         return outputs
 
@@ -816,7 +801,7 @@ class MPlot(PlotDataHelper):
                         single_int.index = single_int.index.droplevel('interface_category')
                         single_int.columns = [interf]
 
-                        if self.shift_leapday == True:
+                        if shift_leapday:
                             single_int = self.adjust_for_leapday(single_int)
 
                         single_int = single_int.reset_index().set_index('timestamp')
@@ -884,7 +869,7 @@ class MPlot(PlotDataHelper):
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
-            #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
+            #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs
 
 
@@ -917,7 +902,7 @@ class MPlot(PlotDataHelper):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1004,7 +989,7 @@ class MPlot(PlotDataHelper):
                     single_line = single_line.droplevel('units')
                     single_line.columns = [line]
 
-                    if self.shift_leapday == True:
+                    if shift_leapday:
                         single_line = self.adjust_for_leapday(single_line)
 
                     single_line_out = single_line.copy()
@@ -1064,9 +1049,9 @@ class MPlot(PlotDataHelper):
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
-       # Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + 'limits.csv'))
+        fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
+       # Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + 'limits.csv'))
 
         outputs = DataSavedInModule()
         return outputs
@@ -1098,7 +1083,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1139,7 +1124,7 @@ class MPlot(PlotDataHelper):
 
                 single_line = flow_diff.xs(line,level = 'line_name')
                 single_line.columns = [line]
-                if self.shift_leapday == True:
+                if shift_leapday:
                     single_line = self.adjust_for_leapday(single_line)
 
                 single_line_out = single_line.copy()
@@ -1175,8 +1160,8 @@ class MPlot(PlotDataHelper):
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
+        fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
 
         outputs = DataSavedInModule()
         return outputs
@@ -1224,7 +1209,7 @@ class MPlot(PlotDataHelper):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1306,7 +1291,7 @@ class MPlot(PlotDataHelper):
                 single_line = single_line.droplevel('units')
                 single_line_out = single_line.copy()
                 single_line.columns = [line]
-                if self.shift_leapday == True:
+                if shift_leapday:
                     single_line = self.adjust_for_leapday(single_line)
 
                 #Split into seasons.
@@ -1364,9 +1349,9 @@ class MPlot(PlotDataHelper):
         fn_suffix = '_duration_curve' if duration_curve else ''
 
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
-        #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
+        fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
+        #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
         outputs = DataSavedInModule()
         return outputs
 
@@ -1385,7 +1370,7 @@ class MPlot(PlotDataHelper):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1446,7 +1431,7 @@ class MPlot(PlotDataHelper):
                 else:
                     lines2ints = self.meta.interface_lines(scenario)
 
-                fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')
+                fn = self.figure_folder.joinpath(self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')
                 lines2ints.to_csv(fn)
 
 
@@ -1506,7 +1491,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",scenario_type)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1528,7 +1513,7 @@ class MPlot(PlotDataHelper):
             for scenario in scenario_type:
 
                 rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
-                if self.shift_leapday == True:
+                if shift_leapday:
                     rr_int = self.adjust_for_leapday(rr_int)
 
                 # For plot_main handeling - need to find better solution
@@ -1620,9 +1605,9 @@ class MPlot(PlotDataHelper):
             if plot_scenario == False:
                 # Location to save to
                 Data_Table_Out = rr_int_agg
-                save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_transmission')
-                fig.savefig(os.path.join(save_figures, "Region_Region_Interchange_{}.svg".format(self.Scenarios[0])), dpi=600, bbox_inches='tight')
-                Data_Table_Out.to_csv(os.path.join(save_figures, "Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
+                save_figures = self.figure_folder.joinpath(self.AGG_BY + '_transmission')
+                fig.savefig(save_figures.joinpath("Region_Region_Interchange_{}.svg".format(self.Scenarios[0])), dpi=600, bbox_inches='tight')
+                Data_Table_Out.to_csv(save_figures.joinpath("Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
                 outputs = DataSavedInModule()
                 return outputs
 
@@ -1652,7 +1637,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1672,7 +1657,7 @@ class MPlot(PlotDataHelper):
         n=0
         for scenario in self.Scenarios:
             rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
-            if self.shift_leapday == True:
+            if shift_leapday:
                 rr_int = self.adjust_for_leapday(rr_int)
 
             if self.AGG_BY != 'region' and self.AGG_BY != 'zone':
@@ -1734,10 +1719,10 @@ class MPlot(PlotDataHelper):
                    labelpad=40)
 
         Data_Table_Out = pd.concat(Data_Out,axis=1)
-        save_figures = os.path.join(self.figure_folder, f"{self.AGG_BY}_transmission")
-        fig.savefig(os.path.join(save_figures, "region_region_checkerboard.svg"), 
+        save_figures = self.figure_folder.joinpath(f"{self.AGG_BY}_transmission")
+        fig.savefig(save_figures.joinpath("region_region_checkerboard.svg"), 
                      dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(save_figures, "region_region_checkerboard.csv"))
+        Data_Table_Out.to_csv(save_figures.joinpath("region_region_checkerboard.csv"))
 
         outputs = DataSavedInModule()
         return outputs
@@ -1797,7 +1782,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Violation",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1898,7 +1883,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,f"{agg}_Net_Interchange",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1916,7 +1901,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {scenario}")
                 net_export_read = self[f"{agg}_Net_Interchange"].get(scenario)
-                if self.shift_leapday == True:
+                if shift_leapday:
                     net_export_read = self.adjust_for_leapday(net_export_read)                
 
                 net_export = net_export_read.xs(zone_input, level = self.AGG_BY)
@@ -1999,7 +1984,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -2052,7 +2037,7 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {str(scenario)}")
                 flow = self["line_Flow"][scenario].copy()
-                if self.shift_leapday == True:
+                if shift_leapday:
                     flow = self.adjust_for_leapday(flow)
                 flow = flow.reset_index()
 
@@ -2169,7 +2154,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -2319,7 +2304,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -2405,10 +2390,10 @@ class MPlot(PlotDataHelper):
         ax.set_ylabel('Flow ({}h)'.format(unitconversion['units']), color='black', 
                       rotation='vertical')
         ax.set_xlabel('')
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, "Figures_Output", f"{self.AGG_BY }_transmission",
+        fig.savefig(self.figure_folder.joinpath(f"{self.AGG_BY }_transmission",
                                 "Individual_Interface_Total_Flow.svg"), 
                     dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, "Figures_Output", f"{self.AGG_BY }_transmission",
+        Data_Table_Out.to_csv(self.figure_folder.joinpath(f"{self.AGG_BY }_transmission",
                                            "Individual_Interface_Total_Flow.csv"))
         outputs = DataSavedInModule()
         return outputs

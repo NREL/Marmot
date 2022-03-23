@@ -6,54 +6,35 @@ This
 @author: Daniel Levie
 """
 
-import os
 import re
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 
-import marmot.plottingmodules.total_generation as gen
 import marmot.utils.mconfig as mconfig
-
+from marmot.plottingmodules.total_generation import TotalGeneration
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)       
 plot_data_settings = mconfig.parser("plot_data")
 
-class MPlot(PlotDataHelper):
-    """total_installed_capacity MPlot class.
+class InstalledCapacity(MPlotDataHelper):
+    """Installed capacity plots.
 
-    All the plotting modules use this same class name.
-    This class contains plotting methods that are grouped based on the
-    current module name.
-    
     The total_installed_capacity module contains methods that are
     related to the total installed capacity of generators and other devices. 
 
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.    
+    InstalledCapacity inherits from the MPlotDataHelper class to assist 
+    in creating figures.    
     """
 
-    def __init__(self, argument_dict: dict):
-        """
-        Args:
-            argument_dict (dict): Dictionary containing all
-                arguments passed from MarmotPlot.
-        """
-        # iterate over items in argument_dict and set as properties of class
-        # see key_list in Marmot_plot_main for list of properties
-        for prop in argument_dict:
-            self.__setattr__(prop, argument_dict[prop])
-
+    def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
 
-        # used for combined cap/gen plot
-        self.argument_dict = argument_dict
+        self.argument_dict = kwargs
+        super().__init__(**kwargs)
          
     def total_cap(self, start_date_range: str = None, 
                   end_date_range: str = None,
@@ -173,7 +154,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -208,9 +189,8 @@ class MPlot(PlotDataHelper):
                     outputs[zone_input] = MissingZoneData()
                     continue
 
-                fn = os.path.join(self.Marmot_Solutions_folder,
-                                  'Figures_Output',
-                                  f'{self.AGG_BY}_total_installed_capacity',
+                fn = self.figure_folder.joinpath(
+                                f'{self.AGG_BY}_total_installed_capacity',
                                   'Individual_Gen_Cap_{scenario}.csv')
 
                 Total_Installed_Capacity.reset_index().to_csv(fn)
@@ -288,7 +268,7 @@ class MPlot(PlotDataHelper):
         """
         # generation figure
         logger.info("Generation data")
-        gen_obj = gen.MPlot(self.argument_dict)
+        gen_obj = TotalGeneration(**self.argument_dict)
         gen_outputs = gen_obj.total_gen(start_date_range, end_date_range, barplot_groupby)
 
         logger.info("Installed capacity data")
@@ -385,7 +365,7 @@ class MPlot(PlotDataHelper):
                                                         'Total Demand'])]*2
                         axs[1].plot(x, height2, c='black', linewidth=1.5, 
                                     label='Demand')
-                    elif extra_plot_data[scenario, "Total Demand"].sum() > 0:
+                    elif extra_plot_data.loc[scenario, "Total Demand"].sum() > 0:
                         axs[1].plot(x, height1, c='black', linewidth=1.5, 
                             label='Demand')
 

@@ -5,53 +5,34 @@ This module contains methods that are
 related to investigating generator and other device sensitivities. 
 """
 
-import os
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
 
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, InputSheetError)
 
 plot_data_settings = mconfig.parser("plot_data")
 
-class MPlot(PlotDataHelper):
-    """sensitivities MPlot class.
+class Sensitivities(MPlotDataHelper):
+    """System sensitivity plots
 
-    All the plotting modules use this same class name.
-    This class contains plotting methods that are grouped based on the
-    current module name.
-    
     The sensitivities.py module contains methods that are
     related to investigating generator sensitivities. 
     
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    Sensitivities inherits from the MPlotDataHelper class to assist 
+    in creating figures.
     """
 
-    def __init__(self, argument_dict: dict):
-        """
-        Args:
-            argument_dict (dict): Dictionary containing all
-                arguments passed from MarmotPlot.
-        """
-        # iterate over items in argument_dict and set as properties of class
-        # see key_list in Marmot_plot_main for list of properties
-        for prop in argument_dict:
-            self.__setattr__(prop, argument_dict[prop])
-        
+    def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
-
-        self.logger = logging.getLogger('plotter.'+__name__)
+        super().__init__(**kwargs)
         
+        self.logger = logging.getLogger('plotter.'+__name__)
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
-
 
     def _process_ts(self, df, zone_input):
         oz = df.xs(zone_input, level = self.AGG_BY)
@@ -106,7 +87,7 @@ class MPlot(PlotDataHelper):
                       (True,f"generator_{self.curtailment_prop}",self.Scenario_Diff),
                       (True,"region_Net_Interchange",self.Scenario_Diff)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -150,7 +131,7 @@ class MPlot(PlotDataHelper):
         diff_csv_perc = pd.DataFrame(index = bc_tech.index.get_level_values('timestamp').unique())
 
         #Add net interchange difference to icing plot.
-        bc_int = pd.read_hdf(os.path.join(self.Marmot_Solutions_folder, "Processed_HDF5_folder", self.Scenario_Diff[0] + "_formatted.h5"),"region_Net_Interchange")
+        bc_int = pd.read_hdf(self.processed_hdf5_folder.joinpath(self.Scenario_Diff[0] + "_formatted.h5"),"region_Net_Interchange")
         bc_int = self.adjust_for_leapday(self["region_Net_Interchange"].get(self.Scenario_Diff[0]))
         scen_int = self.adjust_for_leapday(self["region_Net_Interchange"].get(self.Scenario_Diff[1]))
 
@@ -248,14 +229,14 @@ class MPlot(PlotDataHelper):
                 axs[0].set_ylabel('Generation (MW)',  color='black', rotation='vertical')
                 axs[0].set_xlabel(timezone,  color='black', rotation='horizontal')
                 axs[0].margins(x=0.01)
-                PlotDataHelper.set_subplot_timeseries_format(axs)
+                MPlotDataHelper.set_subplot_timeseries_format(axs)
                 handles, labels = axs[0].get_legend_handles_labels()
                 axs[0].legend(reversed(handles), reversed(labels),facecolor='inherit', frameon=True,loc='lower left',bbox_to_anchor=(1,0))
                 if plot_data_settings["plot_title_as_region"]:
                 	fig2.title(zone_input)
                 outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
 
-        # diff_csv.to_csv(self.Marmot_Solutions_folder + '/' + self.Scenario_name + '/icing_regional_MWdiffs.csv')
-        # diff_csv_perc.to_csv(self.Marmot_Solutions_folder + '/' + self.Scenario_name + '/icing_regional_percdiffs.csv')
+        # diff_csv.to_csv(self.processed_hdf5_folder.joinpath(self.Scenario_name, icing_regional_MWdiffs.csv'))
+        # diff_csv_perc.to_csv(self.processed_hdf5_folder.joinpath(self.Scenario_name, icing_regional_percdiffs.csv'))
 
         return outputs

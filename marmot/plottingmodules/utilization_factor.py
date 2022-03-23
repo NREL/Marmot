@@ -18,7 +18,7 @@ import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
 
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, MissingZoneData)
 
@@ -36,35 +36,19 @@ def df_process_gen_ind_inputs(df, self):
 
     return df
 
-class MPlot(PlotDataHelper):
-    """utilization_factor MPlot class.
+class UtilizationFactor(MPlotDataHelper):
+    """Device utilization plots.
 
-    All the plotting modules use this same class name.
-    This class contains plotting methods that are grouped based on the
-    current module name.
-    
     The utilization.py module contains methods that are
     related to the utilization of generators and other devices. 
     
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    UtilizationFactor inherits from the MPlotDataHelper class to assist 
+    in creating figures.
     """
 
-    def __init__(self, argument_dict: dict):
-        """
-        Args:
-            argument_dict (dict): Dictionary containing all
-                arguments passed from MarmotPlot.
-        """
-        # iterate over items in argument_dict and set as properties of class
-        # see key_list in Marmot_plot_main for list of properties
-        for prop in argument_dict:
-            self.__setattr__(prop, argument_dict[prop])
-
+    def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
+        super().__init__(**kwargs)
 
         self.logger = logging.getLogger('plotter.'+__name__)
         
@@ -83,7 +67,7 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -190,7 +174,7 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -293,7 +277,7 @@ class MPlot(PlotDataHelper):
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Available_Capacity",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -394,7 +378,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
