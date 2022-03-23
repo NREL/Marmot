@@ -28,7 +28,7 @@ except ModuleNotFoundError:
     print(INCORRECT_ENTRY_POINT.format(Path(__file__).name))
     sys.exit()
 from marmot.utils.loggersetup import SetupLogger
-from marmot.utils.definitions import INPUT_DIR
+from marmot.utils.definitions import INPUT_DIR, Module_CLASS_MAPPING
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     DataSavedInModule, InputSheetError, MissingInputData, MissingMetaData,
@@ -222,15 +222,13 @@ class MarmotPlot(SetupLogger):
             self.logger.info(f"Only plotting {self.AGG_BY}: "
                             f"{self.zone_region_sublist}")
 
-        metadata_HDF5_folder_in = self.Marmot_Solutions_folder.joinpath(
+        processed_hdf5_folder = self.Marmot_Solutions_folder.joinpath(
                                                'Processed_HDF5_folder')
         
         figure_format = mconfig.parser("figure_file_format")
         if figure_format == 'nan':
             figure_format = 'png'
-        
-        shift_leapday = str(mconfig.parser("shift_leapday")).upper()
-        
+                
         #================================================================================
         # Input and Output Directories
         #================================================================================
@@ -238,10 +236,7 @@ class MarmotPlot(SetupLogger):
         figure_folder = self.Marmot_Solutions_folder.joinpath(
                                      'Figures_Output')
         figure_folder.mkdir(exist_ok=True)
-        
-        hdf_out_folder = self.Marmot_Solutions_folder.joinpath(
-                                      'Processed_HDF5_folder')
-        
+                
         #================================================================================
         # Standard Generation Order, Gen Categorization Lists, Plotting Colors
         #================================================================================
@@ -376,7 +371,7 @@ class MarmotPlot(SetupLogger):
         #================================================================================
         
         # Create an instance of MetaData.
-        meta = MetaData(metadata_HDF5_folder_in, Region_Mapping=self.Region_Mapping)
+        meta = MetaData(processed_hdf5_folder, Region_Mapping=self.Region_Mapping)
         
         if self.AGG_BY in {"zone", "zones", "Zone", "Zones"}:
             self.AGG_BY = 'zone'
@@ -480,14 +475,14 @@ class MarmotPlot(SetupLogger):
             # dictionary of arguments passed to plotting modules; 
             # key names match the instance variables in each module            
             argument_dict = {
-                "hdf_out_folder": hdf_out_folder,
                 "Zones": Zones,
                 "AGG_BY": self.AGG_BY,
                 "ordered_gen": ordered_gen,
                 "PLEXOS_color_dict": PLEXOS_color_dict,
                 "Scenarios": self.Scenarios,
                 "Scenario_Diff": self.Scenario_Diff,
-                "Marmot_Solutions_folder": self.Marmot_Solutions_folder,
+                "processed_hdf5_folder": processed_hdf5_folder,
+                "figure_folder": figure_folder,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
                 "custom_xticklabels": self.custom_xticklabels,
@@ -499,9 +494,6 @@ class MarmotPlot(SetupLogger):
                 "vre_gen_cat": vre_gen_cat,
                 "thermal_gen_cat": thermal_gen_cat,
                 "Region_Mapping": self.Region_Mapping,
-                "figure_folder": figure_folder,
-                "meta": meta,
-                "shift_leapday": shift_leapday,
                 "TECH_SUBSET": self.TECH_SUBSET
                 }
             
@@ -512,7 +504,9 @@ class MarmotPlot(SetupLogger):
             # Import plot module from plottingmodules package
             plot_module = importlib.import_module('marmot.plottingmodules.' + module)
             # Instantiate the module class
-            instantiate_mplot = plot_module.MPlot(argument_dict)
+
+            class_name = getattr(plot_module, Module_CLASS_MAPPING[module])
+            instantiate_mplot = class_name(**argument_dict)
             
             # Main loop to process each figure and pass 
             # plot specific variables to methods
@@ -535,7 +529,12 @@ class MarmotPlot(SetupLogger):
                     days_after = 2
                 else:
                     days_after = float(row.iloc[5])
-                    
+                
+                if pd.notna(row['Custom Data File']):
+                    custom_data_file_path = Path(row['Custom Data File'])
+                else:
+                    custom_data_file_path = None
+
                 if pd.notna(row['Timeseries Plot Resolution']) and \
                     row['Timeseries Plot Resolution'] == 'Annual':
                     data_resolution : str = '_Annual'
@@ -548,7 +547,10 @@ class MarmotPlot(SetupLogger):
                     barplot_groupby : str = 'Scenario'
 
                 # Get figure method and run plot
-                figure_method = getattr(instantiate_mplot, row['Method'])
+                try:
+                    figure_method = getattr(instantiate_mplot, row['Method'])
+                except AttributeError:
+                    self.logger.warning(f"{Module_CLASS_MAPPING[module]} has no attribute '{row['Method']}'")
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
                                            prop = row.iloc[2],
                                            y_axis_max = float(row.iloc[3]),
@@ -557,7 +559,7 @@ class MarmotPlot(SetupLogger):
                                            timezone = timezone_string,
                                            start_date_range = row.iloc[7],
                                            end_date_range = row.iloc[8],
-                                           custom_data_file_path = row['Custom Data File'],
+                                           custom_data_file_path = custom_data_file_path,
                                            data_resolution = data_resolution,
                                            barplot_groupby = barplot_groupby)
                 
