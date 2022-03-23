@@ -348,7 +348,7 @@ class SetupSubplot():
             y_mw_value = curtailment[x_time_value]
             y_point_value = gen_df.loc[x_time_value].sum()
         
-        elif prop == "Peak Reserve Requirement":
+        elif prop == "Peak Reserve Provision":
             peak_re = df.sum(axis=1)
             x_time_value = peak_re.idxmax()
             y_mw_value = peak_re[x_time_value]
