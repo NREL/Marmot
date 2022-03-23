@@ -197,11 +197,9 @@ def createConfig(configfile_path: Path):
         auto_convert_units = True,
         
         user_defined_inputs_file = 'Marmot_user_defined_inputs.csv',
-
         plot_select_file = 'Marmot_plot_select.csv',
-
         plexos_properties_file = 'plexos_properties.csv',
-        
+        reeds_properties_file = 'reeds_properties.csv',
         color_dictionary_file = 'colour_dictionary.csv',
         ordered_gen_categories = 'ordered_gen_categories.csv'
         )
@@ -216,7 +214,7 @@ if not configfile_path.is_file():
     createConfig(configfile_path)
     
     
-def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, float]: 
+def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, bool]: 
     """Pull requested value from config.yml file.
 
     Args:
@@ -227,7 +225,7 @@ def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, fl
             Defaults to None.
 
     Returns:
-        Union[dict, str, int, float]: Returns the requested level or value from the config file. 
+        Union[dict, str, int, bool]: Returns the requested level or value from the config file. 
         Return type varies based on level accessed.
     """
     with open(configfile_path, "r") as ymlfile:
