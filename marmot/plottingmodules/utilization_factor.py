@@ -29,7 +29,7 @@ def df_process_gen_ind_inputs(df, self):
     df['tech'].replace(self.gen_names_dict, inplace=True)
     df = df[df['tech'].isin(self.thermal_gen_cat)]  #Optional, select which technologies to show.
     df.tech = df.tech.astype("category")
-    df.tech.cat.set_categories(self.ordered_gen, inplace=True)
+    df.tech = df.tech.cat.set_categories(self.ordered_gen)
     df = df.sort_values(["tech"])
     df.set_index(['timestamp','tech','gen_name'],inplace=True)
     df=df[0]

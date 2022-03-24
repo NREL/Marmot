@@ -415,7 +415,7 @@ class Reserves(MPlotDataHelper):
                 reserve_total_chunk.append(reserve_total)
             
             if reserve_total_chunk:
-                reserve_out = pd.concat(reserve_total_chunk, axis=0, sort='False')
+                reserve_out = pd.concat(reserve_total_chunk, axis=0, sort=False)
             else:
                 reserve_out=pd.DataFrame()
             # If no reserves return nothing

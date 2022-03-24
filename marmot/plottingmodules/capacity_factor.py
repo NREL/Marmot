@@ -67,7 +67,7 @@ class CapacityFactor(MPlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            CF_all_scenarios = pd.DataFrame()
+            cf_chunks = []
             logger.info(f"{self.AGG_BY} = {zone_input}")
 
             for scenario in self.Scenarios:
@@ -82,7 +82,7 @@ class CapacityFactor(MPlotDataHelper):
                 Gen = Gen.reset_index()
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
-                Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
+                Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]
                 Gen.set_index('timestamp',inplace=True)
                 Gen = Gen.rename(columns={0: "Output (MWh)"})
@@ -149,8 +149,9 @@ class CapacityFactor(MPlotDataHelper):
                             # for this technology, weighted by capacity.
                             cf = np.average(cfs, weights=caps)
                             CF[tech_name] = cf
-                    CF_all_scenarios = CF_all_scenarios.append(CF)
-                        
+                    cf_chunks.append(CF)
+
+            CF_all_scenarios = pd.concat(cf_chunks)       
             if CF_all_scenarios.empty == True:
                 outputs[zone_input] = MissingZoneData()
                 continue
@@ -343,7 +344,7 @@ class CapacityFactor(MPlotDataHelper):
 
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
-                Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
+                Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[~Gen['tech'].isin(self.vre_gen_cat)]
                 Gen.index = Gen.timestamp

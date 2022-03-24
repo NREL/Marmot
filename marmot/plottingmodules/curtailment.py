@@ -274,15 +274,15 @@ class Curtailment(MPlotDataHelper):
                 total_gen = float(gen.sum())
 
                 # Timeseries [MW] and Total VRE generation [MWh]
-                vre_gen = (gen.loc[(slice(None), self.vre_gen_cat),:])
+                vre_gen = gen.loc[gen.index.isin(self.vre_gen_cat, level='tech')]
                 total_vre_gen = float(vre_gen.sum())
 
                 # Timeseries [MW] and Total RE generation [MWh]
-                re_gen = (gen.loc[(slice(None), self.re_gen_cat),:])
+                re_gen = gen.loc[gen.index.isin(self.re_gen_cat, level='tech')]
                 total_re_gen = float(re_gen.sum())
 
                 # Timeseries [MW] and Total PV generation [MWh]
-                pv_gen = (gen.loc[(slice(None), self.pv_gen_cat),:])
+                pv_gen = gen.loc[gen.index.isin(self.pv_gen_cat, level='tech')]
                 total_pv_gen = float(pv_gen.sum())
 
                 # % Penetration of generation classes across the year
@@ -291,11 +291,13 @@ class Curtailment(MPlotDataHelper):
                 PV_Penetration = (total_pv_gen/total_gen)*100
 
                 # Timeseries [MW] and Total RE available [MWh]
-                re_avail = (avail_gen.loc[(slice(None), self.re_gen_cat),:])
+                re_avail = avail_gen.loc[avail_gen.index.isin(self.re_gen_cat, 
+                                                                level='tech')]
                 total_re_avail = float(re_avail.sum())
 
                 # Timeseries [MW] and Total PV available [MWh]
-                pv_avail = (avail_gen.loc[(slice(None), self.pv_gen_cat),:])
+                pv_avail = avail_gen.loc[avail_gen.index.isin(self.pv_gen_cat, 
+                                                                level='tech')]
                 total_pv_avail = float(pv_avail.sum())
 
                 # Total RE curtailment [MWh]
@@ -788,9 +790,9 @@ class Curtailment(MPlotDataHelper):
             logger.info('Plotting curtailment only for sites specified in Marmot_plot_select.csv')
 
             site_idx = -1
-            sites = pd.Series()
-            sites_gen = pd.Series()
-            curt_tots = pd.Series()
+            sites_chunk = []
+            sites_gen_chunk = []
+            curt_tots_chunk = []
             chunks_scen = []
 
             ti = gen.index.get_level_values('timestamp').unique()
@@ -827,9 +829,9 @@ class Curtailment(MPlotDataHelper):
                 curt_tot.columns = [site]
                 curt.columns = [site]
 
-                sites_gen = sites_gen.append(gen_tot)
-                sites = sites.append(curt_perc)
-                curt_tots = curt_tots.append(curt_tot)
+                sites_gen_chunk.append(gen_tot)
+                sites_chunk.append(curt_perc)
+                curt_tots_chunk.append(curt_tot)
                 chunks_scen.append(curt)
 
             if not chunks_scen:
@@ -840,6 +842,9 @@ class Curtailment(MPlotDataHelper):
             curt_8760_scen = curt_8760_scen.set_index([scen_name],append = True)
             chunks.append(curt_8760_scen)
 
+            sites_gen = pd.concat(sites_gen_chunk)
+            sites = pd.concat(sites_chunk)
+            curt_tots = pd.concat(curt_tots_chunk)
             sites.name = scenario
             sites.index = select_sites
             curt_tots.name = scenario

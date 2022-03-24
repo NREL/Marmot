@@ -2331,8 +2331,7 @@ class Transmission(MPlotDataHelper):
             
             self.logger.info(f"Scenario = {str(scenario)}")
             flow_all = self["interface_Flow"][scenario]
-            pos = pd.Series(name='Total Export')
-            neg = pd.Series(name='Total Import')
+            both_chunk = []
             
             available_inter = select_ints.copy()
             
@@ -2356,14 +2355,15 @@ class Transmission(MPlotDataHelper):
             
                 flow = flow[0]
 
-                pos_sing = pd.Series(flow.where(flow > 0).sum())
-                pos = pos.append(pos_sing)
-                neg_sing = pd.Series(flow.where(flow < 0).sum())
-                neg = neg.append(neg_sing)
+                pos_sing = pd.Series(flow.where(flow > 0).sum(), 
+                                    name='Total Export')
+                neg_sing = pd.Series(flow.where(flow < 0).sum(), 
+                                    name='Total Import')
+                both_df = pd.concat([pos_sing, neg_sing], axis=1)
+                both_chunk.append(both_df)
 
-            both = pd.concat([pos,neg],axis = 1)
+            both = pd.concat(both_chunk)
             both.columns = ['Total Export','Total Import']
-
             if scenario == self.Scenarios[0]:
                 unitconversion = self.capacity_energy_unitconversion(both)
 

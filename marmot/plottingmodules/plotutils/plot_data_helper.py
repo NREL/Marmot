@@ -253,12 +253,12 @@ class MPlotDataHelper(dict):
         # Check if data is not already categorical
         if df.tech.dtype.name != "category":
             df.tech = df.tech.astype("category")
-        df.tech.cat.set_categories(self.ordered_gen, inplace=True)
+        df.tech = df.tech.cat.set_categories(self.ordered_gen)
         df = df.sort_values(["tech"])
         df = df.pivot(index='timestamp', columns='tech', values=0)
         return df.fillna(0)
 
-    def create_categorical_tech_index(self, df: pd.DataFrame) -> pd.DataFrame:
+    def create_categorical_tech_index(self, df: pd.DataFrame, axis=0) -> pd.DataFrame:
         """Creates categorical index based on generators.
 
         Args:
@@ -267,9 +267,13 @@ class MPlotDataHelper(dict):
         Returns:
             pd.DataFrame: Processed DataFrame.
         """
-        df.index = df.index.astype("category")
-        df.index = df.index.set_categories(self.ordered_gen)
-        df = df.sort_index()
+        if axis==0:
+            df.index = df.index.astype("category")
+            df.index = df.index.set_categories(self.ordered_gen)
+        elif axis==1:
+            df.columns = df.columns.astype("category")
+            df.columns = df.columns.set_categories(self.ordered_gen)
+        df = df.sort_index(axis=axis)
         return df
 
     def merge_new_agg(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -383,17 +387,12 @@ class MPlotDataHelper(dict):
         if self.TECH_SUBSET:
             logger.info("Net Imports can not be calculated when using TECH_SUBSET")
             return gen_df
-        # Check if generators are in columns, if yes transpose gen_df
-        if any(gen_type in self.ordered_gen for gen_type in gen_df.columns):
-            gen_df = gen_df.T
-            transpose_df = True
-        else:
-            transpose_df = False
+
         curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
-        if curtailment_name in gen_df.index:
-            total_gen = gen_df.drop(curtailment_name).sum()
+        if curtailment_name in gen_df.columns:
+            total_gen = gen_df.drop(curtailment_name, axis=1).sum(axis=1)
         else:
-            total_gen = gen_df.sum()
+            total_gen = gen_df.sum(axis=1)
         net_imports = load_series.squeeze() - total_gen
         # Remove negative values (i.e exports)
         net_imports = net_imports.clip(lower=0)
@@ -401,12 +400,10 @@ class MPlotDataHelper(dict):
             net_imports -= unsereved_energy.squeeze()
         net_imports = net_imports.rename("Net Imports")
         net_imports = net_imports.fillna(0)
-        gen_df = gen_df.append(net_imports)
-        # In the event of two Net Imports rows combine here
-        gen_df = gen_df.groupby(level=0, axis=0).sum()
-        gen_df = self.create_categorical_tech_index(gen_df)
-        if transpose_df:
-           gen_df = gen_df.T 
+        gen_df = pd.concat([gen_df, net_imports], axis=1)
+        # In the event of two Net Imports columns combine here
+        gen_df = gen_df.groupby(level=0, axis=1).sum()
+        gen_df = self.create_categorical_tech_index(gen_df, axis=1)
         return gen_df
 
     def capacity_energy_unitconversion(self, df: pd.DataFrame, 

@@ -65,7 +65,7 @@ class Ramping(MPlotDataHelper):
         
         for zone_input in self.Zones:
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
-            cap_started_all_scenarios = pd.DataFrame()
+            cap_stated_chunks = []
 
             for scenario in self.Scenarios:
 
@@ -82,7 +82,7 @@ class Ramping(MPlotDataHelper):
                 Gen = Gen.reset_index()
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
-                Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
+                Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
                 # Gen = Gen.drop(columns = ['region'])
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.
@@ -125,7 +125,7 @@ class Ramping(MPlotDataHelper):
 
                     Cap_started[tech_name] = cap_started
 
-                cap_started_all_scenarios = cap_started_all_scenarios.append(Cap_started)
+                cap_stated_chunks.append(Cap_started)
 
 
                 # import time
@@ -152,6 +152,7 @@ class Ramping(MPlotDataHelper):
                 # elapsed = end - start
                 # print('Method 2 (first making a data frame with only 0s, then checking if timestamps > 1 hour) took ' + str(elapsed) + ' seconds')
 
+            cap_started_all_scenarios = pd.concat(cap_stated_chunks)
             if cap_started_all_scenarios.empty == True:
                 out = MissingZoneData()
                 outputs[zone_input] = out
@@ -222,7 +223,7 @@ class Ramping(MPlotDataHelper):
 
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
-                Gen.tech.cat.set_categories(self.ordered_gen, inplace=True)
+                Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
                 Gen = Gen.rename(columns = {0:"Output (MWh)"})
                 Gen = Gen[['timestamp','gen_name','tech','Output (MWh)']]
                 Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.tops.
