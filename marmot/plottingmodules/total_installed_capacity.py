@@ -18,7 +18,8 @@ from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)       
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings : dict = mconfig.parser("plot_data")
+load_legend_names : dict = mconfig.parser("load_legend_names")
 
 class InstalledCapacity(MPlotDataHelper):
     """Installed capacity plots.
@@ -322,13 +323,12 @@ class InstalledCapacity(MPlotDataHelper):
                                                   for i in Total_Gen_Results.columns]
 
             if plot_data_settings["include_barplot_load_lines"]:
-                extra_plot_data = pd.DataFrame(Total_Gen_Results.loc[:, 
-                                                "Total Load Demand + \n Storage Charging"])
+                extra_plot_data = pd.DataFrame(Total_Gen_Results.loc[:, "Total Load"])
                 extra_plot_data["Total Demand"] = Total_Gen_Results.loc[:, f"Total Demand"]
                 extra_plot_data["Unserved Energy"] = Total_Gen_Results.loc[:, f"Unserved Energy"]
 
             Total_Generation_Stack_Out = Total_Gen_Results.drop(
-                                            ["Total Load Demand + \n Storage Charging",
+                                            ["Total Load",
                                             f"Total Demand",
                                             f"Unserved Energy"], axis=1)
             
@@ -353,21 +353,21 @@ class InstalledCapacity(MPlotDataHelper):
                         axs[1].patches[n].get_width()]
                     
                     height1 = [float(extra_plot_data.loc[scenario, 
-                                "Total Load Demand + \n Storage Charging"].sum())]*2
+                                "Total Load"].sum())]*2
                     
                     if plot_data_settings["include_barplot_load_storage_charging_line"] and \
-                        extra_plot_data.loc[scenario, "Total Load Demand + \n Storage Charging"].sum() > \
+                        extra_plot_data.loc[scenario, "Total Load"].sum() > \
                             extra_plot_data.loc[scenario, "Total Demand"].sum():
                         axs[1].plot(x, height1, c='black', linewidth=1.5,
                                 linestyle="--",
-                                label='Demand + \n Storage Charging')
+                                label=load_legend_names["load"])
                         height2 = [float(extra_plot_data.loc[scenario, 
                                                         'Total Demand'])]*2
                         axs[1].plot(x, height2, c='black', linewidth=1.5, 
-                                    label='Demand')
+                                    label=load_legend_names["demand"])
                     elif extra_plot_data.loc[scenario, "Total Demand"].sum() > 0:
                         axs[1].plot(x, height1, c='black', linewidth=1.5, 
-                            label='Demand')
+                            label=load_legend_names["demand"])
 
                     if extra_plot_data.loc[scenario, 'Unserved Energy'] > 0:
                         height3 = [float(extra_plot_data.loc[scenario, 

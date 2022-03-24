@@ -181,6 +181,10 @@ def createConfig(configfile_path: Path):
             include_barplot_net_imports = True,
             include_stackplot_net_imports = True),
 
+        load_legend_names = dict(
+            load = "Demand +\nStorage Charging",
+            demand = "Demand"),
+
         formatter_settings = dict( 
             VoLL = 10000,
             skip_existing_properties = True,

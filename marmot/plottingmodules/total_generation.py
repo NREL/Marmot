@@ -18,7 +18,8 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings : dict = mconfig.parser("plot_data")
+load_legend_names : dict = mconfig.parser("load_legend_names")
 
 class TotalGeneration(MPlotDataHelper):
     """Total generation plots.
@@ -149,7 +150,7 @@ class TotalGeneration(MPlotDataHelper):
                         extra_plot_data[f"{agg}_Demand"] - extra_plot_data[f"{agg}_Unserved_Energy"]                    
 
                 extra_plot_data = extra_plot_data.rename(columns=
-                                            {f"{agg}_Load": "Total Load (Demand + \n Storage Charging)",
+                                            {f"{agg}_Load": "Total Load",
                                             f"{agg}_Unserved_Energy": "Unserved Energy",
                                             f"{agg}_Demand": "Total Demand"})
                 extra_plot_data = extra_plot_data/interval_count
@@ -173,7 +174,7 @@ class TotalGeneration(MPlotDataHelper):
             if plot_data_settings["include_barplot_net_imports"]:
                 total_generation_stack_out =\
                     self.include_net_imports(total_generation_stack_out, 
-                                             extra_data_out['Total Load (Demand + \n Storage Charging)'],
+                                             extra_data_out['Total Load'],
                                              extra_data_out['Unserved Energy'])
 
             total_generation_stack_out = total_generation_stack_out.loc[:, (total_generation_stack_out != 0).any(axis=0)]
@@ -213,21 +214,21 @@ class TotalGeneration(MPlotDataHelper):
                     x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                     
                     height1 = [float(extra_data_out.loc[scenario, 
-                                "Total Load (Demand + \n Storage Charging)"].sum())]*2
+                                "Total Load"].sum())]*2
                     
                     if plot_data_settings["include_barplot_load_storage_charging_line"] and \
-                        extra_plot_data["Total Load (Demand + \n Storage Charging)"].sum() > \
+                        extra_plot_data["Total Load"].sum() > \
                             extra_plot_data["Total Demand"].sum():
                         ax.plot(x, height1, c='black', linewidth=1.5,
                                 linestyle="--",
-                                label='Demand + \n Storage Charging')
+                                label=load_legend_names["load"])
                         height2 = [float(extra_data_out.loc[scenario, 
                                                         'Total Demand'])]*2
                         ax.plot(x, height2, c='black', linewidth=1.5, 
-                                    label='Demand')
+                                    label=load_legend_names["demand"])
                     elif extra_plot_data["Total Demand"].sum() > 0:
                         ax.plot(x, height1, c='black', linewidth=1.5, 
-                            label='Demand')
+                            label=load_legend_names["demand"])
 
                     if extra_data_out.loc[scenario, 'Unserved Energy'] > 0:
                         height3 = [float(extra_data_out.loc[scenario, 
@@ -561,7 +562,7 @@ class TotalGeneration(MPlotDataHelper):
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
 
                 extra_plot_data = extra_plot_data.rename(columns={
-                                        f"{agg}_Load": "Total Load (Demand + \n Storage Charging)",
+                                        f"{agg}_Load": "Total Load",
                                         f"{agg}_Demand": "Total Demand"})
 
                 if pd.notna(start_date_range):
@@ -628,7 +629,7 @@ class TotalGeneration(MPlotDataHelper):
             if plot_data_settings["include_barplot_net_imports"] and \
                 not vre_only:
                 Gen_Out = self.include_net_imports(Gen_Out, 
-                                    extra_data_out["Total Load (Demand + \n Storage Charging)"])
+                                    extra_data_out["Total Load"])
 
             if not plot_as_percnt:
                 # unit conversion return divisor and energy units
@@ -688,22 +689,22 @@ class TotalGeneration(MPlotDataHelper):
                 for n, _m in enumerate(month_extra.index):
                     x = [axs[i].patches[n].get_x(), axs[i].patches[n].get_x() +\
                             axs[i].patches[n].get_width()]
-                    height1 = [float(month_extra.loc[_m, 'Total Load (Demand + \n Storage Charging)'])]*2
+                    height1 = [float(month_extra.loc[_m, 'Total Load'])]*2
                     
                     if plot_data_settings["include_barplot_load_storage_charging_line"] and \
-                        month_extra.loc[_m, "Total Load (Demand + \n Storage Charging)"].sum() > \
+                        month_extra.loc[_m, "Total Load"].sum() > \
                             month_extra.loc[_m, "Total Demand"].sum():
 
                         axs[i].plot(x, height1, c='black', linewidth=2,
                                     linestyle="--",
-                                    label='Demand + \n Storage Charging')
+                                    label=load_legend_names["load"])
                         height2 = [float(month_extra.loc[_m, 
                                                         'Total Demand'])]*2
                         axs[i].plot(x, height2, c='black', linewidth=1.5, 
-                                    label='Demand')
+                                    label=load_legend_names["demand"])
                     elif month_extra.loc[_m, "Total Demand"].sum() > 0:
                         axs[i].plot(x, height1, c='black', linewidth=2, 
-                                    label='Demand')
+                                    label=load_legend_names["demand"])
 
             # add facet labels
             mplt.add_facet_labels(xlabels=self.xlabels,

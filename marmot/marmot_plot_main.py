@@ -563,6 +563,7 @@ class MarmotPlot(SetupLogger):
                     figure_method = getattr(instantiate_mplot, row['Method'])
                 except AttributeError:
                     self.logger.warning(f"{Module_CLASS_MAPPING[module]} has no attribute '{row['Method']}'")
+                    continue
                 Figure_Out = figure_method(figure_name = row.iloc[0], 
                                            prop = row.iloc[2],
                                            y_axis_max = float(row.iloc[3]),

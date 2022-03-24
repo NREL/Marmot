@@ -19,8 +19,9 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, InputSheetError, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings : dict = mconfig.parser("plot_data")
 shift_leapday : bool = mconfig.parser("shift_leapday")
+load_legend_names : dict = mconfig.parser("load_legend_names")
 
 class GenerationStack(MPlotDataHelper):
     """Timeseries generation stacked area plots.
@@ -437,12 +438,14 @@ class GenerationStack(MPlotDataHelper):
                         extra_plot_data["Total Load"].sum() > extra_plot_data["Total Demand"].sum():
                         axs[i].plot(extra_plot_data["Total Load"], 
                                     color='black', linestyle="--",
-                                    label='Demand + \n Storage Charging')
+                                    label=load_legend_names["load"])
                         axs[i].plot(extra_plot_data["Total Demand"], 
-                                    color='black', label='Demand')
+                                    color='black', 
+                                    label=load_legend_names["demand"])
                     elif extra_plot_data["Total Demand"].sum() > 0:
                         axs[i].plot(extra_plot_data["Total Demand"], 
-                                    color='black', label='Demand')                    
+                                    color='black', 
+                                    label=load_legend_names["demand"])               
 
             if not data_tables:
                 outputs = MissingZoneData()

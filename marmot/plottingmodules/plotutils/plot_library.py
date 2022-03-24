@@ -604,6 +604,7 @@ class PlotLibrary(SetupSubplot):
 
         self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, sub_pos=sub_pos)
         ax.margins(x=0.01)
+        # ax.grid(which='both', axis='both', linewidth=0.5)
 
     def barplot(self, df: pd.DataFrame, color: Union[dict, list] = None,
                 stacked: bool = False, sub_pos: Union[int, Tuple[int, int]] = 0, 
@@ -652,6 +653,7 @@ class PlotLibrary(SetupSubplot):
         self.set_yaxis_major_tick_format(tick_format=ytick_major_fmt, 
                                             sub_pos=sub_pos)
 
+        # ax.grid(which='both', axis='both', linewidth=0.5)
         # Set x-tick labels
         if isinstance(custom_tick_labels, pd.Index):
             custom_tick_labels = list(custom_tick_labels)
