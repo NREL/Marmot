@@ -102,18 +102,19 @@ class MarmotFormat(SetupLogger):
 
         if isinstance(Region_Mapping, (str, Path)):
             try:
-                self.Region_Mapping = pd.read_csv(Region_Mapping)
+                Region_Mapping = pd.read_csv(Region_Mapping)
                 if not self.Region_Mapping.empty:
-                    self.Region_Mapping = self.Region_Mapping.astype(str)
+                    Region_Mapping = Region_Mapping.astype(object)
             except FileNotFoundError:
                 self.logger.warning("Could not find specified "
                                     "Region Mapping file; "
                                     "check file name\n")
-                self.Region_Mapping = pd.DataFrame()
-        elif isinstance(Region_Mapping, pd.DataFrame):
+                Region_Mapping = pd.DataFrame()
             self.Region_Mapping = Region_Mapping
-            if not self.Region_Mapping.empty:
-                self.Region_Mapping = self.Region_Mapping.astype('string')
+        elif isinstance(Region_Mapping, pd.DataFrame):
+            if not Region_Mapping.empty:
+                Region_Mapping = Region_Mapping.astype(object)
+            self.Region_Mapping = Region_Mapping
         try:
             # delete category columns if exists
             self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)  
@@ -157,7 +158,6 @@ class MarmotFormat(SetupLogger):
                 Defaults to 'blosc:zlib'.
         """
         self.logger.info("Saving data to h5 file...")
-
         df.to_hdf(file_name, key=key, mode=mode,
                     complevel=complevel,
                     complib=complib,
