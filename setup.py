@@ -21,10 +21,11 @@ setup(name='marmot',
                 'marmot.plottingmodules',
                 'marmot.plottingmodules.plotutils'],
 
-      install_requires=['numpy',
-                        'pandas',
+      install_requires=['h5py==2.10.0',
+                        'numpy',
+                        'pandas>=1.0.5',
+                        'tables'
                         'PyYAML',
-                        'h5py==2.10.0',
                         'matplotlib>=3.1.0',
                         'h5plexos @ git+https://github.com/NREL/h5plexos.git#egg=h5plexos']
       )
