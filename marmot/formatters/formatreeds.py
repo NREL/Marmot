@@ -46,13 +46,13 @@ class ProcessReEDS(Process):
     # The dictionary keys are the existing properties and the values are the new
     # property names and methods used to create it.
     EXTRA_MARMOT_PROPERTIES: dict = {
-        'generator_Total_Generation_Cost': [('generator_VO&M_Cost', 
+        'generator_Total_Generation_Cost': [('generator_VOM_Cost', 
                                                 ExtraProperties.reeds_generator_vom_cost),
                                             ('generator_Fuel_Cost', 
                                                 ExtraProperties.reeds_generator_fuel_cost),
-                                            ('generator_Reserves_VO&M_Cost', 
+                                            ('generator_Reserves_VOM_Cost', 
                                                 ExtraProperties.reeds_generator_reserve_vom_cost),
-                                            ('generator_FO&M_Cost', 
+                                            ('generator_FOM_Cost', 
                                                 ExtraProperties.reeds_generator_fom_cost)],
         'reserves_generators_Provision': [('reserve_Provision', 
                                                 ExtraProperties.reeds_reserve_provision)],
@@ -215,7 +215,6 @@ class ProcessReEDS(Process):
                 # Merge in region mapping, drop any na columns
                 df = df.merge(self.Region_Mapping, how='left', on='region')
                 df.dropna(axis=1, how='all', inplace=True)
-
         # Get desired method, used for extra processing if needed
         process_att = getattr(self, f'df_process_{data_class}', None)
         if process_att:

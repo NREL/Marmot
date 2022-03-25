@@ -28,7 +28,11 @@ class ProcessPLEXOS(Process):
     """
     # Maps PLEXOS property names to Marmot names, 
     # unchanged names not included  
-    PROPERTY_MAPPING: dict = {}
+    PROPERTY_MAPPING: dict = {
+        "generator_Start_&_Shutdown_Cost": "generator_Start_and_Shutdown_Cost",
+        "generator_VO&M_Cost": "generator_VOM_Cost",
+        "generator_Reserves_VO&M_Cost": "generator_Reserves_VOM_Cost"
+    }
     # Extra custom properties that are created based off existing properties. 
     # The dictionary keys are the existing properties and the values are the new
     # property names and methods used to create it.

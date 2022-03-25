@@ -341,11 +341,11 @@ class SystemCosts(MPlotDataHelper):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(False, "generator_FO&M_Cost", self.Scenarios),
-                      (False, "generator_VO&M_Cost", self.Scenarios),
+        properties = [(False, "generator_FOM_Cost", self.Scenarios),
+                      (False, "generator_VOM_Cost", self.Scenarios),
                       (False, "generator_Fuel_Cost", self.Scenarios),
-                      (False, "generator_Start_&_Shutdown_Cost", self.Scenarios),
-                      (False, "generator_Reserves_VO&M_Cost", self.Scenarios),
+                      (False, "generator_Start_and_Shutdown_Cost", self.Scenarios),
+                      (False, "generator_Reserves_VOM_Cost", self.Scenarios),
                       (False, "generator_Emissions_Cost", self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -379,18 +379,18 @@ class SystemCosts(MPlotDataHelper):
                             logger.warning(f"No Generators found in: {zone_input}")
                             break
 
-                    if prop_name[1] == "generator_VO&M_Cost":
+                    if prop_name[1] == "generator_VOM_Cost":
                         df[0].to_numpy()[df[0].to_numpy() < 0] = 0
                     df = df.rename(columns={0: prop_name[1]})
                     data_frames_lst.append(df)
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
                 detailed_gen_cost = detailed_gen_cost.rename(columns=
-                                            {"generator_FO&M_Cost": "FO&M Cost",
-                                             "generator_VO&M_Cost": "VO&M Cost",
+                                            {"generator_FOM_Cost": "FO&M Cost",
+                                             "generator_VOM_Cost": "VO&M Cost",
                                              "generator_Fuel_Cost": "Fuel Cost",
-                                             "generator_Start_&_Shutdown_Cost": "Start & Shutdown Cost",
-                                             "generator_Reserves_VO&M_Cost": "Reserves VO&M Cost",
+                                             "generator_Start_and_Shutdown_Cost": "Start & Shutdown Cost",
+                                             "generator_Reserves_VOM_Cost": "Reserves VO&M Cost",
                                              "generator_Emissions_Cost": "Emissions Cost"})
 
                 if pd.notna(start_date_range):
@@ -836,11 +836,11 @@ class SystemCosts(MPlotDataHelper):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(False, "generator_FO&M_Cost", self.Scenarios),
-                      (False, "generator_VO&M_Cost", self.Scenarios),
+        properties = [(False, "generator_FOM_Cost", self.Scenarios),
+                      (False, "generator_VOM_Cost", self.Scenarios),
                       (False, "generator_Fuel_Cost", self.Scenarios),
-                      (False, "generator_Start_&_Shutdown_Cost", self.Scenarios),
-                      (False, "generator_Reserves_VO&M_Cost", self.Scenarios),
+                      (False, "generator_Start_and_Shutdown_Cost", self.Scenarios),
+                      (False, "generator_Reserves_VOM_Cost", self.Scenarios),
                       (False, "generator_Emissions_Cost", self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -875,18 +875,18 @@ class SystemCosts(MPlotDataHelper):
                             logger.warning(f"No Generators found in: {zone_input}")
                             break
 
-                    if prop_name[1] == "generator_VO&M_Cost":
+                    if prop_name[1] == "generator_VOM_Cost":
                         df[0].to_numpy()[df[0].to_numpy() < 0] = 0
                     df = df.rename(columns={0: prop_name[1]})
                     data_frames_lst.append(df)
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
                 detailed_gen_cost = detailed_gen_cost.rename(columns=
-                                            {"generator_FO&M_Cost": "FO&M Cost",
-                                             "generator_VO&M_Cost": "VO&M Cost",
+                                            {"generator_FOM_Cost": "FO&M Cost",
+                                             "generator_VOM_Cost": "VO&M Cost",
                                              "generator_Fuel_Cost": "Fuel Cost",
-                                             "generator_Start_&_Shutdown_Cost": "Start & Shutdown Cost",
-                                             "generator_Reserves_VO&M_Cost": "Reserves VO&M Cost",
+                                             "generator_Start_and_Shutdown_Cost": "Start & Shutdown Cost",
+                                             "generator_Reserves_VOM_Cost": "Reserves VO&M Cost",
                                              "generator_Emissions_Cost": "Emissions Cost"})
 
                 if pd.notna(start_date_range):

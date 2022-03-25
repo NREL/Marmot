@@ -202,24 +202,24 @@ class ExtraProperties():
         return df.xs('op_fuelcosts_objfn', level='cost_type')
 
     def reeds_generator_reserve_vom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
-        """Creates a generator_Reserves_VO&M_Cost property for ReEDS result sets 
+        """Creates a generator_Reserves_VOM_Cost property for ReEDS result sets 
 
         Args:
             df (pd.DataFrame): generator_Total_Generation_Cost df
 
         Returns:
-            pd.DataFrame: generator_Reserves_VO&M_Cost df
+            pd.DataFrame: generator_Reserves_VOM_Cost df
         """
         return df.xs('op_operating_reserve_costs', level='cost_type')
 
     def reeds_generator_fom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
-        """Creates a generator_FO&M_Cost property for ReEDS result sets 
+        """Creates a generator_FOM_Cost property for ReEDS result sets 
 
         Args:
             df (pd.DataFrame): generator_Total_Generation_Cost df
 
         Returns:
-            pd.DataFrame: generator_FO&M_Cost df
+            pd.DataFrame: generator_FOM_Cost df
         """
         return df.xs('op_fom_costs', level='cost_type')
 
