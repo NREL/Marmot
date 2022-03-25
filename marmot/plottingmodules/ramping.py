@@ -51,7 +51,7 @@ class Ramping(MPlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of 
         # tuples and contain 3 parts:
@@ -188,7 +188,7 @@ class Ramping(MPlotDataHelper):
         logger.warning('count_ramps is under development')
         return outputs
         
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.

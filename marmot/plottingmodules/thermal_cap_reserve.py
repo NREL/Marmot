@@ -133,7 +133,7 @@ class ThermalReserve(MPlotDataHelper):
                         continue
                 
                 # Create data table for each scenario
-                scenario_names = pd.Series([scenario]*len(thermal_reserve), cname='Scenario')
+                scenario_names = pd.Series([scenario]*len(thermal_reserve), name='Scenario')
                 data_table = thermal_reserve.add_suffix(f" ({unitconversion['units']})")
                 data_table = data_table.set_index([scenario_names], append=True)
                 data_table_chunks.append(data_table)

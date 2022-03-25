@@ -49,7 +49,7 @@ class UnservedEnergy(MPlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         if self.AGG_BY == 'zone':
             agg = 'zone'
@@ -143,7 +143,7 @@ class UnservedEnergy(MPlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         if self.AGG_BY == 'zone':
             agg = 'zone'
@@ -261,7 +261,7 @@ class UnservedEnergy(MPlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         if self.AGG_BY == 'zone':
             agg = 'zone'

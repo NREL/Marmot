@@ -39,7 +39,8 @@ class CapacityOut(MPlotDataHelper):
         super().__init__(**kwargs)
 
     def capacity_out_stack(self, start_date_range: str = None, 
-                             end_date_range: str = None, **_):
+                             end_date_range: str = None,
+                             data_resolution: str = "", **_):
         """Creates Timeseries stacked area plots of generation on outage by technology.
 
         Each scenario is plotted by a separate facet plot. 
@@ -57,8 +58,8 @@ class CapacityOut(MPlotDataHelper):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Installed_Capacity",self.Scenarios),
-                      (True,"generator_Available_Capacity",self.Scenarios)]
+        properties = [(True,f"generator_Installed_Capacity{data_resolution}",self.Scenarios),
+                      (True,f"generator_Available_Capacity{data_resolution}",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -104,13 +105,15 @@ class CapacityOut(MPlotDataHelper):
                     continue
                 avail_cap.columns = ['avail']
                 install_cap.columns = ['cap']
-                avail_cap.reset_index(inplace = True)
+                avail_cap['year'] = avail_cap.index.get_level_values('timestamp').year
+                install_cap['year'] = install_cap.index.get_level_values('timestamp').year
+                avail_cap.reset_index(inplace=True)
                 
-                cap_out = avail_cap.merge(install_cap, left_on='gen_name', right_on='gen_name')
+                cap_out = avail_cap.merge(install_cap, on=['year','tech','gen_name'])
                 cap_out[0] = cap_out['cap'] - cap_out['avail']
                 
                 cap_out = self.df_process_gen_inputs(cap_out)
-
+                print(cap_out)
                 #Subset only thermal gen categories
                 thermal_gens = [therm for therm in self.thermal_gen_cat if therm in cap_out.columns]
                 cap_out = cap_out[thermal_gens]
@@ -118,7 +121,7 @@ class CapacityOut(MPlotDataHelper):
                 if cap_out.empty is True:
                     logger.warning(f"No Thermal Generation in: {zone_input}")
                     continue
-                
+                print(cap_out)
                 if pd.notna(start_date_range):
                     cap_out = self.set_timestamp_date_range(cap_out,
                                     start_date_range, end_date_range)
@@ -155,7 +158,7 @@ class CapacityOut(MPlotDataHelper):
             # Looks better for a one scenario plot
             #plt.tight_layout(rect=[0, 0.03, 1.25, 0.97])
             
-            plt.tight_layout(rect=[0,0.03,1,0.97])
+            # plt.tight_layout(rect=[0,0.03,1,0.97])
             # Add title
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
