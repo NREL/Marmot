@@ -22,6 +22,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)        
 plot_data_settings = mconfig.parser("plot_data")
 
 class Hydro(MPlotDataHelper):
@@ -37,8 +38,6 @@ class Hydro(MPlotDataHelper):
     def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
         super().__init__(**kwargs)
-        
-        self.logger = logging.getLogger('plotter.'+__name__)        
 
     def hydro_continent_net_load(self, start_date_range: str = None, 
                              end_date_range: str = None, **_):
@@ -55,7 +54,7 @@ class Hydro(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception 
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -74,8 +73,8 @@ class Hydro(MPlotDataHelper):
 
             Stacked_Gen_read = self["generator_Generation"].get(self.Scenarios[0])
 
-            self.logger.info("Zone = "+ zone_input)
-            self.logger.info("Winter is defined as date range: \
+            logger.info("Zone = "+ zone_input)
+            logger.info("Winter is defined as date range: \
             {} to {}".format(str(start_date_range),str(end_date_range)))
             Net_Load = self.df_process_gen_inputs(Stacked_Gen_read)
 
@@ -88,7 +87,7 @@ class Hydro(MPlotDataHelper):
             try:
                 Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             except KeyError:
-                self.logger.warning("No Generation in %s",zone_input)
+                logger.warning("No Generation in %s",zone_input)
                 continue
             del Stacked_Gen_read
             Stacked_Gen= self.df_process_gen_inputs(Stacked_Gen)
@@ -100,7 +99,7 @@ class Hydro(MPlotDataHelper):
             try:
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
-                self.logger.warning("No Hydro Generation in %s", zone_input)
+                logger.warning("No Hydro Generation in %s", zone_input)
                 Hydro_Gen=MissingZoneData()
                 continue
 
@@ -152,7 +151,7 @@ class Hydro(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception 
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -166,7 +165,7 @@ class Hydro(MPlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info("Zone = "+ zone_input)
+            logger.info("Zone = "+ zone_input)
             
             #Location to save to
             hydro_figures = os.path.join(self.figure_folder, self.AGG_BY + '_Hydro')
@@ -178,7 +177,7 @@ class Hydro(MPlotDataHelper):
             try:
                 Stacked_Gen = Stacked_Gen_read.xs(zone_input,level=self.AGG_BY)
             except KeyError:
-                self.logger.warning("No Generation in %s",zone_input)
+                logger.warning("No Generation in %s",zone_input)
                 continue
 
             del Stacked_Gen_read
@@ -195,7 +194,7 @@ class Hydro(MPlotDataHelper):
             try:
                 Hydro_Gen = Stacked_Gen['Hydro']
             except KeyError:
-                self.logger.warning("No Hydro Generation in %s", zone_input)
+                logger.warning("No Hydro Generation in %s", zone_input)
                 Hydro_Gen=MissingZoneData()
                 continue
 
@@ -207,7 +206,7 @@ class Hydro(MPlotDataHelper):
 
                 period_start=first_date+dt.timedelta(days=(wk-1)*7)
                 period_end=period_start+dt.timedelta(days=end)
-                self.logger.info(str(period_start)+" and next "+str(end)+" days.")
+                logger.info(str(period_start)+" and next "+str(end)+" days.")
                 Hydro_Period = Hydro_Gen[period_start:period_end]
                 Net_Load_Period = Net_Load[period_start:period_end]
 

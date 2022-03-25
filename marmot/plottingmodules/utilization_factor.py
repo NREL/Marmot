@@ -22,6 +22,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 def df_process_gen_ind_inputs(df, self):
@@ -50,9 +51,6 @@ class UtilizationFactor(MPlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(**kwargs)
 
-        self.logger = logging.getLogger('plotter.'+__name__)
-        
-
     def uf_fleet(self, **_):
         """Plot under development
 
@@ -60,7 +58,7 @@ class UtilizationFactor(MPlotDataHelper):
             UnderDevelopment(): Exception class, plot is not functional. 
         """
         return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -76,7 +74,7 @@ class UtilizationFactor(MPlotDataHelper):
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            logger.info(self.AGG_BY + " = " + zone_input)
 
             fig3, ax3 = plt.subplots(len(self.Scenarios),figsize=(4,4*len(self.Scenarios)),sharey=True) # Set up subplots for all scenarios
 
@@ -85,12 +83,12 @@ class UtilizationFactor(MPlotDataHelper):
             cf_chunk = []
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                logger.info("Scenario = " + str(scenario))
                 Gen = self["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No generation in %s",zone_input)
+                    logger.warning("No generation in %s",zone_input)
                     continue
 
                 Gen = df_process_gen_ind_inputs(Gen,self)
@@ -141,7 +139,7 @@ class UtilizationFactor(MPlotDataHelper):
                 #end scenario loop
             
             if not cf_chunk:
-                self.logger.warning("No generation in %s",zone_input)
+                logger.warning("No generation in %s",zone_input)
                 outputs[zone_input] = MissingZoneData()
                 continue
             
@@ -167,7 +165,7 @@ class UtilizationFactor(MPlotDataHelper):
             UnderDevelopment(): Exception class, plot is not functional. 
         """
         return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -182,7 +180,7 @@ class UtilizationFactor(MPlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            logger.info(self.AGG_BY + " = " + zone_input)
 
             fig2, ax2 = plt.subplots(len(self.Scenarios),len(self.thermal_gen_cat),figsize=(len(self.thermal_gen_cat)*4,len(self.Scenarios)*4),sharey=True)# Set up subplots for all scenarios & techs
             CF_all_scenarios=pd.DataFrame()
@@ -191,12 +189,12 @@ class UtilizationFactor(MPlotDataHelper):
             th_gen_chunk = []
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                logger.info("Scenario = " + str(scenario))
                 Gen = self["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No generation in "+ zone_input+".")
+                    logger.warning("No generation in "+ zone_input+".")
                     continue
                 Gen=df_process_gen_ind_inputs(Gen,self)
 
@@ -243,7 +241,7 @@ class UtilizationFactor(MPlotDataHelper):
             #End scenario loop
                 
             if not th_gen_chunk:
-                self.logger.warning("No generation in %s",zone_input)
+                logger.warning("No generation in %s",zone_input)
                 outputs[zone_input] = MissingZoneData()
                 continue
             
@@ -270,7 +268,7 @@ class UtilizationFactor(MPlotDataHelper):
             UnderDevelopment(): Exception class, plot is not functional. 
         """
         return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -286,19 +284,19 @@ class UtilizationFactor(MPlotDataHelper):
         
         for zone_input in self.Zones:
             CF_all_scenarios = pd.DataFrame()
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            logger.info(self.AGG_BY + " = " + zone_input)
 
             fig3, ax3 = plt.subplots(len(self.thermal_gen_cat),figsize=(4,4*len(self.thermal_gen_cat)),sharey=True) # Set up subplots for all scenarios
 
             cf_chunk = []
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                logger.info("Scenario = " + str(scenario))
                 Gen = self["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning("No generation in "+zone_input+".")
+                    logger.warning("No generation in "+zone_input+".")
                     continue
                 Gen = df_process_gen_ind_inputs(Gen,self)
 
@@ -322,7 +320,7 @@ class UtilizationFactor(MPlotDataHelper):
                     try:
                         duration_curve = Gen.xs(i,level="tech").sort_values(by='Type CF',ascending=False).reset_index()
                     except KeyError:
-                        self.logger.info("{} not in {}, skipping technology".format(i, zone_input))
+                        logger.info("{} not in {}, skipping technology".format(i, zone_input))
                         continue
 
                     ax3[n].plot(duration_curve['Type CF'],label=scenario)
@@ -346,7 +344,7 @@ class UtilizationFactor(MPlotDataHelper):
                 #end scenario loop
             
             if not cf_chunk:
-                self.logger.warning("No generation in %s",zone_input)
+                logger.warning("No generation in %s",zone_input)
                 outputs[zone_input] = MissingZoneData()
                 continue
             if plot_data_settings["plot_title_as_region"]:
@@ -372,7 +370,7 @@ class UtilizationFactor(MPlotDataHelper):
             UnderDevelopment(): Exception class, plot is not functional. 
         """
         return UnderDevelopment() #TODO: fix bugs/improve performance, get back to working stage 
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -387,7 +385,7 @@ class UtilizationFactor(MPlotDataHelper):
         
         for zone_input in self.Zones:
             GW_all_scenarios = pd.DataFrame()
-            self.logger.info(self.AGG_BY + " = " + zone_input)
+            logger.info(self.AGG_BY + " = " + zone_input)
 
             fig3, ax3 = plt.subplots(len(self.Scenarios),figsize=(4,4*len(self.Scenarios)),sharey=True) # Set up subplots for all scenarios
 
@@ -396,7 +394,7 @@ class UtilizationFactor(MPlotDataHelper):
             total_gen_chunks = []
             for scenario in self.Scenarios:
 
-                self.logger.info("Scenario = " + str(scenario))
+                logger.info("Scenario = " + str(scenario))
                 Gen = self["generator_Generation"].get(scenario)
                 try:
                     Gen = Gen.xs(zone_input,level = self.AGG_BY)
@@ -437,7 +435,7 @@ class UtilizationFactor(MPlotDataHelper):
                 #end scenario loop
             
             if not total_gen_chunks:
-                self.logger.warning("No generation in %s",zone_input)
+                logger.warning("No generation in %s",zone_input)
                 outputs[zone_input] = MissingZoneData()
                 continue
             if plot_data_settings["plot_title_as_region"]:

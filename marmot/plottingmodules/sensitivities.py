@@ -15,6 +15,7 @@ from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData,
             UnderDevelopment, InputSheetError)
 
+logger = logging.getLogger('plotter.'+__name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 class Sensitivities(MPlotDataHelper):
@@ -31,7 +32,6 @@ class Sensitivities(MPlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(**kwargs)
         
-        self.logger = logging.getLogger('plotter.'+__name__)
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
     def _process_ts(self, df, zone_input):
@@ -70,14 +70,14 @@ class Sensitivities(MPlotDataHelper):
         """
         return UnderDevelopment()
 
-        outputs = {}
+        outputs : dict = {}
         
         if self.Scenario_Diff == ['']:
-            self.logger.warning('Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!')
+            logger.warning('Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!')
             outputs = InputSheetError()
             return outputs 
         if len(self.Scenario_Diff) == 1:
-            self.logger.warning('Scenario_Diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!')
+            logger.warning('Scenario_Diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!')
             outputs = InputSheetError()
             return outputs 
         
@@ -97,7 +97,7 @@ class Sensitivities(MPlotDataHelper):
         try:
             bc = self.adjust_for_leapday(self["generator_Generation"].get(self.Scenario_Diff[0]))
         except IndexError:
-            self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
+            logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
             outputs = InputSheetError()
             return outputs 
         
@@ -107,7 +107,7 @@ class Sensitivities(MPlotDataHelper):
         try:
             scen = self.adjust_for_leapday(self["generator_Generation"].get(self.Scenario_Diff[1]))
         except IndexError:
-            self.logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
+            logger.warning('Scenario_Diff "%s" is not in data. Ensure User Input Sheet is set up correctly!',self.Scenario_Diff[0])
             outputs = InputSheetError()
             return outputs 
         

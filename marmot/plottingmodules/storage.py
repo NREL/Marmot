@@ -14,6 +14,7 @@ from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__) 
 plot_data_settings = mconfig.parser("plot_data")
 
 class Storage(MPlotDataHelper):
@@ -28,9 +29,7 @@ class Storage(MPlotDataHelper):
 
     def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
-        
-        self.logger = logging.getLogger('plotter.'+__name__)        
+        super().__init__(**kwargs)       
 
     def storage_volume(self, timezone: str = "", 
                        start_date_range: str = None, 
@@ -56,7 +55,7 @@ class Storage(MPlotDataHelper):
         else:
             agg = 'region'
             
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
@@ -72,20 +71,20 @@ class Storage(MPlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             storage_volume_all_scenarios = pd.DataFrame()
             use_all_scenarios = pd.DataFrame()
 
             for scenario in self.Multi_Scenario:
 
-                self.logger.info(f"Scenario = {str(scenario)}")
+                logger.info(f"Scenario = {str(scenario)}")
 
                 storage_volume_read = self["storage_Initial_Volume"].get(scenario)
                 try:
                     storage_volume = storage_volume_read.xs(zone_input, level = self.AGG_BY)
                 except KeyError:
-                    self.logger.warning(f'No storage resources in {zone_input}')
+                    logger.warning(f'No storage resources in {zone_input}')
                     outputs[zone_input] = MissingZoneData()
                     continue
 
@@ -103,7 +102,7 @@ class Storage(MPlotDataHelper):
                     max_volume = max_volume.groupby('timestamp').sum()
                     max_volume = max_volume.squeeze()[0]
                 except KeyError:
-                    self.logger.warning(f'No storage resources in {zone_input}')
+                    logger.warning(f'No storage resources in {zone_input}')
 
                 #Pull unserved energy.
                 use_read = self[f"{agg}_Unserved_Energy"].get(scenario)
@@ -129,7 +128,7 @@ class Storage(MPlotDataHelper):
                 #     use = use[start_date : end_date]
 
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
+                    logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
 
                     storage_volume = storage_volume[start_date_range : end_date_range]
