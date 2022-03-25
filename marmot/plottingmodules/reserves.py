@@ -28,7 +28,7 @@ class Reserves(MPlotDataHelper):
     The reserves.py module contains methods that are
     related to reserve provision and shortage. 
 
-    MPlot inherits from the MPlotDataHelper class to assist 
+    Reserves inherits from the MPlotDataHelper class to assist 
     in creating figures.
     """
 
@@ -36,7 +36,7 @@ class Reserves(MPlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(**kwargs)
         
-    def reserve_gen_timeseries(self, figure_name: str = None, prop: str = None,
+    def reserve_gen_timeseries(self, prop: str = None,
                                start: float = None, end: float= None,
                                timezone: str = "", start_date_range: str = None,
                                end_date_range: str = None, 
