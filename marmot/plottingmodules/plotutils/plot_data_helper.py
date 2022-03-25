@@ -476,7 +476,7 @@ class MPlotDataHelper(dict):
 
     @staticmethod
     def set_timestamp_date_range(dfs: Union[pd.DataFrame, List[pd.DataFrame]],
-                        start_date: str, end_date: str) -> Tuple[pd.DataFrame, ...]:
+                        start_date: str, end_date: str) -> Union[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
         """Sets the timestamp date range based on start_date and end_date strings
 
         Takes either a single df or a list of dfs as input. 
@@ -492,7 +492,7 @@ class MPlotDataHelper(dict):
                             type pd.MultiIndex with level timestamp.
 
         Returns:
-            Tuple[pd.DataFrame]: adjusted dataframes
+            pd.DataFrame or Tuple[pd.DataFrame]: adjusted dataframes
         """
 
         logger.info(f"Plotting specific date range: \

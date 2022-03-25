@@ -17,7 +17,8 @@ from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
-plot_data_settings = mconfig.parser("plot_data")
+logger = logging.getLogger('plotter.'+__name__)   
+plot_data_settings : dict = mconfig.parser("plot_data")
 shift_leapday : bool = mconfig.parser("shift_leapday")
 
 class ThermalReserve(MPlotDataHelper):
@@ -32,12 +33,11 @@ class ThermalReserve(MPlotDataHelper):
 
     def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
-
-        self.logger = logging.getLogger('plotter.'+__name__)        
+        super().__init__(**kwargs)     
         
     def thermal_cap_reserves(self, start_date_range: str = None, 
-                             end_date_range: str = None, **_):
+                             end_date_range: str = None,
+                             data_resolution: str = "", **_):
         """Plots the total thermal generation capacity that is not committed, i.e in reserve.
 
         If multiple scenarios are included, each one will be plotted on a 
@@ -52,12 +52,12 @@ class ThermalReserve(MPlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Generation",self.Scenarios),
-                      (True,"generator_Available_Capacity",self.Scenarios)]
+        properties = [(True, f"generator_Generation{data_resolution}", self.Scenarios),
+                      (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -67,7 +67,7 @@ class ThermalReserve(MPlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"Zone = {zone_input}")
+            logger.info(f"Zone = {zone_input}")
                 
             # sets up x, y dimensions of plot
             ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
@@ -86,31 +86,31 @@ class ThermalReserve(MPlotDataHelper):
             data_table_chunks = []
 
             for i, scenario in enumerate(self.Scenarios):
+                logger.info(f"Scenario = {scenario}")
 
-                self.logger.info(f"Scenario = {scenario}")
-
-                Gen = self["generator_Generation"].get(scenario).copy()
+                generation : pd.DataFrame = self["generator_Generation"].get(scenario)
                 if shift_leapday:
-                    Gen = self.adjust_for_leapday(Gen)
-                avail_cap = self["generator_Available_Capacity"].get(scenario).copy()
+                    generation = self.adjust_for_leapday(generation)
+
+                avail_cap :pd.DataFrame = self["generator_Available_Capacity"].get(scenario) 
                 if shift_leapday:
                     avail_cap = self.adjust_for_leapday(avail_cap)               
                
                 # Check if zone is in avail_cap
                 try:
-                    avail_cap = avail_cap.xs(zone_input,level = self.AGG_BY)
+                    avail_cap = avail_cap.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning(f"No installed capacity in: {zone_input}")
+                    logger.warning(f"No installed capacity in: {zone_input}")
                     break
-                Gen = Gen.xs(zone_input,level = self.AGG_BY)
+                generation = generation.xs(zone_input, level=self.AGG_BY)
                 avail_cap = self.df_process_gen_inputs(avail_cap)
-                Gen = self.df_process_gen_inputs(Gen)
-                Gen = Gen.loc[:, (Gen != 0).any(axis=0)]
+                generation = self.df_process_gen_inputs(generation)
+                generation = generation.loc[:, (generation != 0).any(axis=0)]
 
-                thermal_reserve = avail_cap - Gen         
+                thermal_reserve = avail_cap - generation         
                 non_thermal_gen = set(thermal_reserve.columns) - set(self.thermal_gen_cat)
                 # filter for only thermal generation 
-                thermal_reserve = thermal_reserve.drop(labels = non_thermal_gen, axis=1)
+                thermal_reserve = thermal_reserve.drop(labels=non_thermal_gen, axis=1)
                 
                 #Convert units
                 if i == 0:
@@ -125,14 +125,17 @@ class ThermalReserve(MPlotDataHelper):
                     continue
                    
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                    thermal_reserve = thermal_reserve[start_date_range : end_date_range]
+                    thermal_reserve = self.set_timestamp_date_range(
+                                        thermal_reserve,
+                                        start_date_range, end_date_range)
+                    if thermal_reserve.empty is True:
+                        logger.warning('No Generation in selected Date Range')
+                        continue
                 
                 # Create data table for each scenario
-                scenario_names = pd.Series([scenario]*len(thermal_reserve),name='Scenario')
+                scenario_names = pd.Series([scenario]*len(thermal_reserve), cname='Scenario')
                 data_table = thermal_reserve.add_suffix(f" ({unitconversion['units']})")
-                data_table = data_table.set_index([scenario_names],append=True)
+                data_table = data_table.set_index([scenario_names], append=True)
                 data_table_chunks.append(data_table)
                 
                 mplt.stackplot(thermal_reserve, color_dict=self.PLEXOS_color_dict,
