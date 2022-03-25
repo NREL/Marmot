@@ -13,8 +13,10 @@ import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
-from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData, UnderDevelopment)
+from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
+                                            MissingZoneData, UnderDevelopment)
 
+logger = logging.getLogger('plotter.'+__name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 class Ramping(MPlotDataHelper):
@@ -30,19 +32,20 @@ class Ramping(MPlotDataHelper):
     def __init__(self, **kwargs):
         # Instantiation of MPlotHelperFunctions
         super().__init__(**kwargs)
-
-        self.logger = logging.getLogger('plotter.'+__name__)
     
     def capacity_started(self, start_date_range: str = None, 
-                         end_date_range: str = None, **_):
+                         end_date_range: str = None,
+                         barplot_groupby: str = 'Scenario', **_):
         """Creates bar plots of total thermal capacity started by technology type.
 
         Each sceanrio is plotted as a separate color grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent data from. 
+            start_date_range (str, optional): Defines a start date at which to 
+                represent data from. 
                 Defaults to None.
-            end_date_range (str, optional): Defines a end date at which to represent data to.
+            end_date_range (str, optional): Defines a end date at which to 
+                represent data to.
                 Defaults to None.
 
         Returns:
@@ -50,13 +53,16 @@ class Ramping(MPlotDataHelper):
         """
         outputs = {}
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of 
+        # tuples and contain 3 parts:
+        # required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"generator_Generation",self.Scenarios),
                       (True,"generator_Installed_Capacity",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
-        # with all required properties, returns a 1 if required data is missing
+        # Runs get_formatted_data within MPlotDataHelper to populate 
+        # MPlotDataHelper dictionary with all required properties, 
+        # returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
 
@@ -64,107 +70,93 @@ class Ramping(MPlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
             cap_stated_chunks = []
 
             for scenario in self.Scenarios:
+                logger.info(f"Scenario = {str(scenario)}")
 
-                self.logger.info(f"Scenario = {str(scenario)}")
-
-                Gen = self["generator_Generation"].get(scenario)
-                
+                Gen : pd.DataFrame = self["generator_Generation"].get(scenario)
                 try:
-                    Gen = Gen.xs(zone_input,level = self.AGG_BY)
+                    Gen = Gen.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
-                    self.logger.warning(f"No installed capacity in : {zone_input}")
+                    logger.warning(f"No installed capacity in : {zone_input}")
                     break
                 
+                Cap : pd.DataFrame = self["generator_Installed_Capacity"].get(scenario)
+                Cap = Cap.xs(zone_input, level=self.AGG_BY)
+
+                if pd.notna(start_date_range):
+                    Gen = self.set_timestamp_date_range(Gen,
+                                        start_date_range, end_date_range)
+                    if Gen.empty is True:
+                        logger.warning('No Generation in selected Date Range')
+                        continue
+
                 Gen = Gen.reset_index()
+                Gen['year'] = Gen.timestamp.dt.year
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                # Gen = Gen.drop(columns = ['region'])
-                Gen = Gen.rename(columns = {0:"Output (MWh)"})
-                Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    #We are only interested in thermal starts/stops.
-
-                Cap = self["generator_Installed_Capacity"].get(scenario)
-                Cap = Cap.xs(zone_input,level = self.AGG_BY)
-                Cap = Cap.reset_index()
-                Cap = Cap.drop(columns = ['timestamp','tech'])
-                Cap = Cap.rename(columns = {0:"Installed Capacity (MW)"})
-                Gen = pd.merge(Gen,Cap, on = 'gen_name')
-                Gen.set_index('timestamp',inplace=True)
+                Gen = Gen.rename(columns={0:"Output (MWh)"})
+                #We are only interested in thermal starts/stops.
+                Gen = Gen[Gen['tech'].isin(self.thermal_gen_cat)]    
                 
-                if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
-                    # sort_index added see https://github.com/pandas-dev/pandas/issues/35509
-                    Gen = Gen.sort_index()[start_date_range : end_date_range]
+                Cap = Cap.reset_index()
+                Cap['year'] = Cap.timestamp.dt.year
+                Cap = self.rename_gen_techs(Cap)
+                Cap = Cap.drop(columns=['timestamp','units'])
+                Cap = Cap.rename(columns={0:"Installed Capacity (MW)"})
+                gen_cap = Gen.merge(Cap, on=['year','tech','gen_name'])
+                gen_cap = gen_cap.set_index('timestamp')
+                
+                gen_cap = self.year_scenario_grouper(gen_cap, scenario, 
+                                groupby=barplot_groupby,
+                                additional_groups=['timestamp', 'tech', 'gen_name']).sum()
+                unique_idx = list(gen_cap.index.get_level_values('Scenario').unique())
+                cap_started_df = pd.DataFrame(
+                                    columns=gen_cap.index.get_level_values('tech').unique(), 
+                                    index=unique_idx)
 
-                tech_names = Gen['tech'].unique()
-                Cap_started = pd.DataFrame(columns = tech_names,index = [scenario])
+                # If split on Year-Scenario we want to loop over individual years
+                for scen in cap_started_df.index:
+                    df = gen_cap.xs(scen, level='Scenario')
+                    # Get list of unique techs by Scenario-year
+                    tech_names = df.index.get_level_values('tech').unique()
+                    for tech_name in tech_names:
+                        stt = df.xs(tech_name, level='tech', drop_level=False)
+                        gen_names = stt.index.get_level_values('gen_name').unique()
+                        cap_started = 0
+                        for gen in gen_names:
+                            sgt = stt.xs(gen, level='gen_name').fillna(0)
+                            #Check that this generator has some, but not all, 
+                            # uncommitted hours.
+                            if any(sgt["Output (MWh)"] == 0) and not \
+                                all(sgt["Output (MWh)"] == 0):   
+                                for idx in range(len(sgt['Output (MWh)']) - 1):
+                                    if sgt["Output (MWh)"].iloc[idx] == 0 and \
+                                        not sgt["Output (MWh)"].iloc[idx + 1] == 0:
+                                        cap_started = \
+                                            cap_started + \
+                                                sgt["Installed Capacity (MW)"].iloc[idx]
 
-                for tech_name in tech_names:
-                    stt = Gen.loc[Gen['tech'] == tech_name]
+                        cap_started_df.loc[scen, tech_name] = cap_started
 
-                    gen_names = stt['gen_name'].unique()
+                cap_stated_chunks.append(cap_started_df)
 
-                    cap_started = 0
-
-
-                    for gen in gen_names:
-                        sgt = stt.loc[stt['gen_name'] == gen]
-                        if any(sgt["Output (MWh)"] == 0) and not all(sgt["Output (MWh)"] == 0):   #Check that this generator has some, but not all, uncommitted hours.
-                            #print('Counting starts for: ' + gen)
-                            for idx in range(len(sgt['Output (MWh)']) - 1):
-                                    if sgt["Output (MWh)"].iloc[idx] == 0 and not sgt["Output (MWh)"].iloc[idx + 1] == 0:
-                                        cap_started = cap_started + sgt["Installed Capacity (MW)"].iloc[idx]
-                                      # print('started on '+ timestamp)
-                                    # if sgt[0].iloc[idx] == 0 and not idx == 0 and not sgt[0].iloc[idx - 1] == 0:
-                                    #     stops = stops + 1
-
-                    Cap_started[tech_name] = cap_started
-
-                cap_stated_chunks.append(Cap_started)
-
-
-                # import time
-                    # start = time.time()
-                    # for gen in gen_names:
-                    #     sgt = stt.loc[stt['gen_name'] == gen]
-
-                    #     if any(sgt[0] == 0) and not all(sgt[0] == 0):   #Check that this generator has some, but not all, uncommitted hours.
-                    #         zeros = sgt.loc[sgt[0] == 0]
-
-                    #         print('Counting starts and stops for: ' + gen)
-                    #         for idx in range(len(zeros['timestamp']) - 1):
-                    #                if not zeros['timestamp'].iloc[idx + 1] == pd.Timedelta(1,'h'):
-                    #                    starts = starts + 1
-                    #                   # print('started on '+ timestamp)
-                    #                if not zeros['timestamp'].iloc[idx - 1] == pd.Timedelta(1,'h'):
-                    #                    stops = stops + 1
-
-                    # starts_and_stops = [starts,stops]
-                    # counts[tech_name] = starts_and_stops
-
-
-                # end = time.time()
-                # elapsed = end - start
-                # print('Method 2 (first making a data frame with only 0s, then checking if timestamps > 1 hour) took ' + str(elapsed) + ' seconds')
-
-            cap_started_all_scenarios = pd.concat(cap_stated_chunks)
+            cap_started_all_scenarios = pd.concat(cap_stated_chunks).dropna(axis=1)
+            
             if cap_started_all_scenarios.empty == True:
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
+            
+            cap_started_all_scenarios = cap_started_all_scenarios.fillna(0)
             unitconversion = self.capacity_energy_unitconversion(cap_started_all_scenarios)
             
             cap_started_all_scenarios = cap_started_all_scenarios/unitconversion['divisor'] 
             Data_Table_Out = cap_started_all_scenarios.T.add_suffix(f" ({unitconversion['units']}-starts)")
             
-            cap_started_all_scenarios.index = cap_started_all_scenarios.index.str.replace('_',' ')
-
             # transpose, sets scenarios as columns
             cap_started_all_scenarios = cap_started_all_scenarios.T
             
@@ -193,7 +185,7 @@ class Ramping(MPlotDataHelper):
         # Plot currently displays the same as capacity_started, this plot needs looking at 
 
         outputs = UnderDevelopment()
-        self.logger.warning('count_ramps is under development')
+        logger.warning('count_ramps is under development')
         return outputs
         
         outputs = {}
@@ -212,12 +204,12 @@ class Ramping(MPlotDataHelper):
             return MissingInputData()
         
         for zone_input in self.Zones:
-            self.logger.info(f"Zone =  {zone_input}")
+            logger.info(f"Zone =  {zone_input}")
             cap_started_chunk = []
 
             for scenario in self.Scenarios:
 
-                self.logger.info(f"Scenario = {str(scenario)}")
+                logger.info(f"Scenario = {str(scenario)}")
                 Gen = self["generator_Generation"].get(scenario)
                 Gen = Gen.xs(zone_input,level = self.AGG_BY)
 
@@ -241,7 +233,7 @@ class Ramping(MPlotDataHelper):
                 # Min = Min.xs(zone_input, level = AGG_BY)
 
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
+                    logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     Gen = Gen[start_date_range : end_date_range]
 
