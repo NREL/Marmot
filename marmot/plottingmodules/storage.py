@@ -73,8 +73,8 @@ class Storage(MPlotDataHelper):
         for zone_input in self.Zones:
             logger.info(f"{self.AGG_BY} = {zone_input}")
 
-            storage_volume_all_scenarios = pd.DataFrame()
-            use_all_scenarios = pd.DataFrame()
+            stor_chunk = []
+            use_chunk = []
 
             for scenario in self.Multi_Scenario:
 
@@ -82,7 +82,7 @@ class Storage(MPlotDataHelper):
 
                 storage_volume_read = self["storage_Initial_Volume"].get(scenario)
                 try:
-                    storage_volume = storage_volume_read.xs(zone_input, level = self.AGG_BY)
+                    storage_volume : pd.DataFrame = storage_volume_read.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
                     logger.warning(f'No storage resources in {zone_input}')
                     outputs[zone_input] = MissingZoneData()
@@ -91,57 +91,43 @@ class Storage(MPlotDataHelper):
                 #Isolate only head storage objects (not tail).
                 storage_gen_units = storage_volume.index.get_level_values('storage_resource')
                 head_units = [unit for unit in storage_gen_units if 'head' in unit]
-                storage_volume = storage_volume.iloc[storage_volume.index.get_level_values('storage_resource').isin(head_units)]
+                storage_volume = storage_volume.iloc[storage_volume.index
+                                               .get_level_values('storage_resource')
+                                               .isin(head_units)]
                 storage_volume = storage_volume.groupby("timestamp").sum()
                 storage_volume.columns = [scenario]
 
                 max_volume = storage_volume.max().squeeze()
                 try:
-                    max_volume = self["storage_Max_Volume"].get(scenario)
+                    max_volume : pd.DataFrame = self["storage_Max_Volume"].get(scenario)
                     max_volume = max_volume.xs(zone_input, level = self.AGG_BY)
                     max_volume = max_volume.groupby('timestamp').sum()
-                    max_volume = max_volume.squeeze()[0]
+                    max_volume = max_volume.squeeze()
                 except KeyError:
                     logger.warning(f'No storage resources in {zone_input}')
 
-                #Pull unserved energy.
-                use_read = self[f"{agg}_Unserved_Energy"].get(scenario)
+                use_read : pd.DataFrame = self[f"{agg}_Unserved_Energy"].get(scenario)
                 use = use_read.xs(zone_input, level = self.AGG_BY)
                 use = use.groupby("timestamp").sum() / 1000
                 use.columns = [scenario]
 
-                # if prop == "Peak Demand":
-
-                #     peak_demand_t = Total_Demand.idxmax()
-                #     end_date = peak_demand_t + dt.timedelta(days=end)
-                #     start_date = peak_demand_t - dt.timedelta(days=start)
-                #     Peak_Demand = Total_Demand[peak_demand_t]
-                #     storage_volume = storage_volume[start_date : end_date]
-                #     use = use[start_date : end_date]
-
-                # elif prop == "Min Net Load":
-                #     min_net_load_t = Net_Load.idxmin()
-                #     end_date = min_net_load_t + dt.timedelta(days=end)
-                #     start_date = min_net_load_t - dt.timedelta(days=start)
-                #     Min_Net_Load = Net_Load[min_net_load_t]
-                #     storage_volume = storage_volume[start_date : end_date]
-                #     use = use[start_date : end_date]
-
                 if pd.notna(start_date_range):
-                    logger.info(f"Plotting specific date range: \
-                    {str(start_date_range)} to {str(end_date_range)}")
+                    storage_volume, max_volume, use = self.set_timestamp_date_range(
+                                        [storage_volume, max_volume, use],
+                                        start_date_range, end_date_range)
+                    if storage_volume.empty is True:
+                        logger.warning('No Storage resources in selected Date Range')
+                        continue
+                
+                stor_chunk.append(storage_volume)
+                use_chunk.append(use)
 
-                    storage_volume = storage_volume[start_date_range : end_date_range]
-                    use = use[start_date_range : end_date_range]
+            storage_volume_all_scenarios = pd.concat(stor_chunk, axis=1)
 
-                storage_volume_all_scenarios = pd.concat([storage_volume_all_scenarios,storage_volume], axis = 1)
-                #storage_volume_all_scenarios.columns = storage_volume_all_scenarios.columns.str.replace('_',' ')
-
-                use_all_scenarios = pd.concat([use_all_scenarios,use], axis = 1)
-                #use_all_scenarios.columns = use_all_scenarios.columns.str.replace('_',' ')
+            use_all_scenarios = pd.concat(use_chunk, axis=1)
 
             # Data table of values to return to main program
-            Data_Table_Out = pd.concat([storage_volume_all_scenarios,use_all_scenarios],axis = 1)
+            Data_Table_Out = pd.concat([storage_volume_all_scenarios,use_all_scenarios], axis=1)
             #Make scenario/color dictionary.
             color_dict = dict(zip(storage_volume_all_scenarios.columns,self.color_list))
 

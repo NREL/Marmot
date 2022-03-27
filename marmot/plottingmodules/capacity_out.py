@@ -113,7 +113,6 @@ class CapacityOut(MPlotDataHelper):
                 cap_out[0] = cap_out['cap'] - cap_out['avail']
                 
                 cap_out = self.df_process_gen_inputs(cap_out)
-                print(cap_out)
                 #Subset only thermal gen categories
                 thermal_gens = [therm for therm in self.thermal_gen_cat if therm in cap_out.columns]
                 cap_out = cap_out[thermal_gens]
@@ -121,7 +120,6 @@ class CapacityOut(MPlotDataHelper):
                 if cap_out.empty is True:
                     logger.warning(f"No Thermal Generation in: {zone_input}")
                     continue
-                print(cap_out)
                 if pd.notna(start_date_range):
                     cap_out = self.set_timestamp_date_range(cap_out,
                                     start_date_range, end_date_range)
