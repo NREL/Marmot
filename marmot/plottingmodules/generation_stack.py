@@ -483,7 +483,8 @@ class GenerationStack(MPlotDataHelper):
 
 
     def gen_diff(self, timezone: str = "", start_date_range: str = None,
-                 end_date_range: str = None, **_):
+                 end_date_range: str = None,
+                data_resolution: str = "", **_):
         """Plots the difference in generation between two scenarios.
 
         A line plot is created for each technology representing the difference 
@@ -500,11 +501,11 @@ class GenerationStack(MPlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
-        outputs : dict  = {}
+        outputs : dict = {}
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Generation",self.Scenarios)]
+        properties = [(True, f"generator_Generation{data_resolution}", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -518,7 +519,7 @@ class GenerationStack(MPlotDataHelper):
             logger.info(f"Zone = {zone_input}")
             # Create Dictionary to hold Datframes for each scenario
 
-            Total_Gen_Stack_1 = self['generator_Generation'].get(self.Scenario_Diff[0])
+            Total_Gen_Stack_1 : pd.DataFrame = self['generator_Generation'].get(self.Scenario_Diff[0])
             if Total_Gen_Stack_1 is None:
                 logger.warning(f"Scenario_Diff '{self.Scenario_Diff[0]}'' is not in data. "
                                     "Ensure User Input Sheet is set up correctly!")
@@ -534,7 +535,7 @@ class GenerationStack(MPlotDataHelper):
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns=self.ordered_gen).fillna(0)
 
-            Total_Gen_Stack_2 = self['generator_Generation'].get(self.Scenario_Diff[1])
+            Total_Gen_Stack_2 : pd.DataFrame = self['generator_Generation'].get(self.Scenario_Diff[1])
             if Total_Gen_Stack_2 is None:
                 logger.warning(f"Scenario_Diff '{self.Scenario_Diff[1]}' is not in data. "
                                     "Ensure User Input Sheet is set up correctly!")
@@ -546,16 +547,17 @@ class GenerationStack(MPlotDataHelper):
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_2 = pd.DataFrame(Total_Gen_Stack_2, columns=self.ordered_gen).fillna(0)
 
-            logger.info(f'Scenario 1 = {self.Scenario_Diff[0]}')
-            logger.info(f'Scenario 2 = {self.Scenario_Diff[1]}')
+            logger.info(f"Scenario 1 = {self.Scenario_Diff[0]}")
+            logger.info(f"Scenario 2 = {self.Scenario_Diff[1]}")
             Gen_Stack_Out = Total_Gen_Stack_1-Total_Gen_Stack_2
 
             if pd.notna(start_date_range):
-                logger.info(f"Plotting specific date range: \
-                {str(start_date_range)} to {str(end_date_range)}")
-                Gen_Stack_Out = Gen_Stack_Out[start_date_range : end_date_range]
-            else:
-                logger.info("Plotting graph for entire timeperiod")
+                Gen_Stack_Out = self.set_timestamp_date_range(
+                                    Gen_Stack_Out,
+                                    start_date_range, end_date_range)
+                if Gen_Stack_Out.empty is True:
+                    logger.warning('No Generation in selected Date Range')
+                    continue
 
             # Removes columns that only equal 0
             Gen_Stack_Out.dropna(inplace=True)
@@ -581,9 +583,10 @@ class GenerationStack(MPlotDataHelper):
                 ax.plot(Gen_Stack_Out[column], linewidth=3, 
                         color=self.PLEXOS_color_dict[column], label=column)
 
-            mplt.add_main_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
-            ax.set_ylabel(f"Generation Difference ({unitconversion['units']})",  color='black', rotation='vertical')
-            ax.set_xlabel(timezone,  color='black', rotation='horizontal')
+            mplt.add_main_title(f"{self.Scenario_Diff[0]} vs. {self.Scenario_Diff[1]}")
+            ax.set_ylabel(f"Generation Difference ({unitconversion['units']})",  
+                            color='black', rotation='vertical')
+            ax.set_xlabel(timezone, color='black', rotation='horizontal')
             mplt.set_yaxis_major_tick_format()
             ax.margins(x=0.01)
             mplt.set_subplot_timeseries_format()
