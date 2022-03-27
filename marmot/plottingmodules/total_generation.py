@@ -39,7 +39,7 @@ class TotalGeneration(MPlotDataHelper):
         
     def total_gen(self, start_date_range: str = None, 
                   end_date_range: str = None,
-                  barplot_groupby: str = 'Scenario', **_):
+                  scenario_groupby: str = 'Scenario', **_):
         """Creates a stacked bar plot of total generation by technology type.
 
         A separate bar is created for each scenario.
@@ -49,6 +49,11 @@ class TotalGeneration(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -159,9 +164,9 @@ class TotalGeneration(MPlotDataHelper):
                 extra_plot_data = extra_plot_data.loc[Total_Gen_Stack.index.min(): 
                                                         Total_Gen_Stack.index.max()]
                 gen_chunks.append(self.year_scenario_grouper(Total_Gen_Stack, scenario, 
-                                                        groupby=barplot_groupby).sum())
+                                                        groupby=scenario_groupby).sum())
                 extra_data_chunks.append(self.year_scenario_grouper(extra_plot_data, scenario, 
-                                                        groupby=barplot_groupby).sum())
+                                                        groupby=scenario_groupby).sum())
             
             if not gen_chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -249,7 +254,7 @@ class TotalGeneration(MPlotDataHelper):
 
     def total_gen_diff(self, start_date_range: str = None, 
                        end_date_range: str = None,
-                        barplot_groupby: str = 'Scenario', **_):
+                        scenario_groupby: str = 'Scenario', **_):
         """Creates a stacked bar plot of total generation by technology type, relative to a base scenario.
 
         Barplots show the change in total generation relative to a base scenario.
@@ -261,6 +266,11 @@ class TotalGeneration(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -327,7 +337,7 @@ class TotalGeneration(MPlotDataHelper):
                                                 end_date_range)
                 
                 gen_chunks.append(self.year_scenario_grouper(Total_Gen_Stack, scenario, 
-                                                        groupby=barplot_groupby).sum())
+                                                        groupby=scenario_groupby).sum())
             
             if not gen_chunks:
                 outputs[zone_input] = MissingZoneData()

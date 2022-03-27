@@ -39,10 +39,21 @@ class InstalledCapacity(MPlotDataHelper):
          
     def total_cap(self, start_date_range: str = None, 
                   end_date_range: str = None,
-                  barplot_groupby: str = 'Scenario', **_):
+                  scenario_groupby: str = 'Scenario', **_):
         """Creates a stacked barplot of total installed capacity.
 
         Each sceanrio will be plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -95,7 +106,7 @@ class InstalledCapacity(MPlotDataHelper):
                         continue
 
                 capacity_chunks.append(self.year_scenario_grouper(Total_Installed_Capacity, scenario, 
-                                                        groupby=barplot_groupby).sum())
+                                                        groupby=scenario_groupby).sum())
 
             Total_Installed_Capacity_Out = pd.concat(capacity_chunks, 
                                                         axis=0, sort=False).fillna(0)
@@ -140,12 +151,23 @@ class InstalledCapacity(MPlotDataHelper):
 
     def total_cap_diff(self, start_date_range: str = None, 
                         end_date_range: str = None,
-                        barplot_groupby: str = 'Scenario', **_):
+                        scenario_groupby: str = 'Scenario', **_):
         """Creates a stacked barplot of total installed capacity relative to a base scenario.
 
         Barplots show the change in total installed capacity relative to a base scenario.
         The default is to comapre against the first scenario provided in the inputs list.
         Each sceanrio is plotted as a separate bar.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -207,7 +229,7 @@ class InstalledCapacity(MPlotDataHelper):
                         continue
 
                 capacity_chunks.append(self.year_scenario_grouper(Total_Installed_Capacity, scenario, 
-                                                        groupby=barplot_groupby).sum())
+                                                        groupby=scenario_groupby).sum())
 
             Total_Installed_Capacity_Out = pd.concat(capacity_chunks, axis=0, sort=False).fillna(0)
 
@@ -256,7 +278,7 @@ class InstalledCapacity(MPlotDataHelper):
 
     def total_cap_and_gen_facet(self, start_date_range: str = None, 
                                 end_date_range: str = None,
-                                barplot_groupby: str = 'Scenario', **_):
+                                scenario_groupby: str = 'Scenario', **_):
         """Creates a facet plot comparing total generation and installed capacity.
 
         Creates a plot with 2 facet plots, total installed capacity on the left 
@@ -264,16 +286,27 @@ class InstalledCapacity(MPlotDataHelper):
         Each facet contains stacked bar plots, each scenario is plotted as a 
         separate bar.
 
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from. 
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
+                    
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
         # generation figure
         logger.info("Generation data")
         gen_obj = TotalGeneration(**self.argument_dict)
-        gen_outputs = gen_obj.total_gen(start_date_range, end_date_range, barplot_groupby)
+        gen_outputs = gen_obj.total_gen(start_date_range, end_date_range, scenario_groupby)
 
         logger.info("Installed capacity data")
-        cap_outputs = self.total_cap(start_date_range, end_date_range, barplot_groupby)
+        cap_outputs = self.total_cap(start_date_range, end_date_range, scenario_groupby)
 
         outputs : dict = {}
         for zone_input in self.Zones:

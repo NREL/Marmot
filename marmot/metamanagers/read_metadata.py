@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Retrieve metadata from PLEXOS production cost modelling results.
+"""Retrieve metadata from modelling results.
 
 Database can be either a h5plexos file or a formatted Marmot hdf5 file.
 
@@ -16,7 +16,7 @@ logger = logging.getLogger('formatter.'+__name__)
 
 class MetaData():
     """Handle the retrieval of metadata from the formatted or
-    original plexos solution h5 files.
+    original solution h5 files.
 
     Attributes:
         filename (str) = The name of the h5 file to retreive data from.

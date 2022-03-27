@@ -45,6 +45,9 @@ class UnservedEnergy(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -74,7 +77,7 @@ class UnservedEnergy(MPlotDataHelper):
             for scenario in self.Scenarios:
                 logger.info(f'Scenario = {scenario}')
 
-                unserved_energy : pd.DataFrame = self[f"{agg}_Unserved_Energy"].get(scenario)
+                unserved_energy : pd.DataFrame = self[f"{agg}_Unserved_Energy{data_resolution}"].get(scenario)
                 unserved_energy = unserved_energy.xs(zone_input,level=self.AGG_BY)
                 unserved_energy = unserved_energy.groupby(["timestamp"]).sum()
 
@@ -129,7 +132,7 @@ class UnservedEnergy(MPlotDataHelper):
 
     def tot_unserved_energy(self, start_date_range: str = None, 
                             end_date_range: str = None,
-                            barplot_groupby: str = 'Scenario', **_):
+                            scenario_groupby: str = 'Scenario', **_):
         """Creates a bar plot of total unserved energy.
 
         Each sceanrio is plotted as a separate bar.
@@ -139,6 +142,11 @@ class UnservedEnergy(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -184,7 +192,7 @@ class UnservedEnergy(MPlotDataHelper):
                         continue
                                 
                 unserved_energy_chunks.append(self.year_scenario_grouper(unserved_energy, 
-                                                scenario, groupby=barplot_groupby).sum())
+                                                scenario, groupby=scenario_groupby).sum())
 
             unserved_energy_out = pd.concat(unserved_energy_chunks, axis=0, sort=False).fillna(0)
 
@@ -245,7 +253,7 @@ class UnservedEnergy(MPlotDataHelper):
 
     def average_diurnal_ue(self, start_date_range: str = None, 
                            end_date_range: str = None,
-                           barplot_groupby: str = 'Scenario', **_):
+                           scenario_groupby: str = 'Scenario', **_):
         """Creates a line plot of average diurnal unserved energy.
 
         Each scenario is plotted as a separate line and shows the average 
@@ -257,6 +265,11 @@ class UnservedEnergy(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -308,7 +321,7 @@ class UnservedEnergy(MPlotDataHelper):
                 interval_count = self.get_sub_hour_interval_count(unserved_energy)
                 unserved_energy = unserved_energy/interval_count
                 # Group data by hours and find mean across entire range 
-                unserved_energy = self.year_scenario_grouper(unserved_energy, scenario, groupby=barplot_groupby,
+                unserved_energy = self.year_scenario_grouper(unserved_energy, scenario, groupby=scenario_groupby,
                                                     additional_groups=[unserved_energy.index.hour]).mean()
                 
                 # reset index to datetime 

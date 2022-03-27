@@ -1,6 +1,6 @@
 
 """Module to set correct project and file paths.
-Also contains any string literals.
+Also contains any string literals and Module to Class Mappings
 
 @author: Daniel Levie
 """

@@ -43,7 +43,7 @@ class Emissions(MPlotDataHelper):
                                 start_date_range: str = None,
                                 end_date_range: str = None, 
                                 custom_data_file_path: Path = None,
-                                barplot_groupby: str = 'Scenario', **_):
+                                scenario_groupby: str = 'Scenario', **_):
         """Creates a stacked bar plot of emissions by generator tech type.
 
         The emission type to plot is defined using the prop argument.
@@ -59,6 +59,11 @@ class Emissions(MPlotDataHelper):
                 Defaults to None.
             custom_data_file_path (Path, optional): Path to custom data file to concat extra 
                 data. Index and column format should be consistent with output data csv.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -106,7 +111,7 @@ class Emissions(MPlotDataHelper):
                 emit = self.rename_gen_techs(emit)
                 # summarize annual emissions by pollutant and tech
                 emitList.append(self.year_scenario_grouper(emit, scenario, 
-                                                        groupby=barplot_groupby,
+                                                        groupby=scenario_groupby,
                                                         additional_groups=['pollutant', 'tech']
                                                         ).sum())
             # concatenate chunks

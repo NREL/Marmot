@@ -70,7 +70,6 @@ class Process():
                 regions/zones to create custom aggregations.
             emit_names (pd.DataFrame): DataFrame with 2 columns to rename 
                 emission names.
-            logger (logging.Logger): logger object from SetupLogger.
         """
         self.input_folder = input_folder
         self.output_file_path = output_file_path

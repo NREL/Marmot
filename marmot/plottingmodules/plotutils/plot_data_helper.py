@@ -633,9 +633,6 @@ class MPlotDataHelper(dict):
         Args:
             existing_df (pd.DataFrame): DataFrame to modify 
             custom_data_file_path (Path): path to custom data file
-            inplace (bool, optional): Modify the DataFrame in place 
-                (do not create a new object). 
-                Defaults to False.
 
         Returns:
             pd.DataFrame: DataFrame with the newly inserted columns

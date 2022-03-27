@@ -50,6 +50,9 @@ class CapacityOut(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -93,8 +96,8 @@ class CapacityOut(MPlotDataHelper):
                 logger.info(f"Scenario = {scenario}")
                 i+=1
                 
-                install_cap = self["generator_Installed_Capacity"].get(scenario).copy()
-                avail_cap = self["generator_Available_Capacity"].get(scenario).copy()
+                install_cap = self[f"generator_Installed_Capacity{data_resolution}"].get(scenario).copy()
+                avail_cap = self[f"generator_Available_Capacity{data_resolution}"].get(scenario).copy()
                 if shift_leapday:
                     avail_cap = self.adjust_for_leapday(avail_cap)
                 if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():

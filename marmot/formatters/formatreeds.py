@@ -286,10 +286,21 @@ class ProcessReEDS(Process):
         df_merged =  df.merge(datetime_block, on=['year', 'h'])
         return df_merged.drop(['h','hour', 'year'], axis=1)  
 
-    def df_process_generator(self, df: pd.DataFrame, prop=None, 
-                                gdx_file=None) -> pd.DataFrame:
+    def df_process_generator(self, df: pd.DataFrame, prop: str = None, 
+                                gdx_file: str = None) -> pd.DataFrame:
         """Does any additional processing for generator properties
+
+        Args:
+            df (pd.DataFrame): input dataframe 
+            prop (str, optional): ReEDS input property. 
+                Defaults to None.
+            gdx_file (str, optional): String path to GDX file. 
+                Defaults to None.
+
+        Returns:
+            pd.DataFrame:
         """
+        
         if 'tech' not in df.columns:
             df['tech'] = 'reeds_vre'
         df['gen_name'] = df.tech + "_" + df.region
@@ -324,17 +335,37 @@ class ProcessReEDS(Process):
 
         return df
 
-    def df_process_line(self, df: pd.DataFrame, reeds_prop=None, 
-                                gdx_file=None) -> pd.DataFrame:
+    def df_process_line(self, df: pd.DataFrame, prop: str = None, 
+                                gdx_file: str = None) -> pd.DataFrame:
         """Does any additional processing for line properties
+
+        Args:
+            df (pd.DataFrame): input dataframe 
+            prop (str, optional): ReEDS input property. 
+                Defaults to None.
+            gdx_file (str, optional): String path to GDX file. 
+                Defaults to None.
+        
+        Returns:
+            pd.DataFrame:
         """
 
         df['line_name'] = df['region_from'] + "_" + df['region_to']
         return df
 
-    def df_process_reserves_generators(self, df: pd.DataFrame, reeds_prop=None, 
-                                        gdx_file=None) -> pd.DataFrame:
+    def df_process_reserves_generators(self, df: pd.DataFrame, prop: str = None, 
+                                gdx_file: str = None) -> pd.DataFrame:
         """Does any additional processing for reserves_generators properties
+
+        Args:
+            df (pd.DataFrame): input dataframe 
+            prop (str, optional): ReEDS input property. 
+                Defaults to None.
+            gdx_file (str, optional): String path to GDX file. 
+                Defaults to None.
+
+        Returns:
+            pd.DataFrame:
         """
         df['Type'] = '-'
         return df
@@ -344,31 +375,45 @@ class ProcessReEDS(Process):
 class PropertyColumns():
     """Column names of properties based on ReEDS input property
     """
+    #Marmot generator_Generation
     gen_out: List = field(default_factory=lambda: ['tech', 'region', 'h', 
-                                                    'year', 'Value'])  #Marmot generator_Generation
+                                                    'year', 'Value'])  
     gen_out_ann: List = field(default_factory=lambda: ['tech', 'region', 'year', 
                                                     'Value']) 
+    #Marmot generator_Installed_Capacity
     cap_out: List = field(default_factory=lambda: ['tech', 'region', 'year', 
-                                                    'Value']) #Marmot generator_Installed_Capacity
+                                                    'Value']) 
+    #Marmot generator_Curtailment
     curt_out: List = field(default_factory=lambda: ['region', 'h', 'year', 
-                                                    'Value']) #Marmot generator_Curtailment
-    load_rt: List = field(default_factory=lambda: ['region', 'year', 'Value']) #Marmot region_Load (year)
+                                                    'Value']) 
+    #Marmot region_Load (year)
+    load_rt: List = field(default_factory=lambda: ['region', 'year', 'Value']) 
+    #Marmot line_Losses 
     losses_tran_h: List = field(default_factory=lambda: ['region_from', 'region_to', 
-                                                        'h', 'year', 'category', 'Value']) #Marmot line_Losses 
+                                                        'h', 'year', 'category', 'Value']) 
+    #Marmot line_Flow
     tran_flow_power: List = field(default_factory=lambda: ['region_from', 'region_to', 
-                                                        'h', 'category', 'year', 'Value']) #Marmot line_Flow
+                                                        'h', 'category', 'year', 'Value']) 
+    #Marmot line_Import_Limit    
     tran_out: List = field(default_factory=lambda: ['region_from', 'region_to', 
-                                                    'category', 'year', 'Value']) #Marmot line_Import_Limit                                            
+                                                    'category', 'year', 'Value'])                                         
+    #Marmot generator_Pumped_Load
     stor_in: List = field(default_factory=lambda: ['tech', 'sub-tech', 'region', 'h', 
-                                                    'year', 'Value']) #Marmot generator_Pumped_Load
+                                                    'year', 'Value']) 
+    #Marmot storage_Generation
     stor_out: List = field(default_factory=lambda: ['tech', 'sub-tech', 'region', 'h', 
-                                                    'year', 'Value']) #Marmot storage_Generation
+                                                    'year', 'Value']) 
+    #Marmot storage_In_Out
     stor_inout: List = field(default_factory=lambda: ['tech', 'sub-tech', 'region', 
-                                                    'year', 'type', 'Value']) #Marmot storage_In_Out
+                                                    'year', 'type', 'Value']) 
+    #Marmot storage_Max_Volume
     stor_energy_cap: List = field(default_factory=lambda: ['tech', 'sub-tech', 'region', 
-                                                            'year', 'Value']) #Marmot storage_Max_Volume
+                                                            'year', 'Value']) 
     emit_nat_tech: List = field(default_factory=lambda: ['emission_type', 'tech', 'year', 'Value'])
-    emit_r: List = field(default_factory=lambda: ['emission_type', 'region', 'year', 'Value']) # Marmot emission_Production (year)
-    opRes_supply_h: List = field(default_factory=lambda: ['parent', 'tech', 'region', 'h', 'year', 'Value']) # Marmot reserves_generators_Provision
+    # Marmot emission_Production (year)
+    emit_r: List = field(default_factory=lambda: ['emission_type', 'region', 'year', 'Value']) 
+    # Marmot reserves_generators_Provision
+    opRes_supply_h: List = field(default_factory=lambda: ['parent', 'tech', 'region', 'h', 'year', 'Value']) 
     opRes_supply: List = field(default_factory=lambda: ['parent', 'tech', 'region', 'year', 'Value'])
-    systemcost_techba: List = field(default_factory=lambda: ['cost_type', 'tech', 'region', 'year', 'Value']) # Marmot generator_Total Generation Cost
+    # Marmot generator_Total Generation Cost
+    systemcost_techba: List = field(default_factory=lambda: ['cost_type', 'tech', 'region', 'year', 'Value']) 

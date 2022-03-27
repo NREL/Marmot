@@ -48,6 +48,9 @@ class ThermalReserve(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -88,11 +91,11 @@ class ThermalReserve(MPlotDataHelper):
             for i, scenario in enumerate(self.Scenarios):
                 logger.info(f"Scenario = {scenario}")
 
-                generation : pd.DataFrame = self["generator_Generation"].get(scenario)
+                generation : pd.DataFrame = self[f"generator_Generation{data_resolution}"].get(scenario)
                 if shift_leapday:
                     generation = self.adjust_for_leapday(generation)
 
-                avail_cap :pd.DataFrame = self["generator_Available_Capacity"].get(scenario) 
+                avail_cap :pd.DataFrame = self[f"generator_Available_Capacity{data_resolution}"].get(scenario) 
                 if shift_leapday:
                     avail_cap = self.adjust_for_leapday(avail_cap)               
                

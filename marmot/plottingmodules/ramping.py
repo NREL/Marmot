@@ -35,7 +35,7 @@ class Ramping(MPlotDataHelper):
     
     def capacity_started(self, start_date_range: str = None, 
                          end_date_range: str = None,
-                         barplot_groupby: str = 'Scenario', **_):
+                         scenario_groupby: str = 'Scenario', **_):
         """Creates bar plots of total thermal capacity started by technology type.
 
         Each sceanrio is plotted as a separate color grouped bar.
@@ -47,6 +47,11 @@ class Ramping(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to 
                 represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -111,7 +116,7 @@ class Ramping(MPlotDataHelper):
                 gen_cap = gen_cap.set_index('timestamp')
                 
                 gen_cap = self.year_scenario_grouper(gen_cap, scenario, 
-                                groupby=barplot_groupby,
+                                groupby=scenario_groupby,
                                 additional_groups=['timestamp', 'tech', 'gen_name']).sum()
                 unique_idx = list(gen_cap.index.get_level_values('Scenario').unique())
                 cap_started_df = pd.DataFrame(

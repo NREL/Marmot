@@ -411,7 +411,7 @@ class SetupSubplot():
         elif tick_format == 'percent':
             ax.yaxis.set_major_formatter(mtick.PercentFormatter(1.0))
         elif tick_format == 'log':
-            print("set_yaxis_major_tick_format: 'log' Not yet developed")
+            logger.warning("set_yaxis_major_tick_format: 'log' Not yet developed")
             pass
 
     def set_subplot_timeseries_format(self,
@@ -434,6 +434,12 @@ class SetupSubplot():
                 can be either a integer or a tuple of 2 integers depending on 
                 how SetupSubplot was instantiated. 
                 Defaults to 0.
+            zero_formats_1 (str, optional): Sets the zero_fromats[1] format.
+                Defaults to '%b\n %Y'.
+            zero_formats_2 (str, optional): Sets the zero_formats[2] format.
+                Defaults to '%d\n %b'.
+            zero_formats_3 (str, optional): Sets the zero_formats[3] format.
+                Defaults to '%H:%M\n %d-%b'.
         """
         ax = self._check_if_array(sub_pos)
 

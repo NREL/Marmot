@@ -38,7 +38,7 @@ class CapacityFactor(MPlotDataHelper):
     def avg_output_when_committed(self,
                                   start_date_range: str = None, 
                                   end_date_range: str = None, 
-                                  barplot_groupby: str = 'Scenario', **_):
+                                  scenario_groupby: str = 'Scenario', **_):
         """Creates barplots of the percentage average generation output when committed by technology type. 
 
         Each scenario is plotted by a different colored grouped bar. 
@@ -48,6 +48,11 @@ class CapacityFactor(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -105,7 +110,7 @@ class CapacityFactor(MPlotDataHelper):
                 Gen.set_index('timestamp',inplace=True)
 
 
-                if barplot_groupby == 'Year-Scenario':
+                if scenario_groupby == 'Year-Scenario':
                     Gen['Scenario'] = \
                          Gen.index.year.astype(str) + f'_{scenario}'
                 else:
@@ -177,7 +182,7 @@ class CapacityFactor(MPlotDataHelper):
 
     def cf(self, start_date_range: str = None, 
            end_date_range: str = None, 
-           barplot_groupby: str = 'Scenario', **_):
+           scenario_groupby: str = 'Scenario', **_):
         """Creates barplots of generator capacity factors by technology type. 
 
         Each scenario is plotted by a different colored grouped bar. 
@@ -187,6 +192,11 @@ class CapacityFactor(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -244,9 +254,9 @@ class CapacityFactor(MPlotDataHelper):
                 Gen = Gen/interval_count
 
                 Total_Gen = self.year_scenario_grouper(Gen, scenario, 
-                                                groupby=barplot_groupby).sum()
+                                                groupby=scenario_groupby).sum()
                 Cap = self.year_scenario_grouper(Cap, scenario, 
-                                                groupby=barplot_groupby).sum()
+                                                groupby=scenario_groupby).sum()
                 #Calculate CF
                 CF = Total_Gen/(Cap * duration_hours)
                 cf_scen_chunks.append(CF)
@@ -279,7 +289,7 @@ class CapacityFactor(MPlotDataHelper):
 
     def time_at_min_gen(self, start_date_range: str = None, 
                         end_date_range: str = None,
-                        barplot_groupby: str = 'Scenario', **_):
+                        scenario_groupby: str = 'Scenario', **_):
         """Creates barplots of generator percentage time at min-gen by technology type. 
 
         Each scenario is plotted by a different colored grouped bar. 
@@ -289,6 +299,11 @@ class CapacityFactor(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: dictionary containing the created plot and its data table.

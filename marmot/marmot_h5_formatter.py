@@ -48,7 +48,7 @@ class MarmotFormat(SetupLogger):
 
     def __init__(self, Scenario_name: str, 
                  Model_Solutions_folder: Union[str, Path], 
-                 Plexos_Properties: Union[str, Path, pd.DataFrame],
+                 Properties_File: Union[str, Path, pd.DataFrame],
                  Marmot_Solutions_folder: Union[str, Path] = None,
                  mapping_folder: Union[str, Path] = INPUT_DIR.joinpath('mapping_folder'),
                  Region_Mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
@@ -59,7 +59,7 @@ class MarmotFormat(SetupLogger):
             Scenario_name (str): Name of scenario to process.
             Model_Solutions_folder (Union[str, Path]): Folder containing model simulation 
                 results subfolders and their files.
-            Plexos_Properties (Union[str, Path, pd.DataFrame]): PLEXOS properties 
+            Properties_File (Union[str, Path, pd.DataFrame]): Properties 
                 to process, must follow format seen in Marmot directory.
             Marmot_Solutions_folder (Union[str, Path], optional): Folder to save Marmot 
                 solution files.
@@ -88,17 +88,17 @@ class MarmotFormat(SetupLogger):
             self.Marmot_Solutions_folder = Path(Marmot_Solutions_folder)
             self.Marmot_Solutions_folder.mkdir(exist_ok=True)
 
-        if isinstance(Plexos_Properties, (str, Path)):
+        if isinstance(Properties_File, (str, Path)):
             try:
-                self.Plexos_Properties = pd.read_csv(Plexos_Properties)
+                self.Properties_File = pd.read_csv(Properties_File)
             except FileNotFoundError:
                 self.logger.error("Could not find specified "
-                                    "Plexos_Properties file; check file name. "
+                                    "Properties_File; check file name. "
                                     "This is required to run Marmot, "
                                     "system will now exit")
                 sys.exit()
-        elif isinstance(Plexos_Properties, pd.DataFrame):
-            self.Plexos_Properties = Plexos_Properties
+        elif isinstance(Properties_File, pd.DataFrame):
+            self.Properties_File = Properties_File
 
         if isinstance(Region_Mapping, (str, Path)):
             try:
@@ -252,8 +252,8 @@ class MarmotFormat(SetupLogger):
             f.close()
             process_sim_model.output_metadata(files_list)
 
-        process_properties = (self.Plexos_Properties
-                                  .loc[self.Plexos_Properties["collect_data"] == True])
+        process_properties = (self.Properties_File
+                                  .loc[self.Properties_File["collect_data"] == True])
         
         start = time.time()
         # Main loop to process each output and pass data to functions
@@ -412,7 +412,7 @@ def main():
 
     # File which determiens which plexos properties to pull from the h5plexos results and 
     # process, this file is in the repo
-    Plexos_Properties = pd.read_csv(INPUT_DIR.joinpath(mconfig.parser(
+    Properties_File = pd.read_csv(INPUT_DIR.joinpath(mconfig.parser(
                                 f'{simulation_model.lower()}_properties_file')))
     
     # Name of the Scenario(s) being run, must have the same name(s) as the folder 
@@ -472,7 +472,7 @@ def main():
     for Scenario_name in Scenario_List:
         
         initiate = MarmotFormat(Scenario_name, Model_Solutions_folder, 
-                                Plexos_Properties,
+                                Properties_File,
                                 Marmot_Solutions_folder=Marmot_Solutions_folder,
                                 mapping_folder=Mapping_folder,
                                 Region_Mapping=Region_Mapping,

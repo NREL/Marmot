@@ -61,6 +61,9 @@ class GenerationStack(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -86,7 +89,7 @@ class GenerationStack(MPlotDataHelper):
             logger.info(f'Zone = {str(zone_input)}')
 
             #Get technology list.
-            gens = self['generator_Installed_Capacity'].get(self.Scenarios[0])
+            gens = self[f'generator_Installed_Capacity{data_resolution}'].get(self.Scenarios[0])
             try:
                 gens = gens.xs(zone_input,level=self.AGG_BY)
             except KeyError:
@@ -115,8 +118,8 @@ class GenerationStack(MPlotDataHelper):
             for i, scenario in enumerate(self.Scenarios):
                 logger.info(f"Scenario = {scenario}")
 
-                units_gen : pd.DataFrame = self['generator_Units_Generating'].get(scenario)
-                avail_cap : pd.DataFrame = self['generator_Available_Capacity'].get(scenario)
+                units_gen : pd.DataFrame = self[f'generator_Units_Generating{data_resolution}'].get(scenario)
+                avail_cap : pd.DataFrame = self[f'generator_Available_Capacity{data_resolution}'].get(scenario)
 
                 units_gen = units_gen.xs(zone_input, level=self.AGG_BY)
                 units_gen = self.df_process_gen_inputs(units_gen)
@@ -134,7 +137,7 @@ class GenerationStack(MPlotDataHelper):
                 thermal_commit_cap = thermal_commit_cap/unitconversion['divisor']
 
                 #Process generation.
-                gen : pd.DataFrame = self['generator_Generation'].get(scenario)
+                gen : pd.DataFrame = self[f'generator_Generation{data_resolution}'].get(scenario)
                 gen = gen.xs(zone_input,level = self.AGG_BY)
                 gen = self.df_process_gen_inputs(gen)
                 gen = gen.loc[:, (gen != 0).any(axis=0)]
@@ -228,6 +231,9 @@ class GenerationStack(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -497,6 +503,9 @@ class GenerationStack(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -519,7 +528,7 @@ class GenerationStack(MPlotDataHelper):
             logger.info(f"Zone = {zone_input}")
             # Create Dictionary to hold Datframes for each scenario
 
-            Total_Gen_Stack_1 : pd.DataFrame = self['generator_Generation'].get(self.Scenario_Diff[0])
+            Total_Gen_Stack_1 : pd.DataFrame = self[f'generator_Generation{data_resolution}'].get(self.Scenario_Diff[0])
             if Total_Gen_Stack_1 is None:
                 logger.warning(f"Scenario_Diff '{self.Scenario_Diff[0]}'' is not in data. "
                                     "Ensure User Input Sheet is set up correctly!")
@@ -535,7 +544,7 @@ class GenerationStack(MPlotDataHelper):
             #Adds in all possible columns from ordered gen to ensure the two dataframes have same column names
             Total_Gen_Stack_1 = pd.DataFrame(Total_Gen_Stack_1, columns=self.ordered_gen).fillna(0)
 
-            Total_Gen_Stack_2 : pd.DataFrame = self['generator_Generation'].get(self.Scenario_Diff[1])
+            Total_Gen_Stack_2 : pd.DataFrame = self[f'generator_Generation{data_resolution}'].get(self.Scenario_Diff[1])
             if Total_Gen_Stack_2 is None:
                 logger.warning(f"Scenario_Diff '{self.Scenario_Diff[1]}' is not in data. "
                                     "Ensure User Input Sheet is set up correctly!")

@@ -75,6 +75,10 @@ class MarmotPlot(SetupLogger):
                 simulation results subfolders and their files.
             gen_names (Union[str, Path, pd.DataFrame]): Mapping file to rename 
                 generator technologies.
+            ordered_gen_categories (Union[str, Path, pd.DataFrame]): Path to or Dataframe 
+                containing ordered generation and columns to specify technology subsets.
+            color_dictionary_file (Union[str, Path, pd.DataFrame]): Path to or Dataframe 
+                containing list of colors to assign to each generator category..
             Marmot_plot_select (Union[str, Path, pd.DataFrame]): Selection of plots 
                 to plot.
             Marmot_Solutions_folder (Union[str, Path], optional): Folder to save 
@@ -554,9 +558,9 @@ class MarmotPlot(SetupLogger):
                     data_resolution : str = ''
 
                 if row['Barplots by Scenario or Year-Scenario'] == 'Year-Scenario':
-                    barplot_groupby : str = 'Year-Scenario'
+                    scenario_groupby : str = 'Year-Scenario'
                 else:
-                    barplot_groupby : str = 'Scenario'
+                    scenario_groupby : str = 'Scenario'
 
                 # Get figure method and run plot
                 try:
@@ -574,7 +578,7 @@ class MarmotPlot(SetupLogger):
                                            end_date_range = row.iloc[8],
                                            custom_data_file_path = custom_data_file_path,
                                            data_resolution = data_resolution,
-                                           barplot_groupby = barplot_groupby)
+                                           scenario_groupby = scenario_groupby)
                 
                 if isinstance(Figure_Out, MissingInputData):
                     self.logger.info("Add Inputs With Formatter Before "

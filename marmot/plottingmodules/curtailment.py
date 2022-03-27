@@ -414,7 +414,7 @@ class Curtailment(MPlotDataHelper):
 
     def curt_total(self, start_date_range: str = None, 
                     end_date_range: str = None, 
-                    barplot_groupby: str = 'Scenario', **_):
+                    scenario_groupby: str = 'Scenario', **_):
         """Creates stacked barplots of total curtailment by technology.
 
         A separate bar is created for each scenario.
@@ -424,6 +424,11 @@ class Curtailment(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -492,9 +497,9 @@ class Curtailment(MPlotDataHelper):
                 vre_curt = vre_curt/interval_count
                 avail_gen = avail_gen/interval_count
                 vre_table = self.year_scenario_grouper(vre_curt, scenario, 
-                                                        groupby=barplot_groupby).sum()
+                                                        groupby=scenario_groupby).sum()
                 avail_gen_table = self.year_scenario_grouper(avail_gen, scenario, 
-                                                        groupby=barplot_groupby).sum()
+                                                        groupby=scenario_groupby).sum()
                 
                 vre_curt_chunks.append(vre_table)
                 avail_gen_chunks.append(avail_gen_table)
@@ -901,7 +906,7 @@ class Curtailment(MPlotDataHelper):
 
     def average_diurnal_curt(self, timezone: str = None, start_date_range: str = None,
                              end_date_range: str = None,
-                             barplot_groupby: str = 'Scenario', **_):
+                             scenario_groupby: str = 'Scenario', **_):
         """Average diurnal renewable curtailment plot. 
 
         Each scenario is plotted as a separate line and shows the average 
@@ -915,6 +920,11 @@ class Curtailment(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -964,7 +974,7 @@ class Curtailment(MPlotDataHelper):
                 re_curt = re_curt/interval_count
 
                 # Group data by hours and find mean across entire range 
-                re_curt = self.year_scenario_grouper(re_curt, scenario, groupby=barplot_groupby,
+                re_curt = self.year_scenario_grouper(re_curt, scenario, groupby=scenario_groupby,
                                                     additional_groups=[re_curt.index.hour]).mean()
                 for scen in re_curt.index.get_level_values('Scenario').unique():
                     re_curt_scen = re_curt.xs(scen, level='Scenario')

@@ -37,7 +37,7 @@ class GenerationUnStack(MPlotDataHelper):
         
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
-    def gen_unstack(self, figure_name: str = None, prop: str = None,
+    def gen_unstack(self, prop: str = None,
                     start: float = None, end: float= None,
                     timezone: str = "", start_date_range: str = None,
                     end_date_range: str = None,
@@ -49,8 +49,6 @@ class GenerationUnStack(MPlotDataHelper):
         prop argument.
 
         Args:
-            figure_name (str, optional): User defined figure output name.
-                Defaults to None.
             prop (str, optional): Special argument used to adjust specific 
                 plot settings. Controlled through the plot_select.csv.
                 Opinions available are:
@@ -74,6 +72,9 @@ class GenerationUnStack(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
 
         Returns:
             dict: dictionary containing the created plot and its data table.

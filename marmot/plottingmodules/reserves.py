@@ -51,9 +51,6 @@ class Reserves(MPlotDataHelper):
         Generation order is determined by the ordered_gen_categories.csv.
 
         Args:
-            figure_name (str, optional): User defined figure output name. Used here 
-                to determine if a Facet plot should be created.
-                Defaults to None.
             prop (str, optional): Special argument used to adjust specific 
                 plot settings. Controlled through the plot_select.csv.
                 Opinions available are:
@@ -75,6 +72,9 @@ class Reserves(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -187,7 +187,7 @@ class Reserves(MPlotDataHelper):
 
     def total_reserves_by_gen(self, start_date_range: str = None, 
                               end_date_range: str = None, 
-                              barplot_groupby: str = 'Scenario', **_):
+                              scenario_groupby: str = 'Scenario', **_):
         """Creates a generation stacked barplot of total reserve provision by generator tech type.
 
         A separate bar is created for each scenario.
@@ -197,6 +197,11 @@ class Reserves(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -246,7 +251,7 @@ class Reserves(MPlotDataHelper):
                 reserve_provision = self.year_scenario_grouper(
                                                     reserve_provision_timeseries, 
                                                     scenario, 
-                                                    groupby=barplot_groupby).sum()
+                                                    groupby=scenario_groupby).sum()
                 
                 reserve_chunks.append(reserve_provision)
 
@@ -332,7 +337,7 @@ class Reserves(MPlotDataHelper):
     def _reserve_bar_plots(self, data_set: str, count_hours: bool = False, 
                            start_date_range: str = None, 
                            end_date_range: str = None,
-                           barplot_groupby: str = 'Scenario', **_):
+                           scenario_groupby: str = 'Scenario', **_):
         """internal _reserve_bar_plots method, creates 'Shortage', 'Provision' and 'Shortage' bar 
         plots
 
@@ -347,6 +352,11 @@ class Reserves(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from 
+                the timestamp and appeneded to the sceanrio name. This is useful when plotting data 
+                which covers multiple years such as ReEDS.
+                Defaults to Scenario.
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -402,14 +412,14 @@ class Reserves(MPlotDataHelper):
                 if count_hours == False:
                     reserve_total = self.year_scenario_grouper(
                                         reserve_timeseries, scenario, 
-                                        groupby=barplot_groupby,
+                                        groupby=scenario_groupby,
                                         additional_groups=["Type"]).sum()/interval_count
 
                 elif count_hours == True:
                     reserve_total = reserve_timeseries[reserve_timeseries[0]>0] #Filter for non zero values
                     reserve_total = self.year_scenario_grouper(
                                         reserve_timeseries, scenario, 
-                                        groupby=barplot_groupby,
+                                        groupby=scenario_groupby,
                                         additional_groups=["Type"]).count()/interval_count
 
                 reserve_total_chunk.append(reserve_total)

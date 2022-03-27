@@ -118,7 +118,6 @@ class ProcessPLEXOS(Process):
 
         Args:
             files_list (list): List of all h5 files in hdf5 folder in alpha numeric order
-            output_file_path (str): Location of formatted output h5 file 
         """
         for partition in files_list:
             f = h5py.File(self.input_folder.joinpath(partition),'r')
