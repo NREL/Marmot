@@ -41,7 +41,8 @@ class GenerationStack(MPlotDataHelper):
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
         
     def committed_stack(self, start_date_range: str = None, 
-                        end_date_range: str = None, **_):
+                        end_date_range: str = None,
+                        data_resolution: str = "", **_):
         """Plots the timeseries of committed generation compared to the total available capacity 
         
         The upper line shows the total available cpacity that can be committed 
@@ -68,10 +69,10 @@ class GenerationStack(MPlotDataHelper):
 
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True,"generator_Installed_Capacity",[self.Scenarios[0]]),
-                      (True,"generator_Generation",self.Scenarios),
-                      (True,"generator_Units_Generating",self.Scenarios),
-                      (True,"generator_Available_Capacity",self.Scenarios)]
+        properties = [(True, f"generator_Installed_Capacity{data_resolution}", [self.Scenarios[0]]),
+                      (True, f"generator_Generation{data_resolution}", self.Scenarios),
+                      (True, f"generator_Units_Generating{data_resolution}", self.Scenarios),
+                      (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -114,16 +115,16 @@ class GenerationStack(MPlotDataHelper):
             for i, scenario in enumerate(self.Scenarios):
                 logger.info(f"Scenario = {scenario}")
 
-                units_gen = self['generator_Units_Generating'].get(scenario).copy()
-                avail_cap = self['generator_Available_Capacity'].get(scenario)
+                units_gen : pd.DataFrame = self['generator_Units_Generating'].get(scenario)
+                avail_cap : pd.DataFrame = self['generator_Available_Capacity'].get(scenario)
 
-                # Drop units index to allow multiplication  
-                units_gen.reset_index(level='units', drop=True, inplace=True)
-        
-                #Calculate  committed cap (for thermal only).
+                units_gen = units_gen.xs(zone_input, level=self.AGG_BY)
+                units_gen = self.df_process_gen_inputs(units_gen)
+                avail_cap = avail_cap.xs(zone_input, level=self.AGG_BY)
+                avail_cap = self.df_process_gen_inputs(avail_cap)
+
+                # Calculate  committed cap (for thermal only).
                 thermal_commit_cap = units_gen * avail_cap
-                thermal_commit_cap = thermal_commit_cap.xs(zone_input, level=self.AGG_BY)
-                thermal_commit_cap = self.df_process_gen_inputs(thermal_commit_cap)
                 # Drop all zero columns
                 thermal_commit_cap = thermal_commit_cap.loc[:, (thermal_commit_cap != 0).any(axis=0)]
 
@@ -133,41 +134,47 @@ class GenerationStack(MPlotDataHelper):
                 thermal_commit_cap = thermal_commit_cap/unitconversion['divisor']
 
                 #Process generation.
-                gen = self['generator_Generation'].get(scenario)
+                gen : pd.DataFrame = self['generator_Generation'].get(scenario)
                 gen = gen.xs(zone_input,level = self.AGG_BY)
                 gen = self.df_process_gen_inputs(gen)
                 gen = gen.loc[:, (gen != 0).any(axis=0)]
                 gen = gen/unitconversion['divisor']
 
-                #Process available capacity (for VG only).
-                avail_cap = avail_cap.xs(zone_input, level=self.AGG_BY)
-                avail_cap = self.df_process_gen_inputs(avail_cap)
                 avail_cap = avail_cap.loc[:, (avail_cap !=0).any(axis=0)]
                 avail_cap = avail_cap/unitconversion['divisor']
+                
+                if pd.notna(start_date_range):
+                    thermal_commit_cap, gen, avail_cap = self.set_timestamp_date_range(
+                                                [thermal_commit_cap, gen, avail_cap],
+                                                start_date_range, end_date_range)
+                    if thermal_commit_cap.empty is True:
+                        logger.warning('No Generation in selected Date Range')
+                        continue
 
-                for j,tech in enumerate(tech_list_sort):
+                for j, tech in enumerate(tech_list_sort):
                     if tech not in gen.columns:
-                        gen_one_tech = pd.Series(0,index = gen.index)
-                        # Add dummy columns to deal with coal retirements 
-                        # (coal showing up in 2024, but not future years).
-                        commit_cap = pd.Series(0,index = gen.index) 
+                        gen_one_tech = pd.Series(0, index=gen.index)
+                        commit_cap = pd.Series(0, index=gen.index) 
                     elif tech in self.thermal_gen_cat:
                         gen_one_tech = gen[tech]
                         commit_cap = thermal_commit_cap[tech]
+                    # For all other techs
                     else:
                         gen_one_tech = gen[tech]
                         commit_cap = avail_cap[tech]
 
                     axs[j,i].plot(gen_one_tech, alpha=0, 
-                                    color=self.PLEXOS_color_dict[tech])[0]
+                                  color=self.PLEXOS_color_dict[tech])[0]
                     axs[j,i].fill_between(gen_one_tech.index, gen_one_tech, 0, 
-                                            color=self.PLEXOS_color_dict[tech], alpha=0.5)
+                                          color=self.PLEXOS_color_dict[tech], 
+                                          alpha=0.5)
                     if tech != 'Hydro':
-                        axs[j,i].plot(commit_cap, color=self.PLEXOS_color_dict[tech])
+                        axs[j,i].plot(commit_cap, 
+                                      color=self.PLEXOS_color_dict[tech])
 
-                    mplt.set_yaxis_major_tick_format(sub_pos=(j,i))
+                    mplt.set_yaxis_major_tick_format(sub_pos=(j, i))
                     axs[j,i].margins(x=0.01)
-                    mplt.set_subplot_timeseries_format(sub_pos=(j,i))
+                    mplt.set_subplot_timeseries_format(sub_pos=(j, i))
 
             mplt.add_facet_labels(xlabels_bottom=False, xlabels=self.Scenarios,
                                     ylabels=tech_list_sort)
@@ -182,7 +189,7 @@ class GenerationStack(MPlotDataHelper):
         return outputs
 
 
-    def gen_stack(self, figure_name: str = None, prop: str = None,
+    def gen_stack(self, prop: str = None,
                   start: float = None, end: float= None,
                   timezone: str = "", start_date_range: str = None,
                   end_date_range: str = None,
@@ -196,8 +203,6 @@ class GenerationStack(MPlotDataHelper):
         prop argument.
 
         Args:
-            figure_name (str, optional): User defined figure output name.
-                Defaults to None.
             prop (str, optional): Special argument used to adjust specific 
                 plot settings. Controlled through the plot_select.csv.
                 Opinions available are:
