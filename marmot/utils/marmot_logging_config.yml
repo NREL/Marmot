@@ -32,12 +32,12 @@ handlers:
     mode: a
 
 loggers:
-  marmot_format:
+  formatter:
     level: INFO
     handlers: [console,warning_handler,info_handler]
     propagate: yes
 
-  marmot_plot:
+  plotter:
     level: INFO
     handlers: [console,warning_handler,info_handler]
     propagate: yes

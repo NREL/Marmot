@@ -1,9 +1,53 @@
-# Marmot
-Marmot is a data formatting and visualization tool for PLEXOS production cost modelling results. It provides an efficient way to view PLEXOS results, while also creating publication ready figures and data tables.
+<div align="center">
+  <img src=https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg width="400"><br>
+</div>
+
+# Marmot: Energy Analysis and Visualization
 
 [![Documentation](https://img.shields.io/badge/docs-ready-blue.svg)](https://nrel.github.io/Marmot/index.html)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.6388281.svg)](https://doi.org/10.5281/zenodo.6388281)
+[![License](https://img.shields.io/pypi/l/pandas.svg)](https://github.com/NREL/Marmot/blob/main/LICENSE)
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-![Yellow-bellied marmot](https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg)
+
+## What is it?
+Marmot is a data formatting and visualization tool for production cost and capacity expansion modelling results. It provides an efficient way to analysis data by combing temporally disaggregated results and allowing the aggregation of different device types and modelling regions.
+
+Marmot currently supports analysis of [**PLEXOS**](https://www.energyexemplar.com/plexos) production costs modelling and [**ReEDS**](https://www.nrel.gov/analysis/reeds/) capacity expansion results.
+
+## Main Features
+
+- Formats modelling results data to a standard format and saves them to a hdf5 file.
+- Combines temporally disaggregated results.
+- Handles every timestep whether that be 5 minute or yearly interval data.
+- Provides approximately 120 pre-built plots which offer vast user customization through an easy to use configuration file and various mapping and input data csvs. 
+
+## Installation
+For detailed Installation Instruction see the docs at: https://nrel.github.io/Marmot/get-started/install.html
+
+- To install the latest version 
+``` 
+git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.9.0
+```
+(Make sure to include `--recurse-submodules` else h5plexos will not be included correctly)
+
+- Marmot includes a [conda environment](marmot-env10.yml) and [requirements.txt](requirements.txt) file to ensure all dependencies are available.
+
+
+## Documentation
+The official documentation is hosted on github-pages: https://nrel.github.io/Marmot
+
+## License
+[BSD 3](LICENSE)
+
+## Background
+Work on ``Marmot`` started at the National Renewable Energy Laboratory [NREL](https://www.nrel.gov/about/) (A national laboratory of the U.S. Department of Energy) in 2019 and
+has been under active development since then.
+
+
+
+## Old Readme text (Will remove when migrated to offical docs)
+
 
 Click the following to quickly navigate to the main sections of the ReadME:
 - [Main Python Scripts](https://github.com/NREL/Marmot#main-python-scripts)
@@ -67,7 +111,8 @@ After all required prerequisites are installed, you are ready to install and run
 - To pip install Marmot:
   1. Open a cmd window that is setup with Python and change directory to your desired install location.
   2. Type the following `pip3 install --user -e git+https://github.com/NREL/Marmot.git#egg=marmot` This will install Marmot from the current master branch, however this can be changed to a specific commit or tagged release if desired by adding **@comit_id** after Marmot.git and before the **#** symbol.
-For example, the following can be used to install Marmot release v0.7.0 `git+https://github.com/NREL/Marmot.git@v0.7.0#egg=marmot`  
+For example, the following can be used to install Marmot release v0.9.0 `git+https://github.com/NREL/Marmot.git@v0.9.0#egg=marmot`
+You may have to run `pip` instead of `pip3`.
   3. If no error messages appeared Marmot has been installed correctly. To import the formatter or plotter, use the following import commands:
 
  ```python
@@ -88,13 +133,13 @@ Before you use the **marmot_h5_formatter** you will need to adjust and set the i
 
 Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the formatter include:
 
-- `PLEXOS_Solutions_folder` **Required** The directory that contains all h5plexos files that have come from PLEXOS. This directory should include a sub-folder for each scenario in the `Scenarios`, each of which holds the individual h5plexos solution files. Here's an example of how that would look:
+- `Model_Solutions_folder` **Required** The directory that contains all h5plexos files that have come from PLEXOS. This directory should include a sub-folder for each scenario in the `Scenarios`, each of which holds the individual h5plexos solution files. Here's an example of how that would look:
 
   ![marmot folder structure](https://user-images.githubusercontent.com/43964549/132605149-fd088a10-8c4a-49f1-b8b7-d3d31e3f5a30.png)
 
    Multiple h5plexos files within a single scenario sub-folder will be combined to form a single timeseries, with any overlapping periods trimmed.
 
-- `Marmot_Solutions_folder` **Optional** This is the base directory for saving outputs. When **marmot_h5_formatter** is run it will create a `Processed_HDF5 folder` here, and will save all the processed results with the extension "*_formatted.h5*". Including a folder path here allows the user to save outputs in a different location from inputs if desired. If left blank all data and plots will be saved in `PLEXOS_Solutions_folder`.
+- `Marmot_Solutions_folder` **Optional** This is the base directory for saving outputs. When **marmot_h5_formatter** is run it will create a `Processed_HDF5 folder` here, and will save all the processed results with the extension "*_formatted.h5*". Including a folder path here allows the user to save outputs in a different location from inputs if desired. If left blank all data and plots will be saved in `Model_Solutions_folder`.
 
 - `Scenario_process_list` **Required** This is the list of scenarios to process. The h5plexos hdf5 results files should be saved in folders with these names. The list must contain at least one entry. Using the above example, this list would be "*Scenario_name_1, Scenario_name_2*"
 
@@ -126,7 +171,7 @@ As with the Marmot Formatter, users will need to adjust the input settings in th
 
 Required and Optional Settings to adjust in the **Marmot_user_defined_inputs.csv** to run the plotting code include:
 
-- `PLEXOS_Solutions_folder` **Required** Same as described [above](https://github.com/NREL/Marmot#marmot-formatter)
+- `Model_Solutions_folder` **Required** Same as described [above](https://github.com/NREL/Marmot#marmot-formatter)
 
 - `Marmot_Solutions_folder` **Optional** Same as described [above](https://github.com/NREL/Marmot#marmot-formatter)
 
@@ -216,10 +261,10 @@ The **config.yml** settings and their defaults are as follows:
 
 - **plot_data:**
   - curtailment_property: Curtailment
-  - include_total_pumped_load_line: false
-  - include_timeseries_pumped_load_line: true
+  - include_barplot_load_storage_charging_line: false
+  - include_timeseries_load_storage_charging_line: true
 
-  *Controls certain plot data settings. `curtailment_property` source of Curtailment data. The code defaults to Marmot's calculated Curtailment property. `include_total_pumped_load_line` specifies whether to include the line representing pumped load in total generation bar plots. `include_timeseries_pumped_load_line` specifies whether to include the line representing pumped load in timeseries generation plots*
+  *Controls certain plot data settings. `curtailment_property` source of Curtailment data. The code defaults to Marmot's calculated Curtailment property. `include_barplot_load_storage_charging_line` specifies whether to include the line representing pumped load in total generation bar plots. `include_timeseries_load_storage_charging_line` specifies whether to include the line representing pumped load in timeseries generation plots*
 
 - **figure_file_format:** svg
 
