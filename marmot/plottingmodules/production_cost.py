@@ -9,10 +9,9 @@ Plots can be broken down by cost categories, generator types etc.
 
 import logging
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
@@ -48,12 +47,7 @@ class MPlot(PlotDataHelper):
                     Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
-        
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
-        
+                
     def prod_cost(self, start_date_range: str = None, 
                   end_date_range: str = None, custom_data_file_path: str = None,
                   **_):
@@ -165,49 +159,29 @@ class MPlot(PlotDataHelper):
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
 
-            fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            
-            net_rev = plt.plot(Net_Revenue.index, Net_Revenue.values, color='black', 
-                               linestyle='None', marker='o')
-            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', 
-                                            linewidth='0.1', ax=ax)
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
 
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Total System Net Rev,\nRev, & Cost (Million $)', 
-                          color='black', rotation='vertical')
-            
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Systems_Cost_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: 
-                                         format(x, f',.{self.y_axes_decimalpt}f')))
+            mplt.barplot(Total_Systems_Cost_Out, stacked=True, 
+                         custom_tick_labels=tick_labels)
+            ax.plot(Net_Revenue.index, Net_Revenue.values, 
+                    color='black', linestyle='None', marker='o',
+                    label='Net Revenue')
+            
+            ax.set_ylabel('Total System Net Rev, Rev, & Cost ($/KW-yr)',  color='black', rotation='vertical')            
             ax.margins(x=0.01)
 
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='upper center', 
-                      bbox_to_anchor=(0.5,-0.15), facecolor='inherit', 
-                      frameon=True, ncol=3)
-
-            #Legend 1
-            leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',
-                             bbox_to_anchor=(1,0), facecolor='inherit', frameon=True)
-            #Legend 2
-            ax.legend(net_rev, ['Net Revenue'], loc='center left',bbox_to_anchor=(1, 0.9),
-                      facecolor='inherit', frameon=True)
-
-            # Manually add the first legend back
-            ax.add_artist(leg1)
+            mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
     def sys_cost(self, start_date_range: str = None, 
@@ -308,33 +282,24 @@ class MPlot(PlotDataHelper):
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out.add_suffix(" (Million $)")
             
-            fig2, ax = plt.subplots(figsize=(self.x,self.y))
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', 
-                                            linewidth='0.1', ax=ax)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.set_ylabel('Total System Cost (Million $)', color='black', 
-                          rotation='vertical')
-            
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Systems_Cost_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            mplt.barplot(Total_Systems_Cost_Out, stacked=True, 
+                         custom_tick_labels=tick_labels)
+            ax.set_ylabel('Total System Cost (Million $)', 
+                            color='black', rotation='vertical')        
             ax.margins(x=0.01)
 
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-            
+            mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
             cost_totals = Total_Systems_Cost_Out.sum(axis=1) #holds total of each bar
 
@@ -363,7 +328,7 @@ class MPlot(PlotDataHelper):
                 if k>=len(cost_totals)-1:
                     break
             
-            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
     def detailed_gen_cost(self, start_date_range: str = None, 
@@ -474,32 +439,24 @@ class MPlot(PlotDataHelper):
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
             
-            fig3, ax = plt.subplots(figsize=(self.x,self.y))
-
-            Detailed_Gen_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.axhline(y = 0)
-            ax.set_ylabel('Total Generation Cost (Million $)',  color='black', rotation='vertical')
-            
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Detailed_Gen_Cost_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
+
+            mplt.barplot(Detailed_Gen_Cost_Out, stacked=True, 
+                         custom_tick_labels=tick_labels)
+            ax.axhline(y=0)
+            ax.set_ylabel('Total Generation Cost (Million $)', 
+                          color='black', rotation='vertical')
             ax.margins(x=0.01)
-
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-            
+            mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
                 
             cost_totals = Detailed_Gen_Cost_Out.sum(axis=1) #holds total of each bar
 
@@ -528,7 +485,7 @@ class MPlot(PlotDataHelper):
                 if k>=len(cost_totals)-1:
                     break
             
-            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 
@@ -611,38 +568,27 @@ class MPlot(PlotDataHelper):
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             
-            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], 
-                             edgecolor='black', linewidth='0.1', ax=ax)
-
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-
-            ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')
-            
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            mplt.barplot(Total_Generation_Stack_Out, 
+                        color=self.PLEXOS_color_dict, stacked=True, 
+                        custom_tick_labels=tick_labels)
 
+            ax.set_ylabel('Total System Cost (Million $)',  color='black', rotation='vertical')            
             ax.margins(x=0.01)
 
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-
+            mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 
@@ -740,34 +686,23 @@ class MPlot(PlotDataHelper):
             # Data table of values to return to main program
             Data_Table_Out = Total_Systems_Cost_Out
             Data_Table_Out = Data_Table_Out.add_suffix(" (Million $)")
+            
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
 
-            fig2, ax = plt.subplots(figsize=(self.x,self.y))
+            mplt.barplot(Total_Systems_Cost_Out, stacked=True)
 
-            Total_Systems_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-
-            # Set x-tick labels
-            tick_labels = Total_Systems_Cost_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
-
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            # locs,labels=plt.xticks()
-            ax.axhline(y = 0, color = 'black')
-            ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.axhline(y=0, color='black')
+            ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0], 
+                            color='black', rotation='vertical')
             ax.margins(x=0.01)
             # plt.ylim((0,600))
-            handles, labels = ax.get_legend_handles_labels()
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
+            mplt.add_legend()
 
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 
@@ -849,37 +784,23 @@ class MPlot(PlotDataHelper):
 
             Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_',' ')
             
-            fig1, ax = plt.subplots(figsize=(self.x,self.y))
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
 
-            Total_Generation_Stack_Out.plot.bar(stacked=True,
-                             color=[self.PLEXOS_color_dict.get(x, '#333333') for x in Total_Generation_Stack_Out.columns], edgecolor='black', linewidth='0.1',ax=ax)
+            mplt.barplot(Total_Generation_Stack_Out, 
+                        color=self.PLEXOS_color_dict, stacked=True)
 
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-
-            # Set x-tick labels
-            tick_labels = Total_Generation_Stack_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
-
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            ax.axhline(y = 0)
-            ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0],  color='black', rotation='vertical')
-
-
+            ax.axhline(y=0)
+            ax.set_ylabel('Generation Cost Change (Million $) \n relative to '+ self.Scenarios[0], 
+                            color='black', rotation='vertical')
             ax.margins(x=0.01)
             # plt.ylim((0,600))
 
-            handles, labels = ax.get_legend_handles_labels()
-
-            ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-            
+            mplt.add_legend()
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 
@@ -998,44 +919,30 @@ class MPlot(PlotDataHelper):
             # Data table of values to return to main program
             Data_Table_Out = Detailed_Gen_Cost_Out.add_suffix(" (Million $)")
 
-            fig3, ax = plt.subplots(figsize=(self.x,self.y))
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
 
-            Detailed_Gen_Cost_Out.plot.bar(stacked=True, edgecolor='black', linewidth='0.1', ax=ax)
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.axhline(y= 0 ,linewidth=0.5,linestyle='--',color='grey')
+            mplt.barplot(Detailed_Gen_Cost_Out,
+                         stacked=True)
+
+            ax.axhline(y=0, linewidth=0.5, linestyle='--', color='grey')
             # ax.axhline(y = 65.4, linewidth = 1, linestyle = ':',color = 'orange',label = 'Avg 2032 LCOE')
             
-            # Set x-tick labels
-            tick_labels = Detailed_Gen_Cost_Out.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
-            
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.set_ylabel('Generation Cost Change \n relative to '+ self.Scenarios[0] + ' (Million $)',  color='black', rotation='vertical') #TODO: Add $ unit conversion.
-
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.set_ylabel('Generation Cost Change \n relative to '+ self.Scenarios[0] + ' (Million $)', 
+                            color='black', rotation='vertical') #TODO: Add $ unit conversion.
             ax.margins(x=0.01)
 
             #Add net cost line.
             for n, scenario in enumerate(self.Scenarios[1:]):
                 x = [ax.patches[n].get_x(), ax.patches[n].get_x() + ax.patches[n].get_width()]
                 y_net = [net_cost.loc[scenario]] * 2
-                net_line = plt.plot(x,y_net, c='black', linewidth=1.5)
+                ax.plot(x, y_net, c='black', linewidth=1.5,
+                        label='Net Cost Change')
 
-            handles, labels = ax.get_legend_handles_labels()
-
-            #Main Legend
-            leg_main = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
-
-            #Net cost legend
-            leg_net = ax.legend(net_line,['Net Cost Change'],loc='center left',bbox_to_anchor=(1, -0.05),facecolor='inherit', frameon=True)
-            ax.add_artist(leg_main)
-            ax.add_artist(leg_net)
+            mplt.add_legend()
 
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs

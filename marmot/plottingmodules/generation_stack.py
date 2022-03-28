@@ -6,22 +6,16 @@ This code creates generation stack plots.
 """
 
 import logging
-import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
-import matplotlib as mpl
-from matplotlib.patches import Patch
 
 import marmot.config.mconfig as mconfig
-import marmot.plottingmodules.plotutils.plot_library as plotlib
+from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, InputSheetError, MissingZoneData)
 
-
-custom_legend_elements = Patch(facecolor='#DD0200',
-                               alpha=0.5, edgecolor='#DD0200')
 
 class MPlot(PlotDataHelper):
     """generation_stack MPlot class.
@@ -55,9 +49,6 @@ class MPlot(PlotDataHelper):
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.curtailment_prop = mconfig.parser("plot_data","curtailment_property")
 
         
@@ -67,8 +58,8 @@ class MPlot(PlotDataHelper):
         
         The upper line shows the total available cpacity that can be committed 
         The area between the lower line and the x-axis plots the total capacity that is 
-        committed and producing energy. ​
-
+        committed and producing energy.
+        
         Any gap that exists between the upper and lower line is generation that is 
         not committed but available to use.  
 
@@ -124,11 +115,12 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
 
-            xdimension = len(self.Scenarios)
-            ydimension = len(tech_list_sort)
+            ncols = len(self.Scenarios)
+            nrows = len(tech_list_sort)
             
-            fig, axs = plotlib.setup_plot(xdimension, ydimension, ravel_axs=False, 
-                                          sharex=True, sharey='row')
+            mplt = SetupSubplot(nrows, ncols, sharex=True,
+                                sharey='row', squeeze=False)
+            fig, axs = mplt.get_figure()
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
 
             for i, scenario in enumerate(self.Scenarios):
@@ -149,7 +141,7 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
-                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(thermal_commit_cap.values.max())
+                    unitconversion = self.capacity_energy_unitconversion(thermal_commit_cap)
                 thermal_commit_cap = thermal_commit_cap/unitconversion['divisor']
 
                 #Process generation.
@@ -165,7 +157,6 @@ class MPlot(PlotDataHelper):
                 avail_cap = avail_cap.loc[:, (avail_cap !=0).any(axis=0)]
                 avail_cap = avail_cap/unitconversion['divisor']
 
-                gen_lines = []
                 for j,tech in enumerate(tech_list_sort):
                     if tech not in gen.columns:
                         gen_one_tech = pd.Series(0,index = gen.index)
@@ -179,34 +170,25 @@ class MPlot(PlotDataHelper):
                         gen_one_tech = gen[tech]
                         commit_cap = avail_cap[tech]
 
-                    gen_line = axs[j,i].plot(gen_one_tech, alpha=0, 
-                                             color=self.PLEXOS_color_dict[tech])[0]
-                    gen_lines.append(gen_line)
-                    gen_fill = axs[j,i].fill_between(gen_one_tech.index, gen_one_tech, 0, 
-                                                     color=self.PLEXOS_color_dict[tech], alpha=0.5)
+                    axs[j,i].plot(gen_one_tech, alpha=0, 
+                                    color=self.PLEXOS_color_dict[tech])[0]
+                    axs[j,i].fill_between(gen_one_tech.index, gen_one_tech, 0, 
+                                            color=self.PLEXOS_color_dict[tech], alpha=0.5)
                     if tech != 'Hydro':
-                        cc = axs[j,i].plot(commit_cap, color = self.PLEXOS_color_dict[tech])
+                        axs[j,i].plot(commit_cap, color=self.PLEXOS_color_dict[tech])
 
-                    axs[j,i].spines['right'].set_visible(False)
-                    axs[j,i].spines['top'].set_visible(False)
-                    axs[j,i].tick_params(axis='y', which='major', length=5, width=1)
-                    axs[j,i].tick_params(axis='x', which='major', length=5, width=1)
-                    axs[j,i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
-                                                       lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+                    mplt.set_yaxis_major_tick_format(sub_pos=(j,i))
                     axs[j,i].margins(x=0.01)
-                    PlotDataHelper.set_plot_timeseries_format(axs,(j,i))
+                    mplt.set_subplot_timeseries_format(sub_pos=(j,i))
 
-            self.add_facet_labels(fig, xlabels_bottom=False, alternative_xlabels=self.Scenarios,
-                                    alternative_ylabels=tech_list_sort)
-
-            #fig.legend(gen_lines,labels = tech_list_sort, loc = 'right', title = 'RT Generation')
-            fig.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, 
-                            left=False, right=False)
+            mplt.add_facet_labels(xlabels_bottom=False, xlabels=self.Scenarios,
+                                    ylabels=tech_list_sort)
+            
             if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
             plt.ylabel(f"Generation or Committed Capacity ({unitconversion['units']})", 
                        color='black', rotation='vertical', labelpad=60)
+
             data_table = pd.DataFrame() #TODO: write actual data out
             outputs[zone_input] = {'fig':fig, 'data_table':data_table}
         return outputs
@@ -546,26 +528,35 @@ class MPlot(PlotDataHelper):
         def mkplot(outputs, zone_input, all_scenarios):
 
             # sets up x, y dimensions of plot
-            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=all_scenarios)
+            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=all_scenarios)
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not facet:
-                xdimension = 1
-                ydimension = 1
+                ncols = 1
+                nrows = 1
 
-            grid_size = xdimension*ydimension
+            grid_size = ncols*nrows
 
             # Used to calculate any excess axis to delete
             plot_number = len(all_scenarios)
             excess_axs = grid_size - plot_number
 
-            fig1, axs = plt.subplots(ydimension, xdimension, 
-                                     figsize=((self.x*xdimension),(self.y*ydimension)), 
-                                     sharey=True, squeeze=False)
+            mplt = PlotLibrary(nrows, ncols, sharey=True, 
+                                squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
+
             plt.subplots_adjust(wspace=0.05, hspace=0.5)
-            axs = axs.ravel()
+            
+            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+            if ncols > 1:
+                font_scaling_ratio = 1 + ((ncols-1)*0.09)
+                plt.rcParams['xtick.labelsize'] *= font_scaling_ratio
+                plt.rcParams['ytick.labelsize'] *= font_scaling_ratio
+                plt.rcParams['legend.fontsize'] *= font_scaling_ratio
+                plt.rcParams['axes.labelsize'] *= font_scaling_ratio
+                plt.rcParams['axes.titlesize'] *= font_scaling_ratio
+                
             data_tables = []
-            unique_tech_names = []
 
             for i, scenario in enumerate(all_scenarios):
                 self.logger.info(f"Scenario = {scenario}")
@@ -618,7 +609,8 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
-                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Stacked_Gen.sum(axis=1)))
+                    unitconversion = self.capacity_energy_unitconversion(Stacked_Gen, 
+                                                                            sum_values=True)
 
                 #Convert units
                 Stacked_Gen = Stacked_Gen / unitconversion['divisor']
@@ -654,21 +646,27 @@ class MPlot(PlotDataHelper):
                 single_scen_out = single_scen_out.set_index([scenario_names],append = True)
                 data_tables.append(single_scen_out)
 
-                plotlib.create_stackplot(axs, Stacked_Gen, self.PLEXOS_color_dict, 
-                                         labels=Stacked_Gen.columns, n=i)
+                mplt.stackplot(Stacked_Gen, self.PLEXOS_color_dict, 
+                                      labels=Stacked_Gen.columns, sub_pos=i)
+                mplt.set_subplot_timeseries_format(sub_pos=i)
 
                 if (Unserved_Energy == 0).all() == False:
                     axs[i].plot(Unserved_Energy,
                                       #color='#EE1289'  OLD MARMOT COLOR
-                                      color = '#DD0200' #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
-                                      )
-                #(Load)
-                lp = axs[i].plot(Load, color='black')
-                #print(Total_Demand)
-                if (Pump_Load == 0).all() == False or (batt_load == 0).all() == False:
-                    lp3 = axs[i].plot(Total_Demand, color='black', linestyle="--")
+                                      color = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                                      label='Unserved Energy')
+                    axs[i].fill_between(Load.index, Load,Unserved_Energy,
+                                        # facecolor='#EE1289' OLD MARMOT COLOR
+                                        facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
+                                        alpha=0.5)
 
-                PlotDataHelper.set_plot_timeseries_format(axs,i)
+                if (Pump_Load == 0).all() == False:
+                    axs[i].plot(Load, color='black', 
+                                     label='Demand + \n Storage Charging')
+                    axs[i].plot(Total_Demand, color='black', linestyle="--",
+                                        label='Demand')
+                else:
+                    axs[i].plot(Load, color='black', label='Demand')                    
 
                 if prop == "Min Net Load":
                     axs[i].annotate(f"Min Net Load: \n{str(format(Min_Net_Load, '.2f'))} {unitconversion['units']}",
@@ -711,57 +709,16 @@ class MPlot(PlotDataHelper):
                                             (max(Total_Demand))),
                                     fontsize=13, arrowprops=dict(facecolor='black', width=3, shrink=0.1))
 
-                if (Unserved_Energy == 0).all() == False:
-                    axs[i].fill_between(Load.index, Load,Unserved_Energy,
-                                        # facecolor='#EE1289' OLD MARMOT COLOR
-                                        facecolor = '#DD0200', #SEAC STANDARD COLOR (AS OF MARCH 9, 2020)
-                                        alpha=0.5)
-
-                # create list of gen technologies
-                l1 = Stacked_Gen.columns.tolist()
-                unique_tech_names.extend(l1)
-
-            # create labels list of unique tech names then order
-            labels = np.unique(np.array(unique_tech_names)).tolist()
-            labels.sort(key = lambda i:self.ordered_gen.index(i))
-
-            handles = []
-            # create custom gen_tech legend
-            for tech in labels:
-                gen_legend_patches = Patch(facecolor=self.PLEXOS_color_dict[tech],
-                            alpha=1.0)
-                handles.append(gen_legend_patches)
-
-            if (Pump_Load == 0).all() == False:
-                handles.append(lp3[0])
-                handles.append(lp[0])
-                labels += ['Demand','Demand + \n Storage Charging']
-
-            elif (batt_load == 0).all() == False:
-                handles.append(lp3[0])
-                handles.append(lp[0])
-                labels += ['Demand','Demand + \n BESS Charging']
-
-            else:
-                handles.append(lp[0])
-                labels += ['Demand']
-
-            if (Unserved_Energy == 0).all() == False:
-                handles.append(custom_legend_elements)
-                labels += ['Unserved Energy']
-
-            axs[grid_size-1].legend(reversed(handles),reversed(labels),
-                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
-                                    facecolor='inherit', frameon=True)
-
-            # add facet labels
-            self.add_facet_labels(fig1)
-
-            fig1.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, 
-                            left=False, right=False)
+            # Add facet labels
+            mplt.add_facet_labels(xlabels=self.xlabels,
+                                  ylabels = self.ylabels)
+            # Add legend
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # Remove extra axes
+            mplt.remove_excess_axs(excess_axs, grid_size)
+            # Add title
             if mconfig.parser('plot_title_as_region'):
-                plt.title(zone_input)
+                mplt.add_main_title(zone_input)
 
             #Ylabel should change if there are facet labels, leave at 40 for now, 
             # works for all values in spacing
@@ -769,11 +726,8 @@ class MPlot(PlotDataHelper):
             plt.ylabel(f"Generation ({unitconversion['units']})", color='black', 
                        rotation='vertical', labelpad=labelpad)
 
-            #Remove extra axes
-            if excess_axs != 0:
-                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
             Data_Table_Out = pd.concat(data_tables)
-            out = {'fig':fig1, 'data_table':Data_Table_Out}
+            out = {'fig':fig, 'data_table':Data_Table_Out}
             return out
 
         #TODO: combine data_prop(), setup_data(), mkplot(), into gen_stack()
@@ -790,23 +744,13 @@ class MPlot(PlotDataHelper):
             outputs = MissingInputData()
             return outputs
 
-        xdimension=len(self.xlabels)
-        if xdimension == 0:
-                xdimension = 1
+        ncols=len(self.xlabels)
+        if ncols == 0:
+                ncols = 1
 
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
-            xdimension = 1
-
-        # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
-        if xdimension > 1:
-            font_scaling_ratio = 1 + ((xdimension-1)*0.09)
-            plt.rcParams['xtick.labelsize'] = plt.rcParams['xtick.labelsize']*font_scaling_ratio
-            plt.rcParams['ytick.labelsize'] = plt.rcParams['ytick.labelsize']*font_scaling_ratio
-            plt.rcParams['legend.fontsize'] = plt.rcParams['legend.fontsize']*font_scaling_ratio
-            plt.rcParams['axes.labelsize'] = plt.rcParams['axes.labelsize']*font_scaling_ratio
-            plt.rcParams['axes.titlesize'] =  plt.rcParams['axes.titlesize']*font_scaling_ratio
- 
+            ncols = 1
 
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
@@ -904,34 +848,27 @@ class MPlot(PlotDataHelper):
             # Reverses order of columns
             Gen_Stack_Out = Gen_Stack_Out.iloc[:, ::-1]
 
-            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Gen_Stack_Out.sum(axis=1)))
+            unitconversion = self.capacity_energy_unitconversion(Gen_Stack_Out)
             Gen_Stack_Out = Gen_Stack_Out/unitconversion['divisor']
 
             # Data table of values to return to main program
             Data_Table_Out = Gen_Stack_Out.add_suffix(f" ({unitconversion['units']})")
 
-            fig3, axs = plotlib.setup_plot()
-            # Flatten object
-            ax = axs[0]
+            mplt = SetupSubplot()
+            fig, ax = mplt.get_figure()
 
             for column in Gen_Stack_Out:
                 ax.plot(Gen_Stack_Out[column], linewidth=3, 
                         color=self.PLEXOS_color_dict[column], label=column)
-                ax.legend(loc='lower left',bbox_to_anchor=(1,0),
-                          facecolor='inherit', frameon=True)
 
-            ax.set_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
+            mplt.add_main_title(self.Scenario_Diff[0].replace('_', ' ') + " vs. " + self.Scenario_Diff[1].replace('_', ' '))
             ax.set_ylabel(f"Generation Difference ({unitconversion['units']})",  color='black', rotation='vertical')
             ax.set_xlabel(timezone,  color='black', rotation='horizontal')
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            mplt.set_yaxis_major_tick_format()
             ax.margins(x=0.01)
 
-            PlotDataHelper.set_plot_timeseries_format(axs)
-            outputs[zone_input] = {'fig': fig3, 'data_table': Data_Table_Out}
+            PlotDataHelper.set_plot_timeseries_format(ax)
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs
 
 
@@ -1126,3 +1063,8 @@ class MPlot(PlotDataHelper):
 ########################################################################################
 
 # def monthly_gen_bar_plot()
+            mplt.set_subplot_timeseries_format()
+            mplt.add_legend()
+            
+            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+        #return outputs

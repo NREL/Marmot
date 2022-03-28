@@ -159,7 +159,16 @@ def createConfig(configfile_path: str):
         axes_options = dict(
             x_axes_minticks = 4,
             x_axes_maxticks = 8,
-            y_axes_decimalpt = 1),
+            y_axes_decimalpt = 1,
+            major_x_tick_length = 5,
+            major_y_tick_length = 5,
+            hide_top_spine = True,
+            hide_right_spine = True,
+            hide_bottom_spine = False,
+            hide_left_spine = False,
+            legend_position = 'lower right',
+            legend_columns = 1,
+            show_legend_frame = True),
         
         axes_label_options = dict(
             rotate_x_labels = True,
