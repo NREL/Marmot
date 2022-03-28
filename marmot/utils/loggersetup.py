@@ -1,4 +1,3 @@
-
 """Contains logger class used by Marmot
 
 @author: Daniel Levie
@@ -11,7 +10,7 @@ import logging.config
 from marmot.utils.definitions import ROOT_DIR, LOG_DIR
 
 
-class SetupLogger():
+class SetupLogger:
     """Sets up the python logger.
 
     This class handles the following.
@@ -21,34 +20,35 @@ class SetupLogger():
     3. Sets log_directory.
     4. Append optional suffix to the end of the log file name
 
-    Optional suffix is useful when running multiple processes in parallel to 
+    Optional suffix is useful when running multiple processes in parallel to
     allow logging to separate files.
     """
 
-    def __init__(self, logger_type: str, log_directory: Path = LOG_DIR, 
-                 log_suffix: str = None):
+    def __init__(
+        self, logger_type: str, log_directory: Path = LOG_DIR, log_suffix: str = None
+    ):
         """
         Args:
-            logger_type (str): Type of logger defined in 
+            logger_type (str): Type of logger defined in
                 'utils/marmot_logging_config.yml'
-            log_directory (Path, optional): log directory to save logs. 
+            log_directory (Path, optional): log directory to save logs.
                 Defaults to LOG_DIR.
-            log_suffix (str, optional): Optional suffix to add to end of log file. 
+            log_suffix (str, optional): Optional suffix to add to end of log file.
                 Defaults to None.
         """
         if log_suffix is None:
-            self.log_suffix = ''
+            self.log_suffix = ""
         else:
-             self.log_suffix = f'_{log_suffix}'
-        
-        with open(ROOT_DIR.joinpath('utils/marmot_logging_config.yml'), 'rt') as f:
+            self.log_suffix = f"_{log_suffix}"
+
+        with open(ROOT_DIR.joinpath("utils/marmot_logging_config.yml"), "rt") as f:
             conf = yaml.safe_load(f.read())
-            conf['handlers']['warning_handler']['filename'] = \
-                (conf['handlers']['warning_handler']['filename']
-                .format(log_directory, logger_type, self.log_suffix))
-            conf['handlers']['info_handler']['filename'] = \
-                (conf['handlers']['info_handler']['filename']
-            .format(log_directory, logger_type, self.log_suffix))
+            conf["handlers"]["warning_handler"]["filename"] = conf["handlers"][
+                "warning_handler"
+            ]["filename"].format(log_directory, logger_type, self.log_suffix)
+            conf["handlers"]["info_handler"]["filename"] = conf["handlers"][
+                "info_handler"
+            ]["filename"].format(log_directory, logger_type, self.log_suffix)
 
             logging.config.dictConfig(conf)
 
