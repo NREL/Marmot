@@ -670,7 +670,7 @@ class TotalGeneration(MPlotDataHelper):
                 plt.rcParams['axes.labelsize'] *= font_scaling_ratio
                 plt.rcParams['axes.titlesize'] *= font_scaling_ratio
 
-            for i, scenario in enumerate(self.Scenarios):
+            for i, scenario in enumerate(Gen_Out.index.get_level_values("Scenario").unique()):
                 
                 month_gen = Gen_Out.xs(scenario, level="Scenario")
                 # Drop 0 generation techs

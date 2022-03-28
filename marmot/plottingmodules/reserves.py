@@ -467,7 +467,8 @@ class Reserves(MPlotDataHelper):
 
     def reg_reserve_shortage_timeseries(self, figure_name: str = None,
                                         timezone: str = "", start_date_range: str = None, 
-                                        end_date_range: str = None, **_):
+                                        end_date_range: str = None, 
+                                        data_resolution: str = "", **_):
         """Creates a timeseries line plot of reserve shortage.
 
         A line is plotted for each reserve type shortage.
@@ -488,6 +489,10 @@ class Reserves(MPlotDataHelper):
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted 
+                data and plot.
+                Defaults to "", which will pull interval data.
+
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -506,7 +511,7 @@ class Reserves(MPlotDataHelper):
         
         # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
         # required True/False, property name and scenarios required, scenarios must be a list.
-        properties = [(True, "reserve_Shortage", Scenarios)]
+        properties = [(True, f"reserve_Shortage{data_resolution}", Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -534,7 +539,7 @@ class Reserves(MPlotDataHelper):
 
                 logger.info(f'Scenario = {scenario}')
 
-                reserve_timeseries = self["reserve_Shortage"].get(scenario)
+                reserve_timeseries = self[f"reserve_Shortage{data_resolution}"].get(scenario)
                 # Check if zone has reserves, if not skips
                 try:
                     reserve_timeseries = reserve_timeseries.xs(region,level=self.AGG_BY)

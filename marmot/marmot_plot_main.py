@@ -555,9 +555,9 @@ class MarmotPlot(SetupLogger):
                     row['Timeseries Plot Resolution'] == 'Annual':
                     data_resolution : str = '_Annual'
                 else:
-                    data_resolution : str = ''
+                    data_resolution : str = ""
 
-                if row['Barplots by Scenario or Year-Scenario'] == 'Year-Scenario':
+                if row['Group by Scenario or Year-Scenario'] == 'Year-Scenario':
                     scenario_groupby : str = 'Year-Scenario'
                 else:
                     scenario_groupby : str = 'Scenario'
