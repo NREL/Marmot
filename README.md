@@ -1,5 +1,5 @@
 <div align="center">
-  <img src=https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg><br>
+  <img src=https://upload.wikimedia.org/wikipedia/commons/3/3b/Marmot-edit1.jpg width="400"><br>
 </div>
 
 # Marmot: Energy Analysis and Visualization
