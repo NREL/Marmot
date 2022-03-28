@@ -216,10 +216,10 @@ The **config.yml** settings and their defaults are as follows:
 
 - **plot_data:**
   - curtailment_property: Curtailment
-  - include_total_pumped_load_line: false
-  - include_timeseries_pumped_load_line: true
+  - include_barplot_load_storage_charging_line: false
+  - include_timeseries_load_storage_charging_line: true
 
-  *Controls certain plot data settings. `curtailment_property` source of Curtailment data. The code defaults to Marmot's calculated Curtailment property. `include_total_pumped_load_line` specifies whether to include the line representing pumped load in total generation bar plots. `include_timeseries_pumped_load_line` specifies whether to include the line representing pumped load in timeseries generation plots*
+  *Controls certain plot data settings. `curtailment_property` source of Curtailment data. The code defaults to Marmot's calculated Curtailment property. `include_barplot_load_storage_charging_line` specifies whether to include the line representing pumped load in total generation bar plots. `include_timeseries_load_storage_charging_line` specifies whether to include the line representing pumped load in timeseries generation plots*
 
 - **figure_file_format:** svg
 
