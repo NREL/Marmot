@@ -36,8 +36,12 @@ class Transmission(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
         
         self.font_defaults = mconfig.parser("font_settings")
         self.meta = MetaData(self.processed_hdf5_folder, 
@@ -98,8 +102,9 @@ class Transmission(MPlotDataHelper):
         """
         outputs : dict = {}
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios)]
         
@@ -255,8 +260,9 @@ class Transmission(MPlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios),
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
@@ -469,8 +475,9 @@ class Transmission(MPlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios),
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
@@ -896,8 +903,9 @@ class Transmission(MPlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
@@ -1079,8 +1087,9 @@ class Transmission(MPlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -1203,8 +1212,9 @@ class Transmission(MPlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
@@ -1363,8 +1373,9 @@ class Transmission(MPlotDataHelper):
         """
         return UnderDevelopment() #TODO: Needs finishing
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios),
@@ -1487,8 +1498,9 @@ class Transmission(MPlotDataHelper):
         else:
             agg = 'region'
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",scenario_type)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -1633,8 +1645,9 @@ class Transmission(MPlotDataHelper):
         else:
             agg = 'region'
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -1778,8 +1791,9 @@ class Transmission(MPlotDataHelper):
         """
         outputs : dict = {}
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Violation",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -1879,8 +1893,9 @@ class Transmission(MPlotDataHelper):
         else:
             agg = 'region'
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,f"{agg}_Net_Interchange",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -1980,8 +1995,9 @@ class Transmission(MPlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -2150,8 +2166,9 @@ class Transmission(MPlotDataHelper):
             logger.warning("This plot only supports aggregation zone")
             return UnsupportedAggregation()
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
@@ -2300,8 +2317,9 @@ class Transmission(MPlotDataHelper):
             DataSavedInModule: DataSavedInModule exception.
         """
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  

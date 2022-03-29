@@ -10,5 +10,5 @@ class ProcessEGRET(Process):
     # Maps EGRET property names to Marmot names,
     # unchanged names not included
     PROPERTY_MAPPING: dict = {}
-
+    """Maps simulation model property names to Marmot property names"""
     pass

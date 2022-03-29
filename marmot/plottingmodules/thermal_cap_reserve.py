@@ -36,8 +36,12 @@ class ThermalReserve(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
 
     def thermal_cap_reserves(
         self,
@@ -60,13 +64,16 @@ class ThermalReserve(MPlotDataHelper):
                 data and plot.
                 Defaults to "", which will pull interval data.
 
+                .. versionadded:: 0.10.0
+
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
             (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios),

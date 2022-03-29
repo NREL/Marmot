@@ -42,6 +42,7 @@ class ProcessReEDS(Process):
         "reserves_generators_opRes_supply": "reserves_generators_Provision_Annual",
         "generator_systemcost_techba": "generator_Total_Generation_Cost",
     }
+    """Maps simulation model property names to Marmot property names"""
     # Extra custom properties that are created based off existing properties.
     # The dictionary keys are the existing properties and the values are the new
     # property names and methods used to create it.
@@ -70,6 +71,7 @@ class ProcessReEDS(Process):
         ],
         "region_Load": [("region_Load_Annual", ExtraProperties.annualize_property)],
     }
+    """Dictionary of Extra custom properties that are created based off existing properties."""
 
     def __init__(
         self,
@@ -88,6 +90,9 @@ class ProcessReEDS(Process):
                 regions/zones to create custom aggregations.
             process_subset_years (list, optional): If provided only process
                 years specified. Defaults to None.
+            **kwargs
+                These parameters will be passed to the Process 
+                class.
         """
         self.file_collection: dict = {}
         # Internal cached data is saved to the following variables.
@@ -199,13 +204,13 @@ class ProcessReEDS(Process):
         return files_list
 
     def get_processed_data(
-        self, data_class: str, prop: str, timescale: str, model_filename: str
+        self, prop_class: str, prop: str, timescale: str, model_filename: str
     ) -> pd.DataFrame:
         """Handles the pulling of data from the ReEDS gdx
         file and then passes the data to one of the formating functions
 
         Args:
-            data_class (str): Data class e.g Region, Generator, Zone etc
+            prop_class (str): Property class e.g Region, Generator, Zone etc
             prop (str): Property e.g gen_out, cap_out etc.
             timescale (str): Data timescale, e.g interval, summary.
             model_filename (str): name of model to process.
@@ -221,7 +226,7 @@ class ProcessReEDS(Process):
         try:
             df: pd.DataFrame = gdxpds.to_dataframe(gdx_file, prop)[prop]
         except gdxpds.tools.Error:
-            df = self.report_prop_error(prop, data_class)
+            df = self.report_prop_error(prop, prop_class)
             return df
         # Get column names
         reeds_prop_cols = PropertyColumns()
@@ -233,7 +238,7 @@ class ProcessReEDS(Process):
                 df = df.merge(self.Region_Mapping, how="left", on="region")
                 df.dropna(axis=1, how="all", inplace=True)
         # Get desired method, used for extra processing if needed
-        process_att = getattr(self, f"df_process_{data_class}", None)
+        process_att = getattr(self, f"df_process_{prop_class}", None)
         if process_att:
             # Process attribute and return to df
             df = process_att(df, prop, gdx_file)
@@ -398,22 +403,22 @@ class ProcessReEDS(Process):
 
 @dataclass
 class PropertyColumns:
-    """Column names of properties based on ReEDS input property"""
+    """ReEDS property column names"""
 
-    # Marmot generator_Generation
     gen_out: List = field(
         default_factory=lambda: ["tech", "region", "h", "year", "Value"]
     )
+    """ReEDS 'gen_out' property columns (Marmot generator_Generation property)"""
     gen_out_ann: List = field(
         default_factory=lambda: ["tech", "region", "year", "Value"]
     )
-    # Marmot generator_Installed_Capacity
+    """ReEDS 'gen_out_ann' property columns (Marmot generator_Generation_Annual property)"""
     cap_out: List = field(default_factory=lambda: ["tech", "region", "year", "Value"])
-    # Marmot generator_Curtailment
+    """ReEDS 'cap_out' property columns (Marmot generator_Installed_Capacity property)"""
     curt_out: List = field(default_factory=lambda: ["region", "h", "year", "Value"])
-    # Marmot region_Load (year)
+    """ReEDS 'curt_out' property columns (Marmot generator_Curtailment property)"""
     load_rt: List = field(default_factory=lambda: ["region", "year", "Value"])
-    # Marmot line_Losses
+    """ReEDS 'load_rt' property columns (Marmot region_Load_Annual property)"""
     losses_tran_h: List = field(
         default_factory=lambda: [
             "region_from",
@@ -424,7 +429,7 @@ class PropertyColumns:
             "Value",
         ]
     )
-    # Marmot line_Flow
+    """ReEDS 'losses_tran_h' property columns (Marmot line_Losses property)"""
     tran_flow_power: List = field(
         default_factory=lambda: [
             "region_from",
@@ -435,7 +440,7 @@ class PropertyColumns:
             "Value",
         ]
     )
-    # Marmot line_Import_Limit
+    """ReEDS 'tran_flow_power' property columns (Marmot line_Flow property)"""
     tran_out: List = field(
         default_factory=lambda: [
             "region_from",
@@ -445,37 +450,41 @@ class PropertyColumns:
             "Value",
         ]
     )
-    # Marmot generator_Pumped_Load
+    """ReEDS 'tran_out' property columns (Marmot line_Import_Limit property)"""
     stor_in: List = field(
         default_factory=lambda: ["tech", "sub-tech", "region", "h", "year", "Value"]
     )
-    # Marmot storage_Generation
+    """ReEDS 'stor_in' property columns (Marmot generator_Pumped_Load property)"""
     stor_out: List = field(
         default_factory=lambda: ["tech", "sub-tech", "region", "h", "year", "Value"]
     )
-    # Marmot storage_In_Out
+    """ReEDS 'stor_out' property columns (Marmot storage_Generation property)"""
     stor_inout: List = field(
         default_factory=lambda: ["tech", "sub-tech", "region", "year", "type", "Value"]
     )
-    # Marmot storage_Max_Volume
+    """ReEDS 'stor_inout' property columns (Marmot storage_In_Out property)"""
     stor_energy_cap: List = field(
         default_factory=lambda: ["tech", "sub-tech", "region", "year", "Value"]
     )
+    """ReEDS 'stor_energy_cap' property columns (Marmot storage_Max_Volume property)"""
     emit_nat_tech: List = field(
         default_factory=lambda: ["emission_type", "tech", "year", "Value"]
     )
-    # Marmot emission_Production (year)
+    """ReEDS 'emit_nat_tech' property columns (Marmot emissions property)"""
     emit_r: List = field(
         default_factory=lambda: ["emission_type", "region", "year", "Value"]
     )
-    # Marmot reserves_generators_Provision
+    """ReEDS 'emit_r' property columns (Marmot emission_Production_Annual property)"""
     opRes_supply_h: List = field(
         default_factory=lambda: ["parent", "tech", "region", "h", "year", "Value"]
     )
+    """ReEDS 'opRes_supply_h' property columns (Marmot reserves_generators_Provision property)"""
     opRes_supply: List = field(
         default_factory=lambda: ["parent", "tech", "region", "year", "Value"]
     )
+    """ReEDS 'opRes_supply' property columns (Marmot reserves_generators_Provision_Annual property)"""
     # Marmot generator_Total Generation Cost
     systemcost_techba: List = field(
         default_factory=lambda: ["cost_type", "tech", "region", "year", "Value"]
     )
+    """ReEDS 'systemcost_techba' property columns (Marmot generator_Total Generation Cost property)"""

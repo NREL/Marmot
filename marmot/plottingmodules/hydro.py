@@ -40,8 +40,12 @@ class Hydro(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
 
     def hydro_continent_net_load(
         self, start_date_range: str = None, end_date_range: str = None, **_
@@ -61,8 +65,9 @@ class Hydro(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "generator_Generation", [self.Scenarios[0]])]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -189,8 +194,9 @@ class Hydro(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "generator_Generation", [self.Scenarios[0]])]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary

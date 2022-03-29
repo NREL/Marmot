@@ -34,6 +34,7 @@ class ProcessPLEXOS(Process):
         "generator_VO&M_Cost": "generator_VOM_Cost",
         "generator_Reserves_VO&M_Cost": "generator_Reserves_VOM_Cost",
     }
+    """Maps simulation model property names to Marmot property names"""
     # Extra custom properties that are created based off existing properties.
     # The dictionary keys are the existing properties and the values are the new
     # property names and methods used to create it.
@@ -68,6 +69,7 @@ class ProcessPLEXOS(Process):
         "region_Demand": [("region_Demand_Annual", ExtraProperties.annualize_property)],
         "zone_Demand": [("zone_Demand_Annual", ExtraProperties.annualize_property)],
     }
+    """Dictionary of Extra custom properties that are created based off existing properties."""
 
     def __init__(
         self,
@@ -85,6 +87,9 @@ class ProcessPLEXOS(Process):
             Region_Mapping (pd.DataFrame): DataFrame to map custom
                 regions/zones to create custom aggregations.
             plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
+            **kwargs
+                These parameters will be passed to the Process 
+                class.
         """
         self.plexos_block = plexos_block
         self.file_collection = {}
@@ -170,14 +175,14 @@ class ProcessPLEXOS(Process):
             f.close()
 
     def get_processed_data(
-        self, plexos_class: str, plexos_prop: str, timescale: str, model_filename: str
+        self, prop_class: str, prop: str, timescale: str, model_filename: str
     ) -> pd.DataFrame:
         """Handles the pulling of data from the h5plexos hdf5
         file and then passes the data to one of the formating functions
 
         Args:
-            plexos_class (str): PLEXOS class e.g Region, Generator, Zone etc
-            plexos_prop (str): PLEXOS property e.g Max Capacity, Generation etc.
+            prop_class (str): PLEXOS class e.g Region, Generator, Zone etc
+            prop (str): PLEXOS property e.g Max Capacity, Generation etc.
             timescale (str): Data timescale, e.g Hourly, Monthly, 5 minute etc.
             model_filename (str): name of model to process.
 
@@ -186,28 +191,28 @@ class ProcessPLEXOS(Process):
         """
         db = self.file_collection.get(model_filename)
         try:
-            if "_" in plexos_class:
+            if "_" in prop_class:
                 df = db.query_relation_property(
-                    plexos_class,
-                    plexos_prop,
+                    prop_class,
+                    prop,
                     timescale=timescale,
                     phase=self.plexos_block,
                 )
-                object_class = plexos_class
+                object_class = prop_class
             else:
                 df = db.query_object_property(
-                    plexos_class,
-                    plexos_prop,
+                    prop_class,
+                    prop,
                     timescale=timescale,
                     phase=self.plexos_block,
                 )
                 if (0, 6, 0) <= db.version and db.version < (0, 7, 0):
-                    object_class = f"{plexos_class}s"
+                    object_class = f"{prop_class}s"
                 else:
-                    object_class = plexos_class
+                    object_class = prop_class
 
         except (ValueError, KeyError):
-            df = self.report_prop_error(plexos_prop, plexos_class)
+            df = self.report_prop_error(prop, prop_class)
             return df
 
         if self.plexos_block != "ST" and timescale == "interval":
@@ -219,7 +224,7 @@ class ProcessPLEXOS(Process):
             df_units = (
                 db.h5file[
                     f"/data/{self.plexos_block}/{timescale}"
-                    f"/{object_class}/{plexos_prop}"
+                    f"/{object_class}/{prop}"
                 ]
                 .attrs["units"]
                 .decode("UTF-8")
@@ -227,13 +232,13 @@ class ProcessPLEXOS(Process):
         else:
             df_units = db.h5file[
                 f"/data/{self.plexos_block}/{timescale}"
-                f"/{object_class}/{plexos_prop}"
+                f"/{object_class}/{prop}"
             ].attrs["unit"]
         # find unit conversion values
         converted_units = self.UNITS_CONVERSION.get(df_units, (df_units, 1))
 
         # Get desired method
-        process_att = getattr(self, f"df_process_{plexos_class}")
+        process_att = getattr(self, f"df_process_{prop_class}")
         # Process attribute and return to df
         df = process_att(df, model_filename)
 
@@ -243,8 +248,8 @@ class ProcessPLEXOS(Process):
         df.set_index(units_index, append=True, inplace=True)
 
         if (
-            plexos_class == "region"
-            and plexos_prop == "Unserved Energy"
+            prop_class == "region"
+            and prop == "Unserved Energy"
             and int(df.sum(axis=0)) > 0
         ):
             logger.warning(

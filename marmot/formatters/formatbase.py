@@ -18,11 +18,12 @@ class Process:
     # Maps sim model property names to Marmot names,
     # unchanged names not included
     PROPERTY_MAPPING: dict = {}
+    """Maps simulation model property names to Marmot property names"""
     # Extra custom properties that are created based off existing properties.
     # The dictionary keys are the existing properties and the values are the new
     # property names and methods used to create it.
     EXTRA_MARMOT_PROPERTIES: dict = {}
-
+    """Dictionary of Extra custom properties that are created based off existing properties."""
     # Conversion units dict, key values is a tuple of new unit name and
     # conversion multiplier
     UNITS_CONVERSION: dict = {
@@ -58,6 +59,7 @@ class Process:
         None: ("unitless", 1),
         "unitless": ("unitless", 1),
     }
+    """Dictionary to convert units to standard values used by Marmot"""
 
     def __init__(
         self,
@@ -65,8 +67,8 @@ class Process:
         output_file_path: Path,
         Region_Mapping: pd.DataFrame,
         emit_names: pd.DataFrame,
-        *args,
-        **kwargs,
+        *_,
+        **__,
     ):
         """
         Args:
@@ -101,11 +103,27 @@ class Process:
         return files_list
 
     def output_metadata(self, files_list: list) -> None:
+        """method template for output_metadata
+
+        Args:
+            files_list (list): list of string files or filenames
+        """
         pass
 
     def get_processed_data(
         self, prop_class: str, property: str, timescale: str, model_filename: str
     ) -> pd.DataFrame:
+        """method template for get_processed_data
+
+        Args:
+            prop_class (str): class e.g Region, Generator, Zone etc
+            property (str): Property e.g gen_out, cap_out etc.
+            timescale (str): Data timescale, e.g interval, summary.
+            model_filename (str): name of model to process.
+
+        Returns:
+            pd.DataFrame: pd.DataFrame
+        """
         pass
 
     def report_prop_error(self, property: str, prop_class: str) -> pd.DataFrame:

@@ -16,18 +16,15 @@ logger = logging.getLogger("formatter." + __name__)
 
 
 class MetaData:
-    """Handle the retrieval of metadata from the formatted or
-    original solution h5 files.
-
-    Attributes:
-        filename (str) = The name of the h5 file to retreive data from.
-        h5_filepath (Path) = The path to the h5 file
-        h5_data (h5py.File) = loaded h5 file in memory.
+    """Handle the retrieval of metadata from the formatted or original solution h5 files.
     """
 
     filename: str = None
+    """The name of the h5 file to retrieve data from."""
     h5_filepath: Path = None
+    """The path to the h5 file"""
     h5_data: h5py.File = None
+    """h5 file loaded in memory."""
 
     def __init__(
         self,
@@ -99,8 +96,9 @@ class MetaData:
                     partitions = [key for key in self.h5_data["metadata"].keys()]
                 if self.partition_number > len(partitions):
                     logger.warning(
-                        f"\nYou have chosen to use metadata partition_number {self.partition_number}, "
-                        f"But there are only {len(partitions)} partitions in your formatted h5 file.\n"
+                        "\nYou have chosen to use metadata partition_number "
+                        f"{self.partition_number}, But there are only {len(partitions)} "
+                        "partitions in your formatted h5 file.\n"
                         "Defaulting to partition_number 0"
                     )
                     self.partition_number = 0

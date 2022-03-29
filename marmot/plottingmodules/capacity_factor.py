@@ -33,6 +33,12 @@ class CapacityFactor(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
         # Instantiation of MPlotHelperFunctions
         super().__init__(**kwargs)
 
@@ -46,35 +52,40 @@ class CapacityFactor(MPlotDataHelper):
         scenario_groupby: str = "Scenario",
         **_,
     ):
-        """Creates barplots of the percentage average generation output when committed by technology type.
+        """Creates barplots of the percentage average generation output when committed 
+        by technology type.
 
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent data from.
+            start_date_range (str, optional): Defines a start date at which to represent 
+                data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
-        # with all required properties, returns a 1 if required data is missing
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper 
+        # dictionary with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
@@ -213,15 +224,18 @@ class CapacityFactor(MPlotDataHelper):
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent data from.
+            start_date_range (str, optional): Defines a start date at which to represent 
+                data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -229,15 +243,16 @@ class CapacityFactor(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
-        # with all required properties, returns a 1 if required data is missing
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper 
+        # dictionary with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
@@ -329,15 +344,18 @@ class CapacityFactor(MPlotDataHelper):
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent data from.
+            start_date_range (str, optional): Defines a start date at which to represent 
+                data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: dictionary containing the created plot and its data table.
@@ -345,8 +363,9 @@ class CapacityFactor(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Installed_Capacity", self.Scenarios),

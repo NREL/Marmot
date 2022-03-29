@@ -58,17 +58,20 @@ class InstalledCapacity(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
         # Runs get_data to populate mplot_data_dict with all required properties,
@@ -199,17 +202,20 @@ class InstalledCapacity(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -362,10 +368,12 @@ class InstalledCapacity(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.

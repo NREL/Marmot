@@ -59,8 +59,7 @@ class SetupSubplot:
 
         - 1x1 figure: SetupSubplot()
         - 1xN figure: SetupSubplot(nrows=1, ncols=N, sharey=True)
-        - MxN figure: SetupSubplot(nrows=M, ncols=N, sharey=True,
-                                   squeeze=False, ravel_axs=True)
+        - MxN figure: SetupSubplot(nrows=M, ncols=N, sharey=True, squeeze=False, ravel_axs=True)
 
         Plotting defaults are also set in this class, which are defined
         in the config.yml file.
@@ -82,6 +81,8 @@ class SetupSubplot:
                 1D numpy object array of Axes objects. This can be used to
                 convert MxN figure axs objects to 1D.
                 Defaults to False.
+            **kwargs
+                These parameters will be passed to matplotlib.pyplot.subplots function.
         """
         # Set plot defaults
         mpl.rc("xtick", labelsize=font_settings["xtick_size"])
@@ -168,14 +169,14 @@ class SetupSubplot:
         through the config.yml file.
         The available default options are:
 
-            - 'lower right'
-            - 'center right'
-            - 'upper right'
-            - 'upper center'
-            - 'lower center'
-            - 'lower left'
-            - 'center left'
-            - 'upper left'
+        - 'lower right'
+        - 'center right'
+        - 'upper right'
+        - 'upper center'
+        - 'lower center'
+        - 'lower left'
+        - 'center left'
+        - 'upper left'
 
         The default options will place the legend outside the main figure
         subplots to avoid any overlaps of elements. Custom placement is still
@@ -216,6 +217,8 @@ class SetupSubplot:
                 to position the legend in conjunction with loc. This argument allows arbitrary
                 placement of the legend.
                 Defaults to None.
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.legend function.
         """
 
         loc_anchor = {
@@ -289,13 +292,15 @@ class SetupSubplot:
     ) -> pd.Timestamp:
         """Adds a property annotation to the subplot.
 
+        .. versionadded:: 0.10.0
+        
         The current supported properties are:
 
-            - Peak Demand
-            - Min Net Load
-            - Peak RE
-            - Peak Unserved Energy
-            - Peak Curtailment
+        - Peak Demand
+        - Min Net Load
+        - Peak RE
+        - Peak Unserved Energy
+        - Peak Curtailment
 
         Based on the property selected this method will locate the timestamp
         and corresponding value of the property. The value and an arrow pointing
@@ -322,7 +327,6 @@ class SetupSubplot:
         Returns:
             pd.Timestamp: timstamp of property
         """
-
         ax = self._check_if_array(sub_pos)
 
         # Ensure values are lists
@@ -418,6 +422,8 @@ class SetupSubplot:
 
         Args:
             label (str): Title of figure.
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.set_title function.
         """
         self.exax.set_title(label, **kwargs)
 
@@ -436,9 +442,9 @@ class SetupSubplot:
             tick_format (str, optional): Format options.
                 Opinions available are:
 
-                    - standard (1000 values seperated by ',')
-                    - percent (Adds % symbal to axis values)
-                    - log
+                - standard (1000 values seperated by ',')
+                - percent (Adds % symbal to axis values)
+                - log
 
                 Defaults to 'standard'.
             decimal_accuracy (int, optional): Number of decimal
@@ -482,11 +488,11 @@ class SetupSubplot:
                 how SetupSubplot was instantiated.
                 Defaults to 0.
             zero_formats_1 (str, optional): Sets the zero_fromats[1] format.
-                Defaults to '%b\n %Y'.
+                Defaults to '%b\\n %Y'.
             zero_formats_2 (str, optional): Sets the zero_formats[2] format.
-                Defaults to '%d\n %b'.
+                Defaults to '%d\\n %b'.
             zero_formats_3 (str, optional): Sets the zero_formats[3] format.
-                Defaults to '%H:%M\n %d-%b'.
+                Defaults to '%H:%M\\n %d-%b'.
         """
         ax = self._check_if_array(sub_pos)
 
@@ -532,10 +538,10 @@ class SetupSubplot:
 
         Wrapper around matplotlib.axes.Axes.set_xticklabels
 
-        Checks to see if the number of labels is greater than or equal to the default
-        number set in config.yml. If this is the case, rotate
-        specify whether or not to rotate the labels and angle specifies what angle they should
-        be rotated to.
+        Checks to see if the number of labels is greater than or equal 
+        to the default number set in config.yml. If this is the case, rotate
+        specify whether or not to rotate the labels and angle specifies 
+        what angle they should be rotated to.
 
         Args:
             labels (list): Labels to apply to xticks
@@ -549,6 +555,9 @@ class SetupSubplot:
                 can be either a integer or a tuple of 2 integers depending on
                 how SetupSubplot was instantiated.
                 Defaults to 0.
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.set_xticklabels 
+                function.
         """
         ax = self._check_if_array(sub_pos)
         if rotate:
@@ -578,6 +587,9 @@ class SetupSubplot:
                 Defaults to None.
             ylabels (list, optional): list of ylabels.
                 Defaults to None.
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.set_xlabel 
+                and matplotlib.axes.Axes.set_ylabel functions.
         """
 
         if isinstance(self.axs, Axes):
@@ -660,6 +672,9 @@ class PlotLibrary(SetupSubplot):
                 can be either a integer or a tuple of 2 integers depending on
                 how SetupSubplot was instantiated.
                 Defaults to 0
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.stackplot 
+                function.
         """
         ax = self._check_if_array(sub_pos)
 
@@ -709,6 +724,9 @@ class PlotLibrary(SetupSubplot):
             ytick_major_fmt (str, optional): Sets the ytick major format.
                 Value gets passed to the set_yaxis_major_tick_format method
                 Defaults to 'standard'
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.plot 
+                function.
         """
         ax = self._check_if_array(sub_pos)
 
@@ -773,6 +791,9 @@ class PlotLibrary(SetupSubplot):
             ytick_major_fmt (str, optional): Sets the ytick major format.
                 Value gets passed to the set_yaxis_major_tick_format method
                 Defaults to 'standard'
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.plot 
+                function.
         """
         ax = self._check_if_array(sub_pos)
 
@@ -813,6 +834,9 @@ class PlotLibrary(SetupSubplot):
                 can be either a integer or a tuple of 2 integers depending on
                 how SetupSubplot was instantiated.
                 Defaults to 0
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.hist 
+                function.
         """
         ax = self._check_if_array(sub_pos)
 
@@ -857,6 +881,9 @@ class PlotLibrary(SetupSubplot):
             ytick_major_fmt (str, optional): Sets the ytick major format.
                 Value gets passed to the set_yaxis_major_tick_format method
                 Defaults to 'standard'
+            **kwargs
+                These parameters will be passed to matplotlib.axes.Axes.plot 
+                function.
         """
         ax = self._check_if_array(sub_pos)
 

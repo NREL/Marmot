@@ -37,8 +37,12 @@ class Prices(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
 
     def pdc_all_regions(
         self,
@@ -71,8 +75,9 @@ class Prices(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -201,8 +206,9 @@ class Prices(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -325,8 +331,9 @@ class Prices(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -440,8 +447,9 @@ class Prices(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -594,8 +602,9 @@ class Prices(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception.
         """
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -758,8 +767,9 @@ class Prices(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception.
         """
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
