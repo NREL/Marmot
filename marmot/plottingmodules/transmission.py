@@ -1705,7 +1705,7 @@ class Transmission(MPlotDataHelper):
             axs[n].set_title(scenario.replace('_',' '),fontweight='bold')
 
             # Rotate the tick labels and set their alignment.
-            plt.setp(axs[n].get_xticklabels(), rotation=30, ha="right",
+            plt.setp(axs[n].get_xticklabels(), rotation = 90, ha="right",
                  rotation_mode="anchor")
 
             #Delineate the boxes and make room at top and bottom
