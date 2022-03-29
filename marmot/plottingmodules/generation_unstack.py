@@ -36,8 +36,12 @@ class GenerationUnStack(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
 
         self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
@@ -85,6 +89,8 @@ class GenerationUnStack(MPlotDataHelper):
             data_resolution (str, optional): Specifies the data resolution to pull from the formatted
                 data and plot.
                 Defaults to "", which will pull interval data.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: dictionary containing the created plot and its data table.

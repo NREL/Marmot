@@ -55,8 +55,12 @@ class UtilizationFactor(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
 
     def uf_fleet(self, **_):
         """Plot under development
@@ -69,8 +73,9 @@ class UtilizationFactor(MPlotDataHelper):
         )  # TODO: fix bugs/improve performance, get back to working stage
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Available_Capacity", self.Scenarios),
@@ -206,8 +211,9 @@ class UtilizationFactor(MPlotDataHelper):
         )  # TODO: fix bugs/improve performance, get back to working stage
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Available_Capacity", self.Scenarios),
@@ -350,8 +356,9 @@ class UtilizationFactor(MPlotDataHelper):
         )  # TODO: fix bugs/improve performance, get back to working stage
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Available_Capacity", self.Scenarios),
@@ -468,8 +475,9 @@ class UtilizationFactor(MPlotDataHelper):
         )  # TODO: fix bugs/improve performance, get back to working stage
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary

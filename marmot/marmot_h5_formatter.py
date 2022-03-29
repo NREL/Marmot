@@ -80,6 +80,9 @@ class MarmotFormat(SetupLogger):
             emit_names (Union[str, Path, pd.DataFrame], optional): Mapping file
                 to rename emissions types.
                 Defaults to pd.DataFrame().
+            **kwargs
+                These parameters will be passed to the 
+                marmot.utils.loggersetup.SetupLogger class.
         """
         super().__init__("formatter", **kwargs)  # Instantiation of SetupLogger
 
@@ -182,6 +185,8 @@ class MarmotFormat(SetupLogger):
                 Defaults to 9.
             complib (str, optional): compression library.
                 Defaults to 'blosc:zlib'.
+            **kwargs
+                These parameters will be passed pandas.to_hdf function.
         """
         self.logger.info("Saving data to h5 file...")
         df.to_hdf(

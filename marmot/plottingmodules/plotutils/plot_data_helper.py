@@ -335,7 +335,9 @@ class MPlotDataHelper(dict):
         return df
 
     def adjust_for_leapday(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Shifts dataframe ahead by one day, if a non-leap year time series is modeled with a leap year time index.
+        """Shifts dataframe ahead by one day.
+        
+        Use if a non-leap year time series is modeled with a leap year time index.
 
         Modeled year must be included in the scenario parent directory name.
         Args:
@@ -396,7 +398,8 @@ class MPlotDataHelper(dict):
             or ncols * nrows < len(multi_scenario)
         ):
             logger.info(
-                "Dimensions could not be determined from x & y labels - Using Marmot default dimensions"
+                "Dimensions could not be determined from x & y labels - Using Marmot "
+                "default dimensions"
             )
             ncols, nrows = self.set_x_y_dimension(len(multi_scenario))
         return ncols, nrows
@@ -539,6 +542,8 @@ class MPlotDataHelper(dict):
     ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
         """Sets the timestamp date range based on start_date and end_date strings
 
+        .. versionadded:: 0.10.0
+
         Takes either a single df or a list of dfs as input.
         The index must be a pd.DatetimeIndex or a multiindex with level timestamp.
 
@@ -600,6 +605,8 @@ class MPlotDataHelper(dict):
     ) -> pd.DataFrame.groupby:
         """Special groupby method to group dataframes by Scenario or Year-Scenario.
 
+        .. versionadded:: 0.10.0
+        
         Grouping by Year-Scenario is useful for multi year results sets
         where examining results by year is of interest.
 
@@ -615,6 +622,9 @@ class MPlotDataHelper(dict):
                 Defaults to 'Scenario'.
             additional_groups (list, optional): List of any additional columns
                 to groupby. Defaults to None.
+            **kwargs
+                These parameters will be passed to pandas.DataFrame.groupby 
+                function.
 
         Raises:
             ValueError: If df.index is not of type type pd.DatetimeIndex or

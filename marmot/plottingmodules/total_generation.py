@@ -35,8 +35,12 @@ class TotalGeneration(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
 
         self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
@@ -57,10 +61,12 @@ class TotalGeneration(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -72,8 +78,9 @@ class TotalGeneration(MPlotDataHelper):
             agg = "zone"
         else:
             agg = "region"
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (False, f"generator_{self.curtailment_prop}", self.Scenarios),
@@ -348,10 +355,12 @@ class TotalGeneration(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -359,8 +368,9 @@ class TotalGeneration(MPlotDataHelper):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (False, f"generator_{self.curtailment_prop}", self.Scenarios),
@@ -600,8 +610,9 @@ class TotalGeneration(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (False, f"generator_{self.curtailment_prop}", self.Scenarios),
@@ -898,7 +909,8 @@ class TotalGeneration(MPlotDataHelper):
             # Remove extra axes
             mplt.remove_excess_axs(excess_axs, grid_size)
 
-            # Y-label should change if there are facet labels, leave at 40 for now, works for all values in spacing
+            # Y-label should change if there are facet labels, leave at 40 for now, 
+            # works for all values in spacing
             labelpad = 40
             if plot_as_percnt:
                 plt.ylabel(
@@ -941,8 +953,9 @@ class TotalGeneration(MPlotDataHelper):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (False, f"generator_{self.curtailment_prop}", self.Scenarios),

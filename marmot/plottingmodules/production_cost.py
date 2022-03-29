@@ -34,8 +34,12 @@ class SystemCosts(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
 
     def prod_cost(
         self,
@@ -59,18 +63,21 @@ class SystemCosts(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
             (True, "generator_Pool_Revenue", self.Scenarios),
@@ -222,10 +229,12 @@ class SystemCosts(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -237,8 +246,9 @@ class SystemCosts(MPlotDataHelper):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
@@ -407,18 +417,21 @@ class SystemCosts(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (False, "generator_FOM_Cost", self.Scenarios),
             (False, "generator_VOM_Cost", self.Scenarios),
@@ -599,10 +612,12 @@ class SystemCosts(MPlotDataHelper):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -610,8 +625,9 @@ class SystemCosts(MPlotDataHelper):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -731,10 +747,12 @@ class SystemCosts(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -746,8 +764,9 @@ class SystemCosts(MPlotDataHelper):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
@@ -883,10 +902,12 @@ class SystemCosts(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
@@ -894,8 +915,9 @@ class SystemCosts(MPlotDataHelper):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -1002,8 +1024,8 @@ class SystemCosts(MPlotDataHelper):
         scenario_groupby: str = "Scenario",
         **_,
     ):
-        """Creates stacked barplots of Total Generation Cost by by cost type (fuel, emission, start cost etc.)
-        relative to a base scenario.
+        """Creates stacked barplots of Total Generation Cost by by cost type 
+        (fuel, emission, start cost etc.) relative to a base scenario.
 
         Barplots show the change in total total generation cost relative to a base scenario.
         The default is to comapre against the first scenario provided in the inputs list.
@@ -1015,18 +1037,21 @@ class SystemCosts(MPlotDataHelper):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified from
-                the timestamp and appeneded to the sceanrio name. This is useful when plotting data
-                which covers multiple years such as ReEDS.
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
 
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (False, "generator_FOM_Cost", self.Scenarios),
             (False, "generator_VOM_Cost", self.Scenarios),
@@ -1098,7 +1123,8 @@ class SystemCosts(MPlotDataHelper):
                     ).sum()
                 )
 
-            # Checks if gen_cost_out_chunks contains data, if not skips zone and does not return a plot
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does 
+            # not return a plot
             if not gen_cost_out_chunks:
                 outputs[zone_input] = MissingZoneData()
                 continue

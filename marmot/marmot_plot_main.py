@@ -119,6 +119,9 @@ class MarmotPlot(SetupLogger):
                 The TECH_SUBSET value should be a column in the
                 ordered_gen_categories.csv. If left None all techs will be plotted
                 Defaults to None.
+            **kwargs
+                These parameters will be passed to the 
+                marmot.utils.loggersetup.SetupLogger class.
         """
         super().__init__("plotter", **kwargs)  # Instantiation of SetupLogger
 

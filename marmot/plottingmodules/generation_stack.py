@@ -40,8 +40,12 @@ class GenerationStack(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
 
         self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
@@ -74,13 +78,16 @@ class GenerationStack(MPlotDataHelper):
                 data and plot.
                 Defaults to "", which will pull interval data.
 
+                .. versionadded:: 0.10.0
+
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (
                 True,
@@ -280,6 +287,8 @@ class GenerationStack(MPlotDataHelper):
                 data and plot.
                 Defaults to "", which will pull interval data.
 
+                .. versionadded:: 0.10.0
+
         Returns:
             dict: dictionary containing the created plot and its data table.
 
@@ -292,8 +301,9 @@ class GenerationStack(MPlotDataHelper):
         # Main loop for gen_stack
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
             (
@@ -635,13 +645,16 @@ class GenerationStack(MPlotDataHelper):
                 data and plot.
                 Defaults to "", which will pull interval data.
 
+                .. versionadded:: 0.10.0
+
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True, f"generator_Generation{data_resolution}", self.Scenarios)]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary

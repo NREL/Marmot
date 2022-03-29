@@ -39,6 +39,12 @@ class CapacityOut(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
         # Instantiation of MPlotHelperFunctions
         super().__init__(**kwargs)
 
@@ -62,13 +68,16 @@ class CapacityOut(MPlotDataHelper):
                 data and plot.
                 Defaults to "", which will pull interval data.
 
+                .. versionadded:: 0.10.0
+
         Returns:
             dict: dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [
             (True, f"generator_Installed_Capacity{data_resolution}", self.Scenarios),
             (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios),
