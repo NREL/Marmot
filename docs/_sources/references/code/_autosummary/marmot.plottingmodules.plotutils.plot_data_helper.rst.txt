@@ -8,27 +8,20 @@
    </script>
 
 
+
 marmot.plottingmodules.plotutils.plot\_data\_helper
 ===================================================
 
-.. automodule:: marmot.plottingmodules.plotutils.plot_data_helper
+.. currentmodule:: marmot.plottingmodules.plotutils
+
+.. autoclass:: plot_data_helper
+   :members:
+   :show-inheritance:
 
    
    
    
 
    
-   
-   
-
-   
-   
-   .. rubric:: Classes
-
-   .. autosummary::
-      :toctree:
-      :template: custom-class-template.rst
-   
-      PlotDataHelper
    
    

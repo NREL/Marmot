@@ -1,0 +1,685 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>marmot.formatters.formatreeds &#8212; Marmot 0.10.0 documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">Marmot</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Get Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for marmot.formatters.formatreeds</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Main formatting module for ReEDS results,</span>
+<span class="sd">Contains classes and methods specific to ReEDS outputs.</span>
+<span class="sd">Inherits the Process class.</span>
+
+<span class="sd">@author: Daniel Levie</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">gdxpds</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+
+<span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
+<span class="kn">from</span> <span class="nn">marmot.metamanagers.read_metadata</span> <span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatextra</span> <span class="kn">import</span> <span class="n">ExtraProperties</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;formatter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
+<span class="n">formatter_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;formatter_settings&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProcessReEDS"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS">[docs]</a><span class="k">class</span> <span class="nc">ProcessReEDS</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process ReEDS specific data from a ReEDS result set.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Maps ReEDS property names to Marmot names</span>
+    <span class="n">PROPERTY_MAPPING</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_gen_out&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_gen_out_ann&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_cap_out&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Installed_Capacity&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_curt_out&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;region_load_rt&quot;</span><span class="p">:</span> <span class="s2">&quot;region_Demand&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_losses_tran_h&quot;</span><span class="p">:</span> <span class="s2">&quot;line_Losses&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_tran_flow_power&quot;</span><span class="p">:</span> <span class="s2">&quot;line_Flow&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_tran_out&quot;</span><span class="p">:</span> <span class="s2">&quot;line_Import_Limit&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_stor_in&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;storage_stor_energy_cap&quot;</span><span class="p">:</span> <span class="s2">&quot;storage_Max_Volume&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;emission_emit_r&quot;</span><span class="p">:</span> <span class="s2">&quot;emission_Production&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;reserves_generators_opRes_supply_h&quot;</span><span class="p">:</span> <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;reserves_generators_opRes_supply&quot;</span><span class="p">:</span> <span class="s2">&quot;reserves_generators_Provision_Annual&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_systemcost_techba&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Total_Generation_Cost&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Maps simulation model property names to Marmot property names&quot;&quot;&quot;</span>
+    <span class="c1"># Extra custom properties that are created based off existing properties.</span>
+    <span class="c1"># The dictionary keys are the existing properties and the values are the new</span>
+    <span class="c1"># property names and methods used to create it.</span>
+    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_Total_Generation_Cost&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_VOM_Cost&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">reeds_generator_vom_cost</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Fuel_Cost&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">reeds_generator_fuel_cost</span><span class="p">),</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;generator_Reserves_VOM_Cost&quot;</span><span class="p">,</span>
+                <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">reeds_generator_reserve_vom_cost</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;generator_FOM_Cost&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">reeds_generator_fom_cost</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;reserve_Provision&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">reeds_reserve_provision</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;region_Demand_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;region_Load&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">reeds_region_total_load</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Load&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Load_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)],</span>
+    <span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">process_subset_years</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            input_folder (Path): Folder containing csv files.</span>
+<span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
+<span class="sd">            Region_Mapping (pd.DataFrame): DataFrame to map custom</span>
+<span class="sd">                regions/zones to create custom aggregations.</span>
+<span class="sd">            process_subset_years (list, optional): If provided only process</span>
+<span class="sd">                years specified. Defaults to None.</span>
+<span class="sd">            **kwargs</span>
+<span class="sd">                These parameters will be passed to the Process </span>
+<span class="sd">                class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Internal cached data is saved to the following variables.</span>
+        <span class="c1"># To access the values use the public api e.g self.property_units</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_property_units</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_wind_resource_to_pca</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
+            <span class="n">output_file_path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+            <span class="n">read_from_formatted_h5</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">process_subset_years</span><span class="p">:</span>
+            <span class="c1"># Ensure values are ints</span>
+            <span class="n">process_subset_years</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">int</span><span class="p">,</span> <span class="n">process_subset_years</span><span class="p">))</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing subset of ReEDS years: </span><span class="si">{</span><span class="n">process_subset_years</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">process_subset_years</span> <span class="o">=</span> <span class="n">process_subset_years</span>
+
+        <span class="c1"># Instantiation of Process Base class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">input_folder</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">property_units</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Gets the property units from data, e.g MW, MWh</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: _property_units</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_property_units</span>
+
+    <span class="nd">@property_units</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">property_units</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">gdx_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the property units, adds values to a dict</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            gdx_filename (str): Full path to gdx_file</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Extracts values between markers</span>
+        <span class="n">symbol_marker</span> <span class="o">=</span> <span class="s2">&quot;--(.*?)--&quot;</span>
+
+        <span class="n">symbol_list</span> <span class="o">=</span> <span class="n">gdxpds</span><span class="o">.</span><span class="n">list_symbols</span><span class="p">(</span><span class="n">gdx_filename</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbol_list</span><span class="p">:</span>
+            <span class="n">unit</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">symbol_marker</span><span class="p">,</span> <span class="n">symbol</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">unit</span><span class="p">:</span>
+                <span class="n">unit</span> <span class="o">=</span> <span class="n">unit</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">symbol</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_property_units</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_property_units</span><span class="p">[</span><span class="n">symbol</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">unit</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">wind_resource_to_pca</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the wind resource (s) to pca/region mapping</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: wind_resource_to_pca mapping</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wind_resource_to_pca</span>
+
+    <span class="nd">@wind_resource_to_pca</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">wind_resource_to_pca</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">h5_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets the wind_resource_to_pca mapping</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            h5_filename (str): formatted h5 filename</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">filename</span> <span class="o">!=</span> <span class="n">h5_filename</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_wind_resource_to_pca</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">regions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">h5_filename</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_wind_resource_to_pca</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">regions</span><span class="p">[[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">]]</span>
+                <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;region&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="ProcessReEDS.output_metadata"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.output_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">output_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add ReEDS specific metadata to formatted h5 file .</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            files_list (list): List of all gdx files in inputs</span>
+<span class="sd">                folder in alpha numeric order.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">partition</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
+            <span class="n">region_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;inputs_case&quot;</span><span class="p">,</span> <span class="s2">&quot;regions.csv&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">region_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;p&quot;</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;s&quot;</span><span class="p">:</span> <span class="s2">&quot;category&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">region_df</span><span class="o">.</span><span class="n">to_hdf</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span><span class="p">,</span>
+                <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;metadata/</span><span class="si">{</span><span class="n">partition</span><span class="si">}</span><span class="s2">/objects/regions&quot;</span><span class="p">,</span>
+                <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProcessReEDS.get_input_files"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.get_input_files">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Gets a list of input files within the scenario folders&quot;&quot;&quot;</span>
+        <span class="n">reeds_outputs_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;outputs&quot;</span><span class="p">)</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">reeds_outputs_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="sa">f</span><span class="s2">&quot;rep_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.gdx&quot;</span><span class="p">:</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">property_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+
+        <span class="c1"># List of all files in input folder in alpha numeric order</span>
+        <span class="n">files_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+        <span class="n">files_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">reeds_outputs_dir</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">files_list</span></div>
+
+<div class="viewcode-block" id="ProcessReEDS.get_processed_data"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.get_processed_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_processed_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Handles the pulling of data from the ReEDS gdx</span>
+<span class="sd">        file and then passes the data to one of the formating functions</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prop_class (str): Property class e.g Region, Generator, Zone etc</span>
+<span class="sd">            prop (str): Property e.g gen_out, cap_out etc.</span>
+<span class="sd">            timescale (str): Data timescale, e.g interval, summary.</span>
+<span class="sd">            model_filename (str): name of model to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Formatted results dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Set wind_resource_to_pca dict</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">wind_resource_to_pca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">name</span>
+
+        <span class="n">gdx_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">gdxpds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">gdx_file</span><span class="p">,</span> <span class="n">prop</span><span class="p">)[</span><span class="n">prop</span><span class="p">]</span>
+        <span class="k">except</span> <span class="n">gdxpds</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_prop_error</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span>
+        <span class="c1"># Get column names</span>
+        <span class="n">reeds_prop_cols</span> <span class="o">=</span> <span class="n">PropertyColumns</span><span class="p">()</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">reeds_prop_cols</span><span class="p">,</span> <span class="n">prop</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;region&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">region</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">region</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">wind_resource_to_pca</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="c1"># Merge in region mapping, drop any na columns</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># Get desired method, used for extra processing if needed</span>
+        <span class="n">process_att</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;df_process_</span><span class="si">{</span><span class="n">prop_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">process_att</span><span class="p">:</span>
+            <span class="c1"># Process attribute and return to df</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">process_att</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">prop</span><span class="p">,</span> <span class="n">gdx_file</span><span class="p">)</span>
+
+        <span class="n">df</span><span class="o">.</span><span class="n">year</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">process_subset_years</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">process_subset_years</span><span class="p">)]</span>
+
+        <span class="k">if</span> <span class="n">timescale</span> <span class="o">==</span> <span class="s2">&quot;interval&quot;</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_timeseries_block_data</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+        <span class="k">if</span> <span class="s2">&quot;year&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;year&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;Value&quot;</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df_col</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">])</span>
+
+        <span class="n">df_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">property_units</span><span class="p">[</span><span class="n">prop</span><span class="p">]</span>
+        <span class="c1"># find unit conversion values</span>
+        <span class="n">converted_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UNITS_CONVERSION</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">df_units</span><span class="p">,</span> <span class="p">(</span><span class="n">df_units</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># Convert units and add unit column to index</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span> <span class="o">*</span> <span class="n">converted_units</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">units_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="n">converted_units</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">units_index</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;Value&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessReEDS.merge_timeseries_block_data"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.merge_timeseries_block_data">[docs]</a>    <span class="k">def</span> <span class="nf">merge_timeseries_block_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Merge chronological time intervals with reeds timeslices</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): input dataframe</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: df with merged in timeseries data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">timeslice_mapping_file</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;inputs_case&quot;</span><span class="p">,</span> <span class="s2">&quot;h_dt_szn.csv&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="c1"># All year timeslice mappings are the same, defaulting to 2007</span>
+        <span class="n">timeslice_mapping_file</span> <span class="o">=</span> <span class="n">timeslice_mapping_file</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+            <span class="n">timeslice_mapping_file</span><span class="o">.</span><span class="n">year</span> <span class="o">==</span> <span class="mi">2007</span>
+        <span class="p">]</span>
+        <span class="n">timeslice_mapping_file</span> <span class="o">=</span> <span class="n">timeslice_mapping_file</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">year_list</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="n">year_list</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
+
+        <span class="n">year_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">year</span> <span class="ow">in</span> <span class="n">year_list</span><span class="p">:</span>
+            <span class="n">year_chunks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">date_range</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">year</span><span class="si">}</span><span class="s2">-01-01&quot;</span><span class="p">,</span> <span class="n">periods</span><span class="o">=</span><span class="mi">8760</span><span class="p">,</span> <span class="n">freq</span><span class="o">=</span><span class="s2">&quot;H&quot;</span><span class="p">))</span>
+
+        <span class="n">datetime_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">data</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8761</span><span class="p">))</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">year_list</span><span class="p">),</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">year_chunks</span><span class="p">),</span>
+            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;hour&quot;</span><span class="p">],</span>
+        <span class="p">)</span>
+        <span class="n">datetime_df</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">datetime_df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">datetime_df</span> <span class="o">=</span> <span class="n">datetime_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">datetime_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">datetime_block</span> <span class="o">=</span> <span class="n">datetime_df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">timeslice_mapping_file</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;hour&quot;</span><span class="p">)</span>
+        <span class="n">datetime_block</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df_merged</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">datetime_block</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">df_merged</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;hour&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProcessReEDS.df_process_generator"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.df_process_generator">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_generator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">gdx_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Does any additional processing for generator properties</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): input dataframe</span>
+<span class="sd">            prop (str, optional): ReEDS input property.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            gdx_file (str, optional): String path to GDX file.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="s2">&quot;tech&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;reeds_vre&quot;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;gen_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">tech</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="o">.</span><span class="n">region</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">prop</span> <span class="o">==</span> <span class="s2">&quot;gen_out&quot;</span>
+            <span class="ow">or</span> <span class="n">prop</span> <span class="o">==</span> <span class="s2">&quot;gen_out_ann&quot;</span>
+            <span class="ow">and</span> <span class="n">formatter_settings</span><span class="p">[</span><span class="s2">&quot;exclude_pumping_from_reeds_storage_gen&quot;</span><span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="o">==</span> <span class="s2">&quot;gen_out&quot;</span><span class="p">:</span>
+                <span class="n">stor_prop_name</span> <span class="o">=</span> <span class="s2">&quot;stor_out&quot;</span>
+                <span class="n">group_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">stor_prop_name</span> <span class="o">=</span> <span class="s2">&quot;stor_inout&quot;</span>
+                <span class="n">group_list</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">]</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">stor_out</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">gdxpds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">gdx_file</span><span class="p">,</span> <span class="n">stor_prop_name</span><span class="p">)[</span>
+                    <span class="n">stor_prop_name</span>
+                <span class="p">]</span>
+            <span class="k">except</span> <span class="n">gdxpds</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
+                <span class="n">stor_out</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_prop_error</span><span class="p">(</span><span class="n">stor_prop_name</span><span class="p">,</span> <span class="s2">&quot;storage&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">df</span>
+            <span class="n">reeds_prop_cols</span> <span class="o">=</span> <span class="n">PropertyColumns</span><span class="p">()</span>
+            <span class="n">stor_out</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">reeds_prop_cols</span><span class="p">,</span> <span class="n">stor_prop_name</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">prop</span> <span class="o">==</span> <span class="s2">&quot;gen_out_ann&quot;</span><span class="p">:</span>
+                <span class="n">stor_out</span> <span class="o">=</span> <span class="n">stor_out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">stor_out</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s2">&quot;out&quot;</span><span class="p">]</span>
+            <span class="n">stor_out</span> <span class="o">=</span> <span class="n">stor_out</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">group_list</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">stor_out</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">group_list</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Value_y&quot;</span><span class="p">]</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Value_x&quot;</span><span class="p">])</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()[</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;Value&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;Value_x&quot;</span><span class="p">,</span> <span class="s2">&quot;Value_y&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessReEDS.df_process_line"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.df_process_line">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_line</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">gdx_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Does any additional processing for line properties</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): input dataframe</span>
+<span class="sd">            prop (str, optional): ReEDS input property.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            gdx_file (str, optional): String path to GDX file.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;line_name&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;region_from&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_&quot;</span> <span class="o">+</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;region_to&quot;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessReEDS.df_process_reserves_generators"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.df_process_reserves_generators">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_reserves_generators</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">gdx_file</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Does any additional processing for reserves_generators properties</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): input dataframe</span>
+<span class="sd">            prop (str, optional): ReEDS input property.</span>
+<span class="sd">                Defaults to None.</span>
+<span class="sd">            gdx_file (str, optional): String path to GDX file.</span>
+<span class="sd">                Defaults to None.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame:</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;Type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+        <span class="k">return</span> <span class="n">df</span></div></div>
+
+
+<div class="viewcode-block" id="PropertyColumns"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.PropertyColumns.html#marmot.formatters.formatreeds.PropertyColumns">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">PropertyColumns</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS property column names&quot;&quot;&quot;</span>
+
+    <span class="n">gen_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;gen_out&#39; property columns (Marmot generator_Generation property)&quot;&quot;&quot;</span>
+    <span class="n">gen_out_ann</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;gen_out_ann&#39; property columns (Marmot generator_Generation_Annual property)&quot;&quot;&quot;</span>
+    <span class="n">cap_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;cap_out&#39; property columns (Marmot generator_Installed_Capacity property)&quot;&quot;&quot;</span>
+    <span class="n">curt_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;curt_out&#39; property columns (Marmot generator_Curtailment property)&quot;&quot;&quot;</span>
+    <span class="n">load_rt</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;load_rt&#39; property columns (Marmot region_Load_Annual property)&quot;&quot;&quot;</span>
+    <span class="n">losses_tran_h</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;region_from&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;region_to&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;h&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Value&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;losses_tran_h&#39; property columns (Marmot line_Losses property)&quot;&quot;&quot;</span>
+    <span class="n">tran_flow_power</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;region_from&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;region_to&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;h&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Value&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;tran_flow_power&#39; property columns (Marmot line_Flow property)&quot;&quot;&quot;</span>
+    <span class="n">tran_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;region_from&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;region_to&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Value&quot;</span><span class="p">,</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;tran_out&#39; property columns (Marmot line_Import_Limit property)&quot;&quot;&quot;</span>
+    <span class="n">stor_in</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;stor_in&#39; property columns (Marmot generator_Pumped_Load property)&quot;&quot;&quot;</span>
+    <span class="n">stor_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;stor_out&#39; property columns (Marmot storage_Generation property)&quot;&quot;&quot;</span>
+    <span class="n">stor_inout</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;type&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;stor_inout&#39; property columns (Marmot storage_In_Out property)&quot;&quot;&quot;</span>
+    <span class="n">stor_energy_cap</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;stor_energy_cap&#39; property columns (Marmot storage_Max_Volume property)&quot;&quot;&quot;</span>
+    <span class="n">emit_nat_tech</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;emission_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;emit_nat_tech&#39; property columns (Marmot emissions property)&quot;&quot;&quot;</span>
+    <span class="n">emit_r</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;emission_type&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;emit_r&#39; property columns (Marmot emission_Production_Annual property)&quot;&quot;&quot;</span>
+    <span class="n">opRes_supply_h</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;opRes_supply_h&#39; property columns (Marmot reserves_generators_Provision property)&quot;&quot;&quot;</span>
+    <span class="n">opRes_supply</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;opRes_supply&#39; property columns (Marmot reserves_generators_Provision_Annual property)&quot;&quot;&quot;</span>
+    <span class="c1"># Marmot generator_Total Generation Cost</span>
+    <span class="n">systemcost_techba</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;cost_type&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS &#39;systemcost_techba&#39; property columns (Marmot generator_Total Generation Cost property)&quot;&quot;&quot;</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

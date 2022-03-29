@@ -1,0 +1,477 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>marmot.utils.mconfig &#8212; Marmot 0.10.0 documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">Marmot</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Get Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for marmot.utils.mconfig</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- coding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;This module creates the default config.yml file that is used by Marmot.</span>
+
+<span class="sd">The parser function is used to parse information from the config file.</span>
+<span class="sd">The defaults defined here should not be modifed by any user, </span>
+<span class="sd">instead edit the values directly in the config.yml file once created. </span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">yaml</span>
+<span class="kn">import</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">marmot.utils.definitions</span> <span class="kn">import</span> <span class="n">ROOT_DIR</span>
+
+<span class="n">CONFIGFILE_NAME</span> <span class="o">=</span> <span class="s2">&quot;config.yml&quot;</span>
+<span class="n">configfile_path</span> <span class="o">=</span> <span class="n">ROOT_DIR</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">CONFIGFILE_NAME</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="createConfig"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.mconfig.createConfig.html#marmot.utils.mconfig.createConfig">[docs]</a><span class="k">def</span> <span class="nf">createConfig</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates config.yml file using default values.</span>
+
+<span class="sd">    The following are Marmot default config settings that are used to</span>
+<span class="sd">    create the config.yml file when Marmot is first run.</span>
+<span class="sd">    Users Should NOT edit these values, instead edit the values directly</span>
+<span class="sd">    in the config.yml file once created. If the config.yml file is deleted,</span>
+<span class="sd">    it will be created with these defaults when mconfig.py is called anytime Marmot</span>
+<span class="sd">    is run.</span>
+
+<span class="sd">    The default config settings are as follows:</span>
+
+<span class="sd">    - **font_settings:**</span>
+<span class="sd">        *Settings to adjust font sizes, family, and tick size within figures*</span>
+
+<span class="sd">        - xtick_size: 12</span>
+<span class="sd">        - ytick_size: 12</span>
+<span class="sd">        - axes_label_size: 16</span>
+<span class="sd">        - legend_size: 12</span>
+<span class="sd">        - title_size: 16</span>
+<span class="sd">        - font_family: serif</span>
+
+<span class="sd">    - **text_position:**</span>
+<span class="sd">        *Adjust the position of text relative to the edge of the plot (matplotlib points)*</span>
+<span class="sd">        - title_height: 40</span>
+
+<span class="sd">    - **figure_size:**</span>
+<span class="sd">        *Adjust the x and y-axes dimensions of the output figure*</span>
+<span class="sd">        - xdimension: 6</span>
+<span class="sd">        - ydimension: 4</span>
+
+<span class="sd">    - **axes_options:**</span>
+<span class="sd">        *Allows adjustment of the minimum and maximum tick marks on datetime x-axes and </span>
+<span class="sd">        the number of decimal points to include on the y-axes. Also controls visibility of</span>
+<span class="sd">        figure spines and legend settings and position*</span>
+
+<span class="sd">        - x_axes_maxticks: 8</span>
+<span class="sd">        - x_axes_minticks: 4</span>
+<span class="sd">        - y_axes_decimalpt: 1</span>
+<span class="sd">        - major_x_tick_length: 5</span>
+<span class="sd">        - major_y_tick_length: 5</span>
+<span class="sd">        - hide_top_spine: true</span>
+<span class="sd">        - hide_right_spine: true</span>
+<span class="sd">        - hide_bottom_spine: false</span>
+<span class="sd">        - hide_left_spine: false</span>
+<span class="sd">        - legend_position: center right</span>
+<span class="sd">        - legend_columns: 1</span>
+<span class="sd">        - show_legend_frame: true</span>
+
+<span class="sd">        .. versionadded:: 0.9.0</span>
+<span class="sd">            legend control settings</span>
+
+<span class="sd">    - **axes_label_options:**</span>
+<span class="sd">        *Controls whether x-axes labels are rotated from their default horizontal (0 degrees),</span>
+<span class="sd">        and at what number of labels to begin rotating to the specified rotation_angle.</span>
+<span class="sd">        By default, labels will begin rotating at 7 labels to an angle of 45 degrees from </span>
+<span class="sd">        0 degrees*</span>
+
+<span class="sd">        - rotate_x_labels: true</span>
+<span class="sd">        - rotate_at_num_labels: 7</span>
+<span class="sd">        - rotation_angle: 45</span>
+
+<span class="sd">    - **plot_data:**</span>
+<span class="sd">        *Controls certain plot data settings. </span>
+<span class="sd">        `curtailment_property` source of Curtailment data. The code defaults to </span>
+<span class="sd">        Marmot&#39;s calculated Curtailment property.</span>
+<span class="sd">        `plot_title_as_region` If True a the region/zone name will be added as a title to the </span>
+<span class="sd">        figure</span>
+<span class="sd">        `include_barplot_load_storage_charging_line` specifies whether to include the line </span>
+<span class="sd">        representing pumped load in total generation bar plots. </span>
+<span class="sd">        `include_timeseries_load_storage_charging_line` specifies whether to include the line </span>
+<span class="sd">        representing pumped load in timeseries generation plots </span>
+<span class="sd">        `*_net_imports` settings controls whether net imports should be included in the figures*</span>
+
+<span class="sd">        - curtailment_property: Curtailment</span>
+<span class="sd">        - plot_title_as_region: true</span>
+<span class="sd">        - include_barplot_load_lines: true</span>
+<span class="sd">        - include_stackplot_load_lines: true</span>
+<span class="sd">        - include_barplot_load_storage_charging_line: true</span>
+<span class="sd">        - include_timeseries_load_storage_charging_line: true</span>
+<span class="sd">        - include_barplot_net_imports: true</span>
+<span class="sd">        - include_stackplot_net_imports: true</span>
+
+<span class="sd">    - **load_legend_names:**</span>
+<span class="sd">        *Sets the legened name of load and demand lines*</span>
+
+<span class="sd">        - load: &#39;Demand + Storage Charging&#39;</span>
+<span class="sd">        - demand: Demand</span>
+
+<span class="sd">        .. versionadded:: 0.10.0</span>
+
+<span class="sd">    - **formatter_settings:**</span>
+<span class="sd">        *Formatter specific settings, VOLL value, </span>
+<span class="sd">        `skip_existing_properties` Toggles whether existing properties are skipped or </span>
+<span class="sd">        overwritten if they already contained in a previous processed_h5 file, the default is </span>
+<span class="sd">        to skip.</span>
+<span class="sd">        `append_plexos_block_name` Toggles whether to append PLEXOS block name to formatted </span>
+<span class="sd">        results e.g ST, MT, LT, PASA. Defaults to False.</span>
+<span class="sd">        `exclude_pumping_from_reeds_storage_gen` toggles whether to exclude pumping </span>
+<span class="sd">        (negative gen) from ReEDS storage generation. Defaults to True*</span>
+
+<span class="sd">        - VoLL: 10000</span>
+<span class="sd">        - skip_existing_properties: true</span>
+<span class="sd">        - append_plexos_block_name: false</span>
+<span class="sd">        - exclude_pumping_from_reeds_storage_gen: true</span>
+
+<span class="sd">        .. versionadded:: 0.10.0</span>
+<span class="sd">            exclude_pumping_from_reeds_storage_gen setting</span>
+
+<span class="sd">    - **multithreading_workers:** 16</span>
+<span class="sd">        *Sets multithread workers when reading data, Defaults to 16</span>
+
+<span class="sd">    - **figure_file_format:** svg</span>
+<span class="sd">        *Adjust the plot image format. The default is **svg**, a vector-based image.</span>
+<span class="sd">        This field accepts any format that is compatible with matplotlib*</span>
+
+<span class="sd">    - **shift_leapday:** false</span>
+<span class="sd">        *Handles auto shifting of leap day, if required by your model. The default is false*</span>
+
+<span class="sd">    - **auto_convert_units:** true</span>
+<span class="sd">        *If True automatically converts Energy and Capacity units so that no number </span>
+<span class="sd">        exceeds 1000. All base units are in MW, and units can be converted to GW, TW and kW*</span>
+
+<span class="sd">    - **user_defined_inputs_file:** Marmot_user_defined_inputs.csv</span>
+<span class="sd">        *Change the default Marmot_user_defined_inputs file, file must be created first*</span>
+
+<span class="sd">    - **plot_select_file:** Marmot_plot_select.csv</span>
+<span class="sd">        *Change the default Marmot_plot_select.csv file, file must be created first*</span>
+
+<span class="sd">    - **plexos_properties_file:** plexos_properties.csv</span>
+<span class="sd">        *Change the default plexos_properties_file.csv file, file must be created first*</span>
+
+<span class="sd">    - **reeds_properties_file:** reeds_properties.csv</span>
+<span class="sd">        *Change the default reeds_properties_file.csv file, file must be created first*</span>
+
+
+<span class="sd">    Args:</span>
+<span class="sd">        configfile_path (Path): Path to config.yml file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">font_settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">xtick_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">ytick_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">axes_label_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+            <span class="n">legend_size</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span>
+            <span class="n">title_size</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+            <span class="n">font_family</span><span class="o">=</span><span class="s2">&quot;serif&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">text_position</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">title_height</span><span class="o">=</span><span class="mi">40</span><span class="p">),</span>
+        <span class="n">figure_size</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">xdimension</span><span class="o">=</span><span class="mi">6</span><span class="p">,</span> <span class="n">ydimension</span><span class="o">=</span><span class="mi">4</span><span class="p">),</span>
+        <span class="n">axes_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">x_axes_minticks</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span>
+            <span class="n">x_axes_maxticks</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span>
+            <span class="n">y_axes_decimalpt</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">major_x_tick_length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">major_y_tick_length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+            <span class="n">hide_top_spine</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">hide_right_spine</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">hide_bottom_spine</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">hide_left_spine</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">legend_position</span><span class="o">=</span><span class="s2">&quot;lower right&quot;</span><span class="p">,</span>
+            <span class="n">legend_columns</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+            <span class="n">show_legend_frame</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">axes_label_options</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">rotate_x_labels</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rotate_at_num_labels</span><span class="o">=</span><span class="mi">7</span><span class="p">,</span> <span class="n">rotation_angle</span><span class="o">=</span><span class="mi">45</span>
+        <span class="p">),</span>
+        <span class="n">plot_data</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">curtailment_property</span><span class="o">=</span><span class="s2">&quot;Curtailment&quot;</span><span class="p">,</span>
+            <span class="n">plot_title_as_region</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">include_barplot_load_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">include_stackplot_load_lines</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">include_barplot_load_storage_charging_line</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">include_timeseries_load_storage_charging_line</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">include_barplot_net_imports</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">include_stackplot_net_imports</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">load_legend_names</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">load</span><span class="o">=</span><span class="s2">&quot;Demand +</span><span class="se">\n</span><span class="s2">Storage Charging&quot;</span><span class="p">,</span> <span class="n">demand</span><span class="o">=</span><span class="s2">&quot;Demand&quot;</span><span class="p">),</span>
+        <span class="n">formatter_settings</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span>
+            <span class="n">VoLL</span><span class="o">=</span><span class="mi">10000</span><span class="p">,</span>
+            <span class="n">skip_existing_properties</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">append_plexos_block_name</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">exclude_pumping_from_reeds_storage_gen</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">),</span>
+        <span class="n">multithreading_workers</span><span class="o">=</span><span class="mi">16</span><span class="p">,</span>
+        <span class="n">figure_file_format</span><span class="o">=</span><span class="s2">&quot;svg&quot;</span><span class="p">,</span>
+        <span class="n">shift_leapday</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">auto_convert_units</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="n">user_defined_inputs_file</span><span class="o">=</span><span class="s2">&quot;Marmot_user_defined_inputs.csv&quot;</span><span class="p">,</span>
+        <span class="n">plot_select_file</span><span class="o">=</span><span class="s2">&quot;Marmot_plot_select.csv&quot;</span><span class="p">,</span>
+        <span class="n">plexos_properties_file</span><span class="o">=</span><span class="s2">&quot;plexos_properties.csv&quot;</span><span class="p">,</span>
+        <span class="n">reeds_properties_file</span><span class="o">=</span><span class="s2">&quot;reeds_properties.csv&quot;</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">cfgfile</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">cfgfile</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<span class="c1"># Check if there is already a configuration file</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">configfile_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+    <span class="c1"># Create the configuration file as it doesn&#39;t exist yet</span>
+    <span class="n">createConfig</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="parser"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.mconfig.parser.html#marmot.utils.mconfig.parser">[docs]</a><span class="k">def</span> <span class="nf">parser</span><span class="p">(</span><span class="n">top_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]:</span>
+    <span class="sd">&quot;&quot;&quot;Pull requested value from config.yml file.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        top_level (str): Top level of config dictionary,</span>
+<span class="sd">            will return specified level and any sublevel.</span>
+<span class="sd">        second_level (str, optional): Second level of config dictionary</span>
+<span class="sd">            under top_level, will return a single value.</span>
+<span class="sd">            Defaults to None.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Union[dict, str, int, bool]: Returns the requested level or value from </span>
+<span class="sd">        the config file. Return type varies based on level accessed.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">ymlfile</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">ymlfile</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">second_level</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">][</span><span class="n">second_level</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">value</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">(</span>
+            <span class="s2">&quot;Config file read Error: New config settings have been added which &quot;</span>
+            <span class="s2">&quot;require the config.yml to be re-created. &quot;</span>
+            <span class="s2">&quot;To continue delete config.yml located in the top directory level of Marmot&quot;</span>
+        <span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="edit_value"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.mconfig.edit_value.html#marmot.utils.mconfig.edit_value">[docs]</a><span class="k">def</span> <span class="nf">edit_value</span><span class="p">(</span><span class="n">new_value</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">top_level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">second_level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Edit the config.yml file through code.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        new_value (str): New value to apply to config file.</span>
+<span class="sd">        top_level (str): Top level of config dictionary,</span>
+<span class="sd">            will return specified level and any sublevel.</span>
+<span class="sd">        second_level (str, optional): Second level of config dictionary under top_level,</span>
+<span class="sd">            will return a single value.</span>
+<span class="sd">            Defaults to None.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">cfg</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">second_level</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cfg</span><span class="p">[</span><span class="n">top_level</span><span class="p">][</span><span class="n">second_level</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_value</span>
+
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">yaml</span><span class="o">.</span><span class="n">safe_dump</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">default_flow_style</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">sort_keys</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="reset_defaults"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.utils.mconfig.reset_defaults.html#marmot.utils.mconfig.reset_defaults">[docs]</a><span class="k">def</span> <span class="nf">reset_defaults</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;When called, resets config.yml to default values.&quot;&quot;&quot;</span>
+    <span class="n">createConfig</span><span class="p">(</span><span class="n">configfile_path</span><span class="p">)</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

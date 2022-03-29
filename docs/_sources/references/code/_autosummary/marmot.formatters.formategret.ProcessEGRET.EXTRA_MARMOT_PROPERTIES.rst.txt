@@ -1,0 +1,6 @@
+marmot.formatters.formategret.ProcessEGRET.EXTRA\_MARMOT\_PROPERTIES
+====================================================================
+
+.. currentmodule:: marmot.formatters.formategret
+
+.. autoattribute:: ProcessEGRET.EXTRA_MARMOT_PROPERTIES

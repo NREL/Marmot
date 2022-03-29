@@ -1,0 +1,6 @@
+marmot.metamanagers.read\_metadata.MetaData.filename
+====================================================
+
+.. currentmodule:: marmot.metamanagers.read_metadata
+
+.. autoattribute:: MetaData.filename

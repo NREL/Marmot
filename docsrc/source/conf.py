@@ -12,18 +12,17 @@
 #
 import os
 import sys
-import sphinx_rtd_theme
 sys.path.insert(0, os.path.abspath('../../'))
 
 
 # -- Project information -----------------------------------------------------
 
 project = 'Marmot'
-copyright = '2021, Alliance for Sustainable Energy, LLC'
+copyright = '2022, Alliance for Sustainable Energy, LLC'
 author = 'Daniel Levie, Marty Schwarz, Brian Sergi, Ryan Houseman'
 
 # The full version, including alpha/beta/rc tags
-release = '0.9.0'
+release = '0.10.0'
 
 #
 # -- General configuration ---------------------------------------------------
@@ -37,7 +36,8 @@ release = '0.9.0'
 
 # extensions = ['sphinx.ext.autosummary','sphinx.ext.napoleon','sphinx.ext.autodoc']
 
-extensions = ["sphinx.ext.autodoc",
+extensions = [
+    "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
@@ -46,12 +46,18 @@ extensions = ["sphinx.ext.autodoc",
     "sphinx.ext.viewcode",
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
-    "sphinx_rtd_theme",
     'sphinx_click.ext',
     "sphinx.ext.autosectionlabel"]
 
 intersphinx_mapping = {
+    "dateutil": ("https://dateutil.readthedocs.io/en/latest/", None),
+    "matplotlib": ("https://matplotlib.org/stable/", None),
+    "numpy": ("https://numpy.org/doc/stable/", None),
+    'pandas': ('http://pandas.pydata.org/pandas-docs/dev', None),
+    "py": ("https://pylib.readthedocs.io/en/latest/", None),
     "python": ("https://docs.python.org/3/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
+    "statsmodels": ("https://www.statsmodels.org/devel/", None),
 }
 
 # Add any paths that contain templates here, relative to this directory.
@@ -67,8 +73,8 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = 'sphinx_rtd_theme'
-html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
+html_theme = 'pydata_sphinx_theme'
+# html_theme_path = [sphinx_rtd_theme.get_html_theme_path()]
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -85,10 +91,18 @@ html4_writer=True
 
 html_theme_options = {
     'collapse_navigation': False,
-    'sticky_navigation': True,
-    'titles_only': False,
+    # 'sticky_navigation': True,
+    # 'titles_only': False,
     "navigation_depth": 4,
-    'display_version': True,
+    "show_nav_level": 1,
+    # 'display_version': True,
+    "icon_links": [
+        {
+            "name": "GitHub",
+            "url": "https://github.com/pandas-dev/pandas",
+            "icon": "fab fa-github-square",
+            "type": "fontawesome",
+        },]
 }
 
 
@@ -106,14 +120,14 @@ autosummary_generate = True  # Turn on sphinx.ext.autosummary
 autoclass_content = "both"  # Add __init__ doc (ie. params) to class summaries
 autodoc_member_order = 'bysource'
 
-autodoc_inherit_docstrings = True  # If no docstring, inherit from base class
+autodoc_inherit_docstrings = False  # If no docstring, inherit from base class
 add_module_names = False  # Remove namespaces from class/method signatures
 # # Remove 'view source code' from top of page (for html, not python)
 html_show_sourcelink = True
 # # numpy_show_class_member = True
-napoleon_google_docstring = True
-napoleon_use_param = True
-napoleon_preprocess_types = True
+# napoleon_google_docstring = True
+# napoleon_use_param = True
+# napoleon_preprocess_types = True
 
-napoleon_use_ivar = False
-napoleon_use_rtype = False
+# napoleon_use_ivar = False
+# napoleon_use_rtype = False

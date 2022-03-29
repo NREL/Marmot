@@ -1,0 +1,6 @@
+marmot.formatters.formategret.ProcessEGRET.UNITS\_CONVERSION
+============================================================
+
+.. currentmodule:: marmot.formatters.formategret
+
+.. autoattribute:: ProcessEGRET.UNITS_CONVERSION

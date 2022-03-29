@@ -38,7 +38,5 @@ marmot.marmot\_h5\_formatter
       :template: custom-class-template.rst
    
       MarmotFormat
-      Process
-      SetupLogger
    
    

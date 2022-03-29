@@ -1,0 +1,6 @@
+marmot.formatters.formatbase.Process.PROPERTY\_MAPPING
+======================================================
+
+.. currentmodule:: marmot.formatters.formatbase
+
+.. autoattribute:: Process.PROPERTY_MAPPING

@@ -38,6 +38,5 @@ marmot.marmot\_plot\_main
       :template: custom-class-template.rst
    
       MarmotPlot
-      SetupLogger
    
    

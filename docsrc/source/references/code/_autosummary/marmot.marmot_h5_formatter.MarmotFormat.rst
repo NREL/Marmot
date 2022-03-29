@@ -24,8 +24,8 @@ marmot.marmot\_h5\_formatter.MarmotFormat
 
    .. autosummary::
    
-        ~MarmotFormat.output_metadata
         ~MarmotFormat.run_formatter
+        ~MarmotFormat.save_to_h5
    
    
 

@@ -1,0 +1,6 @@
+marmot.metamanagers.read\_metadata.MetaData.h5\_data
+====================================================
+
+.. currentmodule:: marmot.metamanagers.read_metadata
+
+.. autoattribute:: MetaData.h5_data

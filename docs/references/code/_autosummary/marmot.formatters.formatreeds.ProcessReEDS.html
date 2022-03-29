@@ -1,0 +1,845 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>marmot.formatters.formatreeds.ProcessReEDS &#8212; Marmot 0.10.0 documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="marmot.formatters.formatreeds.PropertyColumns" href="marmot.formatters.formatreeds.PropertyColumns.html" />
+    <link rel="prev" title="marmot.formatters.formatplexos.ProcessPLEXOS" href="marmot.formatters.formatplexos.ProcessPLEXOS.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">Marmot</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Get Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../initialize.html">
+   Initialization
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.marmot_h5_formatter.html">
+     marmot.marmot_h5_formatter
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_h5_formatter.main.html">
+       marmot.marmot_h5_formatter.main
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_h5_formatter.MarmotFormat.html">
+       marmot.marmot_h5_formatter.MarmotFormat
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.marmot_plot_main.html">
+     marmot.marmot_plot_main
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+    <label for="toctree-checkbox-3">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_plot_main.main.html">
+       marmot.marmot_plot_main.main
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_plot_main.MarmotPlot.html">
+       marmot.marmot_plot_main.MarmotPlot
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="../format.html">
+   Formatters
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+  <label for="toctree-checkbox-4">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatbase.Process.html">
+     marmot.formatters.formatbase.Process
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraProperties.html">
+     marmot.formatters.formatextra.ExtraProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatplexos.ProcessPLEXOS.html">
+     marmot.formatters.formatplexos.ProcessPLEXOS
+    </a>
+   </li>
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     marmot.formatters.formatreeds.ProcessReEDS
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds.PropertyColumns.html">
+     marmot.formatters.formatreeds.PropertyColumns
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formategret.ProcessEGRET.html">
+     marmot.formatters.formategret.ProcessEGRET
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../meta.html">
+   Meta Data
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+  <label for="toctree-checkbox-5">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.metamanagers.read_metadata.MetaData.html">
+     marmot.metamanagers.read_metadata.MetaData
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../plots.html">
+   Plots
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+  <label for="toctree-checkbox-6">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.capacity_factor.CapacityFactor.html">
+     marmot.plottingmodules.capacity_factor.CapacityFactor
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.capacity_out.CapacityOut.html">
+     marmot.plottingmodules.capacity_out.CapacityOut
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.curtailment.Curtailment.html">
+     marmot.plottingmodules.curtailment.Curtailment
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.emissions.Emissions.html">
+     marmot.plottingmodules.emissions.Emissions
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.generation_stack.GenerationStack.html">
+     marmot.plottingmodules.generation_stack.GenerationStack
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.generation_unstack.GenerationUnStack.html">
+     marmot.plottingmodules.generation_unstack.GenerationUnStack
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.hydro.Hydro.html">
+     marmot.plottingmodules.hydro.Hydro
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.prices.Prices.html">
+     marmot.plottingmodules.prices.Prices
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.production_cost.SystemCosts.html">
+     marmot.plottingmodules.production_cost.SystemCosts
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.ramping.Ramping.html">
+     marmot.plottingmodules.ramping.Ramping
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.reserves.Reserves.html">
+     marmot.plottingmodules.reserves.Reserves
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.sensitivities.Sensitivities.html">
+     marmot.plottingmodules.sensitivities.Sensitivities
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.storage.Storage.html">
+     marmot.plottingmodules.storage.Storage
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.ThermalReserve.html">
+     marmot.plottingmodules.thermal_cap_reserve.ThermalReserve
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.total_generation.TotalGeneration.html">
+     marmot.plottingmodules.total_generation.TotalGeneration
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.html">
+     marmot.plottingmodules.total_installed_capacity.InstalledCapacity
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.transmission.Transmission.html">
+     marmot.plottingmodules.transmission.Transmission
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.unserved_energy.UnservedEnergy.html">
+     marmot.plottingmodules.unserved_energy.UnservedEnergy
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.utilization_factor.UtilizationFactor.html">
+     marmot.plottingmodules.utilization_factor.UtilizationFactor
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../plot_util.html">
+   Plot Utilities
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+  <label for="toctree-checkbox-7">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html">
+     marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html">
+     marmot.plottingmodules.plotutils.plot_library.SetupSubplot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.PlotLibrary.html">
+     marmot.plottingmodules.plotutils.plot_library.PlotLibrary
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.html">
+     marmot.plottingmodules.plotutils.plot_exceptions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+    <label for="toctree-checkbox-8">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../utils.html">
+   Utilities
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+  <label for="toctree-checkbox-9">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.utils.loggersetup.SetupLogger.html">
+     marmot.utils.loggersetup.SetupLogger
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.utils.definitions.html">
+     marmot.utils.definitions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+    <label for="toctree-checkbox-10">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.get_project_root.html">
+       marmot.utils.definitions.get_project_root
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.input_dir.html">
+       marmot.utils.definitions.input_dir
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.log_dir.html">
+       marmot.utils.definitions.log_dir
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.utils.mconfig.html">
+     marmot.utils.mconfig
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+    <label for="toctree-checkbox-11">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.createConfig.html">
+       marmot.utils.mconfig.createConfig
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.edit_value.html">
+       marmot.utils.mconfig.edit_value
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.parser.html">
+       marmot.utils.mconfig.parser
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.reset_defaults.html">
+       marmot.utils.mconfig.reset_defaults
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+
+<nav id="bd-toc-nav">
+    
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <script>
+   var arr = document.getElementsByClassName('reference internal');
+   for(var i = 0; i < arr.length; i++) {
+   arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
+   }
+</script><section id="marmot-formatters-formatreeds-processreeds">
+<h1>marmot.formatters.formatreeds.ProcessReEDS<a class="headerlink" href="#marmot-formatters-formatreeds-processreeds" title="Permalink to this headline">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ProcessReEDS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">process_subset_years</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/formatters/formatreeds.html#ProcessReEDS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference internal" href="marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process" title="marmot.formatters.formatbase.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.formatters.formatbase.Process</span></code></a></p>
+<p>Process ReEDS specific data from a ReEDS result set.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_folder</strong> (<em>Path</em>) – Folder containing csv files.</p></li>
+<li><p><strong>output_file_path</strong> (<em>Path</em>) – Path to formatted h5 output file.</p></li>
+<li><p><strong>Region_Mapping</strong> (<em>pd.DataFrame</em>) – DataFrame to map custom
+regions/zones to create custom aggregations.</p></li>
+<li><p><strong>process_subset_years</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>, </em><em>optional</em>) – If provided only process
+years specified. Defaults to None.</p></li>
+<li><p><strong>**kwargs</strong> – These parameters will be passed to the Process
+class.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.df_process_generator" title="marmot.formatters.formatreeds.ProcessReEDS.df_process_generator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_generator</span></code></a>(df[, prop, gdx_file])</p></td>
+<td><p>Does any additional processing for generator properties</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.df_process_line" title="marmot.formatters.formatreeds.ProcessReEDS.df_process_line"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_line</span></code></a>(df[, prop, gdx_file])</p></td>
+<td><p>Does any additional processing for line properties</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.df_process_reserves_generators" title="marmot.formatters.formatreeds.ProcessReEDS.df_process_reserves_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_reserves_generators</span></code></a>(df[, prop, ...])</p></td>
+<td><p>Does any additional processing for reserves_generators properties</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.get_input_files" title="marmot.formatters.formatreeds.ProcessReEDS.get_input_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_files</span></code></a>()</p></td>
+<td><p>Gets a list of input files within the scenario folders</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.get_processed_data" title="marmot.formatters.formatreeds.ProcessReEDS.get_processed_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_processed_data</span></code></a>(prop_class, prop, ...)</p></td>
+<td><p>Handles the pulling of data from the ReEDS gdx file and then passes the data to one of the formating functions</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.merge_timeseries_block_data" title="marmot.formatters.formatreeds.ProcessReEDS.merge_timeseries_block_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_timeseries_block_data</span></code></a>(df)</p></td>
+<td><p>Merge chronological time intervals with reeds timeslices</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.output_metadata" title="marmot.formatters.formatreeds.ProcessReEDS.output_metadata"><code class="xref py py-obj docutils literal notranslate"><span class="pre">output_metadata</span></code></a>(files_list)</p></td>
+<td><p>Add ReEDS specific metadata to formatted h5 file .</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.EXTRA_MARMOT_PROPERTIES" title="marmot.formatters.formatreeds.ProcessReEDS.EXTRA_MARMOT_PROPERTIES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EXTRA_MARMOT_PROPERTIES</span></code></a></p></td>
+<td><p>Dictionary of Extra custom properties that are created based off existing properties.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.PROPERTY_MAPPING" title="marmot.formatters.formatreeds.ProcessReEDS.PROPERTY_MAPPING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PROPERTY_MAPPING</span></code></a></p></td>
+<td><p>Maps simulation model property names to Marmot property names</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNITS_CONVERSION</span></code></p></td>
+<td><p>Dictionary to convert units to standard values used by Marmot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.property_units" title="marmot.formatters.formatreeds.ProcessReEDS.property_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property_units</span></code></a></p></td>
+<td><p>Gets the property units from data, e.g MW, MWh</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.wind_resource_to_pca" title="marmot.formatters.formatreeds.ProcessReEDS.wind_resource_to_pca"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wind_resource_to_pca</span></code></a></p></td>
+<td><p>Get the wind resource (s) to pca/region mapping</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.PROPERTY_MAPPING">
+<span class="sig-name descname"><span class="pre">PROPERTY_MAPPING</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'emission_emit_r':</span> <span class="pre">'emission_Production',</span> <span class="pre">'generator_cap_out':</span> <span class="pre">'generator_Installed_Capacity',</span> <span class="pre">'generator_curt_out':</span> <span class="pre">'generator_Curtailment',</span> <span class="pre">'generator_gen_out':</span> <span class="pre">'generator_Generation',</span> <span class="pre">'generator_gen_out_ann':</span> <span class="pre">'generator_Generation_Annual',</span> <span class="pre">'generator_stor_in':</span> <span class="pre">'generator_Pump_Load',</span> <span class="pre">'generator_systemcost_techba':</span> <span class="pre">'generator_Total_Generation_Cost',</span> <span class="pre">'line_losses_tran_h':</span> <span class="pre">'line_Losses',</span> <span class="pre">'line_tran_flow_power':</span> <span class="pre">'line_Flow',</span> <span class="pre">'line_tran_out':</span> <span class="pre">'line_Import_Limit',</span> <span class="pre">'region_load_rt':</span> <span class="pre">'region_Demand',</span> <span class="pre">'reserves_generators_opRes_supply':</span> <span class="pre">'reserves_generators_Provision_Annual',</span> <span class="pre">'reserves_generators_opRes_supply_h':</span> <span class="pre">'reserves_generators_Provision',</span> <span class="pre">'storage_stor_energy_cap':</span> <span class="pre">'storage_Max_Volume'}</span></em><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.PROPERTY_MAPPING" title="Permalink to this definition">#</a></dt>
+<dd><p>Maps simulation model property names to Marmot property names</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.EXTRA_MARMOT_PROPERTIES">
+<span class="sig-name descname"><span class="pre">EXTRA_MARMOT_PROPERTIES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'generator_Curtailment':</span> <span class="pre">[('generator_Curtailment_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'generator_Pump_Load':</span> <span class="pre">[('generator_Pump_Load_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'generator_Total_Generation_Cost':</span> <span class="pre">[('generator_VOM_Cost',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_generator_vom_cost&gt;),</span> <span class="pre">('generator_Fuel_Cost',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_generator_fuel_cost&gt;),</span> <span class="pre">('generator_Reserves_VOM_Cost',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_generator_reserve_vom_cost&gt;),</span> <span class="pre">('generator_FOM_Cost',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_generator_fom_cost&gt;)],</span> <span class="pre">'region_Demand':</span> <span class="pre">[('region_Demand_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;),</span> <span class="pre">('region_Load',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_region_total_load&gt;)],</span> <span class="pre">'region_Load':</span> <span class="pre">[('region_Load_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'reserves_generators_Provision':</span> <span class="pre">[('reserve_Provision',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_reserve_provision&gt;)]}</span></em><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.EXTRA_MARMOT_PROPERTIES" title="Permalink to this definition">#</a></dt>
+<dd><p>Dictionary of Extra custom properties that are created based off existing properties.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.property_units">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">property_units</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.property_units" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets the property units from data, e.g MW, MWh</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>_property_units</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.wind_resource_to_pca">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">wind_resource_to_pca</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.wind_resource_to_pca" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the wind resource (s) to pca/region mapping</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>wind_resource_to_pca mapping</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.output_metadata">
+<span class="sig-name descname"><span class="pre">output_metadata</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">files_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatreeds.html#ProcessReEDS.output_metadata"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.output_metadata" title="Permalink to this definition">#</a></dt>
+<dd><p>Add ReEDS specific metadata to formatted h5 file .</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>files_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) – List of all gdx files in inputs
+folder in alpha numeric order.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.get_input_files">
+<span class="sig-name descname"><span class="pre">get_input_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatreeds.html#ProcessReEDS.get_input_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.get_input_files" title="Permalink to this definition">#</a></dt>
+<dd><p>Gets a list of input files within the scenario folders</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.get_processed_data">
+<span class="sig-name descname"><span class="pre">get_processed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prop_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">timescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatreeds.html#ProcessReEDS.get_processed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.get_processed_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Handles the pulling of data from the ReEDS gdx
+file and then passes the data to one of the formating functions</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>prop_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Property class e.g Region, Generator, Zone etc</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Property e.g gen_out, cap_out etc.</p></li>
+<li><p><strong>timescale</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Data timescale, e.g interval, summary.</p></li>
+<li><p><strong>model_filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of model to process.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Formatted results dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.merge_timeseries_block_data">
+<span class="sig-name descname"><span class="pre">merge_timeseries_block_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatreeds.html#ProcessReEDS.merge_timeseries_block_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.merge_timeseries_block_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Merge chronological time intervals with reeds timeslices</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – input dataframe</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>df with merged in timeseries data</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.df_process_generator">
+<span class="sig-name descname"><span class="pre">df_process_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdx_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatreeds.html#ProcessReEDS.df_process_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.df_process_generator" title="Permalink to this definition">#</a></dt>
+<dd><p>Does any additional processing for generator properties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – input dataframe</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – ReEDS input property.
+Defaults to None.</p></li>
+<li><p><strong>gdx_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – String path to GDX file.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.df_process_line">
+<span class="sig-name descname"><span class="pre">df_process_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdx_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatreeds.html#ProcessReEDS.df_process_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.df_process_line" title="Permalink to this definition">#</a></dt>
+<dd><p>Does any additional processing for line properties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – input dataframe</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – ReEDS input property.
+Defaults to None.</p></li>
+<li><p><strong>gdx_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – String path to GDX file.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.df_process_reserves_generators">
+<span class="sig-name descname"><span class="pre">df_process_reserves_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gdx_file</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatreeds.html#ProcessReEDS.df_process_reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.df_process_reserves_generators" title="Permalink to this definition">#</a></dt>
+<dd><p>Does any additional processing for reserves_generators properties</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – input dataframe</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – ReEDS input property.
+Defaults to None.</p></li>
+<li><p><strong>gdx_file</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – String path to GDX file.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="marmot.formatters.formatplexos.ProcessPLEXOS.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">marmot.formatters.formatplexos.ProcessPLEXOS</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="marmot.formatters.formatreeds.PropertyColumns.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">marmot.formatters.formatreeds.PropertyColumns</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

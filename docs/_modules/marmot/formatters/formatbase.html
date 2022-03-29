@@ -1,0 +1,340 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>marmot.formatters.formatbase &#8212; Marmot 0.10.0 documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">Marmot</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Get Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for marmot.formatters.formatbase</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Base formatting module for all simulation model results,</span>
+<span class="sd">Inherited by all model specific Process classes </span>
+
+<span class="sd">@author: Daniel Levie</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;formatter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="Process"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process">[docs]</a><span class="k">class</span> <span class="nc">Process</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Base class for processing simulation model data.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Maps sim model property names to Marmot names,</span>
+    <span class="c1"># unchanged names not included</span>
+    <span class="n">PROPERTY_MAPPING</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="sd">&quot;&quot;&quot;Maps simulation model property names to Marmot property names&quot;&quot;&quot;</span>
+    <span class="c1"># Extra custom properties that are created based off existing properties.</span>
+    <span class="c1"># The dictionary keys are the existing properties and the values are the new</span>
+    <span class="c1"># property names and methods used to create it.</span>
+    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+    <span class="c1"># Conversion units dict, key values is a tuple of new unit name and</span>
+    <span class="c1"># conversion multiplier</span>
+    <span class="n">UNITS_CONVERSION</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;kW&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MW&quot;</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
+        <span class="s2">&quot;MW&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MW&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;GW&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MW&quot;</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">),</span>
+        <span class="s2">&quot;TW&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MW&quot;</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">),</span>
+        <span class="s2">&quot;kWh&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MWh&quot;</span><span class="p">,</span> <span class="mf">1e-3</span><span class="p">),</span>
+        <span class="s2">&quot;MWh&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MWh&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;GWh&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MWh&quot;</span><span class="p">,</span> <span class="mf">1e3</span><span class="p">),</span>
+        <span class="s2">&quot;TWh&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MWh&quot;</span><span class="p">,</span> <span class="mf">1e6</span><span class="p">),</span>
+        <span class="s2">&quot;lb&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;kg&quot;</span><span class="p">,</span> <span class="mf">0.453592</span><span class="p">),</span>
+        <span class="s2">&quot;ton&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;kg&quot;</span><span class="p">,</span> <span class="mf">907.18474</span><span class="p">),</span>
+        <span class="s2">&quot;kg&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;kg&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;tonne&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;kg&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+        <span class="s2">&quot;metric tons&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;kg&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+        <span class="s2">&quot;$&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;2004$&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;$000&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;$&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+        <span class="s2">&quot;h&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;MMBTU&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MMBTU&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;GBTU&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MMBTU&quot;</span><span class="p">,</span> <span class="mi">1000</span><span class="p">),</span>
+        <span class="s1">&#39;GJ&quot;&#39;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MMBTU&quot;</span><span class="p">,</span> <span class="mf">0.947817</span><span class="p">),</span>
+        <span class="s2">&quot;TJ&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MMBTU&quot;</span><span class="p">,</span> <span class="mf">947.817120</span><span class="p">),</span>
+        <span class="s2">&quot;$/MW&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;$/MW&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;$/MWh&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;$/MWh&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;lb/MWh&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;kg/MWh&quot;</span><span class="p">,</span> <span class="mf">0.453592</span><span class="p">),</span>
+        <span class="s2">&quot;Kg/MWh&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;Kg/MWh&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;Quads&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;Quads&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;MW/yr&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;MW/yr&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;frac&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;fraction&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;fraction&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;fraction&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="kc">None</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;unitless&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+        <span class="s2">&quot;unitless&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;unitless&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary to convert units to standard values used by Marmot&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="n">emit_names</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">_</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">__</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            input_folder (Path): Folder containing model input files.</span>
+<span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
+<span class="sd">            Region_Mapping (pd.DataFrame): DataFrame to map custom</span>
+<span class="sd">                regions/zones to create custom aggregations.</span>
+<span class="sd">            emit_names (pd.DataFrame): DataFrame with 2 columns to rename</span>
+<span class="sd">                emission names.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span> <span class="o">=</span> <span class="n">input_folder</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span> <span class="o">=</span> <span class="n">output_file_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span> <span class="o">=</span> <span class="n">emit_names</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emit_names_dict</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span><span class="p">[[</span><span class="s2">&quot;Original&quot;</span><span class="p">,</span> <span class="s2">&quot;New&quot;</span><span class="p">]]</span>
+                <span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s2">&quot;Original&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;New&quot;</span><span class="p">]</span>
+            <span class="p">)</span>
+
+<div class="viewcode-block" id="Process.get_input_files"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process.get_input_files">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Gets a list of input files within the scenario folders&quot;&quot;&quot;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="c1"># List of all files in input folder in alpha numeric order</span>
+        <span class="n">files_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="n">files_list</span></div>
+
+<div class="viewcode-block" id="Process.output_metadata"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process.output_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">output_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;method template for output_metadata</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            files_list (list): list of string files or filenames</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Process.get_processed_data"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process.get_processed_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_processed_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;method template for get_processed_data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prop_class (str): class e.g Region, Generator, Zone etc</span>
+<span class="sd">            property (str): Property e.g gen_out, cap_out etc.</span>
+<span class="sd">            timescale (str): Data timescale, e.g interval, summary.</span>
+<span class="sd">            model_filename (str): name of model to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: pd.DataFrame</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">pass</span></div>
+
+<div class="viewcode-block" id="Process.report_prop_error"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process.report_prop_error">[docs]</a>    <span class="k">def</span> <span class="nf">report_prop_error</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">property</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Outputs a warning message when the get_processed_data method</span>
+<span class="sd">        cannot find the specified property in the simulation model solution files.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            property (str): property e.g Max Capacity, Generation etc.</span>
+<span class="sd">            prop_class (str): property class e.g Region, Generator, Zone etc.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Empty DataFrame.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;CAN NOT FIND &quot;</span><span class="si">{</span><span class="n">prop_class</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s1">&quot;. &#39;</span> <span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="nb">property</span><span class="si">}</span><span class="s1">&quot; DOES NOT EXIST&#39;</span>
+        <span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;SKIPPING PROPERTY</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">df</span></div></div>
+</pre></div>
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

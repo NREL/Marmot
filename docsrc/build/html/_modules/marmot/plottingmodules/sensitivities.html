@@ -1,41 +1,36 @@
 
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 
-<!DOCTYPE html>
-<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
-<head>
-  <meta charset="utf-8">
-  
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  
-  <title>marmot.plottingmodules.sensitivities &mdash; Marmot 0.9.0 documentation</title>
-  
-
-  
-  
-  
-  
-
-  
-  <script type="text/javascript" src="../../../_static/js/modernizr.min.js"></script>
-  
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>marmot.plottingmodules.sensitivities &#8212; Marmot 0.10.0 documentation</title>
     
-      <script type="text/javascript" id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
-        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-        <script src="../../../_static/jquery.js"></script>
-        <script src="../../../_static/underscore.js"></script>
-        <script src="../../../_static/doctools.js"></script>
-    
-    <script type="text/javascript" src="../../../_static/js/theme.js"></script>
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 
     
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
-  
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
-  <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" /> 
 <script>
@@ -45,303 +40,122 @@
  }
 </script>
 
-</head>
-
-<body class="wy-body-for-nav">
-
-   
-  <div class="wy-grid-for-nav">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-          
+    <div class="container-fluid" id="banner"></div>
 
-          
-            <a href="../../../index.html" class="icon icon-home"> Marmot
-          
-
-          
-          </a>
-
-          
-            
-            
-          
-
-          
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-
-          
-        </div>
-
-        <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
-          
-            
-            
-              
-            
-            
-              <p class="caption"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../get-started/index.html">Get Started</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/install.html">Install the Marmot software</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#install-system-packages">Install system packages</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#clone-the-marmot-repository">Clone the Marmot repository</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../get-started/install.html#set-up-a-conda-environment">Set up a conda environment</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#your-input-data-and-how-to-organize-it">Your input data and how to organize it</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../get-started/format-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../get-started/format-tutorial.html#plexos-properties">plexos_properties</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../get-started/format-tutorial.html#running-the-formatter">Running the formatter</a></li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../../get-started/plot-tutorial.html">Tutorial: Creating plots and data-tables</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../get-started/plot-tutorial.html#setting-up-the-input-files">Setting up the input files</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../get-started/plot-tutorial.html#marmot-user-defined-input">Marmot_user_defined_input</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../get-started/plot-tutorial.html#marmot-plot-select">Marmot_plot_select</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../get-started/plot-tutorial.html#running-the-plotter">Running the Plotter</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../how-to/index.html">How-to Guides</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../plot-gallery/index.html">Plotting Examples Gallery</a><ul class="simple">
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../references/input-files/files.html">Input File Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../references/input-files/Marmot_user_defined_inputs.html">Marmot_user_defined_inputs: csv file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../references/input-files/plexos_properties.html">plexos_properties: csv file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../references/input-files/Marmot_plot_select.html">Marmot_plot_select: csv file</a></li>
-<li class="toctree-l2"><a class="reference internal" href="../../../references/input-files/mapping-folder/index.html">Mapping Folder</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/mapping-folder/gen_names.html">gen_names: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/mapping-folder/ordered_gen_categories.html">ordered_gen_categories: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/mapping-folder/emit_names.html">emit_names: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/mapping-folder/colour_dictionary.html">colour_dictionary: csv file</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/input-files/mapping-folder/region_mapping.html">Region Mapping: csv file</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="../../../references/code/modules.html">Code Reference</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="../../../references/code/modules.html#initialization-code">Initialization Code</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_h5_formatter.html">marmot.marmot_h5_formatter</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_h5_formatter.main.html">marmot.marmot_h5_formatter.main</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_h5_formatter.MarmotFormat.html">marmot.marmot_h5_formatter.MarmotFormat</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_h5_formatter.Process.html">marmot.marmot_h5_formatter.Process</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_h5_formatter.SetupLogger.html">marmot.marmot_h5_formatter.SetupLogger</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_plot_main.html">marmot.marmot_plot_main</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_plot_main.main.html">marmot.marmot_plot_main.main</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_plot_main.MarmotPlot.html">marmot.marmot_plot_main.MarmotPlot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.marmot_plot_main.SetupLogger.html">marmot.marmot_plot_main.SetupLogger</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.meta_data.html">marmot.meta_data</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.meta_data.MetaData.html">marmot.meta_data.MetaData</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../../references/code/modules.html#config-package">Config Package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.config.mconfig.html">marmot.config.mconfig</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.config.mconfig.createConfig.html">marmot.config.mconfig.createConfig</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.config.mconfig.edit_value.html">marmot.config.mconfig.edit_value</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.config.mconfig.parser.html">marmot.config.mconfig.parser</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.config.mconfig.reset_defaults.html">marmot.config.mconfig.reset_defaults</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../../references/code/modules.html#plotting-modules-package">Plotting Modules Package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_factor.html">marmot.plottingmodules.capacity_factor</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_factor.MPlot.html">marmot.plottingmodules.capacity_factor.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_out.html">marmot.plottingmodules.capacity_out</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.capacity_out.MPlot.html">marmot.plottingmodules.capacity_out.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.curtailment.html">marmot.plottingmodules.curtailment</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.curtailment.MPlot.html">marmot.plottingmodules.curtailment.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.emissions.html">marmot.plottingmodules.emissions</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.emissions.MPlot.html">marmot.plottingmodules.emissions.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_stack.html">marmot.plottingmodules.generation_stack</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_stack.MPlot.html">marmot.plottingmodules.generation_stack.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_unstack.html">marmot.plottingmodules.generation_unstack</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.generation_unstack.MPlot.html">marmot.plottingmodules.generation_unstack.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.hydro.html">marmot.plottingmodules.hydro</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.hydro.MPlot.html">marmot.plottingmodules.hydro.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.prices.html">marmot.plottingmodules.prices</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.prices.MPlot.html">marmot.plottingmodules.prices.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.production_cost.html">marmot.plottingmodules.production_cost</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.production_cost.MPlot.html">marmot.plottingmodules.production_cost.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.ramping.html">marmot.plottingmodules.ramping</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.ramping.MPlot.html">marmot.plottingmodules.ramping.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.reserves.html">marmot.plottingmodules.reserves</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.reserves.MPlot.html">marmot.plottingmodules.reserves.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.html">marmot.plottingmodules.sensitivities</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.MPlot.html">marmot.plottingmodules.sensitivities.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.storage.html">marmot.plottingmodules.storage</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.storage.MPlot.html">marmot.plottingmodules.storage.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.html">marmot.plottingmodules.thermal_cap_reserve</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.thermal_cap_reserve.MPlot.html">marmot.plottingmodules.thermal_cap_reserve.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.total_generation.html">marmot.plottingmodules.total_generation</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.total_generation.MPlot.html">marmot.plottingmodules.total_generation.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.html">marmot.plottingmodules.total_installed_capacity</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.MPlot.html">marmot.plottingmodules.total_installed_capacity.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.transmission.html">marmot.plottingmodules.transmission</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.transmission.MPlot.html">marmot.plottingmodules.transmission.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.html">marmot.plottingmodules.unserved_energy</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.unserved_energy.MPlot.html">marmot.plottingmodules.unserved_energy.MPlot</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.html">marmot.plottingmodules.utilization_factor</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.df_process_gen_ind_inputs.html">marmot.plottingmodules.utilization_factor.df_process_gen_ind_inputs</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.utilization_factor.MPlot.html">marmot.plottingmodules.utilization_factor.MPlot</a></li>
-</ul>
-</li>
-</ul>
-</li>
-<li class="toctree-l2"><a class="reference internal" href="../../../references/code/modules.html#plot-utility-package">Plot Utility Package</a><ul>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.html">marmot.plottingmodules.plotutils.plot_data_helper</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper.html">marmot.plottingmodules.plotutils.plot_data_helper.PlotDataHelper</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.html">marmot.plottingmodules.plotutils.plot_exceptions</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html">marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError.html">marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError.html">marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData.html">marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment.html">marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation.html">marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation</a></li>
-</ul>
-</li>
-<li class="toctree-l3"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.html">marmot.plottingmodules.plotutils.plot_library</a><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_bar_plot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_clustered_stacked_bar_plot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_grouped_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_grouped_bar_plot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_hist_plot.html">marmot.plottingmodules.plotutils.plot_library.create_hist_plot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_line_plot.html">marmot.plottingmodules.plotutils.plot_library.create_line_plot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_stacked_bar_plot.html">marmot.plottingmodules.plotutils.plot_library.create_stacked_bar_plot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.create_stackplot.html">marmot.plottingmodules.plotutils.plot_library.create_stackplot</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.setup_plot.html">marmot.plottingmodules.plotutils.plot_library.setup_plot</a></li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-            
-          
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
-
-      
-      <nav class="wy-nav-top" aria-label="top navigation">
-        
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="../../../index.html">Marmot</a>
-        
-      </nav>
-
-
-      <div class="wy-nav-content">
-        
-        <div class="rst-content">
-        
-          
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-<div role="navigation" aria-label="breadcrumbs navigation">
-
-  <ul class="wy-breadcrumbs">
     
-      <li><a href="../../../index.html">Docs</a> &raquo;</li>
-        
-          <li><a href="../../index.html">Module code</a> &raquo;</li>
-        
-      <li>marmot.plottingmodules.sensitivities</li>
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
     
     
-      <li class="wy-breadcrumbs-aside">
-        
-      </li>
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">Marmot</p>
+</a>
+
     
-  </ul>
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
 
   
-  <hr/>
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Get Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
 </div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
             
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
   <h1>Source code for marmot.plottingmodules.sensitivities</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">&quot;&quot;&quot;System sensitivity plots</span>
@@ -350,71 +164,61 @@
 <span class="sd">related to investigating generator and other device sensitivities. </span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">os</span>
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
-<span class="kn">import</span> <span class="nn">matplotlib</span> <span class="k">as</span> <span class="nn">mpl</span>
-<span class="kn">from</span> <span class="nn">matplotlib.patches</span> <span class="kn">import</span> <span class="n">Patch</span>
 
-<span class="kn">import</span> <span class="nn">marmot.config.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">PlotDataHelper</span>
-<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span><span class="n">MissingInputData</span><span class="p">,</span>
-            <span class="n">UnderDevelopment</span><span class="p">,</span> <span class="n">InputSheetError</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
+
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_data_helper</span> <span class="kn">import</span> <span class="n">MPlotDataHelper</span>
+<span class="kn">from</span> <span class="nn">marmot.plottingmodules.plotutils.plot_exceptions</span> <span class="kn">import</span> <span class="p">(</span>
+    <span class="n">MissingInputData</span><span class="p">,</span>
+    <span class="n">UnderDevelopment</span><span class="p">,</span>
+    <span class="n">InputSheetError</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
+<span class="n">plot_data_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">)</span>
 
 
-<span class="n">custom_legend_elements</span> <span class="o">=</span> <span class="p">[</span><span class="n">Patch</span><span class="p">(</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;#DD0200&#39;</span><span class="p">,</span>
-                            <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span> <span class="n">edgecolor</span><span class="o">=</span><span class="s1">&#39;#DD0200&#39;</span><span class="p">,</span>
-                         <span class="n">label</span><span class="o">=</span><span class="s1">&#39;Unserved Energy&#39;</span><span class="p">)]</span>
+<div class="viewcode-block" id="Sensitivities"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.Sensitivities.html#marmot.plottingmodules.sensitivities.Sensitivities">[docs]</a><span class="k">class</span> <span class="nc">Sensitivities</span><span class="p">(</span><span class="n">MPlotDataHelper</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;System sensitivity plots</span>
 
-<div class="viewcode-block" id="MPlot"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.MPlot.html#marmot.plottingmodules.sensitivities.MPlot">[docs]</a><span class="k">class</span> <span class="nc">MPlot</span><span class="p">(</span><span class="n">PlotDataHelper</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;sensitivities MPlot class.</span>
-
-<span class="sd">    All the plotting modules use this same class name.</span>
-<span class="sd">    This class contains plotting methods that are grouped based on the</span>
-<span class="sd">    current module name.</span>
-<span class="sd">    </span>
 <span class="sd">    The sensitivities.py module contains methods that are</span>
-<span class="sd">    related to investigating generator sensitivities. </span>
-<span class="sd">    </span>
-<span class="sd">    MPlot inherits from the PlotDataHelper class to assist in creating figures.</span>
+<span class="sd">    related to investigating generator sensitivities.</span>
+
+<span class="sd">    Sensitivities inherits from the MPlotDataHelper class to assist</span>
+<span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">:</span> <span class="nb">dict</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
-<span class="sd">            argument_dict (dict): Dictionary containing all</span>
-<span class="sd">                arguments passed from MarmotPlot.</span>
+<span class="sd">            **kwargs</span>
+<span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
+<span class="sd">                class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># iterate over items in argument_dict and set as properties of class</span>
-        <span class="c1"># see key_list in Marmot_plot_main for list of properties</span>
-        <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">argument_dict</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">argument_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">])</span>
-        
-        <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">,</span> 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ylabels</span><span class="p">,</span> 
-                    <span class="bp">self</span><span class="o">.</span><span class="n">xlabels</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">)</span> 
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s1">&#39;marmot_plot.&#39;</span><span class="o">+</span><span class="vm">__name__</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">y_axes_decimalpt</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;axes_options&quot;</span><span class="p">,</span><span class="s2">&quot;y_axes_decimalpt&quot;</span><span class="p">)</span>
-        
-        <span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">,</span><span class="s2">&quot;curtailment_property&quot;</span><span class="p">)</span>
-
+        <span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_data&quot;</span><span class="p">,</span> <span class="s2">&quot;curtailment_property&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_process_ts</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">):</span>
-        <span class="n">oz</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
+        <span class="n">oz</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
         <span class="n">oz</span> <span class="o">=</span> <span class="n">oz</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
-        <span class="n">oz</span> <span class="o">=</span> <span class="n">oz</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-        <span class="k">return</span><span class="p">(</span><span class="n">oz</span><span class="p">)</span>
+        <span class="n">oz</span> <span class="o">=</span> <span class="n">oz</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">oz</span>
 
-<div class="viewcode-block" id="MPlot.sensitivities_gas"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.MPlot.html#marmot.plottingmodules.sensitivities.MPlot.sensitivities_gas">[docs]</a>    <span class="k">def</span> <span class="nf">sensitivities_gas</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">timezone</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span> 
-                          <span class="n">start_date_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> 
-                          <span class="n">end_date_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Highlights the difference in generation between two scenarios of a single resource. </span>
+<div class="viewcode-block" id="Sensitivities.sensitivities_gas"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.sensitivities.Sensitivities.html#marmot.plottingmodules.sensitivities.Sensitivities.sensitivities_gas">[docs]</a>    <span class="k">def</span> <span class="nf">sensitivities_gas</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">timezone</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="n">start_date_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">end_date_range</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">_</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Highlights the difference in generation between two scenarios of a single resource.</span>
 
 <span class="sd">        Plot is currently under development and not available to use.</span>
-<span class="sd">        </span>
+
 <span class="sd">        The two scenarios are specified in the &quot;Scenario_Diff_plot&quot; field of Marmot_user_defined_inputs.csv</span>
 <span class="sd">        The single resource is specified in the &quot;properties&quot; field of Marmot_plot_select.csv.</span>
 <span class="sd">        Blue hatches represent additional energy produced by the resource, and red hatches represent decreased energy.</span>
@@ -428,226 +232,294 @@
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            timezone (str, optional): The timezone to display on the x-axes.</span>
 <span class="sd">                Defaults to &quot;&quot;.</span>
-<span class="sd">            start_date_range (str, optional): Defines a start date at which to represent data from. </span>
+<span class="sd">            start_date_range (str, optional): Defines a start date at which to represent data from.</span>
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            end_date_range (str, optional): Defines a end date at which to represent data to.</span>
 <span class="sd">                Defaults to None.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            UnderDevelopment(): Exception class, plot is not functional. </span>
+<span class="sd">            UnderDevelopment(): Exception class, plot is not functional.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">UnderDevelopment</span><span class="p">()</span>
 
-        <span class="n">outputs</span> <span class="o">=</span> <span class="p">{}</span>
-        
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">==</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">)</span>
+        <span class="n">outputs</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">==</span> <span class="p">[</span><span class="s2">&quot;&quot;</span><span class="p">]:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Scenario_Diff field is empty. Ensure User Input Sheet is set up correctly!&quot;</span>
+            <span class="p">)</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">outputs</span> 
+            <span class="k">return</span> <span class="n">outputs</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Scenario_Diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">)</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s2">&quot;Scenario_Diff field only contains 1 entry, two are required. Ensure User Input Sheet is set up correctly!&quot;</span>
+            <span class="p">)</span>
             <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">outputs</span> 
-        
-        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and contain 3 parts:</span>
-        <span class="c1"># required True/False, property name and scenarios required, scenarios must be a list.</span>
-        <span class="n">properties</span> <span class="o">=</span> <span class="p">[(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">),</span>
-                      <span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">),</span>
-                      <span class="p">(</span><span class="kc">True</span><span class="p">,</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">)]</span>
-        
-        <span class="c1"># Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  </span>
+            <span class="k">return</span> <span class="n">outputs</span>
+
+        <span class="c1"># List of properties needed by the plot, properties are a set of tuples and </span>
+        <span class="c1"># contain 3 parts: required True/False, property name and scenarios required, </span>
+        <span class="c1"># scenarios must be a list.</span>
+        <span class="n">properties</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">),</span>
+            <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">),</span>
+        <span class="p">]</span>
+
+        <span class="c1"># Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary</span>
         <span class="c1"># with all required properties, returns a 1 if required data is missing</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_formatted_data</span><span class="p">(</span><span class="n">properties</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="mi">1</span> <span class="ow">in</span> <span class="n">check_input_data</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">MissingInputData</span><span class="p">()</span>
-        
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Scenario_Diff &quot;</span><span class="si">%s</span><span class="s1">&quot; is not in data. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">outputs</span> 
-        
-        <span class="n">bc_tech</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;tech&#39;</span><span class="p">)</span>
-        <span class="n">bc_CT</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;Gas-CT&#39;</span><span class="p">,</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;tech&#39;</span><span class="p">)</span>
-        <span class="n">bc_CC</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;Gas-CC&#39;</span><span class="p">,</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;tech&#39;</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">scen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
-        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s1">&#39;Scenario_Diff &quot;</span><span class="si">%s</span><span class="s1">&quot; is not in data. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-            <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
-            <span class="k">return</span> <span class="n">outputs</span> 
-        
-        <span class="n">scen_tech</span> <span class="o">=</span> <span class="n">scen</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;tech&#39;</span><span class="p">)</span>
-        <span class="n">scen_CT</span> <span class="o">=</span> <span class="n">scen</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;Gas-CT&#39;</span><span class="p">,</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;tech&#39;</span><span class="p">)</span>
-        <span class="n">scen_CC</span> <span class="o">=</span> <span class="n">scen</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s1">&#39;Gas-CC&#39;</span><span class="p">,</span><span class="n">level</span> <span class="o">=</span> <span class="s1">&#39;tech&#39;</span><span class="p">)</span>
 
-        <span class="n">curt_bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="n">curt_scen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Scenario_Diff &quot;</span><span class="si">%s</span><span class="s1">&quot; is not in data. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">outputs</span>
+
+        <span class="n">bc_tech</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">)</span>
+        <span class="n">bc_CT</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;Gas-CT&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">)</span>
+        <span class="n">bc_CC</span> <span class="o">=</span> <span class="n">bc</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;Gas-CC&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">scen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span>
+                <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;generator_Generation&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="p">)</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="s1">&#39;Scenario_Diff &quot;</span><span class="si">%s</span><span class="s1">&quot; is not in data. Ensure User Input Sheet is set up correctly!&#39;</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="p">)</span>
+            <span class="n">outputs</span> <span class="o">=</span> <span class="n">InputSheetError</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">outputs</span>
+
+        <span class="n">scen_tech</span> <span class="o">=</span> <span class="n">scen</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">)</span>
+        <span class="n">scen_CT</span> <span class="o">=</span> <span class="n">scen</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;Gas-CT&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">)</span>
+        <span class="n">scen_CC</span> <span class="o">=</span> <span class="n">scen</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;Gas-CC&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">)</span>
+
+        <span class="n">curt_bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">curt_scen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;generator_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curtailment_prop</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
         <span class="n">curt_diff_all</span> <span class="o">=</span> <span class="n">curt_scen</span> <span class="o">-</span> <span class="n">curt_bc</span>
 
         <span class="n">regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">bc</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-        <span class="n">tech_regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">scen_tech</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span> 
+        <span class="n">tech_regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">scen_tech</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
 
         <span class="n">CT_diff_all</span> <span class="o">=</span> <span class="n">scen_CT</span> <span class="o">-</span> <span class="n">bc_CT</span>
         <span class="n">CT_regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">CT_diff_all</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
         <span class="n">CC_diff_all</span> <span class="o">=</span> <span class="n">scen_CC</span> <span class="o">-</span> <span class="n">bc_CC</span>
         <span class="n">CC_regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">CC_diff_all</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
 
-        <span class="n">diff_csv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span> <span class="o">=</span> <span class="n">bc_tech</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
-        <span class="n">diff_csv_perc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span> <span class="o">=</span> <span class="n">bc_tech</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+        <span class="n">diff_csv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">bc_tech</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="n">diff_csv_perc</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="n">index</span><span class="o">=</span><span class="n">bc_tech</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="p">)</span>
 
-        <span class="c1">#Add net interchange difference to icing plot.</span>
-        <span class="n">bc_int</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Marmot_Solutions_folder</span><span class="p">,</span> <span class="s2">&quot;Processed_HDF5_folder&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_formatted.h5&quot;</span><span class="p">),</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">)</span>
-        <span class="n">bc_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-        <span class="n">scen_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+        <span class="c1"># Add net interchange difference to icing plot.</span>
+        <span class="n">bc_int</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_hdf</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">processed_hdf5_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="s2">&quot;_formatted.h5&quot;</span>
+            <span class="p">),</span>
+            <span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">bc_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+        <span class="p">)</span>
+        <span class="n">scen_int</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">adjust_for_leapday</span><span class="p">(</span>
+            <span class="bp">self</span><span class="p">[</span><span class="s2">&quot;region_Net_Interchange&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+        <span class="p">)</span>
 
         <span class="n">int_diff_all</span> <span class="o">=</span> <span class="n">scen_int</span> <span class="o">-</span> <span class="n">bc_int</span>
 
         <span class="k">for</span> <span class="n">zone_input</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">Zones</span><span class="p">:</span>
             <span class="nb">print</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">+</span> <span class="s2">&quot; = &quot;</span> <span class="o">+</span> <span class="n">zone_input</span><span class="p">)</span>
 
-
             <span class="k">if</span> <span class="n">zone_input</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">regions</span> <span class="ow">or</span> <span class="n">zone_input</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">tech_regions</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
 
             <span class="k">else</span><span class="p">:</span>
 
-                <span class="n">oz_bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_ts</span><span class="p">(</span><span class="n">bc_tech</span><span class="p">,</span><span class="n">zone_input</span><span class="p">)</span>
-                <span class="n">oz_scen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_ts</span><span class="p">(</span><span class="n">scen_tech</span><span class="p">,</span><span class="n">zone_input</span><span class="p">)</span>
+                <span class="n">oz_bc</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_ts</span><span class="p">(</span><span class="n">bc_tech</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">)</span>
+                <span class="n">oz_scen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_ts</span><span class="p">(</span><span class="n">scen_tech</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">)</span>
                 <span class="n">icing_diff</span> <span class="o">=</span> <span class="n">oz_scen</span> <span class="o">-</span> <span class="n">oz_bc</span>
                 <span class="n">icing_diff_perc</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">icing_diff</span> <span class="o">/</span> <span class="n">oz_bc</span>
 
-                <span class="n">oz_bc</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span> 
+                <span class="n">oz_bc</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])]</span>
                 <span class="n">oz_scen</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
 
                 <span class="n">Data_Out_List</span> <span class="o">=</span> <span class="p">[]</span>
                 <span class="n">Data_Out_List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oz_bc</span><span class="p">)</span>
                 <span class="n">Data_Out_List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">oz_scen</span><span class="p">)</span>
 
-                <span class="n">diffs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">Data_Out_List</span><span class="p">,</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="n">copy</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="n">diffs</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">Data_Out_List</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
                 <span class="c1"># icing_diff.columns = [zone_input]</span>
-                <span class="c1"># icing_diff_perc.columns = [zone_input]  </span>
-                <span class="c1"># diff_csv = pd.concat([diff_csv, icing_diff], axis = 1)  </span>
+                <span class="c1"># icing_diff_perc.columns = [zone_input]</span>
+                <span class="c1"># diff_csv = pd.concat([diff_csv, icing_diff], axis = 1)</span>
                 <span class="c1"># diff_csv_perc = pd.concat([diff_csv_perc, icing_diff_perc], axis = 1)</span>
                 <span class="c1"># continue</span>
 
-                <span class="n">curt_diff</span> <span class="o">=</span> <span class="n">curt_diff_all</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span><span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
+                <span class="n">curt_diff</span> <span class="o">=</span> <span class="n">curt_diff_all</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="n">zone_input</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">)</span>
                 <span class="n">curt_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df_process_gen_inputs</span><span class="p">(</span><span class="n">curt_diff</span><span class="p">)</span>
                 <span class="n">curt_diff</span> <span class="o">=</span> <span class="n">curt_diff</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">curt_diff</span> <span class="o">=</span> <span class="n">curt_diff</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;Curtailment difference&#39;</span><span class="p">)</span>
+                <span class="n">curt_diff</span> <span class="o">=</span> <span class="n">curt_diff</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;Curtailment difference&quot;</span><span class="p">)</span>
                 <span class="n">Data_Out_List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curt_diff</span><span class="p">)</span>
 
                 <span class="n">int_diff_all</span> <span class="o">=</span> <span class="n">int_diff_all</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
                 <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">int_diff_all</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                     <span class="n">int_diff_all</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_new_agg</span><span class="p">(</span><span class="n">int_diff_all</span><span class="p">)</span>
                 <span class="n">int_diff</span> <span class="o">=</span> <span class="n">int_diff_all</span><span class="p">[</span><span class="n">int_diff_all</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span><span class="p">]</span> <span class="o">==</span> <span class="n">zone_input</span><span class="p">]</span>
-                <span class="n">int_diff</span> <span class="o">=</span> <span class="n">int_diff</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;timestamp&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-                <span class="n">int_diff</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Net export difference&#39;</span><span class="p">]</span>
+                <span class="n">int_diff</span> <span class="o">=</span> <span class="n">int_diff</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+                <span class="n">int_diff</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Net export difference&quot;</span><span class="p">]</span>
                 <span class="n">Data_Out_List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">int_diff</span><span class="p">)</span>
-
 
                 <span class="n">fig2</span><span class="p">,</span> <span class="n">axs</span> <span class="o">=</span> <span class="n">plotlib</span><span class="o">.</span><span class="n">setup_plot</span><span class="p">()</span>
 
                 <span class="n">plt</span><span class="o">.</span><span class="n">subplots_adjust</span><span class="p">(</span><span class="n">wspace</span><span class="o">=</span><span class="mf">0.05</span><span class="p">,</span> <span class="n">hspace</span><span class="o">=</span><span class="mf">0.2</span><span class="p">)</span>
 
                 <span class="k">if</span> <span class="n">zone_input</span> <span class="ow">in</span> <span class="n">CT_regions</span><span class="p">:</span>
-                    <span class="n">CT_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_ts</span><span class="p">(</span><span class="n">CT_diff_all</span><span class="p">,</span><span class="n">zone_input</span><span class="p">)</span>
-                    <span class="n">CT_diff</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Gas-CT difference&#39;</span><span class="p">]</span>
+                    <span class="n">CT_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_ts</span><span class="p">(</span><span class="n">CT_diff_all</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">)</span>
+                    <span class="n">CT_diff</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Gas-CT difference&quot;</span><span class="p">]</span>
                     <span class="n">Data_Out_List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CT_diff</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">zone_input</span> <span class="ow">in</span> <span class="n">CC_regions</span><span class="p">:</span>
-                    <span class="n">CC_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_ts</span><span class="p">(</span><span class="n">CC_diff_all</span><span class="p">,</span><span class="n">zone_input</span><span class="p">)</span>
-                    <span class="n">CC_diff</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;Gas-CC difference&#39;</span><span class="p">]</span>
+                    <span class="n">CC_diff</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_process_ts</span><span class="p">(</span><span class="n">CC_diff_all</span><span class="p">,</span> <span class="n">zone_input</span><span class="p">)</span>
+                    <span class="n">CC_diff</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;Gas-CC difference&quot;</span><span class="p">]</span>
                     <span class="n">Data_Out_List</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CC_diff</span><span class="p">)</span>
 
-                <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">Data_Out_List</span><span class="p">,</span><span class="n">axis</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span><span class="n">copy</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span>
+                <span class="n">Data_Table_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">Data_Out_List</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
-                <span class="n">custom_color_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Curtailment difference&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s1">&#39;Curtailment&#39;</span><span class="p">],</span>
-                                     <span class="n">prop</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
-                                     <span class="s1">&#39;Gas-CC difference&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s1">&#39;Gas-CC&#39;</span><span class="p">],</span>
-                                     <span class="s1">&#39;Gas-CT difference&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s1">&#39;Gas-CT&#39;</span><span class="p">],</span>
-                                     <span class="s1">&#39;Net export difference&#39;</span><span class="p">:</span> <span class="s1">&#39;black&#39;</span><span class="p">}</span>
+                <span class="n">custom_color_dict</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;Curtailment difference&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s2">&quot;Curtailment&quot;</span><span class="p">],</span>
+                    <span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="n">prop</span><span class="p">],</span>
+                    <span class="s2">&quot;Gas-CC difference&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s2">&quot;Gas-CC&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;Gas-CT difference&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">PLEXOS_color_dict</span><span class="p">[</span><span class="s2">&quot;Gas-CT&quot;</span><span class="p">],</span>
+                    <span class="s2">&quot;Net export difference&quot;</span><span class="p">:</span> <span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
 
-                <span class="n">ls_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;Curtailment difference&#39;</span> <span class="p">:</span> <span class="s1">&#39;solid&#39;</span><span class="p">,</span>
-                                     <span class="n">prop</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">:</span> <span class="s1">&#39;solid&#39;</span><span class="p">,</span>
-                                     <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="p">:</span><span class="s1">&#39;:&#39;</span><span class="p">,</span>
-                                     <span class="s1">&#39;Gas-CC difference&#39;</span> <span class="p">:</span> <span class="s1">&#39;solid&#39;</span><span class="p">,</span>
-                                     <span class="s1">&#39;Gas-CT difference&#39;</span> <span class="p">:</span> <span class="s1">&#39;solid&#39;</span><span class="p">,</span>
-                                     <span class="s1">&#39;Net export difference&#39;</span><span class="p">:</span> <span class="s1">&#39;--&#39;</span><span class="p">}</span>
+                <span class="n">ls_dict</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="s2">&quot;Curtailment difference&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+                    <span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span> <span class="s2">&quot;:&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Gas-CC difference&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Gas-CT difference&quot;</span><span class="p">:</span> <span class="s2">&quot;solid&quot;</span><span class="p">,</span>
+                    <span class="s2">&quot;Net export difference&quot;</span><span class="p">:</span> <span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
 
-                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">Data_Table_Out</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span> 
-                    <span class="n">plotlib</span><span class="o">.</span><span class="n">create_line_plot</span><span class="p">(</span><span class="n">axs</span><span class="p">,</span><span class="n">Data_Table_Out</span><span class="p">,</span><span class="n">col</span><span class="p">,</span><span class="n">color_dict</span> <span class="o">=</span> <span class="n">custom_color_dict</span><span class="p">,</span> <span class="n">label</span> <span class="o">=</span> <span class="n">col</span><span class="p">,</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="n">ls_dict</span><span class="p">[</span><span class="n">col</span><span class="p">],</span> <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                    
-                <span class="c1">#Make two hatches: blue for when scenario &gt; basecase, and red for when scenario &lt; basecase.</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span> <span class="s1">&#39;Icing&#39;</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">!=</span> <span class="s1">&#39;DryHydro&#39;</span><span class="p">:</span>
-                    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">diffs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span><span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
-                        <span class="n">where</span> <span class="o">=</span> <span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="o">&gt;</span> <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
-                        <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Increased &#39;</span> <span class="o">+</span> <span class="n">prop</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; generation&#39;</span><span class="p">,</span> <span class="n">facecolor</span> <span class="o">=</span> <span class="s1">&#39;blue&#39;</span><span class="p">,</span> <span class="n">hatch</span> <span class="o">=</span> <span class="s1">&#39;///&#39;</span><span class="p">,</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span><span class="n">diffs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span><span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span><span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
-                    <span class="n">where</span> <span class="o">=</span> <span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span> <span class="o">&lt;</span> <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
-                    <span class="n">label</span> <span class="o">=</span> <span class="s1">&#39;Decreased &#39;</span> <span class="o">+</span> <span class="n">prop</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s1">&#39; generation&#39;</span><span class="p">,</span> <span class="n">facecolor</span> <span class="o">=</span> <span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">hatch</span> <span class="o">=</span> <span class="s1">&#39;///&#39;</span><span class="p">,</span><span class="n">alpha</span> <span class="o">=</span> <span class="mf">0.5</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span><span class="n">y</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">xmin</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span> <span class="n">xmax</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span> <span class="n">linestyle</span> <span class="o">=</span> <span class="s1">&#39;--&#39;</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;right&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s1">&#39;top&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;y&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;x&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Generation (MW)&#39;</span><span class="p">,</span>  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;vertical&#39;</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">timezone</span><span class="p">,</span>  <span class="n">color</span><span class="o">=</span><span class="s1">&#39;black&#39;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s1">&#39;horizontal&#39;</span><span class="p">)</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">set_major_formatter</span><span class="p">(</span><span class="n">mpl</span><span class="o">.</span><span class="n">ticker</span><span class="o">.</span><span class="n">FuncFormatter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">,</span> <span class="n">p</span><span class="p">:</span> <span class="nb">format</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;,.</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">y_axes_decimalpt</span><span class="si">}</span><span class="s1">f&#39;</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">Data_Table_Out</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="n">plotlib</span><span class="o">.</span><span class="n">create_line_plot</span><span class="p">(</span>
+                        <span class="n">axs</span><span class="p">,</span>
+                        <span class="n">Data_Table_Out</span><span class="p">,</span>
+                        <span class="n">col</span><span class="p">,</span>
+                        <span class="n">color_dict</span><span class="o">=</span><span class="n">custom_color_dict</span><span class="p">,</span>
+                        <span class="n">label</span><span class="o">=</span><span class="n">col</span><span class="p">,</span>
+                        <span class="n">linestyle</span><span class="o">=</span><span class="n">ls_dict</span><span class="p">[</span><span class="n">col</span><span class="p">],</span>
+                        <span class="n">n</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="p">)</span>
+
+                <span class="c1"># Make two hatches: blue for when scenario &gt; basecase, and red for when scenario &lt; basecase.</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;Icing&quot;</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">&quot;DryHydro&quot;</span>
+                <span class="p">):</span>
+                    <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                        <span class="n">diffs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                        <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
+                        <span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+                        <span class="n">where</span><span class="o">=</span><span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                        <span class="o">&gt;</span> <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
+                        <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Increased &quot;</span> <span class="o">+</span> <span class="n">prop</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; generation&quot;</span><span class="p">,</span>
+                        <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;blue&quot;</span><span class="p">,</span>
+                        <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;///&quot;</span><span class="p">,</span>
+                        <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                    <span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">fill_between</span><span class="p">(</span>
+                    <span class="n">diffs</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+                    <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
+                    <span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])],</span>
+                    <span class="n">where</span><span class="o">=</span><span class="n">diffs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">1</span><span class="p">])]</span>
+                    <span class="o">&lt;</span> <span class="n">diffs</span><span class="p">[</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot; &quot;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span><span class="p">[</span><span class="mi">0</span><span class="p">])],</span>
+                    <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Decreased &quot;</span> <span class="o">+</span> <span class="n">prop</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">+</span> <span class="s2">&quot; generation&quot;</span><span class="p">,</span>
+                    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;red&quot;</span><span class="p">,</span>
+                    <span class="n">hatch</span><span class="o">=</span><span class="s2">&quot;///&quot;</span><span class="p">,</span>
+                    <span class="n">alpha</span><span class="o">=</span><span class="mf">0.5</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">hlines</span><span class="p">(</span>
+                    <span class="n">y</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+                    <span class="n">xmin</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">0</span><span class="p">],</span>
+                    <span class="n">xmax</span><span class="o">=</span><span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_xlim</span><span class="p">()[</span><span class="mi">1</span><span class="p">],</span>
+                    <span class="n">linestyle</span><span class="o">=</span><span class="s2">&quot;--&quot;</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;right&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">spines</span><span class="p">[</span><span class="s2">&quot;top&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">set_visible</span><span class="p">(</span><span class="kc">False</span><span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s2">&quot;major&quot;</span><span class="p">,</span> <span class="n">length</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Generation (MW)&quot;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">)</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="n">timezone</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span> <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;horizontal&quot;</span><span class="p">)</span>
                 <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">margins</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
-                <span class="n">PlotDataHelper</span><span class="o">.</span><span class="n">set_plot_timeseries_format</span><span class="p">(</span><span class="n">axs</span><span class="p">)</span>
+                <span class="n">MPlotDataHelper</span><span class="o">.</span><span class="n">set_subplot_timeseries_format</span><span class="p">(</span><span class="n">axs</span><span class="p">)</span>
                 <span class="n">handles</span><span class="p">,</span> <span class="n">labels</span> <span class="o">=</span> <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">get_legend_handles_labels</span><span class="p">()</span>
-                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span><span class="nb">reversed</span><span class="p">(</span><span class="n">handles</span><span class="p">),</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span><span class="n">facecolor</span><span class="o">=</span><span class="s1">&#39;inherit&#39;</span><span class="p">,</span> <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span><span class="n">loc</span><span class="o">=</span><span class="s1">&#39;lower left&#39;</span><span class="p">,</span><span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">0</span><span class="p">))</span>
-                <span class="k">if</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;plot_title_as_region&quot;</span><span class="p">):</span>
-                	<span class="n">fig2</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">zone_input</span><span class="p">)</span>
-                <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;fig&#39;</span><span class="p">:</span> <span class="n">fig2</span><span class="p">,</span> <span class="s1">&#39;data_table&#39;</span><span class="p">:</span> <span class="n">Data_Table_Out</span><span class="p">}</span>
+                <span class="n">axs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">legend</span><span class="p">(</span>
+                    <span class="nb">reversed</span><span class="p">(</span><span class="n">handles</span><span class="p">),</span>
+                    <span class="nb">reversed</span><span class="p">(</span><span class="n">labels</span><span class="p">),</span>
+                    <span class="n">facecolor</span><span class="o">=</span><span class="s2">&quot;inherit&quot;</span><span class="p">,</span>
+                    <span class="n">frameon</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">loc</span><span class="o">=</span><span class="s2">&quot;lower left&quot;</span><span class="p">,</span>
+                    <span class="n">bbox_to_anchor</span><span class="o">=</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">),</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">plot_data_settings</span><span class="p">[</span><span class="s2">&quot;plot_title_as_region&quot;</span><span class="p">]:</span>
+                    <span class="n">fig2</span><span class="o">.</span><span class="n">title</span><span class="p">(</span><span class="n">zone_input</span><span class="p">)</span>
+                <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;fig&quot;</span><span class="p">:</span> <span class="n">fig2</span><span class="p">,</span> <span class="s2">&quot;data_table&quot;</span><span class="p">:</span> <span class="n">Data_Table_Out</span><span class="p">}</span>
 
-        <span class="c1"># diff_csv.to_csv(self.Marmot_Solutions_folder + &#39;/&#39; + self.Scenario_name + &#39;/icing_regional_MWdiffs.csv&#39;)</span>
-        <span class="c1"># diff_csv_perc.to_csv(self.Marmot_Solutions_folder + &#39;/&#39; + self.Scenario_name + &#39;/icing_regional_percdiffs.csv&#39;)</span>
+        <span class="c1"># diff_csv.to_csv(self.processed_hdf5_folder.joinpath(self.Scenario_name, icing_regional_MWdiffs.csv&#39;))</span>
+        <span class="c1"># diff_csv_perc.to_csv(self.processed_hdf5_folder.joinpath(self.Scenario_name, icing_regional_percdiffs.csv&#39;))</span>
 
         <span class="k">return</span> <span class="n">outputs</span></div></div>
 </pre></div>
 
-           </div>
-           
-          </div>
-          <footer>
-  
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              
+          </main>
+          
 
-  <hr/>
-
-  <div role="contentinfo">
-    <p>
-        &copy; Copyright 2021, Alliance for Sustainable Energy, LLC
-
-    </p>
-  </div>
-  Built with <a href="http://sphinx-doc.org/">Sphinx</a> using a <a href="https://github.com/rtfd/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>. 
-
-</footer>
-
-        </div>
       </div>
-
-    </section>
-
-  </div>
+    </div>
   
-
-
-  <script type="text/javascript">
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script>
-
-  
-  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
     
-   
-
-</body>
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
 </html>

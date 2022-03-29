@@ -1,4 +1,4 @@
-﻿.. raw:: html
+.. raw:: html
 
    <script>
       var arr = document.getElementsByClassName('reference internal');

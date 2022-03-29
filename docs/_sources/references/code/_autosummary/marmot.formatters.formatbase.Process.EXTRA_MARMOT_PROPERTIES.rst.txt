@@ -1,0 +1,6 @@
+marmot.formatters.formatbase.Process.EXTRA\_MARMOT\_PROPERTIES
+==============================================================
+
+.. currentmodule:: marmot.formatters.formatbase
+
+.. autoattribute:: Process.EXTRA_MARMOT_PROPERTIES

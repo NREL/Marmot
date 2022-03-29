@@ -29,6 +29,6 @@ marmot.plottingmodules.generation\_stack
       :toctree:
       :template: custom-class-template.rst
    
-      MPlot
+      GenerationStack
    
    

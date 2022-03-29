@@ -1,0 +1,1107 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>marmot.metamanagers.read_metadata.MetaData &#8212; Marmot 0.10.0 documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="Plots" href="../plots.html" />
+    <link rel="prev" title="Meta Data" href="../meta.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">Marmot</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Get Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../initialize.html">
+   Initialization
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.marmot_h5_formatter.html">
+     marmot.marmot_h5_formatter
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_h5_formatter.main.html">
+       marmot.marmot_h5_formatter.main
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_h5_formatter.MarmotFormat.html">
+       marmot.marmot_h5_formatter.MarmotFormat
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.marmot_plot_main.html">
+     marmot.marmot_plot_main
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+    <label for="toctree-checkbox-3">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_plot_main.main.html">
+       marmot.marmot_plot_main.main
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_plot_main.MarmotPlot.html">
+       marmot.marmot_plot_main.MarmotPlot
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../format.html">
+   Formatters
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+  <label for="toctree-checkbox-4">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatbase.Process.html">
+     marmot.formatters.formatbase.Process
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraProperties.html">
+     marmot.formatters.formatextra.ExtraProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatplexos.ProcessPLEXOS.html">
+     marmot.formatters.formatplexos.ProcessPLEXOS
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds.ProcessReEDS.html">
+     marmot.formatters.formatreeds.ProcessReEDS
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds.PropertyColumns.html">
+     marmot.formatters.formatreeds.PropertyColumns
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formategret.ProcessEGRET.html">
+     marmot.formatters.formategret.ProcessEGRET
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="../meta.html">
+   Meta Data
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+  <label for="toctree-checkbox-5">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     marmot.metamanagers.read_metadata.MetaData
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../plots.html">
+   Plots
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+  <label for="toctree-checkbox-6">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.capacity_factor.CapacityFactor.html">
+     marmot.plottingmodules.capacity_factor.CapacityFactor
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.capacity_out.CapacityOut.html">
+     marmot.plottingmodules.capacity_out.CapacityOut
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.curtailment.Curtailment.html">
+     marmot.plottingmodules.curtailment.Curtailment
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.emissions.Emissions.html">
+     marmot.plottingmodules.emissions.Emissions
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.generation_stack.GenerationStack.html">
+     marmot.plottingmodules.generation_stack.GenerationStack
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.generation_unstack.GenerationUnStack.html">
+     marmot.plottingmodules.generation_unstack.GenerationUnStack
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.hydro.Hydro.html">
+     marmot.plottingmodules.hydro.Hydro
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.prices.Prices.html">
+     marmot.plottingmodules.prices.Prices
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.production_cost.SystemCosts.html">
+     marmot.plottingmodules.production_cost.SystemCosts
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.ramping.Ramping.html">
+     marmot.plottingmodules.ramping.Ramping
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.reserves.Reserves.html">
+     marmot.plottingmodules.reserves.Reserves
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.sensitivities.Sensitivities.html">
+     marmot.plottingmodules.sensitivities.Sensitivities
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.storage.Storage.html">
+     marmot.plottingmodules.storage.Storage
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.ThermalReserve.html">
+     marmot.plottingmodules.thermal_cap_reserve.ThermalReserve
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.total_generation.TotalGeneration.html">
+     marmot.plottingmodules.total_generation.TotalGeneration
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.html">
+     marmot.plottingmodules.total_installed_capacity.InstalledCapacity
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.transmission.Transmission.html">
+     marmot.plottingmodules.transmission.Transmission
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.unserved_energy.UnservedEnergy.html">
+     marmot.plottingmodules.unserved_energy.UnservedEnergy
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.utilization_factor.UtilizationFactor.html">
+     marmot.plottingmodules.utilization_factor.UtilizationFactor
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../plot_util.html">
+   Plot Utilities
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+  <label for="toctree-checkbox-7">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html">
+     marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html">
+     marmot.plottingmodules.plotutils.plot_library.SetupSubplot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.PlotLibrary.html">
+     marmot.plottingmodules.plotutils.plot_library.PlotLibrary
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.html">
+     marmot.plottingmodules.plotutils.plot_exceptions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+    <label for="toctree-checkbox-8">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../utils.html">
+   Utilities
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+  <label for="toctree-checkbox-9">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.utils.loggersetup.SetupLogger.html">
+     marmot.utils.loggersetup.SetupLogger
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.utils.definitions.html">
+     marmot.utils.definitions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+    <label for="toctree-checkbox-10">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.get_project_root.html">
+       marmot.utils.definitions.get_project_root
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.input_dir.html">
+       marmot.utils.definitions.input_dir
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.log_dir.html">
+       marmot.utils.definitions.log_dir
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.utils.mconfig.html">
+     marmot.utils.mconfig
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+    <label for="toctree-checkbox-11">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.createConfig.html">
+       marmot.utils.mconfig.createConfig
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.edit_value.html">
+       marmot.utils.mconfig.edit_value
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.parser.html">
+       marmot.utils.mconfig.parser
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.reset_defaults.html">
+       marmot.utils.mconfig.reset_defaults
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+
+<nav id="bd-toc-nav">
+    
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <script>
+   var arr = document.getElementsByClassName('reference internal');
+   for(var i = 0; i < arr.length; i++) {
+   arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
+   }
+</script><section id="marmot-metamanagers-read-metadata-metadata">
+<h1>marmot.metamanagers.read_metadata.MetaData<a class="headerlink" href="#marmot-metamanagers-read-metadata-metadata" title="Permalink to this headline">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetaData</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">HDF5_folder_in:</span> <span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">read_from_formatted_h5:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping:</span> <span class="pre">pandas.core.frame.DataFrame</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">partition_number:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Handle the retrieval of metadata from the formatted or original solution h5 files.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>HDF5_folder_in</strong> (<em>Path</em>) – Folder containing h5plexos h5 files.</p></li>
+<li><p><strong>read_from_formatted_h5</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Boolean for whether the metadata is
+being read from the formatted hdf5 file or the original PLEXOS solution file.
+Defaults to True.</p></li>
+<li><p><strong>Region_Mapping</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – DataFrame of extra regions to map.
+Defaults to pd.DataFrame().</p></li>
+<li><p><strong>partition_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a><em>, </em><em>optional</em>) – Which temporal partition of h5 data to retrieve
+metadata from in the formatted h5 file. Defaults to 0.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.close_h5" title="marmot.metamanagers.read_metadata.MetaData.close_h5"><code class="xref py py-obj docutils literal notranslate"><span class="pre">close_h5</span></code></a>()</p></td>
+<td><p>Closes h5 file open in memory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.generator_category" title="marmot.metamanagers.read_metadata.MetaData.generator_category"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generator_category</span></code></a>(filename)</p></td>
+<td><p>Generator categories mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.generator_node" title="marmot.metamanagers.read_metadata.MetaData.generator_node"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generator_node</span></code></a>(filename)</p></td>
+<td><p>generator node mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.generator_storage" title="marmot.metamanagers.read_metadata.MetaData.generator_storage"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generator_storage</span></code></a>(filename)</p></td>
+<td><p>Generator Storage mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.interface_lines" title="marmot.metamanagers.read_metadata.MetaData.interface_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interface_lines</span></code></a>(filename)</p></td>
+<td><p>Interface to lines mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.lines" title="marmot.metamanagers.read_metadata.MetaData.lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lines</span></code></a>(filename)</p></td>
+<td><p>Line objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.node_region" title="marmot.metamanagers.read_metadata.MetaData.node_region"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_region</span></code></a>(filename)</p></td>
+<td><p>Node Region mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.node_zone" title="marmot.metamanagers.read_metadata.MetaData.node_zone"><code class="xref py py-obj docutils literal notranslate"><span class="pre">node_zone</span></code></a>(filename)</p></td>
+<td><p>Node zone mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.region_exporting_lines" title="marmot.metamanagers.read_metadata.MetaData.region_exporting_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_exporting_lines</span></code></a>(filename)</p></td>
+<td><p>Region exporting lines mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.region_generator_category" title="marmot.metamanagers.read_metadata.MetaData.region_generator_category"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_generator_category</span></code></a>(filename)</p></td>
+<td><p>Region generators category mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.region_generators" title="marmot.metamanagers.read_metadata.MetaData.region_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_generators</span></code></a>(filename)</p></td>
+<td><p>Region generators mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.region_importing_lines" title="marmot.metamanagers.read_metadata.MetaData.region_importing_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_importing_lines</span></code></a>(filename)</p></td>
+<td><p>Region importing lines mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.region_interregionallines" title="marmot.metamanagers.read_metadata.MetaData.region_interregionallines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_interregionallines</span></code></a>(filename)</p></td>
+<td><p>Region inter-regional lines mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.region_intraregionallines" title="marmot.metamanagers.read_metadata.MetaData.region_intraregionallines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_intraregionallines</span></code></a>(filename)</p></td>
+<td><p>Region intra-regional lines mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.region_lines" title="marmot.metamanagers.read_metadata.MetaData.region_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_lines</span></code></a>(filename)</p></td>
+<td><p>Region to Lines mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.region_regions" title="marmot.metamanagers.read_metadata.MetaData.region_regions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_regions</span></code></a>(filename)</p></td>
+<td><p>Region-region mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.regions" title="marmot.metamanagers.read_metadata.MetaData.regions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">regions</span></code></a>(filename)</p></td>
+<td><p>Region objects.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.reserves" title="marmot.metamanagers.read_metadata.MetaData.reserves"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reserves</span></code></a>(filename)</p></td>
+<td><p>Reserves objects.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.reserves_generators" title="marmot.metamanagers.read_metadata.MetaData.reserves_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reserves_generators</span></code></a>(filename)</p></td>
+<td><p>Reserves to generators mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.reserves_regions" title="marmot.metamanagers.read_metadata.MetaData.reserves_regions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reserves_regions</span></code></a>(filename)</p></td>
+<td><p>Reserves to regions mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.reserves_zones" title="marmot.metamanagers.read_metadata.MetaData.reserves_zones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reserves_zones</span></code></a>(filename)</p></td>
+<td><p>Reserves to zones mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.zone_exporting_lines" title="marmot.metamanagers.read_metadata.MetaData.zone_exporting_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zone_exporting_lines</span></code></a>(filename)</p></td>
+<td><p>Zone exporting lines mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.zone_generator_category" title="marmot.metamanagers.read_metadata.MetaData.zone_generator_category"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zone_generator_category</span></code></a>(filename)</p></td>
+<td><p>Zone generators category mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.zone_generators" title="marmot.metamanagers.read_metadata.MetaData.zone_generators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zone_generators</span></code></a>(filename)</p></td>
+<td><p>Zone generators mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.zone_importing_lines" title="marmot.metamanagers.read_metadata.MetaData.zone_importing_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zone_importing_lines</span></code></a>(filename)</p></td>
+<td><p>Zone importing lines mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.zone_interzonallines" title="marmot.metamanagers.read_metadata.MetaData.zone_interzonallines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zone_interzonallines</span></code></a>(filename)</p></td>
+<td><p>Zone inter-zonal lines mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.zone_intrazonallines" title="marmot.metamanagers.read_metadata.MetaData.zone_intrazonallines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zone_intrazonallines</span></code></a>(filename)</p></td>
+<td><p>Zone intra-zonal lines mapping.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.zone_lines" title="marmot.metamanagers.read_metadata.MetaData.zone_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zone_lines</span></code></a>(filename)</p></td>
+<td><p>Zone to Lines mapping.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.zones" title="marmot.metamanagers.read_metadata.MetaData.zones"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zones</span></code></a>(filename)</p></td>
+<td><p>Zone objects.</p></td>
+</tr>
+</tbody>
+</table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.filename" title="marmot.metamanagers.read_metadata.MetaData.filename"><code class="xref py py-obj docutils literal notranslate"><span class="pre">filename</span></code></a></p></td>
+<td><p>The name of the h5 file to retrieve data from.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.h5_data" title="marmot.metamanagers.read_metadata.MetaData.h5_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">h5_data</span></code></a></p></td>
+<td><p>h5 file loaded in memory.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.metamanagers.read_metadata.MetaData.h5_filepath" title="marmot.metamanagers.read_metadata.MetaData.h5_filepath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">h5_filepath</span></code></a></p></td>
+<td><p>The path to the h5 file</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.filename">
+<span class="sig-name descname"><span class="pre">filename</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.filename" title="Permalink to this definition">#</a></dt>
+<dd><p>The name of the h5 file to retrieve data from.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.h5_filepath">
+<span class="sig-name descname"><span class="pre">h5_filepath</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.h5_filepath" title="Permalink to this definition">#</a></dt>
+<dd><p>The path to the h5 file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.h5_data">
+<span class="sig-name descname"><span class="pre">h5_data</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">h5py._hl.files.File</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">None</span></em><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.h5_data" title="Permalink to this definition">#</a></dt>
+<dd><p>h5 file loaded in memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.close_h5">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">close_h5</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.close_h5"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.close_h5" title="Permalink to this definition">#</a></dt>
+<dd><p>Closes h5 file open in memory.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.generator_category">
+<span class="sig-name descname"><span class="pre">generator_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.generator_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.generator_category" title="Permalink to this definition">#</a></dt>
+<dd><p>Generator categories mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.region_generators">
+<span class="sig-name descname"><span class="pre">region_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.region_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.region_generators" title="Permalink to this definition">#</a></dt>
+<dd><p>Region generators mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.region_generator_category">
+<span class="sig-name descname"><span class="pre">region_generator_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.region_generator_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.region_generator_category" title="Permalink to this definition">#</a></dt>
+<dd><p>Region generators category mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.zone_generators">
+<span class="sig-name descname"><span class="pre">zone_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.zone_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.zone_generators" title="Permalink to this definition">#</a></dt>
+<dd><p>Zone generators mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.zone_generator_category">
+<span class="sig-name descname"><span class="pre">zone_generator_category</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.zone_generator_category"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.zone_generator_category" title="Permalink to this definition">#</a></dt>
+<dd><p>Zone generators category mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.generator_storage">
+<span class="sig-name descname"><span class="pre">generator_storage</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.generator_storage"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.generator_storage" title="Permalink to this definition">#</a></dt>
+<dd><p>Generator Storage mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.node_region">
+<span class="sig-name descname"><span class="pre">node_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.node_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.node_region" title="Permalink to this definition">#</a></dt>
+<dd><p>Node Region mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.node_zone">
+<span class="sig-name descname"><span class="pre">node_zone</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.node_zone"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.node_zone" title="Permalink to this definition">#</a></dt>
+<dd><p>Node zone mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.generator_node">
+<span class="sig-name descname"><span class="pre">generator_node</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.generator_node"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.generator_node" title="Permalink to this definition">#</a></dt>
+<dd><p>generator node mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.regions">
+<span class="sig-name descname"><span class="pre">regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.regions" title="Permalink to this definition">#</a></dt>
+<dd><p>Region objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.zones">
+<span class="sig-name descname"><span class="pre">zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.zones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.zones" title="Permalink to this definition">#</a></dt>
+<dd><p>Zone objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.lines">
+<span class="sig-name descname"><span class="pre">lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.lines" title="Permalink to this definition">#</a></dt>
+<dd><p>Line objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.region_regions">
+<span class="sig-name descname"><span class="pre">region_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.region_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.region_regions" title="Permalink to this definition">#</a></dt>
+<dd><p>Region-region mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.region_interregionallines">
+<span class="sig-name descname"><span class="pre">region_interregionallines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.region_interregionallines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.region_interregionallines" title="Permalink to this definition">#</a></dt>
+<dd><p>Region inter-regional lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.region_intraregionallines">
+<span class="sig-name descname"><span class="pre">region_intraregionallines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.region_intraregionallines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.region_intraregionallines" title="Permalink to this definition">#</a></dt>
+<dd><p>Region intra-regional lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.region_exporting_lines">
+<span class="sig-name descname"><span class="pre">region_exporting_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.region_exporting_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.region_exporting_lines" title="Permalink to this definition">#</a></dt>
+<dd><p>Region exporting lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.region_importing_lines">
+<span class="sig-name descname"><span class="pre">region_importing_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.region_importing_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.region_importing_lines" title="Permalink to this definition">#</a></dt>
+<dd><p>Region importing lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.zone_interzonallines">
+<span class="sig-name descname"><span class="pre">zone_interzonallines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.zone_interzonallines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.zone_interzonallines" title="Permalink to this definition">#</a></dt>
+<dd><p>Zone inter-zonal lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.zone_intrazonallines">
+<span class="sig-name descname"><span class="pre">zone_intrazonallines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.zone_intrazonallines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.zone_intrazonallines" title="Permalink to this definition">#</a></dt>
+<dd><p>Zone intra-zonal lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.zone_exporting_lines">
+<span class="sig-name descname"><span class="pre">zone_exporting_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.zone_exporting_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.zone_exporting_lines" title="Permalink to this definition">#</a></dt>
+<dd><p>Zone exporting lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.zone_importing_lines">
+<span class="sig-name descname"><span class="pre">zone_importing_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.zone_importing_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.zone_importing_lines" title="Permalink to this definition">#</a></dt>
+<dd><p>Zone importing lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.interface_lines">
+<span class="sig-name descname"><span class="pre">interface_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.interface_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.interface_lines" title="Permalink to this definition">#</a></dt>
+<dd><p>Interface to lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.region_lines">
+<span class="sig-name descname"><span class="pre">region_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.region_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.region_lines" title="Permalink to this definition">#</a></dt>
+<dd><p>Region to Lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.zone_lines">
+<span class="sig-name descname"><span class="pre">zone_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.zone_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.zone_lines" title="Permalink to this definition">#</a></dt>
+<dd><p>Zone to Lines mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.reserves">
+<span class="sig-name descname"><span class="pre">reserves</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.reserves"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.reserves" title="Permalink to this definition">#</a></dt>
+<dd><p>Reserves objects.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.reserves_generators">
+<span class="sig-name descname"><span class="pre">reserves_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.reserves_generators" title="Permalink to this definition">#</a></dt>
+<dd><p>Reserves to generators mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.reserves_regions">
+<span class="sig-name descname"><span class="pre">reserves_regions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.reserves_regions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.reserves_regions" title="Permalink to this definition">#</a></dt>
+<dd><p>Reserves to regions mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.metamanagers.read_metadata.MetaData.reserves_zones">
+<span class="sig-name descname"><span class="pre">reserves_zones</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/metamanagers/read_metadata.html#MetaData.reserves_zones"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.metamanagers.read_metadata.MetaData.reserves_zones" title="Permalink to this definition">#</a></dt>
+<dd><p>Reserves to zones mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>filename</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – The name of the h5 file to retreive data from.
+If retreiving from fromatted h5 file, just pass scenario name.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="../meta.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Meta Data</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="../plots.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Plots</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

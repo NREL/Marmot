@@ -1,0 +1,6 @@
+marmot.formatters.formategret.ProcessEGRET.PROPERTY\_MAPPING
+============================================================
+
+.. currentmodule:: marmot.formatters.formategret
+
+.. autoattribute:: ProcessEGRET.PROPERTY_MAPPING

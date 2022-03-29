@@ -1,0 +1,1122 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper &#8212; Marmot 0.10.0 documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <link rel="next" title="marmot.plottingmodules.plotutils.plot_library.SetupSubplot" href="marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html" />
+    <link rel="prev" title="Plot Utilities" href="../plot_util.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">Marmot</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Get Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="../modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../initialize.html">
+   Initialization
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/>
+  <label for="toctree-checkbox-1">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.marmot_h5_formatter.html">
+     marmot.marmot_h5_formatter
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/>
+    <label for="toctree-checkbox-2">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_h5_formatter.main.html">
+       marmot.marmot_h5_formatter.main
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_h5_formatter.MarmotFormat.html">
+       marmot.marmot_h5_formatter.MarmotFormat
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.marmot_plot_main.html">
+     marmot.marmot_plot_main
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/>
+    <label for="toctree-checkbox-3">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_plot_main.main.html">
+       marmot.marmot_plot_main.main
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.marmot_plot_main.MarmotPlot.html">
+       marmot.marmot_plot_main.MarmotPlot
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../format.html">
+   Formatters
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-4" name="toctree-checkbox-4" type="checkbox"/>
+  <label for="toctree-checkbox-4">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatbase.Process.html">
+     marmot.formatters.formatbase.Process
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraProperties.html">
+     marmot.formatters.formatextra.ExtraProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatplexos.ProcessPLEXOS.html">
+     marmot.formatters.formatplexos.ProcessPLEXOS
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds.ProcessReEDS.html">
+     marmot.formatters.formatreeds.ProcessReEDS
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds.PropertyColumns.html">
+     marmot.formatters.formatreeds.PropertyColumns
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formategret.ProcessEGRET.html">
+     marmot.formatters.formategret.ProcessEGRET
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../meta.html">
+   Meta Data
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" type="checkbox"/>
+  <label for="toctree-checkbox-5">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.metamanagers.read_metadata.MetaData.html">
+     marmot.metamanagers.read_metadata.MetaData
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../plots.html">
+   Plots
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+  <label for="toctree-checkbox-6">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.capacity_factor.CapacityFactor.html">
+     marmot.plottingmodules.capacity_factor.CapacityFactor
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.capacity_out.CapacityOut.html">
+     marmot.plottingmodules.capacity_out.CapacityOut
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.curtailment.Curtailment.html">
+     marmot.plottingmodules.curtailment.Curtailment
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.emissions.Emissions.html">
+     marmot.plottingmodules.emissions.Emissions
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.generation_stack.GenerationStack.html">
+     marmot.plottingmodules.generation_stack.GenerationStack
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.generation_unstack.GenerationUnStack.html">
+     marmot.plottingmodules.generation_unstack.GenerationUnStack
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.hydro.Hydro.html">
+     marmot.plottingmodules.hydro.Hydro
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.prices.Prices.html">
+     marmot.plottingmodules.prices.Prices
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.production_cost.SystemCosts.html">
+     marmot.plottingmodules.production_cost.SystemCosts
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.ramping.Ramping.html">
+     marmot.plottingmodules.ramping.Ramping
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.reserves.Reserves.html">
+     marmot.plottingmodules.reserves.Reserves
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.sensitivities.Sensitivities.html">
+     marmot.plottingmodules.sensitivities.Sensitivities
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.storage.Storage.html">
+     marmot.plottingmodules.storage.Storage
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.thermal_cap_reserve.ThermalReserve.html">
+     marmot.plottingmodules.thermal_cap_reserve.ThermalReserve
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.total_generation.TotalGeneration.html">
+     marmot.plottingmodules.total_generation.TotalGeneration
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.html">
+     marmot.plottingmodules.total_installed_capacity.InstalledCapacity
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.transmission.Transmission.html">
+     marmot.plottingmodules.transmission.Transmission
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.unserved_energy.UnservedEnergy.html">
+     marmot.plottingmodules.unserved_energy.UnservedEnergy
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.utilization_factor.UtilizationFactor.html">
+     marmot.plottingmodules.utilization_factor.UtilizationFactor
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 current active has-children">
+  <a class="reference internal" href="../plot_util.html">
+   Plot Utilities
+  </a>
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+  <label for="toctree-checkbox-7">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul class="current">
+   <li class="toctree-l2 current active">
+    <a class="current reference internal" href="#">
+     marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html">
+     marmot.plottingmodules.plotutils.plot_library.SetupSubplot
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.PlotLibrary.html">
+     marmot.plottingmodules.plotutils.plot_library.PlotLibrary
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.html">
+     marmot.plottingmodules.plotutils.plot_exceptions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+    <label for="toctree-checkbox-8">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.FacetLabelError
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.InputSheetError
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingInputData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingMetaData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.MissingZoneData
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation.html">
+       marmot.plottingmodules.plotutils.plot_exceptions.UnsupportedAggregation
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toctree-l1 has-children">
+  <a class="reference internal" href="../utils.html">
+   Utilities
+  </a>
+  <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+  <label for="toctree-checkbox-9">
+   <i class="fas fa-chevron-down">
+   </i>
+  </label>
+  <ul>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.utils.loggersetup.SetupLogger.html">
+     marmot.utils.loggersetup.SetupLogger
+    </a>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.utils.definitions.html">
+     marmot.utils.definitions
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+    <label for="toctree-checkbox-10">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.get_project_root.html">
+       marmot.utils.definitions.get_project_root
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.input_dir.html">
+       marmot.utils.definitions.input_dir
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.definitions.log_dir.html">
+       marmot.utils.definitions.log_dir
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.utils.mconfig.html">
+     marmot.utils.mconfig
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+    <label for="toctree-checkbox-11">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.createConfig.html">
+       marmot.utils.mconfig.createConfig
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.edit_value.html">
+       marmot.utils.mconfig.edit_value
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.parser.html">
+       marmot.utils.mconfig.parser
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.reset_defaults.html">
+       marmot.utils.mconfig.reset_defaults
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+
+<nav id="bd-toc-nav">
+    
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <script>
+   var arr = document.getElementsByClassName('reference internal');
+   for(var i = 0; i < arr.length; i++) {
+   arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
+   }
+</script><section id="marmot-plottingmodules-plotutils-plot-data-helper-mplotdatahelper">
+<h1>marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper<a class="headerlink" href="#marmot-plottingmodules-plotutils-plot-data-helper-mplotdatahelper" title="Permalink to this headline">#</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MPlotDataHelper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">Zones:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">AGG_BY:</span> <span class="pre">typing.Optional[str]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ordered_gen:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">PLEXOS_color_dict:</span> <span class="pre">typing.Optional[dict]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Scenarios:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Scenario_Diff:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">processed_hdf5_folder:</span> <span class="pre">typing.Optional[pathlib.Path]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">figure_folder:</span> <span class="pre">typing.Optional[pathlib.Path]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ylabels:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">xlabels:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_xticklabels:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">color_list:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker_style:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">gen_names_dict:</span> <span class="pre">typing.Optional[dict]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pv_gen_cat:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">re_gen_cat:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">vre_gen_cat:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">thermal_gen_cat:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping:</span> <span class="pre">pandas.core.frame.DataFrame</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">TECH_SUBSET:</span> <span class="pre">typing.Optional[typing.List[str]]</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper" title="Permalink to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></p>
+<p>Methods used to assist with the creation of Marmot plots</p>
+<p>Collection of Methods to assist with creation of figures,
+including getting and formatting data, setting up plot sizes.</p>
+<p>MPlotDataHelper inherits the python class ‘dict’ so acts like a
+dictionary and stores the formatted data when retrieved by the
+get_formatted_data method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>Zones</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – List of regions/zones to plot.
+Defaults to None.</p></li>
+<li><p><strong>AGG_BY</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Informs region type to aggregate by when creating plots.
+Defaults to None.</p></li>
+<li><p><strong>ordered_gen</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – Ordered list of generator technologies to plot,
+order defines the generator technology position in stacked bar and area plots.
+Defaults to None.</p></li>
+<li><p><strong>PLEXOS_color_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>optional</em>) – Dictionary of colors to use for
+generation technologies.
+Defaults to None.</p></li>
+<li><p><strong>Scenarios</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – List of scenarios to process.
+Defaults to None.</p></li>
+<li><p><strong>Scenario_Diff</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – 2 value list, used to compare 2
+scenarios.
+Defaults to None.</p></li>
+<li><p><strong>processed_hdf5_folder</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory containing
+Marmot solution files.
+Defaults to None.</p></li>
+<li><p><strong>figure_folder</strong> (<em>Path</em><em>, </em><em>optional</em>) – Directory containing resulting
+figures and csv files.
+Defaults to None.</p></li>
+<li><p><strong>ylabels</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – y-axis labels for facet plots.
+Defaults to None.</p></li>
+<li><p><strong>xlabels</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – x-axis labels for facet plots.
+Defaults to None.</p></li>
+<li><p><strong>custom_xticklabels</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – List of custom x labels to
+apply to barplots. Values will overwite existing ones.
+Defaults to None.</p></li>
+<li><p><strong>color_list</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – List of colors for plotting.
+Defaults to None.</p></li>
+<li><p><strong>marker_style</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – List of markers for plotting.
+Defaults to None.</p></li>
+<li><p><strong>gen_names_dict</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><em>dict</em></a><em>, </em><em>optional</em>) – Mapping dictionary to rename generator
+technologies.
+Defaults to None.</p></li>
+<li><p><strong>pv_gen_cat</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – List of PV technologies.
+Defaults to None.</p></li>
+<li><p><strong>re_gen_cat</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – List of RE technologies.
+Defaults to None.</p></li>
+<li><p><strong>vre_gen_cat</strong> (<em>lList</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>ist</em><em>, </em><em>optional</em>) – List of VRE technologies.
+Defaults to None.</p></li>
+<li><p><strong>thermal_gen_cat</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – List of thermal technologies.
+Defaults to None.</p></li>
+<li><p><strong>Region_Mapping</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – Mapping file to map
+custom regions/zones to create custom aggregations.
+Aggregations are created by grouping PLEXOS regions.
+Defaults to pd.DataFrame().</p></li>
+<li><p><strong>TECH_SUBSET</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>]</em><em>, </em><em>optional</em>) – Tech subset category to plot.
+The TECH_SUBSET value should be a column in the
+ordered_gen_categories.csv. If left None all techs will be plotted
+Defaults to None.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Methods</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.adjust_for_leapday" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.adjust_for_leapday"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adjust_for_leapday</span></code></a>(df)</p></td>
+<td><p>Shifts dataframe ahead by one day.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.assign_curtailment_techs" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.assign_curtailment_techs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">assign_curtailment_techs</span></code></a>(df)</p></td>
+<td><p>Assign technologies to Marmot's Curtailment property (generator_Curtailment).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.capacity_energy_unitconversion" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.capacity_energy_unitconversion"><code class="xref py py-obj docutils literal notranslate"><span class="pre">capacity_energy_unitconversion</span></code></a>(df[, sum_values])</p></td>
+<td><p>Unitconversion for capacity and energy figures.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.create_categorical_tech_index" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.create_categorical_tech_index"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create_categorical_tech_index</span></code></a>(df[, axis])</p></td>
+<td><p>Creates categorical index based on generators.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.df_process_gen_inputs" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.df_process_gen_inputs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">df_process_gen_inputs</span></code></a>(df)</p></td>
+<td><p>Processes generation data into a pivot table.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_formatted_data" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_formatted_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_formatted_data</span></code></a>(properties)</p></td>
+<td><p>Get data from formatted h5 file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_sub_hour_interval_count" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_sub_hour_interval_count"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_sub_hour_interval_count</span></code></a>(df)</p></td>
+<td><p>Detects the interval spacing of timeseries data.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.include_net_imports" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.include_net_imports"><code class="xref py py-obj docutils literal notranslate"><span class="pre">include_net_imports</span></code></a>(gen_df, load_series[, ...])</p></td>
+<td><p>Adds net imports to total and timeseries generation plots.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.insert_custom_data_columns" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.insert_custom_data_columns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">insert_custom_data_columns</span></code></a>(existing_df, ...)</p></td>
+<td><p>Insert custom columns into existing DataFrame before plotting.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.merge_new_agg" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.merge_new_agg"><code class="xref py py-obj docutils literal notranslate"><span class="pre">merge_new_agg</span></code></a>(df)</p></td>
+<td><p>Adds new region aggregation in the plotting step.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.read_processed_h5file" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.read_processed_h5file"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_processed_h5file</span></code></a>(plx_prop_name, scenario)</p></td>
+<td><p>Reads Data from processed h5file.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.rename_gen_techs" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.rename_gen_techs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rename_gen_techs</span></code></a>(df)</p></td>
+<td><p>Renames generator technologies based on the gen_names.csv file.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_facet_col_row_dimensions" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_facet_col_row_dimensions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_facet_col_row_dimensions</span></code></a>([facet, ...])</p></td>
+<td><p>Sets facet plot col and row dimensions based on user defined labeles</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_timestamp_date_range" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_timestamp_date_range"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_timestamp_date_range</span></code></a>(dfs, start_date, ...)</p></td>
+<td><p>Sets the timestamp date range based on start_date and end_date strings</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_x_y_dimension" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_x_y_dimension"><code class="xref py py-obj docutils literal notranslate"><span class="pre">set_x_y_dimension</span></code></a>(region_number)</p></td>
+<td><p>Sets X,Y dimension of plots without x,y labels.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.sort_duration" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.sort_duration"><code class="xref py py-obj docutils literal notranslate"><span class="pre">sort_duration</span></code></a>(df, col)</p></td>
+<td><p>Converts a dataframe time series into a duration curve.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.year_scenario_grouper" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.year_scenario_grouper"><code class="xref py py-obj docutils literal notranslate"><span class="pre">year_scenario_grouper</span></code></a>(df, scenario[, ...])</p></td>
+<td><p>Special groupby method to group dataframes by Scenario or Year-Scenario.</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_formatted_data">
+<span class="sig-name descname"><span class="pre">get_formatted_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">properties</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><span class="pre">tuple</span></a><span class="p"><span class="pre">]</span></span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.get_formatted_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_formatted_data" title="Permalink to this definition">#</a></dt>
+<dd><p>Get data from formatted h5 file.</p>
+<p>Adds data to dictionary with scenario name as key</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>properties</strong> (<em>List</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.10)"><em>tuple</em></a><em>]</em>) – list of tuples containing required
+plexos property information</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If 1 in list required data is missing.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)">list</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.read_processed_h5file">
+<span class="sig-name descname"><span class="pre">read_processed_h5file</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">plx_prop_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.read_processed_h5file"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.read_processed_h5file" title="Permalink to this definition">#</a></dt>
+<dd><p>Reads Data from processed h5file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>plx_prop_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name of property, e.g generator_Generation</p></li>
+<li><p><strong>scenario</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Name of scenario.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Requested dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.rename_gen_techs">
+<span class="sig-name descname"><span class="pre">rename_gen_techs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.rename_gen_techs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.rename_gen_techs" title="Permalink to this definition">#</a></dt>
+<dd><p>Renames generator technologies based on the gen_names.csv file.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe to process.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Processed DataFrame with renamed techs.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.assign_curtailment_techs">
+<span class="sig-name descname"><span class="pre">assign_curtailment_techs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.assign_curtailment_techs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.assign_curtailment_techs" title="Permalink to this definition">#</a></dt>
+<dd><p>Assign technologies to Marmot’s Curtailment property (generator_Curtailment).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe to process.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dataframe containing only specified curtailment technologies.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.df_process_gen_inputs">
+<span class="sig-name descname"><span class="pre">df_process_gen_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.df_process_gen_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.df_process_gen_inputs" title="Permalink to this definition">#</a></dt>
+<dd><p>Processes generation data into a pivot table.</p>
+<p>Also calls rename_gen_techs() to rename technologies
+Technology names will be columns,
+Timeseries as index</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe to process.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Transformed Dataframe.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.create_categorical_tech_index">
+<span class="sig-name descname"><span class="pre">create_categorical_tech_index</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">axis</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.create_categorical_tech_index"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.create_categorical_tech_index" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates categorical index based on generators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – Dataframe to process.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Processed DataFrame.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.merge_new_agg">
+<span class="sig-name descname"><span class="pre">merge_new_agg</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.merge_new_agg"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.merge_new_agg" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds new region aggregation in the plotting step.</p>
+<p>This allows one to create a new aggregation without re-formatting the .h5 file.
+:param df: Dataframe to process.
+:type df: pd.DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Same dataframe, with new aggregation level added.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.adjust_for_leapday">
+<span class="sig-name descname"><span class="pre">adjust_for_leapday</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.adjust_for_leapday"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.adjust_for_leapday" title="Permalink to this definition">#</a></dt>
+<dd><p>Shifts dataframe ahead by one day.</p>
+<p>Use if a non-leap year time series is modeled with a leap year time index.</p>
+<p>Modeled year must be included in the scenario parent directory name.
+:param df: Dataframe to process.
+:type df: pd.DataFrame</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Same dataframe, with time index shifted.</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_facet_col_row_dimensions">
+<span class="sig-name descname"><span class="pre">set_facet_col_row_dimensions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">facet</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">multi_scenario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.set_facet_col_row_dimensions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_facet_col_row_dimensions" title="Permalink to this definition">#</a></dt>
+<dd><p>Sets facet plot col and row dimensions based on user defined labeles</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>facet</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Trigger for plotting facet plots.
+Defaults to True.</p></li>
+<li><p><strong>multi_scenario</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>, </em><em>optional</em>) – List of scenarios.
+Defaults to None.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Facet x,y dimensions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_x_y_dimension">
+<span class="sig-name descname"><span class="pre">set_x_y_dimension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">region_number</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.set_x_y_dimension"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_x_y_dimension" title="Permalink to this definition">#</a></dt>
+<dd><p>Sets X,Y dimension of plots without x,y labels.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>region_number</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – # regions/scenarios</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Facet x,y dimensions.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Tuple[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.include_net_imports">
+<span class="sig-name descname"><span class="pre">include_net_imports</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">gen_df:</span> <span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">load_series:</span> <span class="pre">pandas.core.series.Series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">unsereved_energy:</span> <span class="pre">pandas.core.series.Series</span> <span class="pre">=</span> <span class="pre">Series([]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dtype:</span> <span class="pre">float64)</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.include_net_imports"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.include_net_imports" title="Permalink to this definition">#</a></dt>
+<dd><p>Adds net imports to total and timeseries generation plots.</p>
+<p>Net imports are calculated as load - total generation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>gen_df</strong> (<em>pd.DataFrame</em>) – generation dataframe</p></li>
+<li><p><strong>load_series</strong> (<em>pd.Series</em>) – load series</p></li>
+<li><p><strong>unsereved_energy</strong> (<em>pd.Series</em>) – unsereved energy series,
+(optional)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dataframe with net imports included</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.capacity_energy_unitconversion">
+<span class="sig-name descname"><span class="pre">capacity_energy_unitconversion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">sum_values</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.capacity_energy_unitconversion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.capacity_energy_unitconversion" title="Permalink to this definition">#</a></dt>
+<dd><p>Unitconversion for capacity and energy figures.</p>
+<p>Takes a pd.DataFrame as input and will then determine the max value
+in the frame.</p>
+<p>If sum_values is True, either rows or columns will be summated before
+determining max value. The axis is chosen automatically based on where
+the scenario entries or datetime index is located. If correct axis
+cannot be determined axis 0 (rows) will be summed.
+This setting should mainly be set to True when potting stacked bar
+and area plots.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – pandas dataframe</p></li>
+<li><p><strong>sum_values</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Sum axis values if True.
+Should be set to True for stacked bar and area plots.
+Defaults to False.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary containing divisor and units.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_timestamp_date_range">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">set_timestamp_date_range</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dfs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.List" title="(in Python v3.10)"><span class="pre">List</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Union" title="(in Python v3.10)"><span class="pre">Union</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Tuple" title="(in Python v3.10)"><span class="pre">Tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="p"><span class="pre">...</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.set_timestamp_date_range"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.set_timestamp_date_range" title="Permalink to this definition">#</a></dt>
+<dd><p>Sets the timestamp date range based on start_date and end_date strings</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.10.0.</span></p>
+</div>
+<p>Takes either a single df or a list of dfs as input.
+The index must be a pd.DatetimeIndex or a multiindex with level timestamp.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dfs</strong> (<em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>List</em><em>[</em><em>pd.DataFrame</em><em>]</em><em>]</em>) – df(s) to set date range for</p></li>
+<li><p><strong>start_date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – start date</p></li>
+<li><p><strong>end_date</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – end date</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If df.index is not of type type pd.DatetimeIndex or
+    type pd.MultiIndex with level timestamp.</p>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>adjusted dataframes</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>pd.DataFrame or Tuple[pd.DataFrame]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.year_scenario_grouper">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">year_scenario_grouper</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">groupby</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Scenario'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">additional_groups</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame.groupby</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.year_scenario_grouper"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.year_scenario_grouper" title="Permalink to this definition">#</a></dt>
+<dd><p>Special groupby method to group dataframes by Scenario or Year-Scenario.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.10.0.</span></p>
+</div>
+<p>Grouping by Year-Scenario is useful for multi year results sets
+where examining results by year is of interest.</p>
+<p>This method is a wrapper around pd.DataFrame.groupby and takes all the
+same arguments.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – DataFrame to group</p></li>
+<li><p><strong>scenario</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – name of the scenario to groupby</p></li>
+<li><p><strong>groupby</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Groupby ‘Scenario’ or ‘Year-Scenario’.
+If Year-Scenario is chosen the year is extracted from the
+DatetimeIndex and appended to the scenario name.
+Defaults to ‘Scenario’.</p></li>
+<li><p><strong>additional_groups</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a><em>, </em><em>optional</em>) – List of any additional columns
+to groupby. Defaults to None.</p></li>
+<li><p><strong>**kwargs</strong> – These parameters will be passed to pandas.DataFrame.groupby
+function.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises</dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If df.index is not of type type pd.DatetimeIndex or
+    type pd.MultiIndex with level timestamp.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.10)"><strong>ValueError</strong></a> – If additional_groups is not a list</p></li>
+</ul>
+</dd>
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p><dl class="simple">
+<dt>Returns a groupby object that contains</dt><dd><p>information about the groups.</p>
+</dd>
+</dl>
+</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>DataFrameGroupBy</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_sub_hour_interval_count">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_sub_hour_interval_count</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.get_sub_hour_interval_count"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_sub_hour_interval_count" title="Permalink to this definition">#</a></dt>
+<dd><p>Detects the interval spacing of timeseries data.</p>
+<p>Used to adjust sums of certain variables for sub-hourly data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>df</strong> (<em>pd.DataFrame</em>) – pandas dataframe with timestamp in index.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Number of intervals per 60 minutes.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)">int</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.sort_duration">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">sort_duration</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">col</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.sort_duration"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.sort_duration" title="Permalink to this definition">#</a></dt>
+<dd><p>Converts a dataframe time series into a duration curve.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>df</strong> (<em>pd.DataFrame</em>) – pandas multiindex dataframe.</p></li>
+<li><p><strong>col</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Column name by which to sort.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dataframe with values sorted from largest to smallest.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.insert_custom_data_columns">
+<em class="property"><span class="pre">static</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">insert_custom_data_columns</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">existing_df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_data_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+616.g9aeddee047)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/plotutils/plot_data_helper.html#MPlotDataHelper.insert_custom_data_columns"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.insert_custom_data_columns" title="Permalink to this definition">#</a></dt>
+<dd><p>Insert custom columns into existing DataFrame before plotting.</p>
+<p>Custom data is loaded from passed custom_data_file_path,
+the custom data file must be a csv.
+Default position of new columns is at the end of the existing DataFrame.
+Specific positions can be selected by including a row with index label
+‘column_position’.
+Corresponding column positions can then be included.
+-1 can be passed to insert the column at the end of the DataFrame (rightmost position).</p>
+<p>New rows can also be included but their position can not be changed and are
+appended to end of DataFrame.</p>
+<p>NaN values are returned as 0</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>existing_df</strong> (<em>pd.DataFrame</em>) – DataFrame to modify</p></li>
+<li><p><strong>custom_data_file_path</strong> (<em>Path</em>) – path to custom data file</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataFrame with the newly inserted columns</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="../plot_util.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">Plot Utilities</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">marmot.plottingmodules.plotutils.plot_library.SetupSubplot</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

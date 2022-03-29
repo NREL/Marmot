@@ -1,0 +1,1083 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>marmot.formatters.formatplexos &#8212; Marmot 0.10.0 documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+<script>
+ var arr = document.getElementsByClassName('reference internal');
+ for(var i = 0; i < arr.length; i++) {
+ arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
+ }
+</script>
+
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../../../index.html">
+<p class="title">Marmot</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Get Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for marmot.formatters.formatplexos</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Main formatting module for PLEXOS results,</span>
+<span class="sd">Contains classes and methods specific to PLEXOS outputs.</span>
+<span class="sd">Inherits the Process class.</span>
+
+<span class="sd">@author: Daniel Levie</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">h5py</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">marmot.metamanagers.read_metadata</span> <span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatextra</span> <span class="kn">import</span> <span class="n">ExtraProperties</span>
+
+<span class="k">try</span><span class="p">:</span>
+    <span class="c1"># Import as Submodule</span>
+    <span class="kn">from</span> <span class="nn">marmot.h5plexos.h5plexos.query</span> <span class="kn">import</span> <span class="n">PLEXOSSolution</span>
+<span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">h5plexos.query</span> <span class="kn">import</span> <span class="n">PLEXOSSolution</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;formatter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProcessPLEXOS"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS">[docs]</a><span class="k">class</span> <span class="nc">ProcessPLEXOS</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process PLEXOS class specific data from a h5plexos database.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Maps PLEXOS property names to Marmot names,</span>
+    <span class="c1"># unchanged names not included</span>
+    <span class="n">PROPERTY_MAPPING</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_Start_&amp;_Shutdown_Cost&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Start_and_Shutdown_Cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_VO&amp;M_Cost&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_VOM_Cost&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_Reserves_VO&amp;M_Cost&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Reserves_VOM_Cost&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Maps simulation model property names to Marmot property names&quot;&quot;&quot;</span>
+    <span class="c1"># Extra custom properties that are created based off existing properties.</span>
+    <span class="c1"># The dictionary keys are the existing properties and the values are the new</span>
+    <span class="c1"># property names and methods used to create it.</span>
+    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_Generation&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_generator_curtailment</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;region_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_cost_unserved_energy</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;zone_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;zone_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_cost_unserved_energy</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;region_Load_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;region_Demand&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_demand</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;zone_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;zone_Load_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;zone_Demand&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_demand</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;reserves_generators_Provision_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Demand_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)],</span>
+        <span class="s2">&quot;zone_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;zone_Demand_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)],</span>
+    <span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">plexos_block</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ST&quot;</span><span class="p">,</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            input_folder (Path): Folder containing h5plexos h5 files.</span>
+<span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
+<span class="sd">            Region_Mapping (pd.DataFrame): DataFrame to map custom</span>
+<span class="sd">                regions/zones to create custom aggregations.</span>
+<span class="sd">            plexos_block (str, optional): PLEXOS results type. Defaults to &#39;ST&#39;.</span>
+<span class="sd">            **kwargs</span>
+<span class="sd">                These parameters will be passed to the Process </span>
+<span class="sd">                class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span> <span class="o">=</span> <span class="n">plexos_block</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
+            <span class="n">input_folder</span><span class="p">,</span> <span class="n">read_from_formatted_h5</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span>
+        <span class="p">)</span>
+        <span class="c1"># Instantiation of Process Base class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">input_folder</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="ProcessPLEXOS.get_input_files"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.get_input_files">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Gets a list of h5plexos input files within the scenario folders</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            list: list of h5plexos input filenames to process</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.h5&quot;</span><span class="p">:</span>
+                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># Creates a list of only the hdf5 files</span>
+
+        <span class="c1"># List of all hf files in hdf5 folder in alpha numeric order</span>
+        <span class="n">files_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+
+        <span class="c1"># Read in all HDF5 files into dictionary</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading all HDF5 files to prepare for processing&quot;</span><span class="p">)</span>
+        <span class="n">regions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="n">PLEXOSSolution</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">regions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="s2">&quot;region&quot;</span><span class="p">]))</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">regions</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                <span class="n">missing_regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">regions</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">]))</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;The Following PLEXOS REGIONS are missing from &quot;</span>
+                    <span class="s2">&quot;the &#39;region&#39; column of your mapping file: &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">missing_regions</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+        <span class="k">return</span> <span class="n">files_list</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.output_metadata"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.output_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">output_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Transfers metadata from original PLEXOS solutions file to processed HDF5 file.</span>
+
+<span class="sd">        For each partition in a given scenario, the metadata from that partition</span>
+<span class="sd">        is copied over and saved in the processed output file.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            files_list (list): List of all h5 files in hdf5 folder in alpha numeric order</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">partition</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">partition</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span>
+            <span class="n">meta_keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+
+            <span class="n">group_dict</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">meta_keys</span><span class="p">:</span>
+                <span class="n">sub_dict</span> <span class="o">=</span> <span class="p">{}</span>
+                <span class="n">subkeys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+                <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="n">subkeys</span><span class="p">:</span>
+                    <span class="n">dset</span> <span class="o">=</span> <span class="n">f</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">][</span><span class="n">key</span><span class="p">][</span><span class="n">sub</span><span class="p">]</span>
+                    <span class="n">sub_dict</span><span class="p">[</span><span class="n">sub</span><span class="p">]</span> <span class="o">=</span> <span class="n">dset</span>
+                <span class="n">group_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">sub_dict</span>
+
+            <span class="k">with</span> <span class="n">h5py</span><span class="o">.</span><span class="n">File</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span><span class="p">,</span> <span class="s2">&quot;a&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">g</span><span class="p">:</span>
+                <span class="c1"># check if metadata group already exists</span>
+                <span class="n">existing_groups</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">keys</span><span class="p">()]</span>
+                <span class="k">if</span> <span class="s2">&quot;metadata&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_groups</span><span class="p">:</span>
+                    <span class="n">grp</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="s2">&quot;metadata&quot;</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">grp</span> <span class="o">=</span> <span class="n">g</span><span class="p">[</span><span class="s2">&quot;metadata&quot;</span><span class="p">]</span>
+
+                <span class="n">partition_group</span> <span class="o">=</span> <span class="n">grp</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">partition</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">group_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                    <span class="n">subgrp</span> <span class="o">=</span> <span class="n">partition_group</span><span class="o">.</span><span class="n">create_group</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+                    <span class="n">s_dict</span> <span class="o">=</span> <span class="n">group_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">key2</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">s_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">()):</span>
+                        <span class="n">dset</span> <span class="o">=</span> <span class="n">s_dict</span><span class="p">[</span><span class="n">key2</span><span class="p">]</span>
+                        <span class="n">subgrp</span><span class="o">.</span><span class="n">create_dataset</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">key2</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">dset</span><span class="p">)</span>
+            <span class="n">f</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.get_processed_data"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.get_processed_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_processed_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Handles the pulling of data from the h5plexos hdf5</span>
+<span class="sd">        file and then passes the data to one of the formating functions</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prop_class (str): PLEXOS class e.g Region, Generator, Zone etc</span>
+<span class="sd">            prop (str): PLEXOS property e.g Max Capacity, Generation etc.</span>
+<span class="sd">            timescale (str): Data timescale, e.g Hourly, Monthly, 5 minute etc.</span>
+<span class="sd">            model_filename (str): name of model to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Formatted results dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">if</span> <span class="s2">&quot;_&quot;</span> <span class="ow">in</span> <span class="n">prop_class</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">query_relation_property</span><span class="p">(</span>
+                    <span class="n">prop_class</span><span class="p">,</span>
+                    <span class="n">prop</span><span class="p">,</span>
+                    <span class="n">timescale</span><span class="o">=</span><span class="n">timescale</span><span class="p">,</span>
+                    <span class="n">phase</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">object_class</span> <span class="o">=</span> <span class="n">prop_class</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">query_object_property</span><span class="p">(</span>
+                    <span class="n">prop_class</span><span class="p">,</span>
+                    <span class="n">prop</span><span class="p">,</span>
+                    <span class="n">timescale</span><span class="o">=</span><span class="n">timescale</span><span class="p">,</span>
+                    <span class="n">phase</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">db</span><span class="o">.</span><span class="n">version</span> <span class="ow">and</span> <span class="n">db</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+                    <span class="n">object_class</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop_class</span><span class="si">}</span><span class="s2">s&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">object_class</span> <span class="o">=</span> <span class="n">prop_class</span>
+
+        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_prop_error</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span> <span class="o">!=</span> <span class="s2">&quot;ST&quot;</span> <span class="ow">and</span> <span class="n">timescale</span> <span class="o">==</span> <span class="s2">&quot;interval&quot;</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_timeseries_block_data</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
+
+        <span class="c1"># handles h5plexos naming discrepency</span>
+        <span class="k">if</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="n">db</span><span class="o">.</span><span class="n">version</span> <span class="ow">and</span> <span class="n">db</span><span class="o">.</span><span class="n">version</span> <span class="o">&lt;</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="c1"># Get original units from h5plexos file</span>
+            <span class="n">df_units</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">db</span><span class="o">.</span><span class="n">h5file</span><span class="p">[</span>
+                    <span class="sa">f</span><span class="s2">&quot;/data/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">timescale</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">object_class</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prop</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">]</span>
+                <span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;units&quot;</span><span class="p">]</span>
+                <span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s2">&quot;UTF-8&quot;</span><span class="p">)</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df_units</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">h5file</span><span class="p">[</span>
+                <span class="sa">f</span><span class="s2">&quot;/data/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">timescale</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;/</span><span class="si">{</span><span class="n">object_class</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">prop</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">]</span><span class="o">.</span><span class="n">attrs</span><span class="p">[</span><span class="s2">&quot;unit&quot;</span><span class="p">]</span>
+        <span class="c1"># find unit conversion values</span>
+        <span class="n">converted_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UNITS_CONVERSION</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">df_units</span><span class="p">,</span> <span class="p">(</span><span class="n">df_units</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="c1"># Get desired method</span>
+        <span class="n">process_att</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;df_process_</span><span class="si">{</span><span class="n">prop_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Process attribute and return to df</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">process_att</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">)</span>
+
+        <span class="c1"># Convert units and add unit column to index</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span> <span class="o">*</span> <span class="n">converted_units</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">units_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="n">converted_units</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">units_index</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">prop_class</span> <span class="o">==</span> <span class="s2">&quot;region&quot;</span>
+            <span class="ow">and</span> <span class="n">prop</span> <span class="o">==</span> <span class="s2">&quot;Unserved Energy&quot;</span>
+            <span class="ow">and</span> <span class="nb">int</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span>
+        <span class="p">):</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Scenario contains Unserved Energy: &quot;</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">int</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span><span class="si">}</span><span class="s2"> MW</span><span class="se">\n</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.merge_timeseries_block_data"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.merge_timeseries_block_data">[docs]</a>    <span class="k">def</span> <span class="nf">merge_timeseries_block_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">db</span><span class="p">:</span> <span class="n">PLEXOSSolution</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Merge chronological time intervals and block data found in LT, MT and PASA results</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            db (PLEXOSSolution): PLEXOSSolution instance for specific h5plexos file.</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: df with merged in timeseries data</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">block_mapping</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">blocks</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span><span class="p">]</span>
+        <span class="n">block_mapping</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="n">merged_data</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">block_mapping</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;block&quot;</span><span class="p">)</span>
+        <span class="n">merged_data</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;block&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">index_cols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">merged_data</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">index_cols</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">merged_data</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">index_cols</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">merged_data</span> <span class="o">=</span> <span class="n">merged_data</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">merged_data</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_generator"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_generator">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_generator</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Generator Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">([</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;gen_name&quot;</span><span class="p">],</span> <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">region_gen_cat_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generator_category</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
+        <span class="n">zone_gen_cat_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">zone_generator_category</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
+        <span class="n">timeseries_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">region_gen_cat_meta</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">region_gen_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalIndex</span><span class="p">(</span>
+                <span class="n">region_gen_cat_meta</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">region_gen_idx</span> <span class="o">=</span> <span class="n">region_gen_idx</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">timeseries_len</span><span class="p">)</span>
+
+            <span class="n">idx_region</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span>
+                <span class="n">levels</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span> <span class="o">+</span> <span class="p">[</span><span class="n">region_gen_idx</span><span class="o">.</span><span class="n">categories</span><span class="p">],</span>
+                <span class="n">codes</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">codes</span> <span class="o">+</span> <span class="p">[</span><span class="n">region_gen_idx</span><span class="o">.</span><span class="n">codes</span><span class="p">],</span>
+                <span class="n">names</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">region_gen_idx</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx_region</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+
+        <span class="k">if</span> <span class="n">zone_gen_cat_meta</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">zone_gen_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalIndex</span><span class="p">(</span>
+                <span class="n">zone_gen_cat_meta</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">zone_gen_idx</span> <span class="o">=</span> <span class="n">zone_gen_idx</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">timeseries_len</span><span class="p">)</span>
+
+            <span class="n">idx_zone</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span>
+                <span class="n">levels</span><span class="o">=</span><span class="n">idx_region</span><span class="o">.</span><span class="n">levels</span> <span class="o">+</span> <span class="p">[</span><span class="n">zone_gen_idx</span><span class="o">.</span><span class="n">categories</span><span class="p">],</span>
+                <span class="n">codes</span><span class="o">=</span><span class="n">idx_region</span><span class="o">.</span><span class="n">codes</span> <span class="o">+</span> <span class="p">[</span><span class="n">zone_gen_idx</span><span class="o">.</span><span class="n">codes</span><span class="p">],</span>
+                <span class="n">names</span><span class="o">=</span><span class="n">idx_region</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">zone_gen_idx</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx_zone</span> <span class="o">=</span> <span class="n">idx_region</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">region_gen_mapping</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">region_gen_cat_meta</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;gen_name&quot;</span><span class="p">])</span>
+                <span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;gen_name&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">region_gen_mapping</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">region_gen_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">region_gen_mapping_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_frame</span><span class="p">(</span><span class="n">region_gen_mapping</span><span class="p">)</span>
+                <span class="n">region_gen_mapping_idx</span> <span class="o">=</span> <span class="n">region_gen_mapping_idx</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">timeseries_len</span><span class="p">)</span>
+
+                <span class="n">idx_map</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span>
+                    <span class="n">levels</span><span class="o">=</span><span class="n">idx_zone</span><span class="o">.</span><span class="n">levels</span> <span class="o">+</span> <span class="n">region_gen_mapping_idx</span><span class="o">.</span><span class="n">levels</span><span class="p">,</span>
+                    <span class="n">codes</span><span class="o">=</span><span class="n">idx_zone</span><span class="o">.</span><span class="n">codes</span> <span class="o">+</span> <span class="n">region_gen_mapping_idx</span><span class="o">.</span><span class="n">codes</span><span class="p">,</span>
+                    <span class="n">names</span><span class="o">=</span><span class="n">idx_zone</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">region_gen_mapping_idx</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx_map</span> <span class="o">=</span> <span class="n">idx_zone</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx_map</span> <span class="o">=</span> <span class="n">idx_zone</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">idx_map</span><span class="p">)</span>
+        <span class="c1"># Gets names of all columns in df and places in list</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="c1"># move timestamp to start of df</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_region"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_region">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Region Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">timeseries_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+
+        <span class="c1"># checks if Region_Mapping contains data to merge, skips if empty</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">region_gen_mapping</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="n">region_gen_mapping</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">region_gen_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">mapping_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_frame</span><span class="p">(</span><span class="n">region_gen_mapping</span><span class="p">)</span>
+                <span class="n">mapping_idx</span> <span class="o">=</span> <span class="n">mapping_idx</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">timeseries_len</span><span class="p">)</span>
+
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span>
+                    <span class="n">levels</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span> <span class="o">+</span> <span class="n">mapping_idx</span><span class="o">.</span><span class="n">levels</span><span class="p">,</span>
+                    <span class="n">codes</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">codes</span> <span class="o">+</span> <span class="n">mapping_idx</span><span class="o">.</span><span class="n">codes</span><span class="p">,</span>
+                    <span class="n">names</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">mapping_idx</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">idx</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_zone"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_zone">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_zone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Zone Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;zone&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>  <span class="c1">#</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_line"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_line">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Line Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;line_name&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_interface"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_interface">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_interface</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS PLEXOS Interface Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;interface_name&quot;</span><span class="p">,</span> <span class="s2">&quot;interface_category&quot;</span><span class="p">],</span>
+            <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">],</span>
+            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_reserve"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_reserve">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_reserve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Reserve Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">([</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;Type&quot;</span><span class="p">],</span> <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>  <span class="c1"># unzip the levels in index</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_regions</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Merges in regions where reserves are located</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_regions</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;parent&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_zones</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Merges in zones where reserves are located</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_zones</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;parent&quot;</span>
+            <span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="c1"># move timestamp to start of df</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_reserves_generators"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_reserves_generators">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_reserves_generators</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Reserve_Generators Relational Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">([</span><span class="s2">&quot;gen_name&quot;</span><span class="p">],</span> <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;child&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>  <span class="c1"># unzip the levels in index</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">generator_category</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span>
+        <span class="p">)</span>
+
+        <span class="c1"># merging in generator region/zones first prevents double</span>
+        <span class="c1"># counting in cases where multiple model regions are within a reserve region</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generators</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generators</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">zone_generators</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">zone_generators</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># now merge in reserve regions/zones</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_regions</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Merges in regions where reserves are located</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_regions</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_zones</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Merges in zones where reserves are located</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_zones</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;zone&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_fuel"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_fuel">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_fuel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Fuel Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;fuel_type&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_constraint"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_constraint">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_constraint</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Constraint Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span>
+            <span class="p">[</span><span class="s2">&quot;constraint_category&quot;</span><span class="p">,</span> <span class="s2">&quot;constraint&quot;</span><span class="p">],</span>
+            <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">],</span>
+            <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_emission"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_emission">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_emission</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Emission Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;emission_type&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_emissions_generators"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_emissions_generators">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_emissions_generators</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Emissions_Generators Relational Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">([</span><span class="s2">&quot;gen_name&quot;</span><span class="p">],</span> <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;child&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">([</span><span class="s2">&quot;pollutant&quot;</span><span class="p">],</span> <span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>  <span class="c1"># unzip the levels in index</span>
+        <span class="c1"># merge in tech information</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">generator_category</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># merge in region and zone information</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generator_category</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># merge in region information</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generator_category</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;gen_name&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">zone_generator_category</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Merges in zones where reserves are located</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">zone_generator_category</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(),</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;gen_name&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">],</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="c1"># reclassify emissions as specified by user in mapping</span>
+            <span class="n">df</span><span class="p">[</span><span class="s2">&quot;pollutant&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Categorical</span><span class="p">(</span>
+                <span class="n">df</span><span class="p">[</span><span class="s2">&quot;pollutant&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">emit_names_dict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">x</span><span class="p">))</span>
+            <span class="p">)</span>
+
+        <span class="c1"># remove categoricals (otherwise h5 save will fail)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="s2">&quot;tech&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">,</span> <span class="s2">&quot;pollutant&quot;</span><span class="p">:</span> <span class="s2">&quot;object&quot;</span><span class="p">})</span>
+
+        <span class="c1"># Checks if all emissions categories have been identified and matched.</span>
+        <span class="c1"># If not, lists categories that need a match</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">emit_names_dict</span> <span class="o">!=</span> <span class="p">{}</span>
+                <span class="ow">and</span> <span class="p">(</span>
+                    <span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;pollutant&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span><span class="p">[</span><span class="s2">&quot;New&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+                <span class="ow">is</span> <span class="kc">False</span>
+            <span class="p">):</span>
+                <span class="n">missing_emit_cat</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                    <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;pollutant&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+                    <span class="o">-</span> <span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">emit_names</span><span class="p">[</span><span class="s2">&quot;New&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+                <span class="p">)</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="s2">&quot;The following emission objects do not have a &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;correct category mapping: </span><span class="si">{</span><span class="n">missing_emit_cat</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="c1"># downcast values to save on memory</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="c1"># convert to range index (otherwise h5 save will fail)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">RangeIndex</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_storage"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_storage">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_storage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Storage Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>  <span class="c1"># unzip the levels in index</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">generator_storage</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;name&quot;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generators</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Merges in regions where generators are located</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generators</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span>
+                <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span>
+                <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">zone_generators</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="c1"># Merges in zones where generators are located</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">zone_generators</span><span class="p">(</span><span class="n">model_filename</span><span class="p">),</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span>
+            <span class="p">)</span>
+        <span class="c1"># checks if Region_Maping contains data to merge, skips if empty (Default)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="c1"># Merges in all Region Mappings</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;storage_resource&quot;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_region_regions"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_region_regions">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_region_regions</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Region_Regions Relational Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_node"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_node">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Node Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">,</span> <span class="s2">&quot;category&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;node&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">sort_index</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;node&quot;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">node_region_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">node_region</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
+        <span class="n">node_zone_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">node_zone</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
+        <span class="n">timeseries_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+
+        <span class="k">if</span> <span class="n">node_region_meta</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">node_region_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalIndex</span><span class="p">(</span>
+                <span class="n">node_region_meta</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">node_region_idx</span> <span class="o">=</span> <span class="n">node_region_idx</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">timeseries_len</span><span class="p">)</span>
+
+            <span class="n">idx_region</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span>
+                <span class="n">levels</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">levels</span> <span class="o">+</span> <span class="p">[</span><span class="n">node_region_idx</span><span class="o">.</span><span class="n">categories</span><span class="p">],</span>
+                <span class="n">codes</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">codes</span> <span class="o">+</span> <span class="p">[</span><span class="n">node_region_idx</span><span class="o">.</span><span class="n">codes</span><span class="p">],</span>
+                <span class="n">names</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">node_region_idx</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx_region</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+
+        <span class="k">if</span> <span class="n">node_zone_meta</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="n">node_zone_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">CategoricalIndex</span><span class="p">(</span>
+                <span class="n">node_zone_meta</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="p">)</span>
+
+            <span class="n">node_zone_idx</span> <span class="o">=</span> <span class="n">node_zone_idx</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">timeseries_len</span><span class="p">)</span>
+
+            <span class="n">idx_zone</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span>
+                <span class="n">levels</span><span class="o">=</span><span class="n">idx_region</span><span class="o">.</span><span class="n">levels</span> <span class="o">+</span> <span class="p">[</span><span class="n">node_zone_idx</span><span class="o">.</span><span class="n">categories</span><span class="p">],</span>
+                <span class="n">codes</span><span class="o">=</span><span class="n">idx_region</span><span class="o">.</span><span class="n">codes</span> <span class="o">+</span> <span class="p">[</span><span class="n">node_zone_idx</span><span class="o">.</span><span class="n">codes</span><span class="p">],</span>
+                <span class="n">names</span><span class="o">=</span><span class="n">idx_region</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">node_zone_idx</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx_zone</span> <span class="o">=</span> <span class="n">idx_region</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">region_mapping</span> <span class="o">=</span> <span class="n">node_region_meta</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span>
+            <span class="p">)</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;node&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">region_mapping</span><span class="o">.</span><span class="n">dropna</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;all&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">region_mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="n">region_mapping_idx</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_frame</span><span class="p">(</span><span class="n">region_mapping</span><span class="p">)</span>
+                <span class="n">region_mapping_idx</span> <span class="o">=</span> <span class="n">region_mapping_idx</span><span class="o">.</span><span class="n">repeat</span><span class="p">(</span><span class="n">timeseries_len</span><span class="p">)</span>
+
+                <span class="n">idx_map</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="p">(</span>
+                    <span class="n">levels</span><span class="o">=</span><span class="n">idx_zone</span><span class="o">.</span><span class="n">levels</span> <span class="o">+</span> <span class="n">region_mapping_idx</span><span class="o">.</span><span class="n">levels</span><span class="p">,</span>
+                    <span class="n">codes</span><span class="o">=</span><span class="n">idx_zone</span><span class="o">.</span><span class="n">codes</span> <span class="o">+</span> <span class="n">region_mapping_idx</span><span class="o">.</span><span class="n">codes</span><span class="p">,</span>
+                    <span class="n">names</span><span class="o">=</span><span class="n">idx_zone</span><span class="o">.</span><span class="n">names</span> <span class="o">+</span> <span class="n">region_mapping_idx</span><span class="o">.</span><span class="n">names</span><span class="p">,</span>
+                <span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">idx_map</span> <span class="o">=</span> <span class="n">idx_zone</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">idx_map</span> <span class="o">=</span> <span class="n">idx_zone</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">idx_map</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_abatement"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_abatement">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_abatement</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format PLEXOS Abatement Class data.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): h5plexos dataframe to process</span>
+<span class="sd">            model_filename (str): name of h5plexos h5 file being processed</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Processed output, single value column with multiindex.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;abatement_name&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessPLEXOS.df_process_batterie"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.df_process_batterie">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_batterie</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Method for formatting data which comes form the PLEXOS Batteries Class</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        df : pd.DataFrame</span>
+<span class="sd">            Processed Output, single value column with multiindex.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;band&quot;</span><span class="p">,</span> <span class="s2">&quot;property&quot;</span><span class="p">])</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s2">&quot;battery_name&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="n">df_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span>
+        <span class="p">)</span>  <span class="c1"># Gets names of all columns in df and places in list</span>
+        <span class="n">df_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span>
+            <span class="mi">0</span><span class="p">,</span> <span class="n">df_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">))</span>
+        <span class="p">)</span>  <span class="c1"># move timestamp to start of df</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reorder_levels</span><span class="p">(</span><span class="n">df_col</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div></div>
+</pre></div>
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>
