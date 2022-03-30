@@ -38,6 +38,8 @@ class Storage(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
 
     def storage_volume(
         self,

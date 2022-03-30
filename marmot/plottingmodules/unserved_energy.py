@@ -40,6 +40,8 @@ class UnservedEnergy(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
 
     def unserved_energy_timeseries(
         self,

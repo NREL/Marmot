@@ -43,6 +43,8 @@ class Reserves(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
 
     def reserve_gen_timeseries(
         self,

@@ -36,10 +36,16 @@ class InstalledCapacity(MPlotDataHelper):
     """
 
     def __init__(self, **kwargs):
+        """
+        Args:
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
+        """
         # Instantiation of MPlotHelperFunctions
-
-        self.argument_dict = kwargs
         super().__init__(**kwargs)
+        
+        self.argument_dict = kwargs
 
     def total_cap(
         self,

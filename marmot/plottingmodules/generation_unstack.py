@@ -42,6 +42,8 @@ class GenerationUnStack(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
 
         self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 

@@ -42,6 +42,8 @@ class ThermalReserve(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
 
     def thermal_cap_reserves(
         self,

@@ -45,6 +45,8 @@ class Emissions(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
 
     def total_emissions_by_type(
         self,
