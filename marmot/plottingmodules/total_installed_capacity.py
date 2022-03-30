@@ -137,7 +137,7 @@ class InstalledCapacity(MPlotDataHelper):
                 )
 
             Total_Installed_Capacity_Out = pd.concat(
-                capacity_chunks, axis=0, sort=False
+                capacity_chunks, axis=0, sort=True
             ).fillna(0)
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[
                 :, (Total_Installed_Capacity_Out != 0).any(axis=0)
@@ -422,7 +422,7 @@ class InstalledCapacity(MPlotDataHelper):
 
             # Remove any suffixes from column names
             Total_Installed_Capacity_Out.columns = [
-                re.sub("[\s (]|GW|TW|MW|kW|\)", "", i)
+                re.sub("[(]|GW|TW|MW|kW|\)", "", i).strip()
                 for i in Total_Installed_Capacity_Out.columns
             ]
 
@@ -462,6 +462,7 @@ class InstalledCapacity(MPlotDataHelper):
                 for i in Total_Gen_Results.columns
             ]
 
+            print(Total_Gen_Results)
             if plot_data_settings["include_barplot_load_lines"]:
                 extra_plot_data = pd.DataFrame(Total_Gen_Results.loc[:, "Total Load"])
                 extra_plot_data["Total Demand"] = Total_Gen_Results.loc[
@@ -470,6 +471,11 @@ class InstalledCapacity(MPlotDataHelper):
                 extra_plot_data["Unserved Energy"] = Total_Gen_Results.loc[
                     :, f"Unserved Energy"
                 ]
+                if "Load-Unserved_Energy" in Total_Gen_Results.columns:
+                    extra_plot_data["Load-Unserved_Energy"] = (
+                            Total_Gen_Results["Load-Unserved_Energy"]
+                    )
+                    Total_Gen_Results.drop("Load-Unserved_Energy", axis=1, inplace=True)
 
             Total_Generation_Stack_Out = Total_Gen_Results.drop(
                 ["Total Load", f"Total Demand", f"Unserved Energy"], axis=1
