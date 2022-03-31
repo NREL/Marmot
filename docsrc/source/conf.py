@@ -13,6 +13,7 @@
 import os
 import sys
 sys.path.insert(0, os.path.abspath('../../'))
+import pkg_resources
 
 
 # -- Project information -----------------------------------------------------
@@ -22,7 +23,10 @@ copyright = '2022, Alliance for Sustainable Energy, LLC'
 author = 'Daniel Levie, Marty Schwarz, Brian Sergi, Ryan Houseman'
 
 # The full version, including alpha/beta/rc tags
-release = '0.10.0'
+version = '0.10.0'
+release = version
+
+# release = '0.10.0'
 
 #
 # -- General configuration ---------------------------------------------------
@@ -47,7 +51,8 @@ extensions = [
     "sphinx.ext.githubpages",
     "sphinx.ext.napoleon",
     'sphinx_click.ext',
-    "sphinx.ext.autosectionlabel"]
+    "sphinx.ext.autosectionlabel",
+    "sphinx_panels",]
 
 intersphinx_mapping = {
     "dateutil": ("https://dateutil.readthedocs.io/en/latest/", None),
@@ -59,6 +64,10 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "statsmodels": ("https://www.statsmodels.org/devel/", None),
 }
+
+# sphinx-panels shouldn't add bootstrap css since the pydata-sphinx-theme
+# already loads it
+panels_add_bootstrap_css = False
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -99,7 +108,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "GitHub",
-            "url": "https://github.com/pandas-dev/pandas",
+            "url": "https://github.com/NREL/Marmot",
             "icon": "fab fa-github-square",
             "type": "fontawesome",
         },]

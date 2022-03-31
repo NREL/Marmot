@@ -23,6 +23,8 @@
     href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -35,14 +37,13 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="Mapping Folder" href="mapping-folder/index.html" />
-    <link rel="prev" title="plexos_properties: csv file" href="plexos_properties.html" /> 
-<script>
- var arr = document.getElementsByClassName('reference internal');
- for(var i = 0; i < arr.length; i++) {
- arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
- }
-</script>
+    <link rel="prev" title="plexos_properties: csv file" href="plexos_properties.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
 
+    <!-- Google Analytics -->
+    
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
@@ -73,7 +74,7 @@
         <ul id="navbar-main-elements" class="navbar-nav">
     <li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../get-started/index.html">
-  Get Started
+  Getting Started
  </a>
 </li>
 
@@ -112,7 +113,7 @@
       <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
-          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -205,9 +206,26 @@
               
               <div class="toc-item">
                 
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
 <nav id="bd-toc-nav">
-    
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-definitions">
+   Input Definitions
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#columns">
+     Columns
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
 </nav>
               </div>
               
@@ -234,6 +252,198 @@
    }
 </script><section id="marmot-plot-select-csv-file">
 <h1>Marmot_plot_select: csv file<a class="headerlink" href="#marmot-plot-select-csv-file" title="Permalink to this headline">#</a></h1>
+<p>Select which plots to create.
+Set values to <strong>TRUE</strong> to create the specified plot.</p>
+<p>Allows some customization on how the plot will appear, including:</p>
+<ul class="simple">
+<li><p>Adding property annotations</p></li>
+<li><p>Set max y-axis value</p></li>
+<li><p>Set start and end dates</p></li>
+<li><p>Specify timescale for timeseries plots</p></li>
+<li><p>Adjust scenario Grouping</p></li>
+</ul>
+<p>Since individual plots can be modified in several ways, copying of rows, and adjusting the
+<strong>Figure Output Name</strong> and other settings is permitted and encouraged.
+The following describes the layout of the input sheet.</p>
+<section id="input-definitions">
+<h2>Input Definitions<a class="headerlink" href="#input-definitions" title="Permalink to this headline">#</a></h2>
+<section id="columns">
+<h3>Columns<a class="headerlink" href="#columns" title="Permalink to this headline">#</a></h3>
+<p>The Marmot_plot_select.csv has 14 columns:</p>
+<ul>
+<li><dl class="simple">
+<dt><strong>Figure Output Name (required):</strong></dt><dd><p>The name given to the figure when saved as output.
+This name is user editable and can be adjusted as liked. Figures will be saved in the
+<cite>Figures_Output</cite> folder where the <strong>Marmot_Solutions_folder</strong> has been set in the
+<a class="reference internal" href="Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Plot Graph (required):</strong></dt><dd><p>Set to TRUE to plot the figure or FALSE to skip.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><strong>Plot Property (optional):</strong></dt><dd><p>Controls the addition of annotations or selection of certain data elements such as
+individual generator or line names. The following are the list of available annotations that can be applied
+to the specified plots:</p>
+<blockquote>
+<div><ul class="simple">
+<li><dl class="simple">
+<dt><strong>gen_stack:</strong></dt><dd><ul>
+<li><p><cite>Peak Demand</cite></p></li>
+<li><p><cite>Min Net Load</cite></p></li>
+<li><p><cite>Peak RE</cite></p></li>
+<li><p><cite>Peak Unserved Energy</cite></p></li>
+<li><p><cite>Peak Curtailment</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>gen_unstack:</strong></dt><dd><ul>
+<li><p><cite>Min Net Load</cite></p></li>
+<li><p><cite>Peak Demand</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>reserve_gen_timeseries:</strong></dt><dd><ul>
+<li><p><cite>Peak Reserve Provision</cite></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</div></blockquote>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Y-Axis Max (optional):</strong></dt><dd><p>The maximum y-axis value. Currently only used in the price.py plots</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Day Before (optional):</strong></dt><dd><p>Sets the number of days to include before the specified annotation in <strong>Plot Property</strong>.
+f timestamps data intervals are larger than hours the interval range will be used in place of Days.
+(e.g., if data interval is years, this is the equivalent of <cite>Year before</cite>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Day After (optional):</strong></dt><dd><p>Sets the number of days to include after the specified annotation in <strong>Plot Property</strong>
+If timestamps data intervals are larger than hours, the interval range will be used in place of Days.
+(e.g., if data interval is years, this is the equivalent of <cite>Year before</cite>)</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Timezone (optional):</strong></dt><dd><p>Optional time zone to apply to the figures x-axes</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><strong>Start date (optional):</strong></dt><dd><p>The start date to plot data from. Accepts any of the following formats:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>M/D/Y</p></li>
+<li><p>M/Y</p></li>
+<li><p>Y</p></li>
+<li><p>M/D/Y HH:MM:SS</p></li>
+</ul>
+</div></blockquote>
+<p>It will also accept dates formatted as D/M/Y and Y/M/D. Python will make a best guess at the
+inputted format. If left blank the entire range of data will be plotted.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><strong>End date (optional):</strong></dt><dd><p>The end date to plot data to. Accepts any of the following formats:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>M/D/Y</p></li>
+<li><p>M/Y</p></li>
+<li><p>Y</p></li>
+<li><p>M/D/Y HH:MM:SS</p></li>
+</ul>
+</div></blockquote>
+<p>It will also accept dates formatted as D/M/Y and Y/M/D. Python will make a best guess at the
+inputted format. If left blank the entire range of data will be plotted.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><strong>Timeseries Plot Resolution (optional):</strong></dt><dd><p>The resolution to plot timeseries figures at. Current available options are
+<cite>Interval</cite> and <cite>Annual</cite>. If the value is left blank and the plot creates a timeseries, Marmot will
+default to plotting interval data.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.10.0.</span></p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><strong>Group by Scenario or Year-Scenario (optional):</strong></dt><dd><p>Specifies whether to group data by <cite>Scenario</cite> or <cite>Year-Scenario</cite>. This setting will only
+effect data that has been grouped into bar plots or diurnal line plots and will have no
+effect on timeseries plots.
+If grouping by <cite>Year-Scenario</cite> the year will be identified
+from the input data timestamp and appended to the scenario name defined in
+<a class="reference internal" href="Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a>. This is useful when
+plotting data which covers multiple years such as ReEDS. If left blank Marmot will default to
+grouping data by <cite>Scenario</cite>.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.10.0.</span></p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><strong>Custom Data File (optional):</strong></dt><dd><p>Path to a custom data file allowing the insertion of custom columns that will be
+appended to the final data frame before plotting
+The custom data file must be a csv.
+Default position of new columns is at the end of the existing data frame.
+Custom data files should have the same format as the final output data csv’s,
+the usual format is scenarios in index, generator techs as column names.
+However, this format may not hold true for all plots in the future.
+Therefore, using this feature may involve some trial and error and should be considered experimental.
+Custom Data Files can be added into the following plots:</p>
+<blockquote>
+<div><ul class="simple">
+<li><p>production_cost: prod_cost</p></li>
+<li><p>production_cost: sys_cost</p></li>
+<li><p>production_cost: detailed_gen_cost</p></li>
+<li><p>production_cost : sys_cost_type</p></li>
+<li><p>emissions : total_emissions_by_type</p></li>
+</ul>
+</div></blockquote>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.9.0.</span></p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Marmot Module (required):</strong></dt><dd><p>The name of the module containing the plotting methods. Plotting modules group plots by type,
+e.g <cite>total_generation</cite>, <cite>prices</cite>, <cite>curtailment</cite> etc.
+This is a required value and should not be modified.
+Copying the data to a new line is permitted with the inclusion of the corresponding method.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Method (required):</strong></dt><dd><p>The name of the method containing the specific plot logic. These methods are contained within
+the corresponding module.
+This is a required value and should not be modified.
+Copying the data to a new line is permitted with the inclusion of the corresponding module.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
 </section>
 
 

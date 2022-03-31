@@ -14,11 +14,11 @@
 Install the Marmot software
 =============================
 
-- Marmot requires Python 3.6 and the following prerequisites to run:
+- Marmot requires Python 3.6 and the following minimum prerequisites to run:
   
   * hdf5=1.10.4 (Install with conda or download from `HDF group website <https://www.hdfgroup.org/downloads/hdf5>`_)
   * numpy
-  * pandas=1.0.5
+  * pandas>=1.0.5
   * PyYAML
   * h5py==2.10.0
   * matplotlib>=3.1.0
@@ -35,30 +35,33 @@ Clone the Marmot repository
 
 Clone the most recent version of the ``Marmot`` repository::
 
-   git clone --recurse-submodules git@github.com:NREL/Marmot.git --branch v0.8.0
+   git clone --recurse-submodules git@github.com:NREL/Marmot.git --branch v0.10.0
 
 You will need to have set up a public key using ``ssh-keygen`` and `added your public key to your GitHub account
 <https://github.com/settings/ssh/new>`_ for this to work. Or, you can use HTTPS instead::
 
-    git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.8.0
+    git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.10.0
 
 Set up a conda environment
 ---------------------------
 
 Setting up a new conda environment is the recommended route for running Marmot.
 To ensure you are using all the required Python modules, create a new conda 
-environment using the provided `marmot-env yml file <https://github.com/NREL/Marmot/blob/main/marmot-env.yml>`_, 
+environment using the provided system specific `marmot-env yml file <https://github.com/NREL/Marmot/blob/main/marmot-env10.yml>`_, 
 located in the Marmot repository.
+
+.. note::
+  The following example uses the provided **Windows** conda environment.
 
 - To create and activate a new conda environment open a terminal and follow these steps:
 
    1. Create the environment from the ``marmot-env.yml`` file, if you are not in the Marmot directory, use the full file path to the file::
 
-         conda env create -f marmot-env.yml
+         conda env create -f marmot-env10.yml
 
    2. Activate the new environment::
    
-         conda activate marmot-env
+         conda activate marmot-env10
 
    3. The required modules should now be ready to use, to verify the environment was setup correctly type::
 

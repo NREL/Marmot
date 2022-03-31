@@ -77,7 +77,7 @@ When you open the file, you will see the following structure:
 
 .. image:: ../images/plot-select-example.png
 
-The file has 11 columns, column **A** is the name of the figures we can create and the names they will be given once saved.
+The file has 14 columns, column **A** is the name of the figures we can create and the names they will be given once saved.
 Column **B** accepts TRUE/FALSE values and is used to determine whether Marmot should create the specified figure. 
 For a more comprehensive look at this file see our How-to Guides and 
 :doc:`Input File References sections<../references/input-files/Marmot_plot_select>`
@@ -97,17 +97,17 @@ Running the Plotter
 
 With the input files setup, we are now ready to create our selected figures.
 Open a terminal that is setup with Python and conda such as Anaconda prompt and change directory 
-to the ``Marmot\marmot`` repository folder using the ``cd`` command like the following example::
+to the ``Marmot\bin`` repository folder using the ``cd`` command like the following example::
 
-      cd E:\Marmot\marmot
+      cd E:\Marmot\bin
 
 Next activate the marmot-env::
 
-      conda activate marmot-env
+      conda activate marmot-env10
 
 Finally initiate the plotter using the following command::
 
-      python .\marmot_plot_main.py
+      python run_marmot_plotter.pt
 
 
 Marmot will now begin creating your figures and will print messages to the terminal.

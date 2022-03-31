@@ -23,6 +23,8 @@
     href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -35,14 +37,13 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Tutorial: Creating plots and data-tables" href="plot-tutorial.html" />
-    <link rel="prev" title="Install the Marmot software" href="install.html" /> 
-<script>
- var arr = document.getElementsByClassName('reference internal');
- for(var i = 0; i < arr.length; i++) {
- arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
- }
-</script>
+    <link rel="prev" title="Install the Marmot software" href="install.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
 
+    <!-- Google Analytics -->
+    
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
@@ -73,7 +74,7 @@
         <ul id="navbar-main-elements" class="navbar-nav">
     <li class="toctree-l1 current active nav-item">
  <a class="reference internal nav-link" href="index.html">
-  Get Started
+  Getting Started
  </a>
 </li>
 
@@ -112,7 +113,7 @@
       <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
-          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -321,16 +322,16 @@ used to determine whether Marmot should process the specified property. For a mo
 <h2>Running the formatter<a class="headerlink" href="#running-the-formatter" title="Permalink to this headline">#</a></h2>
 <p>With the input files setup, we are now ready to process our selected properties.
 Open a terminal that is setup with Python and conda such as Anaconda prompt and change directory
-to the <code class="docutils literal notranslate"><span class="pre">Marmot\marmot</span></code> repository folder using the <code class="docutils literal notranslate"><span class="pre">cd</span></code> command like the following example:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">E</span><span class="p">:</span>\<span class="n">Marmot</span>\<span class="n">marmot</span>
+to the <code class="docutils literal notranslate"><span class="pre">Marmot\bin</span></code> repository folder using the <code class="docutils literal notranslate"><span class="pre">cd</span></code> command like the following example:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">E</span><span class="p">:</span>\<span class="n">Marmot</span>\<span class="nb">bin</span>
 </pre></div>
 </div>
 <p>Next activate the marmot-env:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env10</span>
 </pre></div>
 </div>
 <p>Finally initiate the formatter using the following command:</p>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="o">.</span>\<span class="n">marmot_h5_formatter</span><span class="o">.</span><span class="n">py</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_marmot_formatter</span><span class="o">.</span><span class="n">py</span>
 </pre></div>
 </div>
 <p>Marmot will now begin formatting your properties and will print messages to the terminal.

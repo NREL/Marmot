@@ -23,6 +23,8 @@
     href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/css/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -35,14 +37,13 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="plexos_properties: csv file" href="plexos_properties.html" />
-    <link rel="prev" title="Input File Reference" href="files.html" /> 
-<script>
- var arr = document.getElementsByClassName('reference internal');
- for(var i = 0; i < arr.length; i++) {
- arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
- }
-</script>
+    <link rel="prev" title="Input File Reference" href="files.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
 
+    <!-- Google Analytics -->
+    
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
@@ -73,7 +74,7 @@
         <ul id="navbar-main-elements" class="navbar-nav">
     <li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../get-started/index.html">
-  Get Started
+  Getting Started
  </a>
 </li>
 
@@ -112,7 +113,7 @@
       <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
-          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -205,9 +206,36 @@
               
               <div class="toc-item">
                 
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
 <nav id="bd-toc-nav">
-    
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-definitions">
+   Input Definitions
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#columns">
+     Columns
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#rows">
+     Rows
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-example">
+   Input Example
+  </a>
+ </li>
+</ul>
+
 </nav>
               </div>
               
@@ -234,6 +262,305 @@
    }
 </script><section id="marmot-user-defined-inputs-csv-file">
 <h1>Marmot_user_defined_inputs: csv file<a class="headerlink" href="#marmot-user-defined-inputs-csv-file" title="Permalink to this headline">#</a></h1>
+<p>Sets what data will be processed and plotted:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>For formatting:</strong></dt><dd><p>Controls the type and location of data to process.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>For Plotting:</strong></dt><dd><p>Sets the scenarios to plot and compare, the specific aggregation to plot,
+and any figure axes labels.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<p>The names of the mapping files to use are also set here. By default, these are looked
+for in the <em>mapping folder</em>. A full path can also be used in their place.</p>
+<section id="input-definitions">
+<h2>Input Definitions<a class="headerlink" href="#input-definitions" title="Permalink to this headline">#</a></h2>
+<section id="columns">
+<h3>Columns<a class="headerlink" href="#columns" title="Permalink to this headline">#</a></h3>
+<p>The Marmot_user_defined_inputs.csv has 4 columns:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>Input:</strong></dt><dd><p>Name of input being adjusted</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Input_type:</strong></dt><dd><p>Python data type of input</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Importance:</strong></dt><dd><p>Whether something is <em>Required</em> or <em>Optional</em></p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>User_defined_value:</strong></dt><dd><p>The user value for the specific input</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+<section id="rows">
+<h3>Rows<a class="headerlink" href="#rows" title="Permalink to this headline">#</a></h3>
+<p>The following are the rows by Input</p>
+<ul>
+<li><dl>
+<dt><strong>Simulation Model (str, required):</strong></dt><dd><p>Name of model being processed, current options are PLEXOS, ReEDS and EGRET</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.9.0.</span></p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><strong>PLEXOS_data_blocks (list, optional):</strong></dt><dd><p>PLEXOS results type. e.g ‘ST’, ‘MT’, ‘LT’ or ‘PASA’, can pass a list of values (comma separated)
+or a single value. If left blank will default to ST. Only used when processing PLEXOS results.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.9.0.</span></p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Model_Solutions_folder (path, required):</strong></dt><dd><p>The directory that contains all the <strong>Simulation Model</strong> results.
+This directory should include a sub-folder for each scenario in the <strong>Scenario_process_list</strong>,
+each of which holds the individual scenario results files. For PLEXOS this would be h5plexos files and for ReEDS
+this would be the output results folder containing gdx files.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Marmot_Solutions_folder (path, optional):</strong></dt><dd><p>This is the base directory for saving outputs.
+When <em>marmot_h5_formatter.py</em> is run it will create a <cite>Processed_HDF5 folder</cite> here, and will save all the processed results with the extension
+“<em>_formatted.h5</em>”. Including a folder path here allows the user to save outputs in a different location from
+inputs if desired. If left blank all data and plots will be saved in <strong>Model_Solutions_folder</strong>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Scenario_process_list:</strong> (path, required)</dt><dd><p>This is the list of scenarios to process. The simulation results files should be saved in folders with these names.
+The list must contain at least one entry.</p>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt><strong>process_subset_years (list, optional):</strong></dt><dd><p>For ReEDS models specifies a subset of years to process to the “<em>_formatted.h5</em>” file. If left blank all years will be processed.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.10.0.</span></p>
+</div>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Region_Mapping.csv_name (str, optional):</strong></dt><dd><p>The name of the Region_Mapping.csv. This file allows custom geographic aggregations to be
+created. It is described in more detail in <a class="reference internal" href="mapping-folder/region_mapping.html#region-mapping-csv-file"><span class="std std-ref">Region Mapping: csv file</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>gen_names.csv_name (str, required):</strong></dt><dd><p>The name of the gen_names.csv. Used to rename existing model generator technology types.
+It is described in more detail in <a class="reference internal" href="mapping-folder/gen_names.html#gen-names-csv-file"><span class="std std-ref">gen_names: csv file</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>ordered_gen_categories_file (str, required):</strong></dt><dd><p>The name of the ordered_gen_categories_file.csv. Used to specify the order
+generator technologies appear in a figure and allows grouping of technologies into
+pre-defined and custom categories. It is described in more detail in <a class="reference internal" href="mapping-folder/ordered_gen_categories.html#ordered-gen-categories-csv-file"><span class="std std-ref">ordered_gen_categories: csv file</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>emit_names.csv_name (str, required):</strong></dt><dd><p>The name of the emit_names.csv. Allows renaming of existing emission types.
+It is described in more detail in <a class="reference internal" href="mapping-folder/emit_names.html#emit-names-csv-file"><span class="std std-ref">emit_names: csv file</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>color_dictionary_file (str, required):</strong></dt><dd><p>The name of the color_dictionary_file.csv. Sets the color for each generator technology.
+It is described in more detail in <a class="reference internal" href="mapping-folder/colour_dictionary.html#colour-dictionary-csv-file"><span class="std std-ref">colour_dictionary: csv file</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Scenarios (list, required):</strong></dt><dd><p>This is the name(s) of the scenario(s) to plot. The order of the scenarios will determine the order of the
+scenarios in the plot. The plotter will look for these scenarios in the <cite>Processed_HDF5 folder</cite> of the
+<strong>Marmot_Solutions_folder</strong> described above. The “<em>_formatted.h5</em>” suffix should not be included in the scenario name.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Scenario_Diff_plot (list, optional):</strong></dt><dd><p>Two value list of scenarios which is used to compare one scenario directly against another. The first scenario will be
+subtracted from the second. This setting is currently only used by the <cite>gen_diff</cite> plotting method in the generation_stack.py module.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>AGG_BY (str, required):</strong></dt><dd><p>A string that determines the region type by which to aggregate when creating plots. Values are <cite>case sensitive</cite>.
+The default options are <em>”regions”</em> and <em>“zones”</em>. Other options can be added based on how the user sets
+up the <strong>Region_mapping.csv</strong>, described in <a class="reference internal" href="mapping-folder/region_mapping.html#region-mapping-csv-file"><span class="std std-ref">Region Mapping: csv file</span></a>.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>zone_region_sublist (list, optional):</strong></dt><dd><p>List of <em>“regions/zones”</em> to plot if results are not required for all regions.
+The list of <em>“regions/zones”</em> should be contained within the <strong>AGG_BY</strong> aggregation.
+This is an optional field and can be left empty if not needed.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>TECH_SUBSET (str, optional):</strong></dt><dd><p>Tech category to subset by to allow plotting of only certain technologies,
+e.g., thermal, vre, storage etc. The value given here should correspond to one of the columns
+in the <a class="reference internal" href="mapping-folder/ordered_gen_categories.html#ordered-gen-categories-csv-file"><span class="std std-ref">ordered_gen_categories: csv file</span></a>. Values are <cite>case sensitive</cite>.
+If left blank all available technologies will be plotted.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Facet_ylabels Facet_xlabels (list, optional):</strong></dt><dd><p>Labels that will be applied to the axes of facet plots.
+The number of entries given to each label will determine the dimensions of the Facet plot.
+For example, if you have 6 scenarios, your facet grid dimensions in x,y coordinates may be [2,3], [3,2] or [1,6] etc.
+This is an optional field and can be left empty if not needed. Facet plots can still be created without labels if desired.
+The facet layout will default to max 3 plots wide, with no maximum to the length if not Facet labels are supplied.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Tick_labels (list, optional):</strong></dt><dd><p>List of custom tick labels, which allows adjustment of scenario names on all bar plots.
+Does not apply to difference plots or plots from the <cite>capacity_factor.py</cite> module.</p>
+</dd>
+</dl>
+</li>
+</ul>
+<div class="admonition-see-also admonition">
+<p class="admonition-title">See Also</p>
+<p>What’s a Facet Plot? Examples and usage guide.</p>
+</div>
+</section>
+</section>
+<section id="input-example">
+<h2>Input Example<a class="headerlink" href="#input-example" title="Permalink to this headline">#</a></h2>
+<table class="colwidths-given table" id="id1">
+<caption><span class="caption-text"><a class="reference external" href="https://github.com/NREL/Marmot/blob/ReEDS_formatter/marmot/input_files/Marmot_user_defined_inputs.csv">Marmot_user_defined_inputs</a></span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 35%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Input</p></th>
+<th class="head"><p>Input_type</p></th>
+<th class="head"><p>Importance</p></th>
+<th class="head"><p>User_defined_value</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Simulation_model</p></td>
+<td><p>str</p></td>
+<td><p>required</p></td>
+<td><p>PLEXOS</p></td>
+</tr>
+<tr class="row-odd"><td><p>PLEXOS_data_blocks</p></td>
+<td><p>list</p></td>
+<td><p>optional</p></td>
+<td><p>ST</p></td>
+</tr>
+<tr class="row-even"><td><p>Model_Solutions_folder</p></td>
+<td><p>folder</p></td>
+<td><p>required</p></td>
+<td><p>Marmot//example-data//hourly</p></td>
+</tr>
+<tr class="row-odd"><td><p>Marmot_Solutions_folder</p></td>
+<td><p>folder</p></td>
+<td><p>optional</p></td>
+<td><p>Marmot//example-results</p></td>
+</tr>
+<tr class="row-even"><td><p>Scenario_process_list</p></td>
+<td><p>List</p></td>
+<td><p>required</p></td>
+<td><p>Base DA, High VG DA</p></td>
+</tr>
+<tr class="row-odd"><td><p>process_subset_years</p></td>
+<td><p>List</p></td>
+<td><p>optional</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Region_Mapping.csv_name</p></td>
+<td><p>string</p></td>
+<td><p>optional(default)</p></td>
+<td><p>Region_mapping.csv</p></td>
+</tr>
+<tr class="row-odd"><td><p>gen_names.csv_name</p></td>
+<td><p>string</p></td>
+<td><p>required(default)</p></td>
+<td><p>gen_names.csv</p></td>
+</tr>
+<tr class="row-even"><td><p>ordered_gen_categories_file</p></td>
+<td><p>string</p></td>
+<td><p>required(default)</p></td>
+<td><p>ordered_gen_categories.csv</p></td>
+</tr>
+<tr class="row-odd"><td><p>emit_names.csv_name</p></td>
+<td><p>string</p></td>
+<td><p>required(default)</p></td>
+<td><p>emit_names.csv</p></td>
+</tr>
+<tr class="row-even"><td><p>color_dictionary_file</p></td>
+<td><p>string</p></td>
+<td><p>required(default)</p></td>
+<td><p>colour_dictionary.csv</p></td>
+</tr>
+<tr class="row-odd"><td><p>Scenarios</p></td>
+<td><p>string or List</p></td>
+<td><p>required</p></td>
+<td><p>Base DA, High VG DA</p></td>
+</tr>
+<tr class="row-even"><td><p>Scenario_Diff_plot</p></td>
+<td><p>List</p></td>
+<td><p>optional</p></td>
+<td><p>Base DA, High VG DA</p></td>
+</tr>
+<tr class="row-odd"><td><p>AGG_BY</p></td>
+<td><p>string</p></td>
+<td><p>required</p></td>
+<td><p>region</p></td>
+</tr>
+<tr class="row-even"><td><p>zone_region_sublist</p></td>
+<td><p>List</p></td>
+<td><p>optional</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>TECH_SUBSET</p></td>
+<td><p>string</p></td>
+<td><p>optional</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Facet_ylabels</p></td>
+<td><p>List</p></td>
+<td><p>optional</p></td>
+<td><p>2024</p></td>
+</tr>
+<tr class="row-odd"><td><p>Facet_xlabels</p></td>
+<td><p>List</p></td>
+<td><p>optional</p></td>
+<td><p>Base, High VG</p></td>
+</tr>
+<tr class="row-even"><td><p>Tick_labels</p></td>
+<td><p>List</p></td>
+<td><p>optional</p></td>
+<td><p>Base, High VG</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 
 

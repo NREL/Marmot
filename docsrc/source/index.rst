@@ -5,30 +5,7 @@
 
 .. raw:: html
 
-    <style>
-        .row {clear: both}
-        h2  {border-bottom: 1px solid gray;}
 
-        .column img {border: 1px solid gray;}
-
-        @media only screen and (min-width: 1000px),
-               only screen and (min-width: 500px) and (max-width: 768px){
-
-            .column {
-                padding-left: 5px;
-                padding-right: 5px;
-                float: left;
-            }
-
-            .column3  {
-                width: 33.3%;
-            }
-
-            .column2  {
-                width: 50%;
-            }
-        }
-    </style>
 
     <script>
       var arr = document.getElementsByClassName('reference internal');
@@ -42,11 +19,15 @@
 Marmot - an energy modelling results visualization tool 
 ========================================================
 
-Marmot is a data formatting and visualization tool for PLEXOS production cost modelling results.
-It provides an efficient way to view PLEXOS results by combing temporally disaggregated results 
+Marmot is a data formatting and visualization tool for production cost and capacity expansion 
+modelling results. 
+It provides an efficient way to analysis data by combing temporally disaggregated results 
 and allowing the aggregation of different device types and modelling regions.
 
-Marmot has approximately 100 pre-built plots which allow significant customization, allowing a
+Marmot currently supports analysis of `PLEXOS <https://www.energyexemplar.com/plexos>`_ 
+production costs modelling and `ReEDS <https://www.nrel.gov/analysis/reeds/>`_ capacity expansion results.
+
+Marmot has approximately 120 pre-built plots which allow significant customization, allowing a
 user to create publication figures and data-tables fast.
 
 .. figure:: /images/3_Stacked_Gen_Facet_Grid_Peak_Demand.svg
@@ -54,60 +35,88 @@ user to create publication figures and data-tables fast.
 
     Stacked Generation Plot
 
-.. figure:: /images/3_Total_Installed_Capacity_and_Generation_Facet.svg
-    :align: center
-
-    Total Installed Capacity and Total Generation Plot
-
-If you are a new Marmot user, check out the **Get Started** section of the documentation for 
+If you are a new Marmot user, check out the **Getting Started** section of the documentation for 
 installation instructions and introductory tutorials. For more in depth explanations of various 
 operations and details on Marmot, read our **How-to Guides**. If you would like to see some 
 example plot outputs, you can view them in the **Plotting Examples Gallery**.
 
-Contents
-------------
 
-.. rst-class:: clearfix row
+.. panels::
+    :card: + intro-card text-center
+    :column: col-lg-6 col-md-6 col-sm-6 col-xs-12 d-flex
 
-.. rst-class:: column column2
+    ---
 
-:doc:`Get started <get-started/index>`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Getting started
+    ^^^^^^^^^^^^^^^
 
-Install the software, introductory tutorials.
+    Install the software, introductory tutorials.
 
-.. rst-class:: column column2
+    +++
 
-:doc:`How-to Guides <how-to/index>`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    .. link-button:: ./get-started/index.html
+            :type: url
+            :text: To the getting started guides
+            :classes: btn-block btn-secondary stretched-link
 
-Guides on using Marmot.
+    ---
 
-.. rst-class:: clearfix row
+    How-to Guides
+    ^^^^^^^^^^^^^^^
 
-.. rst-class:: column column2
+    Guides on using Marmot.
 
-:doc:`Plotting Examples Gallery <plot-gallery/index>`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    +++
 
-Marmot output figures examples
+    .. link-button:: ./how-to/index.html
+            :type: url
+            :text: To the how-to guides
+            :classes: btn-block btn-secondary stretched-link
 
-.. rst-class:: column column2
+    ---
 
-:doc:`Input File References <references/input-files/files>`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Plotting Examples Gallery
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Guide to input files.
+    Marmot output figures examples
+
+    +++
+
+    .. link-button:: ./plot-gallery/index.html
+            :type: url
+            :text: To the plotting gallery
+            :classes: btn-block btn-secondary stretched-link
+
+    ---
+
+    Input File References
+    ^^^^^^^^^^^^^^^^
+
+    Guide to input files.
+
+    +++
+
+    .. link-button:: ./references/input-files/files.html
+            :type: url
+            :text: To the input file reference
+            :classes: btn-block btn-secondary stretched-link
+
+    ---
 
 
-.. rst-class:: clearfix row
+    Code References
+    ^^^^^^^^^^^^^^^^
 
-:doc:`Code References <references/code/modules>`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    Guide to code api.
 
-Guide to key Python classes and functions.
+    +++
 
-.. rst-class:: column column2
+    .. link-button:: ./references/code/modules.html
+            :type: url
+            :text: To the code reference api
+            :classes: btn-block btn-secondary stretched-link
+
+
 
 
 
@@ -124,7 +133,7 @@ Guide to key Python classes and functions.
    
 
 Indices and tables
-==================
+~~~~~~~~~~~~~~~~~~
 
 * :ref:`genindex`
 * :ref:`modindex`

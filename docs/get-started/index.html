@@ -8,7 +8,7 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Get Started &#8212; Marmot 0.10.0 documentation</title>
+    <title>Getting Started &#8212; Marmot 0.10.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -23,6 +23,8 @@
     href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
 
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -35,14 +37,13 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="Install the Marmot software" href="install.html" />
-    <link rel="prev" title="Marmot - an energy modelling results visualization tool" href="../index.html" /> 
-<script>
- var arr = document.getElementsByClassName('reference internal');
- for(var i = 0; i < arr.length; i++) {
- arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '_<wbr/>');
- }
-</script>
+    <link rel="prev" title="Marmot - an energy modelling results visualization tool" href="../index.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
 
+    <!-- Google Analytics -->
+    
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
     
@@ -73,7 +74,7 @@
         <ul id="navbar-main-elements" class="navbar-nav">
     <li class="toctree-l1 current active nav-item">
  <a class="current reference internal nav-link" href="#">
-  Get Started
+  Getting Started
  </a>
 </li>
 
@@ -112,7 +113,7 @@
       <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
-          <a class="nav-link" href="https://github.com/pandas-dev/pandas" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
             <label class="sr-only">GitHub</label></a>
         </li>
       </ul>
@@ -168,9 +169,24 @@
               
               <div class="toc-item">
                 
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
 <nav id="bd-toc-nav">
-    
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#installation">
+   Installation
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#getting-started-tutorials">
+   Getting Started Tutorials
+  </a>
+ </li>
+</ul>
+
 </nav>
               </div>
               
@@ -195,18 +211,73 @@
    for(var i = 0; i < arr.length; i++) {
    arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
    }
-</script><section id="get-started">
-<h1>Get Started<a class="headerlink" href="#get-started" title="Permalink to this headline">#</a></h1>
-<p>This section describes the installation of the Marmot software and provides two introductory
-tutorials; the first on formatting PLEXOS modelling results from a h5plexos file and the second on
-creating plots and data-tables from the formatted data.</p>
-<div class="toctree-wrapper compound">
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="install.html">Install the Marmot software</a></li>
-<li class="toctree-l1"><a class="reference internal" href="format-tutorial.html">Tutorial: Formatting PLEXOS modelling results</a></li>
-<li class="toctree-l1"><a class="reference internal" href="plot-tutorial.html">Tutorial: Creating plots and data-tables</a></li>
-</ul>
+</script><section id="getting-started">
+<h1>Getting Started<a class="headerlink" href="#getting-started" title="Permalink to this headline">#</a></h1>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">#</a></h2>
+<div class="sphinx-bs container pb-4 docutils">
+<div class="row docutils">
+<div class="d-flex col-12 p-3 docutils">
+<div class="card w-100 shadow install-card docutils">
+<div class="card-header docutils">
+<p class="card-text">Quick Install from Repo</p>
 </div>
+<div class="card-body docutils">
+<p class="card-text">The following command will clone the latest Marmot version.</p>
+</div>
+<div class="card-footer docutils">
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span>git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.10.0
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="d-flex col-12 p-3 docutils">
+<div class="card w-100 shadow install-card docutils">
+<div class="card-header docutils">
+<p class="card-text">In-depth installation instructions?</p>
+</div>
+<div class="card-body docutils">
+<p class="card-text">Need more help in installation or setting up an environment?
+Check the indepth installation page.</p>
+<p class="card-text"><a class="sphinx-bs btn text-wrap btn-secondary stretched-link reference external" href="./install.html"><span>Learn more</span></a></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="getting-started-tutorials">
+<h2>Getting Started Tutorials<a class="headerlink" href="#getting-started-tutorials" title="Permalink to this headline">#</a></h2>
+<div class="sphinx-bs container pb-4 docutils">
+<div class="row docutils">
+<div class="d-flex col-lg-6 col-md-6 col-sm-12 col-xs-12 p-3 docutils">
+<div class="card w-100 shadow install-card docutils">
+<div class="card-header docutils">
+<p class="card-text">Format data</p>
+</div>
+<div class="card-body docutils">
+<p class="card-text">An introductory tutorial on formatting data with Marmot.</p>
+<p class="card-text"><a class="sphinx-bs btn text-wrap btn-secondary stretched-link reference external" href="./format-tutorial.html"><span>Learn more</span></a></p>
+</div>
+</div>
+</div>
+<div class="d-flex col-lg-6 col-md-6 col-sm-12 col-xs-12 p-3 docutils">
+<div class="card w-100 shadow install-card docutils">
+<div class="card-header docutils">
+<p class="card-text">Plotting data</p>
+</div>
+<div class="card-body docutils">
+<p class="card-text">An introductory tutorial on creating plots with Marmot.</p>
+<p class="card-text"><a class="sphinx-bs btn text-wrap btn-secondary stretched-link reference external" href="./plot-tutorial.html"><span>Learn more</span></a></p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="toctree-wrapper compound">
+</div>
+</section>
 </section>
 
 

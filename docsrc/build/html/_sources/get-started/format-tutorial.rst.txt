@@ -124,17 +124,17 @@ Running the formatter
 
 With the input files setup, we are now ready to process our selected properties.
 Open a terminal that is setup with Python and conda such as Anaconda prompt and change directory 
-to the ``Marmot\marmot`` repository folder using the ``cd`` command like the following example::
+to the ``Marmot\bin`` repository folder using the ``cd`` command like the following example::
 
-      cd E:\Marmot\marmot
+      cd E:\Marmot\bin
 
 Next activate the marmot-env::
 
-      conda activate marmot-env
+      conda activate marmot-env10
 
 Finally initiate the formatter using the following command::
 
-      python .\marmot_h5_formatter.py
+      python run_marmot_formatter.py
 
 
 Marmot will now begin formatting your properties and will print messages to the terminal.
