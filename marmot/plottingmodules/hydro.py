@@ -46,6 +46,8 @@ class Hydro(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
 
     def hydro_continent_net_load(
         self, start_date_range: str = None, end_date_range: str = None, **_

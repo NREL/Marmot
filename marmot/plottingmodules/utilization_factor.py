@@ -61,6 +61,8 @@ class UtilizationFactor(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
 
     def uf_fleet(self, **_):
         """Plot under development

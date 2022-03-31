@@ -42,6 +42,8 @@ class Transmission(MPlotDataHelper):
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
+        # Instantiation of MPlotHelperFunctions
+        super().__init__(**kwargs)
         
         self.font_defaults = mconfig.parser("font_settings")
         self.meta = MetaData(self.processed_hdf5_folder, 
