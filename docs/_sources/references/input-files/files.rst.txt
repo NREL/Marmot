@@ -6,16 +6,49 @@
       arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
       }
    </script>
-   
+
+======================
 Input File Reference
 ======================
 
+This page gives an overview of all the input files used by Marmot.
+These files are all located in the 
+`Marmot/marmot/input_files <https://github.com/NREL/Marmot/tree/main/marmot/input_files>`_ directory.
+
+User Defined Inputs
+---------------------
+.. toctree::
+   :maxdepth: 1
+
+   Marmot_user_defined_inputs
+
+Formatter Input Property Files 
+-------------------------------
+.. toctree::
+   :maxdepth: 1
+
+   plexos_properties
+   reeds_properties
+
+Plot Selection File 
+-------------------------------
+.. toctree::
+   :maxdepth: 1
+
+   Marmot_plot_select
+
+Config File 
+-------------------------------
+.. toctree::
+   :maxdepth: 1
+
+   config_yml
+
+Mapping Folder
+-----------------------
 .. toctree::
    :maxdepth: 2
 
-   Marmot_user_defined_inputs
-   plexos_properties
-   Marmot_plot_select
    mapping-folder/index
 
 

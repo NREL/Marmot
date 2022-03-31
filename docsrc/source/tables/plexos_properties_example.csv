@@ -1,0 +1,11 @@
+data_type,group,data_set,collect_data,description
+interval,generator,Fuel Cost,TRUE,Amount paid by each generator for fuel at each timestep.
+interval,generator,Generation,TRUE,Output from each generator by timestep
+interval,emission,Production,TRUE,Total emissions production by timestep.
+interval,region,Imports,TRUE,Total imports to a region
+interval,region,Unserved Energy,TRUE,Dropped load in a region
+interval,reserve,Provision,TRUE,Reserves provided by region and timestep.
+interval,reserves_generators,Provision,TRUE,Reserves provided by generator and timestep
+interval,zone,Price,TRUE,Depends on the load settlement model used. 
+year,generator,Installed Capacity,TRUE,Nameplate power capacity (Max Capacity x Units)
+year,interface,Export Limit,FALSE,Interface Export Limit in MW

@@ -60,7 +60,7 @@ The Marmot_plot_select.csv has 14 columns:
    The maximum y-axis value. Currently only used in the price.py plots
 - **Day Before (optional):**
     Sets the number of days to include before the specified annotation in **Plot Property**. 
-    f timestamps data intervals are larger than hours the interval range will be used in place of Days. 
+    If timestamps data intervals are larger than hours the interval range will be used in place of Days. 
     (e.g., if data interval is years, this is the equivalent of `Year before`)
 - **Day After (optional):**
    Sets the number of days to include after the specified annotation in **Plot Property**
@@ -136,5 +136,11 @@ The Marmot_plot_select.csv has 14 columns:
    the corresponding module.
    This is a required value and should not be modified.
    Copying the data to a new line is permitted with the inclusion of the corresponding module.
+
+Input Example
+--------------
+
+For an example of the file see it on the GitHub repo:
+`Marmot_plot_select <https://github.com/NREL/Marmot/blob/ReEDS_formatter/marmot/input_files/Marmot_plot_select.csv>`_
 
 

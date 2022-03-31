@@ -36,8 +36,8 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="Mapping Folder" href="mapping-folder/index.html" />
-    <link rel="prev" title="plexos_properties: csv file" href="plexos_properties.html" />
+    <link rel="next" title="config: yml file" href="config_yml.html" />
+    <link rel="prev" title="reeds_properties: csv file" href="reeds_properties.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -136,22 +136,40 @@
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
   <div class="bd-toc-item active">
-    <ul class="current nav bd-sidenav">
+    <ul class="nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="Marmot_user_defined_inputs.html">
    Marmot_user_defined_inputs: csv file
   </a>
  </li>
+</ul>
+<ul class="nav bd-sidenav">
  <li class="toctree-l1">
   <a class="reference internal" href="plexos_properties.html">
    plexos_properties: csv file
   </a>
  </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="reeds_properties.html">
+   reeds_properties: csv file
+  </a>
+ </li>
+</ul>
+<ul class="current nav bd-sidenav">
  <li class="toctree-l1 current active">
   <a class="current reference internal" href="#">
    Marmot_plot_select: csv file
   </a>
  </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="config_yml.html">
+   config: yml file
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
  <li class="toctree-l1 has-children">
   <a class="reference internal" href="mapping-folder/index.html">
    Mapping Folder
@@ -223,6 +241,11 @@
     </a>
    </li>
   </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-example">
+   Input Example
+  </a>
  </li>
 </ul>
 
@@ -328,7 +351,7 @@ to the specified plots:</p>
 </li>
 <li><dl class="simple">
 <dt><strong>Day Before (optional):</strong></dt><dd><p>Sets the number of days to include before the specified annotation in <strong>Plot Property</strong>.
-f timestamps data intervals are larger than hours the interval range will be used in place of Days.
+If timestamps data intervals are larger than hours the interval range will be used in place of Days.
 (e.g., if data interval is years, this is the equivalent of <cite>Year before</cite>)</p>
 </dd>
 </dl>
@@ -444,6 +467,11 @@ Copying the data to a new line is permitted with the inclusion of the correspond
 </ul>
 </section>
 </section>
+<section id="input-example">
+<h2>Input Example<a class="headerlink" href="#input-example" title="Permalink to this headline">#</a></h2>
+<p>For an example of the file see it on the GitHub repo:
+<a class="reference external" href="https://github.com/NREL/Marmot/blob/ReEDS_formatter/marmot/input_files/Marmot_plot_select.csv">Marmot_plot_select</a></p>
+</section>
 </section>
 
 
@@ -452,17 +480,17 @@ Copying the data to a new line is permitted with the inclusion of the correspond
               
               <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="plexos_properties.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="reeds_properties.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">plexos_properties: csv file</p>
+            <p class="prev-next-title">reeds_properties: csv file</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="mapping-folder/index.html" title="next page">
+    <a class='right-next' id="next-link" href="config_yml.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Mapping Folder</p>
+        <p class="prev-next-title">config: yml file</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
