@@ -224,9 +224,19 @@
               
               <div class="toc-item">
                 
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
 <nav id="bd-toc-nav">
-    
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-example">
+   Input Example
+  </a>
+ </li>
+</ul>
+
 </nav>
               </div>
               
@@ -253,6 +263,135 @@
    }
 </script><section id="region-mapping-csv-file">
 <h1>Region Mapping: csv file<a class="headerlink" href="#region-mapping-csv-file" title="Permalink to this headline">#</a></h1>
+<p>This file allows custom geographic aggregations to be created by grouping regions together.
+The first column in the file should always be called <em>“region”</em> and should contain the names
+of the regions in your model database.</p>
+<p>Each subsequent column added defines a new type of region grouping. The names given to each of these
+columns are user definable.
+The <strong>AGG_BY</strong> parameter in the <a class="reference internal" href="../Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a>
+can then be used to plot this grouping.
+In the example provided setting <strong>AGG_BY</strong> to ‘Country’ would group the data to this aggregation
+and create plots for <em>USA</em> and <em>Canada</em></p>
+<p>The custom aggregations are merged into the data during formatting.</p>
+<section id="input-example">
+<h2>Input Example<a class="headerlink" href="#input-example" title="Permalink to this headline">#</a></h2>
+<table class="colwidths-given table" id="id1">
+<caption><span class="caption-text"><a class="reference external" href="https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/Regions_Zones_Mapping_Full.csv">Regions Mapping</a></span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 20%" />
+<col style="width: 10%" />
+<col style="width: 20%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>region</p></th>
+<th class="head"><p>BA</p></th>
+<th class="head"><p>Country</p></th>
+<th class="head"><p>Interconnection</p></th>
+<th class="head"><p>Country Interconnect</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>AEC_EI</p></td>
+<td><p>SERC</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-odd"><td><p>AECIZ_EI</p></td>
+<td><p>SERC</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-even"><td><p>AESO_WI</p></td>
+<td><p>AB</p></td>
+<td><p>Canada</p></td>
+<td><p>WI</p></td>
+<td><p>Canada-WI</p></td>
+</tr>
+<tr class="row-odd"><td><p>ATC_EI</p></td>
+<td><p>MISO</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-even"><td><p>AVA_WI</p></td>
+<td><p>NorthwestUS</p></td>
+<td><p>USA</p></td>
+<td><p>WI</p></td>
+<td><p>USA-WI</p></td>
+</tr>
+<tr class="row-odd"><td><p>AZPS_WI</p></td>
+<td><p>Southwest</p></td>
+<td><p>USA</p></td>
+<td><p>WI</p></td>
+<td><p>USA-WI</p></td>
+</tr>
+<tr class="row-even"><td><p>BANC_WI</p></td>
+<td><p>California</p></td>
+<td><p>USA</p></td>
+<td><p>WI</p></td>
+<td><p>USA-WI</p></td>
+</tr>
+<tr class="row-odd"><td><p>BCHA_WI</p></td>
+<td><p>BC</p></td>
+<td><p>Canada</p></td>
+<td><p>WI</p></td>
+<td><p>Canada-WI</p></td>
+</tr>
+<tr class="row-even"><td><p>BEPC_EI</p></td>
+<td><p>SPP</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-odd"><td><p>BLACKWATER-ACDC_EI</p></td>
+<td><p>SPP</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-even"><td><p>BPAT_WI</p></td>
+<td><p>NorthwestUS</p></td>
+<td><p>USA</p></td>
+<td><p>WI</p></td>
+<td><p>USA-WI</p></td>
+</tr>
+<tr class="row-odd"><td><p>BREC_EI</p></td>
+<td><p>MISO</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-even"><td><p>CAPITL_EI</p></td>
+<td><p>NYISO</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-odd"><td><p>CBPC-NIPCO_EI</p></td>
+<td><p>SPP</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-even"><td><p>CENTRL_EI</p></td>
+<td><p>NYISO</p></td>
+<td><p>USA</p></td>
+<td><p>EI</p></td>
+<td><p>USA-EI</p></td>
+</tr>
+<tr class="row-odd"><td></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 
 

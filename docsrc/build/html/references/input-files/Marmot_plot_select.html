@@ -395,6 +395,14 @@ inputted format. If left blank the entire range of data will be plotted.</p>
 </div></blockquote>
 <p>It will also accept dates formatted as D/M/Y and Y/M/D. Python will make a best guess at the
 inputted format. If left blank the entire range of data will be plotted.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Setting a <strong>Start date</strong> and <strong>End Date</strong> is important when comparing results sets of
+differing timeseries horizon lengths. This is especially important when creating bar plots.
+Different horizon lengths commonly occur when comparing ReEDS vs PLEXOS results, which can cause
+value discrepancies particularly noticeable in Installed Capacity or Total Generation plots if date
+ranges do not align.</p>
+</div>
 </dd>
 </dl>
 </li>
@@ -413,7 +421,7 @@ default to plotting interval data.</p>
 effect data that has been grouped into bar plots or diurnal line plots and will have no
 effect on timeseries plots.
 If grouping by <cite>Year-Scenario</cite> the year will be identified
-from the input data timestamp and appended to the scenario name defined in
+from the input data timestamp and appended to the <strong>Scenarios</strong> name defined in
 <a class="reference internal" href="Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a>. This is useful when
 plotting data which covers multiple years such as ReEDS. If left blank Marmot will default to
 grouping data by <cite>Scenario</cite>.</p>

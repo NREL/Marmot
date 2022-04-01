@@ -224,9 +224,31 @@
               
               <div class="toc-item">
                 
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
 <nav id="bd-toc-nav">
-    
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-definitions">
+   Input Definitions
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#columns">
+     Columns
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-example">
+   Input Example
+  </a>
+ </li>
+</ul>
+
 </nav>
               </div>
               
@@ -253,6 +275,221 @@
    }
 </script><section id="ordered-gen-categories-csv-file">
 <h1>ordered_gen_categories: csv file<a class="headerlink" href="#ordered-gen-categories-csv-file" title="Permalink to this headline">#</a></h1>
+<p>Ordered list of generators which determines how they appear in a stack plot.
+Generator names should equal those in the <a class="reference internal" href="gen_names.html#gen-names-csv-file"><span class="std std-ref">gen_names: csv file</span></a> <strong>New</strong> column.</p>
+<p>Additional columns in the file allow plotting of only certain
+technologies when using the <strong>TECH_SUBSET</strong> entry in the
+<a class="reference internal" href="../Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a>.
+Users can change which technologies belong to the different technology categories
+by setting the values to <em>TRUE</em>.</p>
+<p>As well as being available to use by the <strong>TECH_SUBSET</strong> entry,
+the <em>vre</em> category is also used to determine which technologies
+should be included in Marmot’s internal Curtailment property.</p>
+<p>The <em>re</em> and <em>pv</em> categories are also used by certain plots. Users are free to
+add their own technology categories by adding new columns to the file and
+setting which generators, they would like to include to <em>TRUE</em>.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 0.9.0: </span>The additional columns added to the file now replace the previous <a href="#id1"><span class="problematic" id="id2">**</span></a>_gen_cat.csv* files.</p>
+</div>
+<section id="input-definitions">
+<h2>Input Definitions<a class="headerlink" href="#input-definitions" title="Permalink to this headline">#</a></h2>
+<section id="columns">
+<h3>Columns<a class="headerlink" href="#columns" title="Permalink to this headline">#</a></h3>
+<p>The gen_names.csv has 5 required columns,
+new columns can be added to create new tech grouping:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>Ordered_Gen:</strong></dt><dd><p>Names of the ordered generator technologies.
+The first row will be placed at the bottom of a generator stackplot or barplot.
+Generators that are contained in this column and <strong>not</strong> present in your database will be ignored.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>vre:</strong></dt><dd><p>Variable renewable generator technology categories. Used by Marmot to
+calculate curtailment.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>re:</strong></dt><dd><p>Renewable generator technology categories.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>pv:</strong></dt><dd><p>PV   generator technology categories.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>thermal:</strong></dt><dd><p>Thermal generator technology categories.</p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
+<section id="input-example">
+<h2>Input Example<a class="headerlink" href="#input-example" title="Permalink to this headline">#</a></h2>
+<table class="colwidths-given table" id="id3">
+<caption><span class="caption-text"><a class="reference external" href="https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/ordered_gen_categories.csv">ordered_gen_categories</a></span><a class="headerlink" href="#id3" title="Permalink to this table">#</a></caption>
+<colgroup>
+<col style="width: 40%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+<col style="width: 15%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Ordered_Gen</p></th>
+<th class="head"><p>vre</p></th>
+<th class="head"><p>re</p></th>
+<th class="head"><p>pv</p></th>
+<th class="head"><p>thermal</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Nuclear</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-odd"><td><p>Coal</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-even"><td><p>Gas-CC</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gas-CC CCS</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-even"><td><p>Gas-CT</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gas</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-even"><td><p>Gas-Steam</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-odd"><td><p>Dual Fuel</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-even"><td><p>DualFuel</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-odd"><td><p>Oil-Gas-Steam</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-even"><td><p>Oil</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td><p>TRUE</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hydro</p></td>
+<td></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Ocean</p></td>
+<td></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Geothermal</p></td>
+<td></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Biomass</p></td>
+<td></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Biopower</p></td>
+<td></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Other</p></td>
+<td></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>VRE</p></td>
+<td><p>TRUE</p></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>Wind</p></td>
+<td><p>TRUE</p></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Offshore Wind</p></td>
+<td><p>TRUE</p></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>OffshoreWind</p></td>
+<td><p>TRUE</p></td>
+<td><p>TRUE</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>Solar</p></td>
+<td><p>TRUE</p></td>
+<td><p>TRUE</p></td>
+<td><p>TRUE</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>PV</p></td>
+<td><p>TRUE</p></td>
+<td><p>TRUE</p></td>
+<td><p>TRUE</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 
 

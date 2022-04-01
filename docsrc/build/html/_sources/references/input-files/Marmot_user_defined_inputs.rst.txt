@@ -53,6 +53,11 @@ The following are the rows by Input
 
    .. versionadded:: 0.9.0
    
+      .. note::
+         If processing multiple result sets of different types, be sure to set **formatter_settings: append_plexos_block_name**
+         to **true** in the :ref:`config: yml file` before formatting data. If this value is not set to true, results will be 
+         saved to the same "*_formatted.h5*" file which may result in overwritten data.
+   
 - **Model_Solutions_folder (path, required):** 
    The directory that contains all the **Simulation Model** results. 
    This directory should include a sub-folder for each scenario in the **Scenario_process_list**, 

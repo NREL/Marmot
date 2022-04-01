@@ -1,0 +1,12 @@
+Original,New
+CO2_EI,CO2
+CO2_WI,CO2
+CA Emission_CO2_WI,CO2
+Non-CA Emission_CO2_WI,CO2
+Non-CA Emission_CO2_EI,CO2
+System Emission_NOx_WI,NOx
+System Emission_NOx_EI,NOx
+System Emission_SO2_WI,SO2
+System Emission_SO2_EI,SO2
+CH4,CH4
+N2O,N2O

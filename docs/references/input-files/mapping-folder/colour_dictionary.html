@@ -224,9 +224,31 @@
               
               <div class="toc-item">
                 
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
 <nav id="bd-toc-nav">
-    
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-definitions">
+   Input Definitions
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#columns">
+     Columns
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#input-example">
+   Input Example
+  </a>
+ </li>
+</ul>
+
 </nav>
               </div>
               
@@ -253,6 +275,104 @@
    }
 </script><section id="colour-dictionary-csv-file">
 <h1>colour_dictionary: csv file<a class="headerlink" href="#colour-dictionary-csv-file" title="Permalink to this headline">#</a></h1>
+<p>This file is used to assign a color to generation technology types
+e.g, Gas-CC, Wind, PV etc. The names in the <strong>Generator</strong> column should equal those in
+the <a class="reference internal" href="gen_names.html#gen-names-csv-file"><span class="std std-ref">gen_names: csv file</span></a>. <strong>New</strong> column.</p>
+<section id="input-definitions">
+<h2>Input Definitions<a class="headerlink" href="#input-definitions" title="Permalink to this headline">#</a></h2>
+<section id="columns">
+<h3>Columns<a class="headerlink" href="#columns" title="Permalink to this headline">#</a></h3>
+<p>The colour_dictionary.csv has 2 columns:</p>
+<ul class="simple">
+<li><dl class="simple">
+<dt><strong>Generator:</strong></dt><dd><p>The names of the generators.
+Generators that are contained in this column and <strong>not</strong> present in your database will be ignored.</p>
+</dd>
+</dl>
+</li>
+<li><dl class="simple">
+<dt><strong>Colour:</strong></dt><dd><p>The color identifier, this can either be a string name, e.g, <cite>red</cite> or a
+hex color, e.g, <cite>#820000</cite></p>
+</dd>
+</dl>
+</li>
+</ul>
+</section>
+</section>
+<section id="input-example">
+<h2>Input Example<a class="headerlink" href="#input-example" title="Permalink to this headline">#</a></h2>
+<table class="colwidths-given table" id="id1">
+<caption><span class="caption-text"><a class="reference external" href="https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/colour_dictionary.csv">colour_dictionary</a></span><a class="headerlink" href="#id1" title="Permalink to this table">#</a></caption>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Generator</p></th>
+<th class="head"><p>Colour</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>Nuclear</p></td>
+<td><p>#820000</p></td>
+</tr>
+<tr class="row-odd"><td><p>Coal</p></td>
+<td><p>#222222</p></td>
+</tr>
+<tr class="row-even"><td><p>Steam Turbine</p></td>
+<td><p>#222223</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gas-CC</p></td>
+<td><p>#52216B</p></td>
+</tr>
+<tr class="row-even"><td><p>Combined Cycle Gas Turbine</p></td>
+<td><p>#52216B</p></td>
+</tr>
+<tr class="row-odd"><td><p>Gas-CC CCS</p></td>
+<td><p>#5E1688</p></td>
+</tr>
+<tr class="row-even"><td><p>Gas-CT</p></td>
+<td><p>#C2A1DB</p></td>
+</tr>
+<tr class="row-odd"><td><p>Combustion Turbine</p></td>
+<td><p>#C2A1DB</p></td>
+</tr>
+<tr class="row-even"><td><p>Dual Fuel</p></td>
+<td><p>#000080</p></td>
+</tr>
+<tr class="row-odd"><td><p>DualFuel</p></td>
+<td><p>#000080</p></td>
+</tr>
+<tr class="row-even"><td><p>Oil-Gas-Steam</p></td>
+<td><p>#3D3376</p></td>
+</tr>
+<tr class="row-odd"><td><p>Hydro</p></td>
+<td><p>#187F94</p></td>
+</tr>
+<tr class="row-even"><td><p>Ocean</p></td>
+<td><p>#000080</p></td>
+</tr>
+<tr class="row-odd"><td><p>Geothermal</p></td>
+<td><p>#A96235</p></td>
+</tr>
+<tr class="row-even"><td><p>Biopower</p></td>
+<td><p>#5B9844</p></td>
+</tr>
+<tr class="row-odd"><td><p>VRE</p></td>
+<td><p>#7FC340</p></td>
+</tr>
+<tr class="row-even"><td><p>Wind</p></td>
+<td><p>#00B6EF</p></td>
+</tr>
+<tr class="row-odd"><td><p>CSP</p></td>
+<td><p>#FC761A</p></td>
+</tr>
+<tr class="row-even"><td><p>PV</p></td>
+<td><p>#FFC903</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 
 

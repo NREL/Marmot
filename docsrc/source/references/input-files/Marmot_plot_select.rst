@@ -88,6 +88,14 @@ The Marmot_plot_select.csv has 14 columns:
 
    It will also accept dates formatted as D/M/Y and Y/M/D. Python will make a best guess at the 
    inputted format. If left blank the entire range of data will be plotted.
+
+   .. note::
+      Setting a **Start date** and **End Date** is important when comparing results sets of 
+      differing timeseries horizon lengths. This is especially important when creating bar plots.
+      Different horizon lengths commonly occur when comparing ReEDS vs PLEXOS results, which can cause 
+      value discrepancies particularly noticeable in Installed Capacity or Total Generation plots if date 
+      ranges do not align.
+
 - **Timeseries Plot Resolution (optional):**
    The resolution to plot timeseries figures at. Current available options are 
    `Interval` and `Annual`. If the value is left blank and the plot creates a timeseries, Marmot will
@@ -100,7 +108,7 @@ The Marmot_plot_select.csv has 14 columns:
    effect data that has been grouped into bar plots or diurnal line plots and will have no 
    effect on timeseries plots.
    If grouping by `Year-Scenario` the year will be identified 
-   from the input data timestamp and appended to the scenario name defined in 
+   from the input data timestamp and appended to the **Scenarios** name defined in 
    :ref:`Marmot_user_defined_inputs: csv file`. This is useful when 
    plotting data which covers multiple years such as ReEDS. If left blank Marmot will default to
    grouping data by `Scenario`.
