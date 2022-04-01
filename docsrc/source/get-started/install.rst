@@ -42,6 +42,11 @@ You will need to have set up a public key using ``ssh-keygen`` and `added your p
 
     git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.10.0
 
+.. note::
+   The Marmot PLEXOS formatter imports h5plexos. To avoid import and version errors, 
+   h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot ``--recurse-submodules``, 
+   you can combine the git submodule init and git submodule update steps by running ``git submodule update --init``
+
 Set up a conda environment
 ---------------------------
 
@@ -67,4 +72,16 @@ located in the Marmot repository.
 
          conda list
 
+Alternative dependecies installation
+---------------------------------------
 
+If you prefer not to use Annaconda, dependecies can also be installed using the provided 
+`requirements.txt <https://github.com/NREL/Marmot/blob/main/requirements.txt>`_ file. 
+The text file contains all the python modules that are required by Marmot to run. 
+
+To install from the file run the following from any terminal window that is setup with Python 
+(e.g Git Bash, Anaconda Prompt)::
+
+   pip install -r requirements.txt. 
+   
+If installing on a machine with restricted user rights adding ``--user`` to the command may be required.

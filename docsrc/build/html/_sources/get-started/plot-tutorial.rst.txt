@@ -44,7 +44,7 @@ for a more comprehensive look at this file see our How-to Guides and
 
 .. image:: ../images/user-defined-inputs-plot.png
 
-The first two rows define where our input files are saved and where to save our outputs. The **PLEXOS_Solutions_folder**
+The first two highlighted rows define where our input files are saved and where to save our outputs. The **Model_Solutions_folder**
 should point to the root of our *scenario name* folders. For our data this is the **hourly** folder we setup 
 in the previous tutorial, :ref:`Tutorial: Formatting PLEXOS modelling results`.
 

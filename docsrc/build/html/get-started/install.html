@@ -190,6 +190,11 @@
    Set up a conda environment
   </a>
  </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#alternative-dependecies-installation">
+   Alternative dependecies installation
+  </a>
+ </li>
 </ul>
 
 </nav>
@@ -250,6 +255,12 @@
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span> <span class="n">clone</span> <span class="o">--</span><span class="n">recurse</span><span class="o">-</span><span class="n">submodules</span> <span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NREL</span><span class="o">/</span><span class="n">Marmot</span><span class="o">.</span><span class="n">git</span> <span class="o">--</span><span class="n">branch</span> <span class="n">v0</span><span class="mf">.10.0</span>
 </pre></div>
 </div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The Marmot PLEXOS formatter imports h5plexos. To avoid import and version errors,
+h5plexos is included as a submodule in Marmot. If you already cloned the project and forgot <code class="docutils literal notranslate"><span class="pre">--recurse-submodules</span></code>,
+you can combine the git submodule init and git submodule update steps by running <code class="docutils literal notranslate"><span class="pre">git</span> <span class="pre">submodule</span> <span class="pre">update</span> <span class="pre">--init</span></code></p>
+</div>
 </section>
 <section id="set-up-a-conda-environment">
 <h2>Set up a conda environment<a class="headerlink" href="#set-up-a-conda-environment" title="Permalink to this headline">#</a></h2>
@@ -284,6 +295,18 @@ located in the Marmot repository.</p>
 </div></blockquote>
 </li>
 </ul>
+</section>
+<section id="alternative-dependecies-installation">
+<h2>Alternative dependecies installation<a class="headerlink" href="#alternative-dependecies-installation" title="Permalink to this headline">#</a></h2>
+<p>If you prefer not to use Annaconda, dependecies can also be installed using the provided
+<a class="reference external" href="https://github.com/NREL/Marmot/blob/main/requirements.txt">requirements.txt</a> file.
+The text file contains all the python modules that are required by Marmot to run.</p>
+<p>To install from the file run the following from any terminal window that is setup with Python
+(e.g Git Bash, Anaconda Prompt):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="o">-</span><span class="n">r</span> <span class="n">requirements</span><span class="o">.</span><span class="n">txt</span><span class="o">.</span>
+</pre></div>
+</div>
+<p>If installing on a machine with restricted user rights adding <code class="docutils literal notranslate"><span class="pre">--user</span></code> to the command may be required.</p>
 </section>
 </section>
 
