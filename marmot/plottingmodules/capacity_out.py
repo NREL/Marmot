@@ -11,10 +11,11 @@ import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 import matplotlib.dates as mdates
+import marmot.plottingmodules.plotutils.plot_library as plotlib
 
 import marmot.config.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, MissingZoneData)
@@ -51,6 +52,10 @@ class MPlot(PlotDataHelper):
                     Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+
 
     def capacity_out_stack(self, start_date_range: str = None, 
                              end_date_range: str = None, **_):
@@ -83,9 +88,9 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         # sets up x, y dimensions of plot
-        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
 
-        grid_size = ncols*nrows
+        grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
@@ -94,12 +99,11 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             self.logger.info(f'Zone = {str(zone_input)}')
 
-            mplt = PlotLibrary(nrows, ncols, sharex=True,
-                                sharey='row', 
-                                squeeze=False, ravel_axs=True)
-            fig, axs = mplt.get_figure()
-
+            fig2, axs = plt.subplots(ydimension,xdimension, 
+                                     figsize=((self.x*xdimension),(self.y*ydimension)),
+                                     sharex=True, sharey='row', squeeze=False)
             plt.subplots_adjust(wspace=0.1, hspace=0.2)
+            axs = axs.ravel()
 
             chunks = []
             i=-1
@@ -136,8 +140,7 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak outage hour, only checked once 
                 if i == 0:
-                    unitconversion = self.capacity_energy_unitconversion(cap_out,
-                                                                            sum_values=True)
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(cap_out.sum(axis=1)))
                
                 cap_out = cap_out / unitconversion['divisor']
 
@@ -145,9 +148,10 @@ class MPlot(PlotDataHelper):
                 single_scen_out = cap_out.set_index([scenario_names],append = True)
                 chunks.append(single_scen_out)
                 
-                mplt.stackplot(df=cap_out, color_dict=self.PLEXOS_color_dict, 
-                                      labels=cap_out.columns, sub_pos=i)
-                mplt.set_subplot_timeseries_format(sub_pos=i)
+                plotlib.create_stackplot(axs=axs, data=cap_out, color_dict=self.PLEXOS_color_dict, 
+                                         labels=cap_out.columns, n=i)
+                PlotDataHelper.set_plot_timeseries_format(axs, n=i)
+                axs[i].legend(loc = 'lower left',bbox_to_anchor=(1.05,0), facecolor='inherit', frameon=True)
             
             if not chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -156,19 +160,19 @@ class MPlot(PlotDataHelper):
             Data_Table_Out = pd.concat(chunks,axis = 0)
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
-            # Add legend
-            mplt.add_legend(reverse_legend=True)
+            fig2.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel(f"Capacity out ({unitconversion['units']})",  color='black', 
                        rotation='vertical', labelpad=30)
             # Looks better for a one scenario plot
             #plt.tight_layout(rect=[0, 0.03, 1.25, 0.97])
             
             plt.tight_layout(rect=[0,0.03,1,0.97])
-            # Add title
+            
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                plt.title(zone_input)
 
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
 
@@ -184,14 +188,14 @@ class MPlot(PlotDataHelper):
             
             self.logger.info('Zone = ' + str(zone_input))
 
-            ncols=len(self.xlabels)
-            if ncols == 0:
-                ncols = 1
-            nrows=len(self.ylabels)
-            if nrows == 0:
-                nrows = 1
-            grid_size = ncols*nrows
-            fig1, axs = plt.subplots(nrows,ncols, figsize=((8*ncols),(4*nrows)), sharey=True)
+            xdimension=len(self.xlabels)
+            if xdimension == 0:
+                xdimension = 1
+            ydimension=len(self.ylabels)
+            if ydimension == 0:
+                ydimension = 1
+            grid_size = xdimension*ydimension
+            fig1, axs = plt.subplots(ydimension,xdimension, figsize=((8*xdimension),(4*ydimension)), sharey=True)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             if len(self.Multi_Scenario) > 1:
                 axs = axs.ravel()
@@ -250,6 +254,7 @@ class MPlot(PlotDataHelper):
                     axs[i].spines['top'].set_visible(False)
                     axs[i].tick_params(axis='y', which='major', length=5, width=1)
                     axs[i].tick_params(axis='x', which='major', length=5, width=1)
+                    axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                     axs[i].margins(x=0.01)
                     axs[i].xaxis.set_major_locator(locator)
                     axs[i].xaxis.set_major_formatter(formatter)
@@ -266,6 +271,7 @@ class MPlot(PlotDataHelper):
                     axs.spines['top'].set_visible(False)
                     axs.tick_params(axis='y', which='major', length=5, width=1)
                     axs.tick_params(axis='x', which='major', length=5, width=1)
+                    axs.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                     axs.margins(x=0.01)
                     axs.xaxis.set_major_locator(locator)
                     axs.xaxis.set_major_formatter(formatter)
@@ -297,7 +303,7 @@ class MPlot(PlotDataHelper):
             plt.xlabel(timezone,  color='black', rotation='horizontal', labelpad = 40)
             plt.ylabel('Capacity out (MW)',  color='black', rotation='vertical', labelpad = 60)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                plt.title(zone_input)
 
 
             outputs[zone_input] = {'fig' : fig1, 'data_table' : Data_Table_Out}

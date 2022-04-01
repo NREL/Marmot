@@ -8,11 +8,14 @@ available but not committed (i.e in reserve)
 """
 
 import logging
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib.patches import Patch
 
 import marmot.config.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+import marmot.plottingmodules.plotutils.plot_library as plotlib
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
@@ -47,7 +50,9 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        
         
     def thermal_cap_reserves(self, start_date_range: str = None, 
                              end_date_range: str = None, **_):
@@ -83,19 +88,19 @@ class MPlot(PlotDataHelper):
             self.logger.info(f"Zone = {zone_input}")
                 
             # sets up x, y dimensions of plot
-            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
             
-            grid_size = ncols*nrows
+            grid_size = xdimension*ydimension
 
             # Used to calculate any excess axis to delete
             plot_number = len(self.Scenarios)
             excess_axs = grid_size - plot_number
             
-            mplt = PlotLibrary(nrows, ncols, sharey=True, 
-                                squeeze=False, ravel_axs=True)
-            fig, axs = mplt.get_figure()
+            fig1, axs = plotlib.setup_plot(xdimension,ydimension)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             
+            # holds list of unique generation technologies
+            unique_tech_names = []
             data_table_chunks = []
 
             for i, scenario in enumerate(self.Scenarios):
@@ -120,15 +125,15 @@ class MPlot(PlotDataHelper):
                 Gen = self.df_process_gen_inputs(Gen)
                 Gen = Gen.loc[:, (Gen != 0).any(axis=0)]
 
-                thermal_reserve = avail_cap - Gen         
+                thermal_reserve = avail_cap - Gen
+                                
                 non_thermal_gen = set(thermal_reserve.columns) - set(self.thermal_gen_cat)
                 # filter for only thermal generation 
                 thermal_reserve = thermal_reserve.drop(labels = non_thermal_gen, axis=1)
                 
                 #Convert units
                 if i == 0:
-                    unitconversion = self.capacity_energy_unitconversion(thermal_reserve,
-                                                                            sum_values=True)
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(thermal_reserve.sum(axis=1)))
                 thermal_reserve = thermal_reserve / unitconversion['divisor']
 
                 # Check if thermal_reserve contains data, if not skips
@@ -148,23 +153,49 @@ class MPlot(PlotDataHelper):
                 data_table = data_table.set_index([scenario_names],append=True)
                 data_table_chunks.append(data_table)
                 
-                mplt.stackplot(thermal_reserve, color_dict=self.PLEXOS_color_dict,
-                                labels=thermal_reserve.columns, sub_pos=i)
+                axs[i].stackplot(thermal_reserve.index.values, thermal_reserve.values.T, labels = thermal_reserve.columns, linewidth=0,
+                             colors = [self.PLEXOS_color_dict.get(x, '#333333') for x in thermal_reserve.T.index])
 
+                axs[i].spines['right'].set_visible(False)
+                axs[i].spines['top'].set_visible(False)
+                axs[i].tick_params(axis='y', which='major', length=5, width=1)
+                axs[i].tick_params(axis='x', which='major', length=5, width=1)
+                axs[i].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[i].margins(x=0.01)
-                mplt.set_subplot_timeseries_format(sub_pos=i)
+                PlotDataHelper.set_plot_timeseries_format(axs,i)
+                
+                # create list of unique gen technologies
+                l1 = thermal_reserve.columns.tolist()
+                unique_tech_names.extend(l1)
+
+            # create labels list of unique tech names then order
+            labels = np.unique(np.array(unique_tech_names)).tolist()
+            labels.sort(key = lambda i:self.ordered_gen.index(i))
             
+            handles = []
+            # create custom gen_tech legend
+            for tech in labels:
+                gen_legend_patches = Patch(facecolor=self.PLEXOS_color_dict[tech],
+                            alpha=1.0)
+                handles.append(gen_legend_patches)
+            
+            #Place legend on right side of bottom right plot
+            axs[grid_size-1].legend(reversed(handles),reversed(labels),
+                                    loc = 'lower left',bbox_to_anchor=(1.05,0),
+                                    facecolor='inherit', frameon=True)
+
             # add facet labels
-            mplt.add_facet_labels(xlabels=self.xlabels,
-                                  ylabels=self.ylabels)   
-            # Add legend
-            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            self.add_facet_labels(fig1)    
+            
             # Remove extra axes
-            mplt.remove_excess_axs(excess_axs,grid_size)            
-            plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})", 
-                        color='black', rotation='vertical', labelpad=40)
+            if excess_axs != 0:
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
+            
+            fig1.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+            plt.ylabel(f"Thermal capacity reserve ({unitconversion['units']})",  color='black', rotation='vertical', labelpad=40)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                plt.title(zone_input)
             # If data_table_chunks is empty, does not return data or figure
             if not data_table_chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -173,5 +204,5 @@ class MPlot(PlotDataHelper):
             # Concat all data tables together
             Data_Table_Out = pd.concat(data_table_chunks, copy=False, axis=0)
             
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs

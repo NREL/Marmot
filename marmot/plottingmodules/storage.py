@@ -7,9 +7,10 @@ This module creates energy storage plots.
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
 
 import marmot.config.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
+import marmot.plottingmodules.plotutils.plot_library as plotlib
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
@@ -44,7 +45,9 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        
 
     def storage_volume(self, timezone: str = "", 
                        start_date_range: str = None, 
@@ -160,9 +163,7 @@ class MPlot(PlotDataHelper):
             #Make scenario/color dictionary.
             color_dict = dict(zip(storage_volume_all_scenarios.columns,self.color_list))
 
-            mplt = SetupSubplot(nrows=2, squeeze=False, 
-                                ravel_axs=True)
-            fig, axs = mplt.get_figure()
+            fig1, axs = plotlib.setup_plot(ydimension = 2,sharey = False)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             
             if storage_volume_all_scenarios.empty:
@@ -171,42 +172,30 @@ class MPlot(PlotDataHelper):
                 continue
             
             for column in storage_volume_all_scenarios:
-                axs[0].plot(storage_volume_all_scenarios.index.values, 
-                            storage_volume_all_scenarios[column], 
-                            linewidth=1,
-                            color=color_dict[column],
-                            label=column)
-
-                axs[0].set_ylabel('Head Storage Volume (GWh)', 
-                                  color='black', rotation='vertical')
-                mplt.set_yaxis_major_tick_format(sub_pos=0)
+                plotlib.create_line_plot(axs,storage_volume_all_scenarios,column,color_dict,label = column,n = 0)      
+                axs[0].set_ylabel('Head Storage Volume (GWh)',  color='black', rotation='vertical')
+                axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[0].margins(x=0.01)
-                mplt.set_subplot_timeseries_format(sub_pos=0)
+
                 axs[0].set_ylim(ymin = 0)
                 axs[0].set_title(zone_input)
+                #axs[0].xaxis.set_visible(False)
 
-                axs[1].plot(use_all_scenarios.index.values, 
-                            use_all_scenarios[column], 
-                            linewidth=1,
-                            color=color_dict[column],
-                            label= f"{column} Unserved Energy")
-
-                axs[1].set_ylabel('Unserved Energy (GWh)',  
-                                  color='black', rotation='vertical')
-                axs[1].set_xlabel(timezone,  color='black', 
-                                    rotation='horizontal')
-                mplt.set_yaxis_major_tick_format(sub_pos=1)
+                plotlib.create_line_plot(axs,use_all_scenarios,column,color_dict,label = column + ' Unserved Energy', n = 1)
+                axs[1].set_ylabel('Unserved Energy (GWh)',  color='black', rotation='vertical')
+                axs[1].set_xlabel(timezone,  color='black', rotation='horizontal')
+                axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[1].margins(x=0.01)
-                mplt.set_subplot_timeseries_format(sub_pos=1)
-            
-            mplt.set_yaxis_major_tick_format()
-            axs[0].axhline(y=max_volume, linestyle=':', label='Max Volume')
-            axs[0].legend(loc='lower left', bbox_to_anchor = (1.15,0))
-            axs[1].legend(loc='lower left', bbox_to_anchor = (1.15,0.2))
-            if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+                [PlotDataHelper.set_plot_timeseries_format(axs,n) for n in range(0,2)]
+            
+            axs[0].axhline(y = max_volume, linestyle = ':',label = 'Max Volume')
+            axs[0].legend(loc = 'lower left',bbox_to_anchor = (1.15,0),facecolor = 'inherit',frameon = True)
+            axs[1].legend(loc = 'lower left',bbox_to_anchor = (1.15,0.2),facecolor = 'inherit',frameon = True)
+            if mconfig.parser("plot_title_as_region"):
+                fig1.title(zone_input)
+
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
 

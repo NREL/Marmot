@@ -9,15 +9,20 @@ This
 import os
 import re
 import logging
+import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib as mpl
+from matplotlib.patches import Patch
 
 import marmot.plottingmodules.total_generation as gen
 import marmot.config.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
+
+custom_legend_elements = Patch(facecolor='#DD0200',
+                               alpha=0.5, edgecolor='#DD0200')
 
 class MPlot(PlotDataHelper):
     """total_installed_capacity MPlot class.
@@ -51,7 +56,11 @@ class MPlot(PlotDataHelper):
 
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
-        self.logger = logging.getLogger('marmot_plot.'+__name__)        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.x = mconfig.parser("figure_size","xdimension")
+        self.y = mconfig.parser("figure_size","ydimension")
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        
 
     def total_cap(self, **_):
         """Creates a stacked barplot of total installed capacity.
@@ -113,8 +122,7 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = self.capacity_energy_unitconversion(Total_Installed_Capacity_Out,
-                                                                            sum_values=True)
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor']
 
             Data_Table_Out = Total_Installed_Capacity_Out
@@ -122,27 +130,36 @@ class MPlot(PlotDataHelper):
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
             
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
+            fig1, ax = plt.subplots(figsize=(self.x, self.y))
 
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=ax,
+                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                         for x in Total_Installed_Capacity_Out.columns],
+                                                  edgecolor='black', linewidth='0.1')
+
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.set_ylabel(f"Total Installed Capacity ({unitconversion['units']})",
+                          color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            
             # Set x-tick labels
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
-            
-            mplt.barplot(Total_Installed_Capacity_Out, color=self.PLEXOS_color_dict,
-                         stacked=True,
-                         custom_tick_labels=tick_labels)
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
-            ax.set_ylabel(f"Total Installed Capacity ({unitconversion['units']})",
-                          color='black', rotation='vertical')
-            
-            mplt.add_legend(reverse_legend=True)
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            handles, labels = ax.get_legend_handles_labels()
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',
+                      bbox_to_anchor=(1, 0), facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                ax.set_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
     def total_cap_diff(self, **_):
@@ -227,8 +244,7 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = self.capacity_energy_unitconversion(Total_Installed_Capacity_Out,
-                                                                    sum_values=True)
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(max(Total_Installed_Capacity_Out.sum()))
             Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor']
 
             Data_Table_Out = Total_Installed_Capacity_Out
@@ -236,21 +252,33 @@ class MPlot(PlotDataHelper):
 
             Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
 
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
+            fig2, ax = plt.subplots(figsize=(self.x, self.y))
 
-            mplt.barplot(Total_Installed_Capacity_Out, 
-                         color=self.PLEXOS_color_dict,
-                         stacked=True)
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=ax,
+                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                         for x in Total_Installed_Capacity_Out.columns],
+                                                  edgecolor='black', linewidth='0.1')
 
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
             ax.set_ylabel((f"Capacity Change ({unitconversion['units']}) \n "
                            f"relative to {self.Scenarios[0]}"), color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             
-            mplt.add_legend(reverse_legend=True)
+            tick_labels = Total_Installed_Capacity_Out.index
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
+
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+
+            handles, labels = ax.get_legend_handles_labels()
+            ax.legend(reversed(handles), reversed(labels), loc='lower left',
+                      bbox_to_anchor=(1, 0), facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                ax.set_title(zone_input)
                 
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
     def total_cap_and_gen_facet(self, **_):
@@ -275,11 +303,11 @@ class MPlot(PlotDataHelper):
 
         outputs = {}
         for zone_input in self.Zones:
-            
-            mplt = PlotLibrary(1, 2, figsize=(5, 4))
-            fig, axs = mplt.get_figure()
+
+            fig, axs = plt.subplots(1, 2, figsize=(10, 4))
 
             plt.subplots_adjust(wspace=0.35, hspace=0.2)
+            axs = axs.ravel()
 
             # left panel: installed capacity
             try:
@@ -298,19 +326,29 @@ class MPlot(PlotDataHelper):
             Total_Installed_Capacity_Out.columns = [re.sub('[\s (]|GW|TW|MW|kW|\)', '', i) 
                                                     for i in Total_Installed_Capacity_Out.columns]
 
+
+            Total_Installed_Capacity_Out.plot.bar(stacked=True, ax=axs[0],
+                                                  color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                         for x in Total_Installed_Capacity_Out.columns],
+                                                  edgecolor='black', linewidth='0.1')
+
+            axs[0].spines['right'].set_visible(False)
+            axs[0].spines['top'].set_visible(False)
+            axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})", 
+                              color='black', rotation='vertical')
+            axs[0].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
-
-            mplt.barplot(Total_Installed_Capacity_Out, 
-                         color=self.PLEXOS_color_dict,
-                         stacked=True, sub_pos=0,
-                         custom_tick_labels=tick_labels)
-
-            axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})", 
-                              color='black', rotation='vertical')
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=axs[0])
             
+            axs[0].tick_params(axis='y', which='major', length=5, width=1)
+            axs[0].tick_params(axis='x', which='major', length=5, width=1)
+            axs[0].get_legend().remove()
+
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
 
@@ -346,18 +384,27 @@ class MPlot(PlotDataHelper):
             # Remove any suffixes from column names
             Total_Generation_Stack_Out.columns = [re.sub('[(]|GWh|TWh|MWh|kWh|\)', '', i).strip() 
                                                   for i in Total_Generation_Stack_Out.columns]
+
+            Total_Generation_Stack_Out.plot.bar(stacked=True, ax=axs[1],
+                                                color=[self.PLEXOS_color_dict.get(x, '#333333') 
+                                                       for x in Total_Generation_Stack_Out.columns],
+                                                edgecolor='black', linewidth='0.1')
+
+            axs[1].spines['right'].set_visible(False)
+            axs[1].spines['top'].set_visible(False)
+            axs[1].set_ylabel(f"Total Generation ({energy_units})", 
+                              color='black', rotation='vertical')
+            axs[1].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
-
-            mplt.barplot(Total_Generation_Stack_Out, 
-                         color=self.PLEXOS_color_dict,
-                         stacked=True, sub_pos=1,
-                         custom_tick_labels=tick_labels)
-                         
-            axs[1].set_ylabel(f"Total Generation ({energy_units})", 
-                              color='black', rotation='vertical')
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=axs[1])
+            
+            axs[1].tick_params(axis='y', which='major', length=5, width=1)
+            axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
             data_tables = []
             for n, scenario in enumerate(self.Scenarios):
@@ -365,34 +412,58 @@ class MPlot(PlotDataHelper):
                 x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + 
                      axs[1].patches[n].get_width()]
                 height1 = [float(Total_Load_Out[scenario])]*2
-                if Pump_Load_Out[scenario] > 0:
-                    axs[1].plot(x, height1, c='black', linewidth=1.5,
-                                label='Demand + \n Storage Charging')
-                    height2 = [float(Total_Demand_Out[scenario])]*2
-                    axs[1].plot(x, height2, 'r--', c='black', linewidth=1.5,
-                                label='Demand')
-                else:
-                    axs[1].plot(x, height1, c='black', linewidth=1.5,
-                                label='Demand')
+                lp1 = plt.plot(x, height1, c='black', linewidth=1.5)
+                height2 = [float(Total_Demand_Out[scenario])]*2
+                lp2 = plt.plot(x, height2, 'r--', c='black', linewidth=1.5)
                 if Unserved_Energy_Out[scenario].sum() > 0:
                     height3 = [float(Unserved_Energy_Out[scenario])]*2
-                    axs[1].plot(x, height3, c='#DD0200', linewidth=1.5,
-                                label= 'Unserved Energy')
+                    plt.plot(x, height3, c='#DD0200', linewidth=1.5)
                     axs[1].fill_between(x, height3, height1,
                                         facecolor='#DD0200',
                                         alpha=0.5)
 
-            data_tables = pd.DataFrame() #TODO pass output data back to plot main 
+                data_tables = pd.DataFrame() #TODO pass output data back to plot main 
 
-            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # get names of generator to create custom legend
+            l1 = Total_Installed_Capacity_Out.columns.tolist()
+            l2 = Total_Generation_Stack_Out.columns.tolist()
+            l1.extend(l2)
+
+            labels = np.unique(np.array(l1)).tolist()
+            labels.sort(key=lambda i: self.ordered_gen.index(i))
+            # create custom gen_tech legend
+            handles = []
+            for tech in labels:
+                gen_tech_legend = Patch(facecolor=self.PLEXOS_color_dict[tech],
+                                        alpha=1.0)
+                handles.append(gen_tech_legend)
+
+            if Pump_Load_Out.values.sum() > 0:
+                handles.append(lp2[0])
+                handles.append(lp1[0])
+                labels += ['Demand', 'Demand + \n Storage Charging']
+
+            else:
+                handles.append(lp1[0])
+                labels += ['Demand']
+
+            if Unserved_Energy_Out.values.sum() > 0:
+                handles.append(custom_legend_elements)
+                labels += ['Unserved Energy']
+
+            axs[1].legend(reversed(handles), reversed(labels),
+                          loc='lower left', bbox_to_anchor=(1.05, 0),
+                          facecolor='inherit', frameon=True)
+
             # add labels to panels
-            axs[0].set_title("A.", fontdict={"weight": "bold", "size": 11},
-                             loc='left', pad=4)
-            axs[1].set_title("B.", fontdict={"weight": "bold", "size": 11},
-                             loc='left', pad=4)
+            axs[0].set_title("A.", fontdict={"weight": "bold", "size": 11}, loc='left', pad=4)
+            axs[1].set_title("B.", fontdict={"weight": "bold", "size": 11}, loc='left', pad=4)
             
+            fig.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if mconfig.parser('plot_title_as_region'):
-                mplt.add_main_title(zone_input)
+                plt.title(zone_input)
 
             # output figure
             outputs[zone_input] = {'fig': fig, 'data_table': data_tables}

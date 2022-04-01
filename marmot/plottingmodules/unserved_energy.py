@@ -9,9 +9,11 @@ plots and is called from marmot_plot_main.py
 
 import logging
 import pandas as pd
+import matplotlib as mpl
+import matplotlib.dates as mdates
 
 import marmot.config.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+import marmot.plottingmodules.plotutils.plot_library as plotlib
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
 
@@ -46,7 +48,9 @@ class MPlot(PlotDataHelper):
                     self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
                     Region_Mapping=self.Region_Mapping) 
 
-        self.logger = logging.getLogger('marmot_plot.'+__name__)        
+        self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
+        
 
     def unserved_energy_timeseries(self, timezone: str = "",
                                    start_date_range: str = None, 
@@ -116,30 +120,37 @@ class MPlot(PlotDataHelper):
                 continue
             
             # Determine auto unit coversion
-            unitconversion = self.capacity_energy_unitconversion(Unserved_Energy_Timeseries_Out)
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(Unserved_Energy_Timeseries_Out.values.max())
             Unserved_Energy_Timeseries_Out = Unserved_Energy_Timeseries_Out/unitconversion['divisor'] 
             
             # Data table of values to return to main program
             Data_Table_Out = Unserved_Energy_Timeseries_Out.add_suffix(f" ({unitconversion['units']})")
             
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
+            fig1, axs = plotlib.setup_plot()
+            #flatten object
+            ax = axs[0]
             # Converts color_list into an iterable list for use in a loop
             iter_colour = iter(self.color_list)
 
             for column in Unserved_Energy_Timeseries_Out:
-                mplt.lineplot(Unserved_Energy_Timeseries_Out[column],
-                              color=next(iter_colour), linewidth=3,
-                              label=column)
-            mplt.add_legend()
+                ax.plot(Unserved_Energy_Timeseries_Out[column], linewidth=3, 
+                        antialiased=True, color=next(iter_colour), label=column)
+                ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
             ax.set_ylabel(f"Unserved Energy ({unitconversion['units']})", 
                           color='black', rotation='vertical')
             ax.set_ylim(bottom=0)
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
             ax.margins(x=0.01)
-            mplt.set_subplot_timeseries_format()
+            PlotDataHelper.set_plot_timeseries_format(axs)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+                ax.set_title(zone_input)
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
 
         return outputs
 
@@ -189,7 +200,7 @@ class MPlot(PlotDataHelper):
                 unserved_eng_timeseries = unserved_eng_timeseries.groupby(["timestamp"]).sum()
                 
                 # correct sum for non-hourly runs
-                interval_count = self.get_sub_hour_interval_count(unserved_eng_timeseries)
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(unserved_eng_timeseries)
 
                 if pd.notna(start_date_range):
                     self.logger.info(f"Plotting specific date range: \
@@ -217,7 +228,7 @@ class MPlot(PlotDataHelper):
                 continue
             
             # Determine auto unit coversion
-            unitconversion = self.capacity_energy_unitconversion(Total_Unserved_Energy_Out)
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(Total_Unserved_Energy_Out.values.max())
             Total_Unserved_Energy_Out = Total_Unserved_Energy_Out/unitconversion['divisor']
             
             # Data table of values to return to main program
@@ -225,28 +236,30 @@ class MPlot(PlotDataHelper):
             
             # create color dictionary
             color_dict = dict(zip(Total_Unserved_Energy_Out.index,self.color_list))
+            fig2, axs = plotlib.setup_plot()
+            #flatten object
+            ax=axs[0]
             
-            # Set scenarios as column names
-            Total_Unserved_Energy_Out = Total_Unserved_Energy_Out.T
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
+            plotlib.create_bar_plot(Total_Unserved_Energy_Out.T, ax, color_dict)
+            ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)", 
+                          color='black', rotation='vertical')
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.xaxis.set_visible(False)
+            ax.margins(x=0.01)
             
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
-                tick_labels = Total_Unserved_Energy_Out.index
+                tick_labels = Total_Unserved_Energy_Out.columns
+            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
 
-            mplt.barplot(Total_Unserved_Energy_Out, color=color_dict,
-                        custom_tick_labels=tick_labels)
-
-            ax.set_ylabel(f"Total Unserved Energy ({unitconversion['units']}h)", 
-                          color='black', rotation='vertical')
-            ax.xaxis.set_visible(False)
-            ax.margins(x=0.01)
-            
-            mplt.add_legend()
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                          facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)  
+                ax.set_title(zone_input)  
             for patch in ax.patches:
                 width, height = patch.get_width(), patch.get_height()
                 if height<=1:
@@ -258,7 +271,7 @@ class MPlot(PlotDataHelper):
                     horizontalalignment='center',
                     verticalalignment='center', fontsize=13)
 
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
         return outputs
 
     def average_diurnal_ue(self, start_date_range: str = None, 
@@ -321,7 +334,7 @@ class MPlot(PlotDataHelper):
                         self.logger.warning('No data in selected Date Range')
                         continue
                 
-                interval_count = self.get_sub_hour_interval_count(unserved_energy)
+                interval_count = PlotDataHelper.get_sub_hour_interval_count(unserved_energy)
                 unserved_energy = unserved_energy/interval_count
                 # Group data by hours and find mean across entire range 
                 unserved_energy = unserved_energy.groupby([unserved_energy.index.hour]).mean()
@@ -339,27 +352,43 @@ class MPlot(PlotDataHelper):
             # Create Dictionary from scenario names and color list
             colour_dict = dict(zip(unserved_energy_out.columns, self.color_list))
 
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
+            fig, axs = plotlib.setup_plot()
+            # flatten object
+            ax = axs[0]
 
-            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out)
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(unserved_energy_out.values.max())
             unserved_energy_out = unserved_energy_out / unitconversion['divisor']
             Data_Table_Out = unserved_energy_out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
             
             for column in unserved_energy_out:
-                mplt.lineplot(unserved_energy_out[column], color=colour_dict,
-                             linewidth=3, label=column)
-
-            mplt.set_subplot_timeseries_format()
-            mplt.add_legend()
+                ax.plot(unserved_energy_out[column], linewidth=3, color=colour_dict[column],
+                        label=column)
+            ax.legend(loc='lower left',bbox_to_anchor=(1,0),
+                    facecolor='inherit', frameon=True)
             ax.set_ylabel(f"Average Diurnal Unserved Energy ({unitconversion['units']})", 
-                          color='black', rotation='vertical')            
-            ax.margins(x=0.01)            
+                          color='black', rotation='vertical')
+            
+            ax.spines['right'].set_visible(False)
+            ax.spines['top'].set_visible(False)
+            ax.tick_params(axis='y', which='major', length=5, width=1)
+            ax.tick_params(axis='x', which='major', length=5, width=1)
+            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                         lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
+            ax.margins(x=0.01)
+            
+            # Set time ticks
+            locator = mdates.AutoDateLocator(minticks=8, maxticks=12)
+            formatter = mdates.ConciseDateFormatter(locator)
+            formatter.zero_formats[3] = '%H:%M'
+            formatter.show_offset = False
+            ax.xaxis.set_major_locator(locator)
+            ax.xaxis.set_major_formatter(formatter)
+            
             ax.set_ylim(bottom=0)
 
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
         return outputs

@@ -11,12 +11,12 @@ import logging
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.colors as mcolors
+import matplotlib as mpl
 import matplotlib.dates as mdates
+import matplotlib.lines as mlines
 
 import marmot.config.mconfig as mconfig
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+import marmot.plottingmodules.plotutils.plot_library as plotlib
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
@@ -53,6 +53,7 @@ class MPlot(PlotDataHelper):
                     Region_Mapping=self.Region_Mapping) 
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
+        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
         self.font_defaults = mconfig.parser("font_settings")
         
 
@@ -124,9 +125,9 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         # sets up x, y dimensions of plot
-        ncols, nrows = self.set_facet_col_row_dimensions(facet=True, 
+        xdimension, ydimension = self.setup_facet_xy_dimensions(facet=True, 
                                                                 multi_scenario=self.Scenarios)
-        grid_size = ncols*nrows
+        grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
@@ -135,9 +136,8 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             self.logger.info(f"For all lines touching Zone = {zone_input}")
 
-            mplt = PlotLibrary(nrows, ncols, sharey=True, 
-                                squeeze=False, ravel_axs=True)
-            fig, axs = mplt.get_figure()
+            fig2, axs = plotlib.setup_plot(xdimension=xdimension, 
+                                           ydimension=ydimension, sharey=True)
             plt.subplots_adjust(wspace=0.1, hspace=0.25)
 
             data_table=[]
@@ -193,21 +193,28 @@ class MPlot(PlotDataHelper):
 
                 color_dict = dict(zip(self.Scenarios,self.color_list))
                 if hist == True:
-                    mplt.histogram(annual_util, color_dict,label=scenario, sub_pos=n)
+                    plotlib.create_hist_plot(axs,annual_util,color_dict,label=scenario,n=n)
                 else:
                     for line in top_utilization.index.get_level_values(level='line_name').unique():
                         duration_curve = flow.loc[line].sort_values(by='Util', 
                                                                     ascending=False).reset_index(drop=True)
-                        mplt.lineplot(duration_curve, 'Util' ,label=line, sub_pos=n)
+                        plotlib.create_line_plot(axs,duration_curve, 'Util' ,label=line, n=n)
                         axs[n].set_ylim((0,1.1))
+                        handles, labels = axs[n].get_legend_handles_labels()
+                        axs[n].legend(handles,labels, loc='best',
+                              facecolor='inherit', frameon=True)
                 data_table.append(annual_util)
 
-            mplt.add_legend()
             #Remove extra axes
-            mplt.remove_excess_axs(excess_axs,grid_size)
+            if excess_axs != 0:
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
+
             # add facet labels
-            mplt.add_facet_labels(xlabels=self.xlabels,
-                                  ylabels = self.ylabels)
+            self.add_facet_labels(fig2)
+
+            fig2.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if hist == True:
                 if pd.notna(prop):
                     prop_name = 'All Lines'
@@ -227,7 +234,7 @@ class MPlot(PlotDataHelper):
                 plt.xlabel('Intervals',  color='black', 
                            rotation='horizontal', labelpad=20)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                plt.title(zone_input)
             try:
                 del annual_util, 
             except:
@@ -235,7 +242,7 @@ class MPlot(PlotDataHelper):
 
             Data_Out = pd.concat(data_table)
 
-            outputs[zone_input] = {'fig': fig,'data_table':Data_Out}
+            outputs[zone_input] = {'fig': fig2,'data_table':Data_Out}
         return outputs
 
     def int_flow_ind(self, figure_name: str = None, prop: str = None, 
@@ -349,16 +356,14 @@ class MPlot(PlotDataHelper):
 
             self.logger.info('Plotting full time series results.')
             xdim,ydim = self.set_x_y_dimension(len(interf_list))
-            
-            mplt = PlotLibrary(ydim, xdim, squeeze=False,
-                               ravel_axs=True)
-            fig, axs = mplt.get_figure()
+            fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
 
             grid_size = xdim * ydim
             excess_axs = grid_size - len(interf_list)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
             missing_ints = 0
             chunks = []
+            limits_chunks = []
             n = -1
             for interf in interf_list:
                 n += 1
@@ -394,11 +399,11 @@ class MPlot(PlotDataHelper):
                             single_int = single_int[start_date_range : end_date_range]
                             limits = limits[start_date_range : end_date_range]
                         if duration_curve:
-                            single_int = self.sort_duration(single_int,interf)
+                            single_int = PlotDataHelper.sort_duration(single_int,interf)
 
-                        mplt.lineplot(single_int, interf, 
+                        plotlib.create_line_plot(axs, single_int, interf, 
                                                 label=f"{scenario}\n interface flow",
-                                                sub_pos=n)
+                                                n=n)
 
                         # Only print limits if it doesn't change monthly or if you are plotting a time series. 
                         # Otherwise the limit lines could be misleading.
@@ -406,12 +411,12 @@ class MPlot(PlotDataHelper):
                             if scenario == self.Scenarios[-1]:
                                 #Only plot limits for last scenario.
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
-                                mplt.lineplot(limits, 'export limit',
-                                                         label='export limit', color=limits_color_dict,
-                                                         linestyle='--', sub_pos=n)
-                                mplt.lineplot(limits, 'import limit', 
-                                                         label='import limit', color=limits_color_dict,
-                                                         linestyle='--', sub_pos=n)
+                                plotlib.create_line_plot(axs, limits, 'export limit',
+                                                         label='export limit', color_dict=limits_color_dict,
+                                                         linestyle='--', n=n)
+                                plotlib.create_line_plot(axs, limits, 'import limit', 
+                                                         label='import limit', color_dict=limits_color_dict,
+                                                         linestyle='--', n=n)
 
                         #For output time series .csv
                         scenario_names = pd.Series([scenario] * len(single_int), name='Scenario')
@@ -430,8 +435,12 @@ class MPlot(PlotDataHelper):
                     continue
 
                 axs[n].set_title(interf)
+                handles, labels = axs[n].get_legend_handles_labels()
                 if not duration_curve:
-                    mplt.set_subplot_timeseries_format(sub_pos=n)
+                    PlotDataHelper.set_plot_timeseries_format(axs, n=n)
+                if n == len(interf_list) - 1:
+                    axs[n].legend(loc='lower left', bbox_to_anchor=(1.05, -0.2))
+
                 if missing_ints == len(interf_list):
                     outputs = MissingInputData()
                     return outputs
@@ -446,15 +455,18 @@ class MPlot(PlotDataHelper):
             # Data_Table_Out = Data_Table_Out.reset_index()
             # Data_Table_Out = Data_Table_Out.groupby(Data_Table_Out.index // 24).mean()
             # Data_Table_Out.index = pd.date_range(start = '1/1/2024',end = '12/31/2024',freq = 'D')
-            mplt.add_legend()
+
+            fig2.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', 
                        labelpad=30)
             if duration_curve:
                 plt.xlabel('Sorted hour of the year', color='black', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+                plt.title(zone_input)
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs 
 
@@ -572,9 +584,8 @@ class MPlot(PlotDataHelper):
 
             xdim = 2
             ydim = len(interf_list)
-
-            mplt = PlotLibrary(ydim, xdim, squeeze=False)
-            fig, axs = mplt.get_figure()
+            fig2, axs = plt.subplots(ydim, xdim, figsize=((6*xdim), (4*ydim)), 
+                                     sharey=False, squeeze=False)
 
             grid_size = xdim * ydim
             excess_axs = grid_size - len(interf_list)
@@ -615,10 +626,10 @@ class MPlot(PlotDataHelper):
                     winter_lim = limits.drop(summer.index)
 
                     if duration_curve:
-                        summer = self.sort_duration(summer,interf)
-                        winter = self.sort_duration(winter,interf)
-                        summer_lim = self.sort_duration(summer_lim,'export limit')
-                        winter_lim = self.sort_duration(winter_lim,'export limit')
+                        summer = PlotDataHelper.sort_duration(summer,interf)
+                        winter = PlotDataHelper.sort_duration(winter,interf)
+                        summer_lim = PlotDataHelper.sort_duration(summer_lim,'export limit')
+                        winter_lim = PlotDataHelper.sort_duration(winter_lim,'export limit')
 
                     axs[n,0].plot(summer[interf],linewidth = 1,label = scenario + '\n interface flow')
                     axs[n,1].plot(winter[interf],linewidth = 1,label = scenario + '\n interface flow')
@@ -642,6 +653,7 @@ class MPlot(PlotDataHelper):
 
                 axs[n,0].set_title(interf)
                 axs[n,1].set_title(interf)
+                handles, labels = axs[n,0].get_legend_handles_labels()
                 if not duration_curve:
                     locator = mdates.AutoDateLocator(minticks=4, maxticks=8)
                     formatter = mdates.ConciseDateFormatter(locator)
@@ -656,22 +668,26 @@ class MPlot(PlotDataHelper):
                     axs[n,1].xaxis.set_major_locator(locator)
                     axs[n,1].xaxis.set_major_formatter(formatter)
 
-            mplt.add_legend()
+                if n == len(interf_list) - 1:
+                    axs[n,1].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
+
 
             Data_Table_Out = pd.concat(chunks,axis = 1)
             #Limits_Out = pd.concat(limits_chunks,axis = 1)
             #Limits_Out.index = ['Export Limit','Import Limit']
 
+            fig2.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
             if duration_curve:
                 plt.xlabel('Sorted hour of the year', color = 'black', labelpad = 30)
 
-            fig.text(0.15,0.98,'Summer (' + start_date_range + ' to ' + end_date_range + ')',fontsize = 16)
-            fig.text(0.58,0.98,'Winter',fontsize = 16)
+            fig2.text(0.15,0.98,'Summer (' + start_date_range + ' to ' + end_date_range + ')',fontsize = 16)
+            fig2.text(0.58,0.98,'Winter',fontsize = 16)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)            
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+                plt.title(zone_input)            
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
 
         return outputs
@@ -776,10 +792,7 @@ class MPlot(PlotDataHelper):
                 
             self.logger.info('Plotting full time series results.')
             xdim,ydim = self.set_x_y_dimension(len(interf_list))
-
-            mplt = PlotLibrary(nrows, ncols,
-                              squeeze=False, ravel_axs=True)
-            fig, axs = mplt.get_figure()
+            fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
 
             grid_size = xdim * ydim
             excess_axs = grid_size - len(interf_list)
@@ -825,18 +838,18 @@ class MPlot(PlotDataHelper):
                             limits = limits[self.start_date : self.end_date]
 
                         if duration_curve:
-                            single_int = self.sort_duration(single_int,interf)
+                            single_int = PlotDataHelper.sort_duration(single_int,interf)
                             
 
-                        mplt.lineplot(single_int,interf,label = scenario + '\n interface flow', sub_pos = n)
+                        plotlib.create_line_plot(axs,single_int,interf,label = scenario + '\n interface flow', n = n)
                         
                         #Only print limits if it doesn't change monthly or if you are plotting a time series. Otherwise the limit lines could be misleading.
                         if not duration_curve or identical[0]: 
                             if scenario == self.Scenarios[-1]:
                                 #Only plot limits for last scenario.
                                 limits_color_dict = {'export limit': 'red', 'import limit': 'green'}
-                                mplt.lineplot(limits,'export limit',label = 'export limit',color = limits_color_dict,linestyle = '--', sub_pos = n)
-                                mplt.lineplot(limits,'import limit',label = 'import limit',color = limits_color_dict,linestyle = '--', sub_pos = n)
+                                plotlib.create_line_plot(axs,limits,'export limit',label = 'export limit',color_dict = limits_color_dict,linestyle = '--', n = n)
+                                plotlib.create_line_plot(axs,limits,'import limit',label = 'import limit',color_dict = limits_color_dict,linestyle = '--', n = n)
 
                         #For output time series .csv
                         scenario_names = pd.Series([scenario] * len(single_int),name = 'Scenario')
@@ -856,7 +869,7 @@ class MPlot(PlotDataHelper):
                 axs[n].set_title(interf)
                 handles, labels = axs[n].get_legend_handles_labels()
                 if not duration_curve:
-                    self.set_subplot_timeseries_format(axs, sub_pos=n)
+                    PlotDataHelper.set_plot_timeseries_format(axs, n=n)
                 if n == len(interf_list) - 1:
                     axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
 
@@ -875,13 +888,15 @@ class MPlot(PlotDataHelper):
             # Data_Table_Out = Data_Table_Out.groupby(Data_Table_Out.index // 24).mean()
             # Data_Table_Out.index = pd.date_range(start = '1/1/2024',end = '12/31/2024',freq = 'D')
 
+            fig2.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
             if duration_curve:
                 plt.xlabel('Sorted hour of the year', color = 'black', labelpad = 30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)            
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+                plt.title(zone_input)            
+            outputs[zone_input] = {'fig': fig2, 'data_table': Data_Table_Out}
             #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs
 
@@ -963,10 +978,8 @@ class MPlot(PlotDataHelper):
         xdim,ydim = self.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
-
-        mplt = PlotLibrary(ydim, xdim, squeeze=False,
-                            ravel_axs=True)
-        fig, axs = mplt.get_figure()
+        fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
+        #plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
         reported_lines = self["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
         n = -1
@@ -1007,9 +1020,11 @@ class MPlot(PlotDataHelper):
 
                     single_line_out = single_line.copy()
                     if duration_curve:
-                        single_line = self.sort_duration(single_line,line)
+                        single_line = PlotDataHelper.sort_duration(single_line,line)
 
-                    mplt.lineplot(single_line, line, label = scenario + '\n line flow', sub_pos=n)
+                    #plotlib.create_line_plot(axs, single_line, line, label = scenario + '\n line flow', n = n)
+                    plotlib.create_line_plot(axs, single_line, line, label = scenario, n = n,linewidth = 2)
+
 
                     #Add %congested number to plot.
                     # if scenario == self.Scenarios[0]:
@@ -1039,13 +1054,16 @@ class MPlot(PlotDataHelper):
                 missing_lines += 1
                 continue
 
-            mplt.remove_excess_axs(excess_axs,grid_size)
-            axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit',color = 'red')
-            axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit', color = 'green')
+            PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
+            axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit',color = 'red',linewidth = 2)
+            axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit', color = 'green',linewidth = 2)
 
-            axs[n].set_title(line)
+            #axs[n].set_title(line)
+            handles, labels = axs[n].get_legend_handles_labels()
             if not duration_curve:
-                mplt.set_subplot_timeseries_format(sub_pos=n)
+                PlotDataHelper.set_plot_timeseries_format(axs, n=n)
+            if n == len(select_lines) - 1:
+                axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,0))
 
         if missing_lines == len(select_lines):
             outputs = MissingInputData()
@@ -1055,14 +1073,18 @@ class MPlot(PlotDataHelper):
         #Limits_Out = pd.concat(limits_chunks,axis = 1)
         #Limits_Out.index = ['Export Limit','Import Limit']
 
-        mplt.add_legend()
-        plt.ylabel('Flow (MW)',  color='black', rotation='vertical', labelpad=30)
+        fig2.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
+        plt.ylabel('Alaska Intertie Flow (MW)',  color='black', rotation='vertical', labelpad=30)
+
+        if duration_curve:
+            plt.xlabel('Hour of the year', color='black', labelpad=30)
         #plt.tight_layout(rect=[0, 0.03, 1, 0.97])
         plt.tight_layout()
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
        # Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + 'limits.csv'))
 
@@ -1117,10 +1139,7 @@ class MPlot(PlotDataHelper):
         xdim,ydim = self.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
-
-        mplt = PlotLibrary(ydim, xdim, squeeze=False,
-                            ravel_axs=True)
-        fig, axs = mplt.get_figure()
+        fig2, axs = plotlib.setup_plot(xdim,ydim,sharey = False)
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
         reported_lines = self["line_Flow"].get(self.Scenarios[0]).index.get_level_values('line_name').unique()
@@ -1142,10 +1161,10 @@ class MPlot(PlotDataHelper):
 
                 single_line_out = single_line.copy()
                 if duration_curve:
-                    single_line = self.sort_duration(single_line,line)
+                    single_line = PlotDataHelper.sort_duration(single_line,line)
                                         
-                #mplt.lineplot(single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', sub_pos = n)
-                mplt.lineplot(single_line,line, label = 'BESS - no BESS \n line flow', sub_pos=n)
+                #plotlib.create_line_plot(axs,single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', n = n)
+                plotlib.create_line_plot(axs,single_line,line, label = 'BESS - no BESS \n line flow', n = n)
 
 
             else:
@@ -1154,10 +1173,13 @@ class MPlot(PlotDataHelper):
                 missing_lines += 1
                 continue
 
-            mplt.remove_excess_axs(excess_axs,grid_size)     
+            PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)     
             axs[n].set_title(line)
+            handles, labels = axs[n].get_legend_handles_labels()
             if not duration_curve:
-                mplt.set_subplot_timeseries_format(sub_pos=n)
+                PlotDataHelper.set_plot_timeseries_format(axs, n=n)
+            if n == len(select_lines) - 1:
+                axs[n].legend(loc='lower left',bbox_to_anchor=(1.05,-0.2))
 
             chunks.append(single_line_out)
 
@@ -1167,13 +1189,16 @@ class MPlot(PlotDataHelper):
 
         Data_Table_Out = pd.concat(chunks,axis = 1)
 
-        mplt.add_legend()
+
+        fig2.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Flow difference (MW)',  color='black', rotation='vertical', labelpad=30)
+        plt.tight_layout(rect=[0, 0.03, 1, 0.97])
         plt.tight_layout()
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
 
         outputs = DataSavedInModule()
@@ -1271,9 +1296,9 @@ class MPlot(PlotDataHelper):
         ydim = len(select_lines)
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
+        fig2, axs = plt.subplots(ydim,xdim, figsize=((6*xdim),(4*ydim)), sharey=False, squeeze=False) #Not using plotlib.setup_plot here, I used two dimensional axis array so don't want to axs.ravel().
 
-        mplt = PlotLibrary(ydim, xdim, squeeze=False)
-        fig, axs = mplt.get_figure()
+        #plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
         i = -1
         missing_lines = 0
@@ -1314,10 +1339,10 @@ class MPlot(PlotDataHelper):
                 winter_lim = limits.drop(summer.index)
 
                 if duration_curve:
-                    summer = self.sort_duration(summer,line)
-                    winter = self.sort_duration(winter,line)
-                    summer_lim = self.sort_duration(summer_lim,'export limit')
-                    winter_lim = self.sort_duration(winter_lim,'export limit')
+                    summer = PlotDataHelper.sort_duration(summer,line)
+                    winter = PlotDataHelper.sort_duration(winter,line)
+                    summer_lim = PlotDataHelper.sort_duration(summer_lim,'export limit')
+                    winter_lim = PlotDataHelper.sort_duration(winter_lim,'export limit')
 
                 axs[i,0].plot(summer[line],linewidth = 1,label = scenario + '\n line flow')
                 axs[i,1].plot(winter[line],linewidth = 1,label = scenario + '\n line flow')
@@ -1354,15 +1379,17 @@ class MPlot(PlotDataHelper):
         #Limits_Out = pd.concat(limits_chunks,axis = 1)
         #Limits_Out.index = ['Export Limit','Import Limit']
 
-        fig.text(0.3,1,'Summer (Jun - Sep)')
-        fig.text(0.6,1,'Winter (Jan - Mar,Oct - Dec)')
+        fig2.add_subplot(111, frameon=False)
+        fig2.text(0.3,1,'Summer (Jun - Sep)')
+        fig2.text(0.6,1,'Winter (Jan - Mar,Oct - Dec)')
+        plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
         plt.ylabel('Flow (MW)',  color='black', rotation='vertical', labelpad=30)
         plt.tight_layout()
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
+        fig2.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
         #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
         outputs = DataSavedInModule()
@@ -1514,11 +1541,10 @@ class MPlot(PlotDataHelper):
         for zone_input in self.Zones:
             self.logger.info(f"Zone = {zone_input}")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=scenario_type)
+            xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=scenario_type)
 
-            mplt = PlotLibrary(nrows, ncols, sharey=True,
-                              squeeze=False, ravel_axs=True)
-            fig, axs = mplt.get_figure()            
+            fig3, axs = plotlib.setup_plot(xdimension,ydimension)
+            
             plt.subplots_adjust(wspace=0.6, hspace=0.3)
 
             data_table_chunks=[]
@@ -1553,17 +1579,15 @@ class MPlot(PlotDataHelper):
                     #Make a facet plot, one panel for each parent zone.
                     parent_region = rr_int_agg['parent'].unique()
                     plot_number = len(parent_region)
-                    ncols, nrows =  self.set_x_y_dimension(plot_number)
-                    mplt = PlotLibrary(nrows, ncols,
-                                        squeeze=False, ravel_axs=True)
-                    fig, axs = mplt.get_figure()
+                    xdimension, ydimension =  self.set_x_y_dimension(plot_number)
+                    fig3, axs = plotlib.setup_plot(xdimension,ydimension,sharey=False)
                     plt.subplots_adjust(wspace=0.6, hspace=0.7)
 
                 else:
                     parent_region = [zone_input]
                     plot_number = len(scenario_type)
 
-                grid_size = ncols*nrows
+                grid_size = xdimension*ydimension
                 excess_axs = grid_size - plot_number
 
                 for parent in parent_region:
@@ -1585,17 +1609,18 @@ class MPlot(PlotDataHelper):
 
                     #Convert units
                     if n == 0:
-                        unitconversion = self.capacity_energy_unitconversion(single_parent)
+                        unitconversion = PlotDataHelper.capacity_energy_unitconversion(single_parent.abs().values.max())
                     single_parent = single_parent / unitconversion['divisor']
 
                     for column in single_parent.columns:
 
-                        mplt.lineplot(single_parent, column, label=column, sub_pos=n)
+                        plotlib.create_line_plot(axs,single_parent,column,label=column,n=n)
                         axs[n].set_title(parent)
+                        axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                         axs[n].margins(x=0.01)
-                        mplt.set_subplot_timeseries_format(sub_pos=n)
+                        PlotDataHelper.set_plot_timeseries_format(axs,n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
-                        axs[n].legend(loc='lower left',bbox_to_anchor=(1,0))
+                        axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
 
                     n+=1
                 # Create data table for each scenario
@@ -1606,11 +1631,14 @@ class MPlot(PlotDataHelper):
 
             # if plotting all scenarios add facet labels
             if plot_scenario == True:
-                mplt.add_facet_labels(xlabels=self.xlabels,
-                                      ylabels = self.ylabels)
+                self.add_facet_labels(fig3)
 
             #Remove extra axes
-            mplt.remove_excess_axs(excess_axs, grid_size)
+            if excess_axs != 0:
+                PlotDataHelper.remove_excess_axs(axs, excess_axs, grid_size)
+
+            fig3.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
             plt.xlabel(timezone,  color='black', rotation='horizontal',labelpad = 30)
             plt.ylabel(f"Net Interchange ({unitconversion['units']})",  color='black', rotation='vertical', labelpad = 40)
 
@@ -1619,7 +1647,7 @@ class MPlot(PlotDataHelper):
                 # Location to save to
                 Data_Table_Out = rr_int_agg
                 save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_transmission')
-                fig.savefig(os.path.join(save_figures, "Region_Region_Interchange_{}.svg".format(self.Scenarios[0])), dpi=600, bbox_inches='tight')
+                fig3.savefig(os.path.join(save_figures, "Region_Region_Interchange_{}.svg".format(self.Scenarios[0])), dpi=600, bbox_inches='tight')
                 Data_Table_Out.to_csv(os.path.join(save_figures, "Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
                 outputs = DataSavedInModule()
                 return outputs
@@ -1627,7 +1655,7 @@ class MPlot(PlotDataHelper):
             Data_Out = pd.concat(data_table_chunks, copy=False, axis=0)
 
             # if plotting all scenarios return figures to plot_main
-            outputs[zone_input] = {'fig': fig,'data_table':Data_Out}
+            outputs[zone_input] = {'fig': fig3,'data_table':Data_Out}
         return outputs
 
     def region_region_checkerboard(self, **_):
@@ -1657,13 +1685,11 @@ class MPlot(PlotDataHelper):
         if 1 in check_input_data:
             return MissingInputData()
 
-        ncols, nrows = self.set_x_y_dimension(len(self.Scenarios))
-        grid_size = ncols*nrows
+        xdimension, ydimension = self.set_x_y_dimension(len(self.Scenarios))
+        grid_size = xdimension*ydimension
         excess_axs = grid_size - len(self.Scenarios)
 
-        mplt = PlotLibrary(nrows, ncols,
-                              squeeze=False, ravel_axs=True)
-        fig, axs = mplt.get_figure()
+        fig4, axs = plotlib.setup_plot(xdimension,ydimension,sharey=False)
         plt.subplots_adjust(wspace=0.02, hspace=0.4)
         max_flow_group = []
         Data_Out = []
@@ -1719,13 +1745,17 @@ class MPlot(PlotDataHelper):
             n+=1
 
         #Remove extra axes
-        mplt.remove_excess_axs(excess_axs,grid_size)
+            if excess_axs != 0:
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
 
-        cmap = cm.inferno
-        norm = mcolors.Normalize(vmin=0, vmax=max(max_flow_group))
+        cmap = mpl.cm.inferno
+        norm = mpl.colors.Normalize(vmin=0, vmax=max(max_flow_group))
         cax = plt.axes([0.90, 0.1, 0.035, 0.8])
-        fig.colorbar(cm.ScalarMappable(norm=norm, cmap=cmap),
+        fig4.colorbar(mpl.cm.ScalarMappable(norm=norm, cmap=cmap),
         cax=cax, label='Total Net Interchange [GWh]')
+        fig4.add_subplot(111, frameon=False)
+        plt.tick_params(labelcolor='none', top=False, 
+                        bottom=False, left=False, right=False)
         plt.xlabel('To Region', color='black', rotation='horizontal',
                    labelpad=40)
         plt.ylabel('From Region', color='black', rotation='vertical', 
@@ -1733,7 +1763,7 @@ class MPlot(PlotDataHelper):
 
         Data_Table_Out = pd.concat(Data_Out,axis=1)
         save_figures = os.path.join(self.figure_folder, f"{self.AGG_BY}_transmission")
-        fig.savefig(os.path.join(save_figures, "region_region_checkerboard.svg"), 
+        fig4.savefig(os.path.join(save_figures, "region_region_checkerboard.svg"), 
                      dpi=600, bbox_inches='tight')
         Data_Table_Out.to_csv(os.path.join(save_figures, "region_region_checkerboard.csv"))
 
@@ -1837,7 +1867,7 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
             
-            unitconversion = self.capacity_energy_unitconversion(all_scenarios)
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(all_scenarios.values.max())
             all_scenarios = all_scenarios/unitconversion['divisor']
 
             Data_Table_Out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
@@ -1845,27 +1875,35 @@ class MPlot(PlotDataHelper):
             #Make scenario/color dictionary.
             color_dict = dict(zip(all_scenarios.columns,self.color_list))
 
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
+            fig5, axs = plotlib.setup_plot()
+            #flatten object
+            ax = axs[0]
 
             if total_violations==True:
                 all_scenarios_tot = all_scenarios.sum()
                 all_scenarios_tot.plot.bar(stacked=False, rot=0,
-                                            color=[color_dict.get(x, '#333333') for x in all_scenarios_tot.index],
-                                            linewidth='0.1', width=0.35, ax=ax)
+                                                        color=[color_dict.get(x, '#333333') for x in all_scenarios_tot.index],
+                                                       linewidth='0.1', width=0.35, ax=ax)
+                ax.spines['right'].set_visible(False)
+                ax.spines['top'].set_visible(False)
+                ax.tick_params(axis='y', which='major', length=5, width=1)
+                ax.tick_params(axis='x', which='major', length=5, width=1)
+
             else:
                 for column in all_scenarios:
-                    mplt.lineplot(all_scenarios,column,color=color_dict,label=column)
+                    plotlib.create_line_plot(axs,all_scenarios,column,color_dict=color_dict,label=column)
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
-                mplt.set_subplot_timeseries_format(minticks=6,maxticks=12)
+                PlotDataHelper.set_plot_timeseries_format(axs,minticks=6,maxticks=12)
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
-                mplt.add_legend()
+                handles, labels = ax.get_legend_handles_labels()
+                ax.legend(handles, labels, loc='best',facecolor='inherit', frameon=True)
 
             if mconfig.parser("plot_title_as_region"):
-                fig.set_title(zone_input)
+                fig5.set_title(zone_input)
             ax.set_ylabel(f"Line violations ({unitconversion['units']})",  color='black', rotation='vertical')
 
-            outputs[zone_input] = {'fig': fig,'data_table':Data_Table_Out}
+            outputs[zone_input] = {'fig': fig5,'data_table':Data_Table_Out}
 
         return outputs
 
@@ -1929,7 +1967,7 @@ class MPlot(PlotDataHelper):
                 net_export_all_scenarios = pd.concat([net_export_all_scenarios,net_export], axis = 1)
                 net_export_all_scenarios.columns = net_export_all_scenarios.columns.str.replace('_', ' ')
 
-            unitconversion = self.capacity_energy_unitconversion(net_export_all_scenarios)
+            unitconversion = PlotDataHelper.capacity_energy_unitconversion(net_export_all_scenarios.abs().max().max())
 
             net_export_all_scenarios = net_export_all_scenarios/unitconversion["divisor"]
             # Data table of values to return to main program
@@ -1937,9 +1975,10 @@ class MPlot(PlotDataHelper):
             #Make scenario/color dictionary.
             color_dict = dict(zip(net_export_all_scenarios.columns,self.color_list))
 
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
+            fig1, axs = plotlib.setup_plot()
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            # flatten object
+            ax = axs[0]
 
             if net_export_all_scenarios.empty:
                 out = MissingZoneData()
@@ -1947,20 +1986,30 @@ class MPlot(PlotDataHelper):
                 continue
 
             for column in net_export_all_scenarios:
-                mplt.lineplot(net_export_all_scenarios,column,color_dict, label=column)
+                plotlib.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
                 ax.set_ylabel(f'Net exports ({unitconversion["units"]})', color='black', 
                               rotation='vertical')
                 ax.set_xlabel(timezone, color='black', rotation='horizontal')
+                ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                             lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 ax.margins(x=0.01)
                 ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
                           linestyle=':')
-                mplt.set_subplot_timeseries_format()
+                PlotDataHelper.set_plot_timeseries_format(axs)
 
-            mplt.add_legend(reverse_legend=True)
+            labels = net_export_all_scenarios.columns.tolist()
+            handles = []
+            # create custom handles
+            for scen in labels:
+                scen_legend_patches = mlines.Line2D([],[],color=color_dict[scen])
+                handles.append(scen_legend_patches)
+
+            ax.legend(reversed(handles), reversed(labels), loc='lower left', 
+                      bbox_to_anchor=(1,0), facecolor='inherit', frameon=True)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)            
+                ax.set_title(zone_input)            
                 
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
         return outputs
 
     def zonal_interchange(self, figure_name: str = None,
@@ -2007,8 +2056,8 @@ class MPlot(PlotDataHelper):
         outputs = {}
 
         # sets up x, y dimensions of plot
-        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
-        grid_size = ncols*nrows
+        xdimension, ydimension = self.setup_facet_xy_dimensions(multi_scenario=self.Scenarios)
+        grid_size = xdimension*ydimension
 
         # Used to calculate any excess axis to delete
         plot_number = len(self.Scenarios)
@@ -2018,10 +2067,7 @@ class MPlot(PlotDataHelper):
 
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
 
-            mplt = PlotLibrary(nrows, ncols, sharey=True,
-                              squeeze=False, ravel_axs=True)
-            fig, axs = mplt.get_figure()
-
+            fig7, axs = plotlib.setup_plot(xdimension ,ydimension, sharey=True)
             plt.subplots_adjust(wspace=0.1, hspace=0.5)
 
             net_exports_all = []
@@ -2089,7 +2135,7 @@ class MPlot(PlotDataHelper):
                         net_export = net_export[start_date_range : end_date_range]
 
                     if duration_curve:
-                        net_export = self.sort_duration(net_export,other_zone)
+                        net_export = PlotDataHelper.sort_duration(net_export,other_zone)
 
                     net_exports.append(net_export)
 
@@ -2100,7 +2146,7 @@ class MPlot(PlotDataHelper):
 
                 # unitconversion based off peak export hour, only checked once
                 if zone_input == self.Zones[0] and scenario == self.Scenarios[0]:
-                    unitconversion = self.capacity_energy_unitconversion(net_exports)
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(net_exports.max().max())
 
                 net_exports = net_exports / unitconversion['divisor']
 
@@ -2109,15 +2155,21 @@ class MPlot(PlotDataHelper):
 
                 for column in net_exports:
                     linestyle = '--' if column == 'Net export' else 'solid'
-                    mplt.lineplot(net_exports, column=column, label=column,
-                                    sub_pos=n, linestyle=linestyle)
+                    plotlib.create_line_plot(axs, net_exports, column=column, label=column,
+                                             n=n, linestyle=linestyle)
 
+                axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(
+                                                 lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
                 axs[n].margins(x=0.01)
                 #Add horizontal line at 0.
                 axs[n].hlines(y=0, xmin=axs[n].get_xlim()[0], xmax=axs[n].get_xlim()[1],
                               linestyle=':') 
+                if n == len(self.Scenarios) - 1:
+                    axs[n].legend(loc='lower left', bbox_to_anchor=(1, 0), 
+                                  facecolor='inherit', frameon=True)
+
                 if not duration_curve:
-                    mplt.set_subplot_timeseries_format(sub_pos=n)
+                    PlotDataHelper.set_plot_timeseries_format(axs,n)
 
                 #Add scenario column to output table.
                 scenario_names = pd.Series([scenario] * len(net_exports), name='Scenario')
@@ -2125,14 +2177,17 @@ class MPlot(PlotDataHelper):
                 net_exports = net_exports.set_index([scenario_names], append=True)
                 net_exports_all.append(net_exports)
 
-            mplt.add_facet_labels(xlabels=self.xlabels,
-                                  ylabels = self.ylabels)
-            mplt.add_legend()
-            #Remove extra axes
-            mplt.remove_excess_axs(excess_axs,grid_size)
+            self.add_facet_labels(fig7)
 
+            #Remove extra axes
+            if excess_axs != 0:
+                PlotDataHelper.remove_excess_axs(axs,excess_axs,grid_size)
+
+            fig7.add_subplot(111, frameon=False)
+            plt.tick_params(labelcolor='none', top=False, bottom=False, 
+                            left=False, right=False)
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                plt.title(zone_input)
             plt.ylabel(f"Net export ({unitconversion['units']})", color='black', 
                        rotation='vertical', labelpad=40)
             if duration_curve:
@@ -2140,7 +2195,7 @@ class MPlot(PlotDataHelper):
             
             Data_Table_Out = pd.concat(net_exports_all)
             # if plotting all scenarios return figures to plot_main
-            outputs[zone_input] = {'fig': fig,'data_table' : Data_Table_Out}
+            outputs[zone_input] = {'fig': fig7,'data_table' : Data_Table_Out}
 
         return outputs
 
@@ -2180,9 +2235,10 @@ class MPlot(PlotDataHelper):
 
             self.logger.info(f"{self.AGG_BY} = {zone_input}")
             
-            mplt = PlotLibrary()
-            fig, ax = mplt.get_figure()
+            fig, axs = plotlib.setup_plot(1, 1, sharey=True)
             plt.subplots_adjust(wspace=0.05, hspace=0.2)
+            # flatten object
+            ax = axs[0]
 
             net_exports_all = []
             # Holds each scenario output table
@@ -2255,13 +2311,13 @@ class MPlot(PlotDataHelper):
                 positive = net_exports.agg(lambda x: x[x>0].sum())
                 negative = net_exports.agg(lambda x: x[x<0].sum())
 
-                both = pd.concat([positive,negative], axis=1)
-                both.columns = ["Total Export", "Total Import"]
-
                 # unitconversion based off peak export hour, only checked once
                 if scenario == self.Scenarios[0]:
-                    unitconversion = self.capacity_energy_unitconversion(both)
+                    max_val = max(positive['Net Export'].max(),abs(negative['Net Export']).max())
+                    unitconversion = PlotDataHelper.capacity_energy_unitconversion(max_val)
 
+                both = pd.concat([positive,negative], axis=1)
+                both.columns = ["Total Export", "Total Import"]
                 both = both / unitconversion['divisor']
                 net_exports_all.append(both)
 
@@ -2276,15 +2332,14 @@ class MPlot(PlotDataHelper):
             #Make scenario/color dictionary.
             color_dict = dict(zip(self.Scenarios, self.color_list))
             
-            mplt.clustered_stacked_barplot(net_exports_all, 
-                                            labels=self.Scenarios, 
-                                            color_dict=color_dict)
+            plotlib.create_clustered_stacked_bar_plot(net_exports_all, ax, labels=self.Scenarios, 
+                                                      color_dict=color_dict)
             ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
                       linestyle=':')
             ax.set_ylabel(f"Interchange ({unitconversion['units']}h)", color='black', 
                           rotation='vertical')
             if mconfig.parser("plot_title_as_region"):
-                mplt.add_main_title(zone_input)
+                ax.set_title(zone_input)
 
             outputs[zone_input] = {'fig': fig,'data_table': Data_Table_Out}
 
@@ -2332,9 +2387,10 @@ class MPlot(PlotDataHelper):
         self.logger.info('Plotting only the interfaces specified in Marmot_plot_select.csv')
         self.logger.info(select_ints) 
 
-        mplt = PlotLibrary()
-        fig, ax = mplt.get_figure()
+        fig, axs = plotlib.setup_plot(1, 1, sharey=True)
         plt.subplots_adjust(wspace=0.05, hspace=0.2)
+        # flatten object
+        ax = axs[0]
         
         net_flows_all = []
         # Holds each scenario output table
@@ -2373,13 +2429,13 @@ class MPlot(PlotDataHelper):
                 pos = pos.append(pos_sing)
                 neg_sing = pd.Series(flow.where(flow < 0).sum())
                 neg = neg.append(neg_sing)
+                
+            if scenario == self.Scenarios[0]:
+                max_val = max(pos.max(),abs(neg.max()))
+                unitconversion = PlotDataHelper.capacity_energy_unitconversion(max_val)
 
             both = pd.concat([pos,neg],axis = 1)
             both.columns = ['Total Export','Total Import']
-
-            if scenario == self.Scenarios[0]:
-                unitconversion = self.capacity_energy_unitconversion(both)
-
             both = both / unitconversion['divisor']
             both.index = available_inter
             net_flows_all.append(both)
@@ -2395,9 +2451,8 @@ class MPlot(PlotDataHelper):
         #Make scenario/color dictionary.
         color_dict = dict(zip(self.Scenarios, self.color_list))
         
-        mplt.clustered_stacked_barplot(net_flows_all, 
-                                        labels=self.Scenarios, 
-                                        color_dict=color_dict)
+        plotlib.create_clustered_stacked_bar_plot(net_flows_all, ax, labels=self.Scenarios, 
+                                                  color_dict=color_dict)
         ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
                   linestyle=':')
         ax.set_ylabel('Flow ({}h)'.format(unitconversion['units']), color='black', 
@@ -2523,7 +2578,7 @@ class MPlot(PlotDataHelper):
 
     #         all_scenarios.index = pd.to_datetime(all_scenarios.index)
 
-    #         fig, ax = plt.subplots(figsize=(9,6))
+    #         fig5, ax = plt.subplots(figsize=(9,6))
     #         for idx,column in enumerate(all_scenarios.columns):
     #             ax.plot(all_scenarios.index.values,all_scenarios[column], linewidth=2, color = scenario_color_dict.get(column,'#333333'),label=column)
 
@@ -2533,6 +2588,7 @@ class MPlot(PlotDataHelper):
     #         ax.spines['top'].set_visible(False)
     #         ax.tick_params(axis='y', which='major', length=5, width=1)
     #         ax.tick_params(axis='x', which='major', length=5, width=1)
+    #         ax.yaxis.set_major_formatter(mpl.ticker.StrMethodFormatter('{x:,.0f}'))
     #         ax.margins(x=0.01)
 
     #         locator = mdates.AutoDateLocator(minticks=6, maxticks=12)
@@ -2556,7 +2612,7 @@ class MPlot(PlotDataHelper):
     #         # Manually add the first legend back
     #         ax.add_artist(leg1)
 
-    #         outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+    #         outputs[zone_input] = {'fig': fig5, 'data_table': Data_Table_Out}
     #     return outputs
 
 
@@ -2594,7 +2650,7 @@ class MPlot(PlotDataHelper):
 #         rr_int_hr=rr_int_hr.loc[pathlist].drop(['Abs MW'],axis=1)
 
 #         ## Plot duration curves
-#         fig, ax3 = plt.subplots(figsize=(9,6))
+#         fig3, ax3 = plt.subplots(figsize=(9,6))
 #         for i in pathlist:
 #             duration_curve = rr_int_hr.loc[i].sort_values(ascending=False,by='flow (MW)').reset_index()
 #             plt.plot(duration_curve['flow (MW)'],label=i)
@@ -2611,4 +2667,4 @@ class MPlot(PlotDataHelper):
 
 #         Data_Table_Out = rr_int_hr
 
-        # return {'fig': fig, 'data_table': Data_Table_Out}
+        # return {'fig': fig3, 'data_table': Data_Table_Out}

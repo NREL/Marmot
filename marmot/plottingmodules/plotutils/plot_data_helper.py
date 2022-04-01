@@ -6,10 +6,12 @@
 
 import os
 import math
+import textwrap
 import logging
 import datetime as dt
 import pandas as pd
 import numpy as np
+import matplotlib.dates as mdates
 import functools
 import concurrent.futures
 from typing import Tuple
@@ -23,7 +25,8 @@ class PlotDataHelper(dict):
     """Methods used to assist with the creation of Marmot plots
 
     Collection of Methods to assist with creation of figures,
-    including getting and formatting data, setting up plot sizes.
+    including getting and formatting data, setting up plot sizes and adding 
+    elements to plots such as labels.
 
     PlotDataHelper inherits the python class 'dict' so acts like a dictionary and stores the
     formatted data when retrieved by the get_formatted_data method.
@@ -261,9 +264,9 @@ class PlotDataHelper(dict):
 
         return df
 
-    def set_facet_col_row_dimensions(self, facet: bool = True, 
+    def setup_facet_xy_dimensions(self, facet: bool = True, 
                                   multi_scenario: list = None) -> Tuple[int, int]:
-        """Sets facet plot col and row dimensions based on user defined labeles
+        """Sets facet plot x,y dimensions based on user defined labeles
 
         Args:
             facet (bool, optional): Trigger for plotting facet plots. 
@@ -274,22 +277,22 @@ class PlotDataHelper(dict):
         Returns:
             Tuple[int, int]: Facet x,y dimensions.
         """
-        ncols=len(self.xlabels)
+        xdimension=len(self.xlabels)
         if self.xlabels == ['']:
-            ncols = 1
-        nrows=len(self.ylabels)
+            xdimension = 1
+        ydimension=len(self.ylabels)
         if self.ylabels == ['']:
-            nrows = 1
+            ydimension = 1
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
-            ncols = 1
-            nrows = 1
-            return ncols, nrows
+            xdimension = 1
+            ydimension = 1
+            return xdimension, ydimension
         # If no labels were provided or dimensions less than len scenarios use Marmot default dimension settings
-        if self.xlabels == [''] and self.ylabels == [''] or ncols*nrows<len(multi_scenario):
+        if self.xlabels == [''] and self.ylabels == [''] or xdimension*ydimension<len(multi_scenario):
             logger.info("Dimensions could not be determined from x & y labels - Using Marmot default dimensions")
-            ncols, nrows = self.set_x_y_dimension(len(multi_scenario))
-        return ncols, nrows
+            xdimension, ydimension = self.set_x_y_dimension(len(multi_scenario))
+        return xdimension, ydimension
 
     def set_x_y_dimension(self, region_number: int) -> Tuple[int, int]:
         """Sets X,Y dimension of plots without x,y labels.
@@ -301,15 +304,75 @@ class PlotDataHelper(dict):
             Tuple[int, int]: Facet x,y dimensions.
         """
         if region_number >= 5:
-            ncols = 3
-            nrows = math.ceil(region_number/3)
+            xdimension = 3
+            ydimension = math.ceil(region_number/3)
         if region_number <= 3:
-            ncols = region_number
-            nrows = 1
+            xdimension = region_number
+            ydimension = 1
         if region_number == 4:
-            ncols = 2
-            nrows = 2
-        return ncols,nrows
+            xdimension = 2
+            ydimension = 2
+        return xdimension,ydimension
+
+    def add_facet_labels(self, fig, 
+                         xlabels_bottom: bool = True,
+                         alternative_xlabels: list = None,
+                         alternative_ylabels: list = None,
+                         **kwargs) -> None:
+        """Adds labels to outside of Facet plot.
+
+        Args:
+            fig (matplotlib.fig): matplotlib figure.
+            xlabels_bottom (bool, optional): If True labels are placed under bottom. 
+                Defaults to True.
+            alternative_xlabels (list, optional): Alteranative xlabels. 
+                Defaults to None.
+            alternative_ylabels (list, optional): Alteranative ylabels. 
+                Defaults to None.
+        """
+        font_defaults = mconfig.parser("font_settings")
+
+        if alternative_xlabels:
+            xlabel = alternative_xlabels
+        else:
+            xlabel = self.xlabels
+
+        if alternative_ylabels:
+            ylabel = alternative_ylabels
+        else:
+            ylabel = self.ylabels
+
+        all_axes = fig.get_axes()
+        j=0
+        k=0
+        for ax in all_axes:
+            if xlabels_bottom:
+                if ax.is_last_row():
+                    try:
+                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
+                    except IndexError:
+                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                        continue
+                    j=j+1
+            else:
+                if ax.is_first_row():
+                    try:
+                        ax.set_xlabel(xlabel=(xlabel[j]), color='black', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
+                        ax.xaxis.set_label_position('top')
+                    except IndexError:
+                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                        continue
+                    j=j+1
+            if ax.is_first_col():
+                try:
+                    ax.set_ylabel(ylabel=(ylabel[k]), color='black', rotation='vertical', 
+                                    fontsize=font_defaults['axes_label_size']-2, **kwargs)
+                except IndexError:
+                    logger.warning(f"Warning: ylabel missing for subplot y{k}")
+                    continue
+                k=k+1
 
     def include_net_imports(self, gen_df: pd.DataFrame, 
                             load_series: pd.Series,
@@ -354,68 +417,85 @@ class PlotDataHelper(dict):
            gen_df = gen_df.T 
         return gen_df
 
-    def capacity_energy_unitconversion(self, df: pd.DataFrame, 
-                                        sum_values: bool = False) -> dict:
-        """Unitconversion for capacity and energy figures.
-
-        Takes a pd.DataFrame as input and will then determine the max value
-        in the frame. 
-        
-        If sum_values is True, either rows or columns will be summated before
-        determining max value. The axis is chosen automatically based on where 
-        the scenario entries or datetime index is located. If correct axis 
-        cannot be determined axis 0 (rows) will be summed.
-        This setting should mainly be set to True when potting stacked bar 
-        and area plots.
+    @staticmethod
+    def set_plot_timeseries_format(axs, n: int = 0,
+                                   minticks: int = mconfig.parser("axes_options","x_axes_minticks"),
+                                   maxticks: int = mconfig.parser("axes_options","x_axes_maxticks")
+                                   ) -> None:
+        """Auto sets timeseries format.
 
         Args:
-            df (pd.DataFrame): pandas dataframe
-            sum_values (bool, optional): Sum axis values if True. 
-                Should be set to True for stacked bar and area plots.
-                Defaults to False.
-
-        Returns:
-            dict: Dictionary containing divisor and units.
+            axs (matplotlib.axes): matplotlib.axes
+            n (int, optional): Counter for facet plot. Defaults to 0.
+            minticks (int, optional): Minimum tick marks. 
+                Defaults to mconfig.parser("axes_options","x_axes_minticks").
+            maxticks (int, optional): Max tick marks. 
+                Defaults to mconfig.parser("axes_options","x_axes_maxticks").
         """
-        if mconfig.parser("auto_convert_units"):
-            if sum_values:
-                # Check if scenarios are in index sum across columns
-                if any(scen in self.Scenarios for scen in df.index):
-                    sum_axis=1
-                elif isinstance(df.index, pd.MultiIndex) and\
-                    'Scenario' in df.index.names:
-                    sum_axis=1
-                # If index datetime sum across columns
-                elif isinstance(df.index, pd.DatetimeIndex):
-                    sum_axis=1  
-                elif any(scen in self.Scenarios for scen in df.columns):
-                    sum_axis=0
-                else:
-                    logger.warning("Could not determine axis to sum across, "
-                                   "defaulting to axis 0 (rows)")
-                    sum_axis=0
-                max_value = df.abs().sum(axis=sum_axis).max()
-            else:
-                max_value = df.abs().to_numpy().max()
+        locator = mdates.AutoDateLocator(minticks=minticks, maxticks=maxticks)
+        formatter = mdates.ConciseDateFormatter(locator)
+        formatter.formats[2] = '%d\n %b'
+        formatter.zero_formats[1] = '%b\n %Y'
+        formatter.zero_formats[2] = '%d\n %b'
+        formatter.zero_formats[3] = '%H:%M\n %d-%b'
+        formatter.offset_formats[3] = '%b %Y'
+        formatter.show_offset = False
+        axs[n].xaxis.set_major_locator(locator)
+        axs[n].xaxis.set_major_formatter(formatter)
 
-            if max_value < 1000 and max_value > 1:
-                divisor = 1
-                units = 'MW'
-            elif max_value < 1:
-                divisor = 0.001
-                units = 'kW'
-            elif max_value > 999999.9:
-                divisor = 1000000
-                units = 'TW'
+    @staticmethod
+    def set_barplot_xticklabels(labels: list, ax, 
+                                rotate: bool = mconfig.parser("axes_label_options", "rotate_x_labels"),
+                                num_labels: int = mconfig.parser("axes_label_options", "rotate_at_num_labels"),
+                                angle: float = mconfig.parser("axes_label_options", "rotation_angle"),
+                                **kwargs) -> None:
+        """Set the xticklabels on bar plots and determine whether they will be rotated.
+
+        Wrapper around matplotlib set_xticklabels
+        
+        Checks to see if the number of labels is greater than or equal to the default
+        number set in config.yml. If this is the case, rotate
+        specify whether or not to rotate the labels and angle specifies what angle they should 
+        be rotated to.
+
+        Args:
+            labels (list): Labels to apply to xticks
+            ax (matplotlib.axes): matplotlib.axes
+            rotate (bool, optional): rotate labels True/False. 
+                Defaults to mconfig.parser("axes_label_options", "rotate_x_labels").
+            num_labels (int, optional): Number of labels to rotate at. 
+                Defaults to mconfig.parser("axes_label_options", "rotate_at_num_labels").
+            angle (float, optional): Angle of rotation. 
+                Defaults to mconfig.parser("axes_label_options", "rotation_angle").
+        """
+        if rotate:
+            if (len(labels)) >= num_labels:
+                ax.set_xticklabels(labels, rotation=angle, ha="right", **kwargs)
             else:
-                divisor = 1000
-                units = 'GW'
+                labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
+                ax.set_xticklabels(labels, rotation=0, **kwargs)
         else:
-            # Disables auto unit conversion, all values in MW
-            divisor = 1
-            units = 'MW'
+            labels = [textwrap.fill(x, 10, break_long_words=False) for x in labels]
+            ax.set_xticklabels(labels, rotation=0, **kwargs)
 
-        return {'units':units, 'divisor':divisor}
+    @staticmethod
+    def remove_excess_axs(axs, excess_axs: int, grid_size: int) -> None:
+        """Removes excess axes spins + tick marks.
+
+        Args:
+            axs (matplotlib.axes): matplotlib.axes
+            excess_axs (int): # of excess axes.
+            grid_size (int): Size of facet grid.
+        """
+        while excess_axs > 0:
+            axs[(grid_size)-excess_axs].spines['right'].set_visible(False)
+            axs[(grid_size)-excess_axs].spines['left'].set_visible(False)
+            axs[(grid_size)-excess_axs].spines['bottom'].set_visible(False)
+            axs[(grid_size)-excess_axs].spines['top'].set_visible(False)
+            axs[(grid_size)-excess_axs].tick_params(axis='both',
+                                                    which='both',
+                                                    colors='white')
+            excess_axs-=1
 
     @staticmethod
     def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
@@ -452,6 +532,36 @@ class PlotDataHelper(dict):
                         .drop(columns=['timestamp']))
         
         return sorted_duration
+
+    @staticmethod
+    def capacity_energy_unitconversion(max_value: float) -> dict:
+        """Auto unitconversion for capacity and energy figures.
+
+        Args:
+            max_value (float): Value used to determine divisor and units.
+
+        Returns:
+            dict: Dictionary containing divisor and units.
+        """
+        if max_value < 1000 and max_value > 1:
+            divisor = 1
+            units = 'MW'
+        elif max_value < 1:
+            divisor = 0.001
+            units = 'kW'
+        elif max_value > 999999.9:
+            divisor = 1000000
+            units = 'TW'
+        else:
+            divisor = 1000
+            units = 'GW'
+        
+        # Disables auto unit conversion, all values in MW
+        if mconfig.parser("auto_convert_units") == False:
+            divisor = 1
+            units = 'MW'
+            
+        return {'units':units, 'divisor':divisor}
 
     @staticmethod
     def insert_custom_data_columns(existing_df: pd.DataFrame, 
@@ -507,3 +617,5 @@ class PlotDataHelper(dict):
             modifed_df.drop('column_position', inplace=True)
         
         return modifed_df
+
+
