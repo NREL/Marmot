@@ -16,7 +16,10 @@ import marmot.plottingmodules.total_generation as gen
 import marmot.config.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
-from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, MissingZoneData)
+from marmot.plottingmodules.plotutils.plot_exceptions import (
+    MissingInputData,
+    MissingZoneData,
+)
 
 
 class MPlot(PlotDataHelper):
@@ -25,11 +28,11 @@ class MPlot(PlotDataHelper):
     All the plotting modules use this same class name.
     This class contains plotting methods that are grouped based on the
     current module name.
-    
-    The total_installed_capacity module contains methods that are
-    related to the total installed capacity of generators and other devices. 
 
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.    
+    The total_installed_capacity module contains methods that are
+    related to the total installed capacity of generators and other devices.
+
+    MPlot inherits from the PlotDataHelper class to assist in creating figures.
     """
 
     def __init__(self, argument_dict: dict):
@@ -44,14 +47,22 @@ class MPlot(PlotDataHelper):
             self.__setattr__(prop, argument_dict[prop])
 
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
+        super().__init__(
+            self.Marmot_Solutions_folder,
+            self.AGG_BY,
+            self.ordered_gen,
+            self.PLEXOS_color_dict,
+            self.Scenarios,
+            self.ylabels,
+            self.xlabels,
+            self.gen_names_dict,
+            self.TECH_SUBSET,
+            Region_Mapping=self.Region_Mapping,
+        )
 
         # used for combined cap/gen plot
         self.argument_dict = argument_dict
-        self.logger = logging.getLogger('marmot_plot.'+__name__)        
+        self.logger = logging.getLogger("marmot_plot." + __name__)
 
     def total_cap(self, **_):
         """Creates a stacked barplot of total installed capacity.
@@ -83,28 +94,40 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Installed_Capacity = self["generator_Installed_Capacity"].get(scenario)
+                Total_Installed_Capacity = self["generator_Installed_Capacity"].get(
+                    scenario
+                )
 
-                zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
-                if scenario == 'ADS':
-                    zone_input_adj = zone_input.split('_WI')[0]
+                zones_with_cap = Total_Installed_Capacity.index.get_level_values(
+                    self.AGG_BY
+                ).unique()
+                if scenario == "ADS":
+                    zone_input_adj = zone_input.split("_WI")[0]
                 else:
                     zone_input_adj = zone_input
                 if zone_input_adj in zones_with_cap:
-                    Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input_adj, level=self.AGG_BY)
+                    Total_Installed_Capacity = Total_Installed_Capacity.xs(
+                        zone_input_adj, level=self.AGG_BY
+                    )
                 else:
                     self.logger.warning(f"No installed capacity in {zone_input}")
                     outputs[zone_input] = MissingZoneData()
                     continue
 
-                Total_Installed_Capacity = self.df_process_gen_inputs(Total_Installed_Capacity)
+                Total_Installed_Capacity = self.df_process_gen_inputs(
+                    Total_Installed_Capacity
+                )
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0: scenario}, inplace=True)
-                Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out,
-                                                          Total_Installed_Capacity],
-                                                         axis=0, sort=False).fillna(0)
+                Total_Installed_Capacity_Out = pd.concat(
+                    [Total_Installed_Capacity_Out, Total_Installed_Capacity],
+                    axis=0,
+                    sort=False,
+                ).fillna(0)
 
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[
+                :, (Total_Installed_Capacity_Out != 0).any(axis=0)
+            ]
 
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
             if Total_Installed_Capacity_Out.empty:
@@ -113,15 +136,20 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = self.capacity_energy_unitconversion(Total_Installed_Capacity_Out,
-                                                                            sum_values=True)
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor']
+            unitconversion = self.capacity_energy_unitconversion(
+                Total_Installed_Capacity_Out, sum_values=True
+            )
+            Total_Installed_Capacity_Out = (
+                Total_Installed_Capacity_Out / unitconversion["divisor"]
+            )
 
             Data_Table_Out = Total_Installed_Capacity_Out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
-            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
-            
+            Total_Installed_Capacity_Out.index = (
+                Total_Installed_Capacity_Out.index.str.replace("_", " ")
+            )
+
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
@@ -130,19 +158,25 @@ class MPlot(PlotDataHelper):
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
-            
-            mplt.barplot(Total_Installed_Capacity_Out, color=self.PLEXOS_color_dict,
-                         stacked=True,
-                         custom_tick_labels=tick_labels)
 
-            ax.set_ylabel(f"Total Installed Capacity ({unitconversion['units']})",
-                          color='black', rotation='vertical')
-            
+            mplt.barplot(
+                Total_Installed_Capacity_Out,
+                color=self.PLEXOS_color_dict,
+                stacked=True,
+                custom_tick_labels=tick_labels,
+            )
+
+            ax.set_ylabel(
+                f"Total Installed Capacity ({unitconversion['units']})",
+                color="black",
+                rotation="vertical",
+            )
+
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
                 mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs
 
     def total_cap_diff(self, **_):
@@ -160,7 +194,7 @@ class MPlot(PlotDataHelper):
         # required True/False, property name and scenarios required, scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -177,48 +211,69 @@ class MPlot(PlotDataHelper):
 
                 self.logger.info(f"Scenario = {scenario}")
 
-                Total_Installed_Capacity = self["generator_Installed_Capacity"].get(scenario)
-                zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
-                if scenario == 'ADS':
-                    zone_input_adj = zone_input.split('_WI')[0]
-                    Total_Installed_Capacity.index = pd.MultiIndex.from_frame(Total_Installed_Capacity
-                                                                              .index
-                                                                              .to_frame()
-                                                                              .fillna('All'))  # Fix NaN values from formatter
-                    zones_with_cap = Total_Installed_Capacity.index.get_level_values(self.AGG_BY).unique()
+                Total_Installed_Capacity = self["generator_Installed_Capacity"].get(
+                    scenario
+                )
+                zones_with_cap = Total_Installed_Capacity.index.get_level_values(
+                    self.AGG_BY
+                ).unique()
+                if scenario == "ADS":
+                    zone_input_adj = zone_input.split("_WI")[0]
+                    Total_Installed_Capacity.index = pd.MultiIndex.from_frame(
+                        Total_Installed_Capacity.index.to_frame().fillna("All")
+                    )  # Fix NaN values from formatter
+                    zones_with_cap = Total_Installed_Capacity.index.get_level_values(
+                        self.AGG_BY
+                    ).unique()
                 else:
                     zone_input_adj = zone_input
                 if zone_input_adj in zones_with_cap:
-                    Total_Installed_Capacity = Total_Installed_Capacity.xs(zone_input_adj, level=self.AGG_BY)
+                    Total_Installed_Capacity = Total_Installed_Capacity.xs(
+                        zone_input_adj, level=self.AGG_BY
+                    )
                 else:
                     self.logger.warning(f"No installed capacity in {zone_input}")
                     outputs[zone_input] = MissingZoneData()
                     continue
 
                 # print(Total_Installed_Capacity.index.get_level_values('tech').unique())
-                fn = os.path.join(self.Marmot_Solutions_folder,
-                                  'Figures_Output',
-                                  f'{self.AGG_BY}_total_installed_capacity',
-                                  'Individual_Gen_Cap_{scenario}.csv')
+                fn = os.path.join(
+                    self.Marmot_Solutions_folder,
+                    "Figures_Output",
+                    f"{self.AGG_BY}_total_installed_capacity",
+                    "Individual_Gen_Cap_{scenario}.csv",
+                )
 
                 Total_Installed_Capacity.reset_index().to_csv(fn)
 
-                Total_Installed_Capacity = self.df_process_gen_inputs(Total_Installed_Capacity)
+                Total_Installed_Capacity = self.df_process_gen_inputs(
+                    Total_Installed_Capacity
+                )
                 Total_Installed_Capacity.reset_index(drop=True, inplace=True)
                 Total_Installed_Capacity.rename(index={0: scenario}, inplace=True)
-                Total_Installed_Capacity_Out = pd.concat([Total_Installed_Capacity_Out, Total_Installed_Capacity],
-                                                         axis=0, sort=False).fillna(0)
+                Total_Installed_Capacity_Out = pd.concat(
+                    [Total_Installed_Capacity_Out, Total_Installed_Capacity],
+                    axis=0,
+                    sort=False,
+                ).fillna(0)
 
             try:
                 # Change to a diff on first scenario
-                Total_Installed_Capacity_Out = Total_Installed_Capacity_Out-Total_Installed_Capacity_Out.xs(self.Scenarios[0])  
+                Total_Installed_Capacity_Out = (
+                    Total_Installed_Capacity_Out
+                    - Total_Installed_Capacity_Out.xs(self.Scenarios[0])
+                )
             except KeyError:
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
-            Total_Installed_Capacity_Out.drop(self.Scenarios[0], inplace=True)  # Drop base entry
+            Total_Installed_Capacity_Out.drop(
+                self.Scenarios[0], inplace=True
+            )  # Drop base entry
 
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[:, (Total_Installed_Capacity_Out != 0).any(axis=0)]
+            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[
+                :, (Total_Installed_Capacity_Out != 0).any(axis=0)
+            ]
 
             # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
             if Total_Installed_Capacity_Out.empty:
@@ -227,38 +282,49 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
 
-            unitconversion = self.capacity_energy_unitconversion(Total_Installed_Capacity_Out,
-                                                                    sum_values=True)
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out/unitconversion['divisor']
+            unitconversion = self.capacity_energy_unitconversion(
+                Total_Installed_Capacity_Out, sum_values=True
+            )
+            Total_Installed_Capacity_Out = (
+                Total_Installed_Capacity_Out / unitconversion["divisor"]
+            )
 
             Data_Table_Out = Total_Installed_Capacity_Out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
 
-            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
+            Total_Installed_Capacity_Out.index = (
+                Total_Installed_Capacity_Out.index.str.replace("_", " ")
+            )
 
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            mplt.barplot(Total_Installed_Capacity_Out, 
-                         color=self.PLEXOS_color_dict,
-                         stacked=True)
+            mplt.barplot(
+                Total_Installed_Capacity_Out, color=self.PLEXOS_color_dict, stacked=True
+            )
 
-            ax.set_ylabel((f"Capacity Change ({unitconversion['units']}) \n "
-                           f"relative to {self.Scenarios[0]}"), color='black', rotation='vertical')
-            
+            ax.set_ylabel(
+                (
+                    f"Capacity Change ({unitconversion['units']}) \n "
+                    f"relative to {self.Scenarios[0]}"
+                ),
+                color="black",
+                rotation="vertical",
+            )
+
             mplt.add_legend(reverse_legend=True)
             if mconfig.parser("plot_title_as_region"):
                 mplt.add_main_title(zone_input)
-                
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+
+            outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs
 
     def total_cap_and_gen_facet(self, **_):
         """Creates a facet plot comparing total generation and installed capacity.
 
-        Creates a plot with 2 facet plots, total installed capacity on the left 
-        and total generation on the right. 
-        Each facet contains stacked bar plots, each scenario is plotted as a 
+        Creates a plot with 2 facet plots, total installed capacity on the left
+        and total generation on the right.
+        Each facet contains stacked bar plots, each scenario is plotted as a
         separate bar.
 
         Returns:
@@ -275,7 +341,7 @@ class MPlot(PlotDataHelper):
 
         outputs = {}
         for zone_input in self.Zones:
-            
+
             mplt = PlotLibrary(1, 2, figsize=(5, 4))
             fig, axs = mplt.get_figure()
 
@@ -288,113 +354,160 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = MissingZoneData()
                 continue
 
-            Total_Installed_Capacity_Out.index = Total_Installed_Capacity_Out.index.str.replace('_', ' ')
+            Total_Installed_Capacity_Out.index = (
+                Total_Installed_Capacity_Out.index.str.replace("_", " ")
+            )
 
             # Check units of data
-            capacity_units = [re.search('GW|MW|TW|kW', unit) for unit in Total_Installed_Capacity_Out.columns]
-            capacity_units = [unit for unit in capacity_units if unit is not None][0].group()
+            capacity_units = [
+                re.search("GW|MW|TW|kW", unit)
+                for unit in Total_Installed_Capacity_Out.columns
+            ]
+            capacity_units = [unit for unit in capacity_units if unit is not None][
+                0
+            ].group()
 
             # Remove any suffixes from column names
-            Total_Installed_Capacity_Out.columns = [re.sub('[\s (]|GW|TW|MW|kW|\)', '', i) 
-                                                    for i in Total_Installed_Capacity_Out.columns]
+            Total_Installed_Capacity_Out.columns = [
+                re.sub("[\s (]|GW|TW|MW|kW|\)", "", i)
+                for i in Total_Installed_Capacity_Out.columns
+            ]
 
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Installed_Capacity_Out.index
 
-            mplt.barplot(Total_Installed_Capacity_Out, 
-                         color=self.PLEXOS_color_dict,
-                         stacked=True, sub_pos=0,
-                         custom_tick_labels=tick_labels)
+            mplt.barplot(
+                Total_Installed_Capacity_Out,
+                color=self.PLEXOS_color_dict,
+                stacked=True,
+                sub_pos=0,
+                custom_tick_labels=tick_labels,
+            )
 
-            axs[0].set_ylabel(f"Total Installed Capacity ({capacity_units})", 
-                              color='black', rotation='vertical')
-            
+            axs[0].set_ylabel(
+                f"Total Installed Capacity ({capacity_units})",
+                color="black",
+                rotation="vertical",
+            )
+
             # right panel: annual generation
             Total_Gen_Results = gen_outputs[zone_input]["data_table"]
 
             # Check units of data
-            energy_units = [re.search('GWh|MWh|TWh|kWh', unit) for unit in Total_Gen_Results.columns]
-            energy_units = [unit for unit in energy_units if unit is not None][0].group()
+            energy_units = [
+                re.search("GWh|MWh|TWh|kWh", unit) for unit in Total_Gen_Results.columns
+            ]
+            energy_units = [unit for unit in energy_units if unit is not None][
+                0
+            ].group()
 
             def check_column_substring(df, substring):
-                '''
+                """
                 Checks if df column contains substring and returns actual column name,
                 this is required as columns contain suffixes
 
-                '''
+                """
                 return [column for column in list(df.columns) if substring in column][0]
 
-            Total_Load_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
-                                                                             "Total Load (Demand + \n Storage Charging)")]
-            Total_Demand_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
-                                                                               "Total Demand")]
-            Unserved_Energy_Out = Total_Gen_Results.loc[:, check_column_substring(Total_Gen_Results, 
-                                                                                  "Unserved Energy")]
-            Total_Generation_Stack_Out = Total_Gen_Results.drop([check_column_substring(Total_Gen_Results,
-                                                                                        "Total Load (Demand + \n Storage Charging)"),
-                                                                 check_column_substring(Total_Gen_Results, 
-                                                                                        "Total Demand"),
-                                                                 check_column_substring(Total_Gen_Results, 
-                                                                                        "Unserved Energy")], axis=1)
+            Total_Load_Out = Total_Gen_Results.loc[
+                :,
+                check_column_substring(
+                    Total_Gen_Results, "Total Load (Demand + \n Storage Charging)"
+                ),
+            ]
+            Total_Demand_Out = Total_Gen_Results.loc[
+                :, check_column_substring(Total_Gen_Results, "Total Demand")
+            ]
+            Unserved_Energy_Out = Total_Gen_Results.loc[
+                :, check_column_substring(Total_Gen_Results, "Unserved Energy")
+            ]
+            Total_Generation_Stack_Out = Total_Gen_Results.drop(
+                [
+                    check_column_substring(
+                        Total_Gen_Results, "Total Load (Demand + \n Storage Charging)"
+                    ),
+                    check_column_substring(Total_Gen_Results, "Total Demand"),
+                    check_column_substring(Total_Gen_Results, "Unserved Energy"),
+                ],
+                axis=1,
+            )
 
             Pump_Load_Out = Total_Load_Out - Total_Demand_Out
 
-            Total_Generation_Stack_Out.index = Total_Generation_Stack_Out.index.str.replace('_', ' ')
+            Total_Generation_Stack_Out.index = (
+                Total_Generation_Stack_Out.index.str.replace("_", " ")
+            )
 
             # Remove any suffixes from column names
-            Total_Generation_Stack_Out.columns = [re.sub('[(]|GWh|TWh|MWh|kWh|\)', '', i).strip() 
-                                                  for i in Total_Generation_Stack_Out.columns]
+            Total_Generation_Stack_Out.columns = [
+                re.sub("[(]|GWh|TWh|MWh|kWh|\)", "", i).strip()
+                for i in Total_Generation_Stack_Out.columns
+            ]
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = Total_Generation_Stack_Out.index
 
-            mplt.barplot(Total_Generation_Stack_Out, 
-                         color=self.PLEXOS_color_dict,
-                         stacked=True, sub_pos=1,
-                         custom_tick_labels=tick_labels)
-                         
-            axs[1].set_ylabel(f"Total Generation ({energy_units})", 
-                              color='black', rotation='vertical')
+            mplt.barplot(
+                Total_Generation_Stack_Out,
+                color=self.PLEXOS_color_dict,
+                stacked=True,
+                sub_pos=1,
+                custom_tick_labels=tick_labels,
+            )
+
+            axs[1].set_ylabel(
+                f"Total Generation ({energy_units})", color="black", rotation="vertical"
+            )
 
             data_tables = []
             for n, scenario in enumerate(self.Scenarios):
 
-                x = [axs[1].patches[n].get_x(), axs[1].patches[n].get_x() + 
-                     axs[1].patches[n].get_width()]
-                height1 = [float(Total_Load_Out[scenario])]*2
+                x = [
+                    axs[1].patches[n].get_x(),
+                    axs[1].patches[n].get_x() + axs[1].patches[n].get_width(),
+                ]
+                height1 = [float(Total_Load_Out[scenario])] * 2
                 if Pump_Load_Out[scenario] > 0:
-                    axs[1].plot(x, height1, c='black', linewidth=1.5,
-                                label='Demand + \n Storage Charging')
-                    height2 = [float(Total_Demand_Out[scenario])]*2
-                    axs[1].plot(x, height2, 'r--', c='black', linewidth=1.5,
-                                label='Demand')
+                    axs[1].plot(
+                        x,
+                        height1,
+                        c="black",
+                        linewidth=1.5,
+                        label="Demand + \n Storage Charging",
+                    )
+                    height2 = [float(Total_Demand_Out[scenario])] * 2
+                    axs[1].plot(
+                        x, height2, "r--", c="black", linewidth=1.5, label="Demand"
+                    )
                 else:
-                    axs[1].plot(x, height1, c='black', linewidth=1.5,
-                                label='Demand')
+                    axs[1].plot(x, height1, c="black", linewidth=1.5, label="Demand")
                 if Unserved_Energy_Out[scenario].sum() > 0:
-                    height3 = [float(Unserved_Energy_Out[scenario])]*2
-                    axs[1].plot(x, height3, c='#DD0200', linewidth=1.5,
-                                label= 'Unserved Energy')
-                    axs[1].fill_between(x, height3, height1,
-                                        facecolor='#DD0200',
-                                        alpha=0.5)
+                    height3 = [float(Unserved_Energy_Out[scenario])] * 2
+                    axs[1].plot(
+                        x, height3, c="#DD0200", linewidth=1.5, label="Unserved Energy"
+                    )
+                    axs[1].fill_between(
+                        x, height3, height1, facecolor="#DD0200", alpha=0.5
+                    )
 
-            data_tables = pd.DataFrame() #TODO pass output data back to plot main 
+            data_tables = pd.DataFrame()  # TODO pass output data back to plot main
 
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             # add labels to panels
-            axs[0].set_title("A.", fontdict={"weight": "bold", "size": 11},
-                             loc='left', pad=4)
-            axs[1].set_title("B.", fontdict={"weight": "bold", "size": 11},
-                             loc='left', pad=4)
-            
-            if mconfig.parser('plot_title_as_region'):
+            axs[0].set_title(
+                "A.", fontdict={"weight": "bold", "size": 11}, loc="left", pad=4
+            )
+            axs[1].set_title(
+                "B.", fontdict={"weight": "bold", "size": 11}, loc="left", pad=4
+            )
+
+            if mconfig.parser("plot_title_as_region"):
                 mplt.add_main_title(zone_input)
 
             # output figure
-            outputs[zone_input] = {'fig': fig, 'data_table': data_tables}
+            outputs[zone_input] = {"fig": fig, "data_table": data_tables}
 
         return outputs
