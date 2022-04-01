@@ -12,5 +12,7 @@ How-to Guides
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
 
+   run_main
+   facet

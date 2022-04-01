@@ -48,7 +48,7 @@ The plexos_properties.csv has 5 columns:
 Input Example
 --------------
 
-.. csv-table:: `plexos_properties <https://github.com/NREL/Marmot/blob/ReEDS_formatter/marmot/input_files/plexos_properties.csv>`_
+.. csv-table:: `plexos_properties <https://github.com/NREL/Marmot/blob/main/marmot/input_files/plexos_properties.csv>`_
    :file: ../../tables/plexos_properties_example.csv
    :widths: 10, 20, 20, 10, 40
    :header-rows: 1

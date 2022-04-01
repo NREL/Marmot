@@ -47,7 +47,7 @@ The reeds_properties.csv has 6 columns:
 Input Example
 --------------
 
-.. csv-table:: `reeds_properties <https://github.com/NREL/Marmot/blob/ReEDS_formatter/marmot/input_files/reeds_properties.csv>`_
+.. csv-table:: `reeds_properties <https://github.com/NREL/Marmot/blob/main/marmot/input_files/reeds_properties.csv>`_
    :file: ../../tables/reeds_properties_example.csv
    :widths: 10, 15, 15, 10, 30, 20
    :header-rows: 1

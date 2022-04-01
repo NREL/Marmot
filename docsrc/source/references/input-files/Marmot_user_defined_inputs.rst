@@ -52,7 +52,7 @@ The following are the rows by Input
    or a single value. If left blank will default to ST. Only used when processing PLEXOS results.
 
    .. versionadded:: 0.9.0
-   
+
       .. note::
          If processing multiple result sets of different types, be sure to set **formatter_settings: append_plexos_block_name**
          to **true** in the :ref:`config: yml file` before formatting data. If this value is not set to true, results will be 
@@ -124,12 +124,16 @@ The following are the rows by Input
 
 .. admonition:: See Also
 
-   What’s a Facet Plot? Examples and usage guide.
+   :ref:`What’s a Facet Plot?<Facet plots>`
+      Examples and usage guide.
+
+   :ref:`Advanced configuration settings.<config: yml file>`
+      Adjust plots to make them look exactly how you need.
 
 Input Example
 --------------
 
-.. csv-table:: `Marmot_user_defined_inputs <https://github.com/NREL/Marmot/blob/ReEDS_formatter/marmot/input_files/Marmot_user_defined_inputs.csv>`_
+.. csv-table:: `Marmot_user_defined_inputs <https://github.com/NREL/Marmot/blob/main/marmot/input_files/Marmot_user_defined_inputs.csv>`_
    :file: ../../tables/user_defined_inputs_example.csv
    :widths: 35, 15, 15,  35
    :header-rows: 1

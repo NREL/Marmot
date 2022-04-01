@@ -1,0 +1,390 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Running the Marmot code &#8212; Marmot 0.10.0 documentation</title>
+    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+
+    
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+    
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Facet plots" href="facet.html" />
+    <link rel="prev" title="How-to Guides" href="index.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="None">
+    
+
+    <!-- Google Analytics -->
+    
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
+    
+    <div class="container-fluid" id="banner"></div>
+
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+
+  <div id="navbar-start">
+    
+    
+<a class="navbar-brand" href="../index.html">
+<p class="title">Marmot</p>
+</a>
+
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../get-started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+            
+            <!-- Only show if we have sidebars configured, else just a small margin  -->
+            <div class="col-12 col-md-3 bd-sidebar">
+              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Running the Marmot code
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="facet.html">
+   Facet plots
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+              </div>
+              <div class="sidebar-end-items">
+              </div>
+            </div>
+            
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+            
+              
+              <div class="toc-item">
+                
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
+
+<nav id="bd-toc-nav">
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#runing-marmot-as-an-application">
+   Runing Marmot as an application
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#start-marmot-formatter">
+     Start Marmot formatter
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#start-marmot-plotter">
+     Start Marmot plotter
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#importing-marmot-as-a-module">
+   Importing Marmot as a module
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#pip-install-marmot">
+     pip install Marmot
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#import-the-main-classes">
+     Import the main classes
+    </a>
+   </li>
+  </ul>
+ </li>
+</ul>
+
+</nav>
+              </div>
+              
+              <div class="toc-item">
+                
+              </div>
+              
+            
+          </div>
+          
+
+          
+          
+            
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+   <style>
+     h2  {border-bottom: 1px solid gray;}
+ </style>
+
+<script>
+   var arr = document.getElementsByClassName('reference internal');
+   for(var i = 0; i < arr.length; i++) {
+   arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
+   }
+</script><section id="running-the-marmot-code">
+<h1>Running the Marmot code<a class="headerlink" href="#running-the-marmot-code" title="Permalink to this headline">#</a></h1>
+<p>This is a short introduction to running Marmot.
+This guide will demonstrate how to run Marmot directly as an application,
+or import as a module into your own code.</p>
+<section id="runing-marmot-as-an-application">
+<h2>Runing Marmot as an application<a class="headerlink" href="#runing-marmot-as-an-application" title="Permalink to this headline">#</a></h2>
+<p>The most common way to use Marmot is by launching the code from the command
+line and treating it as an application.
+Marmot uses a seperate launcher file for the formatter and plotting applications.</p>
+<p>The files are located in the <a class="reference external" href="https://github.com/NREL/Marmot/tree/main/bin">Marmot/bin</a> directory.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>To get any useful output, you will need to setup the <a class="reference internal" href="../references/input-files/Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a>
+first before starting Marmot.
+If you are new to Marmot be sure to check out the <a class="reference internal" href="../get-started/format-tutorial.html#tutorial-formatting-plexos-modelling-results"><span class="std std-ref">Getting-Started Tutorials</span></a>.</p>
+</div>
+<section id="start-marmot-formatter">
+<h3>Start Marmot formatter<a class="headerlink" href="#start-marmot-formatter" title="Permalink to this headline">#</a></h3>
+<p>To start the Marmot formatter run the following in any terminal setup with python</p>
+<ol class="arabic">
+<li><p>First change directory to <code class="docutils literal notranslate"><span class="pre">Marmot\bin</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">E</span><span class="p">:</span>\<span class="n">Marmot</span>\<span class="nb">bin</span>
+</pre></div>
+</div>
+</li>
+<li><p>If needed activate your python environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env10</span>
+</pre></div>
+</div>
+</li>
+<li><p>Run the following to launch the program:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_marmot_formatter</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+<section id="start-marmot-plotter">
+<h3>Start Marmot plotter<a class="headerlink" href="#start-marmot-plotter" title="Permalink to this headline">#</a></h3>
+<p>Similiarly to start the Marmot plotter run the following</p>
+<ol class="arabic">
+<li><p>Change directory to <code class="docutils literal notranslate"><span class="pre">Marmot\bin</span></code>:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">cd</span> <span class="n">E</span><span class="p">:</span>\<span class="n">Marmot</span>\<span class="nb">bin</span>
+</pre></div>
+</div>
+</li>
+<li><p>If needed activate your python environment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">conda</span> <span class="n">activate</span> <span class="n">marmot</span><span class="o">-</span><span class="n">env10</span>
+</pre></div>
+</div>
+</li>
+<li><p>Run the following to launch the program:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span> <span class="n">run_marmot_plotter</span><span class="o">.</span><span class="n">py</span>
+</pre></div>
+</div>
+</li>
+</ol>
+</section>
+</section>
+<section id="importing-marmot-as-a-module">
+<h2>Importing Marmot as a module<a class="headerlink" href="#importing-marmot-as-a-module" title="Permalink to this headline">#</a></h2>
+<p>Importing Marmot as a module involves interacting with the internal API code.
+The main access points being:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="../references/code/_autosummary/marmot.marmot_h5_formatter.MarmotFormat.html#marmot.marmot_h5_formatter.MarmotFormat" title="marmot.marmot_h5_formatter.MarmotFormat"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_h5_formatter.MarmotFormat</span></code></a> for the formatter.</p></li>
+<li><p><a class="reference internal" href="../references/code/_autosummary/marmot.marmot_plot_main.MarmotPlot.html#marmot.marmot_plot_main.MarmotPlot" title="marmot.marmot_plot_main.MarmotPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_plot_main.MarmotPlot</span></code></a> for the plotter.</p></li>
+</ul>
+<p>To use Marmot as a python module that can be imported, it first needs to be made visible to the python package directory.
+This can be done two ways, either by pip installing Marmot (preferred method) or by adding the Marmot directory folder to the system path.</p>
+<section id="pip-install-marmot">
+<h3>pip install Marmot<a class="headerlink" href="#pip-install-marmot" title="Permalink to this headline">#</a></h3>
+<p>Open a cmd window that is setup with python and change directory to your desired install location.
+Type the following:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip3</span> <span class="n">install</span> <span class="o">-</span><span class="n">e</span> <span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NREL</span><span class="o">/</span><span class="n">Marmot</span><span class="o">.</span><span class="n">git</span><span class="c1">#egg=marmot</span>
+</pre></div>
+</div>
+<p>This will install Marmot from the current master branch, however this can be changed to a specific commit or
+tagged release if desired by adding <code class="docutils literal notranslate"><span class="pre">&#64;comit_id</span></code> after <code class="docutils literal notranslate"><span class="pre">Marmot.git</span></code> and before the # symbol.
+For example, the following can be used to install Marmot release v0.9.0:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">git</span><span class="o">+</span><span class="n">https</span><span class="p">:</span><span class="o">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">NREL</span><span class="o">/</span><span class="n">Marmot</span><span class="o">.</span><span class="n">git</span><span class="nd">@v0</span><span class="mf">.9.0</span><span class="c1">#egg=marmot</span>
+</pre></div>
+</div>
+<p>If no error messages appeared, Marmot has been installed correctly.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>It is recommended to install Marmot into a separate environment than the one used for running the
+code as an application. This will prevent the python interpreter from choosing the incorrect Marmot instance.</p>
+</div>
+</section>
+<section id="import-the-main-classes">
+<h3>Import the main classes<a class="headerlink" href="#import-the-main-classes" title="Permalink to this headline">#</a></h3>
+<p>To import the formatter or plotter, use the following import commands in a python session</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">marmot.marmot_h5_formatter</span> <span class="kn">import</span> <span class="n">MarmotFormat</span>
+
+<span class="kn">from</span> <span class="nn">marmot.marmot_plot_main</span> <span class="kn">import</span> <span class="n">MarmotPlot</span>
+</pre></div>
+</div>
+<p>When importing Marmot directly, the <a class="reference internal" href="../references/input-files/Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a> is not used.
+However, several other input files are still required which are passed in through the main class init methods in
+<a class="reference internal" href="../references/code/_autosummary/marmot.marmot_h5_formatter.MarmotFormat.html#marmot.marmot_h5_formatter.MarmotFormat" title="marmot.marmot_h5_formatter.MarmotFormat"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_h5_formatter.MarmotFormat</span></code></a> and <a class="reference internal" href="../references/code/_autosummary/marmot.marmot_plot_main.MarmotPlot.html#marmot.marmot_plot_main.MarmotPlot" title="marmot.marmot_plot_main.MarmotPlot"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.marmot_plot_main.MarmotPlot</span></code></a>.</p>
+</section>
+</section>
+</section>
+
+
+              </div>
+              
+              
+              <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+    <a class='left-prev' id="prev-link" href="index.html" title="previous page">
+        <i class="fas fa-angle-left"></i>
+        <div class="prev-next-info">
+            <p class="prev-next-subtitle">previous</p>
+            <p class="prev-next-title">How-to Guides</p>
+        </div>
+    </a>
+    <a class='right-next' id="next-link" href="facet.html" title="next page">
+    <div class="prev-next-info">
+        <p class="prev-next-subtitle">next</p>
+        <p class="prev-next-title">Facet plots</p>
+    </div>
+    <i class="fas fa-angle-right"></i>
+    </a>
+</div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
+<footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    
+    <div class="footer-item">
+      <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+    </div>
+    
+    <div class="footer-item">
+      <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+    </div>
+    
+  </div>
+</footer>
+  </body>
+</html>

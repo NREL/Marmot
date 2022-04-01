@@ -27,7 +27,7 @@ The custom aggregations are merged into the data during formatting.
 Input Example
 --------------
 
-.. csv-table:: `Regions Mapping <https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/Regions_Zones_Mapping_Full.csv>`_
+.. csv-table:: `Regions Mapping <https://github.com/NREL/Marmot/blob/main/marmot/input_files/mapping_folder/Regions_Zones_Mapping_Full.csv>`_
    :file: ../../../tables/region_mapping_example.csv
    :widths: 25, 20, 10, 20, 25
    :header-rows: 1

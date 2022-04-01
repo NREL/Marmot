@@ -33,7 +33,7 @@ The colour_dictionary.csv has 2 columns:
 Input Example
 --------------
 
-.. csv-table:: `colour_dictionary <https://github.com/NREL/Marmot/blob/main/marmot/mapping_folder/colour_dictionary.csv>`_
+.. csv-table:: `colour_dictionary <https://github.com/NREL/Marmot/blob/main/marmot/input_files/mapping_folder/colour_dictionary.csv>`_
    :file: ../../../tables/color_example.csv
    :widths: 50,50
    :header-rows: 1
