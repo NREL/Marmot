@@ -12,10 +12,9 @@ TO DO:
 
 import logging
 import pandas as pd
-import matplotlib as mpl
-import matplotlib.pyplot as plt
 
 import marmot.config.mconfig as mconfig
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary 
 from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, InputSheetError,
                 MissingZoneData)
@@ -53,10 +52,6 @@ class MPlot(PlotDataHelper):
 
         self.logger = logging.getLogger('marmot_plot.'+__name__)
 
-        self.x = mconfig.parser("figure_size","xdimension")
-        self.y = mconfig.parser("figure_size","ydimension")
-        self.y_axes_decimalpt = mconfig.parser("axes_options","y_axes_decimalpt")
-        
 
     # function to collect total emissions by fuel type
     def total_emissions_by_type(self, prop: str = None, start_date_range: str = None,
@@ -117,7 +112,6 @@ class MPlot(PlotDataHelper):
                 emit = self.rename_gen_techs(emit)
                 # summarize annual emissions by pollutant and tech
                 emit = emit.groupby(['pollutant', 'tech']).sum()
-
                 # rename column based on scenario
                 emit.rename(columns={0:scenario}, inplace=True)
                 emitList.append(emit)
@@ -155,42 +149,30 @@ class MPlot(PlotDataHelper):
                 outputs[zone_input] = out
                 continue
         
-            dataOut = emitPlot.copy()
+            dataOut = emitPlot
+                
             # single pollutant plot
-            fig1, ax = plt.subplots(figsize=(self.x,self.y))
-            emitPlot.plot.bar(stacked=True,
-                            color=[self.PLEXOS_color_dict.get(x, '#333333') for x in emitPlot.columns.values], 
-                            edgecolor='black', linewidth='0.1', ax=ax)
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
 
-            # plot formatting
-            ax.spines['right'].set_visible(False)
-            ax.spines['top'].set_visible(False)
-            ax.set_xlabel("")
-            ax.set_ylabel(f"Annual {prop} Emissions\n(million metric tons)", 
-                          color='black', rotation='vertical')
-            #adds comma to y axis data
-            ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-            
             # Set x-tick labels 
             if len(self.custom_xticklabels) > 1:
                 tick_labels = self.custom_xticklabels
             else:
                 tick_labels = emitPlot.index
-            PlotDataHelper.set_barplot_xticklabels(tick_labels, ax=ax)
-            
-            ax.tick_params(axis='y', which='major', length=5, width=1)
-            ax.tick_params(axis='x', which='major', length=5, width=1)
 
-            # legend formatting
-            handles, labels = ax.get_legend_handles_labels()
-            leg1 = ax.legend(reversed(handles), reversed(labels), loc='lower left',bbox_to_anchor=(1,0),
-                            facecolor='inherit', frameon=True)
-            ax.add_artist(leg1)
+            mplt.barplot(emitPlot, color=self.PLEXOS_color_dict,
+                        stacked=True, 
+                        custom_tick_labels=tick_labels)
+
+            ax.set_ylabel(f'Annual {prop} Emissions\n(million metric tons)', 
+                                color='black', rotation='vertical')
+            # Add legend
+            mplt.add_legend(reverse_legend=True)
+            # Add title
             if mconfig.parser("plot_title_as_region"):
-                ax.set_title(zone_input)
+                mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig1, 'data_table': dataOut}
-
-            
+            outputs[zone_input] = {'fig': fig, 'data_table': dataOut}
 
         return outputs
