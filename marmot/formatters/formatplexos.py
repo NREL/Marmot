@@ -92,7 +92,6 @@ class ProcessPLEXOS(Process):
                 class.
         """
         self.plexos_block = plexos_block
-        self.file_collection = {}
         self.metadata = MetaData(
             input_folder, read_from_formatted_h5=False, Region_Mapping=Region_Mapping
         )
@@ -100,40 +99,53 @@ class ProcessPLEXOS(Process):
         super().__init__(
             input_folder, output_file_path, Region_Mapping, *args, **kwargs
         )
-
+    
+    @property
     def get_input_files(self) -> list:
         """Gets a list of h5plexos input files within the scenario folders
 
         Returns:
             list: list of h5plexos input filenames to process
         """
-        files = []
-        for names in self.input_folder.iterdir():
-            if names.suffix == ".h5":
-                files.append(names.name)  # Creates a list of only the hdf5 files
+        if self._get_input_files == None:
+            files = []
+            for names in self.input_folder.iterdir():
+                if names.suffix == ".h5":
+                    files.append(names.name)  # Creates a list of only the hdf5 files
 
-        # List of all hf files in hdf5 folder in alpha numeric order
-        files_list = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+            # List of all hf files in hdf5 folder in alpha numeric order
+            self._get_input_files = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+        return self._get_input_files
 
-        # Read in all HDF5 files into dictionary
-        logger.info("Loading all HDF5 files to prepare for processing")
-        regions = set()
-        for file in files_list:
-            self.file_collection[file] = PLEXOSSolution(
-                self.input_folder.joinpath(file)
-            )
-            if not self.Region_Mapping.empty:
-                regions.update(list(self.metadata.regions(file)["region"]))
+    @property
+    def file_collection(self) -> dict:
+        """Dictionary input file names to h5 PLEXOSSolution
 
-        if not self.Region_Mapping.empty:
-            if regions.issubset(self.Region_Mapping["region"]) is False:
-                missing_regions = list(regions - set(self.Region_Mapping["region"]))
-                logger.warning(
-                    "The Following PLEXOS REGIONS are missing from "
-                    "the 'region' column of your mapping file: "
-                    f"{missing_regions}\n"
+        Returns:
+            dict: file_collection {filename: PLEXOSSolution}
+        """
+        if self._file_collection == None:
+            # Read in all HDF5 files into dictionary
+            logger.info("Loading all HDF5 files to prepare for processing")
+            regions = set()
+
+            self._file_collection = {}
+            for file in self.get_input_files:
+                self._file_collection[file] = PLEXOSSolution(
+                    self.input_folder.joinpath(file)
                 )
-        return files_list
+                if not self.Region_Mapping.empty:
+                    regions.update(list(self.metadata.regions(file)["region"]))
+
+            if not self.Region_Mapping.empty:
+                if regions.issubset(self.Region_Mapping["region"]) is False:
+                    missing_regions = list(regions - set(self.Region_Mapping["region"]))
+                    logger.warning(
+                        "The Following PLEXOS REGIONS are missing from "
+                        "the 'region' column of your mapping file: "
+                        f"{missing_regions}\n"
+                    )
+        return self._file_collection
 
     def output_metadata(self, files_list: list) -> None:
         """Transfers metadata from original PLEXOS solutions file to processed HDF5 file.
@@ -190,6 +202,7 @@ class ProcessPLEXOS(Process):
             pd.DataFrame: Formatted results dataframe.
         """
         db = self.file_collection.get(model_filename)
+        logger.info(f"      {model_filename}")
         try:
             if "_" in prop_class:
                 df = db.query_relation_property(

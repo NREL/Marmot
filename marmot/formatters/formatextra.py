@@ -50,7 +50,6 @@ class ExtraProperties:
         """
         data_chunks = []
         for file in self.files_list:
-            logger.info(f"      {file}")
             processed_data = self.model.get_processed_data(
                 "generator", "Available Capacity", timescale, file
             )
@@ -90,7 +89,6 @@ class ExtraProperties:
         """
         data_chunks = []
         for file in self.files_list:
-            logger.info(f"      {file}")
             processed_data = self.model.get_processed_data(
                 "generator", "Pump Load", timescale, file
             )
@@ -137,7 +135,6 @@ class ExtraProperties:
         """
         data_chunks = []
         for file in self.files_list:
-            logger.info(f"      {file}")
             processed_data = self.model.get_processed_data(
                 "region", "stor_in", "interval", file
             )
