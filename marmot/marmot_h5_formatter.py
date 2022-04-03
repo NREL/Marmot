@@ -257,7 +257,7 @@ class MarmotFormat(SetupLogger):
             process_subset_years=process_subset_years,
         )
 
-        files_list = process_sim_model.get_input_files()
+        files_list = process_sim_model.get_input_files
 
         # init of ExtraProperties class
         extraprops_init = ExtraProperties(process_sim_model, files_list)
@@ -313,11 +313,11 @@ class MarmotFormat(SetupLogger):
 
             if property_key_name not in existing_keys:
                 for model in files_list:
-                    self.logger.info(f"      {model}")
                     processed_data = process_sim_model.get_processed_data(
                         row["group"], row["data_set"], row["data_type"], model
                     )
                     if processed_data.empty is True:
+                        data_chunks.append(processed_data)
                         break
 
                     # Check if data is for year interval and of type capacity
@@ -339,25 +339,11 @@ class MarmotFormat(SetupLogger):
                     else:
                         data_chunks.append(processed_data)
 
-                if data_chunks:
-                    Processed_Data_Out = pd.concat(data_chunks, copy=False)
-
+                # Combine models
+                Processed_Data_Out = process_sim_model.combine_models(data_chunks)
                 if Processed_Data_Out.empty is False:
                     if row["data_type"] == "year" and sim_model == "PLEXOS":
                         self.logger.info(PLEXOS_YEAR_WARNING)
-                    else:
-                        oldsize = Processed_Data_Out.size
-                        # Remove duplicates; keep first entry
-                        Processed_Data_Out = Processed_Data_Out.loc[
-                            ~Processed_Data_Out.index.duplicated(keep="first")
-                        ]
-
-                        if (oldsize - Processed_Data_Out.size) > 0:
-                            self.logger.info(
-                                "Drop duplicates removed "
-                                f"{oldsize-Processed_Data_Out.size} rows"
-                            )
-
                     save_attempt = 1
                     while save_attempt <= 3:
                         try:
@@ -367,7 +353,7 @@ class MarmotFormat(SetupLogger):
                                 key=property_key_name,
                             )
                             save_attempt = 4
-                        except:
+                        except OSError:
                             self.logger.warning(
                                 "h5 File is probably in use, "
                                 "waiting to attempt to save again"
