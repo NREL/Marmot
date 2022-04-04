@@ -50,7 +50,6 @@ class ExtraProperties:
         """
         data_chunks = []
         for file in self.files_list:
-            logger.info(f"      {file}")
             processed_data = self.model.get_processed_data(
                 "generator", "Available Capacity", timescale, file
             )
@@ -65,10 +64,7 @@ class ExtraProperties:
 
             data_chunks.append(processed_data)
 
-        avail_gen = pd.concat(data_chunks, copy=False)
-        # Remove duplicates; keep first entry
-        avail_gen = avail_gen.loc[~avail_gen.index.duplicated(keep="first")]
-
+        avail_gen = self.model.combine_models(data_chunks)
         return avail_gen - df
 
     def plexos_demand(
@@ -90,7 +86,6 @@ class ExtraProperties:
         """
         data_chunks = []
         for file in self.files_list:
-            logger.info(f"      {file}")
             processed_data = self.model.get_processed_data(
                 "generator", "Pump Load", timescale, file
             )
@@ -101,10 +96,7 @@ class ExtraProperties:
 
             data_chunks.append(processed_data)
 
-        pump_load: pd.DataFrame = pd.concat(data_chunks, copy=False)
-        # Remove duplicates; keep first entry
-        pump_load = pump_load.loc[~pump_load.index.duplicated(keep="first")]
-
+        pump_load = self.model.combine_models(data_chunks)
         pump_load = pump_load.groupby(df.index.names).sum()
         return df - pump_load
 
@@ -137,7 +129,6 @@ class ExtraProperties:
         """
         data_chunks = []
         for file in self.files_list:
-            logger.info(f"      {file}")
             processed_data = self.model.get_processed_data(
                 "region", "stor_in", "interval", file
             )

@@ -14,7 +14,6 @@ import logging
 
 logger = logging.getLogger("formatter." + __name__)
 
-
 class MetaData:
     """Handle the retrieval of metadata from the formatted or original solution h5 files.
     """
@@ -35,7 +34,7 @@ class MetaData:
     ):
         """
         Args:
-            HDF5_folder_in (Path): Folder containing h5plexos h5 files.
+            HDF5_folder_in (Path): Folder containing h5 file.
             read_from_formatted_h5 (bool, optional): Boolean for whether the metadata is
                 being read from the formatted hdf5 file or the original PLEXOS solution file.
                 Defaults to True.

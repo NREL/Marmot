@@ -77,24 +77,28 @@ class ProcessReEDS(Process):
         self,
         input_folder: Path,
         output_file_path: Path,
-        Region_Mapping: pd.DataFrame,
         *args,
         process_subset_years: list = None,
+        Region_Mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
         Args:
             input_folder (Path): Folder containing csv files.
             output_file_path (Path): Path to formatted h5 output file.
-            Region_Mapping (pd.DataFrame): DataFrame to map custom
+            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
+                Defaults to pd.DataFrame().
             process_subset_years (list, optional): If provided only process
                 years specified. Defaults to None.
             **kwargs
                 These parameters will be passed to the Process 
                 class.
         """
-        self.file_collection: dict = {}
+        # Instantiation of Process Base class
+        super().__init__(
+            input_folder, output_file_path, *args, Region_Mapping=Region_Mapping, **kwargs
+        )
         # Internal cached data is saved to the following variables.
         # To access the values use the public api e.g self.property_units
         self._property_units: dict = {}
@@ -112,17 +116,12 @@ class ProcessReEDS(Process):
             logger.info(f"Processing subset of ReEDS years: {process_subset_years}")
         self.process_subset_years = process_subset_years
 
-        # Instantiation of Process Base class
-        super().__init__(
-            input_folder, output_file_path, Region_Mapping, *args, **kwargs
-        )
-
     @property
     def property_units(self) -> dict:
         """Gets the property units from data, e.g MW, MWh
 
         Returns:
-            dict: _property_units
+            dict: property_units
         """
         return self._property_units
 
@@ -168,6 +167,35 @@ class ProcessReEDS(Process):
                 .to_dict()["region"]
             )
 
+    @property
+    def get_input_files(self) -> list:
+        """Gets a list of input files within the scenario folders"""
+        if self._get_input_files == None:
+            reeds_outputs_dir = self.input_folder.joinpath("outputs")
+            files = []
+            for names in reeds_outputs_dir.iterdir():
+                if names.name == f"rep_{self.input_folder.name}.gdx":
+                    files.append(names.name)
+
+                    self.property_units = str(names)
+
+            # List of all files in input folder in alpha numeric order
+            self._get_input_files = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+        return self._get_input_files
+
+    @property
+    def file_collection(self) -> dict:
+        """Dictionary input file names to full filename path 
+
+        Returns:
+            dict: file_collection {filename: fullpath}
+        """
+        if self._file_collection == None:
+            self._file_collection = {}
+            for file in self.get_input_files:
+                self._file_collection[file] = str(self.input_folder.joinpath("outputs", file))
+        return self._file_collection
+
     def output_metadata(self, files_list: list) -> None:
         """Add ReEDS specific metadata to formatted h5 file .
 
@@ -185,23 +213,6 @@ class ProcessReEDS(Process):
                 key=f"metadata/{partition}/objects/regions",
                 mode="a",
             )
-
-    def get_input_files(self) -> list:
-        """Gets a list of input files within the scenario folders"""
-        reeds_outputs_dir = self.input_folder.joinpath("outputs")
-        files = []
-        for names in reeds_outputs_dir.iterdir():
-            if names.name == f"rep_{self.input_folder.name}.gdx":
-                files.append(names.name)
-
-                self.property_units = str(names)
-
-        # List of all files in input folder in alpha numeric order
-        files_list = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
-        files_list = sorted(files)
-        for file in files_list:
-            self.file_collection[file] = str(reeds_outputs_dir.joinpath(file))
-        return files_list
 
     def get_processed_data(
         self, prop_class: str, prop: str, timescale: str, model_filename: str
@@ -222,7 +233,7 @@ class ProcessReEDS(Process):
         self.wind_resource_to_pca = self.input_folder.name
 
         gdx_file = self.file_collection.get(model_filename)
-
+        logger.info(f"      {model_filename}")
         try:
             df: pd.DataFrame = gdxpds.to_dataframe(gdx_file, prop)[prop]
         except gdxpds.tools.Error:
