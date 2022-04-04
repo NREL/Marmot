@@ -54,15 +54,18 @@ class UtilizationFactor(MPlotDataHelper):
     in creating figures.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Args:
+            *args
+                Minimum required parameters passed to the MPlotDataHelper 
+                class.
             **kwargs
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     def uf_fleet(self, **_):
         """Plot under development

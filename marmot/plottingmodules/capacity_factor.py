@@ -32,15 +32,18 @@ class CapacityFactor(MPlotDataHelper):
     assist in creating figures.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Args:
+            *args
+                Minimum required parameters passed to the MPlotDataHelper 
+                class.
             **kwargs
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
         self.x = mconfig.parser("figure_size", "xdimension")
         self.y = mconfig.parser("figure_size", "ydimension")
@@ -183,8 +186,9 @@ class CapacityFactor(MPlotDataHelper):
                             CF[tech_name] = cf
                     cf_chunks.append(CF)
 
-            CF_all_scenarios = pd.concat(cf_chunks)
-            if CF_all_scenarios.empty == True:
+            if cf_chunks:
+                CF_all_scenarios = pd.concat(cf_chunks)
+            else:
                 outputs[zone_input] = MissingZoneData()
                 continue
 
@@ -306,10 +310,10 @@ class CapacityFactor(MPlotDataHelper):
                 CF = Total_Gen / (Cap * duration_hours)
                 cf_scen_chunks.append(CF)
 
-            CF_all_scenarios = pd.concat(cf_scen_chunks, axis=0, sort=False).T
-            CF_all_scenarios = CF_all_scenarios.fillna(0, axis=0)
-
-            if CF_all_scenarios.empty == True:
+            if cf_scen_chunks:
+                CF_all_scenarios = pd.concat(cf_scen_chunks, axis=0, sort=False).T
+                CF_all_scenarios = CF_all_scenarios.fillna(0, axis=0)
+            else:
                 outputs[zone_input] = MissingZoneData()
                 continue
 

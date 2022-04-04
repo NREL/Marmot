@@ -14,6 +14,8 @@ import functools
 import concurrent.futures
 from pathlib import Path
 from typing import Tuple, Union, List
+import matplotlib.colors as mcolors
+import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
 
@@ -33,49 +35,44 @@ class MPlotDataHelper(dict):
 
     def __init__(
         self,
-        Zones: List[str] = None,
-        AGG_BY: str = None,
-        ordered_gen: List[str] = None,
+        Zones: List[str],
+        AGG_BY: str,
+        Scenarios: List[str],
+        ordered_gen: List[str],
+        processed_hdf5_folder: Path,
+        figure_folder: Path,
+        gen_names_dict: dict = None,
         PLEXOS_color_dict: dict = None,
-        Scenarios: List[str] = None,
         Scenario_Diff: List[str] = None,
-        processed_hdf5_folder: Path = None,
-        figure_folder: Path = None,
         ylabels: List[str] = None,
         xlabels: List[str] = None,
         custom_xticklabels: List[str] = None,
         color_list: List[str] = None,
         marker_style: List[str] = None,
-        gen_names_dict: dict = None,
+        vre_gen_cat: List[str] = None,
         pv_gen_cat: List[str] = None,
         re_gen_cat: List[str] = None,
-        vre_gen_cat: List[str] = None,
         thermal_gen_cat: List[str] = None,
         Region_Mapping: pd.DataFrame = pd.DataFrame(),
         TECH_SUBSET: List[str] = None,
     ) -> None:
         """
         Args:
-            Zones (List[str], optional): List of regions/zones to plot.
-                Defaults to None.
-            AGG_BY (str, optional): Informs region type to aggregate by when creating plots.
-                Defaults to None.
-            ordered_gen (List[str], optional): Ordered list of generator technologies to plot,
+            Zones (List[str]): List of regions/zones to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            Scenarios (List[str]): List of scenarios to process.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
-                Defaults to None.
+            processed_hdf5_folder (Path): Directory containing Marmot solution files.
+            figure_folder (Path):  Directory containing resulting figures and csv files.
+            gen_names_dict (dict, optional): Mapping dictionary to rename generator 
+                technologies.
+                Default is None.
             PLEXOS_color_dict (dict, optional): Dictionary of colors to use for 
                 generation technologies.
                 Defaults to None.
-            Scenarios (List[str], optional): List of scenarios to process.
-                Defaults to None.
             Scenario_Diff (List[str], optional): 2 value list, used to compare 2
                 scenarios.
-                Defaults to None.
-            processed_hdf5_folder (Path, optional): Directory containing 
-                Marmot solution files.
-                Defaults to None.
-            figure_folder (Path, optional):  Directory containing resulting 
-                figures and csv files.
                 Defaults to None.
             ylabels (List[str], optional): y-axis labels for facet plots.
                 Defaults to None.
@@ -88,14 +85,11 @@ class MPlotDataHelper(dict):
                 Defaults to None.
             marker_style (List[str], optional): List of markers for plotting.
                 Defaults to None.
-            gen_names_dict (dict, optional): Mapping dictionary to rename generator 
-                technologies.
+            vre_gen_cat (List[str], optional): List of variable renewable technologies.
                 Defaults to None.
             pv_gen_cat (List[str], optional): List of PV technologies.
                 Defaults to None.
             re_gen_cat (List[str], optional): List of RE technologies.
-                Defaults to None.
-            vre_gen_cat (lList[str]ist, optional): List of VRE technologies.
                 Defaults to None.
             thermal_gen_cat (List[str], optional): List of thermal technologies.
                 Defaults to None.
@@ -110,22 +104,79 @@ class MPlotDataHelper(dict):
         """
         self.Zones = Zones
         self.AGG_BY = AGG_BY
-        self.ordered_gen = ordered_gen
-        self.PLEXOS_color_dict = PLEXOS_color_dict
         self.Scenarios = Scenarios
-        self.Scenario_Diff = Scenario_Diff
-        self.processed_hdf5_folder = processed_hdf5_folder
-        self.figure_folder = figure_folder
-        self.ylabels = ylabels
-        self.xlabels = xlabels
+        self.ordered_gen = ordered_gen
+        self.processed_hdf5_folder = Path(processed_hdf5_folder)
+        self.figure_folder = Path(figure_folder)
+
+        if gen_names_dict is None:
+            logger.warning("'gen_names_dict' is empty! Generators will not be renamed.")
+            self.gen_names_dict = {}
+        else:
+            self.gen_names_dict = gen_names_dict
+        if PLEXOS_color_dict is None:
+            logger.warning(
+                "'Color dictionary' not passed! Random colors will now be used."
+            )
+            cmap = plt.cm.get_cmap(lut=len(ordered_gen))
+            colors = []
+            for i in range(cmap.N):
+                colors.append(mcolors.rgb2hex(cmap(i)))
+            self.PLEXOS_color_dict = dict(zip(ordered_gen, colors))
+        else:
+            self.PLEXOS_color_dict = PLEXOS_color_dict
+        if Scenario_Diff is None:
+            self.Scenario_Diff = [""]
+        else:
+            self.Scenario_Diff = Scenario_Diff
+        if ylabels is None:
+            self.ylabels = [""]
+        else:
+            self.ylabels = ylabels
+        if xlabels is None:    
+            self.xlabels = [""]
+        else:    
+            self.xlabels = xlabels
+        if color_list is None:
+            self.color_list = [
+                "#396AB1",
+                "#CC2529",
+                "#3E9651",
+                "#ff7f00",
+                "#6B4C9A",
+                "#922428",
+                "#cab2d6",
+                "#6a3d9a",
+                "#fb9a99",
+                "#b15928"
+            ]
+        else:
+            self.color_list = color_list
+        if marker_style is None:
+            self.marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
+        else:
+            self.marker_style = marker_style
+        if vre_gen_cat is None:
+            logger.warning("'vre_gen_cat' not set, curtailment will not be defined!")
+            self.vre_gen_cat = []
+        else:
+            self.vre_gen_cat = vre_gen_cat
+        if pv_gen_cat is None:
+            logger.warning("'pv_gen_cat' not set.")
+            self.pv_gen_cat = []
+        else:
+            self.pv_gen_cat = pv_gen_cat
+        if re_gen_cat is None:
+            logger.warning("'re_gen_cat' not set.")  
+            self.re_gen_cat = []
+        else:
+            self.re_gen_cat = re_gen_cat
+        if thermal_gen_cat is None:
+            logger.warning("'thermal_gen_cat' not set.")
+            self.thermal_gen_cat = []
+        else:
+            self.thermal_gen_cat = thermal_gen_cat
         self.custom_xticklabels = custom_xticklabels
-        self.color_list = color_list
-        self.marker_style = marker_style
-        self.gen_names_dict = gen_names_dict
-        self.pv_gen_cat = pv_gen_cat
-        self.re_gen_cat = re_gen_cat
-        self.vre_gen_cat = vre_gen_cat
-        self.thermal_gen_cat = thermal_gen_cat
         self.Region_Mapping = Region_Mapping
         self.TECH_SUBSET = TECH_SUBSET
 
@@ -201,45 +252,46 @@ class MPlotDataHelper(dict):
         Returns:
             pd.DataFrame: Processed DataFrame with renamed techs.
         """
-        # If tech is a column name
-        if "tech" in df.columns:
-            original_tech_index = df.tech.unique()
-            # Checks if all generator tech categories have been identified and matched. 
-            # If not, lists categories that need a match
-            unmapped_techs = set(original_tech_index) - set(self.gen_names_dict.keys())
-            df["tech"] = pd.CategoricalIndex(
-                df.tech.map(lambda x: self.gen_names_dict.get(x, "Other"))
-            )
+        if self.gen_names_dict:
+            # If tech is a column name
+            if "tech" in df.columns:
+                original_tech_index = df.tech.unique()
+                # Checks if all generator tech categories have been identified and matched. 
+                # If not, lists categories that need a match
+                unmapped_techs = set(original_tech_index) - set(self.gen_names_dict.keys())
+                df["tech"] = pd.CategoricalIndex(
+                    df.tech.map(lambda x: self.gen_names_dict.get(x, "Other"))
+                )
 
-        # If tech is in the index
-        elif "tech" in df.index.names:
-            original_tech_index = df.index.get_level_values(level="tech")
-            # Checks if all generator tech categories have been identified and matched. 
-            # If not, lists categories that need a match
-            unmapped_techs = set(original_tech_index) - set(self.gen_names_dict.keys())
+            # If tech is in the index
+            elif "tech" in df.index.names:
+                original_tech_index = df.index.get_level_values(level="tech")
+                # Checks if all generator tech categories have been identified and matched. 
+                # If not, lists categories that need a match
+                unmapped_techs = set(original_tech_index) - set(self.gen_names_dict.keys())
 
-            tech_index = pd.CategoricalIndex(
-                original_tech_index.map(lambda x: self.gen_names_dict.get(x, "Other"))
-            )
-            df.reset_index(level="tech", drop=True, inplace=True)
+                tech_index = pd.CategoricalIndex(
+                    original_tech_index.map(lambda x: self.gen_names_dict.get(x, "Other"))
+                )
+                df.reset_index(level="tech", drop=True, inplace=True)
 
-            idx_map = pd.MultiIndex(
-                levels=df.index.levels + [tech_index.categories],
-                codes=df.index.codes + [tech_index.codes],
-                names=df.index.names + tech_index.names,
-            )
+                idx_map = pd.MultiIndex(
+                    levels=df.index.levels + [tech_index.categories],
+                    codes=df.index.codes + [tech_index.codes],
+                    names=df.index.names + tech_index.names,
+                )
 
-            df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
-            # Move tech back to position 1
-            index_labels = list(df.index.names)
-            index_labels.insert(1, index_labels.pop(index_labels.index("tech")))
-            df = df.reorder_levels(index_labels, axis=0)
+                df = pd.DataFrame(data=df.values.reshape(-1), index=idx_map)
+                # Move tech back to position 1
+                index_labels = list(df.index.names)
+                index_labels.insert(1, index_labels.pop(index_labels.index("tech")))
+                df = df.reorder_levels(index_labels, axis=0)
 
-        if unmapped_techs:
-            logger.warning(
-                "The following Generators could not be re-classified, "
-                f"they wil be renamed 'Other': {unmapped_techs}"
-            )
+            if unmapped_techs:
+                logger.warning(
+                    "The following Generators could not be re-classified, "
+                    f"they wil be renamed 'Other': {unmapped_techs}"
+                )
         return df
 
     def assign_curtailment_techs(self, df: pd.DataFrame) -> pd.DataFrame:

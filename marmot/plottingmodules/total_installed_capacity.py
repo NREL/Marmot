@@ -35,16 +35,20 @@ class InstalledCapacity(MPlotDataHelper):
     in creating figures.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Args:
+            *args
+                Minimum required parameters passed to the MPlotDataHelper 
+                class.
             **kwargs
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
         
+        self.argument_list = args
         self.argument_dict = kwargs
 
     def total_cap(
@@ -136,15 +140,16 @@ class InstalledCapacity(MPlotDataHelper):
                     ).sum()
                 )
 
-            Total_Installed_Capacity_Out = pd.concat(
-                capacity_chunks, axis=0, sort=True
-            ).fillna(0)
-            Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[
-                :, (Total_Installed_Capacity_Out != 0).any(axis=0)
-            ]
-
-            # If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot
-            if Total_Installed_Capacity_Out.empty:
+            if capacity_chunks:
+                Total_Installed_Capacity_Out = pd.concat(
+                    capacity_chunks, axis=0, sort=True
+                ).fillna(0)
+                Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[
+                    :, (Total_Installed_Capacity_Out != 0).any(axis=0)
+                ]
+            # If Total_Installed_Capacity_Out df is empty returns a empty 
+            # dataframe and does not plot
+            else:
                 logger.warning(f"No installed capacity in {zone_input}")
                 out = MissingZoneData()
                 outputs[zone_input] = out
@@ -291,10 +296,14 @@ class InstalledCapacity(MPlotDataHelper):
                     ).sum()
                 )
 
-            Total_Installed_Capacity_Out = pd.concat(
-                capacity_chunks, axis=0, sort=False
-            ).fillna(0)
-
+            if capacity_chunks:
+                Total_Installed_Capacity_Out = pd.concat(
+                    capacity_chunks, axis=0, sort=False
+                ).fillna(0)
+            else:
+                out = MissingZoneData()
+                outputs[zone_input] = out
+                continue
             try:
                 # Change to a diff on first scenario
                 scen_base = Total_Installed_Capacity_Out.index[0]
@@ -386,7 +395,7 @@ class InstalledCapacity(MPlotDataHelper):
         """
         # generation figure
         logger.info("Generation data")
-        gen_obj = TotalGeneration(**self.argument_dict)
+        gen_obj = TotalGeneration(*self.argument_list, **self.argument_dict)
         gen_outputs = gen_obj.total_gen(
             start_date_range, end_date_range, scenario_groupby
         )
@@ -462,7 +471,6 @@ class InstalledCapacity(MPlotDataHelper):
                 for i in Total_Gen_Results.columns
             ]
 
-            print(Total_Gen_Results)
             if plot_data_settings["include_barplot_load_lines"]:
                 extra_plot_data = pd.DataFrame(Total_Gen_Results.loc[:, "Total Load"])
                 extra_plot_data["Total Demand"] = Total_Gen_Results.loc[

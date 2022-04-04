@@ -39,15 +39,18 @@ class Hydro(MPlotDataHelper):
     assist in creating figures.
     """
 
-    def __init__(self, **kwargs):
+    def __init__(self, *args, **kwargs):
         """
         Args:
+            *args
+                Minimum required parameters passed to the MPlotDataHelper 
+                class.
             **kwargs
                 These parameters will be passed to the MPlotDataHelper 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
-        super().__init__(**kwargs)
+        super().__init__(*args, **kwargs)
 
     def hydro_continent_net_load(
         self, start_date_range: str = None, end_date_range: str = None, **_

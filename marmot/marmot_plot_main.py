@@ -19,7 +19,6 @@ import time
 import pandas as pd
 from pathlib import Path
 from typing import Union
-import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 try:
@@ -203,43 +202,32 @@ class MarmotPlot(SetupLogger):
             self.Scenario_Diff = (
                 pd.Series(Scenario_Diff.split(",")).str.strip().tolist()
             )
-        elif isinstance(Scenario_Diff, list):
+        else:
             self.Scenario_Diff = Scenario_Diff
-
-        if Scenario_Diff == ["nan"] or Scenario_Diff is None:
-            self.Scenario_Diff = [""]
 
         if isinstance(zone_region_sublist, str):
             self.zone_region_sublist = (
                 pd.Series(zone_region_sublist.split(",")).str.strip().tolist()
             )
-        elif isinstance(zone_region_sublist, list):
-            self.zone_region_sublist = zone_region_sublist
         else:
-            self.zone_region_sublist = []
+            self.zone_region_sublist = zone_region_sublist
 
         if isinstance(xlabels, str):
             self.xlabels = pd.Series(xlabels.split(",")).str.strip().tolist()
-        elif isinstance(xlabels, list):
+        else:
             self.xlabels = xlabels
-        if xlabels == ["nan"] or xlabels is None:
-            self.xlabels = [""]
 
         if isinstance(ylabels, str):
             self.ylabels = pd.Series(ylabels.split(",")).str.strip().tolist()
-        elif isinstance(ylabels, list):
+        else:
             self.ylabels = ylabels
-        if ylabels == ["nan"] or ylabels is None:
-            self.ylabels = [""]
 
         if isinstance(ticklabels, str):
             self.custom_xticklabels = (
                 pd.Series(ticklabels.split(",")).str.strip().tolist()
             )
-        elif isinstance(ticklabels, list):
+        else:
             self.custom_xticklabels = ticklabels
-        if ticklabels == ["nan"] or ticklabels is None:
-            self.custom_xticklabels = None
 
         if isinstance(Region_Mapping, (str, Path)):
             try:
@@ -270,7 +258,7 @@ class MarmotPlot(SetupLogger):
 
         self.logger.info(f"Area Aggregation selected: {self.AGG_BY}")
 
-        if self.zone_region_sublist != ["nan"] and self.zone_region_sublist != []:
+        if self.zone_region_sublist:
             self.logger.info(
                 f"Only plotting {self.AGG_BY}: " f"{self.zone_region_sublist}"
             )
@@ -407,15 +395,7 @@ class MarmotPlot(SetupLogger):
                 .to_dict()["Colour"]
             )
         else:
-            self.logger.warning(
-                'Could not find "colour_dictionary.csv"; '
-                "Check file name. Random colors will now be used"
-            )
-            cmap = plt.cm.get_cmap(lut=len(ordered_gen))
-            colors = []
-            for i in range(cmap.N):
-                colors.append(mcolors.rgb2hex(cmap(i)))
-            PLEXOS_color_dict = dict(zip(ordered_gen, colors))
+            PLEXOS_color_dict = None
 
         color_list = [
             "#396AB1",
@@ -458,7 +438,7 @@ class MarmotPlot(SetupLogger):
                 sys.exit()
             Zones = zones["name"].unique()
 
-            if self.zone_region_sublist != ["nan"] and self.zone_region_sublist != []:
+            if self.zone_region_sublist:
                 zsub = []
                 for zone in self.zone_region_sublist:
                     if zone in Zones:
@@ -486,7 +466,7 @@ class MarmotPlot(SetupLogger):
                 sys.exit()
 
             Zones = regions["region"].unique()
-            if self.zone_region_sublist != ["nan"] and self.zone_region_sublist != []:
+            if self.zone_region_sublist:
                 zsub = []
                 for region in self.zone_region_sublist:
                     if region in Zones:
@@ -526,7 +506,7 @@ class MarmotPlot(SetupLogger):
             # remove any nan that might end  up in list
             Zones = [x for x in Zones if str(x) != "nan"]
 
-            if self.zone_region_sublist != ["nan"] and self.zone_region_sublist != []:
+            if self.zone_region_sublist:
                 zsub = []
                 for region in self.zone_region_sublist:
                     if region in Zones:
@@ -567,26 +547,29 @@ class MarmotPlot(SetupLogger):
 
         for module in list_modules:
             module_plots = plot_selection.loc[plot_selection["Marmot Module"] == module]
-            # dictionary of arguments passed to plotting modules;
+            # List of required arguments
+            argument_list = [
+                Zones,
+                self.AGG_BY,
+                self.Scenarios,
+                ordered_gen,
+                processed_hdf5_folder,
+                figure_folder,
+            ]
+            # dictionary of keyword arguments passed to plotting modules;
             # key names match the instance variables in each module
             argument_dict = {
-                "Zones": Zones,
-                "AGG_BY": self.AGG_BY,
-                "ordered_gen": ordered_gen,
+                "gen_names_dict": gen_names_dict,
                 "PLEXOS_color_dict": PLEXOS_color_dict,
-                "Scenarios": self.Scenarios,
                 "Scenario_Diff": self.Scenario_Diff,
-                "processed_hdf5_folder": processed_hdf5_folder,
-                "figure_folder": figure_folder,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
                 "custom_xticklabels": self.custom_xticklabels,
                 "color_list": color_list,
                 "marker_style": marker_style,
-                "gen_names_dict": gen_names_dict,
+                "vre_gen_cat": vre_gen_cat,
                 "pv_gen_cat": pv_gen_cat,
                 "re_gen_cat": re_gen_cat,
-                "vre_gen_cat": vre_gen_cat,
                 "thermal_gen_cat": thermal_gen_cat,
                 "Region_Mapping": self.Region_Mapping,
                 "TECH_SUBSET": self.TECH_SUBSET,
@@ -601,7 +584,7 @@ class MarmotPlot(SetupLogger):
             # Instantiate the module class
 
             class_name = getattr(plot_module, Module_CLASS_MAPPING[module])
-            instantiate_mplot = class_name(**argument_dict)
+            instantiate_mplot = class_name(*argument_list, **argument_dict)
 
             # Main loop to process each figure and pass
             # plot specific variables to methods
@@ -787,17 +770,24 @@ def main():
 
     # For plots using the difference of the values between two scenarios.
     # Max two entries, the second scenario is subtracted from the first.
-    Scenario_Diff = (
-        pd.Series(
-            str(Marmot_user_defined_inputs.loc["Scenario_Diff_plot"].squeeze()).split(
-                ","
-            )
+    if (
+        pd.isna(
+            Marmot_user_defined_inputs.loc[
+                "Scenario_Diff_plot", "User_defined_value"
+            ]
         )
-        .str.strip()
-        .tolist()
-    )
-    if Scenario_Diff == ["nan"]:
-        Scenario_Diff = [""]
+    ):
+        Scenario_Diff = None
+    else:
+        Scenario_Diff = (
+            pd.Series(
+                str(Marmot_user_defined_inputs.loc["Scenario_Diff_plot"].squeeze()).split(
+                    ","
+                )
+            )
+            .str.strip()
+            .tolist()
+        )
 
     Mapping_folder = INPUT_DIR.joinpath("mapping_folder")
 
@@ -807,7 +797,6 @@ def main():
                 "Region_Mapping.csv_name", "User_defined_value"
             ]
         )
-        is True
     ):
         Region_Mapping = pd.DataFrame()
     else:
@@ -838,42 +827,66 @@ def main():
         Marmot_user_defined_inputs.loc["color_dictionary_file", "User_defined_value"]
     )
 
-    AGG_BY = Marmot_user_defined_inputs.loc["AGG_BY"].squeeze().strip()
+    AGG_BY = Marmot_user_defined_inputs.loc["AGG_BY","User_defined_value"].strip()
 
     if pd.notna(Marmot_user_defined_inputs.loc["TECH_SUBSET", "User_defined_value"]):
-        TECH_SUBSET = Marmot_user_defined_inputs.loc["TECH_SUBSET"].squeeze().strip()
+        TECH_SUBSET = Marmot_user_defined_inputs.loc["TECH_SUBSET", "User_defined_value"].strip()
     else:
         TECH_SUBSET = None
 
     # Facet Grid Labels (Based on Scenarios)
-    zone_region_sublist = (
-        pd.Series(
-            str(Marmot_user_defined_inputs.loc["zone_region_sublist"].squeeze()).split(
-                ","
+    if (
+        pd.isna(
+            Marmot_user_defined_inputs.loc[
+                "zone_region_sublist", "User_defined_value"
+            ]
+        )
+    ):
+        zone_region_sublist = None
+    else:
+        zone_region_sublist = (
+            pd.Series(
+                str(Marmot_user_defined_inputs.loc["zone_region_sublist"].squeeze()).split(
+                    ","
+                )
             )
+            .str.strip()
+            .tolist()
         )
-        .str.strip()
-        .tolist()
-    )
 
-    ylabels = (
-        pd.Series(
-            str(Marmot_user_defined_inputs.loc["Facet_ylabels"].squeeze()).split(",")
+    if (
+        pd.isna(
+            Marmot_user_defined_inputs.loc[
+                "Facet_ylabels", "User_defined_value"
+            ]
         )
-        .str.strip()
-        .tolist()
-    )
-    if ylabels == ["nan"]:
-        ylabels = [""]
+    ):
+        ylabels = None
+    else:
+        ylabels = (
+            pd.Series(
+                Marmot_user_defined_inputs.loc["Facet_ylabels", "User_defined_value"].split(",")
+            )
+            .str.strip()
+            .tolist()
+        )
+
+    if (
+        pd.isna(
+            Marmot_user_defined_inputs.loc[
+                "Facet_xlabels", "User_defined_value"
+            ]
+        )
+    ):
+        xlabels = None
+
     xlabels = (
         pd.Series(
-            str(Marmot_user_defined_inputs.loc["Facet_xlabels"].squeeze()).split(",")
+            Marmot_user_defined_inputs.loc["Facet_xlabels", "User_defined_value"].split(",")
         )
         .str.strip()
         .tolist()
     )
-    if xlabels == ["nan"]:
-        xlabels = [""]
 
     # option to change tick labels on plot
     if pd.isna(Marmot_user_defined_inputs.loc["Tick_labels", "User_defined_value"]):
