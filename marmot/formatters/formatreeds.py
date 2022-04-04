@@ -77,23 +77,28 @@ class ProcessReEDS(Process):
         self,
         input_folder: Path,
         output_file_path: Path,
-        Region_Mapping: pd.DataFrame,
         *args,
         process_subset_years: list = None,
+        Region_Mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
         Args:
             input_folder (Path): Folder containing csv files.
             output_file_path (Path): Path to formatted h5 output file.
-            Region_Mapping (pd.DataFrame): DataFrame to map custom
+            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
+                Defaults to pd.DataFrame().
             process_subset_years (list, optional): If provided only process
                 years specified. Defaults to None.
             **kwargs
                 These parameters will be passed to the Process 
                 class.
         """
+        # Instantiation of Process Base class
+        super().__init__(
+            input_folder, output_file_path, *args, Region_Mapping=Region_Mapping, **kwargs
+        )
         # Internal cached data is saved to the following variables.
         # To access the values use the public api e.g self.property_units
         self._property_units: dict = {}
@@ -110,11 +115,6 @@ class ProcessReEDS(Process):
             process_subset_years = list(map(int, process_subset_years))
             logger.info(f"Processing subset of ReEDS years: {process_subset_years}")
         self.process_subset_years = process_subset_years
-
-        # Instantiation of Process Base class
-        super().__init__(
-            input_folder, output_file_path, Region_Mapping, *args, **kwargs
-        )
 
     @property
     def property_units(self) -> dict:
@@ -185,6 +185,11 @@ class ProcessReEDS(Process):
 
     @property
     def file_collection(self) -> dict:
+        """Dictionary input file names to full filename path 
+
+        Returns:
+            dict: file_collection {filename: fullpath}
+        """
         if self._file_collection == None:
             self._file_collection = {}
             for file in self.get_input_files:

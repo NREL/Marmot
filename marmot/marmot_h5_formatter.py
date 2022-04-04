@@ -251,10 +251,10 @@ class MarmotFormat(SetupLogger):
         process_sim_model = process_class(
             input_folder,
             output_file_path,
-            self.Region_Mapping,
-            self.emit_names,
             plexos_block=plexos_block,
             process_subset_years=process_subset_years,
+            Region_Mapping=self.Region_Mapping,
+            emit_names=self.emit_names,
         )
 
         files_list = process_sim_model.get_input_files

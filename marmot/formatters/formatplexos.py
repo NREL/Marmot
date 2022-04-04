@@ -75,9 +75,9 @@ class ProcessPLEXOS(Process):
         self,
         input_folder: Path,
         output_file_path: Path,
-        Region_Mapping: pd.DataFrame,
         *args,
         plexos_block: str = "ST",
+        Region_Mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs,
     ):
         """
@@ -86,18 +86,19 @@ class ProcessPLEXOS(Process):
             output_file_path (Path): Path to formatted h5 output file.
             Region_Mapping (pd.DataFrame): DataFrame to map custom
                 regions/zones to create custom aggregations.
+                Defaults to pd.DataFrame().
             plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
             **kwargs
                 These parameters will be passed to the Process 
                 class.
         """
-        self.plexos_block = plexos_block
-        self.metadata = MetaData(
-            input_folder, read_from_formatted_h5=False, Region_Mapping=Region_Mapping
-        )
         # Instantiation of Process Base class
         super().__init__(
-            input_folder, output_file_path, Region_Mapping, *args, **kwargs
+            input_folder, output_file_path, *args, Region_Mapping=Region_Mapping, **kwargs
+        )
+        self.plexos_block = plexos_block
+        self.metadata = MetaData(
+            self.input_folder, read_from_formatted_h5=False, Region_Mapping=Region_Mapping
         )
     
     @property

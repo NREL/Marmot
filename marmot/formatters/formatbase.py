@@ -65,19 +65,21 @@ class Process:
         self,
         input_folder: Path,
         output_file_path: Path,
-        Region_Mapping: pd.DataFrame,
-        emit_names: pd.DataFrame,
         *_,
+        Region_Mapping : pd.DataFrame = pd.DataFrame(),
+        emit_names : pd.DataFrame = pd.DataFrame(),
         **__,
     ):
         """
         Args:
             input_folder (Path): Folder containing model input files.
             output_file_path (Path): Path to formatted h5 output file.
-            Region_Mapping (pd.DataFrame): DataFrame to map custom
+            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
-            emit_names (pd.DataFrame): DataFrame with 2 columns to rename
+                Defaults to pd.DataFrame().
+            emit_names (pd.DataFrame, optional): DataFrame with 2 columns to rename
                 emission names.
+                Defaults to pd.DataFrame().
         """
         self.input_folder = input_folder
         self.output_file_path = output_file_path
@@ -104,7 +106,7 @@ class Process:
     def input_folder(self, value):
         self._get_input_files = None
         self._file_collection = None
-        self._input_folder = value
+        self._input_folder = Path(value)
 
     @property
     def get_input_files(self) -> list:
@@ -188,7 +190,6 @@ class Process:
             pd.DataFrame: Combined df
         """
         df = pd.concat(model_list, copy=False)
-        
         if drop_duplicates:
             origsize = df.size
             # Remove duplicates; keep first entry
