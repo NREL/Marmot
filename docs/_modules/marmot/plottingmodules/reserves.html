@@ -196,15 +196,18 @@
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
+<span class="sd">            *args</span>
+<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
+<span class="sd">                class.</span>
 <span class="sd">            **kwargs</span>
 <span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
 <span class="sd">                class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
 <div class="viewcode-block" id="Reserves.reserve_gen_timeseries"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.reserves.Reserves.html#marmot.plottingmodules.reserves.Reserves.reserve_gen_timeseries">[docs]</a>    <span class="k">def</span> <span class="nf">reserve_gen_timeseries</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

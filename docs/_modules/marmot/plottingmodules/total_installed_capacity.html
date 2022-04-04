@@ -195,16 +195,20 @@
 <span class="sd">    in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
+<span class="sd">            *args</span>
+<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
+<span class="sd">                class.</span>
 <span class="sd">            **kwargs</span>
 <span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
 <span class="sd">                class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
         
+        <span class="bp">self</span><span class="o">.</span><span class="n">argument_list</span> <span class="o">=</span> <span class="n">args</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">argument_dict</span> <span class="o">=</span> <span class="n">kwargs</span>
 
 <div class="viewcode-block" id="InstalledCapacity.total_cap"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.plottingmodules.total_installed_capacity.InstalledCapacity.html#marmot.plottingmodules.total_installed_capacity.InstalledCapacity.total_cap">[docs]</a>    <span class="k">def</span> <span class="nf">total_cap</span><span class="p">(</span>
@@ -296,15 +300,16 @@
                     <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
                 <span class="p">)</span>
 
-            <span class="n">Total_Installed_Capacity_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-                <span class="n">capacity_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">Total_Installed_Capacity_Out</span> <span class="o">=</span> <span class="n">Total_Installed_Capacity_Out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-                <span class="p">:,</span> <span class="p">(</span><span class="n">Total_Installed_Capacity_Out</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-            <span class="p">]</span>
-
-            <span class="c1"># If Total_Installed_Capacity_Out df is empty returns a empty dataframe and does not plot</span>
-            <span class="k">if</span> <span class="n">Total_Installed_Capacity_Out</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">capacity_chunks</span><span class="p">:</span>
+                <span class="n">Total_Installed_Capacity_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                    <span class="n">capacity_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+                <span class="n">Total_Installed_Capacity_Out</span> <span class="o">=</span> <span class="n">Total_Installed_Capacity_Out</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
+                    <span class="p">:,</span> <span class="p">(</span><span class="n">Total_Installed_Capacity_Out</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="c1"># If Total_Installed_Capacity_Out df is empty returns a empty </span>
+            <span class="c1"># dataframe and does not plot</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No installed capacity in </span><span class="si">{</span><span class="n">zone_input</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="n">out</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span>
@@ -451,10 +456,14 @@
                     <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
                 <span class="p">)</span>
 
-            <span class="n">Total_Installed_Capacity_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
-                <span class="n">capacity_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span>
-            <span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-
+            <span class="k">if</span> <span class="n">capacity_chunks</span><span class="p">:</span>
+                <span class="n">Total_Installed_Capacity_Out</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+                    <span class="n">capacity_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span>
+                <span class="p">)</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
+                <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">out</span>
+                <span class="k">continue</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="c1"># Change to a diff on first scenario</span>
                 <span class="n">scen_base</span> <span class="o">=</span> <span class="n">Total_Installed_Capacity_Out</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -546,7 +555,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># generation figure</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Generation data&quot;</span><span class="p">)</span>
-        <span class="n">gen_obj</span> <span class="o">=</span> <span class="n">TotalGeneration</span><span class="p">(</span><span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">argument_dict</span><span class="p">)</span>
+        <span class="n">gen_obj</span> <span class="o">=</span> <span class="n">TotalGeneration</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">argument_list</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">argument_dict</span><span class="p">)</span>
         <span class="n">gen_outputs</span> <span class="o">=</span> <span class="n">gen_obj</span><span class="o">.</span><span class="n">total_gen</span><span class="p">(</span>
             <span class="n">start_date_range</span><span class="p">,</span> <span class="n">end_date_range</span><span class="p">,</span> <span class="n">scenario_groupby</span>
         <span class="p">)</span>

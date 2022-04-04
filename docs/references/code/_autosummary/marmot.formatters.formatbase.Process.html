@@ -562,7 +562,7 @@
 <h1>marmot.formatters.formatbase.Process<a class="headerlink" href="#marmot-formatters-formatbase-process" title="Permalink to this headline">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.formatters.formatbase.Process">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+629.ge610022ac9)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">emit_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+629.ge610022ac9)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">__</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/formatters/formatbase.html#Process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatbase.Process" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">Process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder:</span> <span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_path:</span> <span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping:</span> <span class="pre">pandas.core.frame.DataFrame</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emit_names:</span> <span class="pre">pandas.core.frame.DataFrame</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**__</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/formatters/formatbase.html#Process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatbase.Process" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/functions.html#object" title="(in Python v3.10)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Base class for processing simulation model data.</p>
 <dl class="field-list simple">
@@ -570,10 +570,12 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_folder</strong> (<em>Path</em>) – Folder containing model input files.</p></li>
 <li><p><strong>output_file_path</strong> (<em>Path</em>) – Path to formatted h5 output file.</p></li>
-<li><p><strong>Region_Mapping</strong> (<em>pd.DataFrame</em>) – DataFrame to map custom
-regions/zones to create custom aggregations.</p></li>
-<li><p><strong>emit_names</strong> (<em>pd.DataFrame</em>) – DataFrame with 2 columns to rename
-emission names.</p></li>
+<li><p><strong>Region_Mapping</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – DataFrame to map custom
+regions/zones to create custom aggregations.
+Defaults to pd.DataFrame().</p></li>
+<li><p><strong>emit_names</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – DataFrame with 2 columns to rename
+emission names.
+Defaults to pd.DataFrame().</p></li>
 </ul>
 </dd>
 </dl>
@@ -584,8 +586,8 @@ emission names.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatbase.Process.get_input_files" title="marmot.formatters.formatbase.Process.get_input_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_files</span></code></a>()</p></td>
-<td><p>Gets a list of input files within the scenario folders</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatbase.Process.combine_models" title="marmot.formatters.formatbase.Process.combine_models"><code class="xref py py-obj docutils literal notranslate"><span class="pre">combine_models</span></code></a>(model_list[, drop_duplicates])</p></td>
+<td><p>Combine temporally disaggregated model results.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatbase.Process.get_processed_data" title="marmot.formatters.formatbase.Process.get_processed_data"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_processed_data</span></code></a>(prop_class, property, ...)</p></td>
 <td><p>method template for get_processed_data</p></td>
@@ -614,6 +616,15 @@ emission names.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatbase.Process.UNITS_CONVERSION" title="marmot.formatters.formatbase.Process.UNITS_CONVERSION"><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNITS_CONVERSION</span></code></a></p></td>
 <td><p>Dictionary to convert units to standard values used by Marmot</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatbase.Process.file_collection" title="marmot.formatters.formatbase.Process.file_collection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_collection</span></code></a></p></td>
+<td><p>Dictionary input file names to full filename path</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatbase.Process.get_input_files" title="marmot.formatters.formatbase.Process.get_input_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_files</span></code></a></p></td>
+<td><p>Gets a list of input files within the scenario folders</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatbase.Process.input_folder" title="marmot.formatters.formatbase.Process.input_folder"><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_folder</span></code></a></p></td>
+<td><p>Path to input folder</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py attribute">
@@ -634,10 +645,38 @@ emission names.</p></li>
 <dd><p>Dictionary to convert units to standard values used by Marmot</p>
 </dd></dl>
 
-<dl class="py method">
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.formatters.formatbase.Process.input_folder">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">input_folder</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></em><a class="headerlink" href="#marmot.formatters.formatbase.Process.input_folder" title="Permalink to this definition">#</a></dt>
+<dd><p>Path to input folder</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>input_folder</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Path</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="marmot.formatters.formatbase.Process.get_input_files">
-<span class="sig-name descname"><span class="pre">get_input_files</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatbase.html#Process.get_input_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatbase.Process.get_input_files" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">get_input_files</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></em><a class="headerlink" href="#marmot.formatters.formatbase.Process.get_input_files" title="Permalink to this definition">#</a></dt>
 <dd><p>Gets a list of input files within the scenario folders</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.formatters.formatbase.Process.file_collection">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">file_collection</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><a class="headerlink" href="#marmot.formatters.formatbase.Process.file_collection" title="Permalink to this definition">#</a></dt>
+<dd><p>Dictionary input file names to full filename path</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>file_collection {filename: fullpath}</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py method">
@@ -653,7 +692,7 @@ emission names.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.formatters.formatbase.Process.get_processed_data">
-<span class="sig-name descname"><span class="pre">get_processed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prop_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">timescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+629.ge610022ac9)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatbase.html#Process.get_processed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatbase.Process.get_processed_data" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_processed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prop_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">timescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_filename</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatbase.html#Process.get_processed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatbase.Process.get_processed_data" title="Permalink to this definition">#</a></dt>
 <dd><p>method template for get_processed_data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -675,7 +714,7 @@ emission names.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.formatters.formatbase.Process.report_prop_error">
-<span class="sig-name descname"><span class="pre">report_prop_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+629.ge610022ac9)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatbase.html#Process.report_prop_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatbase.Process.report_prop_error" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">report_prop_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">property</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatbase.html#Process.report_prop_error"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatbase.Process.report_prop_error" title="Permalink to this definition">#</a></dt>
 <dd><p>Outputs a warning message when the get_processed_data method
 cannot find the specified property in the simulation model solution files.</p>
 <dl class="field-list simple">
@@ -687,6 +726,28 @@ cannot find the specified property in the simulation model solution files.</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>Empty DataFrame.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.formatters.formatbase.Process.combine_models">
+<span class="sig-name descname"><span class="pre">combine_models</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model_list</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_duplicates</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatbase.html#Process.combine_models"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatbase.Process.combine_models" title="Permalink to this definition">#</a></dt>
+<dd><p>Combine temporally disaggregated model results.</p>
+<p>Will drop duplicate index entries by default.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model_list</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) – list of df models to combine.</p></li>
+<li><p><strong>drop_duplicates</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – Drop duplicate index entries.
+Defaults to True.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Combined df</p>
 </dd>
 <dt class="field-odd">Return type</dt>
 <dd class="field-odd"><p>pd.DataFrame</p>

@@ -235,9 +235,9 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="n">plexos_block</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ST&quot;</span><span class="p">,</span>
+        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -246,54 +246,67 @@
 <span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
 <span class="sd">            Region_Mapping (pd.DataFrame): DataFrame to map custom</span>
 <span class="sd">                regions/zones to create custom aggregations.</span>
+<span class="sd">                Defaults to pd.DataFrame().</span>
 <span class="sd">            plexos_block (str, optional): PLEXOS results type. Defaults to &#39;ST&#39;.</span>
 <span class="sd">            **kwargs</span>
 <span class="sd">                These parameters will be passed to the Process </span>
 <span class="sd">                class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span> <span class="o">=</span> <span class="n">plexos_block</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span> <span class="o">=</span> <span class="p">{}</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
-            <span class="n">input_folder</span><span class="p">,</span> <span class="n">read_from_formatted_h5</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span>
-        <span class="p">)</span>
         <span class="c1"># Instantiation of Process Base class</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">input_folder</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+            <span class="n">input_folder</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
         <span class="p">)</span>
-
-<div class="viewcode-block" id="ProcessPLEXOS.get_input_files"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.get_input_files">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">plexos_block</span> <span class="o">=</span> <span class="n">plexos_block</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="p">,</span> <span class="n">read_from_formatted_h5</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span>
+        <span class="p">)</span>
+    
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_input_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Gets a list of h5plexos input files within the scenario folders</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            list: list of h5plexos input filenames to process</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.h5&quot;</span><span class="p">:</span>
-                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># Creates a list of only the hdf5 files</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_files</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.h5&quot;</span><span class="p">:</span>
+                    <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>  <span class="c1"># Creates a list of only the hdf5 files</span>
 
-        <span class="c1"># List of all hf files in hdf5 folder in alpha numeric order</span>
-        <span class="n">files_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+            <span class="c1"># List of all hf files in hdf5 folder in alpha numeric order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_files</span>
 
-        <span class="c1"># Read in all HDF5 files into dictionary</span>
-        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading all HDF5 files to prepare for processing&quot;</span><span class="p">)</span>
-        <span class="n">regions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="n">PLEXOSSolution</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-            <span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-                <span class="n">regions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="s2">&quot;region&quot;</span><span class="p">]))</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">file_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Dictionary input file names to h5 PLEXOSSolution</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">regions</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                <span class="n">missing_regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">regions</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">]))</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="s2">&quot;The Following PLEXOS REGIONS are missing from &quot;</span>
-                    <span class="s2">&quot;the &#39;region&#39; column of your mapping file: &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">missing_regions</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: file_collection {filename: PLEXOSSolution}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_collection</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Read in all HDF5 files into dictionary</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;Loading all HDF5 files to prepare for processing&quot;</span><span class="p">)</span>
+            <span class="n">regions</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file_collection</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_input_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_file_collection</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="n">PLEXOSSolution</span><span class="p">(</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
                 <span class="p">)</span>
-        <span class="k">return</span> <span class="n">files_list</span></div>
+                <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                    <span class="n">regions</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">regions</span><span class="p">(</span><span class="n">file</span><span class="p">)[</span><span class="s2">&quot;region&quot;</span><span class="p">]))</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">regions</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">])</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+                    <span class="n">missing_regions</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">regions</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">]))</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="s2">&quot;The Following PLEXOS REGIONS are missing from &quot;</span>
+                        <span class="s2">&quot;the &#39;region&#39; column of your mapping file: &quot;</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">missing_regions</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_collection</span>
 
 <div class="viewcode-block" id="ProcessPLEXOS.output_metadata"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html#marmot.formatters.formatplexos.ProcessPLEXOS.output_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">output_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Transfers metadata from original PLEXOS solutions file to processed HDF5 file.</span>
@@ -350,6 +363,7 @@
 <span class="sd">            pd.DataFrame: Formatted results dataframe.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">db</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;      </span><span class="si">{</span><span class="n">model_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="s2">&quot;_&quot;</span> <span class="ow">in</span> <span class="n">prop_class</span><span class="p">:</span>
                 <span class="n">df</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">query_relation_property</span><span class="p">(</span>

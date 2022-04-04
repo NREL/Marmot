@@ -237,24 +237,28 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
         <span class="o">*</span><span class="n">args</span><span class="p">,</span>
         <span class="n">process_subset_years</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            input_folder (Path): Folder containing csv files.</span>
 <span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
-<span class="sd">            Region_Mapping (pd.DataFrame): DataFrame to map custom</span>
+<span class="sd">            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom</span>
 <span class="sd">                regions/zones to create custom aggregations.</span>
+<span class="sd">                Defaults to pd.DataFrame().</span>
 <span class="sd">            process_subset_years (list, optional): If provided only process</span>
 <span class="sd">                years specified. Defaults to None.</span>
 <span class="sd">            **kwargs</span>
 <span class="sd">                These parameters will be passed to the Process </span>
 <span class="sd">                class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="c1"># Instantiation of Process Base class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">input_folder</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
         <span class="c1"># Internal cached data is saved to the following variables.</span>
         <span class="c1"># To access the values use the public api e.g self.property_units</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_property_units</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
@@ -272,17 +276,12 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing subset of ReEDS years: </span><span class="si">{</span><span class="n">process_subset_years</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">process_subset_years</span> <span class="o">=</span> <span class="n">process_subset_years</span>
 
-        <span class="c1"># Instantiation of Process Base class</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
-            <span class="n">input_folder</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
-        <span class="p">)</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">property_units</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Gets the property units from data, e.g MW, MWh</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            dict: _property_units</span>
+<span class="sd">            dict: property_units</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_property_units</span>
 
@@ -328,6 +327,35 @@
                 <span class="o">.</span><span class="n">to_dict</span><span class="p">()[</span><span class="s2">&quot;region&quot;</span><span class="p">]</span>
             <span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_input_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Gets a list of input files within the scenario folders&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_files</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">reeds_outputs_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;outputs&quot;</span><span class="p">)</span>
+            <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">reeds_outputs_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="sa">f</span><span class="s2">&quot;rep_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.gdx&quot;</span><span class="p">:</span>
+                    <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+                    <span class="bp">self</span><span class="o">.</span><span class="n">property_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
+
+            <span class="c1"># List of all files in input folder in alpha numeric order</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_files</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_files</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">file_collection</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Dictionary input file names to full filename path </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            dict: file_collection {filename: fullpath}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_collection</span> <span class="o">==</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_file_collection</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_input_files</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_file_collection</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;outputs&quot;</span><span class="p">,</span> <span class="n">file</span><span class="p">))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file_collection</span>
+
 <div class="viewcode-block" id="ProcessReEDS.output_metadata"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.output_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">output_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">files_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Add ReEDS specific metadata to formatted h5 file .</span>
 
@@ -345,23 +373,6 @@
                 <span class="n">key</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;metadata/</span><span class="si">{</span><span class="n">partition</span><span class="si">}</span><span class="s2">/objects/regions&quot;</span><span class="p">,</span>
                 <span class="n">mode</span><span class="o">=</span><span class="s2">&quot;a&quot;</span><span class="p">,</span>
             <span class="p">)</span></div>
-
-<div class="viewcode-block" id="ProcessReEDS.get_input_files"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.get_input_files">[docs]</a>    <span class="k">def</span> <span class="nf">get_input_files</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Gets a list of input files within the scenario folders&quot;&quot;&quot;</span>
-        <span class="n">reeds_outputs_dir</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;outputs&quot;</span><span class="p">)</span>
-        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="n">reeds_outputs_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="sa">f</span><span class="s2">&quot;rep_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.gdx&quot;</span><span class="p">:</span>
-                <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
-                <span class="bp">self</span><span class="o">.</span><span class="n">property_units</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
-
-        <span class="c1"># List of all files in input folder in alpha numeric order</span>
-        <span class="n">files_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
-        <span class="n">files_list</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">files</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">files_list</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="p">[</span><span class="n">file</span><span class="p">]</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">reeds_outputs_dir</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">file</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">files_list</span></div>
 
 <div class="viewcode-block" id="ProcessReEDS.get_processed_data"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS.get_processed_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_processed_data</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_filename</span><span class="p">:</span> <span class="nb">str</span>
@@ -382,7 +393,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">wind_resource_to_pca</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">name</span>
 
         <span class="n">gdx_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">file_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model_filename</span><span class="p">)</span>
-
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;      </span><span class="si">{</span><span class="n">model_filename</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">gdxpds</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">(</span><span class="n">gdx_file</span><span class="p">,</span> <span class="n">prop</span><span class="p">)[</span><span class="n">prop</span><span class="p">]</span>
         <span class="k">except</span> <span class="n">gdxpds</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>

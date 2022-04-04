@@ -24,7 +24,7 @@ marmot.formatters.formatbase.Process
 
    .. autosummary::
    
-        ~Process.get_input_files
+        ~Process.combine_models
         ~Process.get_processed_data
         ~Process.output_metadata
         ~Process.report_prop_error
@@ -40,5 +40,8 @@ marmot.formatters.formatbase.Process
       ~Process.EXTRA_MARMOT_PROPERTIES
       ~Process.PROPERTY_MAPPING
       ~Process.UNITS_CONVERSION
+      ~Process.file_collection
+      ~Process.get_input_files
+      ~Process.input_folder
    
    

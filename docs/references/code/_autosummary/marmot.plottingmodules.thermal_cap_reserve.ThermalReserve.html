@@ -562,7 +562,7 @@
 <h1>marmot.plottingmodules.thermal_cap_reserve.ThermalReserve<a class="headerlink" href="#marmot-plottingmodules-thermal-cap-reserve-thermalreserve" title="Permalink to this headline">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.plottingmodules.thermal_cap_reserve.ThermalReserve">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ThermalReserve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/thermal_cap_reserve.html#ThermalReserve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.thermal_cap_reserve.ThermalReserve" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ThermalReserve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/thermal_cap_reserve.html#ThermalReserve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.thermal_cap_reserve.ThermalReserve" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper" title="marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper</span></code></a></p>
 <p>Thermal capacity in reserve plots.</p>
 <p>The thermal_cap_reserve module contains methods that
@@ -571,8 +571,12 @@ display the amount of generation in reserve, i.e non committed capacity.</p>
 in creating figures.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>**kwargs</strong> – These parameters will be passed to the MPlotDataHelper
-class.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>*args</strong> – Minimum required parameters passed to the MPlotDataHelper
+class.</p></li>
+<li><p><strong>**kwargs</strong> – These parameters will be passed to the MPlotDataHelper
+class.</p></li>
+</ul>
 </dd>
 </dl>
 <p class="rubric">Methods</p>

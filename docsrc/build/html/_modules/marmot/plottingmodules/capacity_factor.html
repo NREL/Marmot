@@ -192,15 +192,18 @@
 <span class="sd">    assist in creating figures.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
+<span class="sd">            *args</span>
+<span class="sd">                Minimum required parameters passed to the MPlotDataHelper </span>
+<span class="sd">                class.</span>
 <span class="sd">            **kwargs</span>
 <span class="sd">                These parameters will be passed to the MPlotDataHelper </span>
 <span class="sd">                class.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Instantiation of MPlotHelperFunctions</span>
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;figure_size&quot;</span><span class="p">,</span> <span class="s2">&quot;xdimension&quot;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;figure_size&quot;</span><span class="p">,</span> <span class="s2">&quot;ydimension&quot;</span><span class="p">)</span>
@@ -343,8 +346,9 @@
                             <span class="n">CF</span><span class="p">[</span><span class="n">tech_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">cf</span>
                     <span class="n">cf_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CF</span><span class="p">)</span>
 
-            <span class="n">CF_all_scenarios</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">cf_chunks</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">CF_all_scenarios</span><span class="o">.</span><span class="n">empty</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cf_chunks</span><span class="p">:</span>
+                <span class="n">CF_all_scenarios</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">cf_chunks</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
                 <span class="k">continue</span>
 
@@ -466,10 +470,10 @@
                 <span class="n">CF</span> <span class="o">=</span> <span class="n">Total_Gen</span> <span class="o">/</span> <span class="p">(</span><span class="n">Cap</span> <span class="o">*</span> <span class="n">duration_hours</span><span class="p">)</span>
                 <span class="n">cf_scen_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">CF</span><span class="p">)</span>
 
-            <span class="n">CF_all_scenarios</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">cf_scen_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
-            <span class="n">CF_all_scenarios</span> <span class="o">=</span> <span class="n">CF_all_scenarios</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="n">CF_all_scenarios</span><span class="o">.</span><span class="n">empty</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">cf_scen_chunks</span><span class="p">:</span>
+                <span class="n">CF_all_scenarios</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">cf_scen_chunks</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">T</span>
+                <span class="n">CF_all_scenarios</span> <span class="o">=</span> <span class="n">CF_all_scenarios</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
                 <span class="n">outputs</span><span class="p">[</span><span class="n">zone_input</span><span class="p">]</span> <span class="o">=</span> <span class="n">MissingZoneData</span><span class="p">()</span>
                 <span class="k">continue</span>
 

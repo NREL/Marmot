@@ -40,7 +40,6 @@ marmot.formatters.formatplexos.ProcessPLEXOS
         ~ProcessPLEXOS.df_process_reserves_generators
         ~ProcessPLEXOS.df_process_storage
         ~ProcessPLEXOS.df_process_zone
-        ~ProcessPLEXOS.get_input_files
         ~ProcessPLEXOS.get_processed_data
         ~ProcessPLEXOS.merge_timeseries_block_data
         ~ProcessPLEXOS.output_metadata
@@ -56,5 +55,8 @@ marmot.formatters.formatplexos.ProcessPLEXOS
       ~ProcessPLEXOS.EXTRA_MARMOT_PROPERTIES
       ~ProcessPLEXOS.PROPERTY_MAPPING
       ~ProcessPLEXOS.UNITS_CONVERSION
+      ~ProcessPLEXOS.file_collection
+      ~ProcessPLEXOS.get_input_files
+      ~ProcessPLEXOS.input_folder
    
    

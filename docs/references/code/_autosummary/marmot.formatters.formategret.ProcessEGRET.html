@@ -562,7 +562,7 @@
 <h1>marmot.formatters.formategret.ProcessEGRET<a class="headerlink" href="#marmot-formatters-formategret-processegret" title="Permalink to this headline">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="marmot.formatters.formategret.ProcessEGRET">
-<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ProcessEGRET</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.10)"><span class="pre">pathlib.Path</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+629.ge610022ac9)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">emit_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v1.5.0.dev0+629.ge610022ac9)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">__</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/formatters/formategret.html#ProcessEGRET"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formategret.ProcessEGRET" title="Permalink to this definition">#</a></dt>
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ProcessEGRET</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_folder:</span> <span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_file_path:</span> <span class="pre">pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Region_Mapping:</span> <span class="pre">pandas.core.frame.DataFrame</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">emit_names:</span> <span class="pre">pandas.core.frame.DataFrame</span> <span class="pre">=</span> <span class="pre">Empty</span> <span class="pre">DataFrame</span> <span class="pre">Columns:</span> <span class="pre">[]</span> <span class="pre">Index:</span> <span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">**__</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/formatters/formategret.html#ProcessEGRET"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formategret.ProcessEGRET" title="Permalink to this definition">#</a></dt>
 <dd><p>Bases: <a class="reference internal" href="marmot.formatters.formatbase.Process.html#marmot.formatters.formatbase.Process" title="marmot.formatters.formatbase.Process"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.formatters.formatbase.Process</span></code></a></p>
 <p>Process EGRET class specific data from a json database.</p>
 <dl class="field-list simple">
@@ -570,10 +570,12 @@
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>input_folder</strong> (<em>Path</em>) – Folder containing model input files.</p></li>
 <li><p><strong>output_file_path</strong> (<em>Path</em>) – Path to formatted h5 output file.</p></li>
-<li><p><strong>Region_Mapping</strong> (<em>pd.DataFrame</em>) – DataFrame to map custom
-regions/zones to create custom aggregations.</p></li>
-<li><p><strong>emit_names</strong> (<em>pd.DataFrame</em>) – DataFrame with 2 columns to rename
-emission names.</p></li>
+<li><p><strong>Region_Mapping</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – DataFrame to map custom
+regions/zones to create custom aggregations.
+Defaults to pd.DataFrame().</p></li>
+<li><p><strong>emit_names</strong> (<em>pd.DataFrame</em><em>, </em><em>optional</em>) – DataFrame with 2 columns to rename
+emission names.
+Defaults to pd.DataFrame().</p></li>
 </ul>
 </dd>
 </dl>
@@ -601,6 +603,15 @@ emission names.</p></li>
 </tr>
 <tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNITS_CONVERSION</span></code></p></td>
 <td><p>Dictionary to convert units to standard values used by Marmot</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">file_collection</span></code></p></td>
+<td><p>Dictionary input file names to full filename path</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_files</span></code></p></td>
+<td><p>Gets a list of input files within the scenario folders</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_folder</span></code></p></td>
+<td><p>Path to input folder</p></td>
 </tr>
 </tbody>
 </table>

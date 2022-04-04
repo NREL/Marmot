@@ -27,7 +27,6 @@ marmot.formatters.formatreeds.ProcessReEDS
         ~ProcessReEDS.df_process_generator
         ~ProcessReEDS.df_process_line
         ~ProcessReEDS.df_process_reserves_generators
-        ~ProcessReEDS.get_input_files
         ~ProcessReEDS.get_processed_data
         ~ProcessReEDS.merge_timeseries_block_data
         ~ProcessReEDS.output_metadata
@@ -43,6 +42,9 @@ marmot.formatters.formatreeds.ProcessReEDS
       ~ProcessReEDS.EXTRA_MARMOT_PROPERTIES
       ~ProcessReEDS.PROPERTY_MAPPING
       ~ProcessReEDS.UNITS_CONVERSION
+      ~ProcessReEDS.file_collection
+      ~ProcessReEDS.get_input_files
+      ~ProcessReEDS.input_folder
       ~ProcessReEDS.property_units
       ~ProcessReEDS.wind_resource_to_pca
    
