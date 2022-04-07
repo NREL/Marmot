@@ -141,12 +141,7 @@ class Transmission(MPlotDataHelper):
             data_table=[]
 
             for n, scenario in enumerate(self.Scenarios):
-<<<<<<< HEAD
-                self.logger.info(f"Scenario = {str(scenario)}")
-
-=======
                 logger.info(f"Scenario = {str(scenario)}")
->>>>>>> origin/ReEDS_formatter
                 # gets correct metadata based on area aggregation
                 if self.AGG_BY=='zone':
                     zone_lines = self.meta.zone_lines(scenario)
@@ -158,10 +153,6 @@ class Transmission(MPlotDataHelper):
                     logger.warning("Column to Aggregate by is missing")
                     continue
 
-<<<<<<< HEAD
-                zone_lines = zone_lines.xs(zone_input)
-                zone_lines=zone_lines['line_name'].unique()
-=======
                 try:
                     zone_lines = zone_lines.xs(zone_input)
                     zone_lines=zone_lines['line_name'].unique()
@@ -169,7 +160,6 @@ class Transmission(MPlotDataHelper):
                     logger.warning('No data to plot for scenario')
                     outputs[zone_input] = MissingZoneData()
                     continue
->>>>>>> origin/ReEDS_formatter
 
                 flow = self["line_Flow"].get(scenario).copy()
                 #Limit to only lines touching to this zone
@@ -230,13 +220,6 @@ class Transmission(MPlotDataHelper):
                     prop_name ='Top 10 Lines'
                 else:
                     prop_name = prop
-<<<<<<< HEAD
-                plt.ylabel(f'Line Utilization: {prop_name}',  color='black', rotation='vertical', labelpad=60)
-                plt.xlabel('Intervals',  color='black', rotation='horizontal', labelpad=20)
-            if mconfig.parser("plot_title_as_region"):
-                plt.title(zone_input)
-            del annual_util, limits
-=======
                 plt.ylabel(f'Line Utilization: {prop_name}', color='black', 
                            rotation='vertical', labelpad=60)
                 plt.xlabel('Intervals',  color='black', 
@@ -247,7 +230,6 @@ class Transmission(MPlotDataHelper):
                 del annual_util, 
             except:
                 continue
->>>>>>> origin/ReEDS_formatter
 
             Data_Out = pd.concat(data_table)
 
@@ -927,28 +909,8 @@ class Transmission(MPlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
 
-        # outputs = {}
-
-        properties = [(True,"line_Import_Limit",self.Scenarios),
-                      (True,"line_Export_Limit",self.Scenarios)]
-        
-        properties_lines = [(True,"line_Flow",self.Scenarios)]
-        
-        # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties_lines,self.Marmot_Solutions_folder)
-        overwrite_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        outputs = {}
             
-            
-<<<<<<< HEAD
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
-        # properties = [(True,"line_Flow",self.Scenarios),
-        #               (True,"line_Import_Limit",self.Scenarios),
-        #               (True,"line_Export_Limit",self.Scenarios)]
-        
-        # # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        # check_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
-=======
         # List of properties needed by the plot, properties are a set of tuples and 
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
@@ -959,7 +921,6 @@ class Transmission(MPlotDataHelper):
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
->>>>>>> origin/ReEDS_formatter
         
         if 1 in check_input_data:
             return MissingInputData()
@@ -974,37 +935,16 @@ class Transmission(MPlotDataHelper):
 
         scenario = self.Scenarios[1] #Select single scenario for purpose of extracting limits.
 
-<<<<<<< HEAD
-        if 1 in overwrite_input_data:
-            import_limits, export_limits = self._overwrite_line_limits_from_minmax_flows(scenario, overwrite_properties=[tup[1] for tup in properties])
-        else:
-            import_limits = self.mplot_data_dict["line_Import_Limit"][scenario].reset_index()
-            export_limits = self.mplot_data_dict["line_Export_Limit"][scenario].reset_index()
-
-        # export_limits = self.mplot_data_dict["line_Export_Limit"].get(scenario).droplevel('timestamp')
-        export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
-        export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
-
-        # import_limits = self.mplot_data_dict["line_Import_Limit"].get(scenario).droplevel('timestamp')
-=======
         export_limits = self["line_Export_Limit"].get(scenario).droplevel('timestamp')
         export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 
         import_limits = self["line_Import_Limit"].get(scenario).droplevel('timestamp')
->>>>>>> origin/ReEDS_formatter
         import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
 
 
-<<<<<<< HEAD
-        flows = self.mplot_data_dict["line_Flow"][scenario]
-        
-        export_limits = export_limits.reset_index().set_index(['line_name'])#.drop_duplicates()
-        import_limits = import_limits.reset_index().set_index(['line_name'])#.drop_duplicates()
-=======
         flows = self["line_Flow"][scenario]
->>>>>>> origin/ReEDS_formatter
 
         # limited_lines = []
         # i = 0
@@ -1439,7 +1379,6 @@ class Transmission(MPlotDataHelper):
         outputs = DataSavedInModule()
         return outputs
 
-<<<<<<< HEAD
     def _grab_zone_net_load(self,zone_input, scenario, interconnect_aggby=False):
 
         fxnaggregator = self.AGG_BY
@@ -1456,14 +1395,14 @@ class Transmission(MPlotDataHelper):
         try:
             Stacked_Gen = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
             if self.shift_leapday == True:
-                Stacked_Gen = mfunc.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
+                Stacked_Gen = self.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
             Stacked_Gen = Stacked_Gen.xs(zone_input,level=fxnaggregator)
         except KeyError:
             self.logger.warning(f'No generation in {zone_input}')
-            out = mfunc.MissingZoneData()
+            out = MissingZoneData()
             return out
 
-        Stacked_Gen = mfunc.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
+        Stacked_Gen = self.df_process_gen_inputs(Stacked_Gen, self.ordered_gen)
 
         curtailment_name = self.gen_names_dict.get('Curtailment','Curtailment')
         #print(self.mplot_data_dict[f"generator_Curtailment"].get(scenario).copy())
@@ -1471,10 +1410,10 @@ class Transmission(MPlotDataHelper):
         if self.mplot_data_dict[f"generator_{curtailment_name}"]:
             Stacked_Curt = self.mplot_data_dict[f"generator_{curtailment_name}"].get(scenario).copy()
             if self.shift_leapday == True:
-                Stacked_Curt = mfunc.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
+                Stacked_Curt = self.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
             if zone_input in Stacked_Curt.index.get_level_values(fxnaggregator).unique():
                 Stacked_Curt = Stacked_Curt.xs(zone_input,level=fxnaggregator)
-                Stacked_Curt = mfunc.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
+                Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt, self.ordered_gen)
                 Stacked_Curt = Stacked_Curt.sum(axis=1)
                 Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                 Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
@@ -1503,7 +1442,7 @@ class Transmission(MPlotDataHelper):
 
         # assert prop in ['Generation','Curtailment','Pump_Load','Load','Unserved_Energy', 'Net_Interchange']
         
-        # return mfunc.UnderDevelopment()
+        # return self.UnderDevelopment()
         #then we can rank-order the hours based on the thing we wish to facet on
         facet=False
         if 'Facet' in figure_name:
@@ -1526,7 +1465,7 @@ class Transmission(MPlotDataHelper):
                           (False,f"{agg}_Net_Interchange",scenario_list)]
 
             # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-            return mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+            return self.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
         outputs = {}
         if facet:
@@ -1535,31 +1474,13 @@ class Transmission(MPlotDataHelper):
             check_input_data = set_dicts([self.Scenarios[0]])
 
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
-=======
-    def extract_tx_cap(self, **_):
-        """Plot under development
-
-        Returns:
-            UnderDevelopment(): Exception class, plot is not functional. 
-        """
-        return UnderDevelopment() #TODO: Needs finishing
-        
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
-        # scenarios must be a list.
-        properties = [(True,"interface_Import_Limit",self.Scenarios),
-                      (True,"interface_Export_Limit",self.Scenarios),
-                      (True,"line_Import_Limit",self.Scenarios),
-                      (True,"line_Export_Limit",self.Scenarios)]
->>>>>>> origin/ReEDS_formatter
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
-<<<<<<< HEAD
-            return mfunc.MissingInputData()
+            return self.MissingInputData()
 
         # here we get the hour and season groups?
         categorize_hours = True
@@ -1579,11 +1500,11 @@ class Transmission(MPlotDataHelper):
         #     try:
         #         all_gen = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
         #         if self.shift_leapday == True:
-        #             all_gen = mfunc.shift_leapday(all_gen,self.Marmot_Solutions_folder)
+        #             all_gen = self.shift_leapday(all_gen,self.Marmot_Solutions_folder)
         #         # Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
         #     except KeyError:
         #         self.logger.warning(f'No generation... probably some problem')
-        #         out = mfunc.MissingZoneData()
+        #         out = MissingZoneData()
         #         return out
         #     for z in all_gen.index.get_level_values(self.AGG_BY).unique():
         #         print(z)
@@ -1600,49 +1521,6 @@ class Transmission(MPlotDataHelper):
                     use_net_load=True
                 elif prop[n] == "all" or prop[n]=='All':
                     interconnect_net_load=True
-=======
-            return MissingInputData()
-        
-        for scenario in self.Scenarios:
-            logger.info(scenario)
-            for zone_input in self.Zones:
-
-                #Lines
-                # lines = self.meta.region_interregionallines(scenario)
-                # if scenario == 'ADS':
-                #     zone_input = zone_input.split('_WI')[0]
-                #     lines = self.meta_ADS.region_interregionallines()
-
-                # lines = lines[lines['region'] == zone_input]
-                # import_lim = self["line_Import_Limit"][scenario].reset_index()
-                # export_lim = self["line_Export_Limit"][scenario].reset_index()
-                # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
-                # lines = lines[['line_name',0]]
-                # lines.columns = ['line_name','import_limit']
-                # lines = lines.merge(export_lim, how = 'inner',on = 'line_name')
-                # lines = lines[['line_name','import_limit',0]]
-                # lines.columns = ['line_name','import_limit','export_limit']
-
-                # fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interregional_Line_Limits_' + scenario + '.csv')
-                # lines.to_csv(fn)
-
-                # lines = self.meta.region_intraregionallines(scenario)
-                # if scenario == 'ADS':
-                #     lines = self.meta_ADS.region_intraregionallines()
-
-                # lines = lines[lines['region'] == zone_input]
-                # import_lim = self["line_Import_Limit"][scenario].reset_index()
-                # export_lim = self["line_Export_Limit"][scenario].reset_index()
-                # lines = lines.merge(import_lim,how = 'inner',on = 'line_name')
-                # lines = lines[['line_name',0]]
-                # lines.columns = ['line_name','import_limit']
-                # lines = lines.merge(export_lim, how = 'inner',on = 'line_name')
-                # lines = lines[['line_name','import_limit',0]]
-                # lines.columns = ['line_name','import_limit','export_limit']
-
-                # fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','Individual_Intraregional_Line_Limits_' + scenario + '.csv')
-                # lines.to_csv(fn)
->>>>>>> origin/ReEDS_formatter
 
 
         #here we can grab interchange
@@ -1654,17 +1532,16 @@ class Transmission(MPlotDataHelper):
                 if use_net_load:
                     net_load,label_addenda = self._grab_zone_net_load(zone_input,scenario,interconnect_aggby=interconnect_net_load)
 
-<<<<<<< HEAD
                 rr_int = self.mplot_data_dict[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
                 if self.shift_leapday == True:
-                    rr_int = mfunc.shift_leapday(rr_int,self.Marmot_Solutions_folder)
+                    rr_int = self.shift_leapday(rr_int,self.Marmot_Solutions_folder)
                 #may need to check agg here if not zone or region
 
                 if self.AGG_BY != 'region' and self.AGG_BY != 'zone':
                     agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
                     # Checks if keys all aggregate to a single value, this plot requires multiple values to work 
                     if len(set(agg_region_mapping.values())) == 1:
-                        return mfunc.UnsupportedAggregation()
+                        return self.UnsupportedAggregation()
                     rr_int = rr_int.reset_index()
                     rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)
@@ -1709,7 +1586,7 @@ class Transmission(MPlotDataHelper):
                 else:
                     Load = self.mplot_data_dict[lookup_label].get(scenario).copy()
                 if self.shift_leapday == True:
-                    Load = mfunc.shift_leapday(Load,self.Marmot_Solutions_folder)
+                    Load = self.shift_leapday(Load,self.Marmot_Solutions_folder)
                 
                 if prop[0]=="Net_Interchange": #want a second prop to tell what to replace?
                     Load = Load.xs("PJM-W",level=self.AGG_BY)
@@ -1718,20 +1595,6 @@ class Transmission(MPlotDataHelper):
                 else:
                     Load = Load.xs(zone_input,level=self.AGG_BY)
                 Load = Load.groupby(["timestamp"]).sum()
-=======
-                int_import_lim = self["interface_Import_Limit"][scenario].reset_index()
-                int_export_lim = self["interface_Export_Limit"][scenario].reset_index()
-                if scenario == 'NARIS':
-                    last_timestamp = int_import_lim['timestamp'].unique()[-1] #Last because ADS uses the last timestamp.
-                    int_import_lim = int_import_lim[int_import_lim['timestamp'] == last_timestamp]
-                    int_export_lim = int_export_lim[int_export_lim['timestamp'] == last_timestamp]
-                    lines2ints = self.meta_ADS.interface_lines()
-                else:
-                    lines2ints = self.meta.interface_lines(scenario)
-
-                fn = self.figure_folder.joinpath(self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')
-                lines2ints.to_csv(fn)
->>>>>>> origin/ReEDS_formatter
 
                 #do a comparison that could allow switching to net load?
                 # print('my comparison!!!')
@@ -1765,18 +1628,18 @@ class Transmission(MPlotDataHelper):
 
             zone_interchange_timeseries = pd.concat(data_table_chunks, copy=False, axis=0)
             #create and bank unit conversions
-            line_unitconversion = mfunc.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,:-1].abs().values.max())
+            line_unitconversion = self.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,:-1].abs().values.max())
             zone_interchange_timeseries.iloc[:,:-1] = zone_interchange_timeseries.iloc[:,:-1] / line_unitconversion['divisor']
             # zone_interchange_avgs = pd.concat(data_avgs, copy=False, axis=0)
-            attr_unitconversion = mfunc.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,-1].abs().values.max())
+            attr_unitconversion = self.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,-1].abs().values.max())
             zone_interchange_timeseries.iloc[:,-1] = zone_interchange_timeseries.iloc[:,-1] / attr_unitconversion['divisor']
 
             #Make a facet plot, one panel for each child zone.
             plot_number = len(zone_interchange_timeseries.columns)-1
-            xdimension, ydimension =  mfunc.set_x_y_dimension(plot_number)
+            xdimension, ydimension =  self.set_x_y_dimension(plot_number)
             grid_size = xdimension*ydimension
             excess_axs = grid_size - plot_number
-            fig3, axs = mfunc.setup_plot(xdimension,ydimension,sharey=False)
+            fig3, axs = self.setup_plot(xdimension,ydimension,sharey=False)
             plt.subplots_adjust(wspace=0.6, hspace=0.7)
 
             #then have a flag for whether you want to use them to set color of scatter
@@ -1826,7 +1689,7 @@ class Transmission(MPlotDataHelper):
             # then iterate across the child zones, plotting relevant info
             # for n,column in enumerate(zone_interchange_timeseries.columns[:-1]):
                          
-            #     mfunc.create_line_plot(axs,zone_interchange_timeseries.reset_index(),column,label=column,n=n)
+            #     self.create_line_plot(axs,zone_interchange_timeseries.reset_index(),column,label=column,n=n)
                 
             #     ax2 = axs[n].twinx()
             #     ax2.plot(zone_interchange_timeseries.reset_index()['sort_attribute'], color='red', label='sort_attribute')
@@ -1863,12 +1726,12 @@ class Transmission(MPlotDataHelper):
             #clean empty and resize
             #Remove extra axes
             if excess_axs != 0:
-                mfunc.remove_excess_axs(axs, excess_axs, grid_size)
+                self.remove_excess_axs(axs, excess_axs, grid_size)
             
             outputs[zone_input] = {'fig': fig3, 'data_table': zone_interchange_timeseries}
         
         return outputs
-        # return mfunc.UnderDevelopment()
+        # return self.UnderDevelopment()
 
     def _overwrite_line_limits_from_minmax_flows(self, scenario, overwrite_properties=['line_Import_Limit','line_Export_Limit']):
         """
@@ -1913,7 +1776,7 @@ class Transmission(MPlotDataHelper):
                         unique_label_limit=15):
         
 
-        # return mfunc.UnderDevelopment() #TODO: Needs finishing
+        # return self.UnderDevelopment() #TODO: Needs finishing
         outputs = {}
 
         properties = [(True,"line_Import_Limit",self.Scenarios),
@@ -1922,11 +1785,11 @@ class Transmission(MPlotDataHelper):
         properties_lines = [(True,"line_Flow",self.Scenarios)]
         
         # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
-        check_input_data = mfunc.get_data(self.mplot_data_dict, properties_lines,self.Marmot_Solutions_folder)
-        overwrite_input_data = mfunc.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
+        check_input_data = self.get_data(self.mplot_data_dict, properties_lines,self.Marmot_Solutions_folder)
+        overwrite_input_data = self.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
 
         if 1 in check_input_data:
-            return mfunc.MissingInputData()
+            return self.MissingInputData()
 
         for scenario in self.Scenarios:
             # self.logger.info(scenario)
@@ -1942,7 +1805,7 @@ class Transmission(MPlotDataHelper):
             ydimension = mconfig.parser("figure_size","ydimension")
 
             #convert values to appropriate units?
-            unitconversion = mfunc.capacity_energy_unitconversion(max(grouped_import_lims[0].values.max(),grouped_export_lims[0].values.max()))
+            unitconversion = self.capacity_energy_unitconversion(max(grouped_import_lims[0].values.max(),grouped_export_lims[0].values.max()))
 
             for zone_input in self.Zones:
                 self.logger.info(f"Zone = {zone_input}")
@@ -2183,29 +2046,6 @@ class Transmission(MPlotDataHelper):
                     single_parent = single_parent / unitconversion['divisor']
 
                     for column in single_parent.columns:
-<<<<<<< HEAD
-                        # if duration curve, then for each resulting column, order greatest to least and re-index by rank
-                        if duration_curve:
-                            net_export_duration_curve = mfunc.sort_duration(single_parent,column)
-                            mfunc.create_line_plot(axs,net_export_duration_curve,column,label=column,n=n)
-                            axs[n].set_title(parent+" duration curves")
-                            axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                            axs[n].margins(x=0.01)
-                            axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
-                            axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
-                            # ax.set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
-                            # ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                            # ax.margins(x=0.01)
-                            # ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
-                        else:
-                            mfunc.create_line_plot(axs,single_parent,column,label=column,n=n)
-                            axs[n].set_title(parent)
-                            axs[n].yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                            axs[n].margins(x=0.01)
-                            mfunc.set_plot_timeseries_format(axs,n)
-                            axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
-                            axs[n].legend(loc='lower left',bbox_to_anchor=(1,0),facecolor='inherit', frameon=True)
-=======
 
                         mplt.lineplot(single_parent, column, label=column, sub_pos=n)
                         axs[n].set_title(parent)
@@ -2213,7 +2053,6 @@ class Transmission(MPlotDataHelper):
                         mplt.set_subplot_timeseries_format(sub_pos=n)
                         axs[n].hlines(y = 0, xmin = axs[n].get_xlim()[0], xmax = axs[n].get_xlim()[1], linestyle = ':') #Add horizontal line at 0.
                         axs[n].legend(loc='lower left',bbox_to_anchor=(1,0))
->>>>>>> origin/ReEDS_formatter
 
                     n+=1
                 # Create data table for each scenario
@@ -2223,20 +2062,6 @@ class Transmission(MPlotDataHelper):
                 data_table_chunks.append(data_table)
 
             # if plotting all scenarios add facet labels
-<<<<<<< HEAD
-            mfunc.add_facet_labels(fig3, self.xlabels, self.ylabels)
-
-            #Remove extra axes
-            if excess_axs != 0:
-                mfunc.remove_excess_axs(axs, excess_axs, grid_size)
-
-            fig3.add_subplot(111, frameon=False)
-            plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
-            if duration_curve:
-                plt.xlabel(f"Tmp Rank",  color='black', rotation='horizontal',labelpad = 30)
-            else:
-                plt.xlabel(f"Date {(timezone)}",  color='black', rotation='horizontal',labelpad = 30)
-=======
             if plot_scenario == True:
                 mplt.add_facet_labels(xlabels=self.xlabels,
                                       ylabels = self.ylabels)
@@ -2244,7 +2069,6 @@ class Transmission(MPlotDataHelper):
             #Remove extra axes
             mplt.remove_excess_axs(excess_axs, grid_size)
             plt.xlabel(timezone,  color='black', rotation='horizontal',labelpad = 30)
->>>>>>> origin/ReEDS_formatter
             plt.ylabel(f"Net Interchange ({unitconversion['units']})",  color='black', rotation='vertical', labelpad = 40)
 
             # If plotting all regions save output and return none plot_main
@@ -2539,15 +2363,7 @@ class Transmission(MPlotDataHelper):
         if 1 in check_input_data:
             return MissingInputData()
 
-<<<<<<< HEAD
-        duration_curve = False
-        if 'duration_curve' in figure_name:
-            duration_curve=True
-
-        outputs = {}
-=======
         outputs : dict = {}
->>>>>>> origin/ReEDS_formatter
         for zone_input in self.Zones:
             logger.info(f"{self.AGG_BY} = {zone_input}")
 
@@ -2592,25 +2408,6 @@ class Transmission(MPlotDataHelper):
                 continue
 
             for column in net_export_all_scenarios:
-<<<<<<< HEAD
-
-                if duration_curve:
-                    net_export_duration_curve = mfunc.sort_duration(net_export_all_scenarios,column)
-                    mfunc.create_line_plot(axs,net_export_duration_curve,column,color_dict)
-                    ax.set_xlabel(f'Tmp rank',  color='black', rotation='horizontal')
-                    ax.set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
-                    ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                    ax.margins(x=0.01)
-                    ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
-                else:
-                    mfunc.create_line_plot(axs,net_export_all_scenarios,column,color_dict)
-                    ax.set_xlabel(f'Date ({timezone})',  color='black', rotation='horizontal')
-                    ax.set_ylabel(f'Net exports ({unitconversion["units"]})',  color='black', rotation='vertical')
-                    ax.yaxis.set_major_formatter(mpl.ticker.FuncFormatter(lambda x, p: format(x, f',.{self.y_axes_decimalpt}f')))
-                    ax.margins(x=0.01)
-                    ax.hlines(y = 0, xmin = ax.get_xlim()[0], xmax = ax.get_xlim()[1], linestyle = ':')
-                    mfunc.set_plot_timeseries_format(axs)
-=======
                 mplt.lineplot(net_export_all_scenarios,column,color_dict, label=column)
                 ax.set_ylabel(f'Net exports ({unitconversion["units"]})', color='black', 
                               rotation='vertical')
@@ -2619,7 +2416,6 @@ class Transmission(MPlotDataHelper):
                 ax.hlines(y=0, xmin=ax.get_xlim()[0], xmax=ax.get_xlim()[1], 
                           linestyle=':')
                 mplt.set_subplot_timeseries_format()
->>>>>>> origin/ReEDS_formatter
 
             mplt.add_legend(reverse_legend=True)
             if plot_data_settings["plot_title_as_region"]:
