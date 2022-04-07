@@ -29,6 +29,7 @@ dependencies:
   - yaml=0.2.5
   - blosc=1.21.0
   - Cython=0.29.2
+  - snappy=1.1.8
   - pip:
     - path-py==12.0.1
     - pyyaml
