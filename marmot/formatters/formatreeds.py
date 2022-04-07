@@ -86,11 +86,11 @@ class ProcessReEDS(Process):
         Args:
             input_folder (Path): Folder containing csv files.
             output_file_path (Path): Path to formatted h5 output file.
+            process_subset_years (list, optional): If provided only process
+                years specified. Defaults to None.
             Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
-            process_subset_years (list, optional): If provided only process
-                years specified. Defaults to None.
             **kwargs
                 These parameters will be passed to the Process 
                 class.

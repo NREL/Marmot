@@ -84,10 +84,10 @@ class ProcessPLEXOS(Process):
         Args:
             input_folder (Path): Folder containing h5plexos h5 files.
             output_file_path (Path): Path to formatted h5 output file.
-            Region_Mapping (pd.DataFrame): DataFrame to map custom
+            plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
+            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
-            plexos_block (str, optional): PLEXOS results type. Defaults to 'ST'.
             **kwargs
                 These parameters will be passed to the Process 
                 class.

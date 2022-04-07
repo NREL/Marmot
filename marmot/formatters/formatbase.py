@@ -110,7 +110,11 @@ class Process:
 
     @property
     def get_input_files(self) -> list:
-        """Gets a list of input files within the scenario folders"""
+        """Gets a list of input files within the scenario folders
+
+        Returns:
+            list: list of input filenames to process
+        """
         if self._get_input_files == None:
             files = []
             for names in self.input_folder.iterdir():
@@ -139,7 +143,7 @@ class Process:
         Args:
             files_list (list): list of string files or filenames
         """
-        pass
+        raise NotImplementedError("No default implementation of this functionality")
 
     def get_processed_data(
         self, prop_class: str, property: str, timescale: str, model_filename: str
@@ -155,7 +159,7 @@ class Process:
         Returns:
             pd.DataFrame: pd.DataFrame
         """
-        pass
+        raise NotImplementedError("No default implementation of this functionality")
 
     def report_prop_error(self, property: str, prop_class: str) -> pd.DataFrame:
         """Outputs a warning message when the get_processed_data method
