@@ -6,7 +6,6 @@ This code creates transmission line and interface plots.
 @author: Daniel Levie, Marty Schwarz
 """
 
-import os
 import logging
 import pandas as pd
 import numpy as np
@@ -15,46 +14,43 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 import matplotlib.dates as mdates
 
-import marmot.config.mconfig as mconfig
+import marmot.utils.mconfig as mconfig
+from marmot.metamanagers.read_metadata import MetaData
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
+logger = logging.getLogger('plotter.'+__name__)
+plot_data_settings = mconfig.parser("plot_data")
+shift_leapday : bool = mconfig.parser("shift_leapday")
 
-class MPlot(PlotDataHelper):
-    """transmission MPlot class.
+class Transmission(MPlotDataHelper):
+    """System transmission plots.
 
-    All the plotting modules use this same class name.
-    This class contains plotting methods that are grouped based on the
-    current module name.
-    
     The transmission.py module contains methods that are
     related to the transmission network. 
     
-    MPlot inherits from the PlotDataHelper class to assist in creating figures.
+    Transmission inherits from the MPlotDataHelper class to assist 
+    in creating figures.
     """
 
-    def __init__(self, argument_dict: dict):
+    def __init__(self, *args, **kwargs):
         """
         Args:
-            argument_dict (dict): Dictionary containing all
-                arguments passed from MarmotPlot.
+            *args
+                Minimum required parameters passed to the MPlotDataHelper 
+                class.
+            **kwargs
+                These parameters will be passed to the MPlotDataHelper 
+                class.
         """
-        # iterate over items in argument_dict and set as properties of class
-        # see key_list in Marmot_plot_main for list of properties
-        for prop in argument_dict:
-            self.__setattr__(prop, argument_dict[prop])
-        
         # Instantiation of MPlotHelperFunctions
-        super().__init__(self.Marmot_Solutions_folder, self.AGG_BY, self.ordered_gen, 
-                    self.PLEXOS_color_dict, self.Scenarios, self.ylabels, 
-                    self.xlabels, self.gen_names_dict, self.TECH_SUBSET, 
-                    Region_Mapping=self.Region_Mapping) 
-
-        self.logger = logging.getLogger('marmot_plot.'+__name__)
-        self.font_defaults = mconfig.parser("font_settings")
+        super().__init__(*args, **kwargs)
         
+        self.font_defaults = mconfig.parser("font_settings")
+        self.meta = MetaData(self.processed_hdf5_folder, 
+                            Region_Mapping=self.Region_Mapping)
 
     def line_util(self, **kwargs):
         """Creates a timeseries line plot of transmission lineflow utilization for each region.
@@ -109,14 +105,15 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        outputs = {}
+        outputs : dict = {}
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -133,7 +130,7 @@ class MPlot(PlotDataHelper):
         excess_axs = grid_size - plot_number
 
         for zone_input in self.Zones:
-            self.logger.info(f"For all lines touching Zone = {zone_input}")
+            logger.info(f"For all lines touching Zone = {zone_input}")
 
             mplt = PlotLibrary(nrows, ncols, sharey=True, 
                                 squeeze=False, ravel_axs=True)
@@ -143,7 +140,7 @@ class MPlot(PlotDataHelper):
             data_table=[]
 
             for n, scenario in enumerate(self.Scenarios):
-                self.logger.info(f"Scenario = {str(scenario)}")
+                logger.info(f"Scenario = {str(scenario)}")
                 # gets correct metadata based on area aggregation
                 if self.AGG_BY=='zone':
                     zone_lines = self.meta.zone_lines(scenario)
@@ -152,14 +149,14 @@ class MPlot(PlotDataHelper):
                 try:
                     zone_lines = zone_lines.set_index([self.AGG_BY])
                 except:
-                    self.logger.warning("Column to Aggregate by is missing")
+                    logger.warning("Column to Aggregate by is missing")
                     continue
 
                 try:
                     zone_lines = zone_lines.xs(zone_input)
                     zone_lines=zone_lines['line_name'].unique()
                 except KeyError:
-                    self.logger.warning('No data to plot for scenario')
+                    logger.warning('No data to plot for scenario')
                     outputs[zone_input] = MissingZoneData()
                     continue
 
@@ -167,7 +164,7 @@ class MPlot(PlotDataHelper):
                 #Limit to only lines touching to this zone
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] 
 
-                if self.shift_leapday == True:
+                if shift_leapday:
                     flow = self.adjust_for_leapday(flow)
                 limits = self["line_Import_Limit"].get(scenario).copy()
                 limits = limits.droplevel('timestamp').drop_duplicates()
@@ -176,7 +173,7 @@ class MPlot(PlotDataHelper):
 
                 # This checks for a nan in string. If no scenario selected, do nothing.
                 if pd.notna(prop):
-                    self.logger.info(f"Line category = {str(prop)}")
+                    logger.info(f"Line category = {str(prop)}")
                     line_relations = self.meta.lines(scenario).rename(columns={"name":"line_name"}).set_index(["line_name"])
                     flow=pd.merge(flow,line_relations, left_index=True, 
                                   right_index=True)
@@ -226,7 +223,7 @@ class MPlot(PlotDataHelper):
                            rotation='vertical', labelpad=60)
                 plt.xlabel('Intervals',  color='black', 
                            rotation='horizontal', labelpad=20)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             try:
                 del annual_util, 
@@ -268,13 +265,14 @@ class MPlot(PlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios),
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -283,14 +281,14 @@ class MPlot(PlotDataHelper):
 
         scenario = self.Scenarios[0]
 
-        outputs = {}
+        outputs : dict = {}
 
         if pd.notna(start_date_range):
-            self.logger.info(f"Plotting specific date range: \
+            logger.info(f"Plotting specific date range: \
                 {str(start_date_range)} to {str(end_date_range)}")
 
         for zone_input in self.Zones:
-            self.logger.info(f"For all interfaces touching Zone = {zone_input}")
+            logger.info(f"For all interfaces touching Zone = {zone_input}")
 
             Data_Table_Out = pd.DataFrame()
 
@@ -302,7 +300,7 @@ class MPlot(PlotDataHelper):
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
-                self.logger.info("Column to Aggregate by is missing")
+                logger.info("Column to Aggregate by is missing")
                 continue
 
             zone_lines = zone_lines.xs(zone_input)
@@ -342,12 +340,12 @@ class MPlot(PlotDataHelper):
 
             if pd.notna(prop):
                 interf_list = prop.split(',')
-                self.logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
-                self.logger.info(interf_list)
+                logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
+                logger.info(interf_list)
             else:
                 interf_list = reported_ints.copy()
 
-            self.logger.info('Plotting full time series results.')
+            logger.info('Plotting full time series results.')
             xdim,ydim = self.set_x_y_dimension(len(interf_list))
             
             mplt = PlotLibrary(ydim, xdim, squeeze=False,
@@ -388,7 +386,7 @@ class MPlot(PlotDataHelper):
                         single_int = single_int.reset_index().set_index('timestamp')
                         limits = limits.reset_index().set_index('timestamp')
 
-                        if self.shift_leapday == True:
+                        if shift_leapday:
                             single_int = self.adjust_for_leapday(single_int)
                         if pd.notna(start_date_range):
                             single_int = single_int[start_date_range : end_date_range]
@@ -423,7 +421,7 @@ class MPlot(PlotDataHelper):
                     chunks.append(Data_out_line)
 
                 else:
-                    self.logger.warning(f"{interf} not found in results. Have you tagged "
+                    logger.warning(f"{interf} not found in results. Have you tagged "
                                         "it with the 'Must Report' property in PLEXOS?")
                     excess_axs += 1
                     missing_ints += 1
@@ -452,10 +450,10 @@ class MPlot(PlotDataHelper):
             if duration_curve:
                 plt.xlabel('Sorted hour of the year', color='black', labelpad=30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
-            #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
+            #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs 
 
     def int_flow_ind_seasonal(self, figure_name: str = None, prop: str = None, 
@@ -482,13 +480,14 @@ class MPlot(PlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios),
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -497,9 +496,9 @@ class MPlot(PlotDataHelper):
 
         scenario = self.Scenarios[0]
 
-        outputs = {}
+        outputs : dict = {}
         for zone_input in self.Zones:
-            self.logger.info("For all interfaces touching Zone = "+zone_input)
+            logger.info("For all interfaces touching Zone = "+zone_input)
 
             Data_Table_Out = pd.DataFrame()
 
@@ -511,7 +510,7 @@ class MPlot(PlotDataHelper):
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
-                self.logger.info("Column to Aggregate by is missing")
+                logger.info("Column to Aggregate by is missing")
                 continue
 
             zone_lines = zone_lines.xs(zone_input)
@@ -551,12 +550,12 @@ class MPlot(PlotDataHelper):
 
             if prop != '':
                 interf_list = prop.split(',')
-                self.logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
-                self.logger.info(interf_list)
+                logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
+                logger.info(interf_list)
             else:
                 interf_list = reported_ints.copy()
 
-            self.logger.info('Carving out season from ' + start_date_range + ' to ' + end_date_range)
+            logger.info('Carving out season from ' + start_date_range + ' to ' + end_date_range)
 
             #Remove missing interfaces from the list.
             for interf in interf_list:
@@ -564,7 +563,7 @@ class MPlot(PlotDataHelper):
                 if interf[0] == ' ':
                     interf = interf[1:]
                 if interf not in reported_ints:
-                    self.logger.warning(interf + ' not found in results.')
+                    logger.warning(interf + ' not found in results.')
                     interf_list.remove(interf)
             if not interf_list:
                 outputs = MissingInputData()
@@ -607,7 +606,7 @@ class MPlot(PlotDataHelper):
                     single_int = flow.xs(interf,level = 'interface_name') / 1000
                     single_int.index = single_int.index.droplevel('interface_category')
                     single_int.columns = [interf]
-                    if self.shift_leapday == True:
+                    if shift_leapday:
                         single_int = self.adjust_for_leapday(single_int)
                     summer = single_int[start_date_range:end_date_range]
                     winter = single_int.drop(summer.index)
@@ -669,10 +668,10 @@ class MPlot(PlotDataHelper):
             fig.text(0.15,0.98,'Summer (' + start_date_range + ' to ' + end_date_range + ')',fontsize = 16)
             fig.text(0.58,0.98,'Winter',fontsize = 16)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
-            #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
+            #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
 
         return outputs
 
@@ -710,14 +709,14 @@ class MPlot(PlotDataHelper):
 
         scenario = self.Scenarios[0]
 
-        outputs = {}
+        outputs : dict = {}
         
         if not pd.isnull(self.start_date):
-            self.logger.info("Plotting specific date range: \
+            logger.info("Plotting specific date range: \
             {} to {}".format(str(self.start_date),str(self.end_date)))
         
         for zone_input in self.Zones:
-            self.logger.info("For all interfaces touching Zone = "+zone_input)
+            logger.info("For all interfaces touching Zone = "+zone_input)
 
             Data_Table_Out = pd.DataFrame()
 
@@ -729,7 +728,7 @@ class MPlot(PlotDataHelper):
             try:
                 zone_lines = zone_lines.set_index([self.AGG_BY])
             except:
-                self.logger.info("Column to Aggregate by is missing")
+                logger.info("Column to Aggregate by is missing")
                 continue
 
             zone_lines = zone_lines.xs(zone_input)
@@ -769,12 +768,12 @@ class MPlot(PlotDataHelper):
 
             if self.prop != '':
                 interf_list = self.prop.split(',')
-                self.logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
-                self.logger.info(interf_list) 
+                logger.info('Plotting only interfaces specified in Marmot_plot_select.csv')
+                logger.info(interf_list) 
             else:
                 interf_list = reported_ints.copy()
                 
-            self.logger.info('Plotting full time series results.')
+            logger.info('Plotting full time series results.')
             xdim,ydim = self.set_x_y_dimension(len(interf_list))
 
             mplt = PlotLibrary(nrows, ncols,
@@ -814,7 +813,7 @@ class MPlot(PlotDataHelper):
                         single_int.index = single_int.index.droplevel('interface_category')
                         single_int.columns = [interf]
 
-                        if self.shift_leapday == True:
+                        if shift_leapday:
                             single_int = self.adjust_for_leapday(single_int)
 
                         single_int = single_int.reset_index().set_index('timestamp')
@@ -848,7 +847,7 @@ class MPlot(PlotDataHelper):
                     chunks.append(Data_out_line)
 
                 else:
-                    self.logger.warning(interf + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
+                    logger.warning(interf + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
                     excess_axs += 1
                     missing_ints += 1
                     continue
@@ -879,10 +878,10 @@ class MPlot(PlotDataHelper):
             if duration_curve:
                 plt.xlabel('Sorted hour of the year', color = 'black', labelpad = 30)
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
-            #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
+            #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs
 
 
@@ -909,13 +908,14 @@ class MPlot(PlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -927,8 +927,8 @@ class MPlot(PlotDataHelper):
         if select_lines == None:
             return InputSheetError()
 
-        self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
-        self.logger.info(select_lines)
+        logger.info('Plotting only lines specified in Marmot_plot_select.csv')
+        logger.info(select_lines)
 
         scenario = self.Scenarios[1] #Select single scenario for purpose of extracting limits.
 
@@ -1002,7 +1002,7 @@ class MPlot(PlotDataHelper):
                     single_line = single_line.droplevel('units')
                     single_line.columns = [line]
 
-                    if self.shift_leapday == True:
+                    if shift_leapday:
                         single_line = self.adjust_for_leapday(single_line)
 
                     single_line_out = single_line.copy()
@@ -1034,7 +1034,7 @@ class MPlot(PlotDataHelper):
                 Data_out_line = pd.concat(chunks_line,axis = 0)
                 chunks.append(Data_out_line)
             else:
-                self.logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
+                logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
                 excess_axs += 1
                 missing_lines += 1
                 continue
@@ -1062,9 +1062,9 @@ class MPlot(PlotDataHelper):
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
-       # Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + 'limits.csv'))
+        fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
+       # Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + 'limits.csv'))
 
         outputs = DataSavedInModule()
         return outputs
@@ -1092,11 +1092,12 @@ class MPlot(PlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1110,8 +1111,8 @@ class MPlot(PlotDataHelper):
             outputs = InputSheetError()
             return outputs
 
-        self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
-        self.logger.info(select_lines) 
+        logger.info('Plotting only lines specified in Marmot_plot_select.csv')
+        logger.info(select_lines) 
         flow_diff = self["line_Flow"].get(self.Scenario_Diff[1]) - self["line_Flow"].get(self.Scenario_Diff[0])
 
         xdim,ydim = self.set_x_y_dimension(len(select_lines))
@@ -1137,7 +1138,7 @@ class MPlot(PlotDataHelper):
 
                 single_line = flow_diff.xs(line,level = 'line_name')
                 single_line.columns = [line]
-                if self.shift_leapday == True:
+                if shift_leapday:
                     single_line = self.adjust_for_leapday(single_line)
 
                 single_line_out = single_line.copy()
@@ -1149,7 +1150,7 @@ class MPlot(PlotDataHelper):
 
 
             else:
-                self.logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
+                logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
                 excess_axs += 1
                 missing_lines += 1
                 continue
@@ -1173,8 +1174,8 @@ class MPlot(PlotDataHelper):
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
+        fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
 
         outputs = DataSavedInModule()
         return outputs
@@ -1206,7 +1207,7 @@ class MPlot(PlotDataHelper):
         #TODO: Use auto unit converter in method
 
         if pd.isna(start_date_range):
-            self.logger.warning('You are attempting to plot a time series facetted by two seasons,\n\
+            logger.warning('You are attempting to plot a time series facetted by two seasons,\n\
             but you are missing a value in the "Start Date" column of "Marmot_plot_select.csv" \
             Please enter dates in "Start Date" and "End Date". These will define the bounds of \
             one of your two seasons. The other season will be comprised of the rest of the year.')
@@ -1216,13 +1217,14 @@ class MPlot(PlotDataHelper):
         if 'duration_curve' in figure_name:
             duration_curve = True
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1235,8 +1237,8 @@ class MPlot(PlotDataHelper):
             return InputSheetError()
 
 
-        self.logger.info('Plotting only lines specified in Marmot_plot_select.csv')
-        self.logger.info(select_lines)
+        logger.info('Plotting only lines specified in Marmot_plot_select.csv')
+        logger.info(select_lines)
 
         scenario = self.Scenarios[0]
 
@@ -1253,7 +1255,7 @@ class MPlot(PlotDataHelper):
         ti = self["line_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
         reported_lines = self["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
 
-        self.logger.info('Carving out season from ' + start_date_range + ' to ' + end_date_range)
+        logger.info('Carving out season from ' + start_date_range + ' to ' + end_date_range)
 
         #Remove missing interfaces from the list.
         for line in select_lines:
@@ -1261,7 +1263,7 @@ class MPlot(PlotDataHelper):
             if line[0] == ' ':
                 line = line[1:]
             if line not in reported_lines:
-                self.logger.warning(line + ' not found in results.')
+                logger.warning(line + ' not found in results.')
                 select_lines.remove(line)
         if not select_lines:
             outputs = MissingInputData()
@@ -1304,7 +1306,7 @@ class MPlot(PlotDataHelper):
                 single_line = single_line.droplevel('units')
                 single_line_out = single_line.copy()
                 single_line.columns = [line]
-                if self.shift_leapday == True:
+                if shift_leapday:
                     single_line = self.adjust_for_leapday(single_line)
 
                 #Split into seasons.
@@ -1362,9 +1364,9 @@ class MPlot(PlotDataHelper):
         fn_suffix = '_duration_curve' if duration_curve else ''
 
 
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
-        #Limits_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, 'Figures_Output',self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
+        fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
+        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
+        #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
         outputs = DataSavedInModule()
         return outputs
 
@@ -1376,14 +1378,15 @@ class MPlot(PlotDataHelper):
         """
         return UnderDevelopment() #TODO: Needs finishing
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios),
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1391,7 +1394,7 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
         
         for scenario in self.Scenarios:
-            self.logger.info(scenario)
+            logger.info(scenario)
             for zone_input in self.Zones:
 
                 #Lines
@@ -1444,7 +1447,7 @@ class MPlot(PlotDataHelper):
                 else:
                     lines2ints = self.meta.interface_lines(scenario)
 
-                fn = os.path.join(self.Marmot_Solutions_folder, 'NARIS', 'Figures_Output',self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')
+                fn = self.figure_folder.joinpath(self.AGG_BY + '_transmission','test_meta_' + scenario + '.csv')
                 lines2ints.to_csv(fn)
 
 
@@ -1493,18 +1496,19 @@ class MPlot(PlotDataHelper):
         Returns:
             [type]: [description]
         """
-        outputs = {}
+        outputs : dict = {}
         
         if self.AGG_BY == 'zone':
             agg = 'zone'
         else:
             agg = 'region'
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",scenario_type)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1512,7 +1516,7 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         for zone_input in self.Zones:
-            self.logger.info(f"Zone = {zone_input}")
+            logger.info(f"Zone = {zone_input}")
 
             ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=scenario_type)
 
@@ -1526,7 +1530,7 @@ class MPlot(PlotDataHelper):
             for scenario in scenario_type:
 
                 rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
-                if self.shift_leapday == True:
+                if shift_leapday:
                     rr_int = self.adjust_for_leapday(rr_int)
 
                 # For plot_main handeling - need to find better solution
@@ -1618,9 +1622,9 @@ class MPlot(PlotDataHelper):
             if plot_scenario == False:
                 # Location to save to
                 Data_Table_Out = rr_int_agg
-                save_figures = os.path.join(self.figure_folder, self.AGG_BY + '_transmission')
-                fig.savefig(os.path.join(save_figures, "Region_Region_Interchange_{}.svg".format(self.Scenarios[0])), dpi=600, bbox_inches='tight')
-                Data_Table_Out.to_csv(os.path.join(save_figures, "Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
+                save_figures = self.figure_folder.joinpath(self.AGG_BY + '_transmission')
+                fig.savefig(save_figures.joinpath("Region_Region_Interchange_{}.svg".format(self.Scenarios[0])), dpi=600, bbox_inches='tight')
+                Data_Table_Out.to_csv(save_figures.joinpath("Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
                 outputs = DataSavedInModule()
                 return outputs
 
@@ -1639,18 +1643,19 @@ class MPlot(PlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception.
         """
-        outputs = {}
+        outputs : dict = {}
         
         if self.AGG_BY == 'zone':
             agg = 'zone'
         else:
             agg = 'region'
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1670,7 +1675,7 @@ class MPlot(PlotDataHelper):
         n=0
         for scenario in self.Scenarios:
             rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
-            if self.shift_leapday == True:
+            if shift_leapday:
                 rr_int = self.adjust_for_leapday(rr_int)
 
             if self.AGG_BY != 'region' and self.AGG_BY != 'zone':
@@ -1705,7 +1710,7 @@ class MPlot(PlotDataHelper):
             axs[n].set_title(scenario.replace('_',' '),fontweight='bold')
 
             # Rotate the tick labels and set their alignment.
-            plt.setp(axs[n].get_xticklabels(), rotation=30, ha="right",
+            plt.setp(axs[n].get_xticklabels(), rotation = 90, ha="right",
                  rotation_mode="anchor")
 
             #Delineate the boxes and make room at top and bottom
@@ -1732,10 +1737,10 @@ class MPlot(PlotDataHelper):
                    labelpad=40)
 
         Data_Table_Out = pd.concat(Data_Out,axis=1)
-        save_figures = os.path.join(self.figure_folder, f"{self.AGG_BY}_transmission")
-        fig.savefig(os.path.join(save_figures, "region_region_checkerboard.svg"), 
+        save_figures = self.figure_folder.joinpath(f"{self.AGG_BY}_transmission")
+        fig.savefig(save_figures.joinpath("region_region_checkerboard.svg"), 
                      dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(save_figures, "region_region_checkerboard.csv"))
+        Data_Table_Out.to_csv(save_figures.joinpath("region_region_checkerboard.csv"))
 
         outputs = DataSavedInModule()
         return outputs
@@ -1789,13 +1794,14 @@ class MPlot(PlotDataHelper):
         Returns:
             dict: dictionary containing the created plot and its data table
         """
-        outputs = {}
+        outputs : dict = {}
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Violation",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1803,11 +1809,11 @@ class MPlot(PlotDataHelper):
             return MissingInputData()
 
         for zone_input in self.Zones:
-            self.logger.info(f'Zone = {zone_input}')
+            logger.info(f'Zone = {zone_input}')
             all_scenarios = pd.DataFrame()
 
             for scenario in self.Scenarios:
-                self.logger.info(f"Scenario = {str(scenario)}")
+                logger.info(f"Scenario = {str(scenario)}")
 
                 if self.AGG_BY == 'zone':
                     lines = self.meta.zone_lines(scenario)
@@ -1861,7 +1867,7 @@ class MPlot(PlotDataHelper):
                 ax.set_xlabel(timezone,  color='black', rotation='horizontal')
                 mplt.add_legend()
 
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 fig.set_title(zone_input)
             ax.set_ylabel(f"Line violations ({unitconversion['units']})",  color='black', rotation='vertical')
 
@@ -1892,29 +1898,30 @@ class MPlot(PlotDataHelper):
         else:
             agg = 'region'
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,f"{agg}_Net_Interchange",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
         if 1 in check_input_data:
             return MissingInputData()
 
-        outputs = {}
+        outputs : dict = {}
         for zone_input in self.Zones:
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             net_export_all_scenarios = pd.DataFrame()
 
             for scenario in self.Scenarios:
 
 
-                self.logger.info(f"Scenario = {scenario}")
+                logger.info(f"Scenario = {scenario}")
                 net_export_read = self[f"{agg}_Net_Interchange"].get(scenario)
-                if self.shift_leapday == True:
+                if shift_leapday:
                     net_export_read = self.adjust_for_leapday(net_export_read)                
 
                 net_export = net_export_read.xs(zone_input, level = self.AGG_BY)
@@ -1922,7 +1929,7 @@ class MPlot(PlotDataHelper):
                 net_export.columns = [scenario]
 
                 if pd.notna(start_date_range):
-                    self.logger.info(f"Plotting specific date range: \
+                    logger.info(f"Plotting specific date range: \
                     {str(start_date_range)} to {str(end_date_range)}")
                     net_export = net_export[start_date_range : end_date_range]
 
@@ -1957,7 +1964,7 @@ class MPlot(PlotDataHelper):
                 mplt.set_subplot_timeseries_format()
 
             mplt.add_legend(reverse_legend=True)
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
                 
             outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
@@ -1986,25 +1993,26 @@ class MPlot(PlotDataHelper):
             dict: dictionary containing the created plot and its data table
         """
         if self.AGG_BY not in ["zone", "zones", "Zone", "Zones"]:
-            self.logger.warning("This plot only supports aggregation zone")
+            logger.warning("This plot only supports aggregation zone")
             return UnsupportedAggregation()
         
         duration_curve=False
         if 'duration_curve' in figure_name:
             duration_curve = True
             
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
 
-        outputs = {}
+        outputs : dict = {}
 
         # sets up x, y dimensions of plot
         ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
@@ -2016,7 +2024,7 @@ class MPlot(PlotDataHelper):
 
         for zone_input in self.Zones:
 
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
 
             mplt = PlotLibrary(nrows, ncols, sharey=True,
                               squeeze=False, ravel_axs=True)
@@ -2046,11 +2054,11 @@ class MPlot(PlotDataHelper):
                 try:
                     other_zones.remove(zone_input)
                 except:
-                    self.logger.warning("Are you sure you set agg_by = zone?")
+                    logger.warning("Are you sure you set agg_by = zone?")
 
-                self.logger.info(f"Scenario = {str(scenario)}")
+                logger.info(f"Scenario = {str(scenario)}")
                 flow = self["line_Flow"][scenario].copy()
-                if self.shift_leapday == True:
+                if shift_leapday:
                     flow = self.adjust_for_leapday(flow)
                 flow = flow.reset_index()
 
@@ -2083,7 +2091,7 @@ class MPlot(PlotDataHelper):
 
                     if pd.notna(start_date_range):
                         if other_zone == [other_zones[0]]:
-                            self.logger.info(f"Plotting specific date range: \
+                            logger.info(f"Plotting specific date range: \
                             {str(start_date_range)} to {str(end_date_range)}")
 
                         net_export = net_export[start_date_range : end_date_range]
@@ -2131,7 +2139,7 @@ class MPlot(PlotDataHelper):
             #Remove extra axes
             mplt.remove_excess_axs(excess_axs,grid_size)
 
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             plt.ylabel(f"Net export ({unitconversion['units']})", color='black', 
                        rotation='vertical', labelpad=40)
@@ -2160,25 +2168,26 @@ class MPlot(PlotDataHelper):
             dict: dictionary containing the created plot and its data table
         """
         if self.AGG_BY not in ["zone", "zones", "Zone", "Zones"]:
-            self.logger.warning("This plot only supports aggregation zone")
+            logger.warning("This plot only supports aggregation zone")
             return UnsupportedAggregation()
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
         if 1 in check_input_data:
             return MissingInputData()
 
-        outputs = {}
+        outputs : dict = {}
 
         for zone_input in self.Zones:
 
-            self.logger.info(f"{self.AGG_BY} = {zone_input}")
+            logger.info(f"{self.AGG_BY} = {zone_input}")
             
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
@@ -2207,7 +2216,7 @@ class MPlot(PlotDataHelper):
                 other_zones.remove(zone_input)
 
                 net_exports = []
-                self.logger.info(f"Scenario = {str(scenario)}")
+                logger.info(f"Scenario = {str(scenario)}")
                 flow = self["line_Flow"][scenario]
                 flow = flow.reset_index()
 
@@ -2240,7 +2249,7 @@ class MPlot(PlotDataHelper):
 
                     if pd.notna(start_date_range):
                         if other_zone == other_zones[0]:
-                            self.logger.info(f"Plotting specific date range: \
+                            logger.info(f"Plotting specific date range: \
                             {str(start_date_range)} to {str(end_date_range)}")
 
                         net_export = net_export[start_date_range : end_date_range]
@@ -2283,7 +2292,7 @@ class MPlot(PlotDataHelper):
                       linestyle=':')
             ax.set_ylabel(f"Interchange ({unitconversion['units']}h)", color='black', 
                           rotation='vertical')
-            if mconfig.parser("plot_title_as_region"):
+            if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {'fig': fig,'data_table': Data_Table_Out}
@@ -2313,11 +2322,12 @@ class MPlot(PlotDataHelper):
             DataSavedInModule: DataSavedInModule exception.
         """
         
-        # List of properties needed by the plot, properties are a set of tuples and contain 3 parts:
-        # required True/False, property name and scenarios required, scenarios must be a list.
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within PlotDataHelper to populate PlotDataHelper dictionary  
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -2329,8 +2339,8 @@ class MPlot(PlotDataHelper):
         if select_ints == None:
             return InputSheetError()
 
-        self.logger.info('Plotting only the interfaces specified in Marmot_plot_select.csv')
-        self.logger.info(select_ints) 
+        logger.info('Plotting only the interfaces specified in Marmot_plot_select.csv')
+        logger.info(select_ints) 
 
         mplt = PlotLibrary()
         fig, ax = mplt.get_figure()
@@ -2342,16 +2352,15 @@ class MPlot(PlotDataHelper):
         
         for i, scenario in enumerate(self.Scenarios):
             
-            self.logger.info(f"Scenario = {str(scenario)}")
+            logger.info(f"Scenario = {str(scenario)}")
             flow_all = self["interface_Flow"][scenario]
-            pos = pd.Series(name='Total Export')
-            neg = pd.Series(name='Total Import')
+            both_chunk = []
             
             available_inter = select_ints.copy()
             
             for inter in select_ints:
                 if inter not in flow_all.index.get_level_values('interface_name'):
-                    self.logger.info(f'{inter} Not in Data')
+                    logger.info(f'{inter} Not in Data')
                     available_inter.remove(inter)
                     continue
                 
@@ -2363,20 +2372,21 @@ class MPlot(PlotDataHelper):
                 flow = flow.reset_index()
                  
                 if pd.notna(start_date_range):
-                    self.logger.info("Plotting specific date range: \
+                    logger.info("Plotting specific date range: \
                     {} to {}".format(str(start_date_range), str(end_date_range)))
                     flow = flow[start_date_range : end_date_range]
             
                 flow = flow[0]
 
-                pos_sing = pd.Series(flow.where(flow > 0).sum())
-                pos = pos.append(pos_sing)
-                neg_sing = pd.Series(flow.where(flow < 0).sum())
-                neg = neg.append(neg_sing)
+                pos_sing = pd.Series(flow.where(flow > 0).sum(), 
+                                    name='Total Export')
+                neg_sing = pd.Series(flow.where(flow < 0).sum(), 
+                                    name='Total Import')
+                both_df = pd.concat([pos_sing, neg_sing], axis=1)
+                both_chunk.append(both_df)
 
-            both = pd.concat([pos,neg],axis = 1)
+            both = pd.concat(both_chunk)
             both.columns = ['Total Export','Total Import']
-
             if scenario == self.Scenarios[0]:
                 unitconversion = self.capacity_energy_unitconversion(both)
 
@@ -2403,10 +2413,10 @@ class MPlot(PlotDataHelper):
         ax.set_ylabel('Flow ({}h)'.format(unitconversion['units']), color='black', 
                       rotation='vertical')
         ax.set_xlabel('')
-        fig.savefig(os.path.join(self.Marmot_Solutions_folder, "Figures_Output", f"{self.AGG_BY }_transmission",
+        fig.savefig(self.figure_folder.joinpath(f"{self.AGG_BY }_transmission",
                                 "Individual_Interface_Total_Flow.svg"), 
                     dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(os.path.join(self.Marmot_Solutions_folder, "Figures_Output", f"{self.AGG_BY }_transmission",
+        Data_Table_Out.to_csv(self.figure_folder.joinpath(f"{self.AGG_BY }_transmission",
                                            "Individual_Interface_Total_Flow.csv"))
         outputs = DataSavedInModule()
         return outputs
@@ -2426,15 +2436,15 @@ class MPlot(PlotDataHelper):
     #     self._getdata(line_limit_collection,"line_Export_Limit")
     #     self._getdata(interface_limit_collection,"interface_Export_Limit")
 
-    #     outputs = {}
+    #     outputs : dict = {}
 
     #     for zone_input in self.Zones:
-    #         self.logger.info('Zone = ' + str(zone_input))
+    #         logger.info('Zone = ' + str(zone_input))
 
     #         all_scenarios = pd.DataFrame()
 
     #         for scenario in self.Scenarios:
-    #             self.logger.info("Scenario = " + str(scenario))
+    #             logger.info("Scenario = " + str(scenario))
 
     #             lineflow = self["line_Flow"].get(scenario)
     #             linelim = line_limit_collection.get(scenario)
