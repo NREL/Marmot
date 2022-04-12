@@ -879,14 +879,14 @@ def main():
         )
     ):
         xlabels = None
-
-    xlabels = (
-        pd.Series(
-            Marmot_user_defined_inputs.loc["Facet_xlabels", "User_defined_value"].split(",")
+    else:
+        xlabels = (
+            pd.Series(
+                Marmot_user_defined_inputs.loc["Facet_xlabels", "User_defined_value"].split(",")
+            )
+            .str.strip()
+            .tolist()
         )
-        .str.strip()
-        .tolist()
-    )
 
     # option to change tick labels on plot
     if pd.isna(Marmot_user_defined_inputs.loc["Tick_labels", "User_defined_value"]):
