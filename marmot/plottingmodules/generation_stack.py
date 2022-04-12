@@ -131,7 +131,7 @@ class GenerationStack(MPlotDataHelper):
             tech_list_sort = [
                 tech_type
                 for tech_type in self.ordered_gen
-                if tech_type in tech_list and tech_type in self.thermal_gen_cat
+                if tech_type in tech_list and tech_type in self.gen_categories.thermal
             ]
 
             if not tech_list_sort:
@@ -201,7 +201,7 @@ class GenerationStack(MPlotDataHelper):
                     if tech not in gen.columns:
                         gen_one_tech = pd.Series(0, index=gen.index)
                         commit_cap = pd.Series(0, index=gen.index)
-                    elif tech in self.thermal_gen_cat:
+                    elif tech in self.gen_categories.thermal:
                         gen_one_tech = gen[tech]
                         commit_cap = thermal_commit_cap[tech]
                     # For all other techs
@@ -407,11 +407,11 @@ class GenerationStack(MPlotDataHelper):
                         )
                         stacked_gen_df = stacked_gen_df.fillna(0)
                         # Calculates Net Load by removing variable gen + curtailment
-                        vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+                        vre_gen_cat = self.gen_categories.vre + [curtailment_name]
                     else:
-                        vre_gen_cat = self.vre_gen_cat
+                        vre_gen_cat = self.gen_categories.vre
                 else:
-                    vre_gen_cat = self.vre_gen_cat
+                    vre_gen_cat = self.gen_categories.vre
 
                 if pd.notna(start_date_range):
                     stacked_gen_df = self.set_timestamp_date_range(
@@ -498,7 +498,7 @@ class GenerationStack(MPlotDataHelper):
                         sub_pos=i,
                         curtailment_name=curtailment_name,
                         energy_unit=unitconversion["units"],
-                        re_gen_cat=self.re_gen_cat,
+                        re_gen_cat=self.gen_categories.re,
                         gen_cols=stacked_gen_df.columns,
                     )
 

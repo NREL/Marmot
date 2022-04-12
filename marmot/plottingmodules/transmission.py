@@ -906,8 +906,8 @@ class Transmission(MPlotDataHelper):
         """
         #TODO: Use auto unit converter in method
         duration_curve=False
-        if 'duration_curve' in figure_name:
-            duration_curve = True
+        # if 'duration_curve' in figure_name:
+        #     duration_curve = True
 
         outputs = {}
             
@@ -915,8 +915,8 @@ class Transmission(MPlotDataHelper):
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios),
-                      (True,"line_Import_Limit",self.Scenarios),
-                      (True,"line_Export_Limit",self.Scenarios)]
+                      (False,"line_Import_Limit2",self.Scenarios),
+                      (False,"line_Export_Limit2",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -935,33 +935,16 @@ class Transmission(MPlotDataHelper):
 
         scenario = self.Scenarios[1] #Select single scenario for purpose of extracting limits.
 
-        export_limits = self["line_Export_Limit"].get(scenario).droplevel('timestamp')
-        export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+        export_limits = self["line_Export_Limit2"].get(scenario).droplevel('timestamp')
+        export_limits.mask(export_limits[0]==0.0, other=0.01, inplace=True) #if limit is zero set to small value
         export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
 
-        import_limits = self["line_Import_Limit"].get(scenario).droplevel('timestamp')
+        import_limits = self["line_Import_Limit2"].get(scenario).droplevel('timestamp')
         import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
         import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
 
 
         flows = self["line_Flow"][scenario]
-
-        # limited_lines = []
-        # i = 0
-        # all_lines = flows.index.get_level_values('line_name').unique()
-
-        # for line in all_lines:
-        #     i += 1
-        #     print(line)
-        #     print(i / len(all_lines))
-        #     exp = export_limits.loc[line].squeeze()[0]
-        #     imp = import_limits.loc[line].squeeze()[0]
-        #     flow = flows.xs(line,level = 'line_name')[0].tolist()
-        #     if exp in flow or imp in flow:
-        #         limited_lines.append(line)
-
-        # print(limited_lines)
-        # pd.DataFrame(limited_lines).to_csv('/Users/mschwarz/OR OSW local/Solutions/Figures_Output/limited_lines.csv')
 
         xdim,ydim = self.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
@@ -1418,13 +1401,13 @@ class Transmission(MPlotDataHelper):
                 Stacked_Curt[Stacked_Curt<0.05] = 0 #Remove values less than 0.05 MW
                 Stacked_Gen.insert(len(Stacked_Gen.columns),column=curtailment_name,value=Stacked_Curt) #Insert curtailment into
                 # Calculates Net Load by removing variable gen + curtailment
-                vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+                vre_gen_cat = self.gen_categories.vre + [curtailment_name]
             else:
-                vre_gen_cat = self.vre_gen_cat
+                vre_gen_cat = self.gen_categories.vre
                 
         else:
-            vre_gen_cat = self.vre_gen_cat
-        # vre_gen_cat = self.vre_gen_cat
+            vre_gen_cat = self.gen_categories.vre
+        # vre_gen_cat = self.gen_categories.vre
         vre_gen_cat = [name for name in vre_gen_cat if name in Stacked_Gen.columns]
         
         Net_Load = Stacked_Gen.drop(labels = vre_gen_cat, axis=1)

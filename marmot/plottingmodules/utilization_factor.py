@@ -33,7 +33,7 @@ def df_process_gen_ind_inputs(df, self):
     df = df.reset_index(["timestamp", "tech", "gen_name"])
     df["tech"].replace(self.gen_names_dict, inplace=True)
     df = df[
-        df["tech"].isin(self.thermal_gen_cat)
+        df["tech"].isin(self.gen_categories.thermal)
     ]  # Optional, select which technologies to show.
     df.tech = df.tech.astype("category")
     df.tech = df.tech.cat.set_categories(self.ordered_gen)
@@ -236,8 +236,8 @@ class UtilizationFactor(MPlotDataHelper):
 
             fig2, ax2 = plt.subplots(
                 len(self.Scenarios),
-                len(self.thermal_gen_cat),
-                figsize=(len(self.thermal_gen_cat) * 4, len(self.Scenarios) * 4),
+                len(self.gen_categories.thermal),
+                figsize=(len(self.gen_categories.thermal) * 4, len(self.Scenarios) * 4),
                 sharey=True,
             )  # Set up subplots for all scenarios & techs
             CF_all_scenarios = pd.DataFrame()
@@ -381,8 +381,8 @@ class UtilizationFactor(MPlotDataHelper):
             logger.info(self.AGG_BY + " = " + zone_input)
 
             fig3, ax3 = plt.subplots(
-                len(self.thermal_gen_cat),
-                figsize=(4, 4 * len(self.thermal_gen_cat)),
+                len(self.gen_categories.thermal),
+                figsize=(4, 4 * len(self.gen_categories.thermal)),
                 sharey=True,
             )  # Set up subplots for all scenarios
 
@@ -415,7 +415,7 @@ class UtilizationFactor(MPlotDataHelper):
                 )  # Calculation of fleet wide capacity factor by hour and type
                 n = 0  # Counter for type subplots
 
-                for i in self.thermal_gen_cat:  # Gen.reset_index()['tech'].unique():
+                for i in self.gen_categories.thermal:  # Gen.reset_index()['tech'].unique():
                     try:
                         duration_curve = (
                             Gen.xs(i, level="tech")

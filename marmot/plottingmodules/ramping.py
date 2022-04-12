@@ -126,7 +126,7 @@ class Ramping(MPlotDataHelper):
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
                 Gen = Gen.rename(columns={0: "Output (MWh)"})
                 # We are only interested in thermal starts/stops.
-                Gen = Gen[Gen["tech"].isin(self.thermal_gen_cat)]
+                Gen = Gen[Gen["tech"].isin(self.gen_categories.thermal)]
 
                 Cap = Cap.reset_index()
                 Cap["year"] = Cap.timestamp.dt.year
@@ -263,7 +263,7 @@ class Ramping(MPlotDataHelper):
                 Gen = Gen.rename(columns={0: "Output (MWh)"})
                 Gen = Gen[["timestamp", "gen_name", "tech", "Output (MWh)"]]
                 Gen = Gen[
-                    Gen["tech"].isin(self.thermal_gen_cat)
+                    Gen["tech"].isin(self.gen_categories.thermal)
                 ]  # We are only interested in thermal starts/stops.tops.
 
                 Cap = self["generator_Installed_Capacity"].get(scenario)

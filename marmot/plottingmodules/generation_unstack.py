@@ -219,11 +219,11 @@ class GenerationUnStack(MPlotDataHelper):
                         )
                         stacked_gen_df = stacked_gen_df.fillna(0)
                         # Calculates Net Load by removing variable gen + curtailment
-                        vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+                        vre_gen_cat = self.gen_categories.vre + [curtailment_name]
                     else:
-                        vre_gen_cat = self.vre_gen_cat
+                        vre_gen_cat = self.gen_categories.vre
                 else:
-                    vre_gen_cat = self.vre_gen_cat
+                    vre_gen_cat = self.gen_categories.vre
 
                 if pd.notna(start_date_range):
                     stacked_gen_df = self.set_timestamp_date_range(
@@ -302,7 +302,7 @@ class GenerationUnStack(MPlotDataHelper):
                         sub_pos=i,
                         curtailment_name=curtailment_name,
                         energy_unit=unitconversion["units"],
-                        re_gen_cat=self.re_gen_cat,
+                        re_gen_cat=self.gen_categories.re,
                         gen_cols=stacked_gen_df.columns,
                     )
 

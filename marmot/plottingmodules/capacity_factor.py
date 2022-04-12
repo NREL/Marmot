@@ -111,7 +111,7 @@ class CapacityFactor(MPlotDataHelper):
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen[Gen["tech"].isin(self.thermal_gen_cat)]
+                Gen = Gen[Gen["tech"].isin(self.gen_categories.thermal)]
                 Gen.set_index("timestamp", inplace=True)
                 Gen = Gen.rename(columns={0: "Output (MWh)"})
 
@@ -421,7 +421,7 @@ class CapacityFactor(MPlotDataHelper):
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
                 Gen = Gen.rename(columns={0: "Output (MWh)"})
-                Gen = Gen[~Gen["tech"].isin(self.vre_gen_cat)]
+                Gen = Gen[~Gen["tech"].isin(self.gen_categories.vre)]
                 Gen.index = Gen.timestamp
 
                 Caps = Cap.groupby("gen_name").mean()
