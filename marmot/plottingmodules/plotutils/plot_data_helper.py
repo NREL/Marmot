@@ -256,12 +256,10 @@ class MPlotDataHelper(dict):
                 for scenario, df in zip(scen_list, data_files):
                     self[f"{plx_prop_name}"][scenario] = df
             
-            get_manual_property = True
             # If any of the dataframes are empty for given property log warning
             missing_scen_data = [scen for scen, df in self[f"{plx_prop_name}"].items() if df.empty]
             if missing_scen_data:
-
-                if get_manual_property:
+                if mconfig.parser("read_csv_properties"):
                     logger.info(
                         f"{plx_prop_name} not found in Marmot formatted h5 files, "
                         "attempting to read from csv property file."
