@@ -291,7 +291,7 @@ class Transmission(MPlotDataHelper):
         for zone_input in self.Zones:
             logger.info(f"For all interfaces touching Zone = {zone_input}")
 
-            Data_Table_Out = pd.DataFrame()
+            data_table_out = pd.DataFrame()
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
@@ -435,16 +435,16 @@ class Transmission(MPlotDataHelper):
                     outputs = MissingInputData()
                     return outputs
 
-            Data_Table_Out = pd.concat(chunks,axis = 1)
-            Data_Table_Out = Data_Table_Out.reset_index()
+            data_table_out = pd.concat(chunks,axis = 1)
+            data_table_out = data_table_out.reset_index()
             index_name = 'level_0' if duration_curve else 'timestamp'
-            Data_Table_Out = Data_Table_Out.pivot(index = index_name,columns = 'Scenario')
+            data_table_out = data_table_out.pivot(index = index_name,columns = 'Scenario')
             #Limits_Out = pd.concat(limits_chunks,axis = 1)
             #Limits_Out.index = ['Export Limit','Import Limit']
 
-            # Data_Table_Out = Data_Table_Out.reset_index()
-            # Data_Table_Out = Data_Table_Out.groupby(Data_Table_Out.index // 24).mean()
-            # Data_Table_Out.index = pd.date_range(start = '1/1/2024',end = '12/31/2024',freq = 'D')
+            # data_table_out = data_table_out.reset_index()
+            # data_table_out = data_table_out.groupby(data_table_out.index // 24).mean()
+            # data_table_out.index = pd.date_range(start = '1/1/2024',end = '12/31/2024',freq = 'D')
             mplt.add_legend()
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', 
                        labelpad=30)
@@ -453,7 +453,7 @@ class Transmission(MPlotDataHelper):
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': data_table_out}
             #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs 
 
@@ -501,7 +501,7 @@ class Transmission(MPlotDataHelper):
         for zone_input in self.Zones:
             logger.info("For all interfaces touching Zone = "+zone_input)
 
-            Data_Table_Out = pd.DataFrame()
+            data_table_out = pd.DataFrame()
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
@@ -658,7 +658,7 @@ class Transmission(MPlotDataHelper):
 
             mplt.add_legend()
 
-            Data_Table_Out = pd.concat(chunks,axis = 1)
+            data_table_out = pd.concat(chunks,axis = 1)
             #Limits_Out = pd.concat(limits_chunks,axis = 1)
             #Limits_Out.index = ['Export Limit','Import Limit']
 
@@ -671,7 +671,7 @@ class Transmission(MPlotDataHelper):
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': data_table_out}
             #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
 
         return outputs
@@ -719,7 +719,7 @@ class Transmission(MPlotDataHelper):
         for zone_input in self.Zones:
             logger.info("For all interfaces touching Zone = "+zone_input)
 
-            Data_Table_Out = pd.DataFrame()
+            data_table_out = pd.DataFrame()
 
             # gets correct metadata based on area aggregation
             if self.AGG_BY=='zone':
@@ -864,16 +864,16 @@ class Transmission(MPlotDataHelper):
                     outputs = MissingInputData()
                     return outputs
 
-            Data_Table_Out = pd.concat(chunks,axis = 1)
-            Data_Table_Out = Data_Table_Out.reset_index()
+            data_table_out = pd.concat(chunks,axis = 1)
+            data_table_out = data_table_out.reset_index()
             index_name = 'level_0' if duration_curve else 'timestamp'
-            Data_Table_Out = Data_Table_Out.pivot(index = index_name,columns = 'Scenario')
+            data_table_out = data_table_out.pivot(index = index_name,columns = 'Scenario')
             #Limits_Out = pd.concat(limits_chunks,axis = 1)
             #Limits_Out.index = ['Export Limit','Import Limit']
 
-            # Data_Table_Out = Data_Table_Out.reset_index()
-            # Data_Table_Out = Data_Table_Out.groupby(Data_Table_Out.index // 24).mean()
-            # Data_Table_Out.index = pd.date_range(start = '1/1/2024',end = '12/31/2024',freq = 'D')
+            # data_table_out = data_table_out.reset_index()
+            # data_table_out = data_table_out.groupby(data_table_out.index // 24).mean()
+            # data_table_out.index = pd.date_range(start = '1/1/2024',end = '12/31/2024',freq = 'D')
 
             plt.ylabel('Flow (GW)',  color='black', rotation='vertical', labelpad=30)
             if duration_curve:
@@ -881,12 +881,16 @@ class Transmission(MPlotDataHelper):
             plt.tight_layout(rect=[0, 0.03, 1, 0.97])
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': data_table_out}
             #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Interface_Limits.csv'))
         return outputs
 
 
-    def line_flow_ind(self, figure_name: str = None, prop: str = None, **_):
+    def line_flow_ind(self, figure_name: str = None, prop: str = None, 
+        start_date_range: str = None,
+        end_date_range: str = None,
+        **_
+    ):
         """
         #TODO: Finish Docstring 
 
@@ -904,19 +908,18 @@ class Transmission(MPlotDataHelper):
         Returns:
             [type]: [description]
         """
-        #TODO: Use auto unit converter in method
         duration_curve=False
         # if 'duration_curve' in figure_name:
         #     duration_curve = True
 
-        outputs = {}
+        outputs : dict = {}
             
         # List of properties needed by the plot, properties are a set of tuples and 
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios),
-                      (False,"line_Import_Limit2",self.Scenarios),
-                      (False,"line_Export_Limit2",self.Scenarios)]
+                      (False,"line_Import_Limit",self.Scenarios),
+                      (False,"line_Export_Limit",self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -925,138 +928,108 @@ class Transmission(MPlotDataHelper):
         if 1 in check_input_data:
             return MissingInputData()
 
-        #Select only lines specified in Marmot_plot_select.csv.
-        select_lines = prop.split(",")
-        if select_lines == None:
+        if prop is None:
             return InputSheetError()
-
+        #Select only lines specified in Marmot_plot_select.csv.
+        select_lines = [x.strip() for x in prop.split(",")]        
         logger.info('Plotting only lines specified in Marmot_plot_select.csv')
         logger.info(select_lines)
 
-        scenario = self.Scenarios[1] #Select single scenario for purpose of extracting limits.
-
-        export_limits = self["line_Export_Limit2"].get(scenario).droplevel('timestamp')
-        export_limits.mask(export_limits[0]==0.0, other=0.01, inplace=True) #if limit is zero set to small value
-        export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
-
-        import_limits = self["line_Import_Limit2"].get(scenario).droplevel('timestamp')
-        import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
-        import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
-
-
-        flows = self["line_Flow"][scenario]
-
-        xdim,ydim = self.set_x_y_dimension(len(select_lines))
+        xdim, ydim = self.set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
 
         mplt = PlotLibrary(ydim, xdim, squeeze=False,
-                            ravel_axs=True)
+                            ravel_axs=True, sharey=True)
         fig, axs = mplt.get_figure()
 
-        reported_lines = self["line_Flow"][self.Scenarios[0]].index.get_level_values('line_name').unique()
-        n = -1
         missing_lines = 0
-        chunks = []
-        limits_chunks = []
-        for line in select_lines:
-            n += 1
-            #Remove leading spaces
-            if line[0] == ' ':
-                line = line[1:]
-            if line in reported_lines:
-                chunks_line = []
+        data_tables = []
+        for n, line in enumerate(select_lines):
+            logger.info(f"Line = {line}")
+            chunks_line = []
 
-                single_exp_lim = export_limits.loc[line]
-                single_imp_lim = import_limits.loc[line]
-                limits = pd.concat([single_exp_lim,single_imp_lim])
-                limits_chunks.append(limits)
-                single_exp_lim = single_exp_lim.squeeze()
-                single_imp_lim = single_imp_lim.squeeze()
+            for scenario in self.Scenarios:
+                logger.info(f"Scenario = {scenario}")
+                flow = self["line_Flow"].get(scenario)
+                try:
+                    single_line = flow.xs(line, level='line_name')
+                except KeyError:
+                    logger.warning(f"{line} not found in results. Have you tagged "
+                            "it with the 'Must Report' property in PLEXOS?")
+                    excess_axs += 1
+                    missing_lines += 1
+                    continue
 
-                # If export/import limits were pulled as an interval property, take the average.
-                if len(single_exp_lim) > 1:
-                    single_exp_lim = single_exp_lim.mean()
-                    single_imp_lim = single_imp_lim.mean()
+                single_line = single_line.droplevel('units')
+                single_line = single_line.rename(columns={0: scenario})
+
+                if shift_leapday:
+                    single_line = self.adjust_for_leapday(single_line)
+
+                if pd.notna(start_date_range):
+                    single_line = self.set_timestamp_date_range(
+                        single_line, start_date_range, end_date_range
+                    )
+                    if single_line.empty is True:
+                        logger.warning("No data in selected Date Range")
+                        continue
+
+                chunks_line.append(single_line)
+
+                #For output time series.csv
+                single_line_out = single_line.rename(columns={scenario: f"Line Flow"})
+                scenario_names = pd.Series([scenario] * len(single_line_out), name='Scenario')
+                line_name = pd.Series([line] * len(single_line_out), name='Line')
+                single_line_out = single_line_out.set_index([scenario_names, line_name], append=True)
+                data_tables.append(single_line_out)
+
+            line_flow_out = pd.concat(chunks_line, axis=1)
+
+            # Only convert on first lines
+            if n == 0:
+                unitconversion = self.capacity_energy_unitconversion(
+                    line_flow_out, sum_values=False
+                )
+            line_flow_out = (
+                line_flow_out / unitconversion["divisor"]
+            )
+
+            # Plot line flow
+            for column in line_flow_out:
+                if duration_curve:
+                    single_line = self.sort_duration(line_flow_out, column)
+                mplt.lineplot(line_flow_out, column, label=f"{column}\nLine flow", sub_pos=n)
                 
-                # If export/import limits were pulled as pd.Series, take the value.
-                if type(single_exp_lim)==pd.Series:
-                    single_exp_lim = single_exp_lim.values[0]
-                    single_imp_lim = single_imp_lim.values[0]
-
-
-                limits = pd.Series([single_exp_lim,single_imp_lim],name = line)
-                limits_chunks.append(limits)
-
-                for scenario in self.Scenarios:
-                    flow = self["line_Flow"][scenario]
-                    single_line = flow.xs(line,level = 'line_name')
-                    single_line = single_line.droplevel('units')
-                    single_line.columns = [line]
-
-                    if shift_leapday:
-                        single_line = self.adjust_for_leapday(single_line)
-
-                    single_line_out = single_line.copy()
-                    if duration_curve:
-                        single_line = self.sort_duration(single_line,line)
-
-                    mplt.lineplot(single_line, line, label = scenario + '\n line flow', sub_pos=n)
-
-                    #Add %congested number to plot.
-                    # if scenario == self.Scenarios[0]:
-
-                    #     viol_exp = single_line[single_line[line] > single_exp_lim].count()
-                    #     viol_imp = single_line[single_line[line] < single_imp_lim].count()
-                    #     viol_perc = 100 * (viol_exp + viol_imp) / len(single_line)
-                    #     viol_perc = round(viol_perc.squeeze(),3)
-                    #     axs[n].annotate('Violation = ' + str(viol_perc) + '% of hours', xy = (0.1,0.15),xycoords='axes fraction')
-
-                    #     cong_exp = single_line[single_line[line] == single_exp_lim].count()
-                    #     cong_imp = single_line[single_line[line] == single_imp_lim].count()
-                    #     cong_perc = 100 * (cong_exp + cong_imp) / len(single_line)
-                    #     cong_perc = round(cong_perc.squeeze(),0)
-                    #     axs[n].annotate('Congestion = ' + str(cong_perc) + '% of hours', xy = (0.1,0.1),xycoords='axes fraction')
-
-                    #For output time series .csv
-                    scenario_names = pd.Series([scenario] * len(single_line_out),name = 'Scenario')
-                    single_line_out = single_line_out.set_index([scenario_names],append = True)
-                    chunks_line.append(single_line_out)
-
-                Data_out_line = pd.concat(chunks_line,axis = 0)
-                chunks.append(Data_out_line)
-            else:
-                logger.warning(line + ' not found in results. Have you tagged it with the "Must Report" property in PLEXOS?')
-                excess_axs += 1
-                missing_lines += 1
-                continue
-
-            mplt.remove_excess_axs(excess_axs,grid_size)
-            axs[n].axhline(y = single_exp_lim, ls = '--',label = 'Export Limit',color = 'red')
-            axs[n].axhline(y = single_imp_lim, ls = '--',label = 'Import Limit', color = 'green')
+            # Get and process all line limits
+            line_limits = self.get_line_interface_limits(
+                            line, 'line_name',
+                            ["line_Export_Limit",
+                                "line_Import_Limit",
+                            ],
+            ) / unitconversion["divisor"]
+            # Plot line limits
+            self.plot_line_interface_limits("line", line_limits, mplt, n, duration_curve)
+            mplt.remove_excess_axs(excess_axs, grid_size)
 
             axs[n].set_title(line)
             if not duration_curve:
                 mplt.set_subplot_timeseries_format(sub_pos=n)
 
         if missing_lines == len(select_lines):
-            outputs = MissingInputData()
-            return outputs
+            return MissingInputData()
 
-        Data_Table_Out = pd.concat(chunks,axis = 1)
-        #Limits_Out = pd.concat(limits_chunks,axis = 1)
-        #Limits_Out.index = ['Export Limit','Import Limit']
+        data_table_out = pd.concat(data_tables, axis=0) / unitconversion["divisor"]
+        data_table_out = data_table_out.add_suffix(f" ({unitconversion['units']})")
 
-        mplt.add_legend()
-        plt.ylabel('Flow (MW)',  color='black', rotation='vertical', labelpad=30)
-        #plt.tight_layout(rect=[0, 0.03, 1, 0.97])
+        mplt.add_legend(sort_by=["line flow"])
+        plt.ylabel(f"Flow ({unitconversion['units']})", color='black', rotation='vertical', labelpad=30)
         plt.tight_layout()
 
         fn_suffix = '_duration_curve' if duration_curve else ''
 
         fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
-       # Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + 'limits.csv'))
+        data_table_out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
 
         outputs = DataSavedInModule()
         return outputs
@@ -1158,7 +1131,7 @@ class Transmission(MPlotDataHelper):
             outputs = MissingInputData()
             return outputs
 
-        Data_Table_Out = pd.concat(chunks,axis = 1)
+        data_table_out = pd.concat(chunks,axis = 1)
 
         mplt.add_legend()
         plt.ylabel('Flow difference (MW)',  color='black', rotation='vertical', labelpad=30)
@@ -1167,7 +1140,7 @@ class Transmission(MPlotDataHelper):
         fn_suffix = '_duration_curve' if duration_curve else ''
 
         fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
+        data_table_out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission',figure_name + fn_suffix + '.csv'))
 
         outputs = DataSavedInModule()
         return outputs
@@ -1344,7 +1317,7 @@ class Transmission(MPlotDataHelper):
             outputs = MissingInputData()
             return outputs
 
-        Data_Table_Out = pd.concat(chunks,axis = 1)
+        data_table_out = pd.concat(chunks,axis = 1)
         #Limits_Out = pd.concat(limits_chunks,axis = 1)
         #Limits_Out.index = ['Export Limit','Import Limit']
 
@@ -1357,7 +1330,7 @@ class Transmission(MPlotDataHelper):
 
 
         fig.savefig(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.svg'), dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
+        data_table_out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Flow' + fn_suffix + '_seasonal.csv'))
         #Limits_Out.to_csv(self.figure_folder.joinpath(self.AGG_BY + '_transmission','Individual_Line_Limits.csv'))
         outputs = DataSavedInModule()
         return outputs
@@ -1450,7 +1423,7 @@ class Transmission(MPlotDataHelper):
             # Runs get_data to populate mplot_data_dict with all required properties, returns a 1 if required data is missing
             return self.get_data(self.mplot_data_dict, properties,self.Marmot_Solutions_folder)
         
-        outputs = {}
+        outputs : dict = {}
         if facet:
             check_input_data = set_dicts(self.Scenarios)
         else:
@@ -1760,7 +1733,7 @@ class Transmission(MPlotDataHelper):
         
 
         # return self.UnderDevelopment() #TODO: Needs finishing
-        outputs = {}
+        outputs : dict = {}
 
         properties = [(True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
@@ -1803,10 +1776,10 @@ class Transmission(MPlotDataHelper):
                 export_line_cap = export_line_cap[[self.AGG_BY,'line_name',0]]
                 export_line_cap[0] = export_line_cap[0].div(unitconversion['divisor'])
 
-                Data_Table_Out = pd.concat([import_line_cap,export_line_cap])
-                Data_Table_Out.set_index(self.AGG_BY,inplace=True)
-                Data_Table_Out.columns = ['line_name',f"line_capacity ({unitconversion['units']})"]
-                Data_Table_Out['type'] = ['import' if v<0 else 'export' for v in Data_Table_Out[f"line_capacity ({unitconversion['units']})"]]
+                data_table_out = pd.concat([import_line_cap,export_line_cap])
+                data_table_out.set_index(self.AGG_BY,inplace=True)
+                data_table_out.columns = ['line_name',f"line_capacity ({unitconversion['units']})"]
+                data_table_out['type'] = ['import' if v<0 else 'export' for v in data_table_out[f"line_capacity ({unitconversion['units']})"]]
                 
                 # subgroup if too many lines for plotting
                 if len(import_line_cap.index) > unique_label_limit or len(export_line_cap.index) > unique_label_limit:
@@ -1884,7 +1857,7 @@ class Transmission(MPlotDataHelper):
                 fig1.add_subplot(111, frameon=False)
                 plt.tick_params(labelcolor='none', top=False, bottom=False, left=False, right=False)
 
-                outputs[zone_input] = {'fig': fig1, 'data_table': Data_Table_Out}
+                outputs[zone_input] = {'fig': fig1, 'data_table': data_table_out}
         return outputs
 
     def region_region_interchange_all_scenarios(self, **kwargs):
@@ -2057,10 +2030,10 @@ class Transmission(MPlotDataHelper):
             # If plotting all regions save output and return none plot_main
             if plot_scenario == False:
                 # Location to save to
-                Data_Table_Out = rr_int_agg
+                data_table_out = rr_int_agg
                 save_figures = self.figure_folder.joinpath(self.AGG_BY + '_transmission')
                 fig.savefig(save_figures.joinpath("Region_Region_Interchange_{}.svg".format(self.Scenarios[0])), dpi=600, bbox_inches='tight')
-                Data_Table_Out.to_csv(save_figures.joinpath("Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
+                data_table_out.to_csv(save_figures.joinpath("Region_Region_Interchange_{}.csv".format(self.Scenarios[0])))
                 outputs = DataSavedInModule()
                 return outputs
 
@@ -2172,11 +2145,11 @@ class Transmission(MPlotDataHelper):
         plt.ylabel('From Region', color='black', rotation='vertical', 
                    labelpad=40)
 
-        Data_Table_Out = pd.concat(Data_Out,axis=1)
+        data_table_out = pd.concat(Data_Out,axis=1)
         save_figures = self.figure_folder.joinpath(f"{self.AGG_BY}_transmission")
         fig.savefig(save_figures.joinpath("region_region_checkerboard.svg"), 
                      dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(save_figures.joinpath("region_region_checkerboard.csv"))
+        data_table_out.to_csv(save_figures.joinpath("region_region_checkerboard.csv"))
 
         outputs = DataSavedInModule()
         return outputs
@@ -2282,7 +2255,7 @@ class Transmission(MPlotDataHelper):
             unitconversion = self.capacity_energy_unitconversion(all_scenarios)
             all_scenarios = all_scenarios/unitconversion['divisor']
 
-            Data_Table_Out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
+            data_table_out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
 
             #Make scenario/color dictionary.
             color_dict = dict(zip(all_scenarios.columns,self.color_list))
@@ -2307,7 +2280,7 @@ class Transmission(MPlotDataHelper):
                 fig.set_title(zone_input)
             ax.set_ylabel(f"Line violations ({unitconversion['units']})",  color='black', rotation='vertical')
 
-            outputs[zone_input] = {'fig': fig,'data_table':Data_Table_Out}
+            outputs[zone_input] = {'fig': fig,'data_table':data_table_out}
 
         return outputs
 
@@ -2376,7 +2349,7 @@ class Transmission(MPlotDataHelper):
 
             net_export_all_scenarios = net_export_all_scenarios/unitconversion["divisor"]
             # Data table of values to return to main program
-            Data_Table_Out = net_export_all_scenarios.add_suffix(f" ({unitconversion['units']})")
+            data_table_out = net_export_all_scenarios.add_suffix(f" ({unitconversion['units']})")
 
             #Make scenario/color dictionary.
             color_dict = dict(zip(net_export_all_scenarios.columns,self.color_list))
@@ -2404,7 +2377,7 @@ class Transmission(MPlotDataHelper):
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)            
                 
-            outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig, 'data_table': data_table_out}
         return outputs
 
     def zonal_interchange(self, figure_name: str = None,
@@ -2583,9 +2556,9 @@ class Transmission(MPlotDataHelper):
             if duration_curve:
                 plt.xlabel('Sorted hour of the year', color='black', labelpad=30)
             
-            Data_Table_Out = pd.concat(net_exports_all)
+            data_table_out = pd.concat(net_exports_all)
             # if plotting all scenarios return figures to plot_main
-            outputs[zone_input] = {'fig': fig,'data_table' : Data_Table_Out}
+            outputs[zone_input] = {'fig': fig,'data_table' : data_table_out}
 
         return outputs
 
@@ -2717,7 +2690,7 @@ class Transmission(MPlotDataHelper):
                 data_table = data_table.add_suffix(f" ({unitconversion['units']})")
                 data_out_chunk.append(data_table)
 
-            Data_Table_Out = pd.concat(data_out_chunk)
+            data_table_out = pd.concat(data_out_chunk)
             
             #Make scenario/color dictionary.
             color_dict = dict(zip(self.Scenarios, self.color_list))
@@ -2732,7 +2705,7 @@ class Transmission(MPlotDataHelper):
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
 
-            outputs[zone_input] = {'fig': fig,'data_table': Data_Table_Out}
+            outputs[zone_input] = {'fig': fig,'data_table': data_table_out}
 
         return outputs
 
@@ -2837,7 +2810,7 @@ class Transmission(MPlotDataHelper):
             data_table = data_table.add_suffix(f" ({unitconversion['units']})")
             data_out_chunk.append(data_table)
         
-        Data_Table_Out = pd.concat(data_out_chunk)
+        data_table_out = pd.concat(data_out_chunk)
          
         #Make scenario/color dictionary.
         color_dict = dict(zip(self.Scenarios, self.color_list))
@@ -2853,11 +2826,90 @@ class Transmission(MPlotDataHelper):
         fig.savefig(self.figure_folder.joinpath(f"{self.AGG_BY }_transmission",
                                 "Individual_Interface_Total_Flow.svg"), 
                     dpi=600, bbox_inches='tight')
-        Data_Table_Out.to_csv(self.figure_folder.joinpath(f"{self.AGG_BY }_transmission",
+        data_table_out.to_csv(self.figure_folder.joinpath(f"{self.AGG_BY }_transmission",
                                            "Individual_Interface_Total_Flow.csv"))
         outputs = DataSavedInModule()
         return outputs
+    
+    def get_line_interface_limits(self, object_name: str, level_name: str, 
+        extra_property_names: list
+    ) -> pd.DataFrame:
+        """Get and process line and interface limits
+
+        Args:
+            object_name (str): _description_
+            level_name (str): _description_
+            extra_property_names (list): _description_
+
+        Returns:
+            pd.DataFrame: dataframe of limts
+        """
+        extra_data_frames = []
+        
+        for ext_prop in extra_property_names:
+            scen_chunk = []
+            for scenario in self.Scenarios:
+                df: pd.DataFrame = self[ext_prop].get(scenario)
+                if df.empty:
+                    date_index = pd.date_range(
+                        start="2010-01-01", periods=1, freq="H", name="timestamp"
+                    )
+                    df = pd.DataFrame(data=[0], index=date_index)
+                else:
+                    df = df.xs(object_name, level=level_name)
+                    df = df.groupby(["timestamp"]).sum()
                 
+                #Filter out unenforced lines/interfaces.
+                df = df[df[0].abs() < 99998] 
+                df = df.rename(columns={0: ext_prop})
+                scenario_names = pd.Series([scenario] * len(df), name='Scenario')
+                df = df.set_index(scenario_names, append=True)
+                scen_chunk.append(df)
+
+            all_scenario_data = pd.concat(scen_chunk, axis=0)
+            compare_limits = all_scenario_data.groupby("Scenario").mean().to_numpy()
+            if (compare_limits[0] == compare_limits).all():
+                extra_data_frames.append(all_scenario_data.xs(scenario, level="Scenario"))
+            else:
+                extra_data_frames.append(all_scenario_data)
+        return pd.concat(extra_data_frames, axis=1).fillna(0)
+
+    def plot_line_interface_limits(self, object_type, limits, mplt, n, duration_curve=False) -> None:
+        """_summary_
+
+        Args:
+            object_type (_type_): _description_
+            limits (_type_): _description_
+            mplt (_type_): _description_
+            n (_type_): _description_
+        """
+        if limits[f"{object_type}_Export_Limit"].to_numpy().sum() > 0:
+            if "Scenario" in limits.index.names:
+                for scenario in self.Scenarios:
+                    export_limits = limits.xs(scenario, level="Scenario").filter(like='Export', axis=1)
+                    import_limits = limits.xs(scenario, level="Scenario").filter(like='Import', axis=1)
+
+                    if duration_curve or len(limits.index.get_level_values('timestamp') == 1):
+                        mplt.axs[n].axhline(y=import_limits.to_numpy().max(), linestyle='-.', label=f"{scenario}\nImport Limit")
+                        mplt.axs[n].axhline(y=export_limits.to_numpy().max(), linestyle='--', label=f"{scenario}\nExport Limit")
+                    else:
+                        mplt.lineplot(import_limits.squeeze(), linestyle='-.', label=f"{scenario}\nImport Limit", sub_pos=n)
+                        mplt.lineplot(export_limits.squeeze(), linestyle='--', label=f"{scenario}\nExport Limit", sub_pos=n)
+            else:
+                export_limits = limits.filter(like='Export', axis=1)
+                import_limits = limits.filter(like='Import', axis=1)
+                if duration_curve or len(limits.index.get_level_values('timestamp') == 1):
+                        mplt.axs[n].axhline(y=import_limits.to_numpy().max(), linestyle='-.', label="Import Limit")
+                        mplt.axs[n].axhline(y=export_limits.to_numpy().max(), linestyle='--', label="Export Limit")
+                else:       
+                    mplt.lineplot(import_limits.squeeze(), linestyle='-.', label="Import Limit", sub_pos=n)
+                    mplt.lineplot(export_limits.squeeze(), linestyle='--', label="Export Limit", sub_pos=n)
+
+
+        
+
+
+
     ### Archived Code ####
 
     # def line_util_agged(self):
@@ -2960,7 +3012,7 @@ class Transmission(MPlotDataHelper):
     #             all_scenarios = pd.concat([all_scenarios,onezone], axis = 1)
 
     #         # Data table of values to return to main program
-    #         Data_Table_Out = all_scenarios.copy()
+    #         data_table_out = all_scenarios.copy()
 
     #         #Make scenario/color dictionary.
     #         scenario_color_dict = {}
@@ -3003,7 +3055,7 @@ class Transmission(MPlotDataHelper):
     #         # Manually add the first legend back
     #         ax.add_artist(leg1)
 
-    #         outputs[zone_input] = {'fig': fig, 'data_table': Data_Table_Out}
+    #         outputs[zone_input] = {'fig': fig, 'data_table': data_table_out}
     #     return outputs
 
 
@@ -3056,6 +3108,6 @@ class Transmission(MPlotDataHelper):
 #         ax3.legend(loc='best')
 # #            plt.lim((0,int(prop)))
 
-#         Data_Table_Out = rr_int_hr
+#         data_table_out = rr_int_hr
 
-        # return {'fig': fig, 'data_table': Data_Table_Out}
+        # return {'fig': fig, 'data_table': data_table_out}
