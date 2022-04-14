@@ -491,7 +491,7 @@ class GenerationStack(MPlotDataHelper):
                 extra_plot_data = extra_plot_data / unitconversion["divisor"]
 
                 # Adds property annotation and
-                if pd.notna(prop):
+                if prop:
                     x_time_value = mplt.add_property_annotation(
                         pd.concat([stacked_gen_df, extra_plot_data], axis=1),
                         prop,
