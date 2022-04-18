@@ -451,7 +451,7 @@ class ProcessPLEXOS(Process):
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
         """
-        df = df.droplevel(level=["band", "property", "category"])
+        df = df.droplevel(level=["band", "property"])
         df.index.rename("line_name", level="name", inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names)
