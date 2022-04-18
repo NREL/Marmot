@@ -528,6 +528,8 @@ class MarmotPlot(SetupLogger):
 
                 if pd.isna(row.iloc[2]):
                     prop = None
+                else:
+                    prop = row.iloc[2]
                 # Modifies timezone string before plotting
                 if pd.isna(row.iloc[6]):
                     timezone_string: str = "Date"
