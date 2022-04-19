@@ -82,7 +82,7 @@ class Process:
                 Defaults to pd.DataFrame().
         """
         self.input_folder = input_folder
-        self.output_file_path = output_file_path
+        self.output_file_path = Path(output_file_path)
         self.Region_Mapping = Region_Mapping
         self.emit_names = emit_names
 
