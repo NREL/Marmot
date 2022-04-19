@@ -1,5 +1,5 @@
-"""Main formatting module for ReEDS results,
-Contains classes and methods specific to ReEDS outputs.
+"""Main formatting module for SIIP results,
+Contains classes and methods specific to SIIP outputs.
 Inherits the Process class.
 
 @author: Daniel Levie
@@ -127,7 +127,6 @@ class ProcessSIIP(Process):
         units_index = pd.Index([converted_units[0]] * len(df), name="units")
         df.set_index(units_index, append=True, inplace=True)
         return df
-
 
     def df_process_generator(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
 

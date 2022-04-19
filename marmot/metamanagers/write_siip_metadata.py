@@ -4,7 +4,6 @@ import pandas as pd
 from pathlib import Path
 
 
-
 class WriteSIIPMetaData():
 
     META_KEYS_TO_METHODS = {
@@ -32,7 +31,7 @@ class WriteSIIPMetaData():
             meta_method = getattr(meta_cls, meta_cls.META_KEYS_TO_METHODS.get(key))
             meta_method(json_data[key], partition)
 
-    def write_regions(self, data: dict, partition: str):
+    def write_regions(self, data: dict, partition: str) -> None:
         
         df = pd.DataFrame(data).rename(columns={0: "name"})
         df["category"] = "-"
@@ -40,21 +39,21 @@ class WriteSIIPMetaData():
                 f"metadata/{partition}/objects/regions",
                 mode="a")
 
-    def write_generator_category(self, data: dict, partition: str):
+    def write_generator_category(self, data: dict, partition: str) -> None:
 
         df = pd.DataFrame(data.items()).rename(columns={0: "name", 1: "category"})
         df.to_hdf(self.output_file_path, 
                 f"metadata/{partition}/objects/generators",
                 mode="a")
 
-    def write_region_generators(self, data: dict, partition: str):
+    def write_region_generators(self, data: dict, partition: str) -> None:
 
         df = pd.DataFrame(data.items()).rename(columns={0: "child", 1: "parent"})
         df.to_hdf(self.output_file_path, 
                 f"metadata/{partition}/relations/regions_generators",
                 mode="a")
 
-    def write_reserve_generators(self, data: dict, partition: str):
+    def write_reserve_generators(self, data: dict, partition: str) -> None:
 
         df = pd.DataFrame.from_dict(data, orient='index', columns=["child", "parent"])
         df = df.reset_index().rename(columns={"index": "gen_name_reserve"})
