@@ -30,8 +30,8 @@ class Transmission(MPlotDataHelper):
     """System transmission plots.
 
     The transmission.py module contains methods that are
-    related to the transmission network. 
-    
+    related to the transmission network.
+
     Transmission inherits from the MPlotDataHelper class to assist 
     in creating figures.
     """
@@ -40,17 +40,17 @@ class Transmission(MPlotDataHelper):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the MPlotDataHelper
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the MPlotDataHelper
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
-        
+
         self.font_defaults = mconfig.parser("font_settings")
-        self.meta = MetaData(self.processed_hdf5_folder, 
+        self.meta = MetaData(self.processed_hdf5_folder,
                             Region_Mapping=self.Region_Mapping)
 
     def line_util(self, **kwargs):
@@ -917,7 +917,9 @@ class Transmission(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule class
         """
-        
+        if prop is None:
+            return InputSheetError()
+
         return self._tx_flow_ind(connection='interface', 
                         figure_name=figure_name,
                         prop=prop
@@ -948,6 +950,9 @@ class Transmission(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule class
         """
+        if prop is None:
+            return InputSheetError()
+
         return self._tx_flow_ind(connection='line', 
                         figure_name=figure_name,
                         prop=prop
@@ -999,8 +1004,6 @@ class Transmission(MPlotDataHelper):
         if 1 in check_input_data:
             return MissingInputData()
 
-        if prop is None:
-            return InputSheetError()
         #Select only lines specified in Marmot_plot_select.csv.
         select_lines = [x.strip() for x in prop.split(",")]        
         logger.info(f'Plotting only {connection}s specified in Marmot_plot_select.csv')
@@ -2956,14 +2959,19 @@ class Transmission(MPlotDataHelper):
                 extra_data_frames.append(all_scenario_data)
         return pd.concat(extra_data_frames, axis=1).fillna(0)
 
-    def plot_line_interface_limits(self, object_type, limits, mplt, n, duration_curve=False) -> None:
-        """_summary_
+    def plot_line_interface_limits(self, object_type: str, limits: pd.DataFrame, 
+                mplt: PlotLibrary, n: int, duration_curve: bool = False
+        ) -> None:
+        """Plots line/interface limits on a subplot
 
         Args:
-            object_type (_type_): _description_
-            limits (_type_): _description_
-            mplt (_type_): _description_
-            n (_type_): _description_
+            object_type (str): "line" or "interface"
+            limits (pd.DataFrame): dataframe of import/export limits with a timeseries
+            mplt (PlotLibrary): Instance of PlotLibrary
+            n (int): Counter for subplots 
+            duration_curve (bool, optional): When potting a duration curve. 
+                If True, uses the max of the limit values. 
+                Defaults to False.
         """
         if (limits[f"{object_type}_Export_Limit"].to_numpy().sum() > 0 or 
             limits[f"{object_type}_Import_Limit"].to_numpy().sum() > 0):
