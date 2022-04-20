@@ -43,7 +43,7 @@ class MetaData:
             partition_number (int, optional): Which temporal partition of h5 data to retrieve
                 metadata from in the formatted h5 file. Defaults to 0.
         """
-        self.HDF5_folder_in = HDF5_folder_in
+        self.HDF5_folder_in = Path(HDF5_folder_in)
         self.Region_Mapping = Region_Mapping
         self.read_from_formatted_h5 = read_from_formatted_h5
         self.partition_number = partition_number
