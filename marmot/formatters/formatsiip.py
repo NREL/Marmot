@@ -25,14 +25,21 @@ class ProcessSIIP(Process):
 
     # Maps SIIP property names to Marmot names
     PROPERTY_MAPPING: dict = {
-        "marmot_gen_UC": "generator_Generation",
-        "marmot_load_UC": "region_Load",
-        "marmot_reserve_contribution_UC": "reserve_Provision"}
+        "generator_marmot_gen_UC": "generator_Generation",
+        "generator_marmot_gen_timeseries_UC": "generator_Available_Capacity",
+        "region_marmot_load_UC": "region_Demand",
+        "reserves_generators_marmot_reserve_contribution_UC": "reserves_generators_Provision"}
     """Maps simulation model property names to Marmot property names"""
     # Extra custom properties that are created based off existing properties.
     # The dictionary keys are the existing properties and the values are the new
     # property names and methods used to create it.
-    EXTRA_MARMOT_PROPERTIES: dict = {}
+    EXTRA_MARMOT_PROPERTIES: dict = {
+        "generator_Generation": [
+            ("generator_Curtailment", ExtraProperties.siip_generator_curtailment),
+            ("generator_Generation_Annual", ExtraProperties.annualize_property)],
+        "generator_Curtailment": [
+            ("generator_Curtailment_Annual", ExtraProperties.annualize_property)],
+        "region_Demand": [("region_Load", ExtraProperties.siip_region_total_load)]}
     """Dictionary of Extra custom properties that are created based off existing properties."""
 
     def __init__(
@@ -76,7 +83,6 @@ class ProcessSIIP(Process):
         """
         if self._get_input_files == None:
             self._get_input_files = [self.input_folder.name]
-
         return self._get_input_files
 
     def output_metadata(self, *_) -> None:
@@ -117,15 +123,21 @@ class ProcessSIIP(Process):
         process_att = getattr(self, f"df_process_{prop_class}")
         # Process attribute and return to df
         df = process_att(df, model_filename)
+        # Set multiindex
+        df_idx_col = list(df.columns)
+        df_idx_col.pop(df_idx_col.index(0))
+        # move timestamp to start of df
+        df_idx_col.insert(0, df_idx_col.pop(df_idx_col.index("timestamp")))
+        df = df.set_index(df_idx_col)
         
         df_units = "MW"
         # find unit conversion values
         converted_units = self.UNITS_CONVERSION.get(df_units, (df_units, 1))
-
         # Convert units and add unit column to index
         df = df * converted_units[1]
         units_index = pd.Index([converted_units[0]] * len(df), name="units")
         df.set_index(units_index, append=True, inplace=True)
+        df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
     def df_process_generator(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
@@ -136,13 +148,6 @@ class ProcessSIIP(Process):
         df = df.merge(region_gen_cat_meta, how='left', on="gen_name")
         if not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
-
-        df_idx_col = list(df.columns)
-        df_idx_col.pop(df_idx_col.index(0))
-        # move timestamp to start of df
-        df_idx_col.insert(0, df_idx_col.pop(df_idx_col.index("timestamp")))
-        df = df.set_index(df_idx_col)
-        df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
     def df_process_region(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
@@ -150,13 +155,6 @@ class ProcessSIIP(Process):
         df = df.melt(id_vars=["timestamp"], var_name="region", value_name=0)
         if not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
-        
-        df_idx_col = list(df.columns)
-        df_idx_col.pop(df_idx_col.index(0))
-        # move timestamp to start of df
-        df_idx_col.insert(0, df_idx_col.pop(df_idx_col.index("timestamp")))
-        df = df.set_index(df_idx_col)
-        df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
     def df_process_reserves_generators(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
@@ -170,13 +168,6 @@ class ProcessSIIP(Process):
         df = df.merge(region_gen_cat_meta, how='left', on="gen_name")
         if not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
-
-        df_idx_col = list(df.columns)
-        df_idx_col.pop(df_idx_col.index(0))
-        # move timestamp to start of df
-        df_idx_col.insert(0, df_idx_col.pop(df_idx_col.index("timestamp")))
-        df = df.set_index(df_idx_col)
-        df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
 

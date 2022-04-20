@@ -228,3 +228,58 @@ class ExtraProperties:
         ]
         timestamp_annualized.extend(index_names)
         return df.groupby(timestamp_annualized).sum()
+
+    def siip_generator_curtailment(
+        self, df: pd.DataFrame, timescale: str = "interval"
+    ) -> pd.DataFrame:
+        """Creates a generator_Curtailment property for SIIP result sets
+
+        Args:
+            df (pd.DataFrame): generator_Generation df
+            timescale (str, optional): Data timescale, e.g Hourly, Monthly, 5 minute etc.
+                Defaults to 'interval'.
+
+        Returns:
+            pd.DataFrame: generator_Curtailment df
+        """
+        avail_gen = self.model.get_processed_data(
+            "generator", "marmot_gen_timeseries_UC", timescale, self.files_list[0]
+        )
+
+        if avail_gen.empty is True:
+            logger.warning(
+                "marmot_gen_timeseries_UC & "
+                "marmot_gen_UC are required "
+                "for Curtailment calculation"
+            )
+            return pd.DataFrame()
+
+        return (avail_gen - df).dropna()
+
+    def siip_region_total_load(
+        self, df: pd.DataFrame, timescale: str = "interval"
+    ) -> pd.DataFrame:
+        """Creates a region_Load property for SIIP results sets
+
+        SIIP does not include storage charging in total load
+        This is added to region_Demand to get region_Load
+
+        Args:
+            df (pd.DataFrame): region_Demand df
+            timescale (str, optional): Data timescale.
+                Defaults to 'interval'.
+
+        Returns:
+            pd.DataFrame: region_Load df
+        """
+        pump_load = self.model.get_processed_data(
+            "generator", "pump", "interval", self.files_list[0]
+        )
+
+        if pump_load.empty is True:
+            logger.info("region_Load will equal region_Demand")
+            return df
+
+        pump_load = pump_load.groupby(df.index.names).sum()
+
+        return df + pump_load
