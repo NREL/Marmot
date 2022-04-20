@@ -41,6 +41,34 @@ def save_to_h5(
     )
     logger.info("Data saved to h5 file successfully\n")
 
+def metadata_to_h5(
+    df: pd.DataFrame,
+    file_name: Path,
+    key: str,
+    partition: str = "model_metadata",
+    mode: str = "a",
+    **kwargs,
+) -> None:
+    """Save metadata to formatted h5 file.
+
+    Args:
+        df (pd.DataFrame): Dataframe to save
+        file_name (Path): name of hdf5 file
+        key (str): metadata key, e.g objects/generators
+        partition (str, optional): metadata partition. 
+            Defaults to "model_metadata".
+        mode (str, optional): file access mode. 
+        Defaults to "a".
+        **kwargs
+            These parameters will be passed pandas.to_hdf function.
+    """
+    df.to_hdf(
+        file_name, 
+        key=f"metadata/{partition}/{key}",
+        mode=mode,
+        **kwargs,
+    )
+
 def read_processed_h5file(processed_hdf5_folder: Path, plx_prop_name: str, scenario: str
 ) -> pd.DataFrame:
     """Reads Data from processed h5file.
