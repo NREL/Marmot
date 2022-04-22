@@ -1,63 +1,81 @@
-import logging
+"""Write SIIP metadata to Marmot formatted results file 
+"""
 import json
 import pandas as pd
 from pathlib import Path
-from marmot.utils.dataio import metadata_to_h5
+from marmot.utils.dataio import write_metadata_to_h5
 
-
-class WriteSIIPMetaData():
-
-    META_KEYS_TO_METHODS = {
-        "Regions": ("write_regions", "objects/regions"),
-        "Generator_fuel_mapping": ("write_generator_category", "objects/generators"),
-        "Generator_region_mapping": ("write_region_generators", "relations/regions_generators"),
-        "Generator_reserve_mapping": ("write_reserve_generators", "relations/reserves_generators"),
+META_KEYS_TO_FUNCTIONS: dict = {
+        "Regions": ("format_regions_meta", "objects/regions"),
+        "Generator_fuel_mapping": ("format_generator_category_meta", "objects/generators"),
+        "Generator_region_mapping": ("format_region_generators_meta", "relations/regions_generators"),
+        "Generator_reserve_mapping": ("format_reserve_generators_meta", "relations/reserves_generators"),
     }
+"""json metadata keys to functions and Marmot metadata keys."""
 
-    def __init__(self, metadata_file: Path, output_file_path: Path,
-                partition: str = "SIIP_metadata") -> None:
-        
-        self.metadata_file = metadata_file
-        self.output_file_path = output_file_path
-        self.partition = partition
+def metadata_to_h5(metadata_file: Path, output_file_path: Path, 
+            partition: str = "SIIP_metadata") -> None:
+    """Process and write all SIIP metadata to hdf5 file
 
-    @classmethod
-    def write_to_h5(cls, metadata_file: Path, output_file_path: Path, 
-                partition: str = "SIIP_metadata") -> None:
-        
-        meta_cls = cls(metadata_file, output_file_path, partition)
+    Args:
+        metadata_file (Path): Path to SIIP metadata json file
+        output_file_path (Path): Path to formatted h5 output file.
+        partition (str, optional): Metadata partition. 
+            Defaults to "SIIP_metadata".
+    """
+    with open(metadata_file) as f:
+        json_data = json.load(f)
 
-        with open(metadata_file) as f:
-            json_data = json.load(f)
+    for key in json_data.keys():
+        func_key_tup = META_KEYS_TO_FUNCTIONS.get(key)
+        meta_func = globals()[func_key_tup[0]]
+        df = meta_func(json_data[key])
+        write_metadata_to_h5(df, output_file_path, func_key_tup[1], partition)
 
-        for key in json_data.keys():
-            method_key_tup = meta_cls.META_KEYS_TO_METHODS.get(key)
-            meta_method = getattr(meta_cls, method_key_tup[0])
-            df = meta_method(json_data[key])
-            metadata_to_h5(df, output_file_path, method_key_tup[1], partition)
+def format_regions_meta(data: dict) -> pd.DataFrame:
+    """Format SIIP regions metadata
 
-    @staticmethod
-    def write_regions(data: dict) -> pd.DataFrame:
-        
-        df = pd.DataFrame(data).rename(columns={0: "name"})
-        df["category"] = "-"
-        return df
+    Args:
+        data (dict): "Regions" SIIP json metadata entry
 
-    @staticmethod
-    def write_generator_category(data: dict) -> pd.DataFrame:
+    Returns:
+        pd.DataFrame: Formatted metadata
+    """
+    df = pd.DataFrame(data).rename(columns={0: "name"})
+    df["category"] = "-"
+    return df
 
-        df = pd.DataFrame(data.items()).rename(columns={0: "name", 1: "category"})
-        return df
+def format_generator_category_meta(data: dict) -> pd.DataFrame:
+    """Format SIIP generator category metadata
 
-    @staticmethod
-    def write_region_generators(data: dict) -> pd.DataFrame:
+    Args:
+        data (dict): "Generator_fuel_mapping" SIIP json metadata entry
 
-        df = pd.DataFrame(data.items()).rename(columns={0: "child", 1: "parent"})
-        return df
+    Returns:
+        pd.DataFrame: Formatted metadata
+    """
+    return pd.DataFrame(data.items()).rename(columns={0: "name", 1: "category"})
 
-    @staticmethod
-    def write_reserve_generators(data: dict) -> pd.DataFrame:
+def format_region_generators_meta(data: dict) -> pd.DataFrame:
+    """"Format SIIP region generator metadata
 
-        df = pd.DataFrame.from_dict(data, orient='index', columns=["child", "parent"])
-        df = df.reset_index().rename(columns={"index": "gen_name_reserve"})
-        return df
+    Args:
+        data (dict): "Generator_region_mapping" SIIP json metadata entry
+
+    Returns:
+        pd.DataFrame: Formatted metadata
+    """
+    return pd.DataFrame(data.items()).rename(columns={0: "child", 1: "parent"})
+
+def format_reserve_generators_meta(data: dict) -> pd.DataFrame:
+    """"Format SIIP reserve generators metadata
+
+    Args:
+        data (dict): "Generator_reserve_mapping" SIIP json metadata entry
+
+    Returns:
+        pd.DataFrame: Formatted metadata
+    """
+    df = pd.DataFrame.from_dict(data, orient='index', columns=["child", "parent"])
+    df = df.reset_index().rename(columns={"index": "gen_name_reserve"})
+    return df
