@@ -41,7 +41,7 @@ def save_to_h5(
     )
     logger.info("Data saved to h5 file successfully\n")
 
-def metadata_to_h5(
+def write_metadata_to_h5(
     df: pd.DataFrame,
     file_name: Path,
     key: str,
