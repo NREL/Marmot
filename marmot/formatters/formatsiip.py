@@ -8,11 +8,10 @@ Inherits the Process class.
 import logging
 import pandas as pd
 from pathlib import Path
-from typing import List
 
 import marmot.utils.mconfig as mconfig
+import marmot.metamanagers.write_siip_metadata as write_siip_metadata
 from marmot.metamanagers.read_metadata import MetaData
-from marmot.metamanagers.write_siip_metadata import WriteSIIPMetaData
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraProperties
 
@@ -89,8 +88,7 @@ class ProcessSIIP(Process):
         """Add SIIP specific metadata to formatted h5 file .
         """
         json_metadata_file = self.input_folder.joinpath("metadata.json")
-    
-        WriteSIIPMetaData.write_to_h5(json_metadata_file, 
+        write_siip_metadata.metadata_to_h5(json_metadata_file, 
         self.output_file_path)
 
     def get_processed_data(
@@ -102,7 +100,7 @@ class ProcessSIIP(Process):
         Args:
             prop_class (str): Property class e.g Region, Generator, Zone etc
             prop (str): Property e.g marmot_gen_UC, marmot_load_UC etc.
-            timescale (str): Data timescale, e.g interval, summary.
+            timescale (str): Data timescale, e.g interval, month, year, etc.
             model_filename (str): name of model to process.
 
         Returns:
@@ -123,6 +121,9 @@ class ProcessSIIP(Process):
         process_att = getattr(self, f"df_process_{prop_class}")
         # Process attribute and return to df
         df = process_att(df, model_filename)
+        # Add region mapping
+        if 'region' in df.columns and not self.Region_Mapping.empty:
+            df = df.merge(self.Region_Mapping, how="left", on="region")
         # Set multiindex
         df_idx_col = list(df.columns)
         df_idx_col.pop(df_idx_col.index(0))
@@ -140,25 +141,46 @@ class ProcessSIIP(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_generator(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_generator(self, df: pd.DataFrame, model_filename: str
+    ) -> pd.DataFrame:
+        """Format SIIP Generator class data
 
+        Args:
+            df (pd.DataFrame): Data Frame to process
+            model_filename (str): name of scenario, used for metadata
+
+        Returns:
+            pd.DataFrame: dataframe formatted to generator class spec
+        """
         region_gen_cat_meta = self.metadata.region_generator_category(model_filename).reset_index()
 
         df = df.melt(id_vars=["timestamp"], var_name="gen_name", value_name=0)
         df = df.merge(region_gen_cat_meta, how='left', on="gen_name")
-        if not self.Region_Mapping.empty:
-            df = df.merge(self.Region_Mapping, how="left", on="region")
         return df
 
     def df_process_region(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+        """Format SIIP Region data
 
-        df = df.melt(id_vars=["timestamp"], var_name="region", value_name=0)
-        if not self.Region_Mapping.empty:
-            df = df.merge(self.Region_Mapping, how="left", on="region")
-        return df
+        Args:
+            df (pd.DataFrame): Data Frame to process
+            model_filename (str): name of scenario, used for metadata
 
-    def df_process_reserves_generators(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
-        
+        Returns:
+            pd.DataFrame: dataframe formatted to region class spec
+        """
+        return df.melt(id_vars=["timestamp"], var_name="region", value_name=0)
+
+    def df_process_reserves_generators(self, df: pd.DataFrame, model_filename: str
+    ) -> pd.DataFrame:
+        """Format SIIP Reserves Generator data
+
+        Args:
+            df (pd.DataFrame): Data Frame to process
+            model_filename (str): name of scenario, used for metadata
+
+        Returns:
+            pd.DataFrame: dataframe formatted to reserves generator class spec
+        """
         reserves_generators = self.metadata.reserves_generators(model_filename)
         region_gen_cat_meta = self.metadata.region_generator_category(model_filename).reset_index()
 
@@ -166,8 +188,6 @@ class ProcessSIIP(Process):
         df = df.merge(reserves_generators, how='left', on="gen_name_reserve")
         df = df.drop("gen_name_reserve", axis=1)
         df = df.merge(region_gen_cat_meta, how='left', on="gen_name")
-        if not self.Region_Mapping.empty:
-            df = df.merge(self.Region_Mapping, how="left", on="region")
         return df
 
 
