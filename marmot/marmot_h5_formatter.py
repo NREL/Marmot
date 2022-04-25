@@ -125,7 +125,7 @@ class MarmotFormat(SetupLogger):
                 Region_Mapping = pd.DataFrame()
             self.Region_Mapping = Region_Mapping
         elif isinstance(Region_Mapping, pd.DataFrame):
-            if not Region_Mapping.empty:
+            if not self.Region_Mapping.empty:
                 Region_Mapping = Region_Mapping.astype(object)
             self.Region_Mapping = Region_Mapping
         try:
