@@ -1430,7 +1430,7 @@ class Transmission(MPlotDataHelper):
 
         try:
             Stacked_Gen = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
-            if self.shift_leapday == True:
+            if self.shift_leapday is True:
                 Stacked_Gen = self.shift_leapday(Stacked_Gen,self.Marmot_Solutions_folder)
             Stacked_Gen = Stacked_Gen.xs(zone_input,level=fxnaggregator)
         except KeyError:
@@ -1445,7 +1445,7 @@ class Transmission(MPlotDataHelper):
         # Insert Curtailmnet into gen stack if it exhists in database
         if self.mplot_data_dict[f"generator_{curtailment_name}"]:
             Stacked_Curt = self.mplot_data_dict[f"generator_{curtailment_name}"].get(scenario).copy()
-            if self.shift_leapday == True:
+            if self.shift_leapday is True:
                 Stacked_Curt = self.shift_leapday(Stacked_Curt,self.Marmot_Solutions_folder)
             if zone_input in Stacked_Curt.index.get_level_values(fxnaggregator).unique():
                 Stacked_Curt = Stacked_Curt.xs(zone_input,level=fxnaggregator)
@@ -1535,7 +1535,7 @@ class Transmission(MPlotDataHelper):
         # for scenario in self.Scenarios:
         #     try:
         #         all_gen = self.mplot_data_dict['generator_Generation'].get(scenario).copy()
-        #         if self.shift_leapday == True:
+        #         if self.shift_leapday is True:
         #             all_gen = self.shift_leapday(all_gen,self.Marmot_Solutions_folder)
         #         # Stacked_Gen = Stacked_Gen.xs(zone_input,level=self.AGG_BY)
         #     except KeyError:
@@ -1569,7 +1569,7 @@ class Transmission(MPlotDataHelper):
                     net_load,label_addenda = self._grab_zone_net_load(zone_input,scenario,interconnect_aggby=interconnect_net_load)
 
                 rr_int = self.mplot_data_dict[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
-                if self.shift_leapday == True:
+                if self.shift_leapday is True:
                     rr_int = self.shift_leapday(rr_int,self.Marmot_Solutions_folder)
                 #may need to check agg here if not zone or region
 
@@ -1621,7 +1621,7 @@ class Transmission(MPlotDataHelper):
                     lookup_label += f'_{prop[1]}'
                 else:
                     Load = self.mplot_data_dict[lookup_label].get(scenario).copy()
-                if self.shift_leapday == True:
+                if self.shift_leapday is True:
                     Load = self.shift_leapday(Load,self.Marmot_Solutions_folder)
                 
                 if prop[0]=="Net_Interchange": #want a second prop to tell what to replace?
@@ -2098,7 +2098,7 @@ class Transmission(MPlotDataHelper):
                 data_table_chunks.append(data_table)
 
             # if plotting all scenarios add facet labels
-            if plot_scenario == True:
+            if plot_scenario is True:
                 mplt.add_facet_labels(xlabels=self.xlabels,
                                       ylabels = self.ylabels)
 
@@ -2351,7 +2351,7 @@ class Transmission(MPlotDataHelper):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            if total_violations==True:                
+            if total_violations is True:                
                 all_scenarios_tot = all_scenarios.sum()
                 
                 # Set x-tick labels
@@ -2755,12 +2755,12 @@ class Transmission(MPlotDataHelper):
                     net_export.columns = [other_zone]
 
                     if pd.notna(start_date_range):
-                        if other_zone == other_zones[0]:
-                            logger.info(f"Plotting specific date range: \
-                            {str(start_date_range)} to {str(end_date_range)}")
-
-                        net_export = net_export[start_date_range : end_date_range]
-
+                        net_export = self.set_timestamp_date_range(
+                            net_export, start_date_range, end_date_range
+                        )
+                        if net_export.empty is True:
+                            logger.warning("No data in selected Date Range")
+                            continue
                     net_exports.append(net_export)
 
                 net_exports = pd.concat(net_exports, axis=1)
@@ -2805,7 +2805,7 @@ class Transmission(MPlotDataHelper):
 
         return outputs
 
-    def total_int_flow_ind(self, prop: str = None, 
+    def total_int_flow_ind(self, prop: str, 
                            start_date_range: str = None,
                            end_date_range: str = None, **_):
         """Creates a clustered barplot of the total flow for a specific interface, separated by positive and negative flows.
@@ -2817,8 +2817,7 @@ class Transmission(MPlotDataHelper):
         separate group of clustered bar.
 
         Args:
-            prop (str, optional): Comma separated string of interfaces to plot. 
-                Defaults to None.
+            prop (str): Comma separated string of interfaces to plot. 
             start_date_range (str, optional): Defines a start date at which to represent data from. 
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
@@ -2875,12 +2874,14 @@ class Transmission(MPlotDataHelper):
                     inter = inter[1:]
 
                 flow = flow_all.xs(inter, level='interface_name')
-                flow = flow.reset_index()
-                 
+                
                 if pd.notna(start_date_range):
-                    logger.info("Plotting specific date range: \
-                    {} to {}".format(str(start_date_range), str(end_date_range)))
-                    flow = flow[start_date_range : end_date_range]
+                    flow = self.set_timestamp_date_range(
+                        flow, start_date_range, end_date_range
+                    )
+                    if flow.empty is True:
+                        logger.warning("No data in selected Date Range")
+                        continue
             
                 flow = flow[0]
 
