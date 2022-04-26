@@ -2265,7 +2265,9 @@ class Transmission(MPlotDataHelper):
     def _violations(self, total_violations: bool = False, 
                     timezone: str = "", 
                     start_date_range: str = None,
-                    end_date_range: str = None, **_):
+                    end_date_range: str = None,
+                    **_,
+    ):
         """Creates line violation plots, line plot and barplots
 
         This methods is called from line_violations_timeseries() and line_violations_totals()
@@ -2288,7 +2290,7 @@ class Transmission(MPlotDataHelper):
         # List of properties needed by the plot, properties are a set of tuples and 
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
-        properties = [(True,"line_Violation",self.Scenarios)]
+        properties = [(True, "line_Violation", self.Scenarios)]
         
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
         # with all required properties, returns a 1 if required data is missing
@@ -2298,8 +2300,8 @@ class Transmission(MPlotDataHelper):
             return MissingInputData()
 
         for zone_input in self.Zones:
-            logger.info(f'Zone = {zone_input}')
-            all_scenarios = pd.DataFrame()
+            logger.info(f'Zone = {zone_input}')            
+            scenario_df_list = []
 
             for scenario in self.Scenarios:
                 logger.info(f"Scenario = {str(scenario)}")
@@ -2310,21 +2312,30 @@ class Transmission(MPlotDataHelper):
                     lines = self.meta.region_lines(scenario)
 
                 line_v = self["line_Violation"].get(scenario)
-                line_v = line_v.reset_index()
+                
+                if pd.notna(start_date_range):
+                    line_v = self.set_timestamp_date_range(
+                        line_v, start_date_range, end_date_range
+                    )
+                    if line_v.empty is True:
+                        logger.warning("No data in selected Date Range")
+                        continue
 
-                viol = line_v.merge(lines,on = 'line_name',how = 'left')
+                line_v = line_v.reset_index()
+                viol = line_v.merge(lines, on='line_name', how='left')
 
                 if self.AGG_BY == 'zone':
                     viol = viol.groupby(["timestamp", "zone"]).sum()
                 else:
                     viol = viol.groupby(["timestamp", self.AGG_BY]).sum()
 
-                one_zone = viol.xs(zone_input, level = self.AGG_BY)
-                one_zone = one_zone.rename(columns = {0 : scenario})
+                one_zone = viol.xs(zone_input, level=self.AGG_BY)
+                one_zone = one_zone.rename(columns={0: scenario})
                 one_zone = one_zone.abs() #We don't care the direction of the violation
-                all_scenarios = pd.concat([all_scenarios,one_zone], axis = 1)
+                scenario_df_list.append(one_zone)
+            
+            all_scenarios = pd.concat(scenario_df_list, axis=1)
 
-            all_scenarios.columns = all_scenarios.columns.str.replace('_',' ')
             #remove columns that are all equal to 0
             all_scenarios = all_scenarios.loc[:, (all_scenarios != 0).any(axis=0)]
             
@@ -2337,31 +2348,37 @@ class Transmission(MPlotDataHelper):
 
             data_table_out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
 
-            #Make scenario/color dictionary.
-            color_dict = dict(zip(all_scenarios.columns,self.color_list))
-
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            if total_violations==True:
+            if total_violations==True:                
                 all_scenarios_tot = all_scenarios.sum()
-                all_scenarios_tot.plot.bar(stacked=False, rot=0,
-                                            color=[color_dict.get(x, '#333333') for x in all_scenarios_tot.index],
-                                            linewidth='0.1', width=0.35, ax=ax)
+                
+                # Set x-tick labels
+                if self.custom_xticklabels:
+                    tick_labels = self.custom_xticklabels
+                else:
+                    tick_labels = all_scenarios_tot.index
+                mplt.barplot(
+                    all_scenarios_tot,
+                    color=self.color_list,
+                    stacked=False,
+                    custom_tick_labels=tick_labels)
             else:
                 for column in all_scenarios:
-                    mplt.lineplot(all_scenarios,column,color=color_dict,label=column)
+                    mplt.lineplot(all_scenarios, column, color=self.color_list, 
+                    label=column)
                 ax.margins(x=0.01)
                 mplt.set_subplot_timeseries_format(minticks=6,maxticks=12)
-                ax.set_xlabel(timezone,  color='black', rotation='horizontal')
+                ax.set_xlabel(timezone, color='black', rotation='horizontal')
                 mplt.add_legend()
 
             if plot_data_settings["plot_title_as_region"]:
-                fig.set_title(zone_input)
-            ax.set_ylabel(f"Line violations ({unitconversion['units']})",  color='black', rotation='vertical')
+                mplt.add_main_title(zone_input)
+            ax.set_ylabel(f"Line violations ({unitconversion['units']})", color='black',
+                rotation='vertical')
 
             outputs[zone_input] = {'fig': fig,'data_table':data_table_out}
-
         return outputs
 
     def net_export(self, timezone: str = "", 
