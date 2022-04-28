@@ -923,7 +923,7 @@ class Transmission(MPlotDataHelper):
 
         return self._tx_flow_ind(connection='interface', 
                         figure_name=figure_name,
-                        prop=prop
+                        prop=prop,
                         **kwargs)
 
     def line_flow_ind(self, 
@@ -956,7 +956,7 @@ class Transmission(MPlotDataHelper):
 
         return self._tx_flow_ind(connection='line', 
                         figure_name=figure_name,
-                        prop=prop
+                        prop=prop,
                         **kwargs)
 
     def _tx_flow_ind(self, 
