@@ -24,10 +24,10 @@ class ProcessSIIP(Process):
 
     # Maps SIIP property names to Marmot names
     PROPERTY_MAPPING: dict = {
-        "generator_marmot_gen_UC": "generator_Generation",
-        "generator_marmot_gen_timeseries_UC": "generator_Available_Capacity",
-        "region_marmot_load_UC": "region_Demand",
-        "reserves_generators_marmot_reserve_contribution_UC": "reserves_generators_Provision"}
+        "generator_generation_actual": "generator_Generation",
+        "generator_generation_availability": "generator_Available_Capacity",
+        "region_regional_load": "region_Demand",
+        "reserves_generators_reserve_contribution": "reserves_generators_Provision"}
     """Maps simulation model property names to Marmot property names"""
     # Extra custom properties that are created based off existing properties.
     # The dictionary keys are the existing properties and the values are the new
@@ -99,7 +99,7 @@ class ProcessSIIP(Process):
 
         Args:
             prop_class (str): Property class e.g Region, Generator, Zone etc
-            prop (str): Property e.g marmot_gen_UC, marmot_load_UC etc.
+            prop (str): Property e.g generation_actual, regional_load etc.
             timescale (str): Data timescale, e.g interval, month, year, etc.
             model_filename (str): name of model to process.
 

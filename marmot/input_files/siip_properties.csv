@@ -1,0 +1,5 @@
+﻿data_type,group,data_set,collect_data,description,Marmot Property
+interval,generator,generation_actual,TRUE,Output from each generator by timestep,generator_Generation
+interval,generator,generation_availability,TRUE,RE Generation available capacity,generator_Available_Capacity
+interval,region,regional_load,TRUE,region demand,region_Demand
+interval,reserves_generators,reserve_contribution,TRUE,reserve provison by generator,reserves_genertaors_Provision

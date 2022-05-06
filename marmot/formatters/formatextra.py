@@ -243,13 +243,13 @@ class ExtraProperties:
             pd.DataFrame: generator_Curtailment df
         """
         avail_gen = self.model.get_processed_data(
-            "generator", "marmot_gen_timeseries_UC", timescale, self.files_list[0]
+            "generator", "generation_availability", timescale, self.files_list[0]
         )
 
         if avail_gen.empty is True:
             logger.warning(
-                "marmot_gen_timeseries_UC & "
-                "marmot_gen_UC are required "
+                "generation_availability & "
+                "generation_actual are required "
                 "for Curtailment calculation"
             )
             return pd.DataFrame()
