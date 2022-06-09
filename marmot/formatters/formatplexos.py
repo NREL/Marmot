@@ -915,7 +915,6 @@ class ProcessPLEXOS(Process):
         """
         df = df.droplevel(level=["band", "property"])
         df.index.rename("waterway_name", level="name", inplace=True)
-        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names)
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
