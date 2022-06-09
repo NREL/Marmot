@@ -2974,7 +2974,8 @@ class Transmission(MPlotDataHelper):
             else:
                 compare_limits = all_scenario_data.groupby("Scenario").mean().to_numpy()
                 if (compare_limits[0] == compare_limits).all():
-                    extra_data_frames.append(all_scenario_data.xs(scenario, level="Scenario"))
+                    scen = all_scenario_data.index.get_level_values("Scenario")[0]
+                    extra_data_frames.append(all_scenario_data.xs(scen, level="Scenario"))
                 else:
                     extra_data_frames.append(all_scenario_data)
         return pd.concat(extra_data_frames, axis=1).fillna(0)
@@ -2993,25 +2994,39 @@ class Transmission(MPlotDataHelper):
                 If True, uses the max of the limit values. 
                 Defaults to False.
         """
+        limits_dict = {}
+        linestyles = ['-.', '--']
+
         if (limits[f"{object_type}_Export_Limit"].to_numpy().sum() > 0 or 
             limits[f"{object_type}_Import_Limit"].to_numpy().sum() > 0):
             if "Scenario" in limits.index.names:
                 for scenario in self.Scenarios:
-                    export_limits = limits.xs(scenario, level="Scenario").filter(like='Export', axis=1)
-                    import_limits = limits.xs(scenario, level="Scenario").filter(like='Import', axis=1)
+                    limits_dict["Export Limit"] = limits.xs(scenario, level="Scenario").filter(like='Export', axis=1)
+                    limits_dict["Import Limit"] = limits.xs(scenario, level="Scenario").filter(like='Import', axis=1)
 
-                    if duration_curve or len(limits.index.get_level_values('timestamp') == 1):
-                        mplt.axs[n].axhline(y=import_limits.to_numpy().max(), linestyle='-.', label=f"{scenario}\nImport Limit")
-                        mplt.axs[n].axhline(y=export_limits.to_numpy().max(), linestyle='--', label=f"{scenario}\nExport Limit")
-                    else:
-                        mplt.lineplot(import_limits.squeeze(), linestyle='-.', label=f"{scenario}\nImport Limit", sub_pos=n)
-                        mplt.lineplot(export_limits.squeeze(), linestyle='--', label=f"{scenario}\nExport Limit", sub_pos=n)
+                    l = 0
+                    for limit_type in limits_dict: 
+                        if limits_dict[limit_type].abs().to_numpy().max() == 0:
+                            continue
+                        else:
+                            if duration_curve or len(limits.index.get_level_values('timestamp') == 1):
+                                mplt.axs[n].axhline(y=limits_dict[limit_type].to_numpy().max(), 
+                                    linestyle=linestyles[l], label=f"{scenario}\n{limit_type}")
+                            else:
+                                mplt.lineplot(limits_dict[limit_type].squeeze(), 
+                                    linestyle=linestyles[l], 
+                                    label=f"{scenario}\n{limit_type}", sub_pos=n)
+                            l+=1
             else:
-                export_limits = limits.filter(like='Export', axis=1)
-                import_limits = limits.filter(like='Import', axis=1)
-                if duration_curve or len(limits.index.get_level_values('timestamp') == 1):
-                        mplt.axs[n].axhline(y=import_limits.to_numpy().max(), linestyle='-.', label="Import Limit")
-                        mplt.axs[n].axhline(y=export_limits.to_numpy().max(), linestyle='--', label="Export Limit")
-                else:       
-                    mplt.lineplot(import_limits.squeeze(), linestyle='-.', label="Import Limit", sub_pos=n)
-                    mplt.lineplot(export_limits.squeeze(), linestyle='--', label="Export Limit", sub_pos=n)
+                limits_dict["Export Limit"] = limits.filter(like='Export', axis=1)
+                limits_dict["Import Limit"] = limits.filter(like='Import', axis=1)
+                l = 0
+                for limit_type in limits_dict:
+                    if limits_dict[limit_type].abs().to_numpy().max() == 0:
+                        continue
+                    else:
+                        if duration_curve or len(limits.index.get_level_values('timestamp') == 1):
+                                mplt.axs[n].axhline(y=limits_dict[limit_type].to_numpy().max(), linestyle=linestyles[l], label=limit_type)
+                        else:       
+                            mplt.lineplot(limits_dict[limit_type].squeeze(), linestyle=linestyles[l], label=limit_type, sub_pos=n)
+                        l+=1
