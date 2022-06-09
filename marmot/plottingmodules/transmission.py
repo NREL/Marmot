@@ -1089,10 +1089,10 @@ class Transmission(MPlotDataHelper):
                             [f"{connection}_Export_Limit",
                                 f"{connection}_Import_Limit",
                             ],
-                            line, f'{connection}_name',
+                            line,
             ) / unitconversion["divisor"]
             # Plot line limits
-            self.plot_line_interface_limits(connection, line_limits, mplt, n, duration_curve)
+            self.plot_line_interface_limits(line_limits, mplt, n, duration_curve)
 
             axs[n].set_title(line)
             if not duration_curve:
@@ -2929,7 +2929,7 @@ class Transmission(MPlotDataHelper):
         return outputs
     
     def get_line_interface_limits(self, extra_property_names: list,
-        object_name: str = None, level_name: str = None
+        object_name: str = None
     ) -> pd.DataFrame:
         """Get and process line and interface limits
 
@@ -2941,8 +2941,6 @@ class Transmission(MPlotDataHelper):
             extra_property_names (list): list of limit property names.
             object_name (str, optional): Name of line or interface if only a single
                 object is needed.
-            level_name (str, optional): Name of level, for lines "line_name", 
-                for interfaces "interface_name"
             
         Returns:
             pd.DataFrame: dataframe of limts
@@ -2956,7 +2954,7 @@ class Transmission(MPlotDataHelper):
                 if df.empty is False:
                     
                     if object_name:
-                        df = df.xs(object_name, level=level_name)
+                        df = df.xs(object_name, level=next(n for n in df.index.names if "_name" in n))
                         df = df.groupby(["timestamp"]).sum()
                     #Filter out unenforced lines/interfaces.
                     df = df[df[0].abs() < 99998] 
@@ -2980,13 +2978,12 @@ class Transmission(MPlotDataHelper):
                     extra_data_frames.append(all_scenario_data)
         return pd.concat(extra_data_frames, axis=1).fillna(0)
 
-    def plot_line_interface_limits(self, object_type: str, limits: pd.DataFrame, 
+    def plot_line_interface_limits(self, limits: pd.DataFrame, 
                 mplt: PlotLibrary, n: int, duration_curve: bool = False
         ) -> None:
         """Plots line/interface limits on a subplot
 
         Args:
-            object_type (str): "line" or "interface"
             limits (pd.DataFrame): dataframe of import/export limits with a timeseries
             mplt (PlotLibrary): Instance of PlotLibrary
             n (int): Counter for subplots 
@@ -2997,36 +2994,31 @@ class Transmission(MPlotDataHelper):
         limits_dict = {}
         linestyles = ['-.', '--']
 
-        if (limits[f"{object_type}_Export_Limit"].to_numpy().sum() > 0 or 
-            limits[f"{object_type}_Import_Limit"].to_numpy().sum() > 0):
-            if "Scenario" in limits.index.names:
-                for scenario in self.Scenarios:
-                    limits_dict["Export Limit"] = limits.xs(scenario, level="Scenario").filter(like='Export', axis=1)
-                    limits_dict["Import Limit"] = limits.xs(scenario, level="Scenario").filter(like='Import', axis=1)
+        if (limits.filter(like='Export').to_numpy().sum() > 0 or 
+            limits.filter(like='Import').to_numpy().sum() > 0):
 
-                    l = 0
-                    for limit_type in limits_dict: 
-                        if limits_dict[limit_type].abs().to_numpy().max() == 0:
-                            continue
-                        else:
-                            if duration_curve or len(limits.index.get_level_values('timestamp') == 1):
-                                mplt.axs[n].axhline(y=limits_dict[limit_type].to_numpy().max(), 
-                                    linestyle=linestyles[l], label=f"{scenario}\n{limit_type}")
-                            else:
-                                mplt.lineplot(limits_dict[limit_type].squeeze(), 
-                                    linestyle=linestyles[l], 
-                                    label=f"{scenario}\n{limit_type}", sub_pos=n)
-                            l+=1
-            else:
-                limits_dict["Export Limit"] = limits.filter(like='Export', axis=1)
-                limits_dict["Import Limit"] = limits.filter(like='Import', axis=1)
-                l = 0
-                for limit_type in limits_dict:
-                    if limits_dict[limit_type].abs().to_numpy().max() == 0:
+            limits_dict["Export Limit"] = limits.filter(like='Export', axis=1)
+            limits_dict["Import Limit"] = limits.filter(like='Import', axis=1)
+
+            for scenario in self.Scenarios:
+                for l, limit_type in enumerate(limits_dict): 
+                    if "Scenario" in limits.index.names:
+                        limit_values = limits_dict[limit_type].xs(scenario, level="Scenario")
+                        legend_label = f"{scenario}\n{limit_type}"
+                    else:
+                        limit_values = limits_dict[limit_type]
+                        legend_label = limit_type
+
+                    if limit_values.abs().to_numpy().max() == 0:
                         continue
                     else:
                         if duration_curve or len(limits.index.get_level_values('timestamp') == 1):
-                                mplt.axs[n].axhline(y=limits_dict[limit_type].to_numpy().max(), linestyle=linestyles[l], label=limit_type)
-                        else:       
-                            mplt.lineplot(limits_dict[limit_type].squeeze(), linestyle=linestyles[l], label=limit_type, sub_pos=n)
-                        l+=1
+                            mplt.axs[n].axhline(y=limit_values.to_numpy().max(), 
+                                linestyle=linestyles[l], label=legend_label)
+                        else:
+                            mplt.lineplot(limit_values.squeeze(), 
+                                linestyle=linestyles[l], 
+                                label=legend_label, sub_pos=n)
+                
+                if "Scenario" not in limits.index.names:
+                    continue
