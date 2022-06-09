@@ -2953,29 +2953,30 @@ class Transmission(MPlotDataHelper):
             scen_chunk = []
             for scenario in self.Scenarios:
                 df: pd.DataFrame = self[ext_prop].get(scenario)
-                if df.empty:
-                    date_index = pd.date_range(
-                        start="2010-01-01", periods=1, freq="H", name="timestamp"
-                    )
-                    df = pd.DataFrame(data=[0], index=date_index)
-                else:
+                if df.empty is False:
+                    
                     if object_name:
                         df = df.xs(object_name, level=level_name)
                         df = df.groupby(["timestamp"]).sum()
-                
-                #Filter out unenforced lines/interfaces.
-                df = df[df[0].abs() < 99998] 
-                df = df.rename(columns={0: ext_prop})
-                scenario_names = pd.Series([scenario] * len(df), name='Scenario')
-                df = df.set_index(scenario_names, append=True)
+                    #Filter out unenforced lines/interfaces.
+                    df = df[df[0].abs() < 99998] 
+                    df = df.rename(columns={0: ext_prop})
+                    scenario_names = pd.Series([scenario] * len(df), name='Scenario')
+                    df = df.set_index(scenario_names, append=True)
                 scen_chunk.append(df)
 
             all_scenario_data = pd.concat(scen_chunk, axis=0)
-            compare_limits = all_scenario_data.groupby("Scenario").mean().to_numpy()
-            if (compare_limits[0] == compare_limits).all():
-                extra_data_frames.append(all_scenario_data.xs(scenario, level="Scenario"))
+            if all_scenario_data.empty:
+                date_index = pd.date_range(
+                        start="2010-01-01", periods=1, freq="H", name="timestamp"
+                    )
+                extra_data_frames.append(pd.DataFrame(data=[0], index=date_index, columns=[ext_prop]))
             else:
-                extra_data_frames.append(all_scenario_data)
+                compare_limits = all_scenario_data.groupby("Scenario").mean().to_numpy()
+                if (compare_limits[0] == compare_limits).all():
+                    extra_data_frames.append(all_scenario_data.xs(scenario, level="Scenario"))
+                else:
+                    extra_data_frames.append(all_scenario_data)
         return pd.concat(extra_data_frames, axis=1).fillna(0)
 
     def plot_line_interface_limits(self, object_type: str, limits: pd.DataFrame, 
