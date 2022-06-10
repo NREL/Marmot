@@ -483,7 +483,7 @@ class PropertyColumns:
     )
     """ReEDS 'emit_nat_tech' property columns (Marmot emissions property)"""
     emit_r: List = field(
-        default_factory=lambda: ["emission_type", "region", "year", "Value"]
+        default_factory=lambda: ["region", "year", "Value"]
     )
     """ReEDS 'emit_r' property columns (Marmot emission_Production_Annual property)"""
     opRes_supply_h: List = field(
