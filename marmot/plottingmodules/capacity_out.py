@@ -150,7 +150,7 @@ class CapacityOut(MPlotDataHelper):
                 cap_out = self.df_process_gen_inputs(cap_out)
                 # Subset only thermal gen categories
                 thermal_gens = [
-                    therm for therm in self.thermal_gen_cat if therm in cap_out.columns
+                    therm for therm in self.gen_categories.thermal if therm in cap_out.columns
                 ]
                 cap_out = cap_out[thermal_gens]
 

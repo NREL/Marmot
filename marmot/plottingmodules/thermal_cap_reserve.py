@@ -139,7 +139,7 @@ class ThermalReserve(MPlotDataHelper):
 
                 thermal_reserve = avail_cap - generation
                 non_thermal_gen = set(thermal_reserve.columns) - set(
-                    self.thermal_gen_cat
+                    self.gen_categories.thermal
                 )
                 # filter for only thermal generation
                 thermal_reserve = thermal_reserve.drop(labels=non_thermal_gen, axis=1)

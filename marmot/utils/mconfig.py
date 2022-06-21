@@ -140,6 +140,12 @@ def createConfig(configfile_path: Path):
         *If True automatically converts Energy and Capacity units so that no number 
         exceeds 1000. All base units are in MW, and units can be converted to GW, TW and kW*
 
+    - **read_csv_properties:** true
+        *If True the Marmot plotter will attempt to read the required plot property from a 
+        csv file if it cannot be found in the formatted h5 file.
+
+        .. versionadded:: 0.10.0
+
     - **user_defined_inputs_file:** Marmot_user_defined_inputs.csv
         *Change the default Marmot_user_defined_inputs file, file must be created first*
 
@@ -205,6 +211,7 @@ def createConfig(configfile_path: Path):
         figure_file_format="svg",
         shift_leapday=False,
         auto_convert_units=True,
+        read_csv_properties=True,
         user_defined_inputs_file="Marmot_user_defined_inputs.csv",
         plot_select_file="Marmot_plot_select.csv",
         plexos_properties_file="plexos_properties.csv",
