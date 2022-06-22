@@ -4,8 +4,8 @@ required by the Marmot plotter.
 @author: Daniel Levie
 """
 
-import pandas as pd
 import logging
+import pandas as pd
 import marmot.utils.mconfig as mconfig
 from marmot.formatters.formatbase import Process
 

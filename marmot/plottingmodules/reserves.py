@@ -169,7 +169,7 @@ class Reserves(MPlotDataHelper):
                 )
 
                 # Adds property annotation
-                if pd.notna(prop):
+                if prop:
                     x_time_value = mplt.add_property_annotation(
                         reserve_provision_timeseries,
                         prop,

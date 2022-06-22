@@ -451,7 +451,7 @@ class ProcessPLEXOS(Process):
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
         """
-        df = df.droplevel(level=["band", "property", "category"])
+        df = df.droplevel(level=["band", "property"])
         df.index.rename("line_name", level="name", inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names)
@@ -897,6 +897,26 @@ class ProcessPLEXOS(Process):
         df_col.insert(
             0, df_col.pop(df_col.index("timestamp"))
         )  # move timestamp to start of df
+        df = df.reorder_levels(df_col, axis=0)
+        df[0] = pd.to_numeric(df[0], downcast="float")
+        return df
+
+    def df_process_waterway(
+        self, df: pd.DataFrame, model_filename: str
+    ) -> pd.DataFrame:
+        """Format PLEXOS Waterway Class data.
+
+        Args:
+            df (pd.DataFrame): h5plexos dataframe to process
+            model_filename (str): name of h5plexos h5 file being processed
+
+        Returns:
+            pd.DataFrame: Processed output, single value column with multiindex.
+        """
+        df = df.droplevel(level=["band", "property"])
+        df.index.rename("waterway_name", level="name", inplace=True)
+        df_col = list(df.index.names)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df

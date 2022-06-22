@@ -111,7 +111,7 @@ class Curtailment(MPlotDataHelper):
                     re_curt = self.assign_curtailment_techs(re_curt)
 
                 # Timeseries [MW] PV curtailment [MWh]
-                pv_curt = re_curt[re_curt.columns.intersection(self.pv_gen_cat)]
+                pv_curt = re_curt[re_curt.columns.intersection(self.gen_categories.pv)]
 
                 re_curt = re_curt.sum(axis=1)
                 pv_curt = pv_curt.sum(axis=1)
@@ -329,15 +329,15 @@ class Curtailment(MPlotDataHelper):
                 total_gen = float(gen.sum())
 
                 # Timeseries [MW] and Total VRE generation [MWh]
-                vre_gen = gen.loc[gen.index.isin(self.vre_gen_cat, level="tech")]
+                vre_gen = gen.loc[gen.index.isin(self.gen_categories.vre, level="tech")]
                 total_vre_gen = float(vre_gen.sum())
 
                 # Timeseries [MW] and Total RE generation [MWh]
-                re_gen = gen.loc[gen.index.isin(self.re_gen_cat, level="tech")]
+                re_gen = gen.loc[gen.index.isin(self.gen_categories.re, level="tech")]
                 total_re_gen = float(re_gen.sum())
 
                 # Timeseries [MW] and Total PV generation [MWh]
-                pv_gen = gen.loc[gen.index.isin(self.pv_gen_cat, level="tech")]
+                pv_gen = gen.loc[gen.index.isin(self.gen_categories.pv, level="tech")]
                 total_pv_gen = float(pv_gen.sum())
 
                 # % Penetration of generation classes across the year
@@ -347,13 +347,13 @@ class Curtailment(MPlotDataHelper):
 
                 # Timeseries [MW] and Total RE available [MWh]
                 re_avail = avail_gen.loc[
-                    avail_gen.index.isin(self.re_gen_cat, level="tech")
+                    avail_gen.index.isin(self.gen_categories.re, level="tech")
                 ]
                 total_re_avail = float(re_avail.sum())
 
                 # Timeseries [MW] and Total PV available [MWh]
                 pv_avail = avail_gen.loc[
-                    avail_gen.index.isin(self.pv_gen_cat, level="tech")
+                    avail_gen.index.isin(self.gen_categories.pv, level="tech")
                 ]
                 total_pv_avail = float(pv_avail.sum())
 
@@ -361,7 +361,7 @@ class Curtailment(MPlotDataHelper):
                 total_re_curt = float(re_curt.sum().sum())
 
                 # Timeseries [MW] and Total PV curtailment [MWh]
-                pv_curt = re_curt[re_curt.columns.intersection(self.pv_gen_cat)]
+                pv_curt = re_curt[re_curt.columns.intersection(self.gen_categories.pv)]
                 total_pv_curt = float(pv_curt.sum().sum())
 
                 # % of hours with curtailment
@@ -758,7 +758,7 @@ class Curtailment(MPlotDataHelper):
 
                 logger.info("Scenario = " + scenario)
                 # Adjust list of values to drop from vre_gen_cat depending on if it exists in processed techs
-                # self.vre_gen_cat = [name for name in self.vre_gen_cat if name in curtailment_collection.get(scenario).index.unique(level="tech")]
+                # self.gen_categories.vre = [name for name in self.gen_categories.vre if name in curtailment_collection.get(scenario).index.unique(level="tech")]
 
                 vre_collection = {}
                 avail_vre_collection = {}
@@ -786,7 +786,7 @@ class Curtailment(MPlotDataHelper):
                 if self.curtailment_prop == "Curtailment":
                     avail_gen = self.assign_curtailment_techs(avail_gen)
 
-                for vre_type in self.vre_gen_cat:
+                for vre_type in self.gen_categories.vre:
                     try:
                         vre_curt_type = vre_curt[vre_type]
                     except KeyError:

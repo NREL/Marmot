@@ -115,7 +115,7 @@ class MarmotFormat(SetupLogger):
         if isinstance(Region_Mapping, (str, Path)):
             try:
                 Region_Mapping = pd.read_csv(Region_Mapping)
-                if not self.Region_Mapping.empty:
+                if not Region_Mapping.empty:
                     Region_Mapping = Region_Mapping.astype(object)
             except FileNotFoundError:
                 self.logger.warning(

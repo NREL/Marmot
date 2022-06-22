@@ -7,11 +7,11 @@ Inherits the Process class.
 
 import logging
 import re
-import gdxpds
-import pandas as pd
 from pathlib import Path
 from typing import List
 from dataclasses import dataclass, field
+import gdxpds
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
@@ -170,7 +170,7 @@ class ProcessReEDS(Process):
     @property
     def get_input_files(self) -> list:
         """Gets a list of input files within the scenario folders"""
-        if self._get_input_files == None:
+        if self._get_input_files is None:
             reeds_outputs_dir = self.input_folder.joinpath("outputs")
             files = []
             for names in reeds_outputs_dir.iterdir():
@@ -483,7 +483,7 @@ class PropertyColumns:
     )
     """ReEDS 'emit_nat_tech' property columns (Marmot emissions property)"""
     emit_r: List = field(
-        default_factory=lambda: ["emission_type", "region", "year", "Value"]
+        default_factory=lambda: ["region", "year", "Value"]
     )
     """ReEDS 'emit_r' property columns (Marmot emission_Production_Annual property)"""
     opRes_supply_h: List = field(

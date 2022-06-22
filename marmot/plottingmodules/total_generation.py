@@ -663,7 +663,7 @@ class TotalGeneration(MPlotDataHelper):
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
                 if vre_only:
                     Total_Gen_Stack = Total_Gen_Stack[
-                        Total_Gen_Stack.columns.intersection(self.vre_gen_cat)
+                        Total_Gen_Stack.columns.intersection(self.gen_categories.vre)
                     ]
 
                 if Total_Gen_Stack.empty:
