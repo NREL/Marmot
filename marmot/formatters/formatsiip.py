@@ -5,9 +5,11 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
+import re
 import logging
 import pandas as pd
 from pathlib import Path
+from typing import Dict
 
 import marmot.utils.mconfig as mconfig
 import marmot.metamanagers.write_siip_metadata as write_siip_metadata
@@ -81,8 +83,36 @@ class ProcessSIIP(Process):
         partition files for Marmot
         """
         if self._get_input_files == None:
-            self._get_input_files = [self.input_folder.name]
+
+            folders = []
+            # First checks if input_folder contains partition folders
+            # Adds to list of folders if a dir
+            for names in self.input_folder.iterdir():
+                if names.is_dir():
+                    folders.append(names.name)
+            # If no partition folders found, use input_folder as file directory
+            # This is a non partitioned run
+            if not folders:
+                self._get_input_files = [self.input_folder]
+            else:
+                # List of all partition folders in input folder in alpha numeric order
+                self._get_input_files = sorted(folders, key=lambda x: int(re.sub("\D", "0", x)))
+
         return self._get_input_files
+
+    @property
+    def file_collection(self) -> Dict[Path, Path]:
+        """Dictionary input file names to full filename path 
+
+        Returns:
+            dict: file_collection {filename: fullpath}
+        """
+        if self._file_collection == None:
+            self._file_collection = {}
+            for file in self.get_input_files:
+                self._file_collection[file] = self.input_folder.joinpath(file)
+        return self._file_collection
+
 
     def output_metadata(self, *_) -> None:
         """Add SIIP specific metadata to formatted h5 file .
@@ -108,8 +138,9 @@ class ProcessSIIP(Process):
         """
         logger.info(f"      {model_filename}")
 
+        siip_partition = self.file_collection.get(model_filename)
         try:
-            df: pd.DataFrame = pd.read_csv(self.input_folder.joinpath(prop + ".csv"))
+            df: pd.DataFrame = pd.read_csv(siip_partition.joinpath(prop + ".csv"))
         except FileNotFoundError:
             df = self.report_prop_error(prop, prop_class)
             return df
@@ -120,7 +151,7 @@ class ProcessSIIP(Process):
         # Get desired method
         process_att = getattr(self, f"df_process_{prop_class}")
         # Process attribute and return to df
-        df = process_att(df, model_filename)
+        df = process_att(df)
         # Add region mapping
         if 'region' in df.columns and not self.Region_Mapping.empty:
             df = df.merge(self.Region_Mapping, how="left", on="region")
@@ -141,48 +172,45 @@ class ProcessSIIP(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_generator(self, df: pd.DataFrame, model_filename: str
+    def df_process_generator(self, df: pd.DataFrame
     ) -> pd.DataFrame:
         """Format SIIP Generator class data
 
         Args:
             df (pd.DataFrame): Data Frame to process
-            model_filename (str): name of scenario, used for metadata
 
         Returns:
             pd.DataFrame: dataframe formatted to generator class spec
         """
-        region_gen_cat_meta = self.metadata.region_generator_category(model_filename).reset_index()
+        region_gen_cat_meta = self.metadata.region_generator_category(self.output_file_path.name).reset_index()
 
         df = df.melt(id_vars=["timestamp"], var_name="gen_name", value_name=0)
         df = df.merge(region_gen_cat_meta, how='left', on="gen_name")
         return df
 
-    def df_process_region(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_region(self, df: pd.DataFrame) -> pd.DataFrame:
         """Format SIIP Region data
 
         Args:
             df (pd.DataFrame): Data Frame to process
-            model_filename (str): name of scenario, used for metadata
 
         Returns:
             pd.DataFrame: dataframe formatted to region class spec
         """
         return df.melt(id_vars=["timestamp"], var_name="region", value_name=0)
 
-    def df_process_reserves_generators(self, df: pd.DataFrame, model_filename: str
+    def df_process_reserves_generators(self, df: pd.DataFrame
     ) -> pd.DataFrame:
         """Format SIIP Reserves Generator data
 
         Args:
             df (pd.DataFrame): Data Frame to process
-            model_filename (str): name of scenario, used for metadata
 
         Returns:
             pd.DataFrame: dataframe formatted to reserves generator class spec
         """
-        reserves_generators = self.metadata.reserves_generators(model_filename)
-        region_gen_cat_meta = self.metadata.region_generator_category(model_filename).reset_index()
+        reserves_generators = self.metadata.reserves_generators(self.output_file_path.name)
+        region_gen_cat_meta = self.metadata.region_generator_category(self.output_file_path.name).reset_index()
 
         df = df.melt(id_vars=["timestamp"], var_name="gen_name_reserve", value_name=0)
         df = df.merge(reserves_generators, how='left', on="gen_name_reserve")
