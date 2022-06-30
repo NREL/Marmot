@@ -2995,7 +2995,7 @@ class Transmission(MPlotDataHelper):
         linestyles = ['-.', '--']
 
         if (limits.filter(like='Export').to_numpy().sum() > 0 or 
-            limits.filter(like='Import').to_numpy().sum() > 0):
+            limits.filter(like='Import').to_numpy().sum() < 0):
 
             limits_dict["Export Limit"] = limits.filter(like='Export', axis=1)
             limits_dict["Import Limit"] = limits.filter(like='Import', axis=1)
