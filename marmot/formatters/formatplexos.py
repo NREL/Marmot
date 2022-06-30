@@ -10,6 +10,7 @@ import pandas as pd
 import h5py
 import logging
 from pathlib import Path
+from typing import Dict
 
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
@@ -102,37 +103,37 @@ class ProcessPLEXOS(Process):
         )
     
     @property
-    def get_input_files(self) -> list:
+    def get_input_data_paths(self) -> list:
         """Gets a list of h5plexos input files within the scenario folders
 
         Returns:
             list: list of h5plexos input filenames to process
         """
-        if self._get_input_files == None:
+        if self._get_input_data_paths is None:
             files = []
             for names in self.input_folder.iterdir():
                 if names.suffix == ".h5":
                     files.append(names.name)  # Creates a list of only the hdf5 files
 
             # List of all hf files in hdf5 folder in alpha numeric order
-            self._get_input_files = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
-        return self._get_input_files
+            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+        return self._get_input_data_paths
 
     @property
-    def file_collection(self) -> dict:
-        """Dictionary input file names to h5 PLEXOSSolution
+    def data_collection(self) -> Dict[str, PLEXOSSolution]:
+        """Dictionary model file names to h5 PLEXOSSolution
 
         Returns:
-            dict: file_collection {filename: PLEXOSSolution}
+            dict: data_collection {filename: PLEXOSSolution}
         """
-        if self._file_collection == None:
+        if self._data_collection is None:
             # Read in all HDF5 files into dictionary
             logger.info("Loading all HDF5 files to prepare for processing")
             regions = set()
 
-            self._file_collection = {}
-            for file in self.get_input_files:
-                self._file_collection[file] = PLEXOSSolution(
+            self._data_collection = {}
+            for file in self.get_input_data_paths:
+                self._data_collection[file] = PLEXOSSolution(
                     self.input_folder.joinpath(file)
                 )
                 if not self.Region_Mapping.empty:
@@ -146,7 +147,7 @@ class ProcessPLEXOS(Process):
                         "the 'region' column of your mapping file: "
                         f"{missing_regions}\n"
                     )
-        return self._file_collection
+        return self._data_collection
 
     def output_metadata(self, files_list: list) -> None:
         """Transfers metadata from original PLEXOS solutions file to processed HDF5 file.
@@ -188,7 +189,7 @@ class ProcessPLEXOS(Process):
             f.close()
 
     def get_processed_data(
-        self, prop_class: str, prop: str, timescale: str, model_filename: str
+        self, prop_class: str, prop: str, timescale: str, model_name: str
     ) -> pd.DataFrame:
         """Handles the pulling of data from the h5plexos hdf5
         file and then passes the data to one of the formating functions
@@ -197,13 +198,13 @@ class ProcessPLEXOS(Process):
             prop_class (str): PLEXOS class e.g Region, Generator, Zone etc
             prop (str): PLEXOS property e.g Max Capacity, Generation etc.
             timescale (str): Data timescale, e.g Hourly, Monthly, 5 minute etc.
-            model_filename (str): name of model to process.
+            model_name (str): name of model to process.
 
         Returns:
             pd.DataFrame: Formatted results dataframe.
         """
-        db = self.file_collection.get(model_filename)
-        logger.info(f"      {model_filename}")
+        db = self.data_collection.get(model_name)
+        logger.info(f"      {model_name}")
         try:
             if "_" in prop_class:
                 df = db.query_relation_property(
@@ -254,7 +255,7 @@ class ProcessPLEXOS(Process):
         # Get desired method
         process_att = getattr(self, f"df_process_{prop_class}")
         # Process attribute and return to df
-        df = process_att(df, model_filename)
+        df = process_att(df, model_name)
 
         # Convert units and add unit column to index
         df = df * converted_units[1]
@@ -297,13 +298,13 @@ class ProcessPLEXOS(Process):
         return merged_data
 
     def df_process_generator(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS Generator Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -311,8 +312,8 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property"])
         df.index.rename(["tech", "gen_name"], level=["category", "name"], inplace=True)
 
-        region_gen_cat_meta = self.metadata.region_generator_category(model_filename)
-        zone_gen_cat_meta = self.metadata.zone_generator_category(model_filename)
+        region_gen_cat_meta = self.metadata.region_generator_category(model_name)
+        zone_gen_cat_meta = self.metadata.zone_generator_category(model_name)
         timeseries_len = len(df.index.get_level_values("timestamp").unique())
 
         if region_gen_cat_meta.empty is False:
@@ -377,12 +378,12 @@ class ProcessPLEXOS(Process):
 
         return df
 
-    def df_process_region(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_region(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Region Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -395,7 +396,7 @@ class ProcessPLEXOS(Process):
         # checks if Region_Mapping contains data to merge, skips if empty
         if not self.Region_Mapping.empty:
             region_gen_mapping = (
-                self.metadata.regions(model_filename)
+                self.metadata.regions(model_name)
                 .merge(self.Region_Mapping, how="left", on="region")
                 .drop(["region", "category"], axis=1)
             )
@@ -422,12 +423,12 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_zone(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_zone(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Zone Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -441,12 +442,12 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_line(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_line(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Line Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -461,13 +462,13 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_interface(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS PLEXOS Interface Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -485,12 +486,12 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_reserve(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_reserve(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Reserve Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -498,16 +499,16 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property"])
         df.index.rename(["parent", "Type"], level=["name", "category"], inplace=True)
         df = df.reset_index()  # unzip the levels in index
-        if self.metadata.reserves_regions(model_filename).empty is False:
+        if self.metadata.reserves_regions(model_name).empty is False:
             # Merges in regions where reserves are located
             df = df.merge(
-                self.metadata.reserves_regions(model_filename), how="left", on="parent"
+                self.metadata.reserves_regions(model_name), how="left", on="parent"
             )
 
-        if self.metadata.reserves_zones(model_filename).empty is False:
+        if self.metadata.reserves_zones(model_name).empty is False:
             # Merges in zones where reserves are located
             df = df.merge(
-                self.metadata.reserves_zones(model_filename), how="left", on="parent"
+                self.metadata.reserves_zones(model_name), how="left", on="parent"
             )
         df_col = list(df.columns)
         df_col.remove(0)
@@ -518,13 +519,13 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_reserves_generators(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS Reserve_Generators Relational Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -533,34 +534,34 @@ class ProcessPLEXOS(Process):
         df.index.rename(["gen_name"], level=["child"], inplace=True)
         df = df.reset_index()  # unzip the levels in index
         df = df.merge(
-            self.metadata.generator_category(model_filename), how="left", on="gen_name"
+            self.metadata.generator_category(model_name), how="left", on="gen_name"
         )
 
         # merging in generator region/zones first prevents double
         # counting in cases where multiple model regions are within a reserve region
-        if self.metadata.region_generators(model_filename).empty is False:
+        if self.metadata.region_generators(model_name).empty is False:
             df = df.merge(
-                self.metadata.region_generators(model_filename),
+                self.metadata.region_generators(model_name),
                 how="left",
                 on="gen_name",
             )
-        if self.metadata.zone_generators(model_filename).empty is False:
+        if self.metadata.zone_generators(model_name).empty is False:
             df = df.merge(
-                self.metadata.zone_generators(model_filename), how="left", on="gen_name"
+                self.metadata.zone_generators(model_name), how="left", on="gen_name"
             )
 
         # now merge in reserve regions/zones
-        if self.metadata.reserves_regions(model_filename).empty is False:
+        if self.metadata.reserves_regions(model_name).empty is False:
             # Merges in regions where reserves are located
             df = df.merge(
-                self.metadata.reserves_regions(model_filename),
+                self.metadata.reserves_regions(model_name),
                 how="left",
                 on=["parent", "region"],
             )
-        if self.metadata.reserves_zones(model_filename).empty is False:
+        if self.metadata.reserves_zones(model_name).empty is False:
             # Merges in zones where reserves are located
             df = df.merge(
-                self.metadata.reserves_zones(model_filename),
+                self.metadata.reserves_zones(model_name),
                 how="left",
                 on=["parent", "zone"],
             )
@@ -572,12 +573,12 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_fuel(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_fuel(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Fuel Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -592,13 +593,13 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_constraint(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS Constraint Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -617,13 +618,13 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_emission(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS Emission Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -638,13 +639,13 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_emissions_generators(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS Emissions_Generators Relational Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -656,21 +657,21 @@ class ProcessPLEXOS(Process):
         df = df.reset_index()  # unzip the levels in index
         # merge in tech information
         df = df.merge(
-            self.metadata.generator_category(model_filename), how="left", on="gen_name"
+            self.metadata.generator_category(model_name), how="left", on="gen_name"
         )
         # merge in region and zone information
-        if self.metadata.region_generator_category(model_filename).empty is False:
+        if self.metadata.region_generator_category(model_name).empty is False:
             # merge in region information
             df = df.merge(
-                self.metadata.region_generator_category(model_filename).reset_index(),
+                self.metadata.region_generator_category(model_name).reset_index(),
                 how="left",
                 on=["gen_name", "tech"],
             )
 
-        if self.metadata.zone_generator_category(model_filename).empty is False:
+        if self.metadata.zone_generator_category(model_name).empty is False:
             # Merges in zones where reserves are located
             df = df.merge(
-                self.metadata.zone_generator_category(model_filename).reset_index(),
+                self.metadata.zone_generator_category(model_name).reset_index(),
                 how="left",
                 on=["gen_name", "tech"],
             )
@@ -719,12 +720,12 @@ class ProcessPLEXOS(Process):
         df.columns = pd.RangeIndex(0, 1, step=1)
         return df
 
-    def df_process_storage(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_storage(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Storage Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -732,19 +733,19 @@ class ProcessPLEXOS(Process):
         df = df.droplevel(level=["band", "property", "category"])
         df = df.reset_index()  # unzip the levels in index
         df = df.merge(
-            self.metadata.generator_storage(model_filename), how="left", on="name"
+            self.metadata.generator_storage(model_name), how="left", on="name"
         )
-        if self.metadata.region_generators(model_filename).empty is False:
+        if self.metadata.region_generators(model_name).empty is False:
             # Merges in regions where generators are located
             df = df.merge(
-                self.metadata.region_generators(model_filename),
+                self.metadata.region_generators(model_name),
                 how="left",
                 on="gen_name",
             )
-        if self.metadata.zone_generators(model_filename).empty is False:
+        if self.metadata.zone_generators(model_name).empty is False:
             # Merges in zones where generators are located
             df = df.merge(
-                self.metadata.zone_generators(model_filename), how="left", on="gen_name"
+                self.metadata.zone_generators(model_name), how="left", on="gen_name"
             )
         # checks if Region_Maping contains data to merge, skips if empty (Default)
         if not self.Region_Mapping.empty:
@@ -761,13 +762,13 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_region_regions(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS Region_Regions Relational Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -780,12 +781,12 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_node(self, df: pd.DataFrame, model_filename: str) -> pd.DataFrame:
+    def df_process_node(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Node Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -794,8 +795,8 @@ class ProcessPLEXOS(Process):
         df.index.rename("node", level="name", inplace=True)
         df.sort_index(level=["node"], inplace=True)
 
-        node_region_meta = self.metadata.node_region(model_filename)
-        node_zone_meta = self.metadata.node_zone(model_filename)
+        node_region_meta = self.metadata.node_region(model_name)
+        node_zone_meta = self.metadata.node_zone(model_name)
         timeseries_len = len(df.index.get_level_values("timestamp").unique())
 
         if node_region_meta.empty is False:
@@ -856,13 +857,13 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_abatement(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS Abatement Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
@@ -877,7 +878,7 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_batterie(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Batteries Class
@@ -902,13 +903,13 @@ class ProcessPLEXOS(Process):
         return df
 
     def df_process_waterway(
-        self, df: pd.DataFrame, model_filename: str
+        self, df: pd.DataFrame, model_name: str
     ) -> pd.DataFrame:
         """Format PLEXOS Waterway Class data.
 
         Args:
             df (pd.DataFrame): h5plexos dataframe to process
-            model_filename (str): name of h5plexos h5 file being processed
+            model_name (str): name of h5plexos h5 file being processed
 
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.

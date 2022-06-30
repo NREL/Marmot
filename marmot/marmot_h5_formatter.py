@@ -220,7 +220,7 @@ class MarmotFormat(SetupLogger):
             emit_names=self.emit_names,
         )
 
-        files_list = process_sim_model.get_input_files
+        files_list = process_sim_model.get_input_data_paths
 
         # init of ExtraProperties class
         extraprops_init = ExtraProperties(process_sim_model, files_list)
@@ -261,7 +261,7 @@ class MarmotFormat(SetupLogger):
 
         start = time.time()
         # Main loop to process each output and pass data to functions
-        for index, row in process_properties.iterrows():
+        for _, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
             data_chunks = []
 

@@ -8,7 +8,7 @@ Inherits the Process class.
 import logging
 import re
 from pathlib import Path
-from typing import List
+from typing import List, Dict
 from dataclasses import dataclass, field
 import gdxpds
 import pandas as pd
@@ -168,9 +168,9 @@ class ProcessReEDS(Process):
             )
 
     @property
-    def get_input_files(self) -> list:
-        """Gets a list of input files within the scenario folders"""
-        if self._get_input_files is None:
+    def get_input_data_paths(self) -> list:
+        """Gets a list of input gdx files within the scenario folders"""
+        if self._get_input_data_paths is None:
             reeds_outputs_dir = self.input_folder.joinpath("outputs")
             files = []
             for names in reeds_outputs_dir.iterdir():
@@ -180,21 +180,21 @@ class ProcessReEDS(Process):
                     self.property_units = str(names)
 
             # List of all files in input folder in alpha numeric order
-            self._get_input_files = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
-        return self._get_input_files
-
+            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+        return self._get_input_data_paths
+    
     @property
-    def file_collection(self) -> dict:
+    def data_collection(self) -> Dict[str, Path]:
         """Dictionary input file names to full filename path 
 
         Returns:
-            dict: file_collection {filename: fullpath}
+            dict: data_collection {filename: fullpath}
         """
-        if self._file_collection == None:
-            self._file_collection = {}
-            for file in self.get_input_files:
-                self._file_collection[file] = str(self.input_folder.joinpath("outputs", file))
-        return self._file_collection
+        if self._data_collection is None:
+            self._data_collection = {}
+            for file in self.get_input_data_paths:
+                self._data_collection[file] = self.input_folder.joinpath("outputs", file)
+        return self._data_collection
 
     def output_metadata(self, files_list: list) -> None:
         """Add ReEDS specific metadata to formatted h5 file .
@@ -215,7 +215,7 @@ class ProcessReEDS(Process):
             )
 
     def get_processed_data(
-        self, prop_class: str, prop: str, timescale: str, model_filename: str
+        self, prop_class: str, prop: str, timescale: str, model_name: str
     ) -> pd.DataFrame:
         """Handles the pulling of data from the ReEDS gdx
         file and then passes the data to one of the formating functions
@@ -224,7 +224,7 @@ class ProcessReEDS(Process):
             prop_class (str): Property class e.g Region, Generator, Zone etc
             prop (str): Property e.g gen_out, cap_out etc.
             timescale (str): Data timescale, e.g interval, summary.
-            model_filename (str): name of model to process.
+            model_name (str): name of model to process.
 
         Returns:
             pd.DataFrame: Formatted results dataframe.
@@ -232,10 +232,10 @@ class ProcessReEDS(Process):
         # Set wind_resource_to_pca dict
         self.wind_resource_to_pca = self.input_folder.name
 
-        gdx_file = self.file_collection.get(model_filename)
-        logger.info(f"      {model_filename}")
+        gdx_file = self.data_collection.get(model_name)
+        logger.info(f"      {model_name}")
         try:
-            df: pd.DataFrame = gdxpds.to_dataframe(gdx_file, prop)[prop]
+            df: pd.DataFrame = gdxpds.to_dataframe(str(gdx_file), prop)[prop]
         except gdxpds.tools.Error:
             df = self.report_prop_error(prop, prop_class)
             return df
@@ -252,7 +252,7 @@ class ProcessReEDS(Process):
         process_att = getattr(self, f"df_process_{prop_class}", None)
         if process_att:
             # Process attribute and return to df
-            df = process_att(df, prop, gdx_file)
+            df = process_att(df, prop, str(gdx_file))
 
         df.year = df.year.astype(int)
         if self.process_subset_years:
@@ -483,7 +483,7 @@ class PropertyColumns:
     )
     """ReEDS 'emit_nat_tech' property columns (Marmot emissions property)"""
     emit_r: List = field(
-        default_factory=lambda: ["region", "year", "Value"]
+        default_factory=lambda: ["emission_type", "region", "year", "Value"]
     )
     """ReEDS 'emit_r' property columns (Marmot emission_Production_Annual property)"""
     opRes_supply_h: List = field(

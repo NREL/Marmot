@@ -9,7 +9,6 @@ import re
 import logging
 import pandas as pd
 from pathlib import Path
-from typing import Dict
 
 import marmot.utils.mconfig as mconfig
 import marmot.metamanagers.write_siip_metadata as write_siip_metadata
@@ -74,15 +73,16 @@ class ProcessSIIP(Process):
         )
 
     @property
-    def get_input_files(self) -> list:
-        """For SIIP returns input_folder folder name
+    def get_input_data_paths(self) -> list:
+        """For SIIP returns paths to input folders
         
         SIIP places individual input files in a single folder,
         It does not combine all results into a single file 
-        like PLEXOS or ReEDS. It also does not output 
-        partition files for Marmot
+        like PLEXOS or ReEDS.
+        If models have been split into partitions, returns list 
+        of partition folders, else returns scenario folder.
         """
-        if self._get_input_files == None:
+        if self._get_input_data_paths is None:
 
             folders = []
             # First checks if input_folder contains partition folders
@@ -93,36 +93,22 @@ class ProcessSIIP(Process):
             # If no partition folders found, use input_folder as file directory
             # This is a non partitioned run
             if not folders:
-                self._get_input_files = [self.input_folder]
+                self._get_input_data_paths = [self.input_folder]
             else:
                 # List of all partition folders in input folder in alpha numeric order
-                self._get_input_files = sorted(folders, key=lambda x: int(re.sub("\D", "0", x)))
+                self._get_input_data_paths = sorted(folders, key=lambda x: int(re.sub("\D", "0", x)))
 
-        return self._get_input_files
-
-    @property
-    def file_collection(self) -> Dict[Path, Path]:
-        """Dictionary input file names to full filename path 
-
-        Returns:
-            dict: file_collection {filename: fullpath}
-        """
-        if self._file_collection == None:
-            self._file_collection = {}
-            for file in self.get_input_files:
-                self._file_collection[file] = self.input_folder.joinpath(file)
-        return self._file_collection
-
+        return self._get_input_data_paths
 
     def output_metadata(self, *_) -> None:
         """Add SIIP specific metadata to formatted h5 file .
         """
         json_metadata_file = self.input_folder.joinpath("metadata.json")
         write_siip_metadata.metadata_to_h5(json_metadata_file, 
-        self.output_file_path)
+            self.output_file_path)
 
     def get_processed_data(
-        self, prop_class: str, prop: str, timescale: str, model_filename: str
+        self, prop_class: str, prop: str, timescale: str, model_name: str
     ) -> pd.DataFrame:
         """Handles the pulling of data from the SIIP input folder 
         and then passes the data to one of the formating functions
@@ -131,14 +117,14 @@ class ProcessSIIP(Process):
             prop_class (str): Property class e.g Region, Generator, Zone etc
             prop (str): Property e.g generation_actual, regional_load etc.
             timescale (str): Data timescale, e.g interval, month, year, etc.
-            model_filename (str): name of model to process.
+            model_name (str): name of model to process.
 
         Returns:
             pd.DataFrame: Formatted results dataframe.
         """
-        logger.info(f"      {model_filename}")
+        logger.info(f"      {model_name}")
 
-        siip_partition = self.file_collection.get(model_filename)
+        siip_partition = self.data_collection.get(model_name)
         try:
             df: pd.DataFrame = pd.read_csv(siip_partition.joinpath(prop + ".csv"))
         except FileNotFoundError:
