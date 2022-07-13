@@ -92,7 +92,7 @@ class ExtraProperties:
 
             if processed_data.empty is True:
                 logger.info("Total Demand will equal Total Load")
-                return pd.DataFrame()
+                return df
 
             data_chunks.append(processed_data)
 
@@ -242,19 +242,30 @@ class ExtraProperties:
         Returns:
             pd.DataFrame: generator_Curtailment df
         """
-        avail_gen = self.model.get_processed_data(
-            "generator", "generation_availability", timescale, self.files_list[0]
-        )
 
-        if avail_gen.empty is True:
-            logger.warning(
-                "generation_availability & "
-                "generation_actual are required "
-                "for Curtailment calculation"
+        data_chunks = []
+        for file in self.files_list:
+            processed_data = self.model.get_processed_data(
+                "generator", "generation_availability", timescale, file
             )
-            return pd.DataFrame()
 
-        return (avail_gen - df).dropna()
+            if processed_data.empty is True:
+                logger.warning(
+                    "generation_availability & "
+                    "generation_actual are required "
+                    "for Curtailment calculation"
+                )
+                return pd.DataFrame()
+
+            data_chunks.append(processed_data)
+
+        avail_gen = self.model.combine_models(data_chunks)
+
+        # Only use gens unique to avail_gen and filter generator_Generation df
+        unique_gens = avail_gen.index.get_level_values('gen_name').unique()
+        map_gens = df.index.isin(unique_gens, level='gen_name')
+
+        return avail_gen - df.loc[map_gens,:]
 
     def siip_region_total_load(
         self, df: pd.DataFrame, timescale: str = "interval"
@@ -272,14 +283,19 @@ class ExtraProperties:
         Returns:
             pd.DataFrame: region_Load df
         """
-        pump_load = self.model.get_processed_data(
-            "generator", "pump", "interval", self.files_list[0]
-        )
+        data_chunks = []
+        for file in self.files_list:
+            processed_data = self.model.get_processed_data(
+                "generator", "pump", timescale, file
+            )
 
-        if pump_load.empty is True:
-            logger.info("region_Load will equal region_Demand")
-            return df
+            if processed_data.empty is True:
+                logger.info("region_Load will equal region_Demand")
+                return df
 
+            data_chunks.append(processed_data)
+
+        pump_load = self.model.combine_models(data_chunks)
         pump_load = pump_load.groupby(df.index.names).sum()
 
         return df + pump_load

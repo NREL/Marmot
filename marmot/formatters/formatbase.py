@@ -84,7 +84,7 @@ class Process:
         """
         self.input_folder = input_folder
         self.output_file_path = Path(output_file_path)
-        self.Region_Mapping = Region_Mapping
+        self.Region_Mapping = Region_Mapping.astype(str)
         self.emit_names = emit_names
 
         if not self.emit_names.empty:
