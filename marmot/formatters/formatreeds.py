@@ -279,7 +279,7 @@ class ProcessReEDS(Process):
         df = df * converted_units[1]
         units_index = pd.Index([converted_units[0]] * len(df), name="units")
         df.set_index(units_index, append=True, inplace=True)
-        df.rename(columns={"Value": 0}, inplace=True)
+        df.rename(columns={"Value": "values"}, inplace=True)
         return df
 
     def merge_timeseries_block_data(self, df: pd.DataFrame) -> pd.DataFrame:

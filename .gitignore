@@ -11,4 +11,11 @@ marmot/input_files/*
 !marmot/input_files/plexos_properties.csv
 !marmot/input_files/reeds_properties.csv
 !marmot/input_files/Marmot_plot_select.csv
+marmot/input_files/mapping_folder/*
+!marmot/input_files/mapping_folder/colour_dictionary.csv
+!marmot/input_files/mapping_folder/emit_names.csv
+!marmot/input_files/mapping_folder/gen_names.csv
+!marmot/input_files/mapping_folder/ordered_gen_categories.csv
+!marmot/input_files/mapping_folder/Region_mapping_ReEDS.csv
+!marmot/input_files/mapping_folder/Regions_Zones_Mapping_Full.csv
 config.yml

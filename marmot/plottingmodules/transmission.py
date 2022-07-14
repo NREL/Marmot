@@ -194,7 +194,7 @@ class Transmission(MPlotDataHelper):
                             "All categories will be plotted.")
 
                 flow = pd.merge(flow, limits, on='line_name', how='left')
-                flow['Util']= (flow[0].abs() / flow['line_Import_Limit']).fillna(0)
+                flow['Util']= (flow["values"].abs() / flow['line_Import_Limit']).fillna(0)
                 #If greater than 1 because exceeds flow limit, report as 1
                 flow['Util'][flow['Util'] > 1] = 1
                 annual_util = flow['Util'].groupby(["line_name"]).mean().rename(scenario)
@@ -536,9 +536,9 @@ class Transmission(MPlotDataHelper):
             #flow = flow.droplevel('interface_category')
 
             export_limits = self["interface_Export_Limit"].get(scenario).droplevel('timestamp')
-            export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+            export_limits.mask(export_limits["values"]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
-            export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+            export_limits = export_limits[export_limits["values"].abs() < 99998] #Filter out unenforced interfaces.
 
             #Drop unnecessary columns.
             export_limits.reset_index(inplace = True)
@@ -546,9 +546,9 @@ class Transmission(MPlotDataHelper):
             export_limits.set_index('interface_name',inplace = True)
 
             import_limits = self["interface_Import_Limit"].get(scenario).droplevel('timestamp')
-            import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+            import_limits.mask(import_limits["values"]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
-            import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+            import_limits = import_limits[import_limits["values"].abs() < 99998] #Filter out unenforced interfaces.
             reported_ints = import_limits.index.get_level_values('interface_name').unique()
 
             #Drop unnecessary columns.
@@ -754,9 +754,9 @@ class Transmission(MPlotDataHelper):
             #flow = flow.droplevel('interface_category')
 
             export_limits = Export_Limit_Collection.get(scenario).droplevel('timestamp')
-            export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+            export_limits.mask(export_limits["values"]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             export_limits = export_limits[export_limits.index.get_level_values('interface_name').isin(ints.interface)]
-            export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+            export_limits = export_limits[export_limits["values"].abs() < 99998] #Filter out unenforced interfaces.
 
             #Drop unnecessary columns.
             export_limits.reset_index(inplace = True)
@@ -764,9 +764,9 @@ class Transmission(MPlotDataHelper):
             export_limits.set_index('interface_name',inplace = True)
 
             import_limits = Import_Limit_Collection.get(scenario).droplevel('timestamp')
-            import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+            import_limits.mask(import_limits["values"]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
             import_limits = import_limits[import_limits.index.get_level_values('interface_name').isin(ints.interface)]
-            import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced interfaces.
+            import_limits = import_limits[import_limits["values"].abs() < 99998] #Filter out unenforced interfaces.
             reported_ints = import_limits.index.get_level_values('interface_name').unique()
 
             #Drop unnecessary columns.
@@ -1036,7 +1036,7 @@ class Transmission(MPlotDataHelper):
                 elif 'interface_category' in single_line.index.names:
                     single_line = single_line.droplevel('interface_category')
 
-                single_line = single_line.rename(columns={0: scenario})
+                single_line = single_line.rename(columns={"values": scenario})
 
                 if shift_leapday:
                     single_line = self.adjust_for_leapday(single_line)
@@ -1290,12 +1290,12 @@ class Transmission(MPlotDataHelper):
 
         #Line limits are seasonal.
         export_limits = self["line_Export_Limit"].get(scenario).droplevel('timestamp')
-        export_limits.mask(export_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
-        export_limits = export_limits[export_limits[0].abs() < 99998] #Filter out unenforced lines.
+        export_limits.mask(export_limits["values"]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+        export_limits = export_limits[export_limits["values"].abs() < 99998] #Filter out unenforced lines.
 
         import_limits = self["line_Import_Limit"].get(scenario).droplevel('timestamp')
-        import_limits.mask(import_limits[0]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
-        import_limits = import_limits[import_limits[0].abs() < 99998] #Filter out unenforced lines.
+        import_limits.mask(import_limits["values"]==0.0,other=0.01,inplace=True) #if limit is zero set to small value
+        import_limits = import_limits[import_limits["values"].abs() < 99998] #Filter out unenforced lines.
 
         #Extract time index
         ti = self["line_Flow"][self.Scenarios[0]].index.get_level_values('timestamp').unique()
@@ -1618,7 +1618,7 @@ class Transmission(MPlotDataHelper):
                     Load.set_index(['timestamp',self.AGG_BY],inplace=True)
                     assert prop[1] in Load['tech'].unique()
                     Load = Load[Load['tech']==prop[1]].copy()
-                    Load = Load[0].copy()
+                    Load = Load["values"].copy()
                     lookup_label += f'_{prop[1]}'
                 else:
                     Load = self.mplot_data_dict[lookup_label].get(scenario).copy()
@@ -1702,8 +1702,8 @@ class Transmission(MPlotDataHelper):
                     axs[n].set_ylabel(f"{lookup_label} - {label_addenda} - ({attr_unitconversion['units']})", fontsize=12)
                     d1 = str(tmp_df.at[tmp_df.index[0],'timestamp'])
                     d2 = str(tmp_df.at[tmp_df.index[len(tmp_df.index)-1],'timestamp'])
-                    date1 = d1.split(" ")[0]
-                    date2 = d2.split(" ")[0]
+                    date1 = d1.split(" ")["values"]
+                    date2 = d2.split(" ")["values"]
                     axs[n].set_title(f"5min intervals for {date1} - {date2} plotted", fontsize=12)
                     #subset before doing polyfit
                     for cat in categories:
@@ -1842,7 +1842,7 @@ class Transmission(MPlotDataHelper):
             ydimension = mconfig.parser("figure_size","ydimension")
 
             #convert values to appropriate units?
-            unitconversion = self.capacity_energy_unitconversion(max(grouped_import_lims[0].values.max(),grouped_export_lims[0].values.max()))
+            unitconversion = self.capacity_energy_unitconversion(max(grouped_import_lims["values"].values.max(), grouped_export_lims["values"].values.max()))
 
             for zone_input in self.Zones:
                 self.logger.info(f"Zone = {zone_input}")
@@ -1851,11 +1851,11 @@ class Transmission(MPlotDataHelper):
                 
                 import_line_cap = lines.merge(grouped_import_lims,how = 'inner',on = 'line_name')
                 import_line_cap = import_line_cap[[self.AGG_BY,'line_name',0]] #.set_index('region')
-                import_line_cap[0] = import_line_cap[0].div(unitconversion['divisor'])
+                import_line_cap["values"] = import_line_cap["values"].div(unitconversion['divisor'])
 
                 export_line_cap = lines.merge(grouped_export_lims, how='inner', on='line_name')
                 export_line_cap = export_line_cap[[self.AGG_BY,'line_name',0]]
-                export_line_cap[0] = export_line_cap[0].div(unitconversion['divisor'])
+                export_line_cap["values"] = export_line_cap["values"].div(unitconversion['divisor'])
 
                 data_table_out = pd.concat([import_line_cap,export_line_cap])
                 data_table_out.set_index(self.AGG_BY,inplace=True)
@@ -2331,7 +2331,7 @@ class Transmission(MPlotDataHelper):
                     viol = viol.groupby(["timestamp", self.AGG_BY]).sum()
 
                 one_zone = viol.xs(zone_input, level=self.AGG_BY)
-                one_zone = one_zone.rename(columns={0: scenario})
+                one_zone = one_zone.rename(columns={"values": scenario})
                 one_zone = one_zone.abs() #We don't care the direction of the violation
                 scenario_df_list.append(one_zone)
             
@@ -2884,7 +2884,7 @@ class Transmission(MPlotDataHelper):
                         logger.warning("No data in selected Date Range")
                         continue
             
-                flow = flow[0]
+                flow = flow["values"]
 
                 pos_sing = pd.Series(flow.where(flow > 0).sum(), 
                                     name='Total Export')
@@ -2957,8 +2957,8 @@ class Transmission(MPlotDataHelper):
                         df = df.xs(object_name, level=next(n for n in df.index.names if "_name" in n))
                         df = df.groupby(["timestamp"]).sum()
                     #Filter out unenforced lines/interfaces.
-                    df = df[df[0].abs() < 99998] 
-                    df = df.rename(columns={0: ext_prop})
+                    df = df[df["values"].abs() < 99998] 
+                    df = df.rename(columns={"values": ext_prop})
                     scenario_names = pd.Series([scenario] * len(df), name='Scenario')
                     df = df.set_index(scenario_names, append=True)
                 scen_chunk.append(df)

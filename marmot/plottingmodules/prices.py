@@ -636,7 +636,7 @@ class Prices(MPlotDataHelper):
             price: pd.DataFrame = self["node_Price"][scenario]
             price = price.loc[(slice(None), select_nodes), :]
             price = price.groupby(["timestamp", "node"]).sum()
-            price.rename(columns={0: scenario}, inplace=True)
+            price.rename(columns={"values": scenario}, inplace=True)
             if pd.notna(start_date_range):
                 price = self.set_timestamp_date_range(
                     price, start_date_range, end_date_range
@@ -807,7 +807,7 @@ class Prices(MPlotDataHelper):
                     continue
 
                 price = price.groupby(["timestamp"]).sum()
-                price.rename(columns={0: scenario}, inplace=True)
+                price.rename(columns={"values": scenario}, inplace=True)
                 if pd.notna(start_date_range):
                     price = self.set_timestamp_date_range(
                         price, start_date_range, end_date_range
@@ -919,5 +919,5 @@ class Prices(MPlotDataHelper):
     ) -> pd.DataFrame:
         df: pd.DataFrame = data_collection.get(scenario)
         df = df.xs(zone_input, level=self.AGG_BY)
-        df = df.rename(columns={0: scenario})
+        df = df.rename(columns={"values": scenario})
         return df

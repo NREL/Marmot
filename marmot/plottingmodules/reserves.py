@@ -518,7 +518,7 @@ class Reserves(MPlotDataHelper):
 
                 elif count_hours == True:
                     reserve_total = reserve_timeseries[
-                        reserve_timeseries[0] > 0
+                        reserve_timeseries["values"] > 0
                     ]  # Filter for non zero values
                     reserve_total = (
                         self.year_scenario_grouper(
@@ -543,7 +543,7 @@ class Reserves(MPlotDataHelper):
                 continue
 
             reserve_out = reserve_out.reset_index().pivot(
-                index="Type", columns="Scenario", values=0
+                index="Type", columns="Scenario", values="values"
             )
             if count_hours == False:
                 # Convert units
@@ -686,7 +686,7 @@ class Reserves(MPlotDataHelper):
                     reserve_timeseries["Type"] == "-", reserve_timeseries["parent"]
                 )
                 reserve_timeseries = reserve_timeseries.pivot(
-                    index="timestamp", columns="Type", values=0
+                    index="timestamp", columns="Type", values="values"
                 )
 
                 if pd.notna(start_date_range):

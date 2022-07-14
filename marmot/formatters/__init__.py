@@ -1,22 +1,23 @@
 import traceback
 
-PROCESS_LIBRARY = {"PLEXOS": None, "ReEDS": None, "EGRET": None}
+def plexos():
+    try:
+        from .formatplexos import ProcessPLEXOS
+        return ProcessPLEXOS
+    except ModuleNotFoundError:
+        return traceback.format_exc()
 
-try:
-    from .formatplexos import ProcessPLEXOS
+def reeds():
+    try:
+        from .formatreeds import ProcessReEDS
+        return ProcessReEDS
+    except ModuleNotFoundError:
+        return traceback.format_exc()
 
-    PROCESS_LIBRARY["PLEXOS"] = ProcessPLEXOS
-except ModuleNotFoundError:
-    PROCESS_LIBRARY["Error"] = traceback.format_exc()
-try:
-    from .formatreeds import ProcessReEDS
+def egret():
+    try:
+        from .formategret import ProcessEGRET
+        return ProcessEGRET
+    except ModuleNotFoundError:
+        return traceback.format_exc()
 
-    PROCESS_LIBRARY["ReEDS"] = ProcessReEDS
-except ModuleNotFoundError:
-    PROCESS_LIBRARY["Error"] = traceback.format_exc()
-try:
-    from .formategret import ProcessEGRET
-
-    PROCESS_LIBRARY["EGRET"] = ProcessEGRET
-except ModuleNotFoundError:
-    PROCESS_LIBRARY["Error"] = traceback.format_exc()

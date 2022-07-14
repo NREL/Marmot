@@ -150,8 +150,8 @@ class ExtraProperties:
         pump_load = pump_load.groupby(all_col).sum()
 
         load = df.merge(pump_load, on=all_col, how="outer")
-        load[0] = load["0_x"] + load["0_y"]
-        load[0] = load[0].fillna(load["0_x"])
+        load["values"] = load["0_x"] + load["0_y"]
+        load["values"] = load["values"].fillna(load["0_x"])
         load = load.drop(["0_x", "0_y"], axis=1)
         return load
 

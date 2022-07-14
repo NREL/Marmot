@@ -30,7 +30,7 @@ except ModuleNotFoundError:
 from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
 from marmot.utils.loggersetup import SetupLogger
 import marmot.utils.dataio as dataio
-from marmot.formatters import PROCESS_LIBRARY
+import marmot.formatters as formatters
 from marmot.formatters.formatextra import ExtraProperties
 
 # A bug in pandas requires this to be included,
@@ -191,14 +191,14 @@ class MarmotFormat(SetupLogger):
             scen_name = self.Scenario_name
 
         try:
-            process_class = PROCESS_LIBRARY[sim_model]
-            if process_class is None:
+            process_class = getattr(formatters, sim_model.lower())()
+            if not callable(process_class):
                 self.logger.error(
                     "A required module was not found to " f"process {sim_model} results"
                 )
-                self.logger.error(PROCESS_LIBRARY["Error"])
+                self.logger.error(process_class)
                 sys.exit()
-        except KeyError:
+        except AttributeError:
             self.logger.error(f"No formatter found for model: {sim_model}")
             sys.exit()
 

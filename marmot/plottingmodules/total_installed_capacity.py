@@ -110,7 +110,7 @@ class InstalledCapacity(MPlotDataHelper):
                     self.AGG_BY
                 ).unique()
                 if scenario == "ADS":
-                    zone_input_adj = zone_input.split("_WI")[0]
+                    zone_input_adj = zone_input.split("_WI")["values"]
                 else:
                     zone_input_adj = zone_input
                 if zone_input_adj in zones_with_cap:
