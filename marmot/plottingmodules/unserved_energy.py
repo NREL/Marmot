@@ -111,7 +111,7 @@ class UnservedEnergy(MPlotDataHelper):
                         logger.warning("No Unserved Energy in selected Date Range")
                         continue
 
-                unserved_energy = unserved_energy.rename(columns={0: scenario})
+                unserved_energy = unserved_energy.rename(columns={"values": scenario})
                 unserved_energy_chunks.append(unserved_energy)
 
             unserved_energy_out: pd.DataFrame = pd.concat(
@@ -404,7 +404,7 @@ class UnservedEnergy(MPlotDataHelper):
                     unserved_energy_scen.index = pd.date_range(
                         "2024-01-01", periods=24, freq="H"
                     )
-                    unserved_energy_scen.rename(columns={0: scen}, inplace=True)
+                    unserved_energy_scen.rename(columns={"values": scen}, inplace=True)
                     chunks.append(unserved_energy_scen)
 
             unserved_energy_out = pd.concat(chunks, axis=1, sort=False)
