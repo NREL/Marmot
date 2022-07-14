@@ -175,11 +175,11 @@ class TotalGeneration(MPlotDataHelper):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index)
+                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
                         df = df.xs(zone_input, level=self.AGG_BY)
                         df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={0: ext_prop})
+                    df = df.rename(columns={"values": ext_prop})
                     extra_data_frames.append(df)
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
@@ -713,11 +713,11 @@ class TotalGeneration(MPlotDataHelper):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index)
+                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
                         df = df.xs(zone_input, level=self.AGG_BY)
                         df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={0: ext_prop})
+                    df = df.rename(columns={"values": ext_prop})
                     extra_data_frames.append(df)
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)

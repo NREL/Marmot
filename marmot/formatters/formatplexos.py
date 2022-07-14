@@ -9,9 +9,8 @@ import re
 import pandas as pd
 import h5py
 import logging
-from pathlib import Path
 from typing import Dict
-
+from pathlib import Path
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraProperties
@@ -261,7 +260,7 @@ class ProcessPLEXOS(Process):
         df = df * converted_units[1]
         units_index = pd.Index([converted_units[0]] * len(df), name="units")
         df.set_index(units_index, append=True, inplace=True)
-
+        df = df.rename(columns={0: "values"})
         if (
             prop_class == "region"
             and prop == "Unserved Energy"
@@ -916,6 +915,7 @@ class ProcessPLEXOS(Process):
         """
         df = df.droplevel(level=["band", "property"])
         df.index.rename("waterway_name", level="name", inplace=True)
+        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(df.index.names)
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))
         df = df.reorder_levels(df_col, axis=0)

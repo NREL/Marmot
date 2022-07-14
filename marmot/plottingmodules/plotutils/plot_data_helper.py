@@ -387,7 +387,7 @@ class MPlotDataHelper(dict):
             df.tech = df.tech.astype("category")
         df.tech = df.tech.cat.set_categories(self.ordered_gen)
         df = df.sort_values(["tech"])
-        df = df.pivot(index="timestamp", columns="tech", values=0)
+        df = df.pivot(index="timestamp", columns="tech", values="values")
         return df.fillna(0)
 
     def create_categorical_tech_index(self, df: pd.DataFrame, axis=0) -> pd.DataFrame:
