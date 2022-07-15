@@ -112,7 +112,7 @@ class MarmotFormat(SetupLogger):
         elif isinstance(Region_Mapping, pd.DataFrame):
             self.Region_Mapping = Region_Mapping
             if not self.Region_Mapping.empty:
-                self.Region_Mapping = self.Region_Mapping.astype('string')
+                self.Region_Mapping = self.Region_Mapping.astype(str) #'string'
         try:
             # delete category columns if exists
             self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)  

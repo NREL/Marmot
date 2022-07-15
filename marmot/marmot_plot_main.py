@@ -250,10 +250,10 @@ class MarmotPlot(SetupLogger):
             ordered_gen_categories = pd.read_csv(self.mapping_folder.joinpath(
                                                  mconfig.parser('ordered_gen_categories')))
         except FileNotFoundError:
-            self.logger.warning('Could not find '
-                                f'"{self.mapping_folder.joinpath("ordered_gen.csv")}"; '
-                                'Check file name in config file. This is required to '
-                                'run Marmot, system will now exit')
+            self.logger.warning("Could not find "
+                                f"{os.path.join(self.mapping_folder, mconfig.parser('ordered_gen_categories'))} \n"
+                                "Check file name in config file. \n"
+                                "This is required to run Marmot, system will now exit.")
             sys.exit()
         
         if (set(self.gen_names["New"].unique())
