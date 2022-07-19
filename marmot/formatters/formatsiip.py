@@ -143,7 +143,7 @@ class ProcessSIIP(Process):
             df = df.merge(self.Region_Mapping, how="left", on="region")
         # Set multiindex
         df_idx_col = list(df.columns)
-        df_idx_col.pop(df_idx_col.index(0))
+        df_idx_col.pop(df_idx_col.index("values"))
         # move timestamp to start of df
         df_idx_col.insert(0, df_idx_col.pop(df_idx_col.index("timestamp")))
         df = df.set_index(df_idx_col)
@@ -155,7 +155,7 @@ class ProcessSIIP(Process):
         df = df * converted_units[1]
         units_index = pd.Index([converted_units[0]] * len(df), name="units")
         df.set_index(units_index, append=True, inplace=True)
-        df[0] = pd.to_numeric(df[0], downcast="float")
+        df["values"] = pd.to_numeric(df["values"], downcast="float")
         return df
 
     def df_process_generator(self, df: pd.DataFrame
@@ -170,7 +170,7 @@ class ProcessSIIP(Process):
         """
         region_gen_cat_meta = self.metadata.region_generator_category(self.output_file_path.name).reset_index()
 
-        df = df.melt(id_vars=["timestamp"], var_name="gen_name", value_name=0)
+        df = df.melt(id_vars=["timestamp"], var_name="gen_name", value_name="values")
         df = df.merge(region_gen_cat_meta, how='left', on="gen_name")
         return df
 
@@ -183,7 +183,7 @@ class ProcessSIIP(Process):
         Returns:
             pd.DataFrame: dataframe formatted to region class spec
         """
-        return df.melt(id_vars=["timestamp"], var_name="region", value_name=0)
+        return df.melt(id_vars=["timestamp"], var_name="region", value_name="values")
 
     def df_process_reserves_generators(self, df: pd.DataFrame
     ) -> pd.DataFrame:
@@ -198,7 +198,7 @@ class ProcessSIIP(Process):
         reserves_generators = self.metadata.reserves_generators(self.output_file_path.name)
         region_gen_cat_meta = self.metadata.region_generator_category(self.output_file_path.name).reset_index()
 
-        df = df.melt(id_vars=["timestamp"], var_name="gen_name_reserve", value_name=0)
+        df = df.melt(id_vars=["timestamp"], var_name="gen_name_reserve", value_name="values")
         df = df.merge(reserves_generators, how='left', on="gen_name_reserve")
         df = df.drop("gen_name_reserve", axis=1)
         df = df.merge(region_gen_cat_meta, how='left', on="gen_name")
