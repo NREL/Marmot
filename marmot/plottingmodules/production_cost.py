@@ -282,7 +282,7 @@ class SystemCosts(MPlotDataHelper):
                 except KeyError:
                     logger.warning(f"No Generators found in : {zone_input}")
                     continue
-                gen_cost = gen_cost.rename(columns={0: "Total Generation Cost"})
+                gen_cost = gen_cost.rename(columns={"values": "Total Generation Cost"})
 
                 cost_unserved_energy: pd.DataFrame = self[
                     f"{agg}_Cost_Unserved_Energy"
@@ -296,7 +296,7 @@ class SystemCosts(MPlotDataHelper):
                     zone_input, level=self.AGG_BY
                 )
                 cost_unserved_energy = cost_unserved_energy.rename(
-                    columns={0: "Cost Unserved Energy"}
+                    columns={"values": "Cost Unserved Energy"}
                 )
 
                 if pd.notna(start_date_range):
@@ -468,7 +468,7 @@ class SystemCosts(MPlotDataHelper):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index)
+                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
                         try:
                             df = df.xs(zone_input, level=self.AGG_BY)
@@ -478,8 +478,8 @@ class SystemCosts(MPlotDataHelper):
                             break
 
                     if prop_name[1] == "generator_VOM_Cost":
-                        df[0].to_numpy()[df[0].to_numpy() < 0] = 0
-                    df = df.rename(columns={0: prop_name[1]})
+                        df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
+                    df = df.rename(columns={"values": prop_name[1]})
                     data_frames_lst.append(df)
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)
@@ -800,7 +800,7 @@ class SystemCosts(MPlotDataHelper):
                 except KeyError:
                     logger.warning(f"No Generators found in : {zone_input}")
                     continue
-                gen_cost = gen_cost.rename(columns={0: "Total Generation Cost"})
+                gen_cost = gen_cost.rename(columns={"values": "Total Generation Cost"})
 
                 cost_unserved_energy: pd.DataFrame = self[
                     f"{agg}_Cost_Unserved_Energy"
@@ -814,7 +814,7 @@ class SystemCosts(MPlotDataHelper):
                     zone_input, level=self.AGG_BY
                 )
                 cost_unserved_energy = cost_unserved_energy.rename(
-                    columns={0: "Cost Unserved Energy"}
+                    columns={"values": "Cost Unserved Energy"}
                 )
 
                 if pd.notna(start_date_range):
@@ -1088,7 +1088,7 @@ class SystemCosts(MPlotDataHelper):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index)
+                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
                         try:
                             df = df.xs(zone_input, level=self.AGG_BY)
@@ -1098,8 +1098,8 @@ class SystemCosts(MPlotDataHelper):
                             break
 
                     if prop_name[1] == "generator_VOM_Cost":
-                        df[0].to_numpy()[df[0].to_numpy() < 0] = 0
-                    df = df.rename(columns={0: prop_name[1]})
+                        df["values"].to_numpy()[df["values"].to_numpy() < 0] = 0
+                    df = df.rename(columns={"values": prop_name[1]})
                     data_frames_lst.append(df)
 
                 detailed_gen_cost = pd.concat(data_frames_lst, axis=1).fillna(0)

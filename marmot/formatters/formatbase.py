@@ -8,6 +8,7 @@ import re
 import logging
 import pandas as pd
 from pathlib import Path
+from typing import Dict
 
 logger = logging.getLogger("formatter." + __name__)
 
@@ -82,8 +83,8 @@ class Process:
                 Defaults to pd.DataFrame().
         """
         self.input_folder = input_folder
-        self.output_file_path = output_file_path
-        self.Region_Mapping = Region_Mapping
+        self.output_file_path = Path(output_file_path)
+        self.Region_Mapping = Region_Mapping.astype(str)
         self.emit_names = emit_names
 
         if not self.emit_names.empty:
@@ -104,38 +105,38 @@ class Process:
 
     @input_folder.setter
     def input_folder(self, value):
-        self._get_input_files = None
-        self._file_collection = None
+        self._get_input_data_paths = None
+        self._data_collection = None
         self._input_folder = Path(value)
 
     @property
-    def get_input_files(self) -> list:
+    def get_input_data_paths(self) -> list:
         """Gets a list of input files within the scenario folders
 
         Returns:
             list: list of input filenames to process
         """
-        if self._get_input_files == None:
+        if self._get_input_data_paths is None:
             files = []
             for names in self.input_folder.iterdir():
                 files.append(names.name)
 
             # List of all files in input folder in alpha numeric order
-            self._get_input_files = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
-        return self._get_input_files 
-
+            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+        return self._get_input_data_paths 
+    
     @property
-    def file_collection(self) -> dict:
-        """Dictionary input file names to full filename path 
+    def data_collection(self) -> Dict[str, Path]:
+        """Dictionary model names to full filename path 
 
         Returns:
-            dict: file_collection {filename: fullpath}
+            dict: data_collection {filename: fullpath}
         """
-        if self._file_collection == None:
-            self._file_collection = {}
-            for file in self.get_input_files:
-                self._file_collection[file] = str(self.input_folder.joinpath(file))
-        return self._file_collection
+        if self._data_collection is None:
+            self._data_collection = {}
+            for file in self.get_input_data_paths:
+                self._data_collection[file] = self.input_folder.joinpath(file)
+        return self._data_collection
 
     def output_metadata(self, files_list: list) -> None:
         """method template for output_metadata
@@ -146,7 +147,7 @@ class Process:
         raise NotImplementedError("No default implementation of this functionality")
 
     def get_processed_data(
-        self, prop_class: str, property: str, timescale: str, model_filename: str
+        self, prop_class: str, property: str, timescale: str, model_name: str
     ) -> pd.DataFrame:
         """method template for get_processed_data
 
@@ -154,7 +155,7 @@ class Process:
             prop_class (str): class e.g Region, Generator, Zone etc
             property (str): Property e.g gen_out, cap_out etc.
             timescale (str): Data timescale, e.g interval, summary.
-            model_filename (str): name of model to process.
+            model_name (str): name of model to process.
 
         Returns:
             pd.DataFrame: pd.DataFrame

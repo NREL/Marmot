@@ -124,7 +124,7 @@ class Ramping(MPlotDataHelper):
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen.rename(columns={0: "Output (MWh)"})
+                Gen = Gen.rename(columns={"values": "Output (MWh)"})
                 # We are only interested in thermal starts/stops.
                 Gen = Gen[Gen["tech"].isin(self.gen_categories.thermal)]
 
@@ -132,7 +132,7 @@ class Ramping(MPlotDataHelper):
                 Cap["year"] = Cap.timestamp.dt.year
                 Cap = self.rename_gen_techs(Cap)
                 Cap = Cap.drop(columns=["timestamp", "units"])
-                Cap = Cap.rename(columns={0: "Installed Capacity (MW)"})
+                Cap = Cap.rename(columns={"values": "Installed Capacity (MW)"})
                 gen_cap = Gen.merge(Cap, on=["year", "tech", "gen_name"])
                 gen_cap = gen_cap.set_index("timestamp")
 
@@ -260,7 +260,7 @@ class Ramping(MPlotDataHelper):
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen.rename(columns={0: "Output (MWh)"})
+                Gen = Gen.rename(columns={"values": "Output (MWh)"})
                 Gen = Gen[["timestamp", "gen_name", "tech", "Output (MWh)"]]
                 Gen = Gen[
                     Gen["tech"].isin(self.gen_categories.thermal)
@@ -269,7 +269,7 @@ class Ramping(MPlotDataHelper):
                 Cap = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input, level=self.AGG_BY)
                 Cap = Cap.reset_index()
-                Cap = Cap.rename(columns={0: "Installed Capacity (MW)"})
+                Cap = Cap.rename(columns={"values": "Installed Capacity (MW)"})
                 Cap = Cap[["gen_name", "Installed Capacity (MW)"]]
                 Gen = pd.merge(Gen, Cap, on=["gen_name"])
                 Gen.index = Gen.timestamp
