@@ -28,7 +28,8 @@ class ProcessSIIP(Process):
         "generator_generation_actual": "generator_Generation",
         "generator_generation_availability": "generator_Available_Capacity",
         "region_regional_load": "region_Demand",
-        "reserves_generators_reserve_contribution": "reserves_generators_Provision"}
+        "reserves_generators_reserve_contribution": "reserves_generators_Provision",
+        "line_power_flow_actual": "line_Flow"}
     """Maps simulation model property names to Marmot property names"""
     # Extra custom properties that are created based off existing properties.
     # The dictionary keys are the existing properties and the values are the new
@@ -204,4 +205,14 @@ class ProcessSIIP(Process):
         df = df.merge(region_gen_cat_meta, how='left', on="gen_name")
         return df
 
+    def df_process_line(self, df: pd.DataFrame) -> pd.DataFrame:
+        """Format SIIP Line data
 
+        Args:
+            df (pd.DataFrame): Data Frame to process
+
+        Returns:
+            pd.DataFrame: dataframe formatted to region class spec
+        """
+        df = df.melt(id_vars=["timestamp"], var_name="line_name", value_name="values")
+        return df
