@@ -123,9 +123,8 @@ def read_csv_property_file(csv_property_folder: Path, plx_prop_name: str, scenar
              )
         df.timestamp = pd.to_datetime(df.timestamp)
         df_cols = list(df.columns)
-        df_cols.pop(df_cols.index('0'))
+        df_cols.pop(df_cols.index('values'))
         df = df.set_index(df_cols)
-        df = df.rename(columns={'0': 0})
         return df
     except FileNotFoundError:
         logger.warning(f"{scenario}_{plx_prop_name}.csv was not found in "
