@@ -1,5 +1,3 @@
-
-
 import logging
 import pandas as pd
 import os
@@ -12,10 +10,11 @@ import numpy as np
 from marmot.formatters.formatbase import Process
 from marmot.metamanagers.read_metadata import MetaData
 
-logger = logging.getLogger('formatter.'+__name__)
+logger = logging.getLogger("formatter." + __name__)
 
 
 class ProcessEGRET(Process):
+<<<<<<< HEAD
     """Process EGRET class specific data from a json database.
     """
     # Maps EGRET property names to Marmot names, 
@@ -354,3 +353,12 @@ class ProcessEGRET(Process):
         
 
     #pass
+=======
+    """Process EGRET class specific data from a json database."""
+
+    # Maps EGRET property names to Marmot names,
+    # unchanged names not included
+    PROPERTY_MAPPING: dict = {}
+    """Maps simulation model property names to Marmot property names"""
+    pass
+>>>>>>> e113d4197d71da9c1b06b4d868a91bb2c76e7270
