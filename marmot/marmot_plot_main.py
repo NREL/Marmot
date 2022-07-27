@@ -273,31 +273,6 @@ class MarmotPlot(SetupLogger):
 
         # ================================================================================
         # Standard Generation Order, Gen Categorization Lists, Plotting Colors
-<<<<<<< HEAD
-        #================================================================================
-        
-        try:
-            ordered_gen_categories = pd.read_csv(self.mapping_folder.joinpath(
-                                                 mconfig.parser('ordered_gen_categories')))
-        except FileNotFoundError:
-            self.logger.warning("Could not find "
-                                f"{os.path.join(self.mapping_folder, mconfig.parser('ordered_gen_categories'))} \n"
-                                "Check file name in config file. \n"
-                                "This is required to run Marmot, system will now exit.")
-            sys.exit()
-        
-        if (set(self.gen_names["New"].unique())
-        .issubset(ordered_gen_categories['Ordered_Gen'].str.strip().tolist())) == False:
-            missing_gen = (set(self.gen_names.New.unique()) 
-                           - (set(ordered_gen_categories['Ordered_Gen'].str
-                                                                       .strip()
-                                                                       .tolist())))
-            self.logger.warning("The following tech categories from the "
-                                "gen_names csv do not exist in "
-                                "ordered_gen_categories.csv!: "
-                                f"{missing_gen}")
-            
-=======
         # ================================================================================
 
         if (
@@ -315,7 +290,6 @@ class MarmotPlot(SetupLogger):
                 f"{missing_gen}"
             )
 
->>>>>>> e113d4197d71da9c1b06b4d868a91bb2c76e7270
         # Subset ordered_gen to user desired generation
         if self.TECH_SUBSET:
             if self.TECH_SUBSET not in self.ordered_gen_categories.columns:

@@ -1,41 +1,20 @@
-<<<<<<< HEAD
 Input,Input_type,Importance,User_defined_value
 Simulation_model,str,required,EGRET
 PLEXOS_data_blocks,list,optional,ST
 Model_Solutions_folder,folder,required,/Users/franzman1/Documents/GSEProgramJP/NAERM_CD/marmot/MarmotInput
 Marmot_Solutions_folder,folder,optional,/Users/franzman1/Documents/GSEProgramJP/NAERM_CD/marmot/MarmotOutput
 Scenario_process_list,List,required,Scenario1
-process_subset_years,list,optional,
-Region_Mapping.csv_name,string,optional(default),Region_mapping_EGRET.csv
-gen_names.csv_name,string,required(default),gen_names.csv
-emit_names.csv_name,string,required(default),emit_names.csv
-Scenarios,string or List,required,Scenario1
-Scenario_Diff_plot,List,optional,Scenario1
-AGG_BY,string,required,state
-zone_region_sublist,List,optional,"1,2,3"
-TECH_SUBSET,string,optional,
-Facet_ylabels,List,optional,
-Facet_xlabels,List,optional,Scenario1
-Tick_labels,List,optional,EGRET_Run
-=======
-Input,Input_type,Importance,User_defined_value
-Simulation_model,str,required,PLEXOS
-PLEXOS_data_blocks,list,optional,ST
-Model_Solutions_folder,folder,required,Marmot\example-data
-Marmot_Solutions_folder,folder,optional,Marmot\results
-Scenario_process_list,List,required,"Base DA, High VG DA"
 process_subset_years,List,optional,
-Region_Mapping.csv_name,string,optional(default),Region_mapping.csv
+Region_Mapping.csv_name,string,optional(default),Region_mapping_EGRET.csv
 gen_names.csv_name,string,required(default),gen_names.csv
 ordered_gen_categories_file,string,required(default),ordered_gen_categories.csv
 emit_names.csv_name,string,required(default),emit_names.csv
 color_dictionary_file,string,required(default),colour_dictionary.csv
-Scenarios,string or List,required,"Base DA, High VG DA"
-Scenario_Diff_plot,List,optional,"Base DA, High VG DA"
-AGG_BY,string,required,region
-zone_region_sublist,List,optional,
+Scenarios,string or List,required,Scenario1
+Scenario_Diff_plot,List,optional,Scenario1
+AGG_BY,string,required,region 
+zone_region_sublist,List,optional,"1, 2, 3"
 TECH_SUBSET,string,optional,
 Facet_ylabels,List,optional,
-Facet_xlabels,List,optional,"Base , High VG"
-Tick_labels,List,optional,"Base , High VG"
->>>>>>> e113d4197d71da9c1b06b4d868a91bb2c76e7270
+Facet_xlabels,List,optional,Scenario1
+Tick_labels,List,optional,EGRET_Run

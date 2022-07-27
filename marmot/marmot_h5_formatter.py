@@ -129,11 +129,6 @@ class MarmotFormat(SetupLogger):
             if not Region_Mapping.empty:
                 Region_Mapping = Region_Mapping.astype(object)
             self.Region_Mapping = Region_Mapping
-<<<<<<< HEAD
-            if not self.Region_Mapping.empty:
-                self.Region_Mapping = self.Region_Mapping.astype(str) #'string'
-=======
->>>>>>> e113d4197d71da9c1b06b4d868a91bb2c76e7270
         try:
             # delete category columns if exists
             self.Region_Mapping = self.Region_Mapping.drop(["category"], axis=1)

@@ -14,7 +14,6 @@ logger = logging.getLogger("formatter." + __name__)
 
 
 class ProcessEGRET(Process):
-<<<<<<< HEAD
     """Process EGRET class specific data from a json database.
     """
     # Maps EGRET property names to Marmot names, 
@@ -45,7 +44,7 @@ class ProcessEGRET(Process):
             process_subset_years (list, optional): If provided only process 
                 years specified. Defaults to None.
         """
-        self.file_collection: dict = {}
+        #self.file_collection: dict = {}
         # Internal cached data is saved to the following variables.
         # To access the values use the public api e.g self.property_units
         self._property_units: dict = {}
@@ -76,7 +75,8 @@ class ProcessEGRET(Process):
                 folder in alpha numeric order.
         """
         for partition in files_list:
-            f = open(partition, 'r')
+            # f = open(partition, 'r')
+            f = open(self.input_folder.joinpath(partition), 'r')
             data = json.load(f)
             f.close()
 
@@ -88,23 +88,25 @@ class ProcessEGRET(Process):
                              key=f'metadata/{partition}/objects/regions', 
                              mode='a')
     
-    # NOTE: might need to change this somehow
-    def get_input_files(self) -> list:
-        """Gets a list of input files within the scenario folders
-        """
-        startdir = os.getcwd()
-        os.chdir(self.input_folder) 
+    # # NOTE: might need to change this somehow
+    # def get_input_files(self) -> list:
+    #     """Gets a list of input files within the scenario folders
+    #     """
+    #     startdir = os.getcwd()
+    #     os.chdir(self.input_folder) 
         
-        files = []
-        for names in os.listdir():
-            if names.endswith(".json"):
-                files.append(str(self.input_folder.absolute()) + '/' + names)  # Creates a list of only the json files
+    #     files = []
+    #     for names in os.listdir():
+    #         if names.endswith(".json"):
+    #             files.append(str(self.input_folder.absolute()) + '/' + names)  # Creates a list of only the json files
 
-        # List of all files in alpha numeric order
-        files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
-        os.chdir(startdir)
+    #     # List of all files in alpha numeric order
+    #     # files_list = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
+    #     # os.chdir(startdir)
+    #     self._get_input_files = sorted(files, key=lambda x:int(re.sub('\D', '', x)))
+    #     os.chdir(startdir)
 
-        return files_list
+    #     return self._get_input_files
 
 
     # NOTE: need to make sure we have the correct data_class
@@ -123,7 +125,7 @@ class ProcessEGRET(Process):
             pd.DataFrame: Formatted results dataframe.
         """
         # Read json file
-        f = open(model_filename, 'r')
+        f = open(self.input_folder.joinpath(model_filename), 'r')
         data = json.load(f)
         f.close()
         
@@ -153,7 +155,7 @@ class ProcessEGRET(Process):
         values = []
 
         # Get time information specified by user in egret configs file
-        f = open("/Users/franzman1/Documents/GSEProgramJP/NAERM_CD/marmot/MarmotTests/Marmot/egret_configs.txt")
+        f = open("../marmot/input_files/egret_configs.txt")
         start_day = int(f.readline().split("=")[-1].strip())
         start_month = int(f.readline().split("=")[-1].strip())
         start_year = int(f.readline().split("=")[-1].strip())
@@ -234,7 +236,7 @@ class ProcessEGRET(Process):
             pd.DataFrame: Processed output, single value column with multiindex.
         """
         # Get time information specified by user in egret configs file
-        f = open("/Users/franzman1/Documents/GSEProgramJP/NAERM_CD/marmot/MarmotTests/Marmot/egret_configs.txt")
+        f = open("../marmot/input_files/egret_configs.txt")
         start_day = int(f.readline().split("=")[-1].strip())
         start_month = int(f.readline().split("=")[-1].strip())
         start_year = int(f.readline().split("=")[-1].strip())
@@ -301,7 +303,7 @@ class ProcessEGRET(Process):
             pd.DataFrame: Processed output, single value column with multiindex.
         """
         # Get time information specified by user in egret configs file
-        f = open("/Users/franzman1/Documents/GSEProgramJP/NAERM_CD/marmot/MarmotTests/Marmot/egret_configs.txt")
+        f = open("../marmot/input_files/egret_configs.txt")
         start_day = int(f.readline().split("=")[-1].strip())
         start_month = int(f.readline().split("=")[-1].strip())
         start_year = int(f.readline().split("=")[-1].strip())
@@ -353,12 +355,3 @@ class ProcessEGRET(Process):
         
 
     #pass
-=======
-    """Process EGRET class specific data from a json database."""
-
-    # Maps EGRET property names to Marmot names,
-    # unchanged names not included
-    PROPERTY_MAPPING: dict = {}
-    """Maps simulation model property names to Marmot property names"""
-    pass
->>>>>>> e113d4197d71da9c1b06b4d868a91bb2c76e7270
