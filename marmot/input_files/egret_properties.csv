@@ -1,0 +1,108 @@
+data_type,group,data_set,collect_data,description,egret_key
+interval,generator,headroom,TRUE,Rated Capacity - maintenance - Forced Outage,yes
+interval,generator,Capacity Curtailed,FALSE,Amount of Capacity with ) VO&M costs that is not generating.,no
+interval,generator,Curtailment Factor,FALSE,Capacity curtailed but reported as a percentage.,no
+interval,generator,Emissions Cost,FALSE,Emissions costs reported by generator.,no
+interval,generator,Forced Outage,FALSE,Capacity lost to random forced outages.,no
+interval,generator,Fuel Cost,FALSE,Amount paid by each generator for fuel at each timestep.,no
+interval,generator,Fuel Offtake,FALSE,Amount of fuel consumed by generator and timestep.,no
+interval,generator,pg,TRUE,Output from each generator by timestep,yes
+interval,generator,Maintenance,FALSE,This depends on the simulation phase that is used. What simulation phase do we use???,no
+interval,generator,Price Received,FALSE,Default is for generators to receive the weighted-average price at the nodes they are connected to.,no
+interval,generator,Pump Load,FALSE,The amount that a generator charges during a timestep.,no
+interval,generator,Pump Price Paid,FALSE,The price a storage generator pays to charge.,no
+interval,generator,Ramp Down Price,FALSE,The marginal price the system would pay for addition down-ramping capability.,no
+interval,generator,Ramp Up Price,FALSE,The marginal price the system would pay for addition up-ramping capability.,no
+interval,generator,Reserves Revenue,FALSE,Revenue from providing reserves by generator and timestep.,no
+interval,generator,SRMC,FALSE,The marginal cost for a generator to provide an additional MW of power.,no
+interval,generator,Start & Shutdown Cost,FALSE,The amount spent starting and stopping generators by timestep.,no
+year,generator,Total Generation Cost,FALSE,The total cost for operating a generator during each timestep.,no
+interval,generator,Units Generating,FALSE,The fraction at which a generator is operating.,no
+interval,generator,Units Out,FALSE,Number of units on outage.,no
+interval,generator,VO&M Cost,FALSE,The total amount in VO&M paid to generate (VO&M charge x Generation),no
+interval,generator,Pool Revenue,FALSE,,no
+interval,generator,Net Revenue,FALSE,,no
+interval,constraint,Activity,FALSE,The value of the left-hand side of a constraint.,no
+interval,constraint,Violation,FALSE,The amount of a constraint violation.,no
+interval,constraint,Price,FALSE,,no
+interval,constraint,Hours Binding,FALSE,,no
+interval,emission,Cost,FALSE,"The cost of emissions charged at ""Price"" (if defined, otherwise at ""Shodow Price""",no
+interval,emission,Production,FALSE,Total emissions production by timestep.,no
+interval,emissions_generators,Production,FALSE,Emissions produced by generator for each timestep. Specify the units outputted by the xml you are using here (e.g. kg or lb); Marmot will do the appropriate conversion to metric tons. ,no
+interval,fuel,Cost,FALSE,Cost of fuel by timestep.,no
+interval,fuel,Offtake,FALSE,Fuel consumed by generator and timestep.,no
+interval,fuel,Price,FALSE,,no
+interval,line,Flow,FALSE,"Flow from ""Node From"" to ""Node To""",no
+interval,line,Hours Congested,FALSE,Hours when the line is flowing at its max/min,no
+interval,line,Shadow Price,FALSE,The marginal price the system would pay for another MW of transmission capacity.,no
+interval,line,Violation,FALSE,"The amount the constraint is violated by, only possible if a ""Limit Penalty"" has been defined.",no
+interval,region,Exports,FALSE,Total exports from a region,no
+interval,region,Fixed Load,FALSE,Load that is exogenously assigned.,no
+interval,region,Generation,FALSE,Total Generation within a region,no
+interval,region,Imports,FALSE,Total imports to a region,no
+interval,region,load,TRUE,Total load within a region,yes
+interval,region,Price,FALSE,Depends on the load settlement model used. What load settlement model are we using???,no
+interval,region,Unserved Energy,FALSE,Dropped load in a region,no
+interval,region,Dump Energy,FALSE,,no
+interval,reserve,Price,FALSE,Marginal value of providing reserves in that region,no
+interval,reserve,Provision,FALSE,Reserves provided by region and timestep.,no
+interval,reserve,Shortage,FALSE,Rserve shortages by region and timestep.,no
+interval,reserve,Risk,FALSE,,no
+interval,reserves_generators,Provision,FALSE,Rserves provided by generator and timestep,no
+interval,reserves_generators,Revenue,FALSE,Revenue a generator gets from providing reserves,no
+interval,storage,End Volume,FALSE,Storage volume at end of timestep,no
+interval,storage,Generation,FALSE,Generation from storage resources by timestep.,no
+interval,storage,Inflow,FALSE,Natural inflow: applies to CSP-TES,no
+interval,storage,Initial Volume,FALSE,Storage volume at the beginning of each timestep.,no
+interval,storage,Pump Load,FALSE,The amount that a storage resource charges during a timestep.,no
+interval,storage,Spill,FALSE,Natural inflow that cannot be stored.,no
+interval,storage,Release,FALSE,,no
+interval,zone,Generation,FALSE,Total generation in an RTO,no
+interval,zone,load,TRUE,Total load in an RTO,yes
+interval,zone,Price,FALSE,Depends on the load settlement model used. What load settlement model are we using???,no
+interval,zone,Unserved Energy,FALSE,Unserved energy in an RTO,no
+interval,zone,Dump Energy,FALSE,,no
+year,generator,Installed Capacity,FALSE,Nameplate power capacity (Max Capacity x Units),no
+year,line,Export Limit,FALSE,Transmission capacity,no
+year,line,Import Limit,FALSE,Transmission capacity,no
+interval,region,Net Interchange,FALSE,,no
+interval,zone,Net Interchange,FALSE,,no
+interval,interface,Flow,FALSE,,no
+interval,interface,Shadow Price,FALSE,,no
+interval,interface,Violation,FALSE,,no
+interval,interface,Hours Congested,FALSE,,no
+interval,region_regions,Net Interchange,FALSE,,no
+year,interface,Import Limit,FALSE,,no
+year,interface,Export Limit,FALSE,,no
+year,generator,Hours at Minimum,FALSE,,no
+year,generator,Emissions Cost,FALSE,,no
+year,generator,Fuel Cost,FALSE,,no
+year,generator,Start & Shutdown Cost,FALSE,,no
+year,generator,VO&M Cost,FALSE,,no
+year,interface,Hours Congested,FALSE,,no
+interval,interface,Import Limit,FALSE,,no
+interval,interface,Export Limit,FALSE,,no
+interval,generator,Total Generation Cost,FALSE,,no
+interval,generator,Net Reserves Revenue,FALSE,,no
+interval,generator,Reserves VO&M Cost,FALSE,,no
+interval,emission,Intensity,FALSE,,no
+interval,reserve,Cost,FALSE,,no
+interval,region,Total Generation Cost,FALSE,,no
+interval,zone,Cost to Load,FALSE,,no
+interval,zone,Emissions Cost,FALSE,The total cost for operating a generator during each timestep.,no
+interval,zone,Generator FO&M Cost,FALSE,,no
+interval,zone,Generator Net Profit,FALSE,,no
+interval,zone,Generator Net Revenue,FALSE,,no
+interval,zone,Generator Pool Revenue,FALSE,,no
+interval,zone,Import Revenue,FALSE,,no
+interval,zone,Net Cost of Exports,FALSE,,no
+interval,zone,Settlement Surplus,FALSE,,no
+interval,zone,Total Fixed Costs,FALSE,,no
+interval,zone,Total Generation Cost,FALSE,,no
+interval,node,Price,FALSE,,no
+interval,node,Load,FALSE,,no
+interval,node,Generation,FALSE,,no
+interval,node,Dump Energy,FALSE,,no
+interval,line,Export Limit,FALSE,Transmission capacity,no
+interval,line,Import Limit,FALSE,Transmission capacity,no
+interval,abatement,Abatement,FALSE,,no
