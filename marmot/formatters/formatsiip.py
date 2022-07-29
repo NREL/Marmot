@@ -25,6 +25,7 @@ class ProcessSIIP(Process):
 
     # Maps SIIP property names to Marmot names
     PROPERTY_MAPPING: dict = {
+        "generator_installed_capacity": "generator_Installed_Capacity",
         "generator_generation_actual": "generator_Generation",
         "generator_generation_availability": "generator_Available_Capacity",
         "region_regional_load": "region_Demand",
