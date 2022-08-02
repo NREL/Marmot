@@ -133,7 +133,6 @@ class InstalledCapacity(MPlotDataHelper):
                     if Total_Installed_Capacity.empty is True:
                         logger.warning("No Data in selected Date Range")
                         continue
-
                 capacity_chunks.append(
                     self.year_scenario_grouper(
                         Total_Installed_Capacity, scenario, groupby=scenario_groupby
@@ -142,8 +141,8 @@ class InstalledCapacity(MPlotDataHelper):
 
             if capacity_chunks:
                 Total_Installed_Capacity_Out = pd.concat(
-                    capacity_chunks, axis=0, sort=True
-                ).fillna(0)
+                    capacity_chunks, axis=0,
+                ).fillna(0).sort_index(axis=1)
                 Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[
                     :, (Total_Installed_Capacity_Out != 0).any(axis=0)
                 ]
@@ -154,7 +153,6 @@ class InstalledCapacity(MPlotDataHelper):
                 out = MissingZoneData()
                 outputs[zone_input] = out
                 continue
-
             unitconversion = self.capacity_energy_unitconversion(
                 Total_Installed_Capacity_Out, sum_values=True
             )

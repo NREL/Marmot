@@ -219,8 +219,8 @@ class TotalGeneration(MPlotDataHelper):
                 continue
 
             total_generation_stack_out = pd.concat(
-                gen_chunks, axis=0, sort=True
-            ).fillna(0)
+                gen_chunks, axis=0
+            ).fillna(0).sort_index(axis=1)
             extra_data_out = pd.concat(extra_data_chunks, axis=0, sort=False)
 
             # Add Net Imports if desired
@@ -796,7 +796,7 @@ class TotalGeneration(MPlotDataHelper):
                 continue
 
             # Concat all data into single data-frames
-            Gen_Out = pd.concat(gen_chunks, axis=0, sort=True)
+            Gen_Out = pd.concat(gen_chunks, axis=0).sort_index(axis=1)
             # Drop any technologies with 0 Gen
             Gen_Out = Gen_Out.loc[:, (Gen_Out != 0).any(axis=0)]
 
