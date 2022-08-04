@@ -16,12 +16,13 @@ If you have added new files or modules you will need to run **.\make clean** fir
 
 ## Editing files
 
-All source files are found in the Marmot/docscr/source folder
+All source files are found in the Marmot/docsrc/source folder
 
-All files have a rst foramt, it is similar to markdown.
-Files are layed out in folders with the same names as the online html pages.
-All folders have a index.rst file. This is the inital landing page of each tab on the webpage and controls contents and links to files in the same grouping, e.g get_started
+All files have a rst format, it is like markdown.
+Files are laid out in folders with the same names as the online html pages.
+All folders have a index.rst file. This is the initial landing page of each tab on the webpage and controls contents and links to files in the same grouping, e.g get_started
 
-## Publising
+## Publishing
 
 Once all edits are ready, commit changes and push to remote branch. GitHub will automatically update the docs within a few minutes. 
+
