@@ -30,7 +30,7 @@ except ModuleNotFoundError:
 from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
 from marmot.utils.loggersetup import SetupLogger
 import marmot.utils.dataio as dataio
-from marmot.formatters import PROCESS_LIBRARY
+import marmot.formatters as formatters
 from marmot.formatters.formatextra import ExtraProperties
 
 # A bug in pandas requires this to be included,
@@ -191,14 +191,14 @@ class MarmotFormat(SetupLogger):
             scen_name = self.Scenario_name
 
         try:
-            process_class = PROCESS_LIBRARY[sim_model]
-            if process_class is None:
+            process_class = getattr(formatters, sim_model.lower())()
+            if not callable(process_class):
                 self.logger.error(
                     "A required module was not found to " f"process {sim_model} results"
                 )
-                self.logger.error(PROCESS_LIBRARY["Error"])
+                self.logger.error(process_class)
                 sys.exit()
-        except KeyError:
+        except AttributeError:
             self.logger.error(f"No formatter found for model: {sim_model}")
             sys.exit()
 
@@ -220,7 +220,7 @@ class MarmotFormat(SetupLogger):
             emit_names=self.emit_names,
         )
 
-        files_list = process_sim_model.get_input_files
+        files_list = process_sim_model.get_input_data_paths
 
         # init of ExtraProperties class
         extraprops_init = ExtraProperties(process_sim_model, files_list)
@@ -261,7 +261,7 @@ class MarmotFormat(SetupLogger):
 
         start = time.time()
         # Main loop to process each output and pass data to functions
-        for index, row in process_properties.iterrows():
+        for _, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
             data_chunks = []
 

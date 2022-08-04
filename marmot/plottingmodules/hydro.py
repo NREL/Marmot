@@ -23,6 +23,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     DataSavedInModule,
     MissingZoneData,
+    UnderDevelopment,
 )
 
 logger = logging.getLogger("plotter." + __name__)
@@ -68,6 +69,7 @@ class Hydro(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception
         """
+        return UnderDevelopment()
         outputs: dict = {}
 
         # List of properties needed by the plot, properties are a set of tuples and 
