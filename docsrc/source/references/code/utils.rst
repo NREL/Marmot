@@ -38,4 +38,15 @@ Includes things such as logger setup and config file parsers.
    :template: custom-module-template.rst
    :recursive:
 
+   dataio
+
+.. versionadded:: 0.11.0
+
+
+.. currentmodule:: marmot.utils
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
    mconfig

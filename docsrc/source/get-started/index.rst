@@ -29,7 +29,7 @@ Installation
 
     .. code-block:: bash
 
-        git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.10.0
+        git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.11.0
 
     ---
     :column: col-12 p-3

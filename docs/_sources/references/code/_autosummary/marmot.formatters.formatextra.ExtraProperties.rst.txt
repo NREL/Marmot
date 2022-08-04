@@ -34,6 +34,8 @@ marmot.formatters.formatextra.ExtraProperties
         ~ExtraProperties.reeds_generator_vom_cost
         ~ExtraProperties.reeds_region_total_load
         ~ExtraProperties.reeds_reserve_provision
+        ~ExtraProperties.siip_generator_curtailment
+        ~ExtraProperties.siip_region_total_load
    
    
 

@@ -1,0 +1,438 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>marmot.formatters.formatsiip &#8212; Marmot 0.11.0 documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">Marmot 0.11.0 documentation</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for marmot.formatters.formatsiip</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Main formatting module for SIIP results,</span>
+<span class="sd">Contains classes and methods specific to SIIP outputs.</span>
+<span class="sd">Inherits the Process class.</span>
+
+<span class="sd">@author: Daniel Levie</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
+<span class="kn">import</span> <span class="nn">marmot.metamanagers.write_siip_metadata</span> <span class="k">as</span> <span class="nn">write_siip_metadata</span>
+<span class="kn">from</span> <span class="nn">marmot.metamanagers.read_metadata</span> <span class="kn">import</span> <span class="n">MetaData</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">Process</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatextra</span> <span class="kn">import</span> <span class="n">ExtraProperties</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;formatter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
+<span class="n">formatter_settings</span> <span class="o">=</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;formatter_settings&quot;</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProcessSIIP"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatsiip.ProcessSIIP.html#marmot.formatters.formatsiip.ProcessSIIP">[docs]</a><span class="k">class</span> <span class="nc">ProcessSIIP</span><span class="p">(</span><span class="n">Process</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process SIIP specific data from a SIIP result set.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Maps SIIP property names to Marmot names</span>
+    <span class="n">PROPERTY_MAPPING</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_installed_capacity&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Installed_Capacity&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_generation_actual&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_generation_availability&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Available_Capacity&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;region_regional_load&quot;</span><span class="p">:</span> <span class="s2">&quot;region_Demand&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;reserves_generators_reserve_contribution&quot;</span><span class="p">:</span> <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_power_flow_actual&quot;</span><span class="p">:</span> <span class="s2">&quot;line_Flow&quot;</span><span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Maps simulation model property names to Marmot property names&quot;&quot;&quot;</span>
+    <span class="c1"># Extra custom properties that are created based off existing properties.</span>
+    <span class="c1"># The dictionary keys are the existing properties and the values are the new</span>
+    <span class="c1"># property names and methods used to create it.</span>
+    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_Generation&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">siip_generator_curtailment</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)],</span>
+        <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)],</span>
+        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Load&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">siip_region_total_load</span><span class="p">)]}</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">input_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="o">*</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
+        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Args:</span>
+<span class="sd">            input_folder (Path): Folder containing csv files.</span>
+<span class="sd">            output_file_path (Path): Path to formatted h5 output file.</span>
+<span class="sd">            Region_Mapping (pd.DataFrame, optional): DataFrame to map custom</span>
+<span class="sd">                regions/zones to create custom aggregations.</span>
+<span class="sd">                Defaults to pd.DataFrame().</span>
+<span class="sd">            **kwargs</span>
+<span class="sd">                These parameters will be passed to the Process </span>
+<span class="sd">                class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Instantiation of Process Base class</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span>
+            <span class="n">input_folder</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span> <span class="o">=</span> <span class="n">MetaData</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+            <span class="n">read_from_formatted_h5</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">Region_Mapping</span><span class="o">=</span><span class="n">Region_Mapping</span><span class="p">,</span>
+        <span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">get_input_data_paths</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;For SIIP returns paths to input folders</span>
+<span class="sd">        </span>
+<span class="sd">        SIIP places individual input files in a single folder,</span>
+<span class="sd">        It does not combine all results into a single file </span>
+<span class="sd">        like PLEXOS or ReEDS.</span>
+<span class="sd">        If models have been split into partitions, returns list </span>
+<span class="sd">        of partition folders, else returns scenario folder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_data_paths</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+
+            <span class="n">folders</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="c1"># First checks if input_folder contains partition folders</span>
+            <span class="c1"># Adds to list of folders if a dir</span>
+            <span class="k">for</span> <span class="n">names</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                    <span class="n">folders</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">names</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="c1"># If no partition folders found, use input_folder as file directory</span>
+            <span class="c1"># This is a non partitioned run</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">folders</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_data_paths</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># List of all partition folders in input folder in alpha numeric order</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_data_paths</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">folders</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">&quot;\D&quot;</span><span class="p">,</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="n">x</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_input_data_paths</span>
+
+<div class="viewcode-block" id="ProcessSIIP.output_metadata"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatsiip.ProcessSIIP.html#marmot.formatters.formatsiip.ProcessSIIP.output_metadata">[docs]</a>    <span class="k">def</span> <span class="nf">output_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Add SIIP specific metadata to formatted h5 file .</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">json_metadata_file</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;metadata.json&quot;</span><span class="p">)</span>
+        <span class="n">write_siip_metadata</span><span class="o">.</span><span class="n">metadata_to_h5</span><span class="p">(</span><span class="n">json_metadata_file</span><span class="p">,</span> 
+            <span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProcessSIIP.get_processed_data"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatsiip.ProcessSIIP.html#marmot.formatters.formatsiip.ProcessSIIP.get_processed_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_processed_data</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">prop</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Handles the pulling of data from the SIIP input folder </span>
+<span class="sd">        and then passes the data to one of the formating functions</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            prop_class (str): Property class e.g Region, Generator, Zone etc</span>
+<span class="sd">            prop (str): Property e.g generation_actual, regional_load etc.</span>
+<span class="sd">            timescale (str): Data timescale, e.g interval, month, year, etc.</span>
+<span class="sd">            model_name (str): name of model to process.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: Formatted results dataframe.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;      </span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="n">siip_partition</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_collection</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">siip_partition</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">prop</span> <span class="o">+</span> <span class="s2">&quot;.csv&quot;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">report_prop_error</span><span class="p">(</span><span class="n">prop</span><span class="p">,</span> <span class="n">prop_class</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">df</span>
+        <span class="c1"># Convert to datetime64[ns] type</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">DateTime</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">DateTime</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;DateTime&quot;</span><span class="p">:</span> <span class="s2">&quot;timestamp&quot;</span><span class="p">})</span>
+
+        <span class="c1"># Get desired method</span>
+        <span class="n">process_att</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;df_process_</span><span class="si">{</span><span class="n">prop_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="c1"># Process attribute and return to df</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">process_att</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+        <span class="c1"># Add region mapping</span>
+        <span class="k">if</span> <span class="s1">&#39;region&#39;</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;left&quot;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">)</span>
+        <span class="c1"># Set multiindex</span>
+        <span class="n">df_idx_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="n">df_idx_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_idx_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;values&quot;</span><span class="p">))</span>
+        <span class="c1"># move timestamp to start of df</span>
+        <span class="n">df_idx_col</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">df_idx_col</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">df_idx_col</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)))</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">df_idx_col</span><span class="p">)</span>
+        
+        <span class="n">df_units</span> <span class="o">=</span> <span class="s2">&quot;MW&quot;</span>
+        <span class="c1"># find unit conversion values</span>
+        <span class="n">converted_units</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">UNITS_CONVERSION</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">df_units</span><span class="p">,</span> <span class="p">(</span><span class="n">df_units</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="c1"># Convert units and add unit column to index</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span> <span class="o">*</span> <span class="n">converted_units</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">units_index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="n">converted_units</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">),</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;units&quot;</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">units_index</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">],</span> <span class="n">downcast</span><span class="o">=</span><span class="s2">&quot;float&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessSIIP.df_process_generator"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatsiip.ProcessSIIP.html#marmot.formatters.formatsiip.ProcessSIIP.df_process_generator">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_generator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format SIIP Generator class data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Data Frame to process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: dataframe formatted to generator class spec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">region_gen_cat_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generator_category</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;values&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">region_gen_cat_meta</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessSIIP.df_process_region"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatsiip.ProcessSIIP.html#marmot.formatters.formatsiip.ProcessSIIP.df_process_region">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_region</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format SIIP Region data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Data Frame to process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: dataframe formatted to region class spec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;values&quot;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ProcessSIIP.df_process_reserves_generators"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatsiip.ProcessSIIP.html#marmot.formatters.formatsiip.ProcessSIIP.df_process_reserves_generators">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_reserves_generators</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format SIIP Reserves Generator data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Data Frame to process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: dataframe formatted to reserves generator class spec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">reserves_generators</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">reserves_generators</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">region_gen_cat_meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">region_generator_category</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">output_file_path</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;gen_name_reserve&quot;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;values&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">reserves_generators</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name_reserve&quot;</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s2">&quot;gen_name_reserve&quot;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">region_gen_cat_meta</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s1">&#39;left&#39;</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="s2">&quot;gen_name&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ProcessSIIP.df_process_line"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatsiip.ProcessSIIP.html#marmot.formatters.formatsiip.ProcessSIIP.df_process_line">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Format SIIP Line data</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Data Frame to process</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: dataframe formatted to region class spec</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">],</span> <span class="n">var_name</span><span class="o">=</span><span class="s2">&quot;line_name&quot;</span><span class="p">,</span> <span class="n">value_name</span><span class="o">=</span><span class="s2">&quot;values&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span></div></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

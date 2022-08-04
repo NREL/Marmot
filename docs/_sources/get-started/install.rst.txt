@@ -35,12 +35,12 @@ Clone the Marmot repository
 
 Clone the most recent version of the ``Marmot`` repository::
 
-   git clone --recurse-submodules git@github.com:NREL/Marmot.git --branch v0.10.0
+   git clone --recurse-submodules git@github.com:NREL/Marmot.git --branch v0.11.0
 
 You will need to have set up a public key using ``ssh-keygen`` and `added your public key to your GitHub account
 <https://github.com/settings/ssh/new>`_ for this to work. Or, you can use HTTPS instead::
 
-    git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.10.0
+    git clone --recurse-submodules https://github.com/NREL/Marmot.git --branch v0.11.0
 
 .. note::
    The Marmot PLEXOS formatter imports h5plexos. To avoid import and version errors, 

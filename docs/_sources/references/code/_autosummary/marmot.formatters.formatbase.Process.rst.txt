@@ -40,8 +40,8 @@ marmot.formatters.formatbase.Process
       ~Process.EXTRA_MARMOT_PROPERTIES
       ~Process.PROPERTY_MAPPING
       ~Process.UNITS_CONVERSION
-      ~Process.file_collection
-      ~Process.get_input_files
+      ~Process.data_collection
+      ~Process.get_input_data_paths
       ~Process.input_folder
    
    

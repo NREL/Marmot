@@ -57,6 +57,18 @@ ReEDS
    ProcessReEDS
    PropertyColumns
 
+SIIP
+~~~~~~~~~~~~~~~~~~
+.. versionadded:: 0.11.0
+
+.. currentmodule:: marmot.formatters.formatsiip
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :recursive:
+
+   ProcessSIIP
+
 EGRET
 ~~~~~~~~~~~~~~~~~~
 .. currentmodule:: marmot.formatters.formategret

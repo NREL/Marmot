@@ -1,0 +1,333 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>marmot.metamanagers.write_siip_metadata &#8212; Marmot 0.11.0 documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">Marmot 0.11.0 documentation</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for marmot.metamanagers.write_siip_metadata</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Write SIIP metadata to Marmot formatted results file </span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">marmot.utils.dataio</span> <span class="kn">import</span> <span class="n">write_metadata_to_h5</span>
+
+<span class="n">META_KEYS_TO_FUNCTIONS</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;Regions&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_regions_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;objects/regions&quot;</span><span class="p">)],</span>
+        <span class="s2">&quot;Generator_fuel_mapping&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_generator_category_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;objects/generators&quot;</span><span class="p">)],</span>
+        <span class="s2">&quot;Generator_region_mapping&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_region_generators_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/regions_generators&quot;</span><span class="p">)],</span>
+        <span class="s2">&quot;Generator_reserve_mapping&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;format_reserve_generators_meta&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/reserves_generators&quot;</span><span class="p">)],</span>
+        <span class="s2">&quot;Lines&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;format_region_intraregionallines&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/region_intraregionallines&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;format_region_interregionallines&quot;</span><span class="p">,</span> <span class="s2">&quot;relations/region_interregionallines&quot;</span><span class="p">)</span>
+        <span class="p">]</span>
+    <span class="p">}</span>
+<span class="sd">&quot;&quot;&quot;json metadata keys to functions and Marmot metadata keys.&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="metadata_to_h5"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.metadata_to_h5.html#marmot.metamanagers.write_siip_metadata.metadata_to_h5">[docs]</a><span class="k">def</span> <span class="nf">metadata_to_h5</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> 
+            <span class="n">partition</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;SIIP_metadata&quot;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Process and write all SIIP metadata to hdf5 file</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        metadata_file (Path): Path to SIIP metadata json file</span>
+<span class="sd">        output_file_path (Path): Path to formatted h5 output file.</span>
+<span class="sd">        partition (str, optional): Metadata partition. </span>
+<span class="sd">            Defaults to &quot;SIIP_metadata&quot;.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">metadata_file</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+        <span class="n">json_data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">json_data</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">func_key_tup_list</span> <span class="o">=</span> <span class="n">META_KEYS_TO_FUNCTIONS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">func_key</span> <span class="ow">in</span> <span class="n">func_key_tup_list</span><span class="p">:</span>
+            <span class="n">meta_func</span> <span class="o">=</span> <span class="nb">globals</span><span class="p">()[</span><span class="n">func_key</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">meta_func</span><span class="p">(</span><span class="n">json_data</span><span class="p">[</span><span class="n">key</span><span class="p">])</span>
+            <span class="n">write_metadata_to_h5</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">output_file_path</span><span class="p">,</span> <span class="n">func_key</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">partition</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="format_regions_meta"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_regions_meta.html#marmot.metamanagers.write_siip_metadata.format_regions_meta">[docs]</a><span class="k">def</span> <span class="nf">format_regions_meta</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Format SIIP regions metadata</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (dict): &quot;Regions&quot; SIIP json metadata entry</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Formatted metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">})</span>
+    <span class="n">df</span><span class="p">[</span><span class="s2">&quot;category&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;-&quot;</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="format_generator_category_meta"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_generator_category_meta.html#marmot.metamanagers.write_siip_metadata.format_generator_category_meta">[docs]</a><span class="k">def</span> <span class="nf">format_generator_category_meta</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Format SIIP generator category metadata</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (dict): &quot;Generator_fuel_mapping&quot; SIIP json metadata entry</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Formatted metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;category&quot;</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="format_region_generators_meta"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_region_generators_meta.html#marmot.metamanagers.write_siip_metadata.format_region_generators_meta">[docs]</a><span class="k">def</span> <span class="nf">format_region_generators_meta</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Format SIIP region generator metadata</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (dict): &quot;Generator_region_mapping&quot; SIIP json metadata entry</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Formatted metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">items</span><span class="p">())</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">:</span> <span class="s2">&quot;parent&quot;</span><span class="p">})</span></div>
+
+<div class="viewcode-block" id="format_reserve_generators_meta"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_reserve_generators_meta.html#marmot.metamanagers.write_siip_metadata.format_reserve_generators_meta">[docs]</a><span class="k">def</span> <span class="nf">format_reserve_generators_meta</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Format SIIP reserve generators metadata</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (dict): &quot;Generator_reserve_mapping&quot; SIIP json metadata entry</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Formatted metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;gen_name_reserve&quot;</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="format_region_intraregionallines"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_region_intraregionallines.html#marmot.metamanagers.write_siip_metadata.format_region_intraregionallines">[docs]</a><span class="k">def</span> <span class="nf">format_region_intraregionallines</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Format SIIP region_intraregionallines metadata</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (dict): &quot;Lines&quot; SIIP json metadata entry</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Formatted metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;from_region&quot;</span><span class="p">,</span> <span class="s2">&quot;to_region&quot;</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">from_region</span> <span class="o">==</span> <span class="n">df</span><span class="o">.</span><span class="n">to_region</span><span class="p">][</span><span class="s2">&quot;from_region&quot;</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="s2">&quot;from_region&quot;</span><span class="p">:</span> <span class="s2">&quot;parent&quot;</span><span class="p">})[[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">]]</span></div>
+
+
+<div class="viewcode-block" id="format_region_interregionallines"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.metamanagers.write_siip_metadata.format_region_interregionallines.html#marmot.metamanagers.write_siip_metadata.format_region_interregionallines">[docs]</a><span class="k">def</span> <span class="nf">format_region_interregionallines</span><span class="p">(</span><span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Format SIIP region_interregionallines metadata</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        data (dict): &quot;Lines&quot; SIIP json metadata entry</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        pd.DataFrame: Formatted metadata</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;from_region&quot;</span><span class="p">,</span> <span class="s2">&quot;to_region&quot;</span><span class="p">])</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">df</span><span class="o">.</span><span class="n">from_region</span> <span class="o">!=</span> <span class="n">df</span><span class="o">.</span><span class="n">to_region</span><span class="p">)]</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">df</span><span class="o">.</span><span class="n">from_region</span><span class="p">,</span> <span class="n">df</span><span class="o">.</span><span class="n">to_region</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;index&quot;</span><span class="p">:</span> <span class="s2">&quot;child&quot;</span><span class="p">,</span> <span class="mi">0</span><span class="p">:</span> <span class="s2">&quot;parent&quot;</span><span class="p">})[[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;child&quot;</span><span class="p">]]</span></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

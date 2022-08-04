@@ -62,7 +62,7 @@ def format_generator_category_meta(data: dict) -> pd.DataFrame:
     return pd.DataFrame(data.items()).rename(columns={0: "name", 1: "category"})
 
 def format_region_generators_meta(data: dict) -> pd.DataFrame:
-    """"Format SIIP region generator metadata
+    """Format SIIP region generator metadata
 
     Args:
         data (dict): "Generator_region_mapping" SIIP json metadata entry
@@ -73,7 +73,7 @@ def format_region_generators_meta(data: dict) -> pd.DataFrame:
     return pd.DataFrame(data.items()).rename(columns={0: "child", 1: "parent"})
 
 def format_reserve_generators_meta(data: dict) -> pd.DataFrame:
-    """"Format SIIP reserve generators metadata
+    """Format SIIP reserve generators metadata
 
     Args:
         data (dict): "Generator_reserve_mapping" SIIP json metadata entry
@@ -86,7 +86,7 @@ def format_reserve_generators_meta(data: dict) -> pd.DataFrame:
     return df
 
 def format_region_intraregionallines(data: dict) -> pd.DataFrame:
-    """"Format SIIP region_intraregionallines metadata
+    """Format SIIP region_intraregionallines metadata
 
     Args:
         data (dict): "Lines" SIIP json metadata entry
@@ -100,7 +100,7 @@ def format_region_intraregionallines(data: dict) -> pd.DataFrame:
 
 
 def format_region_interregionallines(data: dict) -> pd.DataFrame:
-    """"Format SIIP region_interregionallines metadata
+    """Format SIIP region_interregionallines metadata
 
     Args:
         data (dict): "Lines" SIIP json metadata entry

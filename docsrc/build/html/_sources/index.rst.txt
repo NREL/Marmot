@@ -24,8 +24,9 @@ modelling results.
 It provides an efficient way to analysis data by combing temporally disaggregated results 
 and allowing the aggregation of different device types and modelling regions.
 
-Marmot currently supports analysis of `PLEXOS <https://www.energyexemplar.com/plexos>`_ 
-production costs modelling and `ReEDS <https://www.nrel.gov/analysis/reeds/>`_ capacity expansion results.
+Marmot currently supports analysis of `PLEXOS <https://www.energyexemplar.com/plexos>`_ and 
+`SIIP <https://www.nrel.gov/analysis/siip.html>`_
+production costs modelling results, and `ReEDS <https://www.nrel.gov/analysis/reeds/>`_ capacity expansion results.
 
 Marmot has approximately 120 pre-built plots which allow significant customization, allowing a
 user to create publication figures and data-tables fast.

@@ -21,3 +21,10 @@ Reads and processes any meta data required by Marmot.
 
    MetaData
 
+.. currentmodule:: marmot.metamanagers
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
+   write_siip_metadata

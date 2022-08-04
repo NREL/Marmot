@@ -1,3 +1,9 @@
+"""Module containing all data import and export functions 
+
+Handles the reading and writing of data to h5 files and csv files
+
+@author: Daniel Levie
+"""
 
 import logging
 from pathlib import Path

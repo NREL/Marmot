@@ -8,13 +8,17 @@
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>marmot.plottingmodules.transmission.Transmission &#8212; Marmot 0.10.0 documentation</title>
-    
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>marmot.plottingmodules.transmission.Transmission &#8212; Marmot 0.11.0 documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
 
-    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
   <link rel="stylesheet"
     href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
@@ -26,9 +30,9 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
-    
+
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
@@ -38,32 +42,40 @@
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="marmot.plottingmodules.unserved_energy.UnservedEnergy" href="marmot.plottingmodules.unserved_energy.UnservedEnergy.html" />
     <link rel="prev" title="marmot.plottingmodules.total_installed_capacity.InstalledCapacity" href="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="None">
-    
-
-    <!-- Google Analytics -->
-    
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
-    
-    <div class="container-fluid" id="banner"></div>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
 
     
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
 
   <div id="navbar-start">
     
     
-<a class="navbar-brand" href="../../../index.html">
-<p class="title">Marmot</p>
-</a>
+  
 
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">Marmot 0.11.0 documentation</p>
+  
+</a>
     
   </div>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="fas fa-bars"></span>
   </button>
 
   
@@ -111,6 +123,14 @@
     <div id="navbar-end">
       
       <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
           <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
@@ -125,13 +145,13 @@
     </nav>
     
 
-    <div class="container-xl">
-      <div class="row">
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
           
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
@@ -229,6 +249,11 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatsiip.ProcessSIIP.html">
+     marmot.formatters.formatsiip.ProcessSIIP
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="marmot.formatters.formategret.ProcessEGRET.html">
      marmot.formatters.formategret.ProcessEGRET
     </a>
@@ -250,14 +275,66 @@
      marmot.metamanagers.read_metadata.MetaData
     </a>
    </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.html">
+     marmot.metamanagers.write_siip_metadata
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
+    <label for="toctree-checkbox-6">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.META_KEYS_TO_FUNCTIONS.html">
+       marmot.metamanagers.write_siip_metadata.META_KEYS_TO_FUNCTIONS
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.format_generator_category_meta.html">
+       marmot.metamanagers.write_siip_metadata.format_generator_category_meta
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.format_region_generators_meta.html">
+       marmot.metamanagers.write_siip_metadata.format_region_generators_meta
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.format_region_interregionallines.html">
+       marmot.metamanagers.write_siip_metadata.format_region_interregionallines
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.format_region_intraregionallines.html">
+       marmot.metamanagers.write_siip_metadata.format_region_intraregionallines
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.format_regions_meta.html">
+       marmot.metamanagers.write_siip_metadata.format_regions_meta
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.format_reserve_generators_meta.html">
+       marmot.metamanagers.write_siip_metadata.format_reserve_generators_meta
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.metamanagers.write_siip_metadata.metadata_to_h5.html">
+       marmot.metamanagers.write_siip_metadata.metadata_to_h5
+      </a>
+     </li>
+    </ul>
+   </li>
   </ul>
  </li>
  <li class="toctree-l1 current active has-children">
   <a class="reference internal" href="../plots.html">
    Plots
   </a>
-  <input checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" type="checkbox"/>
-  <label for="toctree-checkbox-6">
+  <input checked="" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
+  <label for="toctree-checkbox-7">
    <i class="fas fa-chevron-down">
    </i>
   </label>
@@ -363,8 +440,8 @@
   <a class="reference internal" href="../plot_util.html">
    Plot Utilities
   </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" type="checkbox"/>
-  <label for="toctree-checkbox-7">
+  <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
+  <label for="toctree-checkbox-8">
    <i class="fas fa-chevron-down">
    </i>
   </label>
@@ -388,8 +465,8 @@
     <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.html">
      marmot.plottingmodules.plotutils.plot_exceptions
     </a>
-    <input class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" type="checkbox"/>
-    <label for="toctree-checkbox-8">
+    <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
+    <label for="toctree-checkbox-9">
      <i class="fas fa-chevron-down">
      </i>
     </label>
@@ -442,8 +519,8 @@
   <a class="reference internal" href="../utils.html">
    Utilities
   </a>
-  <input class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" type="checkbox"/>
-  <label for="toctree-checkbox-9">
+  <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
+  <label for="toctree-checkbox-10">
    <i class="fas fa-chevron-down">
    </i>
   </label>
@@ -457,8 +534,8 @@
     <a class="reference internal" href="marmot.utils.definitions.html">
      marmot.utils.definitions
     </a>
-    <input class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" type="checkbox"/>
-    <label for="toctree-checkbox-10">
+    <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
+    <label for="toctree-checkbox-11">
      <i class="fas fa-chevron-down">
      </i>
     </label>
@@ -481,11 +558,43 @@
     </ul>
    </li>
    <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.utils.dataio.html">
+     marmot.utils.dataio
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" type="checkbox"/>
+    <label for="toctree-checkbox-12">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.dataio.read_csv_property_file.html">
+       marmot.utils.dataio.read_csv_property_file
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.dataio.read_processed_h5file.html">
+       marmot.utils.dataio.read_processed_h5file
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.dataio.save_to_h5.html">
+       marmot.utils.dataio.save_to_h5
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.dataio.write_metadata_to_h5.html">
+       marmot.utils.dataio.write_metadata_to_h5
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
     <a class="reference internal" href="marmot.utils.mconfig.html">
      marmot.utils.mconfig
     </a>
-    <input class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" type="checkbox"/>
-    <label for="toctree-checkbox-11">
+    <input class="toctree-checkbox" id="toctree-checkbox-13" name="toctree-checkbox-13" type="checkbox"/>
+    <label for="toctree-checkbox-13">
      <i class="fas fa-chevron-down">
      </i>
     </label>
@@ -518,40 +627,39 @@
 
   </div>
 </nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
-          
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
 
           
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-              
-              <div class="toc-item">
-                
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
 
 <nav id="bd-toc-nav">
     
 </nav>
-              </div>
-              
-              <div class="toc-item">
-                
-              </div>
-              
-            
-          </div>
-          
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
 
           
           
-            
-          
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+          <div class="bd-content col-12 col-md-9 col-xl-7">
               
-              <div>
+              <article class="bd-article" role="main">
                 
   <script>
    var arr = document.getElementsByClassName('reference internal');
@@ -586,11 +694,11 @@ class.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.extract_tx_cap" title="marmot.plottingmodules.transmission.Transmission.extract_tx_cap"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_tx_cap</span></code></a>(**_)</p></td>
-<td><p>Plot under development</p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_tx_cap</span></code>([figure_name, prop, start, ...])</p></td>
+<td><p></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.int_flow_ind" title="marmot.plottingmodules.transmission.Transmission.int_flow_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int_flow_ind</span></code></a>([figure_name, prop, ...])</p></td>
-<td><p>Creates a line plot of interchange flows and their import and export limits.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.get_line_interface_limits" title="marmot.plottingmodules.transmission.Transmission.get_line_interface_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_line_interface_limits</span></code></a>(extra_property_names)</p></td>
+<td><p>Get and process line and interface limits</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.int_flow_ind_diff" title="marmot.plottingmodules.transmission.Transmission.int_flow_ind_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int_flow_ind_diff</span></code></a>([figure_name])</p></td>
 <td><p>Plot under development</p></td>
@@ -598,17 +706,23 @@ class.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.int_flow_ind_seasonal" title="marmot.plottingmodules.transmission.Transmission.int_flow_ind_seasonal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">int_flow_ind_seasonal</span></code></a>([figure_name, prop, ...])</p></td>
 <td><p>#TODO: Finish Docstring</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_flow_ind" title="marmot.plottingmodules.transmission.Transmission.line_flow_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_flow_ind</span></code></a>([figure_name, prop])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.interface_flow_ind" title="marmot.plottingmodules.transmission.Transmission.interface_flow_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">interface_flow_ind</span></code></a>([figure_name, prop])</p></td>
+<td><p>Timeseries or duration curve of individual interfaces.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_flow_ind" title="marmot.plottingmodules.transmission.Transmission.line_flow_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_flow_ind</span></code></a>([figure_name, prop])</p></td>
+<td><p>Timeseries or duration curve of individual lines.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_flow_ind_diff" title="marmot.plottingmodules.transmission.Transmission.line_flow_ind_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_flow_ind_diff</span></code></a>([figure_name, prop])</p></td>
 <td><p>#TODO: Finish Docstring</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_flow_ind_diff" title="marmot.plottingmodules.transmission.Transmission.line_flow_ind_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_flow_ind_diff</span></code></a>([figure_name, prop])</p></td>
-<td><p>#TODO: Finish Docstring</p></td>
-</tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_flow_ind_seasonal" title="marmot.plottingmodules.transmission.Transmission.line_flow_ind_seasonal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_flow_ind_seasonal</span></code></a>([figure_name, prop, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_flow_ind_seasonal" title="marmot.plottingmodules.transmission.Transmission.line_flow_ind_seasonal"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_flow_ind_seasonal</span></code></a>([figure_name, prop, ...])</p></td>
 <td><p>TODO: Finish Docstring.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_hist" title="marmot.plottingmodules.transmission.Transmission.line_hist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_hist</span></code></a>(**kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_hist" title="marmot.plottingmodules.transmission.Transmission.line_hist"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_hist</span></code></a>(**kwargs)</p></td>
 <td><p>Creates a histogram of transmission lineflow utilization for each region.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_scatter</span></code>([figure_name, prop, start, ...])</p></td>
+<td><p></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.line_util" title="marmot.plottingmodules.transmission.Transmission.line_util"><code class="xref py py-obj docutils literal notranslate"><span class="pre">line_util</span></code></a>(**kwargs)</p></td>
 <td><p>Creates a timeseries line plot of transmission lineflow utilization for each region.</p></td>
@@ -622,22 +736,25 @@ class.</p></li>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.net_export" title="marmot.plottingmodules.transmission.Transmission.net_export"><code class="xref py py-obj docutils literal notranslate"><span class="pre">net_export</span></code></a>([timezone, start_date_range, ...])</p></td>
 <td><p>creates a timeseries net export line graph.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.region_region_checkerboard" title="marmot.plottingmodules.transmission.Transmission.region_region_checkerboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_region_checkerboard</span></code></a>(**_)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.plot_line_interface_limits" title="marmot.plottingmodules.transmission.Transmission.plot_line_interface_limits"><code class="xref py py-obj docutils literal notranslate"><span class="pre">plot_line_interface_limits</span></code></a>(limits, mplt, n)</p></td>
+<td><p>Plots line/interface limits on a subplot</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.region_region_checkerboard" title="marmot.plottingmodules.transmission.Transmission.region_region_checkerboard"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_region_checkerboard</span></code></a>(**_)</p></td>
 <td><p>Creates a checkerboard/heatmap figure showing total interchanges between regions/zones.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.region_region_interchange_all_regions" title="marmot.plottingmodules.transmission.Transmission.region_region_interchange_all_regions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_region_interchange_all_regions</span></code></a>(**kwargs)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.region_region_interchange_all_regions" title="marmot.plottingmodules.transmission.Transmission.region_region_interchange_all_regions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_region_interchange_all_regions</span></code></a>(**kwargs)</p></td>
 <td><p>#TODO: Finish Docstring</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.region_region_interchange_all_scenarios" title="marmot.plottingmodules.transmission.Transmission.region_region_interchange_all_scenarios"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_region_interchange_all_scenarios</span></code></a>(**kwargs)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.region_region_interchange_all_scenarios" title="marmot.plottingmodules.transmission.Transmission.region_region_interchange_all_scenarios"><code class="xref py py-obj docutils literal notranslate"><span class="pre">region_region_interchange_all_scenarios</span></code></a>(**kwargs)</p></td>
 <td><p>#TODO: Finish Docstring</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.total_int_flow_ind" title="marmot.plottingmodules.transmission.Transmission.total_int_flow_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_int_flow_ind</span></code></a>([prop, start_date_range, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.total_int_flow_ind" title="marmot.plottingmodules.transmission.Transmission.total_int_flow_ind"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_int_flow_ind</span></code></a>(prop[, start_date_range, ...])</p></td>
 <td><p>Creates a clustered barplot of the total flow for a specific interface, separated by positive and negative flows.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.zonal_interchange" title="marmot.plottingmodules.transmission.Transmission.zonal_interchange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zonal_interchange</span></code></a>([figure_name, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.zonal_interchange" title="marmot.plottingmodules.transmission.Transmission.zonal_interchange"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zonal_interchange</span></code></a>([figure_name, ...])</p></td>
 <td><p>Creates a line plot of the net interchange between each zone, with a facet for each zone.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.zonal_interchange_total" title="marmot.plottingmodules.transmission.Transmission.zonal_interchange_total"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zonal_interchange_total</span></code></a>([start_date_range, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.transmission.Transmission.zonal_interchange_total" title="marmot.plottingmodules.transmission.Transmission.zonal_interchange_total"><code class="xref py py-obj docutils literal notranslate"><span class="pre">zonal_interchange_total</span></code></a>([start_date_range, ...])</p></td>
 <td><p>Creates a barplot of the net interchange between each zone, separated by positive and negative flows.</p></td>
 </tr>
 </tbody>
@@ -677,38 +794,6 @@ Each scenarios is plotted on a separate Facet plot.</p>
 </dd>
 <dt class="field-even">Return type</dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.int_flow_ind">
-<span class="sig-name descname"><span class="pre">int_flow_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.int_flow_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.int_flow_ind" title="Permalink to this definition">#</a></dt>
-<dd><p>Creates a line plot of interchange flows and their import and export limits.</p>
-<p>Each interchange is potted on a separate facet plot.
-The plot includes every interchange that originates or ends in the aggregation zone.
-This can be adjusted by passing a comma separated string of interchanges to the property input.</p>
-<p>The code will create either a timeseries or duration curve depending on
-if the word ‘duration_curve’ is in the figure_name.
-To make a duration curve, ensure the word ‘duration_curve’ is found in the figure_name.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>figure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – User defined figure output name.
-Defaults to None.</p></li>
-<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Comma separated string of interchanges.
-Defaults to None.</p></li>
-<li><p><strong>start_date_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Defines a start date at which to represent data from.
-Defaults to None.</p></li>
-<li><p><strong>end_date_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Defines a end date at which to represent data to.
-Defaults to None.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>dictionary containing the created plot and its data table</p>
-</dd>
-<dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -759,26 +844,59 @@ The figure and data tables are saved within the module.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.line_flow_ind">
-<span class="sig-name descname"><span class="pre">line_flow_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.line_flow_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.line_flow_ind" title="Permalink to this definition">#</a></dt>
-<dd><p>#TODO: Finish Docstring</p>
-<p>This method plots flow, import and export limit, for individual transmission lines,
-with a facet for each line.
-The lines are specified in the plot properties field of Marmot_plot_select.csv (column 4).
-The plot includes every interchange that originates or ends in the aggregation zone.
-Figures and data tables are returned to plot_main</p>
+<dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.interface_flow_ind">
+<span class="sig-name descname"><span class="pre">interface_flow_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Individual_Interface_Flow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.interface_flow_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.interface_flow_ind" title="Permalink to this definition">#</a></dt>
+<dd><p>Timeseries or duration curve of individual interfaces.</p>
+<p>This method plots flow, import and export limit, for individual
+transmission interfaces, with a facet for each interface.
+The interfaces are specified in the plot properties field of
+Marmot_plot_select.csv (column 4).
+Figures and data tables are saved within the method.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>figure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – [description]. Defaults to None.</p></li>
-<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – [description]. Defaults to None.</p></li>
+<li><p><strong>figure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Figure output name.
+Defaults to “Individual_Interface_Flow”.</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Used to pass in interface names.
+Input format should be a comma seperated string.
+Defaults to None.</p></li>
+<li><p><strong>**kwargs</strong> – Any additional parameters will be passed to the _tx_flow_ind method.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>[description]</p>
+<dd class="field-even"><p>DataSavedInModule class</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.10)">type</a>]</p>
+<dd class="field-odd"><p><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html#marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule" title="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule">DataSavedInModule</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.line_flow_ind">
+<span class="sig-name descname"><span class="pre">line_flow_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Individual_Line_Flow'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.line_flow_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.line_flow_ind" title="Permalink to this definition">#</a></dt>
+<dd><p>Timeseries or duration curve of individual lines.</p>
+<p>This method plots flow, import and export limit, for individual
+transmission lines, with a facet for each line.
+The lines are specified in the plot properties field of
+Marmot_plot_select.csv (column 4).
+Figures and data tables are saved within the method.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>figure_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Figure output name.
+Defaults to “Individual_Line_Flow”.</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Used to pass in line nams.
+Input format should be a comma seperated string.
+Defaults to None.</p></li>
+<li><p><strong>**kwargs</strong> – Any additional parameters will be passed to the _tx_flow_ind method.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>DataSavedInModule class</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html#marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule" title="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule">DataSavedInModule</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -829,24 +947,10 @@ Figures and data tables saved in the module.</p>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
-<dd class="field-even"><p>[description]</p>
+<dd class="field-even"><p>DataSavedInModule class</p>
 </dd>
 <dt class="field-odd">Return type</dt>
-<dd class="field-odd"><p>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#type" title="(in Python v3.10)">type</a>]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.extract_tx_cap">
-<span class="sig-name descname"><span class="pre">extract_tx_cap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.extract_tx_cap"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.extract_tx_cap" title="Permalink to this definition">#</a></dt>
-<dd><p>Plot under development</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns</dt>
-<dd class="field-odd"><p>Exception class, plot is not functional.</p>
-</dd>
-<dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment.html#marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment" title="marmot.plottingmodules.plotutils.plot_exceptions.UnderDevelopment">UnderDevelopment</a>()</p>
+<dd class="field-odd"><p><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule.html#marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule" title="marmot.plottingmodules.plotutils.plot_exceptions.DataSavedInModule">DataSavedInModule</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -951,7 +1055,7 @@ Defaults to None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.zonal_interchange">
-<span class="sig-name descname"><span class="pre">zonal_interchange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.zonal_interchange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.zonal_interchange" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">zonal_interchange</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">figure_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'zonal_interchange'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.zonal_interchange"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.zonal_interchange" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a line plot of the net interchange between each zone, with a facet for each zone.</p>
 <p>The method will only work if agg_by = “zone”.</p>
 <p>The code will create either a timeseries or duration curve depending on
@@ -1002,7 +1106,7 @@ Defaults to None.</p></li>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.total_int_flow_ind">
-<span class="sig-name descname"><span class="pre">total_int_flow_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.total_int_flow_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.total_int_flow_ind" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">total_int_flow_ind</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.total_int_flow_ind"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.total_int_flow_ind" title="Permalink to this definition">#</a></dt>
 <dd><p>Creates a clustered barplot of the total flow for a specific interface, separated by positive and negative flows.</p>
 <p>Specify the interface(s) of interest by providing a comma separated
 string to the property entry.
@@ -1012,8 +1116,7 @@ separate group of clustered bar.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Comma separated string of interfaces to plot.
-Defaults to None.</p></li>
+<li><p><strong>prop</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a>) – Comma separated string of interfaces to plot.</p></li>
 <li><p><strong>start_date_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Defines a start date at which to represent data from.
 Defaults to None.</p></li>
 <li><p><strong>end_date_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Defines a end date at which to represent data to.
@@ -1029,56 +1132,102 @@ Defaults to None.</p></li>
 </dl>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.get_line_interface_limits">
+<span class="sig-name descname"><span class="pre">get_line_interface_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">extra_property_names</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><span class="pre">list</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">object_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.get_line_interface_limits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.get_line_interface_limits" title="Permalink to this definition">#</a></dt>
+<dd><p>Get and process line and interface limits</p>
+<p>Gets limits for all scenarios.
+If limits are equal across all scenarios, only retunrs a single set of limts
+else returns limits for each scenario.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>extra_property_names</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.10)"><em>list</em></a>) – list of limit property names.</p></li>
+<li><p><strong>object_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Name of line or interface if only a single
+object is needed.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>dataframe of limts</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>pd.DataFrame</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.transmission.Transmission.plot_line_interface_limits">
+<span class="sig-name descname"><span class="pre">plot_line_interface_limits</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">limits</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mplt</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.PlotLibrary.html#marmot.plottingmodules.plotutils.plot_library.PlotLibrary" title="marmot.plottingmodules.plotutils.plot_library.PlotLibrary"><span class="pre">marmot.plottingmodules.plotutils.plot_library.PlotLibrary</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><span class="pre">int</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">duration_curve</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><span class="pre">bool</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://docs.python.org/3/library/constants.html#None" title="(in Python v3.10)"><span class="pre">None</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/transmission.html#Transmission.plot_line_interface_limits"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.transmission.Transmission.plot_line_interface_limits" title="Permalink to this definition">#</a></dt>
+<dd><p>Plots line/interface limits on a subplot</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>limits</strong> (<em>pd.DataFrame</em>) – dataframe of import/export limits with a timeseries</p></li>
+<li><p><strong>mplt</strong> (<a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.PlotLibrary.html#marmot.plottingmodules.plotutils.plot_library.PlotLibrary" title="marmot.plottingmodules.plotutils.plot_library.PlotLibrary"><em>PlotLibrary</em></a>) – Instance of PlotLibrary</p></li>
+<li><p><strong>n</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.10)"><em>int</em></a>) – Counter for subplots</p></li>
+<li><p><strong>duration_curve</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.10)"><em>bool</em></a><em>, </em><em>optional</em>) – When potting a duration curve.
+If True, uses the max of the limit values.
+Defaults to False.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
 
 
-              </div>
+              </article>
               
-              
-              <!-- Previous / next buttons -->
-<div class='prev-next-area'>
-    <a class='left-prev' id="prev-link" href="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.html" title="previous page">
-        <i class="fas fa-angle-left"></i>
-        <div class="prev-next-info">
-            <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">marmot.plottingmodules.total_installed_capacity.InstalledCapacity</p>
-        </div>
-    </a>
-    <a class='right-next' id="next-link" href="marmot.plottingmodules.unserved_energy.UnservedEnergy.html" title="next page">
-    <div class="prev-next-info">
-        <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">marmot.plottingmodules.unserved_energy.UnservedEnergy</p>
-    </div>
-    <i class="fas fa-angle-right"></i>
-    </a>
-</div>
-              
-          </main>
-          
 
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">marmot.plottingmodules.total_installed_capacity.InstalledCapacity</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="marmot.plottingmodules.unserved_energy.UnservedEnergy.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">marmot.plottingmodules.unserved_energy.UnservedEnergy</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
       </div>
     </div>
+
+  
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-<footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
     &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
 </p>
-    </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
 Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
-    </div>
-    
   </div>
+  
+</div>
 </footer>
   </body>
 </html>

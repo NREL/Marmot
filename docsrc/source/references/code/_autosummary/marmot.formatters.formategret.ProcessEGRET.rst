@@ -36,8 +36,8 @@ marmot.formatters.formategret.ProcessEGRET
       ~ProcessEGRET.EXTRA_MARMOT_PROPERTIES
       ~ProcessEGRET.PROPERTY_MAPPING
       ~ProcessEGRET.UNITS_CONVERSION
-      ~ProcessEGRET.file_collection
-      ~ProcessEGRET.get_input_files
+      ~ProcessEGRET.data_collection
+      ~ProcessEGRET.get_input_data_paths
       ~ProcessEGRET.input_folder
    
    

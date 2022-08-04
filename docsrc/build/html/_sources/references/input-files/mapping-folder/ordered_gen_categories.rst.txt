@@ -29,7 +29,7 @@ add their own technology categories by adding new columns to the file and
 setting which generators, they would like to include to *TRUE*.
 
 .. versionchanged:: 0.9.0
-   The additional columns added to the file now replace the previous **_gen_cat.csv* files.
+   The additional columns added to the file now replace the previous *_gen_cat.csv* files.
 
 
 Input Definitions

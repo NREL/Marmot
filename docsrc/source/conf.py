@@ -23,7 +23,7 @@ copyright = '2022, Alliance for Sustainable Energy, LLC'
 author = 'Daniel Levie, Marty Schwarz, Brian Sergi, Ryan Houseman'
 
 # The full version, including alpha/beta/rc tags
-version = '0.10.0'
+version = '0.11.0'
 release = version
 
 # release = '0.10.0'

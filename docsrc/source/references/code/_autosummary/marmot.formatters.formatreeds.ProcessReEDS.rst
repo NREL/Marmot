@@ -42,8 +42,8 @@ marmot.formatters.formatreeds.ProcessReEDS
       ~ProcessReEDS.EXTRA_MARMOT_PROPERTIES
       ~ProcessReEDS.PROPERTY_MAPPING
       ~ProcessReEDS.UNITS_CONVERSION
-      ~ProcessReEDS.file_collection
-      ~ProcessReEDS.get_input_files
+      ~ProcessReEDS.data_collection
+      ~ProcessReEDS.get_input_data_paths
       ~ProcessReEDS.input_folder
       ~ProcessReEDS.property_units
       ~ProcessReEDS.wind_resource_to_pca

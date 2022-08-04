@@ -7,13 +7,17 @@
     <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>marmot.plottingmodules.plotutils.plot_data_helper &#8212; Marmot 0.10.0 documentation</title>
-    
-  <!-- Loaded before other Sphinx assets -->
-  <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
-<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
+    <title>marmot.plottingmodules.plotutils.plot_data_helper &#8212; Marmot 0.11.0 documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
 
-    
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
   <link rel="stylesheet"
     href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
   <link rel="preload" as="font" type="font/woff2" crossorigin
@@ -25,9 +29,9 @@
     <link rel="stylesheet" type="text/css" href="../../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/css/custom.css" />
-    
+
   <!-- Pre-loaded scripts that we'll load fully later -->
-  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf">
+  <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
 
     <script data-url_root="../../../../" id="documentation_options" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
@@ -35,32 +39,40 @@
     <script src="../../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="docsearch:language" content="None">
-    
-
-    <!-- Google Analytics -->
-    
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
   </head>
-  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="60">
-    
-    <div class="container-fluid" id="banner"></div>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
 
     
-    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="container-xl">
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
 
   <div id="navbar-start">
     
     
-<a class="navbar-brand" href="../../../../index.html">
-<p class="title">Marmot</p>
-</a>
+  
 
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">Marmot 0.11.0 documentation</p>
+  
+</a>
     
   </div>
 
   <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
-    <span class="navbar-toggler-icon"></span>
+    <span class="fas fa-bars"></span>
   </button>
 
   
@@ -108,6 +120,14 @@
     <div id="navbar-end">
       
       <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
         <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
         <li class="nav-item">
           <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
@@ -122,13 +142,13 @@
     </nav>
     
 
-    <div class="container-xl">
-      <div class="row">
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
           
-            
-            <!-- Only show if we have sidebars configured, else just a small margin  -->
-            <div class="col-12 col-md-3 bd-sidebar">
-              <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
   <i class="icon fas fa-search"></i>
   <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
 </form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
@@ -136,26 +156,25 @@
     
   </div>
 </nav>
-              </div>
-              <div class="sidebar-end-items">
-              </div>
-            </div>
-            
-          
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
 
           
-          <div class="d-none d-xl-block col-xl-2 bd-toc">
-            
-          </div>
-          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
 
           
           
-            
-          
-          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+          <div class="bd-content col-12 col-md-9 col-xl-7">
               
-              <div>
+              <article class="bd-article" role="main">
                 
   <h1>Source code for marmot.plottingmodules.plotutils.plot_data_helper</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
@@ -172,14 +191,73 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">functools</span>
 <span class="kn">import</span> <span class="nn">concurrent.futures</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">matplotlib.colors</span> <span class="k">as</span> <span class="nn">mcolors</span>
 <span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
 
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
+<span class="kn">import</span> <span class="nn">marmot.utils.dataio</span> <span class="k">as</span> <span class="nn">dataio</span>
 
 <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;plotter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
+
+<span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">GenCategories</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Defines various generator categories.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vre</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;vre (List[str]): List of variable renewable technologies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">pv</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;pv (List[str]): List of PV technologies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">re</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;re (List[str]): List of renewable technologies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">thermal</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;thermal (List[str]): List of thermal technologies.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_categories</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;GenCategories&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Set generator categories from a dataframe</span>
+
+<span class="sd">        Categories include the following:</span>
+
+<span class="sd">        - vre</span>
+<span class="sd">        - pv</span>
+<span class="sd">        - re</span>
+<span class="sd">        - thermal</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): Dataframe containing an &#39;Ordered_Gen&#39;</span>
+<span class="sd">                column and a column for each generator category. The </span>
+<span class="sd">                format should appear like the following.</span>
+<span class="sd">                </span>
+<span class="sd">                https://nrel.github.io/Marmot/references/input-files/mapping-folder/</span>
+<span class="sd">                ordered_gen_categories.html#input-example</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            GenCategories: returns instance of class.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">gen_cats</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;vre&quot;</span><span class="p">,</span> <span class="s2">&quot;pv&quot;</span><span class="p">,</span> <span class="s2">&quot;re&quot;</span><span class="p">,</span> <span class="s2">&quot;thermal&quot;</span><span class="p">]</span>
+        <span class="n">gen_cat_dict</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">gen_cats</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="n">gen_cat_dict</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">category</span><span class="p">]</span> <span class="o">==</span> <span class="kc">True</span><span class="p">][</span><span class="s2">&quot;Ordered_Gen&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2">&#39; column was not found in the &quot;</span>
+                    <span class="s2">&quot;ordered_gen_categories input. Check if the column &quot;</span>
+                    <span class="s2">&quot;exists in the input file. This is required for &quot;</span>
+                    <span class="s2">&quot;certain plots to display correctly&quot;</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s2">&quot;vre&quot;</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;&#39;vre&#39; generator categories not set, &quot;</span>
+                        <span class="s2">&quot;curtailment will not be defined!&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">gen_cat_dict</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="MPlotDataHelper"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper">[docs]</a><span class="k">class</span> <span class="nc">MPlotDataHelper</span><span class="p">(</span><span class="nb">dict</span><span class="p">):</span>
@@ -199,9 +277,9 @@
         <span class="n">AGG_BY</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">Scenarios</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
         <span class="n">ordered_gen</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
-        <span class="n">processed_hdf5_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
-        <span class="n">figure_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+        <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
         <span class="n">gen_names_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">gen_categories</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="n">PLEXOS_color_dict</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">Scenario_Diff</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">ylabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -209,10 +287,6 @@
         <span class="n">custom_xticklabels</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">color_list</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">marker_style</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">vre_gen_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">pv_gen_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">re_gen_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">thermal_gen_cat</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">Region_Mapping</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(),</span>
         <span class="n">TECH_SUBSET</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
@@ -223,11 +297,13 @@
 <span class="sd">            Scenarios (List[str]): List of scenarios to process.</span>
 <span class="sd">            ordered_gen (List[str]): Ordered list of generator technologies to plot,</span>
 <span class="sd">                order defines the generator technology position in stacked bar and area plots.</span>
-<span class="sd">            processed_hdf5_folder (Path): Directory containing Marmot solution files.</span>
-<span class="sd">            figure_folder (Path):  Directory containing resulting figures and csv files.</span>
+<span class="sd">            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.</span>
 <span class="sd">            gen_names_dict (dict, optional): Mapping dictionary to rename generator </span>
 <span class="sd">                technologies.</span>
 <span class="sd">                Default is None.</span>
+<span class="sd">            gen_categories (pd.Dataframe, optional): Dataframe containing ordered generation </span>
+<span class="sd">                and columns to specify technology categories.</span>
+<span class="sd">                Defaults to pd.DataFrame().</span>
 <span class="sd">            PLEXOS_color_dict (dict, optional): Dictionary of colors to use for </span>
 <span class="sd">                generation technologies.</span>
 <span class="sd">                Defaults to None.</span>
@@ -245,14 +321,6 @@
 <span class="sd">                Defaults to None.</span>
 <span class="sd">            marker_style (List[str], optional): List of markers for plotting.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            vre_gen_cat (List[str], optional): List of variable renewable technologies.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            pv_gen_cat (List[str], optional): List of PV technologies.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            re_gen_cat (List[str], optional): List of RE technologies.</span>
-<span class="sd">                Defaults to None.</span>
-<span class="sd">            thermal_gen_cat (List[str], optional): List of thermal technologies.</span>
-<span class="sd">                Defaults to None.</span>
 <span class="sd">            Region_Mapping (pd.DataFrame, optional): Mapping file to map </span>
 <span class="sd">                custom regions/zones to create custom aggregations. </span>
 <span class="sd">                Aggregations are created by grouping PLEXOS regions.</span>
@@ -266,14 +334,23 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">AGG_BY</span> <span class="o">=</span> <span class="n">AGG_BY</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Scenarios</span> <span class="o">=</span> <span class="n">Scenarios</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span> <span class="o">=</span> <span class="n">ordered_gen</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">processed_hdf5_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">processed_hdf5_folder</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">figure_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">figure_folder</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">marmot_solutions_folder</span><span class="p">)</span>
+
+        <span class="c1"># Assign input/output folders</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">processed_hdf5_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;Processed_HDF5_folder&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;Figures_Output&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">figure_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_properties_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;csv_properties&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">csv_properties_folder</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">gen_names_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;&#39;gen_names_dict&#39; is empty! Generators will not be renamed.&quot;</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">gen_names_dict</span> <span class="o">=</span> <span class="n">gen_names_dict</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="p">:</span> <span class="n">GenCategories</span> <span class="o">=</span> <span class="n">GenCategories</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="n">gen_categories</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="n">PLEXOS_color_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
                 <span class="s2">&quot;&#39;Color dictionary&#39; not passed! Random colors will now be used.&quot;</span>
@@ -316,32 +393,13 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">marker_style</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;^&quot;</span><span class="p">,</span> <span class="s2">&quot;*&quot;</span><span class="p">,</span> <span class="s2">&quot;o&quot;</span><span class="p">,</span> <span class="s2">&quot;D&quot;</span><span class="p">,</span> <span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;&lt;&quot;</span><span class="p">,</span> <span class="s2">&quot;P&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">,</span> <span class="s2">&quot;8&quot;</span><span class="p">,</span> <span class="s2">&quot;+&quot;</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">marker_style</span> <span class="o">=</span> <span class="n">marker_style</span>
-        <span class="k">if</span> <span class="n">vre_gen_cat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;&#39;vre_gen_cat&#39; not set, curtailment will not be defined!&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vre_gen_cat</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">vre_gen_cat</span> <span class="o">=</span> <span class="n">vre_gen_cat</span>
-        <span class="k">if</span> <span class="n">pv_gen_cat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;&#39;pv_gen_cat&#39; not set.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">pv_gen_cat</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">pv_gen_cat</span> <span class="o">=</span> <span class="n">pv_gen_cat</span>
-        <span class="k">if</span> <span class="n">re_gen_cat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;&#39;re_gen_cat&#39; not set.&quot;</span><span class="p">)</span>  
-            <span class="bp">self</span><span class="o">.</span><span class="n">re_gen_cat</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">re_gen_cat</span> <span class="o">=</span> <span class="n">re_gen_cat</span>
-        <span class="k">if</span> <span class="n">thermal_gen_cat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;&#39;thermal_gen_cat&#39; not set.&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">thermal_gen_cat</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">thermal_gen_cat</span> <span class="o">=</span> <span class="n">thermal_gen_cat</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">custom_xticklabels</span> <span class="o">=</span> <span class="n">custom_xticklabels</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">Region_Mapping</span> <span class="o">=</span> <span class="n">Region_Mapping</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">TECH_SUBSET</span> <span class="o">=</span> <span class="n">TECH_SUBSET</span>
 
 <div class="viewcode-block" id="MPlotDataHelper.get_formatted_data"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.get_formatted_data">[docs]</a>    <span class="k">def</span> <span class="nf">get_formatted_data</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">properties</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">tuple</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Get data from formatted h5 file.</span>
+        <span class="sd">&quot;&quot;&quot;Get data from formatted h5 file or csv property input files.</span>
 
 <span class="sd">        Adds data to dictionary with scenario name as key</span>
 
@@ -353,7 +411,7 @@
 <span class="sd">            list: If 1 in list required data is missing.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">check_input_data</span> <span class="o">=</span> <span class="p">[]</span>
-
+        
         <span class="k">for</span> <span class="n">prop</span> <span class="ow">in</span> <span class="n">properties</span><span class="p">:</span>
             <span class="n">required</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">,</span> <span class="n">scenario_list</span> <span class="o">=</span> <span class="n">prop</span>
             <span class="k">if</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
@@ -366,7 +424,8 @@
             <span class="k">if</span> <span class="n">scen_list</span><span class="p">:</span>
                 <span class="c1"># Read data in with multi threading</span>
                 <span class="n">executor_func_setup</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span>
-                    <span class="bp">self</span><span class="o">.</span><span class="n">read_processed_h5file</span><span class="p">,</span> <span class="n">plx_prop_name</span>
+                    <span class="n">dataio</span><span class="o">.</span><span class="n">read_processed_h5file</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">processed_hdf5_folder</span><span class="p">,</span> 
+                    <span class="n">plx_prop_name</span>
                 <span class="p">)</span>
                 <span class="k">with</span> <span class="n">concurrent</span><span class="o">.</span><span class="n">futures</span><span class="o">.</span><span class="n">ThreadPoolExecutor</span><span class="p">(</span>
                     <span class="n">max_workers</span><span class="o">=</span><span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;multithreading_workers&quot;</span><span class="p">)</span>
@@ -375,33 +434,31 @@
                 <span class="c1"># Save data to dict</span>
                 <span class="k">for</span> <span class="n">scenario</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">scen_list</span><span class="p">,</span> <span class="n">data_files</span><span class="p">):</span>
                     <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">scenario</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
-
+            
             <span class="c1"># If any of the dataframes are empty for given property log warning</span>
-            <span class="k">if</span> <span class="kc">True</span> <span class="ow">in</span> <span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="k">for</span> <span class="n">df</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">()]:</span>
-                <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2"> is MISSING from the Marmot formatted h5 files&quot;</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">required</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="n">check_input_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">missing_scen_data</span> <span class="o">=</span> <span class="p">[</span><span class="n">scen</span> <span class="k">for</span> <span class="n">scen</span><span class="p">,</span> <span class="n">df</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">missing_scen_data</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;read_csv_properties&quot;</span><span class="p">):</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2"> not found in Marmot formatted h5 files, &quot;</span>
+                        <span class="s2">&quot;attempting to read from csv property file.&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">for</span> <span class="n">scenario</span> <span class="ow">in</span> <span class="n">missing_scen_data</span><span class="p">:</span>
+                        <span class="n">df</span> <span class="o">=</span> <span class="n">dataio</span><span class="o">.</span><span class="n">read_csv_property_file</span><span class="p">(</span>
+                                <span class="bp">self</span><span class="o">.</span><span class="n">csv_properties_folder</span><span class="p">,</span>
+                                <span class="n">plx_prop_name</span><span class="p">,</span>
+                                <span class="n">scenario</span>
+                        <span class="p">)</span>
+                        <span class="bp">self</span><span class="p">[</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">][</span><span class="n">scenario</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span>
+                        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span> <span class="ow">and</span> <span class="n">required</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                            <span class="n">check_input_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">plx_prop_name</span><span class="si">}</span><span class="s2"> is MISSING from the Marmot formatted h5 files&quot;</span>
+                    <span class="p">)</span>
+                    <span class="k">if</span> <span class="n">required</span> <span class="o">==</span> <span class="kc">True</span><span class="p">:</span>
+                        <span class="n">check_input_data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">check_input_data</span></div>
-
-<div class="viewcode-block" id="MPlotDataHelper.read_processed_h5file"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.read_processed_h5file">[docs]</a>    <span class="k">def</span> <span class="nf">read_processed_h5file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">plx_prop_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">scenario</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Reads Data from processed h5file.</span>
-
-<span class="sd">        Args:</span>
-<span class="sd">            plx_prop_name (str): Name of property, e.g generator_Generation</span>
-<span class="sd">            scenario (str): Name of scenario.</span>
-
-<span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: Requested dataframe.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">with</span> <span class="n">pd</span><span class="o">.</span><span class="n">HDFStore</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">processed_hdf5_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">scenario</span><span class="si">}</span><span class="s2">_formatted.h5&quot;</span><span class="p">),</span> <span class="s2">&quot;r&quot;</span>
-            <span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">file</span><span class="p">[</span><span class="n">plx_prop_name</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span></div>
 
 <div class="viewcode-block" id="MPlotDataHelper.rename_gen_techs"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.rename_gen_techs">[docs]</a>    <span class="k">def</span> <span class="nf">rename_gen_techs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Renames generator technologies based on the gen_names.csv file.</span>
@@ -467,7 +524,7 @@
         <span class="c1"># Adjust list of values to drop from vre_gen_cat depending </span>
         <span class="c1"># on if it exists in processed techs</span>
         <span class="n">adjusted_vre_gen_list</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">vre_gen_cat</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+            <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="o">.</span><span class="n">vre</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
         <span class="p">]</span>
 
         <span class="k">if</span> <span class="ow">not</span> <span class="n">adjusted_vre_gen_list</span><span class="p">:</span>
@@ -479,7 +536,7 @@
             <span class="p">)</span>
 
         <span class="c1"># Retrun df with just vre techs</span>
-        <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">vre_gen_cat</span><span class="p">)]</span></div>
+        <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">gen_categories</span><span class="o">.</span><span class="n">vre</span><span class="p">)]</span></div>
 
 <div class="viewcode-block" id="MPlotDataHelper.df_process_gen_inputs"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.df_process_gen_inputs">[docs]</a>    <span class="k">def</span> <span class="nf">df_process_gen_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Processes generation data into a pivot table.</span>
@@ -507,9 +564,9 @@
         <span class="c1"># Check if data is not already categorical</span>
         <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">dtype</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">&quot;category&quot;</span><span class="p">:</span>
             <span class="n">df</span><span class="o">.</span><span class="n">tech</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s2">&quot;category&quot;</span><span class="p">)</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">tech</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">)</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">tech</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">tech</span><span class="o">.</span><span class="n">cat</span><span class="o">.</span><span class="n">set_categories</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ordered_gen</span><span class="p">,</span> <span class="n">ordered</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s2">&quot;tech&quot;</span><span class="p">])</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pivot</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="s2">&quot;values&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="MPlotDataHelper.create_categorical_tech_index"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.html#marmot.plottingmodules.plotutils.plot_data_helper.MPlotDataHelper.create_categorical_tech_index">[docs]</a>    <span class="k">def</span> <span class="nf">create_categorical_tech_index</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
@@ -970,37 +1027,41 @@
         <span class="k">return</span> <span class="n">modifed_df</span></div></div>
 </pre></div>
 
-              </div>
+              </article>
               
+
               
-              <!-- Previous / next buttons -->
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
 <div class='prev-next-area'>
 </div>
+              </footer>
               
-          </main>
+          </div>
           
-
       </div>
     </div>
+
+  
   
   <!-- Scripts loaded after <body> so the DOM is not blocked -->
-  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=1999514e3f237ded88cf"></script>
-<footer class="footer mt-5 mt-md-0">
-  <div class="container">
-    
-    <div class="footer-item">
-      <p class="copyright">
+  <script src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
     &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
 </p>
-    </div>
-    
-    <div class="footer-item">
-      <p class="sphinx-version">
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
 Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
 </p>
-    </div>
-    
   </div>
+  
+</div>
 </footer>
   </body>
 </html>

@@ -1,4 +1,4 @@
-.. raw:: html
+﻿.. raw:: html
 
    <script>
       var arr = document.getElementsByClassName('reference internal');
@@ -25,7 +25,6 @@ marmot.marmot\_h5\_formatter.MarmotFormat
    .. autosummary::
    
         ~MarmotFormat.run_formatter
-        ~MarmotFormat.save_to_h5
    
    
 

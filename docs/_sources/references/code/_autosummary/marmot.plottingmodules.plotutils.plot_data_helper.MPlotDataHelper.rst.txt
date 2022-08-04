@@ -34,7 +34,6 @@ marmot.plottingmodules.plotutils.plot\_data\_helper.MPlotDataHelper
         ~MPlotDataHelper.include_net_imports
         ~MPlotDataHelper.insert_custom_data_columns
         ~MPlotDataHelper.merge_new_agg
-        ~MPlotDataHelper.read_processed_h5file
         ~MPlotDataHelper.rename_gen_techs
         ~MPlotDataHelper.set_facet_col_row_dimensions
         ~MPlotDataHelper.set_timestamp_date_range
