@@ -64,7 +64,7 @@ class MarmotPlot(SetupLogger):
         ordered_gen_categories: Union[str, Path, pd.DataFrame],
         color_dictionary_file: Union[str, Path, pd.DataFrame],
         Marmot_plot_select: Union[str, Path, pd.DataFrame],
-        Marmot_Solutions_folder: Union[str, Path] = None,
+        marmot_solutions_folder: Union[str, Path] = None,
         mapping_folder: Union[str, Path] = INPUT_DIR.joinpath("mapping_folder"),
         Scenario_Diff: Union[str, list] = None,
         zone_region_sublist: Union[str, list] = None,
@@ -91,7 +91,7 @@ class MarmotPlot(SetupLogger):
                 containing list of colors to assign to each generator category..
             Marmot_plot_select (Union[str, Path, pd.DataFrame]): Selection of plots
                 to plot.
-            Marmot_Solutions_folder (Union[str, Path], optional): Folder to save
+            marmot_solutions_folder (Union[str, Path], optional): Folder to save
                 Marmot solution files.
                 Defaults to None.
             mapping_folder (Union[str, Path], optional): The location of the
@@ -191,10 +191,10 @@ class MarmotPlot(SetupLogger):
         elif isinstance(Marmot_plot_select, pd.DataFrame):
             self.Marmot_plot_select = Marmot_plot_select
 
-        if Marmot_Solutions_folder is None:
-            self.Marmot_Solutions_folder = self.Model_Solutions_folder
+        if marmot_solutions_folder is None:
+            self.marmot_solutions_folder = self.Model_Solutions_folder
         else:
-            self.Marmot_Solutions_folder = Path(Marmot_Solutions_folder)
+            self.marmot_solutions_folder = Path(marmot_solutions_folder)
 
         self.mapping_folder = Path(mapping_folder)
 
@@ -263,20 +263,13 @@ class MarmotPlot(SetupLogger):
                 f"Only plotting {self.AGG_BY}: " f"{self.zone_region_sublist}"
             )
 
-        processed_hdf5_folder = self.Marmot_Solutions_folder.joinpath(
+        processed_hdf5_folder = self.marmot_solutions_folder.joinpath(
             "Processed_HDF5_folder"
         )
 
         figure_format = mconfig.parser("figure_file_format")
         if figure_format == "nan":
             figure_format = "png"
-
-        # ================================================================================
-        # Input and Output Directories
-        # ================================================================================
-
-        figure_folder = self.Marmot_Solutions_folder.joinpath("Figures_Output")
-        figure_folder.mkdir(exist_ok=True)
 
         # ================================================================================
         # Standard Generation Order, Gen Categorization Lists, Plotting Colors
@@ -322,62 +315,6 @@ class MarmotPlot(SetupLogger):
         # If Other category does not exist in ordered_gen, create entry
         if "Other" not in ordered_gen:
             ordered_gen.append("Other")
-
-        if "pv" not in self.ordered_gen_categories.columns:
-            pv_gen_cat = []
-            self.logger.warning(
-                '"pv" column was not found in the '
-                "ordered_gen_categories.csv. Check if the column "
-                "exists in the csv file. This is required for "
-                "certain plots to display correctly"
-            )
-        else:
-            pv_gen_cat = self.ordered_gen_categories.loc[
-                self.ordered_gen_categories["pv"] == True
-            ]
-            pv_gen_cat = pv_gen_cat["Ordered_Gen"].str.strip().tolist()
-
-        if "re" not in self.ordered_gen_categories.columns:
-            re_gen_cat = []
-            self.logger.warning(
-                '"re" column was not found in the '
-                "ordered_gen_categories.csv. Check if the column "
-                "exists in the csv file. This is required for "
-                "certain plots to display correctly"
-            )
-        else:
-            re_gen_cat = self.ordered_gen_categories.loc[
-                self.ordered_gen_categories["re"] == True
-            ]
-            re_gen_cat = re_gen_cat["Ordered_Gen"].str.strip().tolist()
-
-        if "vre" not in self.ordered_gen_categories.columns:
-            vre_gen_cat = []
-            self.logger.warning(
-                '"vre" column was not found in the '
-                "ordered_gen_categories.csv. Check if the column "
-                "exists in the csv file. This is required for "
-                "certain plots to display correctly"
-            )
-        else:
-            vre_gen_cat = self.ordered_gen_categories.loc[
-                self.ordered_gen_categories["vre"] == True
-            ]
-            vre_gen_cat = vre_gen_cat["Ordered_Gen"].str.strip().tolist()
-
-        if "thermal" not in self.ordered_gen_categories.columns:
-            thermal_gen_cat = []
-            self.logger.warning(
-                '"thermal" column was not found in the '
-                "ordered_gen_categories.csv. Check if the column "
-                "exists in the csv file. This is required for "
-                "certain plots to display correctly"
-            )
-        else:
-            thermal_gen_cat = self.ordered_gen_categories.loc[
-                self.ordered_gen_categories["thermal"] == True
-            ]
-            thermal_gen_cat = thermal_gen_cat["Ordered_Gen"].str.strip().tolist()
 
         if self.color_dictionary_file is not None:
             PLEXOS_color_dict = self.color_dictionary_file.rename(
@@ -553,13 +490,13 @@ class MarmotPlot(SetupLogger):
                 self.AGG_BY,
                 self.Scenarios,
                 ordered_gen,
-                processed_hdf5_folder,
-                figure_folder,
+                self.marmot_solutions_folder
             ]
             # dictionary of keyword arguments passed to plotting modules;
             # key names match the instance variables in each module
             argument_dict = {
                 "gen_names_dict": gen_names_dict,
+                "gen_categories": self.ordered_gen_categories,
                 "PLEXOS_color_dict": PLEXOS_color_dict,
                 "Scenario_Diff": self.Scenario_Diff,
                 "ylabels": self.ylabels,
@@ -567,17 +504,9 @@ class MarmotPlot(SetupLogger):
                 "custom_xticklabels": self.custom_xticklabels,
                 "color_list": color_list,
                 "marker_style": marker_style,
-                "vre_gen_cat": vre_gen_cat,
-                "pv_gen_cat": pv_gen_cat,
-                "re_gen_cat": re_gen_cat,
-                "thermal_gen_cat": thermal_gen_cat,
                 "Region_Mapping": self.Region_Mapping,
                 "TECH_SUBSET": self.TECH_SUBSET,
             }
-
-            # Create output folder for each plotting module
-            figures = figure_folder.joinpath(f"{self.AGG_BY}_{module}")
-            figures.mkdir(exist_ok=True)
 
             # Import plot module from plottingmodules package
             plot_module = importlib.import_module("marmot.plottingmodules." + module)
@@ -586,6 +515,10 @@ class MarmotPlot(SetupLogger):
             class_name = getattr(plot_module, Module_CLASS_MAPPING[module])
             instantiate_mplot = class_name(*argument_list, **argument_dict)
 
+            # Create output folder for each plotting module
+            figures : Path = instantiate_mplot.figure_folder.joinpath(f"{self.AGG_BY}_{module}")
+            figures.mkdir(exist_ok=True)
+
             # Main loop to process each figure and pass
             # plot specific variables to methods
             for _, row in module_plots.iterrows():
@@ -593,6 +526,10 @@ class MarmotPlot(SetupLogger):
                 print("\n\n\n")
                 self.logger.info(f"Plot =  {row['Figure Output Name']}")
 
+                if pd.isna(row.iloc[2]):
+                    prop = None
+                else:
+                    prop = row.iloc[2]
                 # Modifies timezone string before plotting
                 if pd.isna(row.iloc[6]):
                     timezone_string: str = "Date"
@@ -636,7 +573,7 @@ class MarmotPlot(SetupLogger):
                     continue
                 Figure_Out = figure_method(
                     figure_name=row.iloc[0],
-                    prop=row.iloc[2],
+                    prop=prop,
                     y_axis_max=float(row.iloc[3]),
                     start=days_before,
                     end=days_after,
@@ -747,9 +684,9 @@ def main():
     if pd.isna(
         Marmot_user_defined_inputs.loc["Marmot_Solutions_folder", "User_defined_value"]
     ):
-        Marmot_Solutions_folder = None
+        marmot_solutions_folder = None
     else:
-        Marmot_Solutions_folder = (
+        marmot_solutions_folder = (
             Marmot_user_defined_inputs.loc["Marmot_Solutions_folder"]
             .to_string(index=False)
             .strip()
@@ -879,14 +816,14 @@ def main():
         )
     ):
         xlabels = None
-
-    xlabels = (
-        pd.Series(
-            Marmot_user_defined_inputs.loc["Facet_xlabels", "User_defined_value"].split(",")
+    else:
+        xlabels = (
+            pd.Series(
+                Marmot_user_defined_inputs.loc["Facet_xlabels", "User_defined_value"].split(",")
+            )
+            .str.strip()
+            .tolist()
         )
-        .str.strip()
-        .tolist()
-    )
 
     # option to change tick labels on plot
     if pd.isna(Marmot_user_defined_inputs.loc["Tick_labels", "User_defined_value"]):
@@ -908,7 +845,7 @@ def main():
         ordered_gen_cat_file,
         color_dictionary_file,
         Marmot_plot_select,
-        Marmot_Solutions_folder=Marmot_Solutions_folder,
+        marmot_solutions_folder=marmot_solutions_folder,
         mapping_folder=Mapping_folder,
         Scenario_Diff=Scenario_Diff,
         zone_region_sublist=zone_region_sublist,

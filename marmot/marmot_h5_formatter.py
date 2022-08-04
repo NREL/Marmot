@@ -29,7 +29,8 @@ except ModuleNotFoundError:
     sys.exit()
 from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
 from marmot.utils.loggersetup import SetupLogger
-from marmot.formatters import PROCESS_LIBRARY
+import marmot.utils.dataio as dataio
+import marmot.formatters as formatters
 from marmot.formatters.formatextra import ExtraProperties
 
 # A bug in pandas requires this to be included,
@@ -114,7 +115,7 @@ class MarmotFormat(SetupLogger):
         if isinstance(Region_Mapping, (str, Path)):
             try:
                 Region_Mapping = pd.read_csv(Region_Mapping)
-                if not self.Region_Mapping.empty:
+                if not Region_Mapping.empty:
                     Region_Mapping = Region_Mapping.astype(object)
             except FileNotFoundError:
                 self.logger.warning(
@@ -162,44 +163,6 @@ class MarmotFormat(SetupLogger):
                     inplace=True,
                 )
 
-    def save_to_h5(
-        self,
-        df: pd.DataFrame,
-        file_name: Path,
-        key: str,
-        mode: str = "a",
-        complevel: int = 9,
-        complib: str = "blosc:zlib",
-        **kwargs,
-    ) -> None:
-        """Saves data to formatted hdf5 file
-
-        Args:
-            df (pd.DataFrame): Dataframe to save
-            file_name (Path): name of hdf5 file
-            key (str): formatted property identifier,
-                e.g generator_Generation
-            mode (str, optional): file access mode.
-                Defaults to "a".
-            complevel (int, optional): compression level.
-                Defaults to 9.
-            complib (str, optional): compression library.
-                Defaults to 'blosc:zlib'.
-            **kwargs
-                These parameters will be passed pandas.to_hdf function.
-        """
-        self.logger.info("Saving data to h5 file...")
-        df.to_hdf(
-            file_name,
-            key=key,
-            mode=mode,
-            complevel=complevel,
-            complib=complib,
-            **kwargs,
-        )
-
-        self.logger.info("Data saved to h5 file successfully\n")
-
     def run_formatter(
         self,
         sim_model: str = "PLEXOS",
@@ -228,14 +191,14 @@ class MarmotFormat(SetupLogger):
             scen_name = self.Scenario_name
 
         try:
-            process_class = PROCESS_LIBRARY[sim_model]
-            if process_class is None:
+            process_class = getattr(formatters, sim_model.lower())()
+            if not callable(process_class):
                 self.logger.error(
                     "A required module was not found to " f"process {sim_model} results"
                 )
-                self.logger.error(PROCESS_LIBRARY["Error"])
+                self.logger.error(process_class)
                 sys.exit()
-        except KeyError:
+        except AttributeError:
             self.logger.error(f"No formatter found for model: {sim_model}")
             sys.exit()
 
@@ -257,7 +220,7 @@ class MarmotFormat(SetupLogger):
             emit_names=self.emit_names,
         )
 
-        files_list = process_sim_model.get_input_files
+        files_list = process_sim_model.get_input_data_paths
 
         # init of ExtraProperties class
         extraprops_init = ExtraProperties(process_sim_model, files_list)
@@ -298,7 +261,7 @@ class MarmotFormat(SetupLogger):
 
         start = time.time()
         # Main loop to process each output and pass data to functions
-        for index, row in process_properties.iterrows():
+        for _, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
             data_chunks = []
 
@@ -347,7 +310,7 @@ class MarmotFormat(SetupLogger):
                     save_attempt = 1
                     while save_attempt <= 3:
                         try:
-                            self.save_to_h5(
+                            dataio.save_to_h5(
                                 Processed_Data_Out,
                                 output_file_path,
                                 key=property_key_name,
@@ -383,7 +346,7 @@ class MarmotFormat(SetupLogger):
                                 )
 
                                 if prop.empty is False:
-                                    self.save_to_h5(
+                                    dataio.save_to_h5(
                                         prop, output_file_path, key=prop_name
                                     )
                                 else:
@@ -413,7 +376,7 @@ class MarmotFormat(SetupLogger):
                                         )
 
                                         if prop2.empty is False:
-                                            self.save_to_h5(
+                                            dataio.save_to_h5(
                                                 prop2, output_file_path, key=prop_name2
                                             )
                                         else:
