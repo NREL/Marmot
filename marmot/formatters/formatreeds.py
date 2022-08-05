@@ -73,6 +73,9 @@ class ProcessReEDS(Process):
     }
     """Dictionary of Extra custom properties that are created based off existing properties."""
 
+    gdx_results_prefix = "rep_"
+    """Prefix of gdx results file"""
+
     def __init__(
         self,
         input_folder: Path,
@@ -174,7 +177,7 @@ class ProcessReEDS(Process):
             reeds_outputs_dir = self.input_folder.joinpath("outputs")
             files = []
             for names in reeds_outputs_dir.iterdir():
-                if names.name == f"rep_{self.input_folder.name}.gdx":
+                if names.name == f"{self.gdx_results_prefix}{self.input_folder.name}.gdx":
                     files.append(names.name)
 
                     self.property_units = str(names)
