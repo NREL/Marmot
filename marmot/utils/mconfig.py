@@ -158,6 +158,9 @@ def createConfig(configfile_path: Path):
     - **reeds_properties_file:** reeds_properties.csv
         *Change the default reeds_properties_file.csv file, file must be created first*
 
+    - **reeds_india_properties_file:** reeds_india_properties.csv
+        *Change the default reeds_india_properties_file.csv file, file must be created first*
+
     - **siip_properties_file:** siip_properties.csv
         *Change the default siip_properties_file.csv file, file must be created first*
 
@@ -219,6 +222,7 @@ def createConfig(configfile_path: Path):
         plot_select_file="Marmot_plot_select.csv",
         plexos_properties_file="plexos_properties.csv",
         reeds_properties_file="reeds_properties.csv",
+        reeds_india_properties_file="reeds_india_properties.csv",
         siip_properties_file="siip_properties.csv",
     )
 

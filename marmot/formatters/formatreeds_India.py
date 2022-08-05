@@ -1,6 +1,6 @@
-"""Main formatting module for ReEDS results,
-Contains classes and methods specific to ReEDS outputs.
-Inherits the Process class.
+"""Main formatting module for ReEDS India results,
+Contains classes and methods specific to ReEDS India outputs.
+Inherits the ProcessReEDS class.
 
 @author: Daniel Levie
 """
