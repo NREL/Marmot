@@ -145,7 +145,7 @@ class CapacityOut(MPlotDataHelper):
                 avail_cap.reset_index(inplace=True)
 
                 cap_out = avail_cap.merge(install_cap, on=["year", "tech", "gen_name"])
-                cap_out[0] = cap_out["cap"] - cap_out["avail"]
+                cap_out["values"] = cap_out["cap"] - cap_out["avail"]
 
                 cap_out = self.df_process_gen_inputs(cap_out)
                 # Subset only thermal gen categories

@@ -39,7 +39,7 @@ def df_process_gen_ind_inputs(df, self):
     df.tech = df.tech.cat.set_categories(self.ordered_gen)
     df = df.sort_values(["tech"])
     df.set_index(["timestamp", "tech", "gen_name"], inplace=True)
-    df = df[0]
+    df = df["values"]
 
     return df
 
@@ -527,7 +527,7 @@ class UtilizationFactor(MPlotDataHelper):
 
                     if len(self.Scenarios) > 1:
                         ax3[n].plot(
-                            duration_curve[0] / 1000,
+                            duration_curve["values"] / 1000,
                             color=self.PLEXOS_color_dict.get(i, "#333333"),
                             label=i,
                         )
@@ -543,7 +543,7 @@ class UtilizationFactor(MPlotDataHelper):
 
                     else:
                         ax3.plot(
-                            duration_curve[0] / 1000,
+                            duration_curve["values"] / 1000,
                             color=self.PLEXOS_color_dict.get(i, "#333333"),
                             label=i,
                         )
