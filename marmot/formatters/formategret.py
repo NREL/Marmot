@@ -154,13 +154,13 @@ class ProcessEGRET(Process):
         zone = []
         values = []
 
-        # Get time information specified by user in egret configs file
-        f = open("../marmot/input_files/egret_configs.txt")
-        start_day = int(f.readline().split("=")[-1].strip())
-        start_month = int(f.readline().split("=")[-1].strip())
-        start_year = int(f.readline().split("=")[-1].strip())
-        resolution = int(f.readline().split("=")[-1].strip())
-        f.close()
+        # # Get time information specified by user in egret configs file
+        # f = open("../marmot/input_files/egret_configs.txt")
+        # start_day = int(f.readline().split("=")[-1].strip())
+        # start_month = int(f.readline().split("=")[-1].strip())
+        # start_year = int(f.readline().split("=")[-1].strip())
+        # resolution = int(f.readline().split("=")[-1].strip())
+        # f.close()
 
         # Loop through generators 
         for generator in data['elements']['generator'].keys():
@@ -191,7 +191,8 @@ class ProcessEGRET(Process):
             # Get tech value
             tech_val = data['elements']['generator'][generator]['fuel'] + '_' + data['elements']['generator'][generator]['unit_type']
 
-            timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(vals))]
+            # timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(vals))]
+            timestamp += [dt + ":00" for dt in data["system"]["time_keys"]]
             tech += [tech_val]*len(vals)
             gen_name += [generator]*len(vals)
             region += [area_val]*len(vals)
@@ -235,18 +236,19 @@ class ProcessEGRET(Process):
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
         """
-        # Get time information specified by user in egret configs file
-        f = open("../marmot/input_files/egret_configs.txt")
-        start_day = int(f.readline().split("=")[-1].strip())
-        start_month = int(f.readline().split("=")[-1].strip())
-        start_year = int(f.readline().split("=")[-1].strip())
-        resolution = int(f.readline().split("=")[-1].strip())
-        f.close()
+        # # Get time information specified by user in egret configs file
+        # f = open("../marmot/input_files/egret_configs.txt")
+        # start_day = int(f.readline().split("=")[-1].strip())
+        # start_month = int(f.readline().split("=")[-1].strip())
+        # start_year = int(f.readline().split("=")[-1].strip())
+        # resolution = int(f.readline().split("=")[-1].strip())
+        # f.close()
         
         # If there is no region information, demand is the only key
         if 'demand' in data['elements'][prop].keys():
             values = data['elements'][prop]['demand']['p_load']['values']
-            timestamp = [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
+            # timestamp = [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
+            timestamp += [dt + ":00" for dt in data["system"]["time_keys"]]
             region = [0]*len(values)
 
         # If there is region information, aggregate by region
@@ -267,7 +269,8 @@ class ProcessEGRET(Process):
             region = [] # this is area in Egret
             for key in values_dict.keys():
                 values += list(values_dict[key])
-                timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                # timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                timestamp += [dt + ":00" for dt in data["system"]["time_keys"]]
                 region += [key]*len(values_dict[key])
         
         # Create dataframe
@@ -302,18 +305,19 @@ class ProcessEGRET(Process):
         Returns:
             pd.DataFrame: Processed output, single value column with multiindex.
         """
-        # Get time information specified by user in egret configs file
-        f = open("../marmot/input_files/egret_configs.txt")
-        start_day = int(f.readline().split("=")[-1].strip())
-        start_month = int(f.readline().split("=")[-1].strip())
-        start_year = int(f.readline().split("=")[-1].strip())
-        resolution = int(f.readline().split("=")[-1].strip())
-        f.close()
+        # # Get time information specified by user in egret configs file
+        # f = open("../marmot/input_files/egret_configs.txt")
+        # start_day = int(f.readline().split("=")[-1].strip())
+        # start_month = int(f.readline().split("=")[-1].strip())
+        # start_year = int(f.readline().split("=")[-1].strip())
+        # resolution = int(f.readline().split("=")[-1].strip())
+        # f.close()
         
         # If there is no zone information, demand is the only key
         if 'demand' in data['elements'][prop].keys():
             values = data['elements'][prop]['demand']['p_load']['values']
-            timestamp = [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
+            # timestamp = [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values))]
+            timestamp += [dt + ":00" for dt in data["system"]["time_keys"]]
             zone = [0]*len(values)
 
         # If there is zone information, aggregate by zone
@@ -334,7 +338,8 @@ class ProcessEGRET(Process):
             zone = []
             for key in values_dict.keys():
                 values += list(values_dict[key])
-                timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                # timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(values_dict[key]))]
+                timestamp += [dt + ":00" for dt in data["system"]["time_keys"]]
                 zone += [key]*len(values_dict[key])
 
         # Create dataframe
