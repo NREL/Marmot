@@ -120,6 +120,15 @@ class ProcessReEDS(Process):
         self.process_subset_years = process_subset_years
 
     @property
+    def reeds_prop_cols(self) -> "PropertyColumns":
+        """Get the reeds PropertyColumns dataclass
+
+        Returns:
+            PropertyColumns
+        """
+        return PropertyColumns()
+
+    @property
     def property_units(self) -> dict:
         """Gets the property units from data, e.g MW, MWh
 
@@ -243,8 +252,7 @@ class ProcessReEDS(Process):
             df = self.report_prop_error(prop, prop_class)
             return df
         # Get column names
-        reeds_prop_cols = PropertyColumns()
-        df.columns = getattr(reeds_prop_cols, prop)
+        df.columns = getattr(self.reeds_prop_cols, prop)
         if "region" in df.columns:
             df.region = df.region.map(lambda x: self.wind_resource_to_pca.get(x, x))
             if not self.Region_Mapping.empty:
@@ -256,7 +264,6 @@ class ProcessReEDS(Process):
         if process_att:
             # Process attribute and return to df
             df = process_att(df, prop, str(gdx_file))
-
         df.year = df.year.astype(int)
         if self.process_subset_years:
             df = df.loc[df.year.isin(self.process_subset_years)]
@@ -267,7 +274,6 @@ class ProcessReEDS(Process):
             df["timestamp"] = pd.to_datetime(df.year.astype(str))
         if "year" in df.columns:
             df = df.drop(["year"], axis=1)
-
         df_col = list(df.columns)
         df_col.remove("Value")
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))
@@ -298,9 +304,10 @@ class ProcessReEDS(Process):
             self.input_folder.joinpath("inputs_case", "h_dt_szn.csv")
         )
 
-        # All year timeslice mappings are the same, defaulting to 2007
+        # All year timeslice mappings are the same, defaulting to first available year
+        yr = timeslice_mapping_file.year[0]
         timeslice_mapping_file = timeslice_mapping_file.loc[
-            timeslice_mapping_file.year == 2007
+            timeslice_mapping_file.year == yr
         ]
         timeslice_mapping_file = timeslice_mapping_file.drop("year", axis=1)
 
@@ -363,8 +370,7 @@ class ProcessReEDS(Process):
             except gdxpds.tools.Error:
                 stor_out = self.report_prop_error(stor_prop_name, "storage")
                 return df
-            reeds_prop_cols = PropertyColumns()
-            stor_out.columns = getattr(reeds_prop_cols, stor_prop_name)
+            stor_out.columns = getattr(self.reeds_prop_cols, stor_prop_name)
             if prop == "gen_out_ann":
                 stor_out = stor_out.loc[stor_out.type == "out"]
             stor_out = stor_out.groupby(group_list).sum()
