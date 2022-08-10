@@ -15,7 +15,7 @@ interval,generator,Ramp Down Price,FALSE,The marginal price the system would pay
 interval,generator,Ramp Up Price,FALSE,The marginal price the system would pay for addition up-ramping capability.,no
 interval,generator,Reserves Revenue,FALSE,Revenue from providing reserves by generator and timestep.,no
 interval,generator,SRMC,FALSE,The marginal cost for a generator to provide an additional MW of power.,no
-interval,generator,Start & Shutdown Cost,FALSE,The amount spent starting and stopping generators by timestep.,no
+interval,generator,commitment_cost,TRUE,The amount spent starting and stopping generators by timestep.,yes
 year,generator,Total Generation Cost,FALSE,The total cost for operating a generator during each timestep.,no
 interval,generator,Units Generating,FALSE,The fraction at which a generator is operating.,no
 interval,generator,Units Out,FALSE,Number of units on outage.,no
@@ -62,7 +62,7 @@ interval,zone,load,TRUE,Total load in an RTO,yes
 interval,zone,Price,FALSE,Depends on the load settlement model used. What load settlement model are we using???,no
 interval,zone,Unserved Energy,FALSE,Unserved energy in an RTO,no
 interval,zone,Dump Energy,FALSE,,no
-year,generator,Installed Capacity,FALSE,Nameplate power capacity (Max Capacity x Units),no
+year,generator,p_max,TRUE,Nameplate power capacity (Max Capacity x Units),yes
 year,line,Export Limit,FALSE,Transmission capacity,no
 year,line,Import Limit,FALSE,Transmission capacity,no
 interval,region,Net Interchange,FALSE,,no
@@ -82,7 +82,7 @@ year,generator,VO&M Cost,FALSE,,no
 year,interface,Hours Congested,FALSE,,no
 interval,interface,Import Limit,FALSE,,no
 interval,interface,Export Limit,FALSE,,no
-interval,generator,Total Generation Cost,FALSE,,no
+interval,generator,production_cost,TRUE,,yes
 interval,generator,Net Reserves Revenue,FALSE,,no
 interval,generator,Reserves VO&M Cost,FALSE,,no
 interval,emission,Intensity,FALSE,,no

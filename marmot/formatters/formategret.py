@@ -22,7 +22,10 @@ class ProcessEGRET(Process):
         'generator_headroom':'generator_Available_Capacity',
         'generator_pg':'generator_Generation',
         'zone_load':'zone_Load',
-        'region_load':'region_Load'
+        'region_load':'region_Load',
+        'generator_commitment_cost':'generator_Start_&_Shutdown_Cost',
+        'generator_production_cost':'generator_Total_Generation_Cost',
+        'generator_p_max':'generator_Installed_Capacity'
     }
 
     # Extra custom properties that are created based off existing properties. 
@@ -178,6 +181,27 @@ class ProcessEGRET(Process):
                 else:
                     vals = [0]*len(data['elements']['generator'][generator]["p_max"]['values'])
 
+            # Start & Shutdown Cost >> commitment_cost
+            elif prop == "commitment_cost":
+                if "commitment_cost" in data['elements']['generator'][generator].keys():
+                    vals = data['elements']['generator'][generator][prop]['values']
+                else:
+                    vals = [0]*len(data['elements']['generator'][generator]["pg"]['values'])
+
+            # Total Generation Cost >> production_cost
+            elif prop == "production_cost":
+                vals = data['elements']['generator'][generator][prop]['values']
+
+            # Installed Capacity >> p_max
+            elif prop == "p_max":
+                vals = data['elements']['generator'][generator][prop]
+                # if p max is a time series
+                if type(vals) == dict:
+                    vals = [max(vals['values'])]
+                # if p max is a single value
+                else:
+                    vals = [vals]
+
             # Get zone and area labels if they exists
             if 'zone' in data['elements']['generator'][generator].keys():
                 zone_val = data['elements']['generator'][generator]['zone']
@@ -192,7 +216,7 @@ class ProcessEGRET(Process):
             tech_val = data['elements']['generator'][generator]['fuel'] + '_' + data['elements']['generator'][generator]['unit_type']
 
             # timestamp += [(datetime.datetime(start_year,start_month,start_day) + datetime.timedelta(minutes=i*resolution)).strftime("%Y-%m-%d %H:%M:%S") for i in range(len(vals))]
-            timestamp += [dt + ":00" for dt in data["system"]["time_keys"]]
+            timestamp += [dt + ":00" for dt in data["system"]["time_keys"]][:len(vals)] # this will take first dt for year properties
             tech += [tech_val]*len(vals)
             gen_name += [generator]*len(vals)
             region += [area_val]*len(vals)
