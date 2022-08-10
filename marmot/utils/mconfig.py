@@ -216,6 +216,7 @@ def createConfig(configfile_path: Path):
         plot_select_file="Marmot_plot_select.csv",
         plexos_properties_file="plexos_properties.csv",
         reeds_properties_file="reeds_properties.csv",
+        egret_properties_file="egret_properties.csv",
     )
 
     with open(configfile_path, "w") as cfgfile:
