@@ -10,6 +10,7 @@ from typing import List
 from dataclasses import dataclass, field
 
 from marmot.formatters.formatreeds import ProcessReEDS
+from marmot.formatters.formatextra import ExtraReEDSIndiaProperties
 
 logger = logging.getLogger("formatter." + __name__)
 
@@ -31,21 +32,23 @@ class ProcessReEDSIndia(ProcessReEDS):
     }
     """Maps simulation model property names to Marmot property names"""
 
-    gdx_results_prefix = "output_"
+    GDX_RESULTS_PREFIX = "output_"
     """Prefix of gdx results file"""
 
+    EXTRA_PROPERTIES_CLASS = ExtraReEDSIndiaProperties
+
     @property
-    def reeds_prop_cols(self) -> "PropertyColumns":
-        """Get the reeds PropertyColumns dataclass
+    def reeds_prop_cols(self) -> "ReEDSIndiaPropertyColumns":
+        """Get the ReEDSIndiaPropertyColumns dataclass
 
         Returns:
-            PropertyColumns
+            ReEDSIndiaPropertyColumns
         """
-        return PropertyColumns()
+        return ReEDSIndiaPropertyColumns()
 
 
 @dataclass
-class PropertyColumns():
+class ReEDSIndiaPropertyColumns():
     """ReEDS India property column names"""
 
     GEN: List = field(

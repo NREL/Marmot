@@ -5,6 +5,8 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
+import os
+os.environ['GAMSDIR'] = r"C:\GAMS\39"
 import logging
 import re
 from pathlib import Path
@@ -16,7 +18,7 @@ import pandas as pd
 import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
-from marmot.formatters.formatextra import ExtraProperties
+from marmot.formatters.formatextra import ExtraReEDSProperties
 
 logger = logging.getLogger("formatter." + __name__)
 formatter_settings = mconfig.parser("formatter_settings")
@@ -43,38 +45,10 @@ class ProcessReEDS(Process):
         "generator_systemcost_techba": "generator_Total_Generation_Cost",
     }
     """Maps simulation model property names to Marmot property names"""
-    # Extra custom properties that are created based off existing properties.
-    # The dictionary keys are the existing properties and the values are the new
-    # property names and methods used to create it.
-    EXTRA_MARMOT_PROPERTIES: dict = {
-        "generator_Total_Generation_Cost": [
-            ("generator_VOM_Cost", ExtraProperties.reeds_generator_vom_cost),
-            ("generator_Fuel_Cost", ExtraProperties.reeds_generator_fuel_cost),
-            (
-                "generator_Reserves_VOM_Cost",
-                ExtraProperties.reeds_generator_reserve_vom_cost,
-            ),
-            ("generator_FOM_Cost", ExtraProperties.reeds_generator_fom_cost),
-        ],
-        "reserves_generators_Provision": [
-            ("reserve_Provision", ExtraProperties.reeds_reserve_provision)
-        ],
-        "region_Demand": [
-            ("region_Demand_Annual", ExtraProperties.annualize_property),
-            ("region_Load", ExtraProperties.reeds_region_total_load),
-        ],
-        "generator_Curtailment": [
-            ("generator_Curtailment_Annual", ExtraProperties.annualize_property)
-        ],
-        "generator_Pump_Load": [
-            ("generator_Pump_Load_Annual", ExtraProperties.annualize_property)
-        ],
-        "region_Load": [("region_Load_Annual", ExtraProperties.annualize_property)],
-    }
-    """Dictionary of Extra custom properties that are created based off existing properties."""
 
-    gdx_results_prefix = "rep_"
+    GDX_RESULTS_PREFIX = "rep_"
     """Prefix of gdx results file"""
+    EXTRA_PROPERTIES_CLASS = ExtraReEDSProperties
 
     def __init__(
         self,
@@ -120,13 +94,13 @@ class ProcessReEDS(Process):
         self.process_subset_years = process_subset_years
 
     @property
-    def reeds_prop_cols(self) -> "PropertyColumns":
-        """Get the reeds PropertyColumns dataclass
+    def reeds_prop_cols(self) -> "ReEDSPropertyColumns":
+        """Get the ReEDSPropertyColumns dataclass
 
         Returns:
-            PropertyColumns
+            ReEDSPropertyColumns
         """
-        return PropertyColumns()
+        return ReEDSPropertyColumns()
 
     @property
     def property_units(self) -> dict:
@@ -186,7 +160,7 @@ class ProcessReEDS(Process):
             reeds_outputs_dir = self.input_folder.joinpath("outputs")
             files = []
             for names in reeds_outputs_dir.iterdir():
-                if names.name == f"{self.gdx_results_prefix}{self.input_folder.name}.gdx":
+                if names.name == f"{self.GDX_RESULTS_PREFIX}{self.input_folder.name}.gdx":
                     files.append(names.name)
 
                     self.property_units = str(names)
@@ -422,7 +396,7 @@ class ProcessReEDS(Process):
 
 
 @dataclass
-class PropertyColumns:
+class ReEDSPropertyColumns:
     """ReEDS property column names"""
 
     gen_out: List = field(
