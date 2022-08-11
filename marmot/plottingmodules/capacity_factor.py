@@ -111,13 +111,15 @@ class CapacityFactor(MPlotDataHelper):
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen[Gen["tech"].isin(self.gen_categories.thermal)]
+                Gen = Gen[Gen["tech"].isin(self.thermal_gen_cat)]
                 Gen.set_index("timestamp", inplace=True)
-                Gen = Gen.rename(columns={"values": "Output (MWh)"})
+                Gen = Gen.rename(columns={0: "Output (MWh)"})
 
                 Cap: pd.DataFrame = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input, level=self.AGG_BY)
-                Cap = Cap.rename(columns={"values": "Installed Capacity (MW)"})
+                Cap = Cap.rename(columns={0: "Installed Capacity (MW)"})
+
+                #Totable = gen.merga(cap,on['gen_name','region','zone','State','country'],how='left')
 
                 if pd.notna(start_date_range):
                     Cap, Gen = self.set_timestamp_date_range(
@@ -176,14 +178,18 @@ class CapacityFactor(MPlotDataHelper):
                                     )
                                     cap = sgt["Installed Capacity (MW)"].mean()
                                     # Calculate CF
-                                    cf = total_gen / (cap * duration_hours)
+                                    #ww changed from cf = total_gen / (cap * duration_hours) to cf = total_gen / (cap)
+                                    cf = total_gen / (cap)
                                     cfs.append(cf)
                                     caps.append(cap)
 
                             # Find average "CF" (average output when committed)
                             # for this technology, weighted by capacity.
+                            #ww changed from cf = np.average(cfs, weights=caps)
                             cf = np.average(cfs, weights=caps)
                             CF[tech_name] = cf
+                            #ww added
+                            CF["DAC&CCS-off"] = CF["DAC&CCS-off"] - CF["DAC&CCS-on"]
                     cf_chunks.append(CF)
 
             if cf_chunks:
@@ -201,11 +207,12 @@ class CapacityFactor(MPlotDataHelper):
                 CF_all_scenarios.T,
                 color=self.color_list,
                 custom_tick_labels=list(CF_all_scenarios.columns),
-                ytick_major_fmt="percent",
+                #ytick_major_fmt="percent",
             )
 
             ax.set_ylabel(
-                "Average Output When Committed", color="black", rotation="vertical"
+                #ww changed:"Average Output When Committed", color="black", rotation="vertical" 
+                "MIT Annual Operational Hours(h)", color="black", rotation="vertical"
             )
 
             if plot_data_settings["plot_title_as_region"]:
@@ -307,7 +314,8 @@ class CapacityFactor(MPlotDataHelper):
                     Cap, scenario, groupby=scenario_groupby
                 ).sum()
                 # Calculate CF
-                CF = Total_Gen / (Cap * duration_hours)
+                #ww changed from  CF = Total_Gen / (Cap * duration_hours)
+                CF = duration_hours
                 cf_scen_chunks.append(CF)
 
             if cf_scen_chunks:
@@ -415,18 +423,18 @@ class CapacityFactor(MPlotDataHelper):
 
                 Min = Min.reset_index()
                 Min = Min.set_index("gen_name")
-                Min = Min.rename(columns={"values": "Hours at Minimum"})
+                Min = Min.rename(columns={0: "Hours at Minimum"})
 
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen.rename(columns={"values": "Output (MWh)"})
-                Gen = Gen[~Gen["tech"].isin(self.gen_categories.vre)]
+                Gen = Gen.rename(columns={0: "Output (MWh)"})
+                Gen = Gen[~Gen["tech"].isin(self.vre_gen_cat)]
                 Gen.index = Gen.timestamp
 
                 Caps = Cap.groupby("gen_name").mean()
                 Caps.reset_index()
-                Caps = Caps.rename(columns={"values": "Installed Capacity (MW)"})
+                Caps = Caps.rename(columns={0: "Installed Capacity (MW)"})
                 Min = pd.merge(Min, Caps, on="gen_name")
 
                 # Find how many hours each generator was operating, for the denominator of the % time at min gen.
