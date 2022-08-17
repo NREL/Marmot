@@ -9,11 +9,15 @@ Gas-CT,#C2A1DB
 Combustion Turbine,#C2A1DB
 Dual Fuel,#000080
 DualFuel,#000080
-Oil-Gas-Steam,#3D3376
+Oil/Gas,#52216B
+Oil-Gas-Steam,#52216B
 Hydro,#187F94
-Ocean,#000080
+Hydropower,#187F94
+Tidal,#7FC340
+Ocean,#7FC340
 Geothermal,#A96235
 Biopower,#5B9844
+Landfill gas,#5B9844
 VRE,#7FC340
 Wind,#00B6EF
 CSP,#FC761A
@@ -23,6 +27,8 @@ OSW-Battery,#9B014F
 dPV,#FFAB02
 Battery,#FF4A88
 Storage,#FF4A88
+Storage discharge,#FF4A88
+Battery discharge,#FF4A88
 Battery,#FF4A88
 Other,#FF7FBB
 Net Imports,#2762c4

@@ -92,6 +92,8 @@ class TotalGeneration(MPlotDataHelper):
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
             (False, f"{agg}_Unserved_Energy", self.Scenarios),
+            (False,"batterie_Generation",self.Scenarios),
+            (False,"batterie_Load",self.Scenarios),
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -121,7 +123,7 @@ class TotalGeneration(MPlotDataHelper):
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
-                    logger.warning(f"No installed capacity in: {zone_input}")
+                    logger.warning(f"No generation in: {zone_input}")
                     continue
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
 
@@ -167,6 +169,8 @@ class TotalGeneration(MPlotDataHelper):
                     f"{agg}_Load",
                     f"{agg}_Demand",
                     f"{agg}_Unserved_Energy",
+                    f"batterie_Generation",
+                    f"batterie_Load"
                 ]
                 # Get and process extra properties
                 for ext_prop in extra_property_names:
@@ -177,9 +181,11 @@ class TotalGeneration(MPlotDataHelper):
                         )
                         df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
-                        df = df.xs(zone_input, level=self.AGG_BY)
+                        if 'batterie' not in ext_prop: 
+                            df = df.xs(zone_input, level=self.AGG_BY)
                         df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={"values": ext_prop})
+                    df = df.rename(columns={"values" : ext_prop})
+                    df = df.rename(columns={0 : ext_prop})
                     extra_data_frames.append(df)
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
@@ -198,6 +204,17 @@ class TotalGeneration(MPlotDataHelper):
                     }
                 )
                 extra_plot_data = extra_plot_data / interval_count
+
+                #Add battery generation to total gen stack df.
+                if "batterie_Generation" in extra_plot_data.keys():
+                    Total_Gen_Stack["Battery discharge"] = extra_plot_data["batterie_Generation"].squeeze()
+                    del extra_plot_data['batterie_Generation']
+
+                #Battery load is already included natively in PLEXOS' region_load property,
+                #so need to subtract it from total demand.
+                if "batterie_Load" in extra_plot_data.keys():
+                    extra_plot_data["Total Demand"] = extra_plot_data["Total Demand"] - extra_plot_data["batterie_Load"]
+                    del extra_plot_data['batterie_Load']
 
                 # Adjust extra data to generator date range
                 extra_plot_data = extra_plot_data.loc[

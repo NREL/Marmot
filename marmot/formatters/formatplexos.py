@@ -888,7 +888,7 @@ class ProcessPLEXOS(Process):
             Processed Output, single value column with multiindex.
 
         """
-        df = self.df.droplevel(level=["band", "property"])
+        df = df.droplevel(level=["band", "property"])
         df.index.rename("battery_name", level="name", inplace=True)
         df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
         df_col = list(

@@ -1079,7 +1079,7 @@ class Transmission(MPlotDataHelper):
                     line_flow_single = self.sort_duration(line_flow_out, column)
                 else:
                     line_flow_single = line_flow_out
-                legend_label = f"{column}\n{connection.capitalize()} Flow"
+                legend_label = f"{column}"
                 mplt.lineplot(line_flow_single, column, label=legend_label, sub_pos=n)
                 axs[n].axhline(y=0, linestyle=':', color='gray')
                 legend_order.append(legend_label)

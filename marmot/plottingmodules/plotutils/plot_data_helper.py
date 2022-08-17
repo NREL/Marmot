@@ -372,6 +372,7 @@ class MPlotDataHelper(dict):
         Returns:
             pd.DataFrame: Transformed Dataframe.
         """
+        if 'values' not in df.columns: df = df.rename(columns={0: "values"})
         if set(["timestamp", "tech"]).issubset(df.index.names):
             df = df.reset_index(["timestamp", "tech"])
         df = df.groupby(["timestamp", "tech"], as_index=False, observed=True).sum()
