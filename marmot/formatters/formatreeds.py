@@ -6,7 +6,7 @@ Inherits the Process class.
 """
 
 import os
-os.environ['GAMSDIR'] = r"C:\GAMS\39"
+#os.environ['GAMSDIR'] = r"C:\GAMS\39"
 import logging
 import re
 from pathlib import Path
