@@ -191,7 +191,8 @@ class ProcessReEDS(Process):
         """
         for partition in files_list:
             region_df = pd.read_csv(
-                self.input_folder.joinpath("inputs_case", "regions.csv")
+                self.input_folder.joinpath("inputs_case", "regions.csv"),
+                dtype=str
             )
             region_df.rename(columns={"p": "name", "s": "category"}, inplace=True)
             region_df.to_hdf(
