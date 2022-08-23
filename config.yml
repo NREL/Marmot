@@ -25,7 +25,7 @@ axes_options:
   show_legend_frame: true
 axes_label_options:
   rotate_x_labels: true
-  rotate_at_num_labels: 5
+  rotate_at_num_labels: 7
   rotation_angle: 45
 plot_data:
   curtailment_property: Curtailment
@@ -46,12 +46,14 @@ formatter_settings:
   skip_existing_properties: true
   append_plexos_block_name: false
   exclude_pumping_from_reeds_storage_gen: true
-multithreading_workers: 16
+multithreading_workers: 1
 figure_file_format: svg
 shift_leapday: false
 auto_convert_units: true
 read_csv_properties: true
-user_defined_inputs_file: Marmot_user_defined_inputs.csv
-plot_select_file: Marmot_plot_select.csv
+user_defined_inputs_file: Marmot_user_defined_inputs_reeds_india.csv
+plot_select_file: Marmot_plot_select_india.csv
 plexos_properties_file: plexos_properties.csv
 reeds_properties_file: reeds_properties.csv
+reeds_india_properties_file: reeds_india_properties.csv
+siip_properties_file: siip_properties.csv
