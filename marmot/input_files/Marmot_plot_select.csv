@@ -103,6 +103,7 @@ Total_Generation_Diff,FALSE,,,,,,,,,Scenario,,total_generation,total_gen_diff
 Total_Generation_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen_diff
 Total_Installed_Capacity,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap
 Total_Installed_Capacity_by_year,FALSE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap
+Total_Installed_Capacity_facet,TRUE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap_facet
 Total_Installed_Capacity_Diff,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_diff
 Total_Installed_Capacity_and_Generation_Facet,FALSE,,,,,,2040,2040,,Scenario,,total_installed_capacity,total_cap_and_gen_facet
 Total_Installed_Capacity_and_Generation_Facet_by_year,FALSE,,,,,,2020,2040,,Year-Scenario,,total_installed_capacity,total_cap_and_gen_facet
