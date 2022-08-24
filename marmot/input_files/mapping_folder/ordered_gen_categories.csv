@@ -15,7 +15,6 @@ Oil,,,,TRUE,
 Hydro,,TRUE,,,
 Hydropower,,TRUE,,,
 Ocean,,TRUE,,,
-Tidal,,TRUE,,,
 Geothermal,,TRUE,,,
 Biomass,,TRUE,,,
 Biopower,,TRUE,,,
@@ -32,8 +31,10 @@ PV-Battery,,TRUE,TRUE,,TRUE
 Battery,,,,,TRUE
 OSW-Battery,,,,,TRUE
 PHS,,,,,TRUE
+Tidal,,TRUE,,,
 Storage,,,,,TRUE
 Storage discharge,,,,,TRUE
+Battery discharge,,,,,TRUE
 Net Imports,,,,,
 Curtailment,,,,,
 curtailment,,,,,
