@@ -20,14 +20,15 @@ class ProcessReEDSIndia(ProcessReEDS):
 
     # Maps ReEDS property names to Marmot names
     PROPERTY_MAPPING: dict = {
-        "generator_GEN": "generator_Generation",
+        "generator_gen_out": "generator_Generation",
         "generator_resgen": "generator_Generation_Annual",
-        "generator_CAP": "generator_Installed_Capacity",
-        "generator_CURT": "generator_Curtailment",
-        "region_LOAD": "region_Demand",
+        "generator_rescap": "generator_Installed_Capacity",
+        "generator_curt_out": "generator_Curtailment",
+        "region_load_mw": "region_Demand",
+        "region_load_rt": "region_Demand_Annual",
         "line_FLOW": "line_Flow",
         "line_CAPTRAN": "line_Import_Limit",
-        "generator_STORAGE_IN": "generator_Pump_Load",
+        "generator_stor_charge": "generator_Pump_Load",
         "reserves_generators_OPRES": "reserves_generators_Provision",
     }
     """Maps simulation model property names to Marmot property names"""
@@ -51,20 +52,22 @@ class ProcessReEDSIndia(ProcessReEDS):
 class ReEDSIndiaPropertyColumns():
     """ReEDS India property column names"""
 
-    GEN: List = field(
-        default_factory=lambda: ["tech", "sub-tech", "region", "h", "year", "Value", "marginal", "lower", "upper", "scale"]
+    gen_out: List = field(
+        default_factory=lambda: ["tech", "region", "h", "year", "Value"]
     )
     """ReEDS India 'gen_out' property columns (Marmot generator_Generation property)"""
     resgen: List = field(
         default_factory=lambda: ["tech", "region", "year", "Value"]
     )
     """ReEDS India 'resgen' property columns (Marmot generator_Generation_Annual property)"""
-    CAP: List = field(default_factory=lambda: ["tech", "sub-tech", "region", "year", "Value", "marginal", "lower", "upper", "scale"])
-    """ReEDS India 'CAP' property columns (Marmot generator_Installed_Capacity property)"""
-    CURT: List = field(default_factory=lambda: ["region", "h", "year", "Value", "marginal", "lower", "upper", "scale"])
-    """ReEDS India 'CURT' property columns (Marmot generator_Curtailment property)"""
+    rescap: List = field(default_factory=lambda: ["tech", "region", "year", "Value"])
+    """ReEDS India 'rescap' property columns (Marmot generator_Installed_Capacity property)"""
+    curt_out: List = field(default_factory=lambda: ["tech","region", "h", "year", "Value"])
+    """ReEDS India 'curt_out' property columns (Marmot generator_Curtailment property)"""
+    load_mw: List = field(default_factory=lambda: ["region", "h", "year", "Value"])
+    """ReEDS India 'load_mw' property columns (Marmot region_Demand property)"""
     load_rt: List = field(default_factory=lambda: ["region", "year", "Value"])
-    """ReEDS India 'load_rt' property columns (Marmot region_Load_Annual property)"""
+    """ReEDS India 'load_rt' property columns (Marmot region_Demand_Annual property)"""
     FLOW: List = field(
         default_factory=lambda: [
             "region_from",
@@ -86,10 +89,10 @@ class ReEDSIndiaPropertyColumns():
         ]
     )
     """ReEDS India 'CAPTRAN' property columns (Marmot line_Import_Limit property)"""
-    STORAGE_IN: List = field(
-        default_factory=lambda: ["tech", "sub-tech", "region", "h", "src", "year", "Value", "marginal", "lower", "upper", "scale"]
+    stor_charge: List = field(
+        default_factory=lambda: ["tech", "region", "h", "year", "Value"]
     )
-    """ReEDS India 'STORAGE_IN' property columns (Marmot generator_Pumped_Load property)"""
+    """ReEDS India 'stor_charge' property columns (Marmot generator_Pumped_Load property)"""
     OPRES: List = field(
         default_factory=lambda: ["parent", "tech", "sub-tech", "region", "h", "year", "Value", "marginal", "lower", "upper", "scale"]
     )

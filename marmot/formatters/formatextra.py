@@ -248,10 +248,10 @@ class ExtraReEDSProperties(ExtraProperties):
         if timescale == "year":
             pump_load = self.annualize_property(pump_load)
             all_col = list(pump_load.index.names)
-            [all_col.remove(x) for x in ["tech", "sub-tech", "units", "season"]]
+            [all_col.remove(x) for x in ["tech", "units", "season"]]
         else:
             all_col = list(pump_load.index.names)
-            [all_col.remove(x) for x in ["tech", "sub-tech", "units"]]
+            [all_col.remove(x) for x in ["tech", "units"]]
         pump_load = pump_load.groupby(all_col).sum()
 
         load = df.merge(pump_load, on=all_col, how="outer")
@@ -339,7 +339,7 @@ class ExtraReEDSIndiaProperties(ExtraReEDSProperties):
         data_chunks = []
         for file in self.files_list:
             processed_data = self.model.get_processed_data(
-                "generator", "STORAGE_IN", "interval", file
+                "generator", "stor_charge", "interval", file
             )
 
             if processed_data.empty is True:
@@ -352,16 +352,16 @@ class ExtraReEDSIndiaProperties(ExtraReEDSProperties):
         if timescale == "year":
             pump_load = self.annualize_property(pump_load)
             all_col = list(pump_load.index.names)
-            [all_col.remove(x) for x in ["tech", "sub-tech", "units", "season"]]
+            [all_col.remove(x) for x in ["tech", "gen_name", "units", "season"]]
         else:
             all_col = list(pump_load.index.names)
-            [all_col.remove(x) for x in ["tech", "sub-tech", "units"]]
+            [all_col.remove(x) for x in ["tech", "gen_name", "units"]]
         pump_load = pump_load.groupby(all_col).sum()
 
         load = df.merge(pump_load, on=all_col, how="outer")
-        load["values"] = load["0_x"] + load["0_y"]
-        load["values"] = load["values"].fillna(load["0_x"])
-        load = load.drop(["0_x", "0_y"], axis=1)
+        load["values"] = load["values_x"] + load["values_y"]
+        load["values"] = load["values"].fillna(load["values_x"])
+        load = load.drop(["values_x", "values_y"], axis=1)
         return load
 
 
