@@ -4,6 +4,7 @@
 """
 
 from pathlib import Path
+import os
 import yaml
 import logging
 import logging.config
@@ -41,7 +42,12 @@ class SetupLogger:
         else:
             self.log_suffix = f"_{log_suffix}"
 
-        with open(ROOT_DIR.joinpath("utils/marmot_logging_config.yml"), "rt") as f:
+        fromname = "marmot_logging_config.py"
+        toname = "marmot_logging_config.yml"
+        if not os.path.exists(ROOT_DIR.joinpath(os.path.join('utils', toname))):
+            os.rename(ROOT_DIR.joinpath(os.path.join("utils", fromname)), ROOT_DIR.joinpath(os.path.join("utils", toname)))
+
+        with open(ROOT_DIR.joinpath(os.path.join("utils", "marmot_logging_config.yml")), "rt") as f:
             conf = yaml.safe_load(f.read())
             conf["handlers"]["warning_handler"]["filename"] = conf["handlers"][
                 "warning_handler"
