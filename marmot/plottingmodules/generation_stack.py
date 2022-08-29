@@ -450,7 +450,7 @@ class GenerationStack(MPlotDataHelper):
                     f"{agg}_Load{data_resolution}",
                     f"{agg}_Demand{data_resolution}",
                     f"{agg}_Unserved_Energy{data_resolution}",
-                    f"batterie_Load{data_resolution}"
+                    #f"batterie_Load{data_resolution}"
                 ]
                 # Get and process extra properties
                 for ext_prop in extra_property_names:

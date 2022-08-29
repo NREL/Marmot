@@ -240,7 +240,6 @@ class MPlotDataHelper(dict):
 
             # Create new set of scenarios that are not yet in dictionary
             scen_list = set(scenario_list) - set(self[f"{plx_prop_name}"].keys())
-
             # If set is not empty add data to dict
             if scen_list:
                 # Read data in with multi threading
