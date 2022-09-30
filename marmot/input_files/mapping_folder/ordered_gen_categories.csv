@@ -24,6 +24,7 @@ Solar,TRUE,TRUE,TRUE,,
 PV,TRUE,TRUE,TRUE,,
 dPV,TRUE,TRUE,TRUE,,
 CSP,,TRUE,,,
+Cold storage boost,,,,,TRUE
 PV-Battery,,TRUE,TRUE,,TRUE
 Battery,,,,,TRUE
 OSW-Battery,,,,,TRUE

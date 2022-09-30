@@ -533,7 +533,7 @@ class SystemCosts(MPlotDataHelper):
                 total_systems_cost_out = self.insert_custom_data_columns(
                     total_systems_cost_out, custom_data_file_path
                 )
-
+            if 'FO&M Cost' in detailed_gen_cost_out.columns: detailed_gen_cost_out.drop(columns =['FO&M Cost'],inplace = True)
             # Data table of values to return to main program
             Data_Table_Out = detailed_gen_cost_out.add_suffix(" (Million $)")
 

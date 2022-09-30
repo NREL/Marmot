@@ -402,6 +402,8 @@ class TotalGeneration(MPlotDataHelper):
 
                 # Check if zone has generation, if not skips and breaks out of Multi_Scenario loop
                 try:
+                    if self.AGG_BY == 'Country' and 'PLEXOS' in scenario:
+                        self.AGG_BY = 'country'
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
                     logger.warning(f"No installed capacity in : {zone_input}")

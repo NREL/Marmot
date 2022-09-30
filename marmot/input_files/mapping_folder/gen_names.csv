@@ -245,7 +245,7 @@ XcelPV,PV
 XcelNG,Gas-CC
 XcelBattery,Storage
 OSW_BESS,OSW-Battery
-Battery,Battery
+Battery,Storage
 Solar,PV
 Liquid Fuel,Oil-Gas-Steam
 Natural Gas,Oil-Gas-Steam
@@ -269,12 +269,12 @@ wind-ons_7,Wind
 wind-ons_8,Wind
 wind-ons_9,Wind
 wind-ons_10,Wind
-pvb1_2,PV
-pvb1_3,PV
-pvb1_4,PV
-pvb1_5,PV
-pvb1_6,PV
-pvb1_7,PV
+pvb1_2,PV-Battery
+pvb1_3,PV-Battery
+pvb1_4,PV-Battery
+pvb1_5,PV-Battery
+pvb1_6,PV-Battery
+pvb1_7,PV-Battery
 ReEDS_pvb1,PV
 ReEDS_vre-pvb1,PV
 upv_2,PV
@@ -289,11 +289,11 @@ dupv_4,dPV
 dupv_5,dPV
 dupv_6,dPV
 dupv_7,dPV
-battery_2,Battery
-battery_4,Battery
-battery_6,Battery
-battery_8,Battery
-battery_10,Battery
+battery_2,Storage
+battery_4,Storage
+battery_6,Storage
+battery_8,Storage
+battery_10,Storage
 reeds_vre,VRE
 csp-ns,CSP
 hydND,Hydro
@@ -323,3 +323,12 @@ ReEDS_can-imports,Net Imports
 can-imports,Net Imports
 Curtailment,Curtailment
 Curtailment,Curtailment
+Gas-CC-CCS-F2,Gas-CC CCS
+csp2_12,CSP
+csp2_10,CSP
+geohydro_pflash_6,Geothermal
+geohydro_pflash_5,Geothermal
+Wind-ofs_1,Wind
+CSU_pumpgas-cc-ccs-f2,Cold storage boost
+CSU_NGCCgas-cc-ccs-f2,Gas-CC CCS
+wind-ofs_1,Wind

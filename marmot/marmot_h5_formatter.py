@@ -114,7 +114,7 @@ class MarmotFormat(SetupLogger):
         if isinstance(Region_Mapping, (str, Path)):
             try:
                 Region_Mapping = pd.read_csv(Region_Mapping)
-                if not self.Region_Mapping.empty:
+                if not Region_Mapping.empty:
                     Region_Mapping = Region_Mapping.astype(object)
             except FileNotFoundError:
                 self.logger.warning(
@@ -172,7 +172,8 @@ class MarmotFormat(SetupLogger):
         complib: str = "blosc:zlib",
         **kwargs,
     ) -> None:
-        """Saves data to formatted hdf5 file
+        """"
+        Saves data to formatted hdf5 file
 
         Args:
             df (pd.DataFrame): Dataframe to save
@@ -207,7 +208,8 @@ class MarmotFormat(SetupLogger):
         append_block_name: bool = False,
         process_subset_years: list = None,
     ) -> None:
-        """Main method to call to begin formatting simulation model results
+        """
+        Main method to call to begin formatting simulation model results
 
         Args:
             sim_model (str, optional): Name of simulation model to
@@ -245,7 +247,6 @@ class MarmotFormat(SetupLogger):
         input_folder = self.Model_Solutions_folder.joinpath(str(self.Scenario_name))
         output_folder = self.Marmot_Solutions_folder.joinpath("Processed_HDF5_folder")
         output_folder.mkdir(exist_ok=True)
-
         output_file_path = output_folder.joinpath(hdf5_output_name)
 
         process_sim_model = process_class(
@@ -317,6 +318,7 @@ class MarmotFormat(SetupLogger):
                         row["group"], row["data_set"], row["data_type"], model
                     )
                     if processed_data.empty is True:
+                        print('empty')
                         data_chunks.append(processed_data)
                         break
 
