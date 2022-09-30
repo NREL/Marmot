@@ -23,6 +23,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     DataSavedInModule,
     MissingZoneData,
+    UnderDevelopment,
 )
 
 logger = logging.getLogger("plotter." + __name__)
@@ -68,6 +69,7 @@ class Hydro(MPlotDataHelper):
         Returns:
             DataSavedInModule: DataSavedInModule exception
         """
+        return UnderDevelopment()
         outputs: dict = {}
 
         # List of properties needed by the plot, properties are a set of tuples and 
@@ -100,7 +102,7 @@ class Hydro(MPlotDataHelper):
             # Calculates Net Load by removing variable gen
             # Adjust list of values to drop depending on if it exists in Stacked_Gen df
             vre_gen_cat = [
-                name for name in self.vre_gen_cat if name in Net_Load.columns
+                name for name in self.gen_categories.vre if name in Net_Load.columns
             ]
             Net_Load = Net_Load.drop(labels=vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)  # Continent net load
@@ -233,7 +235,7 @@ class Hydro(MPlotDataHelper):
             # Calculates Net Load by removing variable gen
             # Adjust list of values to drop depending on if it exists in Stacked_Gen df
             vre_gen_cat = [
-                name for name in self.vre_gen_cat if name in Stacked_Gen.columns
+                name for name in self.gen_categories.vre if name in Stacked_Gen.columns
             ]
             Net_Load = Stacked_Gen.drop(labels=vre_gen_cat, axis=1)
             Net_Load = Net_Load.sum(axis=1)

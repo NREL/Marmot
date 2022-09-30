@@ -111,13 +111,13 @@ class CapacityFactor(MPlotDataHelper):
                 Gen = self.rename_gen_techs(Gen)
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen[Gen["tech"].isin(self.thermal_gen_cat)]
+                Gen = Gen[Gen["tech"].isin(self.gen_categories.thermal)]
                 Gen.set_index("timestamp", inplace=True)
-                Gen = Gen.rename(columns={0: "Output (MWh)"})
+                Gen = Gen.rename(columns={"values": "Output (MWh)"})
 
                 Cap: pd.DataFrame = self["generator_Installed_Capacity"].get(scenario)
                 Cap = Cap.xs(zone_input, level=self.AGG_BY)
-                Cap = Cap.rename(columns={0: "Installed Capacity (MW)"})
+                Cap = Cap.rename(columns={"values": "Installed Capacity (MW)"})
 
                 if pd.notna(start_date_range):
                     Cap, Gen = self.set_timestamp_date_range(
@@ -415,18 +415,18 @@ class CapacityFactor(MPlotDataHelper):
 
                 Min = Min.reset_index()
                 Min = Min.set_index("gen_name")
-                Min = Min.rename(columns={0: "Hours at Minimum"})
+                Min = Min.rename(columns={"values": "Hours at Minimum"})
 
                 Gen = Gen.reset_index()
                 Gen.tech = Gen.tech.astype("category")
                 Gen.tech = Gen.tech.cat.set_categories(self.ordered_gen)
-                Gen = Gen.rename(columns={0: "Output (MWh)"})
-                Gen = Gen[~Gen["tech"].isin(self.vre_gen_cat)]
+                Gen = Gen.rename(columns={"values": "Output (MWh)"})
+                Gen = Gen[~Gen["tech"].isin(self.gen_categories.vre)]
                 Gen.index = Gen.timestamp
 
                 Caps = Cap.groupby("gen_name").mean()
                 Caps.reset_index()
-                Caps = Caps.rename(columns={0: "Installed Capacity (MW)"})
+                Caps = Caps.rename(columns={"values": "Installed Capacity (MW)"})
                 Min = pd.merge(Min, Caps, on="gen_name")
 
                 # Find how many hours each generator was operating, for the denominator of the % time at min gen.

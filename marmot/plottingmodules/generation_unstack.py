@@ -219,11 +219,11 @@ class GenerationUnStack(MPlotDataHelper):
                         )
                         stacked_gen_df = stacked_gen_df.fillna(0)
                         # Calculates Net Load by removing variable gen + curtailment
-                        vre_gen_cat = self.vre_gen_cat + [curtailment_name]
+                        vre_gen_cat = self.gen_categories.vre + [curtailment_name]
                     else:
-                        vre_gen_cat = self.vre_gen_cat
+                        vre_gen_cat = self.gen_categories.vre
                 else:
-                    vre_gen_cat = self.vre_gen_cat
+                    vre_gen_cat = self.gen_categories.vre
 
                 if pd.notna(start_date_range):
                     stacked_gen_df = self.set_timestamp_date_range(
@@ -258,11 +258,11 @@ class GenerationUnStack(MPlotDataHelper):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index)
+                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
                         df = df.xs(zone_input, level=self.AGG_BY)
                         df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={0: ext_prop})
+                    df = df.rename(columns={"values": ext_prop})
                     extra_data_frames.append(df)
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
@@ -295,14 +295,14 @@ class GenerationUnStack(MPlotDataHelper):
                 extra_plot_data = extra_plot_data / unitconversion["divisor"]
 
                 # Adds property annotation and
-                if pd.notna(prop):
+                if prop:
                     x_time_value = mplt.add_property_annotation(
                         pd.concat([stacked_gen_df, extra_plot_data], axis=1),
                         prop,
                         sub_pos=i,
                         curtailment_name=curtailment_name,
                         energy_unit=unitconversion["units"],
-                        re_gen_cat=self.re_gen_cat,
+                        re_gen_cat=self.gen_categories.re,
                         gen_cols=stacked_gen_df.columns,
                     )
 

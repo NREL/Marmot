@@ -321,6 +321,13 @@ NF-EGS_pbinary_4,Geothermal
 NF-EGS_pbinary_5,Geothermal
 ReEDS_can-imports,Net Imports
 can-imports,Net Imports
+ST_NUCLEAR,Nuclear
+ST_COAL,Coal
+CC_NATURAL_GAS,Gas-CC
+PVe,PV
+WT,Wind
+CT_NATURAL_GAS,Gas-CT
+HY,Hydro
 Curtailment,Curtailment
 Curtailment,Curtailment
 Gas-CC-CCS-F2,Gas-CC CCS

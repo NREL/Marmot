@@ -175,11 +175,11 @@ class TotalGeneration(MPlotDataHelper):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index)
+                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
                         df = df.xs(zone_input, level=self.AGG_BY)
                         df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={0: ext_prop})
+                    df = df.rename(columns={"values": ext_prop})
                     extra_data_frames.append(df)
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
@@ -219,8 +219,8 @@ class TotalGeneration(MPlotDataHelper):
                 continue
 
             total_generation_stack_out = pd.concat(
-                gen_chunks, axis=0, sort=True
-            ).fillna(0)
+                gen_chunks, axis=0
+            ).fillna(0).sort_index(axis=1)
             extra_data_out = pd.concat(extra_data_chunks, axis=0, sort=False)
 
             # Add Net Imports if desired
@@ -665,7 +665,7 @@ class TotalGeneration(MPlotDataHelper):
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
                 if vre_only:
                     Total_Gen_Stack = Total_Gen_Stack[
-                        Total_Gen_Stack.columns.intersection(self.vre_gen_cat)
+                        Total_Gen_Stack.columns.intersection(self.gen_categories.vre)
                     ]
 
                 if Total_Gen_Stack.empty:
@@ -715,11 +715,11 @@ class TotalGeneration(MPlotDataHelper):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index)
+                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
                         df = df.xs(zone_input, level=self.AGG_BY)
                         df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={0: ext_prop})
+                    df = df.rename(columns={"values": ext_prop})
                     extra_data_frames.append(df)
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
@@ -798,7 +798,7 @@ class TotalGeneration(MPlotDataHelper):
                 continue
 
             # Concat all data into single data-frames
-            Gen_Out = pd.concat(gen_chunks, axis=0, sort=True)
+            Gen_Out = pd.concat(gen_chunks, axis=0).sort_index(axis=1)
             # Drop any technologies with 0 Gen
             Gen_Out = Gen_Out.loc[:, (Gen_Out != 0).any(axis=0)]
 
