@@ -413,22 +413,22 @@ class GenerationStack(MPlotDataHelper):
                 ].get(scenario)
 
                 if stacked_bat_gen.empty is True:
-                    logger.warning("No Battery generation in selected Date Range")
-                    continue
-                if shift_leapday:
-                    stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
+                    logger.info("No Battery generation in selected Date Range")
+                else:
+                    if shift_leapday:
+                        stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
 
-                stacked_bat_gen = stacked_bat_gen.xs(
-                    'GVEA BESS', level='battery_name'
-                )
-                stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
+                    stacked_bat_gen = stacked_bat_gen.xs(
+                        'GVEA BESS', level='battery_name'
+                    )
+                    stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
 
-                stacked_gen_df.insert(
-                    len(stacked_bat_gen.columns),
-                    column='Storage discharge',
-                    value=stacked_bat_gen,
-                )
-                stacked_gen_df = stacked_gen_df.fillna(0)
+                    stacked_gen_df.insert(
+                        len(stacked_bat_gen.columns),
+                        column='Storage discharge',
+                        value=stacked_bat_gen,
+                    )
+                    stacked_gen_df = stacked_gen_df.fillna(0)
 
                 #Zoom in on selected date range.
                 if pd.notna(start_date_range):
