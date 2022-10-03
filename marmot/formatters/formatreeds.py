@@ -7,6 +7,7 @@ Inherits the Process class.
 
 import os
 #os.environ['GAMSDIR'] = r"C:\GAMS\39"
+import sys
 import logging
 import re
 from pathlib import Path
@@ -239,7 +240,16 @@ class ProcessReEDS(Process):
         if process_att:
             # Process attribute and return to df
             df = process_att(df, prop, str(gdx_file))
-        df.year = df.year.astype(int)
+        
+        try:
+            df.year = df.year.astype(int)
+        except ValueError as e:
+            logger.error("Formatting ERROR: year column cannot be converted to type int. This is likely due to an " 
+                f"incorrectly ordered {self.reeds_prop_cols.__class__} variable, for property '{prop}'.\n"
+                f"Check column order in {self.reeds_prop_cols.__class__} and try running the formatter again.\n"
+                f"If the issue persists open a GitHub issue.\nTraceback message: {e}\nMarmot will not exit.")
+            sys.exit()
+
         if self.process_subset_years:
             df = df.loc[df.year.isin(self.process_subset_years)]
 
