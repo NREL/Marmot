@@ -98,13 +98,13 @@ Total_Generation_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen
 Total_Generation_Monthly,FALSE,,,,,EST,1/2/2040,2040,,,,total_generation,total_gen_monthly
 Monthly_Wind_Solar,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation
 Monthly_Wind_Solar_Percentage,FALSE,,,,,EST,2048,2050,,,,total_generation,monthly_vre_generation_percentage
-Total_Generation_Pie,FALSE,,,,,EST,2020,2030,,,,total_generation,total_gen_pie
+Total_Generation_Pie,TRUE,,,,,EST,2020,2030,,,,total_generation,total_gen_pie
 Total_Generation_Diff,FALSE,,,,,,,,,Scenario,,total_generation,total_gen_diff
 Total_Generation_Diff_by_year,FALSE,,,,,,,,,Year-Scenario,,total_generation,total_gen_diff
 Total_Installed_Capacity,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap
 Total_Installed_Capacity_by_year,FALSE,,,,,,,,,Year-Scenario,,total_installed_capacity,total_cap
 Total_Installed_Capacity_Diff,FALSE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_diff
-Total_Installed_Capacity_and_Generation_Facet,FALSE,,,,,,2040,2040,,Scenario,,total_installed_capacity,total_cap_and_gen_facet
+Total_Installed_Capacity_and_Generation_Facet,TRUE,,,,,,,,,Scenario,,total_installed_capacity,total_cap_and_gen_facet
 Total_Installed_Capacity_and_Generation_Facet_by_year,FALSE,,,,,,2020,2040,,Year-Scenario,,total_installed_capacity,total_cap_and_gen_facet
 Individual_Interface_Flow,FALSE,"Interface-1-2,Interface-3-2",,,,EST,,,,,,transmission,interface_flow_ind
 Individual_Line_Flow,FALSE,113_316_1,,,,EST,,,,,,transmission,line_flow_ind
