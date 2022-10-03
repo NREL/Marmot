@@ -213,7 +213,7 @@ def createConfig(configfile_path: Path):
             append_plexos_block_name=False,
             exclude_pumping_from_reeds_storage_gen=True,
         ),
-        multithreading_workers=16,
+        multithreading_workers=1,
         figure_file_format="svg",
         shift_leapday=False,
         auto_convert_units=True,
