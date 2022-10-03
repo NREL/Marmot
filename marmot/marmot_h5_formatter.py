@@ -56,7 +56,6 @@ class MarmotFormat(SetupLogger):
         Model_Solutions_folder: Union[str, Path],
         Properties_File: Union[str, Path, pd.DataFrame],
         Marmot_Solutions_folder: Union[str, Path] = None,
-        mapping_folder: Union[str, Path] = INPUT_DIR.joinpath("mapping_folder"),
         Region_Mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
         emit_names: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
         **kwargs,
@@ -71,9 +70,6 @@ class MarmotFormat(SetupLogger):
             Marmot_Solutions_folder (Union[str, Path], optional): Folder to save Marmot
                 solution files.
                 Defaults to None.
-            mapping_folder (Union[str, Path], optional): The location of the Marmot
-                mapping folder.
-                Defaults to INPUT_DIR.joinpath('mapping_folder').
             Region_Mapping (Union[str, Path, pd.DataFrame], optional): Mapping file
                 to map custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
@@ -89,8 +85,6 @@ class MarmotFormat(SetupLogger):
 
         self.Scenario_name = Scenario_name
         self.Model_Solutions_folder = Path(Model_Solutions_folder)
-
-        self.mapping_folder = Path(mapping_folder)
 
         if Marmot_Solutions_folder is None:
             self.Marmot_Solutions_folder = self.Model_Solutions_folder
@@ -531,7 +525,6 @@ def main():
             Model_Solutions_folder,
             Properties_File,
             Marmot_Solutions_folder=Marmot_Solutions_folder,
-            mapping_folder=Mapping_folder,
             Region_Mapping=Region_Mapping,
             emit_names=emit_names,
         )

@@ -65,7 +65,6 @@ class MarmotPlot(SetupLogger):
         color_dictionary_file: Union[str, Path, pd.DataFrame],
         Marmot_plot_select: Union[str, Path, pd.DataFrame],
         marmot_solutions_folder: Union[str, Path] = None,
-        mapping_folder: Union[str, Path] = INPUT_DIR.joinpath("mapping_folder"),
         Scenario_Diff: Union[str, list] = None,
         zone_region_sublist: Union[str, list] = None,
         xlabels: Union[str, list] = None,
@@ -94,9 +93,6 @@ class MarmotPlot(SetupLogger):
             marmot_solutions_folder (Union[str, Path], optional): Folder to save
                 Marmot solution files.
                 Defaults to None.
-            mapping_folder (Union[str, Path], optional): The location of the
-                Marmot mapping folder.
-                Defaults to INPUT_DIR.joinpath('mapping_folder').
             Scenario_Diff (Union[str, list], optional): 2 value string
                 or list, used to compare 2 scenarios.
                 Defaults to None.
@@ -195,8 +191,6 @@ class MarmotPlot(SetupLogger):
             self.marmot_solutions_folder = self.Model_Solutions_folder
         else:
             self.marmot_solutions_folder = Path(marmot_solutions_folder)
-
-        self.mapping_folder = Path(mapping_folder)
 
         if isinstance(Scenario_Diff, str):
             self.Scenario_Diff = (
@@ -846,7 +840,6 @@ def main():
         color_dictionary_file,
         Marmot_plot_select,
         marmot_solutions_folder=marmot_solutions_folder,
-        mapping_folder=Mapping_folder,
         Scenario_Diff=Scenario_Diff,
         zone_region_sublist=zone_region_sublist,
         xlabels=xlabels,
