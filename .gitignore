@@ -10,6 +10,7 @@ marmot/input_files/*
 !marmot/input_files/Marmot_user_defined_inputs.csv
 !marmot/input_files/plexos_properties.csv
 !marmot/input_files/reeds_properties.csv
+!marmot/input_files/reeds_india_properties.csv
 !marmot/input_files/siip_properties.csv
 !marmot/input_files/Marmot_plot_select.csv
 marmot/input_files/mapping_folder/*
