@@ -13,7 +13,7 @@ Input File Reference
 
 This page gives an overview of all the input files used by Marmot.
 These files are all located in the 
-`Marmot/marmot/input_files <https://github.com/NREL/Marmot/tree/main/marmot/input_files>`_ directory.
+`Marmot/input_files <https://github.com/NREL/Marmot/tree/main/input_files>`_ directory.
 
 User Defined Inputs
 ---------------------

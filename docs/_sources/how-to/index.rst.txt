@@ -16,3 +16,10 @@ How-to Guides
 
    run_main
    facet
+   
+
+.. toctree::
+   :maxdepth: 1
+
+   config-yml-usage
+   build-docs

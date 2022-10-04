@@ -62,7 +62,7 @@ Marmot_user_defined_input
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The first file you should setup is the :ref:`Marmot_user_defined_inputs: csv file`. This file is located in the 
-`Marmot/marmot/input_files <https://github.com/NREL/Marmot/tree/main/marmot/input_files>`_ directory.
+`Marmot/input_files <https://github.com/NREL/Marmot/tree/main/input_files>`_ directory.
 If you open the file in a spreadsheet programme such as Microsoft Excel you will see the following structure:
 
 .. image:: ../images/user-defined-inputs.jpg
@@ -91,7 +91,7 @@ plexos_properties
 ~~~~~~~~~~~~~~~~~~~
 
 Next we will setup the :ref:`plexos_properties: csv file`. This file is also located in the
-`Marmot/marmot/input_files <https://github.com/NREL/Marmot/tree/main/marmot/input_files>`_ directory. 
+`Marmot/input_files <https://github.com/NREL/Marmot/tree/main/input_files>`_ directory. 
 This file specifies which PLEXOS properties we want to processes with Marmot.
 
 .. note::

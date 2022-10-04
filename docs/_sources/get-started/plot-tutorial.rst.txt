@@ -36,7 +36,7 @@ Marmot_user_defined_input
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 As with the formatter the :ref:`Marmot_user_defined_inputs: csv file` also needs to be modified to run the plotter. 
-This file is located in the `Marmot/marmot/input_files <https://github.com/NREL/Marmot/tree/main/marmot/input_files>`_ directory.
+This file is located in the `Marmot/input_files <https://github.com/NREL/Marmot/tree/main/input_files>`_ directory.
 
 For this tutorial we will focus on the following rows,
 for a more comprehensive look at this file see our How-to Guides and
@@ -70,7 +70,7 @@ Marmot_plot_select
 ~~~~~~~~~~~~~~~~~~~
 
 Next we will setup the :ref:`Marmot_plot_select: csv file`. This file is also located in the 
-`Marmot/marmot/input_files <https://github.com/NREL/Marmot/tree/main/marmot/input_files>`_ directory. This file specifies which figures we want to 
+`Marmot/input_files <https://github.com/NREL/Marmot/tree/main/input_files>`_ directory. This file specifies which figures we want to 
 create with Marmot.
 
 When you open the file, you will see the following structure:
