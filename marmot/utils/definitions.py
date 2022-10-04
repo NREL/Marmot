@@ -31,7 +31,7 @@ def input_dir() -> Path:
     Returns:
         [pathlib.Path]: path to input dir
     """
-    input_folder = get_project_root().joinpath("input_files")
+    input_folder = get_project_root().parent.joinpath("input_files")
     return input_folder
 
 

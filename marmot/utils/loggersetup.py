@@ -25,8 +25,8 @@ class SetupLogger:
     """
 
     def __init__(
-        self, logger_type: str, log_directory: Path = LOG_DIR, log_suffix: str = None
-    ):
+        self, logger_type: str, log_directory: Path = LOG_DIR, log_suffix: str = None,
+        **kwargs):
         """
         Args:
             logger_type (str): Type of logger defined in
