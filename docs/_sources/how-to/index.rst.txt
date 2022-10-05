@@ -15,6 +15,7 @@ How-to Guides
    :maxdepth: 2
 
    run_main
+   format-reeds-results
    facet
    
 

@@ -244,7 +244,6 @@
         <span class="n">color_dictionary_file</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
         <span class="n">Marmot_plot_select</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span>
         <span class="n">marmot_solutions_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">mapping_folder</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="n">INPUT_DIR</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;mapping_folder&quot;</span><span class="p">),</span>
         <span class="n">Scenario_Diff</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">zone_region_sublist</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -273,9 +272,6 @@
 <span class="sd">            marmot_solutions_folder (Union[str, Path], optional): Folder to save</span>
 <span class="sd">                Marmot solution files.</span>
 <span class="sd">                Defaults to None.</span>
-<span class="sd">            mapping_folder (Union[str, Path], optional): The location of the</span>
-<span class="sd">                Marmot mapping folder.</span>
-<span class="sd">                Defaults to INPUT_DIR.joinpath(&#39;mapping_folder&#39;).</span>
 <span class="sd">            Scenario_Diff (Union[str, list], optional): 2 value string</span>
 <span class="sd">                or list, used to compare 2 scenarios.</span>
 <span class="sd">                Defaults to None.</span>
@@ -374,8 +370,6 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">Model_Solutions_folder</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">marmot_solutions_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">marmot_solutions_folder</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">mapping_folder</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">mapping_folder</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">Scenario_Diff</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">Scenario_Diff</span> <span class="o">=</span> <span class="p">(</span>
@@ -1025,7 +1019,6 @@
         <span class="n">color_dictionary_file</span><span class="p">,</span>
         <span class="n">Marmot_plot_select</span><span class="p">,</span>
         <span class="n">marmot_solutions_folder</span><span class="o">=</span><span class="n">marmot_solutions_folder</span><span class="p">,</span>
-        <span class="n">mapping_folder</span><span class="o">=</span><span class="n">Mapping_folder</span><span class="p">,</span>
         <span class="n">Scenario_Diff</span><span class="o">=</span><span class="n">Scenario_Diff</span><span class="p">,</span>
         <span class="n">zone_region_sublist</span><span class="o">=</span><span class="n">zone_region_sublist</span><span class="p">,</span>
         <span class="n">xlabels</span><span class="o">=</span><span class="n">xlabels</span><span class="p">,</span>

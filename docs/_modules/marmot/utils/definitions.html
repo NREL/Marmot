@@ -210,7 +210,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        [pathlib.Path]: path to input dir</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">input_folder</span> <span class="o">=</span> <span class="n">get_project_root</span><span class="p">()</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;input_files&quot;</span><span class="p">)</span>
+    <span class="n">input_folder</span> <span class="o">=</span> <span class="n">get_project_root</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="s2">&quot;input_files&quot;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">input_folder</span></div>
 
 
