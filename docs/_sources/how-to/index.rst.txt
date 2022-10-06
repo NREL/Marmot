@@ -11,14 +11,25 @@ How-to Guides
 ==============
 
 
+Introductory Guides
+---------------------
+.. toctree::
+   :maxdepth: 1
+
+   run_main
+   format-plexos-results
+   format-reeds-results
+
+Special Features Guides
+------------------------
+
 .. toctree::
    :maxdepth: 2
 
-   run_main
-   format-reeds-results
    facet
-   
 
+Marmot Customization and Configuration Guides
+----------------------------------------------
 .. toctree::
    :maxdepth: 1
 
