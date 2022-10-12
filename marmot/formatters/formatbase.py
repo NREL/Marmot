@@ -20,11 +20,7 @@ class Process:
     # unchanged names not included
     PROPERTY_MAPPING: dict = {}
     """Maps simulation model property names to Marmot property names"""
-    # Extra custom properties that are created based off existing properties.
-    # The dictionary keys are the existing properties and the values are the new
-    # property names and methods used to create it.
-    EXTRA_MARMOT_PROPERTIES: dict = {}
-    """Dictionary of Extra custom properties that are created based off existing properties."""
+
     # Conversion units dict, key values is a tuple of new unit name and
     # conversion multiplier
     UNITS_CONVERSION: dict = {
@@ -61,6 +57,8 @@ class Process:
         "unitless": ("unitless", 1),
     }
     """Dictionary to convert units to standard values used by Marmot"""
+
+    EXTRA_PROPERTIES_CLASS = "ExtraProperties"
 
     def __init__(
         self,

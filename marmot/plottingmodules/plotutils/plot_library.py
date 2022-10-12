@@ -598,47 +598,61 @@ class SetupSubplot:
             all_axes = self.axs.ravel()
         j = 0
         k = 0
+
+        if not xlabels:
+            skip_xlabels = True
+        else:
+            skip_xlabels = False
+
+        if not ylabels:
+            skip_ylabels = True
+        else:
+            skip_ylabels = False
+
         for ax in all_axes:
-            if xlabels_bottom:
-                if ax.is_last_row():
+            if not skip_xlabels:
+                if xlabels_bottom:
+                    if ax.is_last_row():
+                        try:
+                            ax.set_xlabel(
+                                xlabel=(xlabels[j]),
+                                color="black",
+                                fontsize=font_settings["axes_label_size"] - 2,
+                                **kwargs,
+                            )
+                        except IndexError:
+                            logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                            pass
+                        j = j + 1
+                else:
+                    if ax.is_first_row():
+                        try:
+                            ax.set_xlabel(
+                                xlabel=(xlabels[j]),
+                                color="black",
+                                fontsize=font_settings["axes_label_size"] - 2,
+                                **kwargs,
+                            )
+                            ax.xaxis.set_label_position("top")
+                        except IndexError:
+                            logger.warning(f"Warning: xlabel missing for subplot x{j}")
+                            pass
+                        j = j + 1
+
+            if not skip_ylabels:
+                if ax.is_first_col():
                     try:
-                        ax.set_xlabel(
-                            xlabel=(xlabels[j]),
+                        ax.set_ylabel(
+                            ylabel=(ylabels[k]),
                             color="black",
+                            rotation="vertical",
                             fontsize=font_settings["axes_label_size"] - 2,
                             **kwargs,
                         )
                     except IndexError:
-                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
-                        continue
-                    j = j + 1
-            else:
-                if ax.is_first_row():
-                    try:
-                        ax.set_xlabel(
-                            xlabel=(xlabels[j]),
-                            color="black",
-                            fontsize=font_settings["axes_label_size"] - 2,
-                            **kwargs,
-                        )
-                        ax.xaxis.set_label_position("top")
-                    except IndexError:
-                        logger.warning(f"Warning: xlabel missing for subplot x{j}")
-                        continue
-                    j = j + 1
-            if ax.is_first_col():
-                try:
-                    ax.set_ylabel(
-                        ylabel=(ylabels[k]),
-                        color="black",
-                        rotation="vertical",
-                        fontsize=font_settings["axes_label_size"] - 2,
-                        **kwargs,
-                    )
-                except IndexError:
-                    logger.warning(f"Warning: ylabel missing for subplot y{k}")
-                    continue
-                k = k + 1
+                        logger.warning(f"Warning: ylabel missing for subplot y{k}")
+                        pass
+                    k = k + 1
 
 
 class PlotLibrary(SetupSubplot):

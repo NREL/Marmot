@@ -19,5 +19,5 @@ input_files/mapping_folder/*
 !input_files/mapping_folder/ordered_gen_categories.csv
 !input_files/mapping_folder/Region_mapping_ReEDS.csv
 !input_files/mapping_folder/Regions_Zones_Mapping_Full.csv
-config.yml
 marmot-env-JW.yml
+config.yml

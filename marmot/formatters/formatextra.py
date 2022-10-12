@@ -25,17 +25,90 @@ class ExtraProperties:
     instantiation.
     """
 
-    def __init__(self, model: Process, files_list: list):
+    # Extra custom properties that are created based off existing properties.
+    # The dictionary keys are the existing properties and the values are the new
+    # property names and methods used to create it.
+    EXTRA_MARMOT_PROPERTIES: dict = {}
+
+    def __init__(self, model: Process):
         """
         Args:
             model (Process): model specific instance of a Process class,
                 e.g ProcessPLEXOS, ProcessReEDS
-            files_list (list): list of model input filenames, e.g PLEXOS h5plexos files
         """
         self.model = model
-        self.files_list = files_list
+        self.files_list = model.get_input_data_paths
 
-    def plexos_generator_curtailment(
+    def get_extra_properties(self, key):
+
+        if key in self.EXTRA_MARMOT_PROPERTIES:
+            extra_properties = []
+            extra_prop_functions = (
+                self.EXTRA_MARMOT_PROPERTIES[key]
+            )
+            for prop_function_tup in extra_prop_functions:
+                prop_name, prop_function = prop_function_tup
+                extra_properties.append((prop_name, getattr(self, prop_function)))
+
+            return extra_properties
+        else:
+            return None
+
+    def annualize_property(self, df: pd.DataFrame, **_) -> pd.DataFrame:
+        """Annualizes any property, groups by year
+
+        Args:
+            df (pd.DataFrame): multiindex dataframe with timestamp level.
+
+        Returns:
+            pd.DataFrame: df with timestamp grouped by year.
+        """
+        index_names = list(df.index.names)
+        index_names.remove("timestamp")
+        timestamp_annualized = [
+            pd.to_datetime(df.index.get_level_values("timestamp").year.astype(str))
+        ]
+        timestamp_annualized.extend(index_names)
+        return df.groupby(timestamp_annualized).sum()
+
+
+class ExtraPLEXOSProperties(ExtraProperties):
+
+    EXTRA_MARMOT_PROPERTIES: dict = {
+        "generator_Generation": [
+            ("generator_Curtailment", "generator_curtailment"),
+            ("generator_Generation_Annual", "annualize_property"),
+        ],
+        "region_Unserved_Energy": [
+            ("region_Cost_Unserved_Energy", "cost_unserved_energy")
+        ],
+        "zone_Unserved_Energy": [
+            ("zone_Cost_Unserved_Energy", "cost_unserved_energy")
+        ],
+        "region_Load": [
+            ("region_Load_Annual", "annualize_property"),
+            ("region_Demand", "demand"),
+        ],
+        "zone_Load": [
+            ("zone_Load_Annual", "annualize_property"),
+            ("zone_Demand", "demand"),
+        ],
+        "generator_Pump_Load": [
+            ("generator_Pump_Load_Annual", "annualize_property")
+        ],
+        "reserves_generators_Provision": [
+            ("reserves_generators_Provision_Annual", "annualize_property")
+        ],
+        "generator_Curtailment": [
+            ("generator_Curtailment_Annual", "annualize_property")
+        ],
+        "region_Demand": [("region_Demand_Annual", "annualize_property")],
+        "zone_Demand": [("zone_Demand_Annual", "annualize_property")],
+    }
+    """Dictionary of Extra custom properties that are created based off existing properties."""
+
+
+    def generator_curtailment(
         self, df: pd.DataFrame, timescale: str = "interval"
     ) -> pd.DataFrame:
         """Creates a generator_Curtailment property for PLEXOS result sets
@@ -67,7 +140,7 @@ class ExtraProperties:
         avail_gen = self.model.combine_models(data_chunks)
         return avail_gen - df
 
-    def plexos_demand(
+    def demand(
         self, df: pd.DataFrame, timescale: str = "interval"
     ) -> pd.DataFrame:
         """Creates a region_Demand / zone_Demand property for PLEXOS result sets
@@ -100,7 +173,7 @@ class ExtraProperties:
         pump_load = pump_load.groupby(df.index.names).sum()
         return df - pump_load
 
-    def plexos_cost_unserved_energy(self, df: pd.DataFrame, **_) -> pd.DataFrame:
+    def cost_unserved_energy(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a region_Cost_Unserved_Energy property for PLEXOS result sets
 
         Args:
@@ -111,7 +184,39 @@ class ExtraProperties:
         """
         return df * mconfig.parser("formatter_settings", "VoLL")
 
-    def reeds_region_total_load(
+
+class ExtraReEDSProperties(ExtraProperties):
+
+    EXTRA_MARMOT_PROPERTIES: dict = {
+        "generator_Total_Generation_Cost": [
+            ("generator_VOM_Cost", "generator_vom_cost"),
+            ("generator_Fuel_Cost", "generator_fuel_cost"),
+            (
+                "generator_Reserves_VOM_Cost",
+                "generator_reserve_vom_cost",
+            ),
+            ("generator_FOM_Cost", "generator_fom_cost"),
+        ],
+        "reserves_generators_Provision": [
+            ("reserve_Provision", "reserve_provision")
+        ],
+        "region_Demand": [
+            ("region_Demand_Annual", "annualize_property"),
+            ("region_Load", "region_total_load"),
+        ],
+        "generator_Curtailment": [
+            ("generator_Curtailment_Annual", "annualize_property")
+        ],
+        "generator_Pump_Load": [
+            ("generator_Pump_Load_Annual", "annualize_property")
+        ],
+        "region_Load": [("region_Load_Annual", "annualize_property")],
+
+    }
+    """Dictionary of Extra custom properties that are created based off existing properties."""
+
+
+    def region_total_load(
         self, df: pd.DataFrame, timescale: str = "year"
     ) -> pd.DataFrame:
         """Creates a region_Load property for ReEDS results sets
@@ -142,20 +247,19 @@ class ExtraProperties:
         pump_load = pd.concat(data_chunks, copy=False)
         if timescale == "year":
             pump_load = self.annualize_property(pump_load)
-            all_col = list(pump_load.index.names)
-            [all_col.remove(x) for x in ["tech", "sub-tech", "units", "season"]]
-        else:
-            all_col = list(pump_load.index.names)
-            [all_col.remove(x) for x in ["tech", "sub-tech", "units"]]
+
+        all_col = list(pump_load.index.names)
+        [all_col.remove(x) for x in ["tech", "sub-tech", "units", "season"] if x in all_col]
         pump_load = pump_load.groupby(all_col).sum()
 
         load = df.merge(pump_load, on=all_col, how="outer")
-        load["values"] = load["0_x"] + load["0_y"]
-        load["values"] = load["values"].fillna(load["0_x"])
-        load = load.drop(["0_x", "0_y"], axis=1)
+
+        load["values"] = load["values_x"] + load["values_y"]
+        load["values"] = load["values"].fillna(load["values_x"])
+        load = load.drop(["values_x", "values_y"], axis=1)
         return load
 
-    def reeds_reserve_provision(self, df: pd.DataFrame, **_) -> pd.DataFrame:
+    def reserve_provision(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a reserve_Provision property for ReEDS result sets
 
         Args:
@@ -168,7 +272,7 @@ class ExtraProperties:
             ["timestamp", "Type", "parent", "region", "season", "units"]
         ).sum()
 
-    def reeds_generator_vom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
+    def generator_vom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a generator_VO&M property for ReEDS result sets
 
         Args:
@@ -179,7 +283,7 @@ class ExtraProperties:
         """
         return df.xs("op_vom_costs", level="cost_type")
 
-    def reeds_generator_fuel_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
+    def generator_fuel_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a generator_Fuel_Cost property for ReEDS result sets
 
         Args:
@@ -190,7 +294,7 @@ class ExtraProperties:
         """
         return df.xs("op_fuelcosts_objfn", level="cost_type")
 
-    def reeds_generator_reserve_vom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
+    def generator_reserve_vom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a generator_Reserves_VOM_Cost property for ReEDS result sets
 
         Args:
@@ -201,7 +305,7 @@ class ExtraProperties:
         """
         return df.xs("op_operating_reserve_costs", level="cost_type")
 
-    def reeds_generator_fom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
+    def generator_fom_cost(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a generator_FOM_Cost property for ReEDS result sets
 
         Args:
@@ -212,24 +316,65 @@ class ExtraProperties:
         """
         return df.xs("op_fom_costs", level="cost_type")
 
-    def annualize_property(self, df: pd.DataFrame, **_) -> pd.DataFrame:
-        """Annualizes any property, groups by year
+
+class ExtraReEDSIndiaProperties(ExtraReEDSProperties):
+
+    def region_total_load(
+        self, df: pd.DataFrame, timescale: str = "year"
+    ) -> pd.DataFrame:
+        """Creates a region_Load property for ReEDS India results sets
+
+        ReEDS does not include storage charging in total load
+        This is added to region_Demand to get region_Load
 
         Args:
-            df (pd.DataFrame): multiindex dataframe with timestamp level.
+            df (pd.DataFrame): region_Demand df
+            timescale (str, optional): Data timescale.
+                Defaults to 'year'.
 
         Returns:
-            pd.DataFrame: df with timestamp grouped by year.
+            pd.DataFrame: region_Load df
         """
-        index_names = list(df.index.names)
-        index_names.remove("timestamp")
-        timestamp_annualized = [
-            pd.to_datetime(df.index.get_level_values("timestamp").year.astype(str))
-        ]
-        timestamp_annualized.extend(index_names)
-        return df.groupby(timestamp_annualized).sum()
+        data_chunks = []
+        for file in self.files_list:
+            processed_data = self.model.get_processed_data(
+                "generator", "stor_charge", "interval", file
+            )
 
-    def siip_generator_curtailment(
+            if processed_data.empty is True:
+                logger.info("region_Load will equal region_Demand")
+                return df
+
+            data_chunks.append(processed_data)
+
+        pump_load = pd.concat(data_chunks, copy=False)
+        if timescale == "year":
+            pump_load = self.annualize_property(pump_load)
+
+        all_col = list(pump_load.index.names)
+        [all_col.remove(x) for x in ["tech", "gen_name", "units", "season"] if x in all_col]
+        pump_load = pump_load.groupby(all_col).sum()
+
+        load = df.merge(pump_load, on=all_col, how="outer")
+        load["values"] = load["values_x"] + load["values_y"]
+        load["values"] = load["values"].fillna(load["values_x"])
+        load = load.drop(["values_x", "values_y"], axis=1)
+        return load
+
+
+class ExtraSIIProperties(ExtraProperties):
+
+    EXTRA_MARMOT_PROPERTIES: dict = {
+        "generator_Generation": [
+            ("generator_Curtailment", "generator_curtailment"),
+            ("generator_Generation_Annual", "annualize_property")],
+        "generator_Curtailment": [
+            ("generator_Curtailment_Annual", "annualize_property")],
+        "region_Demand": [("region_Load", "region_total_load")]}
+    """Dictionary of Extra custom properties that are created based off existing properties."""
+
+
+    def generator_curtailment(
         self, df: pd.DataFrame, timescale: str = "interval"
     ) -> pd.DataFrame:
         """Creates a generator_Curtailment property for SIIP result sets
@@ -267,7 +412,7 @@ class ExtraProperties:
 
         return avail_gen - df.loc[map_gens,:]
 
-    def siip_region_total_load(
+    def region_total_load(
         self, df: pd.DataFrame, timescale: str = "interval"
     ) -> pd.DataFrame:
         """Creates a region_Load property for SIIP results sets

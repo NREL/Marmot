@@ -31,7 +31,8 @@ from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
 from marmot.utils.loggersetup import SetupLogger
 import marmot.utils.dataio as dataio
 import marmot.formatters as formatters
-from marmot.formatters.formatextra import ExtraProperties
+from marmot.formatters.formatbase import Process
+
 
 # A bug in pandas requires this to be included,
 # otherwise df.to_string truncates long strings. Fix available in Pandas 1.0
@@ -205,7 +206,7 @@ class MarmotFormat(SetupLogger):
 
         output_file_path = output_folder.joinpath(hdf5_output_name)
 
-        process_sim_model = process_class(
+        process_sim_model: Process = process_class(
             input_folder,
             output_file_path,
             plexos_block=plexos_block,
@@ -217,7 +218,8 @@ class MarmotFormat(SetupLogger):
         files_list = process_sim_model.get_input_data_paths
 
         # init of ExtraProperties class
-        extraprops_init = ExtraProperties(process_sim_model, files_list)
+        extraprops_init = process_sim_model.EXTRA_PROPERTIES_CLASS(process_sim_model)
+
         # =====================================================================
         # Process the Outputs
         # =====================================================================
@@ -319,11 +321,9 @@ class MarmotFormat(SetupLogger):
                             save_attempt += 1
 
                     # Calculate any extra properties
-                    if property_key_name in process_sim_model.EXTRA_MARMOT_PROPERTIES:
+                    extra_prop_functions = extraprops_init.get_extra_properties(property_key_name)
+                    if extra_prop_functions:
 
-                        extra_prop_functions = (
-                            process_sim_model.EXTRA_MARMOT_PROPERTIES[property_key_name]
-                        )
                         for prop_function_tup in extra_prop_functions:
                             prop_name, prop_function = prop_function_tup
 
@@ -334,7 +334,6 @@ class MarmotFormat(SetupLogger):
 
                                 self.logger.info(f"Processing {prop_name}")
                                 prop = prop_function(
-                                    extraprops_init,
                                     Processed_Data_Out,
                                     timescale=row["data_type"],
                                 )
@@ -345,12 +344,12 @@ class MarmotFormat(SetupLogger):
                                     )
                                 else:
                                     self.logger.warning(f"{prop_name} was not saved")
+                                    continue
+                                
                             # Run again to check for properties based of new properties
-                            if prop_name in process_sim_model.EXTRA_MARMOT_PROPERTIES:
+                            extra2_prop_functions = extraprops_init.get_extra_properties(prop_name)
+                            if extra2_prop_functions:
 
-                                extra2_prop_functions = (
-                                    process_sim_model.EXTRA_MARMOT_PROPERTIES[prop_name]
-                                )
                                 for prop_function_tup2 in extra2_prop_functions:
                                     prop_name2, prop_function2 = prop_function_tup2
 
@@ -364,7 +363,6 @@ class MarmotFormat(SetupLogger):
 
                                         self.logger.info(f"Processing {prop_name2}")
                                         prop2 = prop_function2(
-                                            extraprops_init,
                                             prop,
                                             timescale=row["data_type"],
                                         )
