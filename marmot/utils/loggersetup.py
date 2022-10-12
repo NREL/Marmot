@@ -61,8 +61,8 @@ class SetupLogger:
     """Default log config if LOG_CONFIG_FILE cannot be found"""
 
     def __init__(
-        self, logger_type: str, log_directory: Path = LOG_DIR, log_suffix: str = None
-    ):
+        self, logger_type: str, log_directory: Path = LOG_DIR, log_suffix: str = None,
+        **kwargs):
         """
         Args:
             logger_type (str): Type of logger defined in
