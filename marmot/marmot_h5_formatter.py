@@ -350,6 +350,8 @@ class MarmotFormat(SetupLogger):
                                     )
                                 else:
                                     self.logger.warning(f"{prop_name} was not saved")
+                                    continue
+                                
                             # Run again to check for properties based of new properties
                             extra2_prop_functions = extraprops_init.get_extra_properties(prop_name)
                             if extra2_prop_functions:
