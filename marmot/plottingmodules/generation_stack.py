@@ -487,6 +487,17 @@ class GenerationStack(MPlotDataHelper):
                     }
                 )
 
+                #Add battery generation to total gen stack df.
+                if "batterie_Load" in extra_plot_data.keys():
+                    stacked_gen_df["Battery charging"] = extra_plot_data["batterie_Load"].squeeze()
+                    del extra_plot_data['batterie_Generation']
+
+                #Battery load is already included natively in PLEXOS' region_load property,
+                #so need to subtract it from total demand.
+                if "batterie_Load" in extra_plot_data.keys():
+                    extra_plot_data["Total Demand"] = extra_plot_data["Total Demand"] - extra_plot_data["batterie_Load"]
+                    del extra_plot_data['batterie_Load']
+
                 # Adjust extra data to generator date range
                 extra_plot_data = extra_plot_data.loc[
                     stacked_gen_df.index.min() : stacked_gen_df.index.max()
@@ -538,6 +549,7 @@ class GenerationStack(MPlotDataHelper):
                         extra_plot_data["Total Load"],
                         extra_plot_data["Unserved Energy"],
                     )
+                else: stacked_gen_df = self.create_categorical_tech_index(stacked_gen_df, axis=1)
 
                 # Remove any all 0 columns
                 stacked_gen_df = stacked_gen_df.loc[
