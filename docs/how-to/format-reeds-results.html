@@ -216,6 +216,11 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#reeds-specific-dependencies">
+   ReEDS specific Dependencies
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#reeds-output-folder-structure">
    ReEDS output folder structure
   </a>
@@ -258,6 +263,21 @@
 <p>This guide will show you how to setup Marmot to process ReEDS results.
 The guide will focus on using the <a class="reference internal" href="../references/input-files/Marmot_user_defined_inputs.html#marmot-user-defined-inputs-csv-file"><span class="std std-ref">Marmot_user_defined_inputs: csv file</span></a> to correctly point to
 ReEDS outputs and scenarios.</p>
+<section id="reeds-specific-dependencies">
+<h2>ReEDS specific Dependencies<a class="headerlink" href="#reeds-specific-dependencies" title="Permalink to this headline">#</a></h2>
+<p>To format ReEDS results you will need to ensure the following dependecies are met:</p>
+<ul>
+<li><p>Install gdxpds (You may already have this module installed if you are using the latest Marmot environment):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">gdxpds</span>
+</pre></div>
+</div>
+</li>
+<li><p>Install <a class="reference external" href="https://www.gams.com/download/">GAMS</a></p></li>
+<li><p>Put the GAMS directory in your PATH and/or assign it to the <strong>GAMS_DIR</strong> environment variable,
+on Windows GAMS will be installed on the C drive by default such as <code class="docutils literal notranslate"><span class="pre">C:\GAMS\40</span></code></p></li>
+<li><p>After adding the GAMS directory to your path restart your computer.</p></li>
+</ul>
+</section>
 <section id="reeds-output-folder-structure">
 <h2>ReEDS output folder structure<a class="headerlink" href="#reeds-output-folder-structure" title="Permalink to this headline">#</a></h2>
 <p>As of writing (October 2022), the typical ReEDS run folder will look similar to the following:</p>

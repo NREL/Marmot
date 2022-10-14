@@ -19,6 +19,19 @@ This guide will show you how to setup Marmot to process ReEDS results.
 The guide will focus on using the :ref:`Marmot_user_defined_inputs: csv file` to correctly point to 
 ReEDS outputs and scenarios.
 
+ReEDS specific Dependencies
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To format ReEDS results you will need to ensure the following dependecies are met:
+
+- Install gdxpds (You may already have this module installed if you are using the latest Marmot environment)::
+
+    pip install gdxpds
+
+- Install `GAMS <https://www.gams.com/download/>`_
+- Put the GAMS directory in your PATH and/or assign it to the **GAMS_DIR** environment variable, 
+  on Windows GAMS will be installed on the C drive by default such as ``C:\GAMS\40``
+- After adding the GAMS directory to your path restart your computer.
 
 ReEDS output folder structure
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
