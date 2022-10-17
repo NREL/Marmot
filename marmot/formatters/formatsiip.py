@@ -14,7 +14,7 @@ import marmot.utils.mconfig as mconfig
 import marmot.metamanagers.write_siip_metadata as write_siip_metadata
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
-from marmot.formatters.formatextra import ExtraProperties
+from marmot.formatters.formatextra import ExtraSIIProperties
 
 logger = logging.getLogger("formatter." + __name__)
 formatter_settings = mconfig.parser("formatter_settings")
@@ -32,17 +32,8 @@ class ProcessSIIP(Process):
         "reserves_generators_reserve_contribution": "reserves_generators_Provision",
         "line_power_flow_actual": "line_Flow"}
     """Maps simulation model property names to Marmot property names"""
-    # Extra custom properties that are created based off existing properties.
-    # The dictionary keys are the existing properties and the values are the new
-    # property names and methods used to create it.
-    EXTRA_MARMOT_PROPERTIES: dict = {
-        "generator_Generation": [
-            ("generator_Curtailment", ExtraProperties.siip_generator_curtailment),
-            ("generator_Generation_Annual", ExtraProperties.annualize_property)],
-        "generator_Curtailment": [
-            ("generator_Curtailment_Annual", ExtraProperties.annualize_property)],
-        "region_Demand": [("region_Load", ExtraProperties.siip_region_total_load)]}
-    """Dictionary of Extra custom properties that are created based off existing properties."""
+
+    EXTRA_PROPERTIES_CLASS = ExtraSIIProperties
 
     def __init__(
         self,

@@ -188,11 +188,11 @@ class MPlotDataHelper(dict):
         else:
             self.Scenario_Diff = Scenario_Diff
         if ylabels is None:
-            self.ylabels = [""]
+            self.ylabels = []
         else:
             self.ylabels = ylabels
         if xlabels is None:    
-            self.xlabels = [""]
+            self.xlabels = []
         else:    
             self.xlabels = xlabels
         if color_list is None:
@@ -469,12 +469,15 @@ class MPlotDataHelper(dict):
         Returns:
             Tuple[int, int]: Facet x,y dimensions.
         """
-        ncols = len(self.xlabels)
-        if self.xlabels == [""]:
+        
+        if not self.xlabels:
             ncols = 1
-        nrows = len(self.ylabels)
-        if self.ylabels == [""]:
+        else:
+            ncols = len(self.xlabels)
+        if not self.ylabels:
             nrows = 1
+        else:
+            nrows = len(self.ylabels)
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
             ncols = 1
@@ -483,8 +486,8 @@ class MPlotDataHelper(dict):
         # If no labels were provided or dimensions less than len scenarios use 
         # Marmot default dimension settings
         if (
-            self.xlabels == [""]
-            and self.ylabels == [""]
+            not self.xlabels
+            and not self.ylabels
             or ncols * nrows < len(multi_scenario)
         ):
             logger.info(
