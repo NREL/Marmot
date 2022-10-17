@@ -777,47 +777,61 @@
             <span class="n">all_axes</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">axs</span><span class="o">.</span><span class="n">ravel</span><span class="p">()</span>
         <span class="n">j</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">k</span> <span class="o">=</span> <span class="mi">0</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">xlabels</span><span class="p">:</span>
+            <span class="n">skip_xlabels</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">skip_xlabels</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ylabels</span><span class="p">:</span>
+            <span class="n">skip_ylabels</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">skip_ylabels</span> <span class="o">=</span> <span class="kc">False</span>
+
         <span class="k">for</span> <span class="n">ax</span> <span class="ow">in</span> <span class="n">all_axes</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">xlabels_bottom</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_last_row</span><span class="p">():</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_xlabels</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">xlabels_bottom</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_last_row</span><span class="p">():</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
+                                <span class="n">xlabel</span><span class="o">=</span><span class="p">(</span><span class="n">xlabels</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+                                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                                <span class="n">fontsize</span><span class="o">=</span><span class="n">font_settings</span><span class="p">[</span><span class="s2">&quot;axes_label_size&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span>
+                                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                            <span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: xlabel missing for subplot x</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">pass</span>
+                        <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_row</span><span class="p">():</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
+                                <span class="n">xlabel</span><span class="o">=</span><span class="p">(</span><span class="n">xlabels</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+                                <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                                <span class="n">fontsize</span><span class="o">=</span><span class="n">font_settings</span><span class="p">[</span><span class="s2">&quot;axes_label_size&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span>
+                                <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
+                            <span class="p">)</span>
+                            <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                            <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: xlabel missing for subplot x</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                            <span class="k">pass</span>
+                        <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
+
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">skip_ylabels</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_col</span><span class="p">():</span>
                     <span class="k">try</span><span class="p">:</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
-                            <span class="n">xlabel</span><span class="o">=</span><span class="p">(</span><span class="n">xlabels</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
+                        <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span>
+                            <span class="n">ylabel</span><span class="o">=</span><span class="p">(</span><span class="n">ylabels</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span>
                             <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
+                            <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
                             <span class="n">fontsize</span><span class="o">=</span><span class="n">font_settings</span><span class="p">[</span><span class="s2">&quot;axes_label_size&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span>
                             <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
                         <span class="p">)</span>
                     <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: xlabel missing for subplot x</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="k">continue</span>
-                    <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_row</span><span class="p">():</span>
-                    <span class="k">try</span><span class="p">:</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span>
-                            <span class="n">xlabel</span><span class="o">=</span><span class="p">(</span><span class="n">xlabels</span><span class="p">[</span><span class="n">j</span><span class="p">]),</span>
-                            <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                            <span class="n">fontsize</span><span class="o">=</span><span class="n">font_settings</span><span class="p">[</span><span class="s2">&quot;axes_label_size&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span>
-                            <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                        <span class="p">)</span>
-                        <span class="n">ax</span><span class="o">.</span><span class="n">xaxis</span><span class="o">.</span><span class="n">set_label_position</span><span class="p">(</span><span class="s2">&quot;top&quot;</span><span class="p">)</span>
-                    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: xlabel missing for subplot x</span><span class="si">{</span><span class="n">j</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                        <span class="k">continue</span>
-                    <span class="n">j</span> <span class="o">=</span> <span class="n">j</span> <span class="o">+</span> <span class="mi">1</span>
-            <span class="k">if</span> <span class="n">ax</span><span class="o">.</span><span class="n">is_first_col</span><span class="p">():</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span>
-                        <span class="n">ylabel</span><span class="o">=</span><span class="p">(</span><span class="n">ylabels</span><span class="p">[</span><span class="n">k</span><span class="p">]),</span>
-                        <span class="n">color</span><span class="o">=</span><span class="s2">&quot;black&quot;</span><span class="p">,</span>
-                        <span class="n">rotation</span><span class="o">=</span><span class="s2">&quot;vertical&quot;</span><span class="p">,</span>
-                        <span class="n">fontsize</span><span class="o">=</span><span class="n">font_settings</span><span class="p">[</span><span class="s2">&quot;axes_label_size&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">2</span><span class="p">,</span>
-                        <span class="o">**</span><span class="n">kwargs</span><span class="p">,</span>
-                    <span class="p">)</span>
-                <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                    <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: ylabel missing for subplot y</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-                    <span class="k">continue</span>
-                <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span></div></div>
+                        <span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: ylabel missing for subplot y</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                        <span class="k">pass</span>
+                    <span class="n">k</span> <span class="o">=</span> <span class="n">k</span> <span class="o">+</span> <span class="mi">1</span></div></div>
 
 
 <div class="viewcode-block" id="PlotLibrary"><a class="viewcode-back" href="../../../../references/code/_autosummary/marmot.plottingmodules.plotutils.plot_library.PlotLibrary.html#marmot.plottingmodules.plotutils.plot_library.PlotLibrary">[docs]</a><span class="k">class</span> <span class="nc">PlotLibrary</span><span class="p">(</span><span class="n">SetupSubplot</span><span class="p">):</span>

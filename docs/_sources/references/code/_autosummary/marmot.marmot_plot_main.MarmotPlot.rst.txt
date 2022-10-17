@@ -1,4 +1,4 @@
-.. raw:: html
+﻿.. raw:: html
 
    <script>
       var arr = document.getElementsByClassName('reference internal');
@@ -29,5 +29,12 @@ marmot.marmot\_plot\_main.MarmotPlot
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MarmotPlot.DEFAULT_LOG_CONFIG
+      ~MarmotPlot.LOG_CONFIG_FILE
    
    

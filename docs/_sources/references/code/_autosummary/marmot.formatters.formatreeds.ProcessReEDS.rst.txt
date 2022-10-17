@@ -39,13 +39,14 @@ marmot.formatters.formatreeds.ProcessReEDS
 
    .. autosummary::
    
-      ~ProcessReEDS.EXTRA_MARMOT_PROPERTIES
+      ~ProcessReEDS.GDX_RESULTS_PREFIX
       ~ProcessReEDS.PROPERTY_MAPPING
       ~ProcessReEDS.UNITS_CONVERSION
       ~ProcessReEDS.data_collection
       ~ProcessReEDS.get_input_data_paths
       ~ProcessReEDS.input_folder
       ~ProcessReEDS.property_units
+      ~ProcessReEDS.reeds_prop_cols
       ~ProcessReEDS.wind_resource_to_pca
    
    

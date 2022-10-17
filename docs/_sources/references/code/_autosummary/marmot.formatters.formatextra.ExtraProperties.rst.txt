@@ -25,20 +25,16 @@ marmot.formatters.formatextra.ExtraProperties
    .. autosummary::
    
         ~ExtraProperties.annualize_property
-        ~ExtraProperties.plexos_cost_unserved_energy
-        ~ExtraProperties.plexos_demand
-        ~ExtraProperties.plexos_generator_curtailment
-        ~ExtraProperties.reeds_generator_fom_cost
-        ~ExtraProperties.reeds_generator_fuel_cost
-        ~ExtraProperties.reeds_generator_reserve_vom_cost
-        ~ExtraProperties.reeds_generator_vom_cost
-        ~ExtraProperties.reeds_region_total_load
-        ~ExtraProperties.reeds_reserve_provision
-        ~ExtraProperties.siip_generator_curtailment
-        ~ExtraProperties.siip_region_total_load
+        ~ExtraProperties.get_extra_properties
    
    
 
    
+   
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~ExtraProperties.EXTRA_MARMOT_PROPERTIES
    
    

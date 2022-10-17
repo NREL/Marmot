@@ -234,6 +234,26 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraPLEXOSProperties.html">
+     marmot.formatters.formatextra.ExtraPLEXOSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSIndiaProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSIndiaProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraSIIProperties.html">
+     marmot.formatters.formatextra.ExtraSIIProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="marmot.formatters.formatplexos.ProcessPLEXOS.html">
      marmot.formatters.formatplexos.ProcessPLEXOS
     </a>
@@ -244,8 +264,18 @@
     </a>
    </li>
    <li class="toctree-l2">
-    <a class="reference internal" href="marmot.formatters.formatreeds.PropertyColumns.html">
-     marmot.formatters.formatreeds.PropertyColumns
+    <a class="reference internal" href="marmot.formatters.formatreeds.ReEDSPropertyColumns.html">
+     marmot.formatters.formatreeds.ReEDSPropertyColumns
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds_india.ProcessReEDSIndia.html">
+     marmot.formatters.formatreeds_india.ProcessReEDSIndia
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns.html">
+     marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns
     </a>
    </li>
    <li class="toctree-l2">
@@ -703,6 +733,9 @@ class.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.plottingmodules.total_installed_capacity.InstalledCapacity.total_cap_diff" title="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.total_cap_diff"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_cap_diff</span></code></a>([start_date_range, ...])</p></td>
 <td><p>Creates a stacked barplot of total installed capacity relative to a base scenario.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.plottingmodules.total_installed_capacity.InstalledCapacity.total_cap_facet" title="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.total_cap_facet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">total_cap_facet</span></code></a>([start_date_range, ...])</p></td>
+<td><p>Creates a stacked barplot of total installed capacity.</p></td>
+</tr>
 </tbody>
 </table>
 <dl class="py method">
@@ -779,6 +812,42 @@ Defaults to Scenario.</p>
 and total generation on the right.
 Each facet contains stacked bar plots, each scenario is plotted as a
 separate bar.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>start_date_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Defines a start date at which to represent data from.
+Defaults to None.</p></li>
+<li><p><strong>end_date_range</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – Defines a end date at which to represent data to.
+Defaults to None.</p></li>
+<li><p><strong>scenario_groupby</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><em>str</em></a><em>, </em><em>optional</em>) – <p>Specifies whether to group data by Scenario
+or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+from the timestamp and appeneded to the sceanrio name. This is useful when
+plotting data which covers multiple years such as ReEDS.
+Defaults to Scenario.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.10.0.</span></p>
+</div>
+</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Dictionary containing the created plot and its data table.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)">dict</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="marmot.plottingmodules.total_installed_capacity.InstalledCapacity.total_cap_facet">
+<span class="sig-name descname"><span class="pre">total_cap_facet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">start_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_date_range</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.10)"><span class="pre">Optional</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scenario_groupby</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'Scenario'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/marmot/plottingmodules/total_installed_capacity.html#InstalledCapacity.total_cap_facet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.plottingmodules.total_installed_capacity.InstalledCapacity.total_cap_facet" title="Permalink to this definition">#</a></dt>
+<dd><p>Creates a stacked barplot of total installed capacity.
+Each sceanrio will be plotted in a separate bar subplot.
+This plot is particularly useful for plotting ReEDS results or
+other models than span multiple years with changing capacity.
+Ensure scenario_groupby is set to ‘Year-Sceanrio’ to observe this
+effect.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">

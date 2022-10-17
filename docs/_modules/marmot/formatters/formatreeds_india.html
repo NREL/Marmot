@@ -1,0 +1,318 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>marmot.formatters.formatreeds_india &#8212; Marmot 0.11.0 documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../../../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../../../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">Marmot 0.11.0 documentation</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../get-started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../how-to/index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+  <h1>Source code for marmot.formatters.formatreeds_india</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Main formatting module for ReEDS India results,</span>
+<span class="sd">Contains classes and methods specific to ReEDS India outputs.</span>
+<span class="sd">Inherits the ProcessReEDS class.</span>
+
+<span class="sd">@author: Daniel Levie</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatreeds</span> <span class="kn">import</span> <span class="n">ProcessReEDS</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatextra</span> <span class="kn">import</span> <span class="n">ExtraReEDSIndiaProperties</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="s2">&quot;formatter.&quot;</span> <span class="o">+</span> <span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProcessReEDSIndia"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds_india.ProcessReEDSIndia.html#marmot.formatters.formatreeds_india.ProcessReEDSIndia">[docs]</a><span class="k">class</span> <span class="nc">ProcessReEDSIndia</span><span class="p">(</span><span class="n">ProcessReEDS</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Process ReEDS India specific data from a ReEDS India result set.&quot;&quot;&quot;</span>
+
+    <span class="c1"># Maps ReEDS property names to Marmot names</span>
+    <span class="n">PROPERTY_MAPPING</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_gen_out&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Generation&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_resgen&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_rescap&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Installed_Capacity&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_curt_out&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;region_load_mw&quot;</span><span class="p">:</span> <span class="s2">&quot;region_Demand&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;region_load_rt&quot;</span><span class="p">:</span> <span class="s2">&quot;region_Demand_Annual&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_FLOW&quot;</span><span class="p">:</span> <span class="s2">&quot;line_Flow&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;line_CAPTRAN&quot;</span><span class="p">:</span> <span class="s2">&quot;line_Import_Limit&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;generator_stor_charge&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;reserves_generators_OPRES&quot;</span><span class="p">:</span> <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Maps simulation model property names to Marmot property names&quot;&quot;&quot;</span>
+
+    <span class="n">GDX_RESULTS_PREFIX</span> <span class="o">=</span> <span class="s2">&quot;output_&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Prefix of gdx results file&quot;&quot;&quot;</span>
+
+    <span class="n">EXTRA_PROPERTIES_CLASS</span> <span class="o">=</span> <span class="n">ExtraReEDSIndiaProperties</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">reeds_prop_cols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;ReEDSIndiaPropertyColumns&quot;</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Get the ReEDSIndiaPropertyColumns dataclass</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            ReEDSIndiaPropertyColumns</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">ReEDSIndiaPropertyColumns</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="ReEDSIndiaPropertyColumns"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns.html#marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns">[docs]</a><span class="nd">@dataclass</span>
+<span class="k">class</span> <span class="nc">ReEDSIndiaPropertyColumns</span><span class="p">():</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India property column names&quot;&quot;&quot;</span>
+
+    <span class="n">gen_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;gen_out&#39; property columns (Marmot generator_Generation property)&quot;&quot;&quot;</span>
+    <span class="n">resgen</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;resgen&#39; property columns (Marmot generator_Generation_Annual property)&quot;&quot;&quot;</span>
+    <span class="n">rescap</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;rescap&#39; property columns (Marmot generator_Installed_Capacity property)&quot;&quot;&quot;</span>
+    <span class="n">curt_out</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;curt_out&#39; property columns (Marmot generator_Curtailment property)&quot;&quot;&quot;</span>
+    <span class="n">load_mw</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;load_mw&#39; property columns (Marmot region_Demand property)&quot;&quot;&quot;</span>
+    <span class="n">load_rt</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">])</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;load_rt&#39; property columns (Marmot region_Demand_Annual property)&quot;&quot;&quot;</span>
+    <span class="n">FLOW</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;region_from&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;region_to&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;h&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Value&quot;</span><span class="p">,</span><span class="s2">&quot;marginal&quot;</span><span class="p">,</span> <span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="s2">&quot;upper&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;FLOW&#39; property columns (Marmot line_Flow property)&quot;&quot;&quot;</span>
+    <span class="n">CAPTRAN</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">&quot;region_from&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;region_to&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;category&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;year&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;Value&quot;</span><span class="p">,</span><span class="s2">&quot;marginal&quot;</span><span class="p">,</span> <span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="s2">&quot;upper&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span>
+        <span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;CAPTRAN&#39; property columns (Marmot line_Import_Limit property)&quot;&quot;&quot;</span>
+    <span class="n">stor_charge</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;stor_charge&#39; property columns (Marmot generator_Pumped_Load property)&quot;&quot;&quot;</span>
+    <span class="n">OPRES</span><span class="p">:</span> <span class="n">List</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;year&quot;</span><span class="p">,</span> <span class="s2">&quot;Value&quot;</span><span class="p">,</span> <span class="s2">&quot;marginal&quot;</span><span class="p">,</span> <span class="s2">&quot;lower&quot;</span><span class="p">,</span> <span class="s2">&quot;upper&quot;</span><span class="p">,</span> <span class="s2">&quot;scale&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="sd">&quot;&quot;&quot;ReEDS India &#39;OPRES&#39; property columns (Marmot reserves_generators_Provision property)&quot;&quot;&quot;</span></div>
+</pre></div>
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../../../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

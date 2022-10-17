@@ -210,7 +210,8 @@
 <span class="kn">from</span> <span class="nn">marmot.utils.loggersetup</span> <span class="kn">import</span> <span class="n">SetupLogger</span>
 <span class="kn">import</span> <span class="nn">marmot.utils.dataio</span> <span class="k">as</span> <span class="nn">dataio</span>
 <span class="kn">import</span> <span class="nn">marmot.formatters</span> <span class="k">as</span> <span class="nn">formatters</span>
-<span class="kn">from</span> <span class="nn">marmot.formatters.formatextra</span> <span class="kn">import</span> <span class="n">ExtraProperties</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">Process</span>
+
 
 <span class="c1"># A bug in pandas requires this to be included,</span>
 <span class="c1"># otherwise df.to_string truncates long strings. Fix available in Pandas 1.0</span>
@@ -384,7 +385,7 @@
 
         <span class="n">output_file_path</span> <span class="o">=</span> <span class="n">output_folder</span><span class="o">.</span><span class="n">joinpath</span><span class="p">(</span><span class="n">hdf5_output_name</span><span class="p">)</span>
 
-        <span class="n">process_sim_model</span> <span class="o">=</span> <span class="n">process_class</span><span class="p">(</span>
+        <span class="n">process_sim_model</span><span class="p">:</span> <span class="n">Process</span> <span class="o">=</span> <span class="n">process_class</span><span class="p">(</span>
             <span class="n">input_folder</span><span class="p">,</span>
             <span class="n">output_file_path</span><span class="p">,</span>
             <span class="n">plexos_block</span><span class="o">=</span><span class="n">plexos_block</span><span class="p">,</span>
@@ -396,7 +397,8 @@
         <span class="n">files_list</span> <span class="o">=</span> <span class="n">process_sim_model</span><span class="o">.</span><span class="n">get_input_data_paths</span>
 
         <span class="c1"># init of ExtraProperties class</span>
-        <span class="n">extraprops_init</span> <span class="o">=</span> <span class="n">ExtraProperties</span><span class="p">(</span><span class="n">process_sim_model</span><span class="p">,</span> <span class="n">files_list</span><span class="p">)</span>
+        <span class="n">extraprops_init</span> <span class="o">=</span> <span class="n">process_sim_model</span><span class="o">.</span><span class="n">EXTRA_PROPERTIES_CLASS</span><span class="p">(</span><span class="n">process_sim_model</span><span class="p">)</span>
+
         <span class="c1"># =====================================================================</span>
         <span class="c1"># Process the Outputs</span>
         <span class="c1"># =====================================================================</span>
@@ -498,11 +500,9 @@
                             <span class="n">save_attempt</span> <span class="o">+=</span> <span class="mi">1</span>
 
                     <span class="c1"># Calculate any extra properties</span>
-                    <span class="k">if</span> <span class="n">property_key_name</span> <span class="ow">in</span> <span class="n">process_sim_model</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span>
+                    <span class="n">extra_prop_functions</span> <span class="o">=</span> <span class="n">extraprops_init</span><span class="o">.</span><span class="n">get_extra_properties</span><span class="p">(</span><span class="n">property_key_name</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">extra_prop_functions</span><span class="p">:</span>
 
-                        <span class="n">extra_prop_functions</span> <span class="o">=</span> <span class="p">(</span>
-                            <span class="n">process_sim_model</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">[</span><span class="n">property_key_name</span><span class="p">]</span>
-                        <span class="p">)</span>
                         <span class="k">for</span> <span class="n">prop_function_tup</span> <span class="ow">in</span> <span class="n">extra_prop_functions</span><span class="p">:</span>
                             <span class="n">prop_name</span><span class="p">,</span> <span class="n">prop_function</span> <span class="o">=</span> <span class="n">prop_function_tup</span>
 
@@ -513,7 +513,6 @@
 
                                 <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                                 <span class="n">prop</span> <span class="o">=</span> <span class="n">prop_function</span><span class="p">(</span>
-                                    <span class="n">extraprops_init</span><span class="p">,</span>
                                     <span class="n">Processed_Data_Out</span><span class="p">,</span>
                                     <span class="n">timescale</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">],</span>
                                 <span class="p">)</span>
@@ -524,12 +523,12 @@
                                     <span class="p">)</span>
                                 <span class="k">else</span><span class="p">:</span>
                                     <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prop_name</span><span class="si">}</span><span class="s2"> was not saved&quot;</span><span class="p">)</span>
+                                    <span class="k">continue</span>
+                                
                             <span class="c1"># Run again to check for properties based of new properties</span>
-                            <span class="k">if</span> <span class="n">prop_name</span> <span class="ow">in</span> <span class="n">process_sim_model</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span>
+                            <span class="n">extra2_prop_functions</span> <span class="o">=</span> <span class="n">extraprops_init</span><span class="o">.</span><span class="n">get_extra_properties</span><span class="p">(</span><span class="n">prop_name</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="n">extra2_prop_functions</span><span class="p">:</span>
 
-                                <span class="n">extra2_prop_functions</span> <span class="o">=</span> <span class="p">(</span>
-                                    <span class="n">process_sim_model</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">[</span><span class="n">prop_name</span><span class="p">]</span>
-                                <span class="p">)</span>
                                 <span class="k">for</span> <span class="n">prop_function_tup2</span> <span class="ow">in</span> <span class="n">extra2_prop_functions</span><span class="p">:</span>
                                     <span class="n">prop_name2</span><span class="p">,</span> <span class="n">prop_function2</span> <span class="o">=</span> <span class="n">prop_function_tup2</span>
 
@@ -543,7 +542,6 @@
 
                                         <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Processing </span><span class="si">{</span><span class="n">prop_name2</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                                         <span class="n">prop2</span> <span class="o">=</span> <span class="n">prop_function2</span><span class="p">(</span>
-                                            <span class="n">extraprops_init</span><span class="p">,</span>
                                             <span class="n">prop</span><span class="p">,</span>
                                             <span class="n">timescale</span><span class="o">=</span><span class="n">row</span><span class="p">[</span><span class="s2">&quot;data_type&quot;</span><span class="p">],</span>
                                         <span class="p">)</span>

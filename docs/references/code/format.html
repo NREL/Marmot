@@ -234,6 +234,26 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html">
+     marmot.formatters.formatextra.ExtraPLEXOSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraReEDSIndiaProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSIndiaProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraSIIProperties.html">
+     marmot.formatters.formatextra.ExtraSIIProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="_autosummary/marmot.formatters.formatplexos.ProcessPLEXOS.html">
      marmot.formatters.formatplexos.ProcessPLEXOS
     </a>
@@ -244,8 +264,18 @@
     </a>
    </li>
    <li class="toctree-l2">
-    <a class="reference internal" href="_autosummary/marmot.formatters.formatreeds.PropertyColumns.html">
-     marmot.formatters.formatreeds.PropertyColumns
+    <a class="reference internal" href="_autosummary/marmot.formatters.formatreeds.ReEDSPropertyColumns.html">
+     marmot.formatters.formatreeds.ReEDSPropertyColumns
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.formatters.formatreeds_india.ProcessReEDSIndia.html">
+     marmot.formatters.formatreeds_india.ProcessReEDSIndia
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns.html">
+     marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns
     </a>
    </li>
    <li class="toctree-l2">
@@ -658,6 +688,11 @@
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#reeds-india">
+   ReEDS India
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#siip">
    SIIP
   </a>
@@ -713,8 +748,20 @@ required by Marmots plotter.</p>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties" title="marmot.formatters.formatextra.ExtraProperties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExtraProperties</span></code></a>(model, files_list)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties" title="marmot.formatters.formatextra.ExtraProperties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExtraProperties</span></code></a>(model)</p></td>
 <td><p>Creates extra properties required by Marmots plotter.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties" title="marmot.formatters.formatextra.ExtraPLEXOSProperties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExtraPLEXOSProperties</span></code></a>(model)</p></td>
+<td><p>Contains PLEXOS specific ExtraProperties and methods</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties" title="marmot.formatters.formatextra.ExtraReEDSProperties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExtraReEDSProperties</span></code></a>(model)</p></td>
+<td><p>Contains ReEDS specific ExtraProperties and methods</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraReEDSIndiaProperties.html#marmot.formatters.formatextra.ExtraReEDSIndiaProperties" title="marmot.formatters.formatextra.ExtraReEDSIndiaProperties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExtraReEDSIndiaProperties</span></code></a>(model)</p></td>
+<td><p>Contains ReEDS India specific ExtraProperties and methods</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatextra.ExtraSIIProperties.html#marmot.formatters.formatextra.ExtraSIIProperties" title="marmot.formatters.formatextra.ExtraSIIProperties"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ExtraSIIProperties</span></code></a>(model)</p></td>
+<td><p>Contains SIIP specific ExtraProperties and methods</p></td>
 </tr>
 </tbody>
 </table>
@@ -749,8 +796,28 @@ required by Marmots plotter.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatreeds.ProcessReEDS.html#marmot.formatters.formatreeds.ProcessReEDS" title="marmot.formatters.formatreeds.ProcessReEDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessReEDS</span></code></a>(input_folder, output_file_path, ...)</p></td>
 <td><p>Process ReEDS specific data from a ReEDS result set.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatreeds.PropertyColumns.html#marmot.formatters.formatreeds.PropertyColumns" title="marmot.formatters.formatreeds.PropertyColumns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PropertyColumns</span></code></a>(gen_out, gen_out_ann, ...)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatreeds.ReEDSPropertyColumns.html#marmot.formatters.formatreeds.ReEDSPropertyColumns" title="marmot.formatters.formatreeds.ReEDSPropertyColumns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReEDSPropertyColumns</span></code></a>(gen_out, gen_out_ann, ...)</p></td>
 <td><p>ReEDS property column names</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="reeds-india">
+<h2>ReEDS India<a class="headerlink" href="#reeds-india" title="Permalink to this headline">#</a></h2>
+<div class="versionadded">
+<p><span class="versionmodified added">New in version 0.11.0.</span></p>
+</div>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatreeds_india.ProcessReEDSIndia.html#marmot.formatters.formatreeds_india.ProcessReEDSIndia" title="marmot.formatters.formatreeds_india.ProcessReEDSIndia"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ProcessReEDSIndia</span></code></a>(input_folder, ...)</p></td>
+<td><p>Process ReEDS India specific data from a ReEDS India result set.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns.html#marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns" title="marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns"><code class="xref py py-obj docutils literal notranslate"><span class="pre">ReEDSIndiaPropertyColumns</span></code></a>(gen_out, resgen, ...)</p></td>
+<td><p>ReEDS India property column names</p></td>
 </tr>
 </tbody>
 </table>

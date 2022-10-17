@@ -37,7 +37,7 @@ marmot.formatters.formatbase.Process
 
    .. autosummary::
    
-      ~Process.EXTRA_MARMOT_PROPERTIES
+      ~Process.EXTRA_PROPERTIES_CLASS
       ~Process.PROPERTY_MAPPING
       ~Process.UNITS_CONVERSION
       ~Process.data_collection

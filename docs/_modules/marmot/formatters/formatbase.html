@@ -199,11 +199,7 @@
     <span class="c1"># unchanged names not included</span>
     <span class="n">PROPERTY_MAPPING</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="sd">&quot;&quot;&quot;Maps simulation model property names to Marmot property names&quot;&quot;&quot;</span>
-    <span class="c1"># Extra custom properties that are created based off existing properties.</span>
-    <span class="c1"># The dictionary keys are the existing properties and the values are the new</span>
-    <span class="c1"># property names and methods used to create it.</span>
-    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+
     <span class="c1"># Conversion units dict, key values is a tuple of new unit name and</span>
     <span class="c1"># conversion multiplier</span>
     <span class="n">UNITS_CONVERSION</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
@@ -240,6 +236,8 @@
         <span class="s2">&quot;unitless&quot;</span><span class="p">:</span> <span class="p">(</span><span class="s2">&quot;unitless&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">),</span>
     <span class="p">}</span>
     <span class="sd">&quot;&quot;&quot;Dictionary to convert units to standard values used by Marmot&quot;&quot;&quot;</span>
+
+    <span class="n">EXTRA_PROPERTIES_CLASS</span> <span class="o">=</span> <span class="s2">&quot;ExtraProperties&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

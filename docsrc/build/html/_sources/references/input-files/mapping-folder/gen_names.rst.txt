@@ -37,7 +37,7 @@ The gen_names.csv has 2 columns:
 Input Example
 --------------
 
-.. csv-table:: `Gen names <https://github.com/NREL/Marmot/blob/main/marmot/input_files/mapping_folder/gen_names.csv>`_
+.. csv-table:: `Gen names <https://github.com/NREL/Marmot/blob/main/input_files/mapping_folder/gen_names.csv>`_
    :file: ../../../tables/gen_names_example.csv
    :widths: 50,50
    :header-rows: 1

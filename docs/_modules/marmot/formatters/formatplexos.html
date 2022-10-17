@@ -192,7 +192,7 @@
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">marmot.metamanagers.read_metadata</span> <span class="kn">import</span> <span class="n">MetaData</span>
 <span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">Process</span>
-<span class="kn">from</span> <span class="nn">marmot.formatters.formatextra</span> <span class="kn">import</span> <span class="n">ExtraProperties</span>
+<span class="kn">from</span> <span class="nn">marmot.formatters.formatextra</span> <span class="kn">import</span> <span class="n">ExtraPLEXOSProperties</span>
 
 <span class="k">try</span><span class="p">:</span>
     <span class="c1"># Import as Submodule</span>
@@ -214,41 +214,8 @@
         <span class="s2">&quot;generator_Reserves_VO&amp;M_Cost&quot;</span><span class="p">:</span> <span class="s2">&quot;generator_Reserves_VOM_Cost&quot;</span><span class="p">,</span>
     <span class="p">}</span>
     <span class="sd">&quot;&quot;&quot;Maps simulation model property names to Marmot property names&quot;&quot;&quot;</span>
-    <span class="c1"># Extra custom properties that are created based off existing properties.</span>
-    <span class="c1"># The dictionary keys are the existing properties and the values are the new</span>
-    <span class="c1"># property names and methods used to create it.</span>
-    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;generator_Generation&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_generator_curtailment</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">),</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;region_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;region_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_cost_unserved_energy</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;zone_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;zone_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_cost_unserved_energy</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;region_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;region_Load_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">&quot;region_Demand&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_demand</span><span class="p">),</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;zone_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;zone_Load_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">),</span>
-            <span class="p">(</span><span class="s2">&quot;zone_Demand&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">plexos_demand</span><span class="p">),</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;reserves_generators_Provision_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
-            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)</span>
-        <span class="p">],</span>
-        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Demand_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)],</span>
-        <span class="s2">&quot;zone_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;zone_Demand_Annual&quot;</span><span class="p">,</span> <span class="n">ExtraProperties</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">)],</span>
-    <span class="p">}</span>
-    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+
+    <span class="n">EXTRA_PROPERTIES_CLASS</span> <span class="o">=</span> <span class="n">ExtraPLEXOSProperties</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>

@@ -234,6 +234,26 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraPLEXOSProperties.html">
+     marmot.formatters.formatextra.ExtraPLEXOSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSIndiaProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSIndiaProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraSIIProperties.html">
+     marmot.formatters.formatextra.ExtraSIIProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="marmot.formatters.formatplexos.ProcessPLEXOS.html">
      marmot.formatters.formatplexos.ProcessPLEXOS
     </a>
@@ -244,8 +264,18 @@
     </a>
    </li>
    <li class="toctree-l2">
-    <a class="reference internal" href="marmot.formatters.formatreeds.PropertyColumns.html">
-     marmot.formatters.formatreeds.PropertyColumns
+    <a class="reference internal" href="marmot.formatters.formatreeds.ReEDSPropertyColumns.html">
+     marmot.formatters.formatreeds.ReEDSPropertyColumns
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds_india.ProcessReEDSIndia.html">
+     marmot.formatters.formatreeds_india.ProcessReEDSIndia
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns.html">
+     marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns
     </a>
    </li>
    <li class="toctree-l2">
@@ -675,7 +705,7 @@
 <p>Sets up the python logger.</p>
 <p>This class handles the following.</p>
 <ol class="arabic simple">
-<li><p>Configures logger from marmot_logging_config.yml file.</p></li>
+<li><p>Configures logger from LOG_CONFIG_FILE file or DEFAULT_LOG_CONFIG.</p></li>
 <li><p>Handles rollover of log file on each instantiation.</p></li>
 <li><p>Sets log_directory.</p></li>
 <li><p>Append optional suffix to the end of the log file name</p></li>
@@ -703,6 +733,33 @@ Defaults to None.</p></li>
 <tbody>
 </tbody>
 </table>
+<p class="rubric">Attributes</p>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.utils.loggersetup.SetupLogger.DEFAULT_LOG_CONFIG" title="marmot.utils.loggersetup.SetupLogger.DEFAULT_LOG_CONFIG"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DEFAULT_LOG_CONFIG</span></code></a></p></td>
+<td><p>Default log config if LOG_CONFIG_FILE cannot be found</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.utils.loggersetup.SetupLogger.LOG_CONFIG_FILE" title="marmot.utils.loggersetup.SetupLogger.LOG_CONFIG_FILE"><code class="xref py py-obj docutils literal notranslate"><span class="pre">LOG_CONFIG_FILE</span></code></a></p></td>
+<td><p>Name of default logging config file located in utils package</p></td>
+</tr>
+</tbody>
+</table>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marmot.utils.loggersetup.SetupLogger.LOG_CONFIG_FILE">
+<span class="sig-name descname"><span class="pre">LOG_CONFIG_FILE</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.10)"><span class="pre">str</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'marmot_logging_config.yml'</span></em><a class="headerlink" href="#marmot.utils.loggersetup.SetupLogger.LOG_CONFIG_FILE" title="Permalink to this definition">#</a></dt>
+<dd><p>Name of default logging config file located in utils package</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marmot.utils.loggersetup.SetupLogger.DEFAULT_LOG_CONFIG">
+<span class="sig-name descname"><span class="pre">DEFAULT_LOG_CONFIG</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'formatters':</span> <span class="pre">{'info_format':</span> <span class="pre">{'datefmt':</span> <span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S',</span> <span class="pre">'format':</span> <span class="pre">'%(asctime)s:%(levelname)-8s-</span> <span class="pre">%(message)s'},</span> <span class="pre">'warning_format':</span> <span class="pre">{'datefmt':</span> <span class="pre">'%Y-%m-%d</span> <span class="pre">%H:%M:%S',</span> <span class="pre">'format':</span> <span class="pre">'%(asctime)s:%(levelname)s:%(module)s.%(funcName)s</span> <span class="pre">-</span> <span class="pre">%(message)s'}},</span> <span class="pre">'handlers':</span> <span class="pre">{'console':</span> <span class="pre">{'class':</span> <span class="pre">'logging.StreamHandler',</span> <span class="pre">'level':</span> <span class="pre">'INFO',</span> <span class="pre">'stream':</span> <span class="pre">'ext://sys.stdout'},</span> <span class="pre">'info_handler':</span> <span class="pre">{'backupCount':</span> <span class="pre">3,</span> <span class="pre">'class':</span> <span class="pre">'logging.handlers.RotatingFileHandler',</span> <span class="pre">'encoding':</span> <span class="pre">'utf8',</span> <span class="pre">'filename':</span> <span class="pre">'{}/Log_{}{}.log',</span> <span class="pre">'formatter':</span> <span class="pre">'info_format',</span> <span class="pre">'level':</span> <span class="pre">'INFO',</span> <span class="pre">'mode':</span> <span class="pre">'a'},</span> <span class="pre">'warning_handler':</span> <span class="pre">{'backupCount':</span> <span class="pre">3,</span> <span class="pre">'class':</span> <span class="pre">'logging.handlers.RotatingFileHandler',</span> <span class="pre">'encoding':</span> <span class="pre">'utf8',</span> <span class="pre">'filename':</span> <span class="pre">'{}/WARNINGS_{}{}.log',</span> <span class="pre">'formatter':</span> <span class="pre">'warning_format',</span> <span class="pre">'level':</span> <span class="pre">'WARNING',</span> <span class="pre">'mode':</span> <span class="pre">'a'}},</span> <span class="pre">'loggers':</span> <span class="pre">{'formatter':</span> <span class="pre">{'handlers':</span> <span class="pre">['console',</span> <span class="pre">'warning_handler',</span> <span class="pre">'info_handler'],</span> <span class="pre">'level':</span> <span class="pre">'INFO',</span> <span class="pre">'propagate':</span> <span class="pre">True},</span> <span class="pre">'plotter':</span> <span class="pre">{'handlers':</span> <span class="pre">['console',</span> <span class="pre">'warning_handler',</span> <span class="pre">'info_handler'],</span> <span class="pre">'level':</span> <span class="pre">'INFO',</span> <span class="pre">'propagate':</span> <span class="pre">True},</span> <span class="pre">'root':</span> <span class="pre">{'handlers':</span> <span class="pre">['console'],</span> <span class="pre">'level':</span> <span class="pre">'DEBUG'}},</span> <span class="pre">'version':</span> <span class="pre">1}</span></em><a class="headerlink" href="#marmot.utils.loggersetup.SetupLogger.DEFAULT_LOG_CONFIG" title="Permalink to this definition">#</a></dt>
+<dd><p>Default log config if LOG_CONFIG_FILE cannot be found</p>
+</dd></dl>
+
 </dd></dl>
 
 </section>

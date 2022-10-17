@@ -30,6 +30,10 @@ required by Marmots plotter.
    :recursive:
 
    ExtraProperties
+   ExtraPLEXOSProperties
+   ExtraReEDSProperties
+   ExtraReEDSIndiaProperties
+   ExtraSIIProperties
 
 .. versionadded:: 0.10.0
    
@@ -55,7 +59,20 @@ ReEDS
    :recursive:
 
    ProcessReEDS
-   PropertyColumns
+   ReEDSPropertyColumns
+
+ReEDS India
+~~~~~~~~~~~~~~~~~~
+.. versionadded:: 0.11.0
+
+.. currentmodule:: marmot.formatters.formatreeds_india
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :recursive:
+
+   ProcessReEDSIndia
+   ReEDSIndiaPropertyColumns
 
 SIIP
 ~~~~~~~~~~~~~~~~~~

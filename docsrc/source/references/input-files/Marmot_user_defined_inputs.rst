@@ -133,7 +133,7 @@ The following are the rows by Input
 Input Example
 --------------
 
-.. csv-table:: `Marmot_user_defined_inputs <https://github.com/NREL/Marmot/blob/main/marmot/input_files/Marmot_user_defined_inputs.csv>`_
+.. csv-table:: `Marmot_user_defined_inputs <https://github.com/NREL/Marmot/blob/main/input_files/Marmot_user_defined_inputs.csv>`_
    :file: ../../tables/user_defined_inputs_example.csv
    :widths: 35, 15, 15,  35
    :header-rows: 1

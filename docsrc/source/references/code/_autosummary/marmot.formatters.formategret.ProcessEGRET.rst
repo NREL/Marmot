@@ -33,7 +33,7 @@ marmot.formatters.formategret.ProcessEGRET
 
    .. autosummary::
    
-      ~ProcessEGRET.EXTRA_MARMOT_PROPERTIES
+      ~ProcessEGRET.EXTRA_PROPERTIES_CLASS
       ~ProcessEGRET.PROPERTY_MAPPING
       ~ProcessEGRET.UNITS_CONVERSION
       ~ProcessEGRET.data_collection

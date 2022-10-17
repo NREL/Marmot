@@ -29,6 +29,8 @@ Formatter Input Property Files
 
    plexos_properties
    reeds_properties
+   reeds_india_properties
+   siip_properties
 
 Plot Selection File 
 -------------------------------

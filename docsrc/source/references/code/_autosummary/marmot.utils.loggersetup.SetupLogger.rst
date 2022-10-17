@@ -29,4 +29,11 @@ marmot.utils.loggersetup.SetupLogger
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~SetupLogger.DEFAULT_LOG_CONFIG
+      ~SetupLogger.LOG_CONFIG_FILE
+   
    

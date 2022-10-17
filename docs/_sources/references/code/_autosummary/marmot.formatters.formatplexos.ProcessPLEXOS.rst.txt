@@ -53,7 +53,6 @@ marmot.formatters.formatplexos.ProcessPLEXOS
 
    .. autosummary::
    
-      ~ProcessPLEXOS.EXTRA_MARMOT_PROPERTIES
       ~ProcessPLEXOS.PROPERTY_MAPPING
       ~ProcessPLEXOS.UNITS_CONVERSION
       ~ProcessPLEXOS.data_collection

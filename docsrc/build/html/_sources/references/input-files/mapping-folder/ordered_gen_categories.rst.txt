@@ -58,7 +58,7 @@ new columns can be added to create new tech grouping:
 Input Example
 --------------
 
-.. csv-table:: `ordered_gen_categories <https://github.com/NREL/Marmot/blob/main/marmot/input_files/mapping_folder/ordered_gen_categories.csv>`_
+.. csv-table:: `ordered_gen_categories <https://github.com/NREL/Marmot/blob/main/input_files/mapping_folder/ordered_gen_categories.csv>`_
    :file: ../../../tables/ordered_gen_names_example.csv
    :widths: 40,15,15,15,15
    :header-rows: 1

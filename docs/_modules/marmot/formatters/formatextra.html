@@ -185,6 +185,7 @@
 
 <span class="kn">import</span> <span class="nn">logging</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">List</span>
 <span class="kn">import</span> <span class="nn">marmot.utils.mconfig</span> <span class="k">as</span> <span class="nn">mconfig</span>
 <span class="kn">from</span> <span class="nn">marmot.formatters.formatbase</span> <span class="kn">import</span> <span class="n">Process</span>
 
@@ -204,17 +205,99 @@
 <span class="sd">    instantiation.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Process</span><span class="p">,</span> <span class="n">files_list</span><span class="p">:</span> <span class="nb">list</span><span class="p">):</span>
+    <span class="c1"># Extra custom properties that are created based off existing properties.</span>
+    <span class="c1"># The dictionary keys are the existing properties and the values are the new</span>
+    <span class="c1"># property names and methods used to create it.</span>
+    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Process</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Args:</span>
 <span class="sd">            model (Process): model specific instance of a Process class,</span>
 <span class="sd">                e.g ProcessPLEXOS, ProcessReEDS</span>
-<span class="sd">            files_list (list): list of model input filenames, e.g PLEXOS h5plexos files</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span> <span class="o">=</span> <span class="n">files_list</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_input_data_paths</span>
 
-<div class="viewcode-block" id="ExtraProperties.plexos_generator_curtailment"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.plexos_generator_curtailment">[docs]</a>    <span class="k">def</span> <span class="nf">plexos_generator_curtailment</span><span class="p">(</span>
+<div class="viewcode-block" id="ExtraProperties.get_extra_properties"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.get_extra_properties">[docs]</a>    <span class="k">def</span> <span class="nf">get_extra_properties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Tuple</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;Returns the list of extra properties to process for a given key</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            key (str): Existing property name to create new properties from </span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            List[Tuple]: Tuple contains name of new property and method used to create</span>
+<span class="sd">                it.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span>
+            <span class="n">extra_properties</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">extra_prop_functions</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">prop_function_tup</span> <span class="ow">in</span> <span class="n">extra_prop_functions</span><span class="p">:</span>
+                <span class="n">prop_name</span><span class="p">,</span> <span class="n">prop_function</span> <span class="o">=</span> <span class="n">prop_function_tup</span>
+                <span class="n">extra_properties</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">prop_name</span><span class="p">,</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prop_function</span><span class="p">)))</span>
+
+            <span class="k">return</span> <span class="n">extra_properties</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
+<div class="viewcode-block" id="ExtraProperties.annualize_property"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.annualize_property">[docs]</a>    <span class="k">def</span> <span class="nf">annualize_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Annualizes any property, groups by year</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            df (pd.DataFrame): multiindex dataframe with timestamp level.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            pd.DataFrame: df with timestamp grouped by year.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">index_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="n">index_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
+        <span class="n">timestamp_annualized</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+        <span class="p">]</span>
+        <span class="n">timestamp_annualized</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index_names</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">timestamp_annualized</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="ExtraPLEXOSProperties"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties">[docs]</a><span class="k">class</span> <span class="nc">ExtraPLEXOSProperties</span><span class="p">(</span><span class="n">ExtraProperties</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Contains PLEXOS specific ExtraProperties and methods&quot;&quot;&quot;</span>
+
+    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_Generation&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;generator_curtailment&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;region_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="s2">&quot;cost_unserved_energy&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;zone_Unserved_Energy&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;zone_Cost_Unserved_Energy&quot;</span><span class="p">,</span> <span class="s2">&quot;cost_unserved_energy&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;region_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;region_Demand&quot;</span><span class="p">,</span> <span class="s2">&quot;demand&quot;</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;zone_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;zone_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;zone_Demand&quot;</span><span class="p">,</span> <span class="s2">&quot;demand&quot;</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;reserves_generators_Provision_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Demand_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
+        <span class="s2">&quot;zone_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;zone_Demand_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
+    <span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ExtraPLEXOSProperties.generator_curtailment"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties.generator_curtailment">[docs]</a>    <span class="k">def</span> <span class="nf">generator_curtailment</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a generator_Curtailment property for PLEXOS result sets</span>
@@ -246,7 +329,7 @@
         <span class="n">avail_gen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">combine_models</span><span class="p">(</span><span class="n">data_chunks</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">avail_gen</span> <span class="o">-</span> <span class="n">df</span></div>
 
-<div class="viewcode-block" id="ExtraProperties.plexos_demand"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.plexos_demand">[docs]</a>    <span class="k">def</span> <span class="nf">plexos_demand</span><span class="p">(</span>
+<div class="viewcode-block" id="ExtraPLEXOSProperties.demand"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties.demand">[docs]</a>    <span class="k">def</span> <span class="nf">demand</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a region_Demand / zone_Demand property for PLEXOS result sets</span>
@@ -279,7 +362,7 @@
         <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pump_load</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">df</span> <span class="o">-</span> <span class="n">pump_load</span></div>
 
-<div class="viewcode-block" id="ExtraProperties.plexos_cost_unserved_energy"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.plexos_cost_unserved_energy">[docs]</a>    <span class="k">def</span> <span class="nf">plexos_cost_unserved_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="ExtraPLEXOSProperties.cost_unserved_energy"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties.cost_unserved_energy">[docs]</a>    <span class="k">def</span> <span class="nf">cost_unserved_energy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a region_Cost_Unserved_Energy property for PLEXOS result sets</span>
 
 <span class="sd">        Args:</span>
@@ -288,9 +371,42 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            pd.DataFrame: region_Cost_Unserved_Energy df</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">df</span> <span class="o">*</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;formatter_settings&quot;</span><span class="p">,</span> <span class="s2">&quot;VoLL&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">df</span> <span class="o">*</span> <span class="n">mconfig</span><span class="o">.</span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;formatter_settings&quot;</span><span class="p">,</span> <span class="s2">&quot;VoLL&quot;</span><span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="ExtraProperties.reeds_region_total_load"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.reeds_region_total_load">[docs]</a>    <span class="k">def</span> <span class="nf">reeds_region_total_load</span><span class="p">(</span>
+
+<div class="viewcode-block" id="ExtraReEDSProperties"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties">[docs]</a><span class="k">class</span> <span class="nc">ExtraReEDSProperties</span><span class="p">(</span><span class="n">ExtraProperties</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Contains ReEDS specific ExtraProperties and methods&quot;&quot;&quot;</span>
+
+    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_Total_Generation_Cost&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_VOM_Cost&quot;</span><span class="p">,</span> <span class="s2">&quot;generator_vom_cost&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Fuel_Cost&quot;</span><span class="p">,</span> <span class="s2">&quot;generator_fuel_cost&quot;</span><span class="p">),</span>
+            <span class="p">(</span>
+                <span class="s2">&quot;generator_Reserves_VOM_Cost&quot;</span><span class="p">,</span>
+                <span class="s2">&quot;generator_reserve_vom_cost&quot;</span><span class="p">,</span>
+            <span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;generator_FOM_Cost&quot;</span><span class="p">,</span> <span class="s2">&quot;generator_fom_cost&quot;</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;reserves_generators_Provision&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;reserve_Provision&quot;</span><span class="p">,</span> <span class="s2">&quot;reserve_provision&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;region_Demand_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;region_Load&quot;</span><span class="p">,</span> <span class="s2">&quot;region_total_load&quot;</span><span class="p">),</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;generator_Pump_Load&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Pump_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)</span>
+        <span class="p">],</span>
+        <span class="s2">&quot;region_Load&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Load_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
+
+    <span class="p">}</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ExtraReEDSProperties.region_total_load"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties.region_total_load">[docs]</a>    <span class="k">def</span> <span class="nf">region_total_load</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;year&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a region_Load property for ReEDS results sets</span>
@@ -321,20 +437,19 @@
         <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data_chunks</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">timescale</span> <span class="o">==</span> <span class="s2">&quot;year&quot;</span><span class="p">:</span>
             <span class="n">pump_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">(</span><span class="n">pump_load</span><span class="p">)</span>
-            <span class="n">all_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pump_load</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
-            <span class="p">[</span><span class="n">all_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">]]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">all_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pump_load</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
-            <span class="p">[</span><span class="n">all_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">]]</span>
+
+        <span class="n">all_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pump_load</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">all_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;sub-tech&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_col</span><span class="p">]</span>
         <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pump_load</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">all_col</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 
         <span class="n">load</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">pump_load</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">all_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
-        <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;0_x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;0_y&quot;</span><span class="p">]</span>
-        <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">load</span><span class="p">[</span><span class="s2">&quot;0_x&quot;</span><span class="p">])</span>
-        <span class="n">load</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;0_x&quot;</span><span class="p">,</span> <span class="s2">&quot;0_y&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values_x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values_y&quot;</span><span class="p">]</span>
+        <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">load</span><span class="p">[</span><span class="s2">&quot;values_x&quot;</span><span class="p">])</span>
+        <span class="n">load</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;values_x&quot;</span><span class="p">,</span> <span class="s2">&quot;values_y&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">load</span></div>
 
-<div class="viewcode-block" id="ExtraProperties.reeds_reserve_provision"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.reeds_reserve_provision">[docs]</a>    <span class="k">def</span> <span class="nf">reeds_reserve_provision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="ExtraReEDSProperties.reserve_provision"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties.reserve_provision">[docs]</a>    <span class="k">def</span> <span class="nf">reserve_provision</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a reserve_Provision property for ReEDS result sets</span>
 
 <span class="sd">        Args:</span>
@@ -347,7 +462,7 @@
             <span class="p">[</span><span class="s2">&quot;timestamp&quot;</span><span class="p">,</span> <span class="s2">&quot;Type&quot;</span><span class="p">,</span> <span class="s2">&quot;parent&quot;</span><span class="p">,</span> <span class="s2">&quot;region&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">]</span>
         <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="ExtraProperties.reeds_generator_vom_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.reeds_generator_vom_cost">[docs]</a>    <span class="k">def</span> <span class="nf">reeds_generator_vom_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="ExtraReEDSProperties.generator_vom_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties.generator_vom_cost">[docs]</a>    <span class="k">def</span> <span class="nf">generator_vom_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a generator_VO&amp;M property for ReEDS result sets</span>
 
 <span class="sd">        Args:</span>
@@ -358,7 +473,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;op_vom_costs&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;cost_type&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ExtraProperties.reeds_generator_fuel_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.reeds_generator_fuel_cost">[docs]</a>    <span class="k">def</span> <span class="nf">reeds_generator_fuel_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="ExtraReEDSProperties.generator_fuel_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties.generator_fuel_cost">[docs]</a>    <span class="k">def</span> <span class="nf">generator_fuel_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a generator_Fuel_Cost property for ReEDS result sets</span>
 
 <span class="sd">        Args:</span>
@@ -369,7 +484,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;op_fuelcosts_objfn&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;cost_type&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ExtraProperties.reeds_generator_reserve_vom_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.reeds_generator_reserve_vom_cost">[docs]</a>    <span class="k">def</span> <span class="nf">reeds_generator_reserve_vom_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="ExtraReEDSProperties.generator_reserve_vom_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties.generator_reserve_vom_cost">[docs]</a>    <span class="k">def</span> <span class="nf">generator_reserve_vom_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a generator_Reserves_VOM_Cost property for ReEDS result sets</span>
 
 <span class="sd">        Args:</span>
@@ -380,7 +495,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;op_operating_reserve_costs&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;cost_type&quot;</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="ExtraProperties.reeds_generator_fom_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.reeds_generator_fom_cost">[docs]</a>    <span class="k">def</span> <span class="nf">reeds_generator_fom_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="ExtraReEDSProperties.generator_fom_cost"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties.generator_fom_cost">[docs]</a>    <span class="k">def</span> <span class="nf">generator_fom_cost</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a generator_FOM_Cost property for ReEDS result sets</span>
 
 <span class="sd">        Args:</span>
@@ -389,26 +504,69 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            pd.DataFrame: generator_FOM_Cost df</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;op_fom_costs&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;cost_type&quot;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">xs</span><span class="p">(</span><span class="s2">&quot;op_fom_costs&quot;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s2">&quot;cost_type&quot;</span><span class="p">)</span></div></div>
 
-<div class="viewcode-block" id="ExtraProperties.annualize_property"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.annualize_property">[docs]</a>    <span class="k">def</span> <span class="nf">annualize_property</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="o">**</span><span class="n">_</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-        <span class="sd">&quot;&quot;&quot;Annualizes any property, groups by year</span>
+
+<div class="viewcode-block" id="ExtraReEDSIndiaProperties"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSIndiaProperties.html#marmot.formatters.formatextra.ExtraReEDSIndiaProperties">[docs]</a><span class="k">class</span> <span class="nc">ExtraReEDSIndiaProperties</span><span class="p">(</span><span class="n">ExtraReEDSProperties</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Contains ReEDS India specific ExtraProperties and methods&quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="ExtraReEDSIndiaProperties.region_total_load"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraReEDSIndiaProperties.html#marmot.formatters.formatextra.ExtraReEDSIndiaProperties.region_total_load">[docs]</a>    <span class="k">def</span> <span class="nf">region_total_load</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;year&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Creates a region_Load property for ReEDS India results sets</span>
+
+<span class="sd">        ReEDS does not include storage charging in total load</span>
+<span class="sd">        This is added to region_Demand to get region_Load</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            df (pd.DataFrame): multiindex dataframe with timestamp level.</span>
+<span class="sd">            df (pd.DataFrame): region_Demand df</span>
+<span class="sd">            timescale (str, optional): Data timescale.</span>
+<span class="sd">                Defaults to &#39;year&#39;.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            pd.DataFrame: df with timestamp grouped by year.</span>
+<span class="sd">            pd.DataFrame: region_Load df</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">index_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
-        <span class="n">index_names</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span>
-        <span class="n">timestamp_annualized</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s2">&quot;timestamp&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">year</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
-        <span class="p">]</span>
-        <span class="n">timestamp_annualized</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">index_names</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">timestamp_annualized</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span></div>
+        <span class="n">data_chunks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">files_list</span><span class="p">:</span>
+            <span class="n">processed_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">get_processed_data</span><span class="p">(</span>
+                <span class="s2">&quot;generator&quot;</span><span class="p">,</span> <span class="s2">&quot;stor_charge&quot;</span><span class="p">,</span> <span class="s2">&quot;interval&quot;</span><span class="p">,</span> <span class="n">file</span>
+            <span class="p">)</span>
 
-<div class="viewcode-block" id="ExtraProperties.siip_generator_curtailment"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.siip_generator_curtailment">[docs]</a>    <span class="k">def</span> <span class="nf">siip_generator_curtailment</span><span class="p">(</span>
+            <span class="k">if</span> <span class="n">processed_data</span><span class="o">.</span><span class="n">empty</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="s2">&quot;region_Load will equal region_Demand&quot;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">df</span>
+
+            <span class="n">data_chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">processed_data</span><span class="p">)</span>
+
+        <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">data_chunks</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">timescale</span> <span class="o">==</span> <span class="s2">&quot;year&quot;</span><span class="p">:</span>
+            <span class="n">pump_load</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">annualize_property</span><span class="p">(</span><span class="n">pump_load</span><span class="p">)</span>
+
+        <span class="n">all_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pump_load</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+        <span class="p">[</span><span class="n">all_col</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;tech&quot;</span><span class="p">,</span> <span class="s2">&quot;gen_name&quot;</span><span class="p">,</span> <span class="s2">&quot;units&quot;</span><span class="p">,</span> <span class="s2">&quot;season&quot;</span><span class="p">]</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">all_col</span><span class="p">]</span>
+        <span class="n">pump_load</span> <span class="o">=</span> <span class="n">pump_load</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">all_col</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+
+        <span class="n">load</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">pump_load</span><span class="p">,</span> <span class="n">on</span><span class="o">=</span><span class="n">all_col</span><span class="p">,</span> <span class="n">how</span><span class="o">=</span><span class="s2">&quot;outer&quot;</span><span class="p">)</span>
+        <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values_x&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values_y&quot;</span><span class="p">]</span>
+        <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">load</span><span class="p">[</span><span class="s2">&quot;values&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">load</span><span class="p">[</span><span class="s2">&quot;values_x&quot;</span><span class="p">])</span>
+        <span class="n">load</span> <span class="o">=</span> <span class="n">load</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s2">&quot;values_x&quot;</span><span class="p">,</span> <span class="s2">&quot;values_y&quot;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">load</span></div></div>
+
+
+<div class="viewcode-block" id="ExtraSIIProperties"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraSIIProperties.html#marmot.formatters.formatextra.ExtraSIIProperties">[docs]</a><span class="k">class</span> <span class="nc">ExtraSIIProperties</span><span class="p">(</span><span class="n">ExtraProperties</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Contains SIIP specific ExtraProperties and methods&quot;&quot;&quot;</span>
+
+    <span class="n">EXTRA_MARMOT_PROPERTIES</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;generator_Generation&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">,</span> <span class="s2">&quot;generator_curtailment&quot;</span><span class="p">),</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Generation_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
+        <span class="s2">&quot;generator_Curtailment&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">(</span><span class="s2">&quot;generator_Curtailment_Annual&quot;</span><span class="p">,</span> <span class="s2">&quot;annualize_property&quot;</span><span class="p">)],</span>
+        <span class="s2">&quot;region_Demand&quot;</span><span class="p">:</span> <span class="p">[(</span><span class="s2">&quot;region_Load&quot;</span><span class="p">,</span> <span class="s2">&quot;region_total_load&quot;</span><span class="p">)]}</span>
+    <span class="sd">&quot;&quot;&quot;Dictionary of Extra custom properties that are created based off existing properties.&quot;&quot;&quot;</span>
+
+
+<div class="viewcode-block" id="ExtraSIIProperties.generator_curtailment"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraSIIProperties.html#marmot.formatters.formatextra.ExtraSIIProperties.generator_curtailment">[docs]</a>    <span class="k">def</span> <span class="nf">generator_curtailment</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a generator_Curtailment property for SIIP result sets</span>
@@ -446,7 +604,7 @@
 
         <span class="k">return</span> <span class="n">avail_gen</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">map_gens</span><span class="p">,:]</span></div>
 
-<div class="viewcode-block" id="ExtraProperties.siip_region_total_load"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraProperties.html#marmot.formatters.formatextra.ExtraProperties.siip_region_total_load">[docs]</a>    <span class="k">def</span> <span class="nf">siip_region_total_load</span><span class="p">(</span>
+<div class="viewcode-block" id="ExtraSIIProperties.region_total_load"><a class="viewcode-back" href="../../../references/code/_autosummary/marmot.formatters.formatextra.ExtraSIIProperties.html#marmot.formatters.formatextra.ExtraSIIProperties.region_total_load">[docs]</a>    <span class="k">def</span> <span class="nf">region_total_load</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">timescale</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;interval&quot;</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Creates a region_Load property for SIIP results sets</span>

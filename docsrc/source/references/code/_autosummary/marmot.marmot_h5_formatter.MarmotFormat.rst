@@ -30,4 +30,11 @@ marmot.marmot\_h5\_formatter.MarmotFormat
 
    
    
+   .. rubric:: Attributes
+
+   .. autosummary::
+   
+      ~MarmotFormat.DEFAULT_LOG_CONFIG
+      ~MarmotFormat.LOG_CONFIG_FILE
+   
    

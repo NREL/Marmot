@@ -149,6 +149,6 @@ Input Example
 --------------
 
 For an example of the file see it on the GitHub repo:
-`Marmot_plot_select <https://github.com/NREL/Marmot/blob/main/marmot/input_files/Marmot_plot_select.csv>`_
+`Marmot_plot_select <https://github.com/NREL/Marmot/blob/main/input_files/Marmot_plot_select.csv>`_
 
 

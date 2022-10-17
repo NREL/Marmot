@@ -27,6 +27,7 @@ marmot.plottingmodules.total\_installed\_capacity.InstalledCapacity
         ~InstalledCapacity.total_cap
         ~InstalledCapacity.total_cap_and_gen_facet
         ~InstalledCapacity.total_cap_diff
+        ~InstalledCapacity.total_cap_facet
    
    
 

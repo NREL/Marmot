@@ -39,7 +39,6 @@ marmot.formatters.formatsiip.ProcessSIIP
 
    .. autosummary::
    
-      ~ProcessSIIP.EXTRA_MARMOT_PROPERTIES
       ~ProcessSIIP.PROPERTY_MAPPING
       ~ProcessSIIP.UNITS_CONVERSION
       ~ProcessSIIP.data_collection

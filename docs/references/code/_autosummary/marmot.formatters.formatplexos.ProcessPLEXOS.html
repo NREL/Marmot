@@ -41,7 +41,7 @@
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <link rel="next" title="marmot.formatters.formatreeds.ProcessReEDS" href="marmot.formatters.formatreeds.ProcessReEDS.html" />
-    <link rel="prev" title="marmot.formatters.formatextra.ExtraProperties" href="marmot.formatters.formatextra.ExtraProperties.html" />
+    <link rel="prev" title="marmot.formatters.formatextra.ExtraSIIProperties" href="marmot.formatters.formatextra.ExtraSIIProperties.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="None">
   </head>
@@ -233,6 +233,26 @@
      marmot.formatters.formatextra.ExtraProperties
     </a>
    </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraPLEXOSProperties.html">
+     marmot.formatters.formatextra.ExtraPLEXOSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSIndiaProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSIndiaProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraSIIProperties.html">
+     marmot.formatters.formatextra.ExtraSIIProperties
+    </a>
+   </li>
    <li class="toctree-l2 current active">
     <a class="current reference internal" href="#">
      marmot.formatters.formatplexos.ProcessPLEXOS
@@ -244,8 +264,18 @@
     </a>
    </li>
    <li class="toctree-l2">
-    <a class="reference internal" href="marmot.formatters.formatreeds.PropertyColumns.html">
-     marmot.formatters.formatreeds.PropertyColumns
+    <a class="reference internal" href="marmot.formatters.formatreeds.ReEDSPropertyColumns.html">
+     marmot.formatters.formatreeds.ReEDSPropertyColumns
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds_india.ProcessReEDSIndia.html">
+     marmot.formatters.formatreeds_india.ProcessReEDSIndia
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns.html">
+     marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns
     </a>
    </li>
    <li class="toctree-l2">
@@ -763,22 +793,19 @@ class.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatplexos.ProcessPLEXOS.EXTRA_MARMOT_PROPERTIES" title="marmot.formatters.formatplexos.ProcessPLEXOS.EXTRA_MARMOT_PROPERTIES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EXTRA_MARMOT_PROPERTIES</span></code></a></p></td>
-<td><p>Dictionary of Extra custom properties that are created based off existing properties.</p></td>
-</tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatplexos.ProcessPLEXOS.PROPERTY_MAPPING" title="marmot.formatters.formatplexos.ProcessPLEXOS.PROPERTY_MAPPING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PROPERTY_MAPPING</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatplexos.ProcessPLEXOS.PROPERTY_MAPPING" title="marmot.formatters.formatplexos.ProcessPLEXOS.PROPERTY_MAPPING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PROPERTY_MAPPING</span></code></a></p></td>
 <td><p>Maps simulation model property names to Marmot property names</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNITS_CONVERSION</span></code></p></td>
+<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">UNITS_CONVERSION</span></code></p></td>
 <td><p>Dictionary to convert units to standard values used by Marmot</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatplexos.ProcessPLEXOS.data_collection" title="marmot.formatters.formatplexos.ProcessPLEXOS.data_collection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_collection</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatplexos.ProcessPLEXOS.data_collection" title="marmot.formatters.formatplexos.ProcessPLEXOS.data_collection"><code class="xref py py-obj docutils literal notranslate"><span class="pre">data_collection</span></code></a></p></td>
 <td><p>Dictionary model file names to h5 PLEXOSSolution</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatplexos.ProcessPLEXOS.get_input_data_paths" title="marmot.formatters.formatplexos.ProcessPLEXOS.get_input_data_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_data_paths</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatplexos.ProcessPLEXOS.get_input_data_paths" title="marmot.formatters.formatplexos.ProcessPLEXOS.get_input_data_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_input_data_paths</span></code></a></p></td>
 <td><p>Gets a list of h5plexos input files within the scenario folders</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_folder</span></code></p></td>
+<tr class="row-odd"><td><p><code class="xref py py-obj docutils literal notranslate"><span class="pre">input_folder</span></code></p></td>
 <td><p>Path to input folder</p></td>
 </tr>
 </tbody>
@@ -790,9 +817,9 @@ class.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="marmot.formatters.formatplexos.ProcessPLEXOS.EXTRA_MARMOT_PROPERTIES">
-<span class="sig-name descname"><span class="pre">EXTRA_MARMOT_PROPERTIES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'generator_Curtailment':</span> <span class="pre">[('generator_Curtailment_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'generator_Generation':</span> <span class="pre">[('generator_Curtailment',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.plexos_generator_curtailment&gt;),</span> <span class="pre">('generator_Generation_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'generator_Pump_Load':</span> <span class="pre">[('generator_Pump_Load_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'region_Demand':</span> <span class="pre">[('region_Demand_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'region_Load':</span> <span class="pre">[('region_Load_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;),</span> <span class="pre">('region_Demand',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.plexos_demand&gt;)],</span> <span class="pre">'region_Unserved_Energy':</span> <span class="pre">[('region_Cost_Unserved_Energy',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.plexos_cost_unserved_energy&gt;)],</span> <span class="pre">'reserves_generators_Provision':</span> <span class="pre">[('reserves_generators_Provision_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'zone_Demand':</span> <span class="pre">[('zone_Demand_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'zone_Load':</span> <span class="pre">[('zone_Load_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;),</span> <span class="pre">('zone_Demand',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.plexos_demand&gt;)],</span> <span class="pre">'zone_Unserved_Energy':</span> <span class="pre">[('zone_Cost_Unserved_Energy',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.plexos_cost_unserved_energy&gt;)]}</span></em><a class="headerlink" href="#marmot.formatters.formatplexos.ProcessPLEXOS.EXTRA_MARMOT_PROPERTIES" title="Permalink to this definition">#</a></dt>
-<dd><p>Dictionary of Extra custom properties that are created based off existing properties.</p>
+<dt class="sig sig-object py" id="marmot.formatters.formatplexos.ProcessPLEXOS.EXTRA_PROPERTIES_CLASS">
+<span class="sig-name descname"><span class="pre">EXTRA_PROPERTIES_CLASS</span></span><a class="headerlink" href="#marmot.formatters.formatplexos.ProcessPLEXOS.EXTRA_PROPERTIES_CLASS" title="Permalink to this definition">#</a></dt>
+<dd><p>alias of <a class="reference internal" href="marmot.formatters.formatextra.ExtraPLEXOSProperties.html#marmot.formatters.formatextra.ExtraPLEXOSProperties" title="marmot.formatters.formatextra.ExtraPLEXOSProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.formatters.formatextra.ExtraPLEXOSProperties</span></code></a></p>
 </dd></dl>
 
 <dl class="py property">
@@ -1225,11 +1252,11 @@ file and then passes the data to one of the formating functions</p>
               <footer class="bd-footer-article">
                   <!-- Previous / next buttons -->
 <div class='prev-next-area'>
-  <a class='left-prev' id="prev-link" href="marmot.formatters.formatextra.ExtraProperties.html" title="previous page">
+  <a class='left-prev' id="prev-link" href="marmot.formatters.formatextra.ExtraSIIProperties.html" title="previous page">
       <i class="fas fa-angle-left"></i>
       <div class="prev-next-info">
           <p class="prev-next-subtitle">previous</p>
-          <p class="prev-next-title">marmot.formatters.formatextra.ExtraProperties</p>
+          <p class="prev-next-title">marmot.formatters.formatextra.ExtraSIIProperties</p>
       </div>
   </a>
   <a class='right-next' id="next-link" href="marmot.formatters.formatreeds.ProcessReEDS.html" title="next page">

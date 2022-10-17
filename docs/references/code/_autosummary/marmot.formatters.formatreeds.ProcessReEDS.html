@@ -40,7 +40,7 @@
     <script src="../../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
-    <link rel="next" title="marmot.formatters.formatreeds.PropertyColumns" href="marmot.formatters.formatreeds.PropertyColumns.html" />
+    <link rel="next" title="marmot.formatters.formatreeds.ReEDSPropertyColumns" href="marmot.formatters.formatreeds.ReEDSPropertyColumns.html" />
     <link rel="prev" title="marmot.formatters.formatplexos.ProcessPLEXOS" href="marmot.formatters.formatplexos.ProcessPLEXOS.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="None">
@@ -234,6 +234,26 @@
     </a>
    </li>
    <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraPLEXOSProperties.html">
+     marmot.formatters.formatextra.ExtraPLEXOSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSIndiaProperties.html">
+     marmot.formatters.formatextra.ExtraReEDSIndiaProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatextra.ExtraSIIProperties.html">
+     marmot.formatters.formatextra.ExtraSIIProperties
+    </a>
+   </li>
+   <li class="toctree-l2">
     <a class="reference internal" href="marmot.formatters.formatplexos.ProcessPLEXOS.html">
      marmot.formatters.formatplexos.ProcessPLEXOS
     </a>
@@ -244,8 +264,18 @@
     </a>
    </li>
    <li class="toctree-l2">
-    <a class="reference internal" href="marmot.formatters.formatreeds.PropertyColumns.html">
-     marmot.formatters.formatreeds.PropertyColumns
+    <a class="reference internal" href="marmot.formatters.formatreeds.ReEDSPropertyColumns.html">
+     marmot.formatters.formatreeds.ReEDSPropertyColumns
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds_india.ProcessReEDSIndia.html">
+     marmot.formatters.formatreeds_india.ProcessReEDSIndia
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns.html">
+     marmot.formatters.formatreeds_india.ReEDSIndiaPropertyColumns
     </a>
    </li>
    <li class="toctree-l2">
@@ -722,8 +752,8 @@ class.</p></li>
 <col style="width: 90%" />
 </colgroup>
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.EXTRA_MARMOT_PROPERTIES" title="marmot.formatters.formatreeds.ProcessReEDS.EXTRA_MARMOT_PROPERTIES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EXTRA_MARMOT_PROPERTIES</span></code></a></p></td>
-<td><p>Dictionary of Extra custom properties that are created based off existing properties.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.GDX_RESULTS_PREFIX" title="marmot.formatters.formatreeds.ProcessReEDS.GDX_RESULTS_PREFIX"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GDX_RESULTS_PREFIX</span></code></a></p></td>
+<td><p>Prefix of gdx results file</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.PROPERTY_MAPPING" title="marmot.formatters.formatreeds.ProcessReEDS.PROPERTY_MAPPING"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PROPERTY_MAPPING</span></code></a></p></td>
 <td><p>Maps simulation model property names to Marmot property names</p></td>
@@ -743,7 +773,10 @@ class.</p></li>
 <tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.property_units" title="marmot.formatters.formatreeds.ProcessReEDS.property_units"><code class="xref py py-obj docutils literal notranslate"><span class="pre">property_units</span></code></a></p></td>
 <td><p>Gets the property units from data, e.g MW, MWh</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.wind_resource_to_pca" title="marmot.formatters.formatreeds.ProcessReEDS.wind_resource_to_pca"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wind_resource_to_pca</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.reeds_prop_cols" title="marmot.formatters.formatreeds.ProcessReEDS.reeds_prop_cols"><code class="xref py py-obj docutils literal notranslate"><span class="pre">reeds_prop_cols</span></code></a></p></td>
+<td><p>Get the ReEDSPropertyColumns dataclass</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#marmot.formatters.formatreeds.ProcessReEDS.wind_resource_to_pca" title="marmot.formatters.formatreeds.ProcessReEDS.wind_resource_to_pca"><code class="xref py py-obj docutils literal notranslate"><span class="pre">wind_resource_to_pca</span></code></a></p></td>
 <td><p>Get the wind resource (s) to pca/region mapping</p></td>
 </tr>
 </tbody>
@@ -755,9 +788,26 @@ class.</p></li>
 </dd></dl>
 
 <dl class="py attribute">
-<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.EXTRA_MARMOT_PROPERTIES">
-<span class="sig-name descname"><span class="pre">EXTRA_MARMOT_PROPERTIES</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.10)"><span class="pre">dict</span></a></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'generator_Curtailment':</span> <span class="pre">[('generator_Curtailment_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'generator_Pump_Load':</span> <span class="pre">[('generator_Pump_Load_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'generator_Total_Generation_Cost':</span> <span class="pre">[('generator_VOM_Cost',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_generator_vom_cost&gt;),</span> <span class="pre">('generator_Fuel_Cost',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_generator_fuel_cost&gt;),</span> <span class="pre">('generator_Reserves_VOM_Cost',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_generator_reserve_vom_cost&gt;),</span> <span class="pre">('generator_FOM_Cost',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_generator_fom_cost&gt;)],</span> <span class="pre">'region_Demand':</span> <span class="pre">[('region_Demand_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;),</span> <span class="pre">('region_Load',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_region_total_load&gt;)],</span> <span class="pre">'region_Load':</span> <span class="pre">[('region_Load_Annual',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.annualize_property&gt;)],</span> <span class="pre">'reserves_generators_Provision':</span> <span class="pre">[('reserve_Provision',</span> <span class="pre">&lt;function</span> <span class="pre">ExtraProperties.reeds_reserve_provision&gt;)]}</span></em><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.EXTRA_MARMOT_PROPERTIES" title="Permalink to this definition">#</a></dt>
-<dd><p>Dictionary of Extra custom properties that are created based off existing properties.</p>
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.GDX_RESULTS_PREFIX">
+<span class="sig-name descname"><span class="pre">GDX_RESULTS_PREFIX</span></span><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'rep_'</span></em><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.GDX_RESULTS_PREFIX" title="Permalink to this definition">#</a></dt>
+<dd><p>Prefix of gdx results file</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.EXTRA_PROPERTIES_CLASS">
+<span class="sig-name descname"><span class="pre">EXTRA_PROPERTIES_CLASS</span></span><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.EXTRA_PROPERTIES_CLASS" title="Permalink to this definition">#</a></dt>
+<dd><p>alias of <a class="reference internal" href="marmot.formatters.formatextra.ExtraReEDSProperties.html#marmot.formatters.formatextra.ExtraReEDSProperties" title="marmot.formatters.formatextra.ExtraReEDSProperties"><code class="xref py py-class docutils literal notranslate"><span class="pre">marmot.formatters.formatextra.ExtraReEDSProperties</span></code></a></p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="marmot.formatters.formatreeds.ProcessReEDS.reeds_prop_cols">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">reeds_prop_cols</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="marmot.formatters.formatreeds.ReEDSPropertyColumns.html#marmot.formatters.formatreeds.ReEDSPropertyColumns" title="marmot.formatters.formatreeds.ReEDSPropertyColumns"><span class="pre">marmot.formatters.formatreeds.ReEDSPropertyColumns</span></a></em><a class="headerlink" href="#marmot.formatters.formatreeds.ProcessReEDS.reeds_prop_cols" title="Permalink to this definition">#</a></dt>
+<dd><p>Get the ReEDSPropertyColumns dataclass</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>ReEDSPropertyColumns</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py property">
@@ -939,10 +989,10 @@ Defaults to None.</p></li>
           <p class="prev-next-title">marmot.formatters.formatplexos.ProcessPLEXOS</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="marmot.formatters.formatreeds.PropertyColumns.html" title="next page">
+  <a class='right-next' id="next-link" href="marmot.formatters.formatreeds.ReEDSPropertyColumns.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">marmot.formatters.formatreeds.PropertyColumns</p>
+      <p class="prev-next-title">marmot.formatters.formatreeds.ReEDSPropertyColumns</p>
   </div>
   <i class="fas fa-angle-right"></i>
   </a>

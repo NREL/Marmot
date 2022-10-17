@@ -28,6 +28,7 @@ marmot.plottingmodules.total\_generation.TotalGeneration
         ~TotalGeneration.monthly_vre_generation_percentage
         ~TotalGeneration.total_gen
         ~TotalGeneration.total_gen_diff
+        ~TotalGeneration.total_gen_facet
         ~TotalGeneration.total_gen_monthly
         ~TotalGeneration.total_gen_pie
    

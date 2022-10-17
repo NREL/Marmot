@@ -6,6 +6,7 @@ required by the Marmot plotter.
 
 import logging
 import pandas as pd
+from typing import Tuple, List
 import marmot.utils.mconfig as mconfig
 from marmot.formatters.formatbase import Process
 
@@ -39,8 +40,16 @@ class ExtraProperties:
         self.model = model
         self.files_list = model.get_input_data_paths
 
-    def get_extra_properties(self, key):
+    def get_extra_properties(self, key: str) -> List[Tuple]:
+        """Returns the list of extra properties to process for a given key
 
+        Args:
+            key (str): Existing property name to create new properties from 
+
+        Returns:
+            List[Tuple]: Tuple contains name of new property and method used to create
+                it.
+        """
         if key in self.EXTRA_MARMOT_PROPERTIES:
             extra_properties = []
             extra_prop_functions = (
@@ -73,6 +82,7 @@ class ExtraProperties:
 
 
 class ExtraPLEXOSProperties(ExtraProperties):
+    """Contains PLEXOS specific ExtraProperties and methods"""
 
     EXTRA_MARMOT_PROPERTIES: dict = {
         "generator_Generation": [
@@ -186,6 +196,7 @@ class ExtraPLEXOSProperties(ExtraProperties):
 
 
 class ExtraReEDSProperties(ExtraProperties):
+    """Contains ReEDS specific ExtraProperties and methods"""
 
     EXTRA_MARMOT_PROPERTIES: dict = {
         "generator_Total_Generation_Cost": [
@@ -318,6 +329,7 @@ class ExtraReEDSProperties(ExtraProperties):
 
 
 class ExtraReEDSIndiaProperties(ExtraReEDSProperties):
+    """Contains ReEDS India specific ExtraProperties and methods"""
 
     def region_total_load(
         self, df: pd.DataFrame, timescale: str = "year"
@@ -363,6 +375,7 @@ class ExtraReEDSIndiaProperties(ExtraReEDSProperties):
 
 
 class ExtraSIIProperties(ExtraProperties):
+    """Contains SIIP specific ExtraProperties and methods"""
 
     EXTRA_MARMOT_PROPERTIES: dict = {
         "generator_Generation": [
