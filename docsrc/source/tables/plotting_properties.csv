@@ -1,0 +1,77 @@
+﻿Plotting Module,Plotting Method,Required Marmot Property,Optional Marmot Property
+capacity_factor,avg_output_when_committed,"generator_Generation, generator_Installed_Capacity",
+capacity_factor,cf,"generator_Generation, generator_Installed_Capacity",
+capacity_factor,time_at_min_gen,"generator_Generation, generator_Installed_Capacity, generator_Hours_at_Minimum",
+capacity_out,capacity_out_stack,"generator_Installed_Capacity, generator_Available_Capacity",
+capacity_out,capacity_out_stack_PASA,,
+curtailment,curt_duration_curve,generator_Curtailment*,
+curtailment,curt_ind,"generator_Generation, generator_Curtailment*",
+curtailment,curt_pen,"generator_Generation, generator_Available_Capacity, generator_Total_Generation_Cost, generator_Curtailment*",
+curtailment,curt_total,generator_Curtailment*,generator_Available_Capacity
+curtailment,curt_total_diff,"generator_Available_Capacity, generator_Curtailment*",
+curtailment,average_diurnal_curt,generator_Curtailment*,
+emissions,total_emissions_by_type,emissions_generators_Production,
+generation_stack,committed_stack,"generator_Installed_Capacity, generator_Generation, generator_Units_Generating, generator_Available_Capacity",
+generation_stack,gen_diff,generator_Generation,
+generation_stack,gen_stack,generator_Generation,"generator_Curtailment*, generator_Pumped_Load, region_Load, region_Unserved_Energy, zone_Load, zone_Unserved_Energy,"
+generation_unstack,gen_unstack,generator_Generation,"generator_Curtailment*, generator_Pumped_Load, region_Load, region_Unserved_Energy, zone_Load, zone_Unserved_Energy,"
+hydro,hydro_continent_net_load,generator_Generation,
+hydro,hydro_net_load,generator_Generation,
+prices,pdc_all_regions,region_Price or zone_Price,
+prices,region_pdc,region_Price or zone_Price,
+prices,region_timeseries_price,region_Price or zone_Price,
+prices,timeseries_price_all_regions,region_Price or zone_Price,
+prices,node_pdc,node_Price,
+prices,node_timeseries_price,node_Price,
+prices,node_price_hist,node_Price,
+prices,node_price_hist_diff,node_Price,
+production_cost,detailed_gen_cost,,"generator_FOM_Cost, generator_VOM_Cost, generator_Fuel_Cost, generator_Start_and_Shutdown_Cost, generator_Reserves_VOM_Cost, generator_Emissions_Cost"
+production_cost,detailed_gen_cost_diff,,"generator_FOM_Cost, generator_VOM_Cost, generator_Fuel_Cost, generator_Start_and_Shutdown_Cost, generator_Reserves_VOM_Cost, generator_Emissions_Cost"
+production_cost,prod_cost,"generator_Total_Generation_Cost, generator_Pool_Revenue, generator_Reserves_Revenue, generator_Installed_Capacity",
+production_cost,sys_cost,generator_Total_Generation_Cost,"region_Unserved_Energy, zone_unserved_Energy"
+production_cost,sys_cost_diff,generator_Total_Generation_Cost,"region_Unserved_Energy, zone_unserved_Energy"
+production_cost,sys_cost_type,generator_Total_Generation_Cost,
+production_cost,sys_cost_type_diff,generator_Total_Generation_Cost,
+ramping,capacity_started,"generator_Generation, generator_Installed_Capacity",
+ramping,count_ramps,"generator_Generation, generator_Installed_Capacity",
+reserves,reg_reserve_provision,reserve_Provision,
+reserves,reg_reserve_shortage,reserve_Shortage,
+reserves,reg_reserve_shortage_hrs,reserve_Shortage,
+reserves,reg_reserve_shortage_timeseries,reserve_Shortage,
+reserves,reserve_gen_timeseries,reserves_generators_Provision,
+reserves,total_reserves_by_gen,reserves_generators_Provision,
+sensitivities,sensitivities_gas,"generator_Generation, region_Net_Interchange, generator_Curtailment*",
+thermal_cap_reserve,thermal_cap_reserves,"generator_Generation, generator_Available_Capacity",
+total_generation,total_gen,generator_Generation,"generator_Curtailment*, generator_Pumped_Load, region_Load, region_Unserved_Energy, zone_Load, zone_Unserved_Energy,"
+total_generation,total_gen_monthly,generator_Generation,"generator_Curtailment*, generator_Pumped_Load, region_Load, zone_Load, "
+total_generation,monthly_vre_generation,generator_Generation,"generator_Curtailment*, generator_Pumped_Load, region_Load, zone_Load, "
+total_generation,monthly_vre_generation_percentage,generator_Generation,"generator_Curtailment*, generator_Pumped_Load, region_Load, zone_Load, "
+total_generation,total_gen_pie,generator_Generation,generator_Curtailment*
+total_generation,total_gen_diff,generator_Generation,generator_Curtailment*
+total_generation,total_gen_facet,generator_Generation,
+total_installed_capacity,total_cap,generator_Installed_Capacity,
+total_installed_capacity,total_cap_facet,generator_Installed_Capacity,
+total_installed_capacity,total_cap_diff,generator_Installed_Capacity,
+total_installed_capacity,total_cap_and_gen_facet,"generator_Installed_Capacity, generator_Generation","generator_Curtailment*, generator_Pumped_Load, region_Load, region_Unserved_Energy, zone_Load, zone_Unserved_Energy"
+transmission,interface_flow_ind,"interface_Flow, ","interface_Import_Limit, interface_Export_Limit"
+transmission,line_flow_ind,line_Flow,"line_Import_Limit, line_Export_Limit"
+transmission,line_flow_ind_seasonal,"interface_Flow, interface_Import_Limit, interface_Export_Limit",
+transmission,line_flow_ind_diff,line_Flow,
+transmission,line_hist,"line_Flow, line_Import_Limit",
+transmission,line_util,"line_Flow, line_Import_Limit",
+transmission,line_violations_timeseries,line_Violation,
+transmission,line_violations_totals,line_Violation,
+transmission,net_export,region_Net_Interchange or zone_Net_Interchange,
+transmission,region_region_checkerboard,region_regions_Net_Interchange or zone_zones_Net_Interchange,
+transmission,region_region_interchange_all_regions,region_regions_Net_Interchange or zone_zones_Net_Interchange,
+transmission,region_region_interchange_all_scenarios,region_regions_Net_Interchange or zone_zones_Net_Interchange,
+transmission,total_int_flow_ind,interface_Flow,
+transmission,zonal_interchange,line_Flow,
+transmission,zonal_interchange_total,line_Flow,
+unserved_energy,tot_unserved_energy,region_Unserved_Energy or zone_Unserved_Energy,
+unserved_energy,unserved_energy_timeseries,region_Unserved_Energy or zone_Unserved_Energy,
+unserved_energy,average_diurnal_ue,region_Unserved_Energy or zone_Unserved_Energy,
+utilization_factor,GW_fleet,generator_Generation,
+utilization_factor,uf_fleet,"generator_Generation, generator_Available_Capacity",
+utilization_factor,uf_fleet_by_type,"generator_Generation, generator_Available_Capacity",
+utilization_factor,uf_gen,"generator_Generation, generator_Available_Capacity",

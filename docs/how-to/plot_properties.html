@@ -1,0 +1,710 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="X-UA-Compatible" content="IE=Edge" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
+    <title>Plotting Properties Index &#8212; Marmot 0.11.0 documentation</title>
+<script>
+  document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+  document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
+</script>
+
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../_static/styles/theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+<link href="../_static/styles/pydata-sphinx-theme.css?digest=92025949c220c2e29695" rel="stylesheet">
+
+
+  <link rel="stylesheet"
+    href="../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-main.c949a650a448cc0ae9fd3441c0e17fb0.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/panels-variables.06eb56fa6e07937060861dad626602ad.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css" />
+
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695">
+
+    <script data-url_root="../" id="documentation_options" src="../_static/documentation_options.js"></script>
+    <script src="../_static/jquery.js"></script>
+    <script src="../_static/underscore.js"></script>
+    <script src="../_static/doctools.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Facet plots" href="facet.html" />
+    <link rel="prev" title="How to process and format ReEDS results with Marmot" href="format-reeds-results.html" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="docsearch:language" content="None">
+  </head>
+  
+  
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="180" data-default-mode="">
+    <div class="bd-header-announcement container-fluid" id="banner">
+      
+
+    </div>
+
+    
+    <nav class="bd-header navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main"><div class="bd-header__inner container-xl">
+
+  <div id="navbar-start">
+    
+    
+  
+
+
+<a class="navbar-brand logo" href="../index.html">
+  
+  
+  
+  
+  
+    <p class="title logo__title">Marmot 0.11.0 documentation</p>
+  
+</a>
+    
+  </div>
+
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-collapsible" aria-controls="navbar-collapsible" aria-expanded="false" aria-label="Toggle navigation">
+    <span class="fas fa-bars"></span>
+  </button>
+
+  
+  <div id="navbar-collapsible" class="col-lg-9 collapse navbar-collapse">
+    <div id="navbar-center" class="mr-auto">
+      
+      <div class="navbar-center-item">
+        <ul id="navbar-main-elements" class="navbar-nav">
+    <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../get-started/index.html">
+  Getting Started
+ </a>
+</li>
+
+<li class="toctree-l1 current active nav-item">
+ <a class="reference internal nav-link" href="index.html">
+  How-to Guides
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../plot-gallery/index.html">
+  Plotting Examples Gallery
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../references/input-files/files.html">
+  Input File Reference
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../references/code/modules.html">
+  Code Reference
+ </a>
+</li>
+
+    
+</ul>
+      </div>
+      
+    </div>
+
+    <div id="navbar-end">
+      
+      <div class="navbar-end-item">
+        <span id="theme-switch" class="btn btn-sm btn-outline-primary navbar-btn rounded-circle">
+    <a class="theme-switch" data-mode="light"><i class="fas fa-sun"></i></a>
+    <a class="theme-switch" data-mode="dark"><i class="far fa-moon"></i></a>
+    <a class="theme-switch" data-mode="auto"><i class="fas fa-adjust"></i></a>
+</span>
+      </div>
+      
+      <div class="navbar-end-item">
+        <ul id="navbar-icon-links" class="navbar-nav" aria-label="Icon Links">
+        <li class="nav-item">
+          <a class="nav-link" href="https://github.com/NREL/Marmot" rel="noopener" target="_blank" title="GitHub"><span><i class="fab fa-github-square"></i></span>
+            <label class="sr-only">GitHub</label></a>
+        </li>
+      </ul>
+      </div>
+      
+    </div>
+  </div>
+</div>
+    </nav>
+    
+
+    <div class="bd-container container-xl">
+      <div class="bd-container__inner row">
+          
+
+<!-- Only show if we have sidebars configured, else just a small margin  -->
+<div class="bd-sidebar-primary col-12 col-md-3 bd-sidebar">
+  <div class="sidebar-start-items"><form class="bd-search d-flex align-items-center" action="../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form><nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+  <div class="bd-toc-item active">
+    <ul class="current nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="run_main.html">
+   Running the Marmot code
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="format-plexos-results.html">
+   How to process and format PLEXOS results with Marmot
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="format-reeds-results.html">
+   How to process and format ReEDS results with Marmot
+  </a>
+ </li>
+ <li class="toctree-l1 current active">
+  <a class="current reference internal" href="#">
+   Plotting Properties Index
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="facet.html">
+   Facet plots
+  </a>
+ </li>
+</ul>
+<ul class="nav bd-sidenav">
+ <li class="toctree-l1">
+  <a class="reference internal" href="config-yml-usage.html">
+   How to change default input files with the config.yml
+  </a>
+ </li>
+ <li class="toctree-l1">
+  <a class="reference internal" href="build-docs.html">
+   How to edit and build Sphinx documentation for Marmot
+  </a>
+ </li>
+</ul>
+
+  </div>
+</nav>
+  </div>
+  <div class="sidebar-end-items">
+  </div>
+</div>
+
+
+          
+
+
+<div class="bd-sidebar-secondary d-none d-xl-block col-xl-2 bd-toc">
+  
+    
+    <div class="toc-item">
+      
+
+<nav id="bd-toc-nav">
+    
+</nav>
+    </div>
+    
+    <div class="toc-item">
+      
+    </div>
+    
+  
+</div>
+
+
+          
+          
+          <div class="bd-content col-12 col-md-9 col-xl-7">
+              
+              <article class="bd-article" role="main">
+                
+   <style>
+     h2  {border-bottom: 1px solid gray;}
+ </style>
+
+<script>
+   var arr = document.getElementsByClassName('reference internal');
+   for(var i = 0; i < arr.length; i++) {
+   arr[i].innerHTML = arr[i].innerHTML.replace(/\./g, '.<wbr/>');
+   }
+</script><section id="plotting-properties-index">
+<h1>Plotting Properties Index<a class="headerlink" href="#plotting-properties-index" title="Permalink to this headline">#</a></h1>
+<p>This is a reference guide which shows which properties are <strong>required</strong> and which are <strong>optional</strong>
+when creating plots with Marmot. If a property is required, you must first process that property for your
+desired model (e.g. PLEXOS, ReEDS, SIIP) so that it is contained within the formatted.h5 file. Ensure that
+the required property is set to <strong>TRUE</strong> in your models <a class="reference internal" href="../references/input-files/files.html"><span class="doc">property.csv</span></a></p>
+<p>This table is laid out as follows:</p>
+<ul class="simple">
+<li><p><strong>Plotting Module:</strong> The Marmot python plotting module, equivalent to the <em>Marmot Module</em> in the <a class="reference internal" href="../references/input-files/Marmot_plot_select.html#marmot-plot-select-csv-file"><span class="std std-ref">Marmot_plot_select: csv file</span></a>.</p></li>
+<li><p><strong>Plotting Method:</strong> The name of the method containing the specific plot logic, equivalent to the <em>Method</em> in the <a class="reference internal" href="../references/input-files/Marmot_plot_select.html#marmot-plot-select-csv-file"><span class="std std-ref">Marmot_plot_select: csv file</span></a>.</p></li>
+<li><p><strong>Required Marmot Property:</strong> These properties are required to create the plot.</p></li>
+<li><p><strong>Optional Marmot Property:</strong> These properties are optional but add extra information to a plot.</p></li>
+</ul>
+<table class="colwidths-given table">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 30%" />
+<col style="width: 30%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Plotting Module</p></th>
+<th class="head"><p>Plotting Method</p></th>
+<th class="head"><p>Required Marmot Property</p></th>
+<th class="head"><p>Optional Marmot Property</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>capacity_factor</p></td>
+<td><p>avg_output_when_committed</p></td>
+<td><p>generator_Generation, generator_Installed_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>capacity_factor</p></td>
+<td><p>cf</p></td>
+<td><p>generator_Generation, generator_Installed_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>capacity_factor</p></td>
+<td><p>time_at_min_gen</p></td>
+<td><p>generator_Generation, generator_Installed_Capacity, generator_Hours_at_Minimum</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>capacity_out</p></td>
+<td><p>capacity_out_stack</p></td>
+<td><p>generator_Installed_Capacity, generator_Available_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>capacity_out</p></td>
+<td><p>capacity_out_stack_PASA</p></td>
+<td></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>curtailment</p></td>
+<td><p>curt_duration_curve</p></td>
+<td><p>generator_Curtailment*</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>curtailment</p></td>
+<td><p>curt_ind</p></td>
+<td><p>generator_Generation, generator_Curtailment*</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>curtailment</p></td>
+<td><p>curt_pen</p></td>
+<td><p>generator_Generation, generator_Available_Capacity, generator_Total_Generation_Cost, generator_Curtailment*</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>curtailment</p></td>
+<td><p>curt_total</p></td>
+<td><p>generator_Curtailment*</p></td>
+<td><p>generator_Available_Capacity</p></td>
+</tr>
+<tr class="row-odd"><td><p>curtailment</p></td>
+<td><p>curt_total_diff</p></td>
+<td><p>generator_Available_Capacity, generator_Curtailment*</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>curtailment</p></td>
+<td><p>average_diurnal_curt</p></td>
+<td><p>generator_Curtailment*</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>emissions</p></td>
+<td><p>total_emissions_by_type</p></td>
+<td><p>emissions_generators_Production</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>generation_stack</p></td>
+<td><p>committed_stack</p></td>
+<td><p>generator_Installed_Capacity, generator_Generation, generator_Units_Generating, generator_Available_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>generation_stack</p></td>
+<td><p>gen_diff</p></td>
+<td><p>generator_Generation</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>generation_stack</p></td>
+<td><p>gen_stack</p></td>
+<td><p>generator_Generation</p></td>
+<td><p>generator_Curtailment*, generator_Pumped_Load, region_Load, region_Unserved_Energy, zone_Load, zone_Unserved_Energy,</p></td>
+</tr>
+<tr class="row-odd"><td><p>generation_unstack</p></td>
+<td><p>gen_unstack</p></td>
+<td><p>generator_Generation</p></td>
+<td><p>generator_Curtailment*, generator_Pumped_Load, region_Load, region_Unserved_Energy, zone_Load, zone_Unserved_Energy,</p></td>
+</tr>
+<tr class="row-even"><td><p>hydro</p></td>
+<td><p>hydro_continent_net_load</p></td>
+<td><p>generator_Generation</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>hydro</p></td>
+<td><p>hydro_net_load</p></td>
+<td><p>generator_Generation</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>prices</p></td>
+<td><p>pdc_all_regions</p></td>
+<td><p>region_Price or zone_Price</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>prices</p></td>
+<td><p>region_pdc</p></td>
+<td><p>region_Price or zone_Price</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>prices</p></td>
+<td><p>region_timeseries_price</p></td>
+<td><p>region_Price or zone_Price</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>prices</p></td>
+<td><p>timeseries_price_all_regions</p></td>
+<td><p>region_Price or zone_Price</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>prices</p></td>
+<td><p>node_pdc</p></td>
+<td><p>node_Price</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>prices</p></td>
+<td><p>node_timeseries_price</p></td>
+<td><p>node_Price</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>prices</p></td>
+<td><p>node_price_hist</p></td>
+<td><p>node_Price</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>prices</p></td>
+<td><p>node_price_hist_diff</p></td>
+<td><p>node_Price</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>production_cost</p></td>
+<td><p>detailed_gen_cost</p></td>
+<td></td>
+<td><p>generator_FOM_Cost, generator_VOM_Cost, generator_Fuel_Cost, generator_Start_and_Shutdown_Cost, generator_Reserves_VOM_Cost, generator_Emissions_Cost</p></td>
+</tr>
+<tr class="row-odd"><td><p>production_cost</p></td>
+<td><p>detailed_gen_cost_diff</p></td>
+<td></td>
+<td><p>generator_FOM_Cost, generator_VOM_Cost, generator_Fuel_Cost, generator_Start_and_Shutdown_Cost, generator_Reserves_VOM_Cost, generator_Emissions_Cost</p></td>
+</tr>
+<tr class="row-even"><td><p>production_cost</p></td>
+<td><p>prod_cost</p></td>
+<td><p>generator_Total_Generation_Cost, generator_Pool_Revenue, generator_Reserves_Revenue, generator_Installed_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>production_cost</p></td>
+<td><p>sys_cost</p></td>
+<td><p>generator_Total_Generation_Cost</p></td>
+<td><p>region_Unserved_Energy, zone_unserved_Energy</p></td>
+</tr>
+<tr class="row-even"><td><p>production_cost</p></td>
+<td><p>sys_cost_diff</p></td>
+<td><p>generator_Total_Generation_Cost</p></td>
+<td><p>region_Unserved_Energy, zone_unserved_Energy</p></td>
+</tr>
+<tr class="row-odd"><td><p>production_cost</p></td>
+<td><p>sys_cost_type</p></td>
+<td><p>generator_Total_Generation_Cost</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>production_cost</p></td>
+<td><p>sys_cost_type_diff</p></td>
+<td><p>generator_Total_Generation_Cost</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>ramping</p></td>
+<td><p>capacity_started</p></td>
+<td><p>generator_Generation, generator_Installed_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>ramping</p></td>
+<td><p>count_ramps</p></td>
+<td><p>generator_Generation, generator_Installed_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>reserves</p></td>
+<td><p>reg_reserve_provision</p></td>
+<td><p>reserve_Provision</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>reserves</p></td>
+<td><p>reg_reserve_shortage</p></td>
+<td><p>reserve_Shortage</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>reserves</p></td>
+<td><p>reg_reserve_shortage_hrs</p></td>
+<td><p>reserve_Shortage</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>reserves</p></td>
+<td><p>reg_reserve_shortage_timeseries</p></td>
+<td><p>reserve_Shortage</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>reserves</p></td>
+<td><p>reserve_gen_timeseries</p></td>
+<td><p>reserves_generators_Provision</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>reserves</p></td>
+<td><p>total_reserves_by_gen</p></td>
+<td><p>reserves_generators_Provision</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>sensitivities</p></td>
+<td><p>sensitivities_gas</p></td>
+<td><p>generator_Generation, region_Net_Interchange, generator_Curtailment*</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>thermal_cap_reserve</p></td>
+<td><p>thermal_cap_reserves</p></td>
+<td><p>generator_Generation, generator_Available_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>total_generation</p></td>
+<td><p>total_gen</p></td>
+<td><p>generator_Generation</p></td>
+<td><p>generator_Curtailment*, generator_Pumped_Load, region_Load, region_Unserved_Energy, zone_Load, zone_Unserved_Energy,</p></td>
+</tr>
+<tr class="row-even"><td><p>total_generation</p></td>
+<td><p>total_gen_monthly</p></td>
+<td><p>generator_Generation</p></td>
+<td><p>generator_Curtailment*, generator_Pumped_Load, region_Load, zone_Load,</p></td>
+</tr>
+<tr class="row-odd"><td><p>total_generation</p></td>
+<td><p>monthly_vre_generation</p></td>
+<td><p>generator_Generation</p></td>
+<td><p>generator_Curtailment*, generator_Pumped_Load, region_Load, zone_Load,</p></td>
+</tr>
+<tr class="row-even"><td><p>total_generation</p></td>
+<td><p>monthly_vre_generation_percentage</p></td>
+<td><p>generator_Generation</p></td>
+<td><p>generator_Curtailment*, generator_Pumped_Load, region_Load, zone_Load,</p></td>
+</tr>
+<tr class="row-odd"><td><p>total_generation</p></td>
+<td><p>total_gen_pie</p></td>
+<td><p>generator_Generation</p></td>
+<td><p>generator_Curtailment*</p></td>
+</tr>
+<tr class="row-even"><td><p>total_generation</p></td>
+<td><p>total_gen_diff</p></td>
+<td><p>generator_Generation</p></td>
+<td><p>generator_Curtailment*</p></td>
+</tr>
+<tr class="row-odd"><td><p>total_generation</p></td>
+<td><p>total_gen_facet</p></td>
+<td><p>generator_Generation</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>total_installed_capacity</p></td>
+<td><p>total_cap</p></td>
+<td><p>generator_Installed_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>total_installed_capacity</p></td>
+<td><p>total_cap_facet</p></td>
+<td><p>generator_Installed_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>total_installed_capacity</p></td>
+<td><p>total_cap_diff</p></td>
+<td><p>generator_Installed_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>total_installed_capacity</p></td>
+<td><p>total_cap_and_gen_facet</p></td>
+<td><p>generator_Installed_Capacity, generator_Generation</p></td>
+<td><p>generator_Curtailment*, generator_Pumped_Load, region_Load, region_Unserved_Energy, zone_Load, zone_Unserved_Energy</p></td>
+</tr>
+<tr class="row-even"><td><p>transmission</p></td>
+<td><p>interface_flow_ind</p></td>
+<td><p>interface_Flow,</p></td>
+<td><p>interface_Import_Limit, interface_Export_Limit</p></td>
+</tr>
+<tr class="row-odd"><td><p>transmission</p></td>
+<td><p>line_flow_ind</p></td>
+<td><p>line_Flow</p></td>
+<td><p>line_Import_Limit, line_Export_Limit</p></td>
+</tr>
+<tr class="row-even"><td><p>transmission</p></td>
+<td><p>line_flow_ind_seasonal</p></td>
+<td><p>interface_Flow, interface_Import_Limit, interface_Export_Limit</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>transmission</p></td>
+<td><p>line_flow_ind_diff</p></td>
+<td><p>line_Flow</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>transmission</p></td>
+<td><p>line_hist</p></td>
+<td><p>line_Flow, line_Import_Limit</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>transmission</p></td>
+<td><p>line_util</p></td>
+<td><p>line_Flow, line_Import_Limit</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>transmission</p></td>
+<td><p>line_violations_timeseries</p></td>
+<td><p>line_Violation</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>transmission</p></td>
+<td><p>line_violations_totals</p></td>
+<td><p>line_Violation</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>transmission</p></td>
+<td><p>net_export</p></td>
+<td><p>region_Net_Interchange or zone_Net_Interchange</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>transmission</p></td>
+<td><p>region_region_checkerboard</p></td>
+<td><p>region_regions_Net_Interchange or zone_zones_Net_Interchange</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>transmission</p></td>
+<td><p>region_region_interchange_all_regions</p></td>
+<td><p>region_regions_Net_Interchange or zone_zones_Net_Interchange</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>transmission</p></td>
+<td><p>region_region_interchange_all_scenarios</p></td>
+<td><p>region_regions_Net_Interchange or zone_zones_Net_Interchange</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>transmission</p></td>
+<td><p>total_int_flow_ind</p></td>
+<td><p>interface_Flow</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>transmission</p></td>
+<td><p>zonal_interchange</p></td>
+<td><p>line_Flow</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>transmission</p></td>
+<td><p>zonal_interchange_total</p></td>
+<td><p>line_Flow</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>unserved_energy</p></td>
+<td><p>tot_unserved_energy</p></td>
+<td><p>region_Unserved_Energy or zone_Unserved_Energy</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>unserved_energy</p></td>
+<td><p>unserved_energy_timeseries</p></td>
+<td><p>region_Unserved_Energy or zone_Unserved_Energy</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>unserved_energy</p></td>
+<td><p>average_diurnal_ue</p></td>
+<td><p>region_Unserved_Energy or zone_Unserved_Energy</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>utilization_factor</p></td>
+<td><p>GW_fleet</p></td>
+<td><p>generator_Generation</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>utilization_factor</p></td>
+<td><p>uf_fleet</p></td>
+<td><p>generator_Generation, generator_Available_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-even"><td><p>utilization_factor</p></td>
+<td><p>uf_fleet_by_type</p></td>
+<td><p>generator_Generation, generator_Available_Capacity</p></td>
+<td></td>
+</tr>
+<tr class="row-odd"><td><p>utilization_factor</p></td>
+<td><p>uf_gen</p></td>
+<td><p>generator_Generation, generator_Available_Capacity</p></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+</section>
+
+
+              </article>
+              
+
+              
+              <footer class="bd-footer-article">
+                  <!-- Previous / next buttons -->
+<div class='prev-next-area'>
+  <a class='left-prev' id="prev-link" href="format-reeds-results.html" title="previous page">
+      <i class="fas fa-angle-left"></i>
+      <div class="prev-next-info">
+          <p class="prev-next-subtitle">previous</p>
+          <p class="prev-next-title">How to process and format ReEDS results with Marmot</p>
+      </div>
+  </a>
+  <a class='right-next' id="next-link" href="facet.html" title="next page">
+  <div class="prev-next-info">
+      <p class="prev-next-subtitle">next</p>
+      <p class="prev-next-title">Facet plots</p>
+  </div>
+  <i class="fas fa-angle-right"></i>
+  </a>
+</div>
+              </footer>
+              
+          </div>
+          
+      </div>
+    </div>
+
+  
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script src="../_static/scripts/pydata-sphinx-theme.js?digest=92025949c220c2e29695"></script>
+
+<footer class="bd-footer"><div class="bd-footer__inner container">
+  
+  <div class="footer-item">
+    <p class="copyright">
+    &copy; Copyright 2022, Alliance for Sustainable Energy, LLC.<br>
+</p>
+  </div>
+  
+  <div class="footer-item">
+    <p class="sphinx-version">
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.5.0.<br>
+</p>
+  </div>
+  
+</div>
+</footer>
+  </body>
+</html>

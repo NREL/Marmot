@@ -41,6 +41,7 @@ release = version
 # extensions = ['sphinx.ext.autosummary','sphinx.ext.napoleon','sphinx.ext.autodoc']
 
 extensions = [
+    "crate.sphinx.csv",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
@@ -52,7 +53,8 @@ extensions = [
     "sphinx.ext.napoleon",
     'sphinx_click.ext',
     "sphinx.ext.autosectionlabel",
-    "sphinx_panels",]
+    "sphinx_panels",
+    ]
 
 intersphinx_mapping = {
     "dateutil": ("https://dateutil.readthedocs.io/en/latest/", None),

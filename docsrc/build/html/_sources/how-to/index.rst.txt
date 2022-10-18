@@ -19,6 +19,7 @@ Introductory Guides
    run_main
    format-plexos-results
    format-reeds-results
+   plot_properties
 
 Special Features Guides
 ------------------------
