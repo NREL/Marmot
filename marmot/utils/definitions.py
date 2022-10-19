@@ -63,7 +63,8 @@ Module_CLASS_MAPPING = {
 INCORRECT_ENTRY_POINT = (
     "Beginning in Marmot v0.10.0, the abilty to run "
     "'python {}' directly has been removed. To run "
-    "the code as before, run 'python bin/run_marmot_plotter.py' from "
+    "the code as before, run 'python bin/run_marmot_plotter.py' or "
+    "'python bin/run_marmot_formatter.py' from "
     "Marmot Package directory"
 )
 
