@@ -838,7 +838,7 @@ results e.g ST, MT, LT, PASA. Defaults to False.
 </dl>
 </li>
 <li><dl class="simple">
-<dt><strong>multithreading_workers:</strong> 16</dt><dd><p><a href="#id1"><span class="problematic" id="id2">*</span></a>Sets multithread workers when reading data, Defaults to 16</p>
+<dt><strong>multithreading_workers:</strong> 1</dt><dd><p><a href="#id1"><span class="problematic" id="id2">*</span></a>Sets multithread workers when reading data, Defaults to 1</p>
 </dd>
 </dl>
 </li>
@@ -860,10 +860,24 @@ exceeds 1000. All base units are in MW, and units can be converted to GW, TW and
 </dl>
 </li>
 <li><dl>
-<dt><strong>read_csv_properties:</strong> true</dt><dd><p><a href="#id3"><span class="problematic" id="id4">*</span></a>If True the Marmot plotter will attempt to read the required plot property from a
-csv file if it cannot be found in the formatted h5 file.</p>
+<dt><strong>read_csv_properties:</strong> false</dt><dd><p><em>If True the Marmot plotter will attempt to read the required plot property from a
+csv file if it cannot be found in the formatted h5 file.
+Format of data must adhere to the standard
+Marmot formats for each data class, e.g generator, line etc.</em></p>
+<dl class="simple">
+<dt>Filename should be of the following pattern:</dt><dd><ul class="simple">
+<li><p>{scenario}_{plx_prop_name}.csv</p></li>
+</ul>
+</dd>
+<dt>An example of a line_Net_Import:</dt><dd><ul class="simple">
+<li><p>Base DA_line_Net_Import.csv</p></li>
+</ul>
+</dd>
+</dl>
+<p>These csv files should be saved in the <em>csv_properties</em> folder which will be
+created in the Marmot_Solutions_folder.</p>
 <div class="versionadded">
-<p><span class="versionmodified added">New in version 0.10.0.</span></p>
+<p><span class="versionmodified added">New in version 0.11.0.</span></p>
 </div>
 </dd>
 </dl>

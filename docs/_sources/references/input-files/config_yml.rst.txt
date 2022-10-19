@@ -135,8 +135,8 @@ Default Values and Descriptions
    .. versionadded:: 0.10.0
       exclude_pumping_from_reeds_storage_gen setting
 
-- **multithreading_workers:** 16
-   Sets multithread workers when reading data, Defaults to 16.
+- **multithreading_workers:** 1
+   Sets multithread workers when reading data, Defaults to 1.
 
 - **figure_file_format:** svg
    Adjust the plot image format. The default is **svg**, a vector-based image.
@@ -144,6 +144,25 @@ Default Values and Descriptions
 
 - **shift_leapday:** false
    Handles auto shifting of leap day, if required by your model. The default is false.
+
+- **read_csv_properties:** false
+   If True the Marmot plotter will attempt to read the required plot property from a 
+   csv file if it cannot be found in the formatted h5 file.
+   Format of data must adhere to the standard 
+   Marmot formats for each data class, e.g generator, line etc.
+
+   Filename should be of the following pattern:
+      - {scenario}_{plx_prop_name}.csv
+   
+
+   An example of a line_Net_Import:
+      - Base DA_line_Net_Import.csv
+   
+
+   These csv files should be saved in the *csv_properties* folder which will be 
+   created in the Marmot_Solutions_folder.
+
+   .. versionadded:: 0.11.0
 
 - **auto_convert_units:** true
    If True automatically converts Energy and Capacity units so that no number 

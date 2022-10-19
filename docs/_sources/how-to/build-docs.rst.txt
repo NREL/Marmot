@@ -26,6 +26,7 @@ The documentation is built with the python Sphinx package. The following modules
 - sphinx==4.5.0
 - sphinx_click==4.3.0
 - sphinx_panels==0.6.0
+- sphinx-csv-filter==0.3.0
 - pydata_sphinx_theme==0.9.0
 
 .. note::

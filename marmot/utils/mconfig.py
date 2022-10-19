@@ -144,13 +144,13 @@ def createConfig(configfile_path: Path):
         *If True the Marmot plotter will attempt to read the required plot property from a 
         csv file if it cannot be found in the formatted h5 file.
         Format of data must adhere to the standard 
-        Marmot formats for each data class, e.g generator, line etc.
+        Marmot formats for each data class, e.g generator, line etc.*
 
         Filename should be of the following pattern:
-        - {scenario}_{plx_prop_name}.csv
+            - {scenario}_{plx_prop_name}.csv
         
         An example of a line_Net_Import:
-        - Base DA_line_Net_Import.csv
+            - Base DA_line_Net_Import.csv   
         
         These csv files should be saved in the *csv_properties* folder which will be 
         created in the Marmot_Solutions_folder.

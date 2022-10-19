@@ -28,7 +28,6 @@ This table is laid out as follows:
 - **Optional Marmot Property:** These properties are optional but add extra information to a plot.
 
 
-
 .. csv-filter:: 
    :file: ../tables/plotting_properties.csv
    :widths: 10, 30, 30, 30
