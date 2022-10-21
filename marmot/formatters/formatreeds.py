@@ -401,7 +401,7 @@ class ReEDSPropertyColumns(ReEDSPropertyColumnsBase):
     """ReEDS property column names"""
 
     gen_out: List = field(
-        default_factory=lambda: ["tech", "region", "h", "year", "Value", "yyy"]
+        default_factory=lambda: ["tech", "region", "h", "year", "Value"]
     )
     """ReEDS 'gen_out' property columns (Marmot generator_Generation property)"""
     gen_out_ann: List = field(
