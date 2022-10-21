@@ -2,6 +2,21 @@
 from dataclasses import dataclass
 import pandas as pd
 
+
+@dataclass
+class MissingH5PLEXOSDataError(Exception):
+    """Raise when the data key in the H5PLEXOS file is empty"""
+    
+    h5_file: str
+
+    def __post_init__(self) -> None:
+        self.message = (f"There is no data in {self.h5_file} file, "
+                "The file may be corrupted or missing information. "
+                "Check the file before continuing the formatter.")
+
+    def __str__(self) -> str:
+        return self.message
+
 @dataclass
 class ReEDSColumnLengthError(ValueError):
     """Raised when there is a length mismatch between ReEDS df and ReEDSPropertyColumns"""
