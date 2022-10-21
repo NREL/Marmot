@@ -5,9 +5,7 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
-import os
 #os.environ['GAMSDIR'] = r"C:\GAMS\39"
-import sys
 import logging
 import re
 from pathlib import Path
@@ -18,7 +16,7 @@ import pandas as pd
 
 import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
-from marmot.formatters.formatbase import Process
+from marmot.formatters.formatbase import Process, ReEDSPropertyColumnsBase
 from marmot.formatters.formatextra import ExtraReEDSProperties
 
 logger = logging.getLogger("formatter." + __name__)
@@ -196,9 +194,9 @@ class ProcessReEDS(Process):
                 dtype=str
             )
             region_df.rename(columns={"p": "name", "s": "category"}, inplace=True)
-            region_df.to_hdf(
+            region_df[["name", "category"]].to_hdf(
                 self.output_file_path,
-                key=f"metadata/{partition}/objects/regions",
+                key=f"metadata/{partition.split('.')[0]}/objects/regions",
                 mode="a",
             )
 
@@ -228,7 +226,7 @@ class ProcessReEDS(Process):
             df = self.report_prop_error(prop, prop_class)
             return df
         # Get column names
-        df.columns = getattr(self.reeds_prop_cols, prop)
+        df = self.reeds_prop_cols.assign_column_names(df, prop)
         if "region" in df.columns:
             df.region = df.region.map(lambda x: self.wind_resource_to_pca.get(x, x))
             if not self.Region_Mapping.empty:
@@ -240,15 +238,6 @@ class ProcessReEDS(Process):
         if process_att:
             # Process attribute and return to df
             df = process_att(df, prop, str(gdx_file))
-        
-        try:
-            df.year = df.year.astype(int)
-        except ValueError as e:
-            logger.error("Formatting ERROR: year column cannot be converted to type int. This is likely due to an " 
-                f"incorrectly ordered {self.reeds_prop_cols.__class__} variable, for property '{prop}'.\n"
-                f"Check column order in {self.reeds_prop_cols.__class__} and try running the formatter again.\n"
-                f"If the issue persists open a GitHub issue.\nTraceback message: {e}\nMarmot will not exit.")
-            sys.exit()
 
         if self.process_subset_years:
             df = df.loc[df.year.isin(self.process_subset_years)]
@@ -355,7 +344,8 @@ class ProcessReEDS(Process):
             except gdxpds.tools.Error:
                 stor_out = self.report_prop_error(stor_prop_name, "storage")
                 return df
-            stor_out.columns = getattr(self.reeds_prop_cols, stor_prop_name)
+            
+            stor_out = self.reeds_prop_cols.assign_column_names(stor_out, stor_prop_name)
             if prop == "gen_out_ann":
                 stor_out = stor_out.loc[stor_out.type == "out"]
             stor_out = stor_out.groupby(group_list).sum()
@@ -407,11 +397,11 @@ class ProcessReEDS(Process):
 
 
 @dataclass
-class ReEDSPropertyColumns:
+class ReEDSPropertyColumns(ReEDSPropertyColumnsBase):
     """ReEDS property column names"""
 
     gen_out: List = field(
-        default_factory=lambda: ["tech", "region", "h", "year", "Value"]
+        default_factory=lambda: ["tech", "region", "h", "year", "Value", "yyy"]
     )
     """ReEDS 'gen_out' property columns (Marmot generator_Generation property)"""
     gen_out_ann: List = field(
@@ -450,8 +440,8 @@ class ReEDSPropertyColumns:
         default_factory=lambda: [
             "region_from",
             "region_to",
-            "category",
             "year",
+            "category",
             "Value",
         ]
     )

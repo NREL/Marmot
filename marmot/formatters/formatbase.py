@@ -10,6 +10,8 @@ import pandas as pd
 from pathlib import Path
 from typing import Dict
 
+from marmot.utils.error_handler import ReEDSColumnLengthError, ReEDSYearTypeConvertError
+
 logger = logging.getLogger("formatter." + __name__)
 
 
@@ -200,4 +202,35 @@ class Process:
 
             if (origsize - df.size) > 0:
                 logger.info(f"Drop duplicates removed {origsize-df.size} rows")
+        return df
+
+
+class ReEDSPropertyColumnsBase():
+    """Contains methods common to all ReEDSPropertyColumns classes"""
+
+    def assign_column_names(self, df: pd.DataFrame, prop: str) -> pd.DataFrame:
+        """Assign column names to ReEDS DataFrame
+
+        Args:
+            df (pd.DataFrame): unprocessed ReEDS DataFrame
+            prop (str): Property name e.g gen_out, cap_out etc.
+
+        Raises:
+            ReEDSColumnLengthError: Raised when there is a length mismatch 
+                between ReEDS df and ReEDSPropertyColumns
+            ReEDSYearTypeConvertError: Raised when ReEDS df.year column cannot 
+                be convetred to type int
+
+        Returns:
+            pd.DataFrame: DataFrame with column names defined.
+        """
+        prop_columns = getattr(self, prop)
+        if len(df.columns) != len(prop_columns):
+            raise ReEDSColumnLengthError(df, prop_columns, prop, self.__class__)
+        else:
+            df.columns = prop_columns
+            try:
+                df.year = df.year.astype(int)
+            except ValueError:
+                raise ReEDSYearTypeConvertError(df, prop, self.__class__)
         return df
