@@ -311,6 +311,7 @@ class GenerationStack(MPlotDataHelper):
             (False, f"{agg}_Load{data_resolution}", self.Scenarios),
             (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
             (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios),
+            (False,f"batterie_Generation{data_resolution}",self.scenarios)
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary

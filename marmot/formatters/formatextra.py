@@ -181,8 +181,6 @@ class ExtraPLEXOSProperties(ExtraProperties):
             if batt_load_data.empty is False:
                 batt_load_chunks.append(batt_load_data)
                 batt_load = self.model.combine_models(batt_load_chunks)
-                print(df)
-                print(batt_load)
                 batt_load = batt_load.groupby(df.index.names).sum()
                 df = df - batt_load
 

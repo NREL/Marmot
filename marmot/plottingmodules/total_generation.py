@@ -55,7 +55,6 @@ class TotalGeneration(MPlotDataHelper):
         start_date_range: str = None,
         end_date_range: str = None,
         scenario_groupby: str = "Scenario",
-        data_resolution: str = "",
         **_,
     ):
         """Creates a stacked bar plot of total generation by technology type.
@@ -72,11 +71,6 @@ class TotalGeneration(MPlotDataHelper):
                 from the timestamp and appeneded to the sceanrio name. This is useful when 
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
-
-                .. versionadded:: 0.10.0
-            data_resolution (str, optional): Specifies the data resolution to pull from the formatted
-                data and plot.
-                Defaults to "", which will pull interval data.
 
                 .. versionadded:: 0.10.0
 
@@ -99,6 +93,7 @@ class TotalGeneration(MPlotDataHelper):
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
             (False, f"{agg}_Unserved_Energy", self.Scenarios),
+            (False,"batterie_Generation",self.scenarios)
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -168,11 +163,11 @@ class TotalGeneration(MPlotDataHelper):
 
                 #Insert battery generation.
                 stacked_bat_gen : pd.DataFrame = self[
-                    f"batterie_Generation{data_resolution}"
+                    f"batterie_Generation"
                 ].get(scenario)
                 battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
                 if stacked_bat_gen.empty is True:
-                    logger.warning("No Battery generation in selected Date Range")
+                    logger.info("No Battery generation in selected Date Range")
                     continue
                 if shift_leapday:
                     stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
