@@ -308,8 +308,6 @@ class GenerationStack(MPlotDataHelper):
         properties = [
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
             (False,f"generator_{self.curtailment_prop}{data_resolution}",self.Scenarios),
-            (False,f"batterie_Generation{data_resolution}",self.Scenarios),
-            (False,f"batterie_Load{data_resolution}",self.Scenarios),
             (False, f"{agg}_Load{data_resolution}", self.Scenarios),
             (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
             (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios),
@@ -411,7 +409,7 @@ class GenerationStack(MPlotDataHelper):
                 stacked_bat_gen : pd.DataFrame = self[
                     f"batterie_Generation{data_resolution}"
                 ].get(scenario)
-
+                battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
                 if stacked_bat_gen.empty is True:
                     logger.warning("No Battery generation in selected Date Range")
                     continue
@@ -419,13 +417,14 @@ class GenerationStack(MPlotDataHelper):
                     stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
 
                 stacked_bat_gen = stacked_bat_gen.xs(
-                    'GVEA BESS', level='battery_name'
+                    zone_input, level=self.AGG_BY
                 )
+
                 stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
 
                 stacked_gen_df.insert(
                     len(stacked_bat_gen.columns),
-                    column='Storage discharge',
+                    column=battery_discharge_name,
                     value=stacked_bat_gen,
                 )
                 stacked_gen_df = stacked_gen_df.fillna(0)
@@ -450,7 +449,6 @@ class GenerationStack(MPlotDataHelper):
                     f"{agg}_Load{data_resolution}",
                     f"{agg}_Demand{data_resolution}",
                     f"{agg}_Unserved_Energy{data_resolution}",
-                    #f"batterie_Load{data_resolution}"
                 ]
                 # Get and process extra properties
                 for ext_prop in extra_property_names:
@@ -486,17 +484,6 @@ class GenerationStack(MPlotDataHelper):
                         f"{agg}_Demand{data_resolution}": "Total Demand",
                     }
                 )
-
-                #Add battery generation to total gen stack df.
-                if "batterie_Load" in extra_plot_data.keys():
-                    stacked_gen_df["Battery charging"] = extra_plot_data["batterie_Load"].squeeze()
-                    del extra_plot_data['batterie_Generation']
-
-                #Battery load is already included natively in PLEXOS' region_load property,
-                #so need to subtract it from total demand.
-                if "batterie_Load" in extra_plot_data.keys():
-                    extra_plot_data["Total Demand"] = extra_plot_data["Total Demand"] - extra_plot_data["batterie_Load"]
-                    del extra_plot_data['batterie_Load']
 
                 # Adjust extra data to generator date range
                 extra_plot_data = extra_plot_data.loc[

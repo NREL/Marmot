@@ -20,6 +20,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 )
 
 logger = logging.getLogger("plotter." + __name__)
+shift_leapday: bool = mconfig.parser("shift_leapday")
 plot_data_settings: dict = mconfig.parser("plot_data")
 load_legend_names: dict = mconfig.parser("load_legend_names")
 
@@ -54,6 +55,7 @@ class TotalGeneration(MPlotDataHelper):
         start_date_range: str = None,
         end_date_range: str = None,
         scenario_groupby: str = "Scenario",
+        data_resolution: str = "",
         **_,
     ):
         """Creates a stacked bar plot of total generation by technology type.
@@ -70,6 +72,11 @@ class TotalGeneration(MPlotDataHelper):
                 from the timestamp and appeneded to the sceanrio name. This is useful when 
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
+            data_resolution (str, optional): Specifies the data resolution to pull from the formatted
+                data and plot.
+                Defaults to "", which will pull interval data.
 
                 .. versionadded:: 0.10.0
 
@@ -92,8 +99,6 @@ class TotalGeneration(MPlotDataHelper):
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
             (False, f"{agg}_Unserved_Energy", self.Scenarios),
-            (False,"batterie_Generation",self.Scenarios),
-            (False,"batterie_Load",self.Scenarios),
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -161,6 +166,27 @@ class TotalGeneration(MPlotDataHelper):
                             :, (Total_Gen_Stack != 0).any(axis=0)
                         ]
 
+                #Insert battery generation.
+                stacked_bat_gen : pd.DataFrame = self[
+                    f"batterie_Generation{data_resolution}"
+                ].get(scenario)
+                battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
+                if stacked_bat_gen.empty is True:
+                    logger.warning("No Battery generation in selected Date Range")
+                    continue
+                if shift_leapday:
+                    stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
+
+                stacked_bat_gen = stacked_bat_gen.xs(
+                    zone_input, level=self.AGG_BY
+                )
+
+                stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
+                Total_Gen_Stack.insert(
+                    len(Total_Gen_Stack.columns),
+                    column=battery_discharge_name,
+                    value=stacked_bat_gen,
+                )
                 Total_Gen_Stack = Total_Gen_Stack / interval_count
 
                 # Extra optional properties
@@ -169,8 +195,6 @@ class TotalGeneration(MPlotDataHelper):
                     f"{agg}_Load",
                     f"{agg}_Demand",
                     f"{agg}_Unserved_Energy",
-                    f"batterie_Generation",
-                    f"batterie_Load"
                 ]
                 # Get and process extra properties
                 for ext_prop in extra_property_names:
@@ -181,8 +205,7 @@ class TotalGeneration(MPlotDataHelper):
                         )
                         df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
                     else:
-                        if 'batterie' not in ext_prop: 
-                            df = df.xs(zone_input, level=self.AGG_BY)
+                        df = df.xs(zone_input, level=self.AGG_BY)
                         df = df.groupby(["timestamp"]).sum()
                     df = df.rename(columns={"values" : ext_prop})
                     df = df.rename(columns={0 : ext_prop})
@@ -203,20 +226,7 @@ class TotalGeneration(MPlotDataHelper):
                         f"{agg}_Demand": "Total Demand",
                     }
                 )
-                extra_plot_data = extra_plot_data / interval_count
-
-                #Add battery generation to total gen stack df.
-                if "batterie_Generation" in extra_plot_data.keys():
-                    Total_Gen_Stack["Battery discharge"] = extra_plot_data["batterie_Generation"].squeeze()
-                    del extra_plot_data['batterie_Generation']
-
-                #Battery load is already included natively in PLEXOS' region_load property,
-                #so need to subtract it from total demand.
-                if "batterie_Load" in extra_plot_data.keys():
-                    extra_plot_data["Total Demand"] = extra_plot_data["Total Demand"] - extra_plot_data["batterie_Load"]
-                    del extra_plot_data['batterie_Load']
-
-                # Adjust extra data to generator date range
+                extra_plot_data = extra_plot_data / interval_count               
                 extra_plot_data = extra_plot_data.loc[
                     Total_Gen_Stack.index.min() : Total_Gen_Stack.index.max()
                 ]
