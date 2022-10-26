@@ -13,7 +13,7 @@ from typing import Dict
 from pathlib import Path
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
-from marmot.formatters.formatextra import ExtraProperties
+from marmot.formatters.formatextra import ExtraPLEXOSProperties
 
 try:
     # Import as Submodule
@@ -35,41 +35,8 @@ class ProcessPLEXOS(Process):
         "generator_Reserves_VO&M_Cost": "generator_Reserves_VOM_Cost",
     }
     """Maps simulation model property names to Marmot property names"""
-    # Extra custom properties that are created based off existing properties.
-    # The dictionary keys are the existing properties and the values are the new
-    # property names and methods used to create it.
-    EXTRA_MARMOT_PROPERTIES: dict = {
-        "generator_Generation": [
-            ("generator_Curtailment", ExtraProperties.plexos_generator_curtailment),
-            ("generator_Generation_Annual", ExtraProperties.annualize_property),
-        ],
-        "region_Unserved_Energy": [
-            ("region_Cost_Unserved_Energy", ExtraProperties.plexos_cost_unserved_energy)
-        ],
-        "zone_Unserved_Energy": [
-            ("zone_Cost_Unserved_Energy", ExtraProperties.plexos_cost_unserved_energy)
-        ],
-        "region_Load": [
-            ("region_Load_Annual", ExtraProperties.annualize_property),
-            ("region_Demand", ExtraProperties.plexos_demand),
-        ],
-        "zone_Load": [
-            ("zone_Load_Annual", ExtraProperties.annualize_property),
-            ("zone_Demand", ExtraProperties.plexos_demand),
-        ],
-        "generator_Pump_Load": [
-            ("generator_Pump_Load_Annual", ExtraProperties.annualize_property)
-        ],
-        "reserves_generators_Provision": [
-            ("reserves_generators_Provision_Annual", ExtraProperties.annualize_property)
-        ],
-        "generator_Curtailment": [
-            ("generator_Curtailment_Annual", ExtraProperties.annualize_property)
-        ],
-        "region_Demand": [("region_Demand_Annual", ExtraProperties.annualize_property)],
-        "zone_Demand": [("zone_Demand_Annual", ExtraProperties.annualize_property)],
-    }
-    """Dictionary of Extra custom properties that are created based off existing properties."""
+
+    EXTRA_PROPERTIES_CLASS = ExtraPLEXOSProperties
 
     def __init__(
         self,

@@ -126,8 +126,8 @@ def createConfig(configfile_path: Path):
         .. versionadded:: 0.10.0
             exclude_pumping_from_reeds_storage_gen setting
 
-    - **multithreading_workers:** 16
-        *Sets multithread workers when reading data, Defaults to 16
+    - **multithreading_workers:** 1
+        *Sets multithread workers when reading data, Defaults to 1
 
     - **figure_file_format:** svg
         *Adjust the plot image format. The default is **svg**, a vector-based image.
@@ -140,11 +140,22 @@ def createConfig(configfile_path: Path):
         *If True automatically converts Energy and Capacity units so that no number 
         exceeds 1000. All base units are in MW, and units can be converted to GW, TW and kW*
 
-    - **read_csv_properties:** true
+    - **read_csv_properties:** false
         *If True the Marmot plotter will attempt to read the required plot property from a 
         csv file if it cannot be found in the formatted h5 file.
+        Format of data must adhere to the standard 
+        Marmot formats for each data class, e.g generator, line etc.
 
-        .. versionadded:: 0.10.0
+        Filename should be of the following pattern:
+        - {scenario}_{plx_prop_name}.csv
+        
+        An example of a line_Net_Import:
+        - Base DA_line_Net_Import.csv
+        
+        These csv files should be saved in the *csv_properties* folder which will be 
+        created in the Marmot_Solutions_folder.
+
+        .. versionadded:: 0.11.0
 
     - **user_defined_inputs_file:** Marmot_user_defined_inputs.csv
         *Change the default Marmot_user_defined_inputs file, file must be created first*
@@ -157,6 +168,9 @@ def createConfig(configfile_path: Path):
 
     - **reeds_properties_file:** reeds_properties.csv
         *Change the default reeds_properties_file.csv file, file must be created first*
+
+    - **reeds_india_properties_file:** reeds_india_properties.csv
+        *Change the default reeds_india_properties_file.csv file, file must be created first*
 
     - **siip_properties_file:** siip_properties.csv
         *Change the default siip_properties_file.csv file, file must be created first*
@@ -210,15 +224,16 @@ def createConfig(configfile_path: Path):
             append_plexos_block_name=False,
             exclude_pumping_from_reeds_storage_gen=True,
         ),
-        multithreading_workers=16,
+        multithreading_workers=1,
         figure_file_format="svg",
         shift_leapday=False,
         auto_convert_units=True,
-        read_csv_properties=True,
+        read_csv_properties=False,
         user_defined_inputs_file="Marmot_user_defined_inputs.csv",
         plot_select_file="Marmot_plot_select.csv",
         plexos_properties_file="plexos_properties.csv",
         reeds_properties_file="reeds_properties.csv",
+        reeds_india_properties_file="reeds_india_properties.csv",
         siip_properties_file="siip_properties.csv",
     )
 

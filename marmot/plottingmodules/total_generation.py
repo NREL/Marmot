@@ -1121,3 +1121,170 @@ class TotalGeneration(MPlotDataHelper):
             outputs[zone_input] = {"fig": fig, "data_table": Total_Gen_Out}
 
         return outputs
+
+    def total_gen_facet(
+        self,
+        start_date_range: str = None,
+        end_date_range: str = None,
+        scenario_groupby: str = "Scenario",
+        **_,
+    ):
+        """Creates a stacked barplot of total generation.
+        Each scenario will be plotted in a separate bar subplot.
+        This plot is particularly useful for plotting ReEDS results or 
+        other models than span multiple years with changing capacity.
+        Ensure scenario_groupby is set to 'Year-Sceanrio' to observe this
+        effect.
+
+        Args:
+            start_date_range (str, optional): Defines a start date at which to represent data from.
+                Defaults to None.
+            end_date_range (str, optional): Defines a end date at which to represent data to.
+                Defaults to None.
+            scenario_groupby (str, optional): Specifies whether to group data by Scenario
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
+                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                plotting data which covers multiple years such as ReEDS.
+                Defaults to Scenario.
+
+                .. versionadded:: 0.10.0
+
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
+        outputs: dict = {}
+        # List of properties needed by the plot, properties are a set of tuples and 
+        # contain 3 parts: required True/False, property name and scenarios required, 
+        # scenarios must be a list.
+        properties = [(True, "generator_Generation", self.Scenarios)]
+
+        # Runs get_data to populate mplot_data_dict with all required properties,
+        # returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        # Checks if all data required by plot is available, if 1 in list required data is missing
+        if 1 in check_input_data:
+            outputs = MissingInputData()
+            return outputs
+
+        for zone_input in self.Zones:
+
+            logger.info(f"Zone = {zone_input}")
+            
+            # sets up x, y dimensions of plot
+            ncols, nrows = self.set_facet_col_row_dimensions(
+                multi_scenario=self.Scenarios
+            )
+            grid_size = ncols * nrows
+            # Used to calculate any excess axis to delete
+            plot_number = len(self.Scenarios)
+            excess_axs = grid_size - plot_number
+
+            mplt = PlotLibrary(nrows, ncols, sharey=True, squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
+
+            plt.subplots_adjust(wspace=0.05, hspace=0.5)
+
+            # If creating a facet plot the font is scaled by 9% for each added x dimesion fact plot
+            if ncols > 1:
+                font_scaling_ratio = 1 + ((ncols - 1) * 0.09)
+                plt.rcParams["xtick.labelsize"] *= font_scaling_ratio
+                plt.rcParams["ytick.labelsize"] *= font_scaling_ratio
+                plt.rcParams["legend.fontsize"] *= font_scaling_ratio
+                plt.rcParams["axes.labelsize"] *= font_scaling_ratio
+                plt.rcParams["axes.titlesize"] *= font_scaling_ratio
+
+            data_tables = []
+
+            for i, scenario in enumerate(self.Scenarios):
+                logger.info(f"Scenario = {scenario}")
+
+
+                total_generation = self["generator_Generation"].get(
+                    scenario
+                )
+
+                try:
+                    generation = total_generation.xs(zone_input, level=self.AGG_BY)
+                except KeyError:
+                    logger.warning(f"No installed capacity in {zone_input}")
+                    outputs[zone_input] = MissingZoneData()
+                    continue
+
+                generation = self.df_process_gen_inputs(
+                    generation
+                )
+
+                if pd.notna(start_date_range):
+                    generation = self.set_timestamp_date_range(
+                        generation, start_date_range, end_date_range
+                    )
+                    if generation.empty is True:
+                        logger.warning("No Data in selected Date Range")
+                        continue
+                generation_grouped = self.year_scenario_grouper(
+                        generation, scenario, groupby=scenario_groupby
+                    ).sum()
+                
+
+                # unitconversion based off peak generation hour, only checked once
+                if i == 0:
+                    unitconversion = self.capacity_energy_unitconversion(
+                    generation_grouped, sum_values=True
+                    )
+                generation_grouped = (
+                    generation_grouped / unitconversion["divisor"]
+                )
+
+                data_tables.append(generation_grouped)
+
+                # Set x-tick labels
+                if self.custom_xticklabels:
+                    tick_labels = self.custom_xticklabels
+                elif scenario_groupby == "Year-Scenario":
+                    tick_labels = [x.split(":")[0] for x in generation_grouped.index]
+                else:
+                    tick_labels = generation_grouped.index
+
+                mplt.barplot(
+                    generation_grouped,
+                    color=self.PLEXOS_color_dict,
+                    stacked=True,
+                    custom_tick_labels=tick_labels,
+                    sub_pos=i,
+                )
+                
+                if scenario_groupby == "Year-Scenario":
+                    axs[i].set_xlabel(scenario)
+                else:
+                    axs[i].set_xlabel("")
+
+            if not data_tables:
+                outputs[zone_input] = MissingZoneData()
+                continue
+            
+            # Add facet labels
+            if self.xlabels or self.ylabels:
+                mplt.add_facet_labels(xlabels=self.xlabels, ylabels=self.ylabels)
+            # Add legend
+            mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
+            # Remove extra axes
+            mplt.remove_excess_axs(excess_axs, grid_size)
+            # Add title
+            if plot_data_settings["plot_title_as_region"]:
+                mplt.add_main_title(zone_input)
+
+            # Ylabel should change if there are facet labels, leave at 40 for now,
+            # works for all values in spacing
+            labelpad = 40
+            plt.ylabel(
+                    f"Total Generation ({unitconversion['units']})",
+                    color="black",
+                    rotation="vertical",
+                    labelpad=labelpad,
+            )
+
+            Data_Table_Out = pd.concat(data_tables)
+            Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")
+            outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
+        return outputs
