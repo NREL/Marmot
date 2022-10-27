@@ -15,6 +15,7 @@ import gdxpds
 import pandas as pd
 
 import marmot.utils.mconfig as mconfig
+from marmot.utils.error_handler import PropertyNotFound
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process, ReEDSPropertyColumnsBase
 from marmot.formatters.formatextra import ExtraReEDSProperties
@@ -223,8 +224,8 @@ class ProcessReEDS(Process):
         try:
             df: pd.DataFrame = gdxpds.to_dataframe(str(gdx_file), prop)[prop]
         except gdxpds.tools.Error:
-            df = self.report_prop_error(prop, prop_class)
-            return df
+            raise PropertyNotFound(prop, prop_class)
+
         # Get column names
         df = self.reeds_prop_cols.assign_column_names(df, prop)
         if "region" in df.columns:
@@ -342,7 +343,6 @@ class ProcessReEDS(Process):
                     stor_prop_name
                 ]
             except gdxpds.tools.Error:
-                stor_out = self.report_prop_error(stor_prop_name, "storage")
                 return df
             
             stor_out = self.reeds_prop_cols.assign_column_names(stor_out, stor_prop_name)

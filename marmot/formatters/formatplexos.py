@@ -11,7 +11,7 @@ import h5py
 import logging
 from typing import Dict
 from pathlib import Path
-from marmot.utils.error_handler import MissingH5PLEXOSDataError
+from marmot.utils.error_handler import MissingH5PLEXOSDataError, PropertyNotFound
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraPLEXOSProperties
@@ -198,8 +198,7 @@ class ProcessPLEXOS(Process):
                     object_class = prop_class
 
         except (ValueError, KeyError):
-            df = self.report_prop_error(prop, prop_class)
-            return df
+            raise PropertyNotFound(prop, prop_class)
 
         if self.plexos_block != "ST" and timescale == "interval":
             df = self.merge_timeseries_block_data(db, df)

@@ -4,6 +4,38 @@ import pandas as pd
 
 
 @dataclass
+class ConfigFileReadError(KeyError):
+    """Raise when a requested key cannot be found in the config.yml file"""
+    
+    key: str
+
+    def __post_init__(self) -> None:
+        self.message = (f"{self.key} could not be found in the config.yml. "
+            "New config settings may have been added which will "
+            "require the config.yml to be re-created.\n"
+            "To continue delete config.yml located in the top directory level of Marmot.")
+
+    def __str__(self) -> str:
+        return self.message
+
+
+@dataclass
+class PropertyNotFound(KeyError):
+    """Raise when the get_processed_data method cannot find the specified 
+        property in the simulation model solution files"""
+    
+    property: str
+    prop_class: str
+
+    def __post_init__(self) -> None:
+        self.message = (f"CAN NOT FIND '{self.prop_class} {self.property}'. "
+                        f"'{self.property}' DOES NOT EXIST.\nSKIPPING PROPERTY\n")
+
+    def __str__(self) -> str:
+        return self.message
+
+
+@dataclass
 class MissingH5PLEXOSDataError(Exception):
     """Raise when the data key in the H5PLEXOS file is empty"""
     

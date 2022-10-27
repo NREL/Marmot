@@ -162,24 +162,6 @@ class Process:
         """
         raise NotImplementedError("No default implementation of this functionality")
 
-    def report_prop_error(self, property: str, prop_class: str) -> pd.DataFrame:
-        """Outputs a warning message when the get_processed_data method
-        cannot find the specified property in the simulation model solution files.
-
-        Args:
-            property (str): property e.g Max Capacity, Generation etc.
-            prop_class (str): property class e.g Region, Generator, Zone etc.
-
-        Returns:
-            pd.DataFrame: Empty DataFrame.
-        """
-        logger.warning(
-            f'CAN NOT FIND "{prop_class} {property}". ' f'"{property}" DOES NOT EXIST'
-        )
-        logger.info("SKIPPING PROPERTY\n")
-        df = pd.DataFrame()
-        return df
-
     def combine_models(self, model_list: list, 
         drop_duplicates: bool = True) -> pd.DataFrame:
         """Combine temporally disaggregated model results.
