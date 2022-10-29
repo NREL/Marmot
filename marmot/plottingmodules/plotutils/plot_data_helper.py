@@ -12,14 +12,73 @@ import pandas as pd
 import numpy as np
 import functools
 import concurrent.futures
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Tuple, Union, List
 import matplotlib.colors as mcolors
 import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
+import marmot.utils.dataio as dataio
 
 logger = logging.getLogger("plotter." + __name__)
+
+@dataclass
+class GenCategories:
+    """Defines various generator categories.
+    """
+    vre: List[str] = field(default_factory=list)
+    """vre (List[str]): List of variable renewable technologies.
+    """
+    pv: List[str] = field(default_factory=list)
+    """pv (List[str]): List of PV technologies.
+    """
+    re: List[str] = field(default_factory=list)
+    """re (List[str]): List of renewable technologies.
+    """
+    thermal: List[str] = field(default_factory=list)
+    """thermal (List[str]): List of thermal technologies.
+    """
+
+    @classmethod
+    def set_categories(cls, df: pd.DataFrame) -> "GenCategories":
+        """Set generator categories from a dataframe
+
+        Categories include the following:
+
+        - vre
+        - pv
+        - re
+        - thermal
+
+        Args:
+            df (pd.DataFrame): Dataframe containing an 'Ordered_Gen'
+                column and a column for each generator category. The 
+                format should appear like the following.
+                
+                https://nrel.github.io/Marmot/references/input-files/mapping-folder/
+                ordered_gen_categories.html#input-example
+
+        Returns:
+            GenCategories: returns instance of class.
+        """
+        gen_cats = ["vre", "pv", "re", "thermal"]
+        gen_cat_dict = {}
+        for category in gen_cats:
+            if category in df.columns:
+                gen_cat_dict[category] = (
+                    df.loc[df[category] == True]["Ordered_Gen"].str.strip().tolist())
+            else:
+                logger.warning(
+                    f"'{category}' column was not found in the "
+                    "ordered_gen_categories input. Check if the column "
+                    "exists in the input file. This is required for "
+                    "certain plots to display correctly"
+                )
+                if category == "vre":
+                    logger.warning("'vre' generator categories not set, "
+                        "curtailment will not be defined!")
+        return cls(**gen_cat_dict)
 
 
 class MPlotDataHelper(dict):
@@ -39,9 +98,9 @@ class MPlotDataHelper(dict):
         AGG_BY: str,
         Scenarios: List[str],
         ordered_gen: List[str],
-        processed_hdf5_folder: Path,
-        figure_folder: Path,
+        marmot_solutions_folder: Path,
         gen_names_dict: dict = None,
+        gen_categories: pd.DataFrame = pd.DataFrame(),
         PLEXOS_color_dict: dict = None,
         Scenario_Diff: List[str] = None,
         ylabels: List[str] = None,
@@ -49,10 +108,6 @@ class MPlotDataHelper(dict):
         custom_xticklabels: List[str] = None,
         color_list: List[str] = None,
         marker_style: List[str] = None,
-        vre_gen_cat: List[str] = None,
-        pv_gen_cat: List[str] = None,
-        re_gen_cat: List[str] = None,
-        thermal_gen_cat: List[str] = None,
         Region_Mapping: pd.DataFrame = pd.DataFrame(),
         TECH_SUBSET: List[str] = None,
     ) -> None:
@@ -63,11 +118,13 @@ class MPlotDataHelper(dict):
             Scenarios (List[str]): List of scenarios to process.
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
-            processed_hdf5_folder (Path): Directory containing Marmot solution files.
-            figure_folder (Path):  Directory containing resulting figures and csv files.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
             gen_names_dict (dict, optional): Mapping dictionary to rename generator 
                 technologies.
                 Default is None.
+            gen_categories (pd.Dataframe, optional): Dataframe containing ordered generation 
+                and columns to specify technology categories.
+                Defaults to pd.DataFrame().
             PLEXOS_color_dict (dict, optional): Dictionary of colors to use for 
                 generation technologies.
                 Defaults to None.
@@ -85,14 +142,6 @@ class MPlotDataHelper(dict):
                 Defaults to None.
             marker_style (List[str], optional): List of markers for plotting.
                 Defaults to None.
-            vre_gen_cat (List[str], optional): List of variable renewable technologies.
-                Defaults to None.
-            pv_gen_cat (List[str], optional): List of PV technologies.
-                Defaults to None.
-            re_gen_cat (List[str], optional): List of RE technologies.
-                Defaults to None.
-            thermal_gen_cat (List[str], optional): List of thermal technologies.
-                Defaults to None.
             Region_Mapping (pd.DataFrame, optional): Mapping file to map 
                 custom regions/zones to create custom aggregations. 
                 Aggregations are created by grouping PLEXOS regions.
@@ -106,14 +155,23 @@ class MPlotDataHelper(dict):
         self.AGG_BY = AGG_BY
         self.Scenarios = Scenarios
         self.ordered_gen = ordered_gen
-        self.processed_hdf5_folder = Path(processed_hdf5_folder)
-        self.figure_folder = Path(figure_folder)
+        self.marmot_solutions_folder = Path(marmot_solutions_folder)
+
+        # Assign input/output folders
+        self.processed_hdf5_folder = self.marmot_solutions_folder.joinpath("Processed_HDF5_folder")
+        self.figure_folder = self.marmot_solutions_folder.joinpath("Figures_Output")
+        self.figure_folder.mkdir(exist_ok=True)
+        self.csv_properties_folder = self.marmot_solutions_folder.joinpath("csv_properties")
+        self.csv_properties_folder.mkdir(exist_ok=True)
 
         if gen_names_dict is None:
             logger.warning("'gen_names_dict' is empty! Generators will not be renamed.")
             self.gen_names_dict = {}
         else:
             self.gen_names_dict = gen_names_dict
+
+        self.gen_categories: GenCategories = GenCategories.set_categories(gen_categories)
+
         if PLEXOS_color_dict is None:
             logger.warning(
                 "'Color dictionary' not passed! Random colors will now be used."
@@ -130,11 +188,11 @@ class MPlotDataHelper(dict):
         else:
             self.Scenario_Diff = Scenario_Diff
         if ylabels is None:
-            self.ylabels = [""]
+            self.ylabels = []
         else:
             self.ylabels = ylabels
         if xlabels is None:    
-            self.xlabels = [""]
+            self.xlabels = []
         else:    
             self.xlabels = xlabels
         if color_list is None:
@@ -156,32 +214,13 @@ class MPlotDataHelper(dict):
             self.marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
         else:
             self.marker_style = marker_style
-        if vre_gen_cat is None:
-            logger.warning("'vre_gen_cat' not set, curtailment will not be defined!")
-            self.vre_gen_cat = []
-        else:
-            self.vre_gen_cat = vre_gen_cat
-        if pv_gen_cat is None:
-            logger.warning("'pv_gen_cat' not set.")
-            self.pv_gen_cat = []
-        else:
-            self.pv_gen_cat = pv_gen_cat
-        if re_gen_cat is None:
-            logger.warning("'re_gen_cat' not set.")  
-            self.re_gen_cat = []
-        else:
-            self.re_gen_cat = re_gen_cat
-        if thermal_gen_cat is None:
-            logger.warning("'thermal_gen_cat' not set.")
-            self.thermal_gen_cat = []
-        else:
-            self.thermal_gen_cat = thermal_gen_cat
+
         self.custom_xticklabels = custom_xticklabels
         self.Region_Mapping = Region_Mapping
         self.TECH_SUBSET = TECH_SUBSET
 
     def get_formatted_data(self, properties: List[tuple]) -> list:
-        """Get data from formatted h5 file.
+        """Get data from formatted h5 file or csv property input files.
 
         Adds data to dictionary with scenario name as key
 
@@ -193,7 +232,7 @@ class MPlotDataHelper(dict):
             list: If 1 in list required data is missing.
         """
         check_input_data = []
-
+        
         for prop in properties:
             required, plx_prop_name, scenario_list = prop
             if f"{plx_prop_name}" not in self:
@@ -206,7 +245,8 @@ class MPlotDataHelper(dict):
             if scen_list:
                 # Read data in with multi threading
                 executor_func_setup = functools.partial(
-                    self.read_processed_h5file, plx_prop_name
+                    dataio.read_processed_h5file, self.processed_hdf5_folder, 
+                    plx_prop_name
                 )
                 with concurrent.futures.ThreadPoolExecutor(
                     max_workers=mconfig.parser("multithreading_workers")
@@ -215,33 +255,31 @@ class MPlotDataHelper(dict):
                 # Save data to dict
                 for scenario, df in zip(scen_list, data_files):
                     self[f"{plx_prop_name}"][scenario] = df
-
+            
             # If any of the dataframes are empty for given property log warning
-            if True in [df.empty for df in self[f"{plx_prop_name}"].values()]:
-                logger.warning(
-                    f"{plx_prop_name} is MISSING from the Marmot formatted h5 files"
-                )
-                if required == True:
-                    check_input_data.append(1)
+            missing_scen_data = [scen for scen, df in self[f"{plx_prop_name}"].items() if df.empty]
+            if missing_scen_data:
+                if mconfig.parser("read_csv_properties"):
+                    logger.info(
+                        f"{plx_prop_name} not found in Marmot formatted h5 files, "
+                        "attempting to read from csv property file."
+                    )
+                    for scenario in missing_scen_data:
+                        df = dataio.read_csv_property_file(
+                                self.csv_properties_folder,
+                                plx_prop_name,
+                                scenario
+                        )
+                        self[f"{plx_prop_name}"][scenario] = df
+                        if df.empty and required == True:
+                            check_input_data.append(1)
+                else:
+                    logger.warning(
+                        f"{plx_prop_name} is MISSING from the Marmot formatted h5 files"
+                    )
+                    if required == True:
+                        check_input_data.append(1)
         return check_input_data
-
-    def read_processed_h5file(self, plx_prop_name: str, scenario: str) -> pd.DataFrame:
-        """Reads Data from processed h5file.
-
-        Args:
-            plx_prop_name (str): Name of property, e.g generator_Generation
-            scenario (str): Name of scenario.
-
-        Returns:
-            pd.DataFrame: Requested dataframe.
-        """
-        try:
-            with pd.HDFStore(
-                self.processed_hdf5_folder.joinpath(f"{scenario}_formatted.h5"), "r"
-            ) as file:
-                return file[plx_prop_name]
-        except KeyError:
-            return pd.DataFrame()
 
     def rename_gen_techs(self, df: pd.DataFrame) -> pd.DataFrame:
         """Renames generator technologies based on the gen_names.csv file.
@@ -307,7 +345,7 @@ class MPlotDataHelper(dict):
         # Adjust list of values to drop from vre_gen_cat depending 
         # on if it exists in processed techs
         adjusted_vre_gen_list = [
-            name for name in self.vre_gen_cat if name in df.columns
+            name for name in self.gen_categories.vre if name in df.columns
         ]
 
         if not adjusted_vre_gen_list:
@@ -319,7 +357,7 @@ class MPlotDataHelper(dict):
             )
 
         # Retrun df with just vre techs
-        return df[df.columns.intersection(self.vre_gen_cat)]
+        return df[df.columns.intersection(self.gen_categories.vre)]
 
     def df_process_gen_inputs(self, df: pd.DataFrame) -> pd.DataFrame:
         """Processes generation data into a pivot table.
@@ -347,9 +385,9 @@ class MPlotDataHelper(dict):
         # Check if data is not already categorical
         if df.tech.dtype.name != "category":
             df.tech = df.tech.astype("category")
-        df.tech = df.tech.cat.set_categories(self.ordered_gen)
+        df.tech = df.tech.cat.set_categories(self.ordered_gen, ordered=True)
         df = df.sort_values(["tech"])
-        df = df.pivot(index="timestamp", columns="tech", values=0)
+        df = df.pivot(index="timestamp", columns="tech", values="values")
         return df.fillna(0)
 
     def create_categorical_tech_index(self, df: pd.DataFrame, axis=0) -> pd.DataFrame:
@@ -431,12 +469,15 @@ class MPlotDataHelper(dict):
         Returns:
             Tuple[int, int]: Facet x,y dimensions.
         """
-        ncols = len(self.xlabels)
-        if self.xlabels == [""]:
+        
+        if not self.xlabels:
             ncols = 1
-        nrows = len(self.ylabels)
-        if self.ylabels == [""]:
+        else:
+            ncols = len(self.xlabels)
+        if not self.ylabels:
             nrows = 1
+        else:
+            nrows = len(self.ylabels)
         # If the plot is not a facet plot, grid size should be 1x1
         if not facet:
             ncols = 1
@@ -445,8 +486,8 @@ class MPlotDataHelper(dict):
         # If no labels were provided or dimensions less than len scenarios use 
         # Marmot default dimension settings
         if (
-            self.xlabels == [""]
-            and self.ylabels == [""]
+            not self.xlabels
+            and not self.ylabels
             or ncols * nrows < len(multi_scenario)
         ):
             logger.info(

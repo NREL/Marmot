@@ -43,14 +43,13 @@ class MetaData:
             partition_number (int, optional): Which temporal partition of h5 data to retrieve
                 metadata from in the formatted h5 file. Defaults to 0.
         """
-        self.HDF5_folder_in = HDF5_folder_in
+        self.HDF5_folder_in = Path(HDF5_folder_in)
         self.Region_Mapping = Region_Mapping
         self.read_from_formatted_h5 = read_from_formatted_h5
         self.partition_number = partition_number
         self.start_index = None
 
-    @classmethod
-    def _check_if_existing_filename(cls, filename: str) -> bool:
+    def _check_if_existing_filename(self, filename: str) -> bool:
         """Check if the passed filename is the same or different from previous calls.
 
         If file is different replaces the filename with new value
@@ -62,11 +61,11 @@ class MetaData:
         Returns:
             bool: False if new file, True if existing
         """
-        if cls.filename != filename:
-            cls.filename = filename
-            cls.close_h5()
+        if self.filename != filename:
+            self.filename = filename
+            self.close_h5()
             return False
-        elif cls.filename == filename:
+        elif self.filename == filename:
             return True
 
     @classmethod
@@ -87,8 +86,9 @@ class MetaData:
 
         try:
             if self.read_from_formatted_h5:
-
-                filename = processed_file_format.format(filename)
+                
+                if "_formatted.h5" not in filename:
+                    filename = processed_file_format.format(filename)
                 self.h5_filepath = self.HDF5_folder_in.joinpath(filename)
                 with h5py.File(self.HDF5_folder_in.joinpath(filename), "r") as f:
                     self.h5_data = f

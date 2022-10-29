@@ -5,18 +5,21 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
+import os
+#os.environ['GAMSDIR'] = r"C:\GAMS\39"
+import sys
 import logging
 import re
+from pathlib import Path
+from typing import List, Dict
+from dataclasses import dataclass, field
 import gdxpds
 import pandas as pd
-from pathlib import Path
-from typing import List
-from dataclasses import dataclass, field
 
 import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
-from marmot.formatters.formatextra import ExtraProperties
+from marmot.formatters.formatextra import ExtraReEDSProperties
 
 logger = logging.getLogger("formatter." + __name__)
 formatter_settings = mconfig.parser("formatter_settings")
@@ -43,35 +46,10 @@ class ProcessReEDS(Process):
         "generator_systemcost_techba": "generator_Total_Generation_Cost",
     }
     """Maps simulation model property names to Marmot property names"""
-    # Extra custom properties that are created based off existing properties.
-    # The dictionary keys are the existing properties and the values are the new
-    # property names and methods used to create it.
-    EXTRA_MARMOT_PROPERTIES: dict = {
-        "generator_Total_Generation_Cost": [
-            ("generator_VOM_Cost", ExtraProperties.reeds_generator_vom_cost),
-            ("generator_Fuel_Cost", ExtraProperties.reeds_generator_fuel_cost),
-            (
-                "generator_Reserves_VOM_Cost",
-                ExtraProperties.reeds_generator_reserve_vom_cost,
-            ),
-            ("generator_FOM_Cost", ExtraProperties.reeds_generator_fom_cost),
-        ],
-        "reserves_generators_Provision": [
-            ("reserve_Provision", ExtraProperties.reeds_reserve_provision)
-        ],
-        "region_Demand": [
-            ("region_Demand_Annual", ExtraProperties.annualize_property),
-            ("region_Load", ExtraProperties.reeds_region_total_load),
-        ],
-        "generator_Curtailment": [
-            ("generator_Curtailment_Annual", ExtraProperties.annualize_property)
-        ],
-        "generator_Pump_Load": [
-            ("generator_Pump_Load_Annual", ExtraProperties.annualize_property)
-        ],
-        "region_Load": [("region_Load_Annual", ExtraProperties.annualize_property)],
-    }
-    """Dictionary of Extra custom properties that are created based off existing properties."""
+
+    GDX_RESULTS_PREFIX = "rep_"
+    """Prefix of gdx results file"""
+    EXTRA_PROPERTIES_CLASS = ExtraReEDSProperties
 
     def __init__(
         self,
@@ -115,6 +93,15 @@ class ProcessReEDS(Process):
             process_subset_years = list(map(int, process_subset_years))
             logger.info(f"Processing subset of ReEDS years: {process_subset_years}")
         self.process_subset_years = process_subset_years
+
+    @property
+    def reeds_prop_cols(self) -> "ReEDSPropertyColumns":
+        """Get the ReEDSPropertyColumns dataclass
+
+        Returns:
+            ReEDSPropertyColumns
+        """
+        return ReEDSPropertyColumns()
 
     @property
     def property_units(self) -> dict:
@@ -168,33 +155,33 @@ class ProcessReEDS(Process):
             )
 
     @property
-    def get_input_files(self) -> list:
-        """Gets a list of input files within the scenario folders"""
-        if self._get_input_files == None:
+    def get_input_data_paths(self) -> list:
+        """Gets a list of input gdx files within the scenario folders"""
+        if self._get_input_data_paths is None:
             reeds_outputs_dir = self.input_folder.joinpath("outputs")
             files = []
             for names in reeds_outputs_dir.iterdir():
-                if names.name == f"rep_{self.input_folder.name}.gdx":
+                if names.name == f"{self.GDX_RESULTS_PREFIX}{self.input_folder.name}.gdx":
                     files.append(names.name)
 
                     self.property_units = str(names)
 
             # List of all files in input folder in alpha numeric order
-            self._get_input_files = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
-        return self._get_input_files
-
+            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+        return self._get_input_data_paths
+    
     @property
-    def file_collection(self) -> dict:
+    def data_collection(self) -> Dict[str, Path]:
         """Dictionary input file names to full filename path 
 
         Returns:
-            dict: file_collection {filename: fullpath}
+            dict: data_collection {filename: fullpath}
         """
-        if self._file_collection == None:
-            self._file_collection = {}
-            for file in self.get_input_files:
-                self._file_collection[file] = str(self.input_folder.joinpath("outputs", file))
-        return self._file_collection
+        if self._data_collection is None:
+            self._data_collection = {}
+            for file in self.get_input_data_paths:
+                self._data_collection[file] = self.input_folder.joinpath("outputs", file)
+        return self._data_collection
 
     def output_metadata(self, files_list: list) -> None:
         """Add ReEDS specific metadata to formatted h5 file .
@@ -205,7 +192,8 @@ class ProcessReEDS(Process):
         """
         for partition in files_list:
             region_df = pd.read_csv(
-                self.input_folder.joinpath("inputs_case", "regions.csv")
+                self.input_folder.joinpath("inputs_case", "regions.csv"),
+                dtype=str
             )
             region_df.rename(columns={"p": "name", "s": "category"}, inplace=True)
             region_df.to_hdf(
@@ -215,7 +203,7 @@ class ProcessReEDS(Process):
             )
 
     def get_processed_data(
-        self, prop_class: str, prop: str, timescale: str, model_filename: str
+        self, prop_class: str, prop: str, timescale: str, model_name: str
     ) -> pd.DataFrame:
         """Handles the pulling of data from the ReEDS gdx
         file and then passes the data to one of the formating functions
@@ -224,7 +212,7 @@ class ProcessReEDS(Process):
             prop_class (str): Property class e.g Region, Generator, Zone etc
             prop (str): Property e.g gen_out, cap_out etc.
             timescale (str): Data timescale, e.g interval, summary.
-            model_filename (str): name of model to process.
+            model_name (str): name of model to process.
 
         Returns:
             pd.DataFrame: Formatted results dataframe.
@@ -232,16 +220,15 @@ class ProcessReEDS(Process):
         # Set wind_resource_to_pca dict
         self.wind_resource_to_pca = self.input_folder.name
 
-        gdx_file = self.file_collection.get(model_filename)
-        logger.info(f"      {model_filename}")
+        gdx_file = self.data_collection.get(model_name)
+        logger.info(f"      {model_name}")
         try:
-            df: pd.DataFrame = gdxpds.to_dataframe(gdx_file, prop)[prop]
+            df: pd.DataFrame = gdxpds.to_dataframe(str(gdx_file), prop)[prop]
         except gdxpds.tools.Error:
             df = self.report_prop_error(prop, prop_class)
             return df
         # Get column names
-        reeds_prop_cols = PropertyColumns()
-        df.columns = getattr(reeds_prop_cols, prop)
+        df.columns = getattr(self.reeds_prop_cols, prop)
         if "region" in df.columns:
             df.region = df.region.map(lambda x: self.wind_resource_to_pca.get(x, x))
             if not self.Region_Mapping.empty:
@@ -252,9 +239,17 @@ class ProcessReEDS(Process):
         process_att = getattr(self, f"df_process_{prop_class}", None)
         if process_att:
             # Process attribute and return to df
-            df = process_att(df, prop, gdx_file)
+            df = process_att(df, prop, str(gdx_file))
+        
+        try:
+            df.year = df.year.astype(int)
+        except ValueError as e:
+            logger.error("Formatting ERROR: year column cannot be converted to type int. This is likely due to an " 
+                f"incorrectly ordered {self.reeds_prop_cols.__class__} variable, for property '{prop}'.\n"
+                f"Check column order in {self.reeds_prop_cols.__class__} and try running the formatter again.\n"
+                f"If the issue persists open a GitHub issue.\nTraceback message: {e}\nMarmot will not exit.")
+            sys.exit()
 
-        df.year = df.year.astype(int)
         if self.process_subset_years:
             df = df.loc[df.year.isin(self.process_subset_years)]
 
@@ -264,7 +259,6 @@ class ProcessReEDS(Process):
             df["timestamp"] = pd.to_datetime(df.year.astype(str))
         if "year" in df.columns:
             df = df.drop(["year"], axis=1)
-
         df_col = list(df.columns)
         df_col.remove("Value")
         df_col.insert(0, df_col.pop(df_col.index("timestamp")))
@@ -279,7 +273,7 @@ class ProcessReEDS(Process):
         df = df * converted_units[1]
         units_index = pd.Index([converted_units[0]] * len(df), name="units")
         df.set_index(units_index, append=True, inplace=True)
-        df.rename(columns={"Value": 0}, inplace=True)
+        df.rename(columns={"Value": "values"}, inplace=True)
         return df
 
     def merge_timeseries_block_data(self, df: pd.DataFrame) -> pd.DataFrame:
@@ -295,9 +289,10 @@ class ProcessReEDS(Process):
             self.input_folder.joinpath("inputs_case", "h_dt_szn.csv")
         )
 
-        # All year timeslice mappings are the same, defaulting to 2007
+        # All year timeslice mappings are the same, defaulting to first available year
+        yr = timeslice_mapping_file.year[0]
         timeslice_mapping_file = timeslice_mapping_file.loc[
-            timeslice_mapping_file.year == 2007
+            timeslice_mapping_file.year == yr
         ]
         timeslice_mapping_file = timeslice_mapping_file.drop("year", axis=1)
 
@@ -360,8 +355,7 @@ class ProcessReEDS(Process):
             except gdxpds.tools.Error:
                 stor_out = self.report_prop_error(stor_prop_name, "storage")
                 return df
-            reeds_prop_cols = PropertyColumns()
-            stor_out.columns = getattr(reeds_prop_cols, stor_prop_name)
+            stor_out.columns = getattr(self.reeds_prop_cols, stor_prop_name)
             if prop == "gen_out_ann":
                 stor_out = stor_out.loc[stor_out.type == "out"]
             stor_out = stor_out.groupby(group_list).sum()
@@ -413,7 +407,7 @@ class ProcessReEDS(Process):
 
 
 @dataclass
-class PropertyColumns:
+class ReEDSPropertyColumns:
     """ReEDS property column names"""
 
     gen_out: List = field(

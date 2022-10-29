@@ -1,5 +1,5 @@
 """
-Execute and run the Marmot formatter 
+Execute and run the Marmot formatter
 """
 
 import sys

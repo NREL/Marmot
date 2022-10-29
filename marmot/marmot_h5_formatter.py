@@ -29,8 +29,10 @@ except ModuleNotFoundError:
     sys.exit()
 from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
 from marmot.utils.loggersetup import SetupLogger
-from marmot.formatters import PROCESS_LIBRARY
-from marmot.formatters.formatextra import ExtraProperties
+import marmot.utils.dataio as dataio
+import marmot.formatters as formatters
+from marmot.formatters.formatbase import Process
+
 
 # A bug in pandas requires this to be included,
 # otherwise df.to_string truncates long strings. Fix available in Pandas 1.0
@@ -55,7 +57,6 @@ class MarmotFormat(SetupLogger):
         Model_Solutions_folder: Union[str, Path],
         Properties_File: Union[str, Path, pd.DataFrame],
         Marmot_Solutions_folder: Union[str, Path] = None,
-        mapping_folder: Union[str, Path] = INPUT_DIR.joinpath("mapping_folder"),
         Region_Mapping: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
         emit_names: Union[str, Path, pd.DataFrame] = pd.DataFrame(),
         **kwargs,
@@ -70,9 +71,6 @@ class MarmotFormat(SetupLogger):
             Marmot_Solutions_folder (Union[str, Path], optional): Folder to save Marmot
                 solution files.
                 Defaults to None.
-            mapping_folder (Union[str, Path], optional): The location of the Marmot
-                mapping folder.
-                Defaults to INPUT_DIR.joinpath('mapping_folder').
             Region_Mapping (Union[str, Path, pd.DataFrame], optional): Mapping file
                 to map custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
@@ -88,8 +86,6 @@ class MarmotFormat(SetupLogger):
 
         self.Scenario_name = Scenario_name
         self.Model_Solutions_folder = Path(Model_Solutions_folder)
-
-        self.mapping_folder = Path(mapping_folder)
 
         if Marmot_Solutions_folder is None:
             self.Marmot_Solutions_folder = self.Model_Solutions_folder
@@ -114,7 +110,7 @@ class MarmotFormat(SetupLogger):
         if isinstance(Region_Mapping, (str, Path)):
             try:
                 Region_Mapping = pd.read_csv(Region_Mapping)
-                if not self.Region_Mapping.empty:
+                if not Region_Mapping.empty:
                     Region_Mapping = Region_Mapping.astype(object)
             except FileNotFoundError:
                 self.logger.warning(
@@ -162,44 +158,6 @@ class MarmotFormat(SetupLogger):
                     inplace=True,
                 )
 
-    def save_to_h5(
-        self,
-        df: pd.DataFrame,
-        file_name: Path,
-        key: str,
-        mode: str = "a",
-        complevel: int = 9,
-        complib: str = "blosc:zlib",
-        **kwargs,
-    ) -> None:
-        """Saves data to formatted hdf5 file
-
-        Args:
-            df (pd.DataFrame): Dataframe to save
-            file_name (Path): name of hdf5 file
-            key (str): formatted property identifier,
-                e.g generator_Generation
-            mode (str, optional): file access mode.
-                Defaults to "a".
-            complevel (int, optional): compression level.
-                Defaults to 9.
-            complib (str, optional): compression library.
-                Defaults to 'blosc:zlib'.
-            **kwargs
-                These parameters will be passed pandas.to_hdf function.
-        """
-        self.logger.info("Saving data to h5 file...")
-        df.to_hdf(
-            file_name,
-            key=key,
-            mode=mode,
-            complevel=complevel,
-            complib=complib,
-            **kwargs,
-        )
-
-        self.logger.info("Data saved to h5 file successfully\n")
-
     def run_formatter(
         self,
         sim_model: str = "PLEXOS",
@@ -228,14 +186,14 @@ class MarmotFormat(SetupLogger):
             scen_name = self.Scenario_name
 
         try:
-            process_class = PROCESS_LIBRARY[sim_model]
-            if process_class is None:
+            process_class = getattr(formatters, sim_model.lower())()
+            if not callable(process_class):
                 self.logger.error(
                     "A required module was not found to " f"process {sim_model} results"
                 )
-                self.logger.error(PROCESS_LIBRARY["Error"])
+                self.logger.error(process_class)
                 sys.exit()
-        except KeyError:
+        except AttributeError:
             self.logger.error(f"No formatter found for model: {sim_model}")
             sys.exit()
 
@@ -248,7 +206,7 @@ class MarmotFormat(SetupLogger):
 
         output_file_path = output_folder.joinpath(hdf5_output_name)
 
-        process_sim_model = process_class(
+        process_sim_model: Process = process_class(
             input_folder,
             output_file_path,
             plexos_block=plexos_block,
@@ -257,10 +215,11 @@ class MarmotFormat(SetupLogger):
             emit_names=self.emit_names,
         )
 
-        files_list = process_sim_model.get_input_files
+        files_list = process_sim_model.get_input_data_paths
 
         # init of ExtraProperties class
-        extraprops_init = ExtraProperties(process_sim_model, files_list)
+        extraprops_init = process_sim_model.EXTRA_PROPERTIES_CLASS(process_sim_model)
+
         # =====================================================================
         # Process the Outputs
         # =====================================================================
@@ -298,7 +257,7 @@ class MarmotFormat(SetupLogger):
 
         start = time.time()
         # Main loop to process each output and pass data to functions
-        for index, row in process_properties.iterrows():
+        for _, row in process_properties.iterrows():
             Processed_Data_Out = pd.DataFrame()
             data_chunks = []
 
@@ -347,7 +306,7 @@ class MarmotFormat(SetupLogger):
                     save_attempt = 1
                     while save_attempt <= 3:
                         try:
-                            self.save_to_h5(
+                            dataio.save_to_h5(
                                 Processed_Data_Out,
                                 output_file_path,
                                 key=property_key_name,
@@ -362,11 +321,9 @@ class MarmotFormat(SetupLogger):
                             save_attempt += 1
 
                     # Calculate any extra properties
-                    if property_key_name in process_sim_model.EXTRA_MARMOT_PROPERTIES:
+                    extra_prop_functions = extraprops_init.get_extra_properties(property_key_name)
+                    if extra_prop_functions:
 
-                        extra_prop_functions = (
-                            process_sim_model.EXTRA_MARMOT_PROPERTIES[property_key_name]
-                        )
                         for prop_function_tup in extra_prop_functions:
                             prop_name, prop_function = prop_function_tup
 
@@ -377,23 +334,22 @@ class MarmotFormat(SetupLogger):
 
                                 self.logger.info(f"Processing {prop_name}")
                                 prop = prop_function(
-                                    extraprops_init,
                                     Processed_Data_Out,
                                     timescale=row["data_type"],
                                 )
 
                                 if prop.empty is False:
-                                    self.save_to_h5(
+                                    dataio.save_to_h5(
                                         prop, output_file_path, key=prop_name
                                     )
                                 else:
                                     self.logger.warning(f"{prop_name} was not saved")
+                                    continue
+                                
                             # Run again to check for properties based of new properties
-                            if prop_name in process_sim_model.EXTRA_MARMOT_PROPERTIES:
+                            extra2_prop_functions = extraprops_init.get_extra_properties(prop_name)
+                            if extra2_prop_functions:
 
-                                extra2_prop_functions = (
-                                    process_sim_model.EXTRA_MARMOT_PROPERTIES[prop_name]
-                                )
                                 for prop_function_tup2 in extra2_prop_functions:
                                     prop_name2, prop_function2 = prop_function_tup2
 
@@ -407,13 +363,12 @@ class MarmotFormat(SetupLogger):
 
                                         self.logger.info(f"Processing {prop_name2}")
                                         prop2 = prop_function2(
-                                            extraprops_init,
                                             prop,
                                             timescale=row["data_type"],
                                         )
 
                                         if prop2.empty is False:
-                                            self.save_to_h5(
+                                            dataio.save_to_h5(
                                                 prop2, output_file_path, key=prop_name2
                                             )
                                         else:
@@ -568,7 +523,6 @@ def main():
             Model_Solutions_folder,
             Properties_File,
             Marmot_Solutions_folder=Marmot_Solutions_folder,
-            mapping_folder=Mapping_folder,
             Region_Mapping=Region_Mapping,
             emit_names=emit_names,
         )

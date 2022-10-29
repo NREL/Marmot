@@ -83,7 +83,12 @@ class Prices(MPlotDataHelper):
         # List of properties needed by the plot, properties are a set of tuples and 
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
-        properties = [(True, f"{agg}_Price", self.Scenarios)]
+        properties = [
+            (True, f"{agg}_Price", self.Scenarios),
+            #(True, "generator_Installed_Capacity", self.Scenarios),
+            (True, f"generator_Installed_Capacity", self.Scenarios),
+            (True, f"generator_Available_Capacity", self.Scenarios),
+        ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
         # with all required properties, returns a 1 if required data is missing
@@ -115,19 +120,40 @@ class Prices(MPlotDataHelper):
             for scenario in self.Scenarios:
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
+                #ww added
+                Cap = self._process_data(self[f"generator_Available_Capacity"], scenario, zone_input)
+                #Cap = Cap.xs(zone_input, level=self.AGG_BY)
+                #Cap = Cap.rename(columns={0: "Installed Capacity (MW)"})
+                Cap = Cap.groupby(["timestamp"]).sum()
+                #price = pd.merge(price,Cap,on=["timestamp"])
+                #global price
+                #price = [price / Cap for price, Cap in zip(price, Cap)]
+                #(price.astype(int)* Cap.astype(int)) /
+                #(price.astype(int)/ sum(Cap.astype(int)) )*Cap.astype(int)
+                price = (price.astype(int)/ (Cap.astype(int).sum()) )*Cap.astype(int)
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
-                        price, start_date_range, end_date_range
+                    #ww changed
+                    price,cap = self.set_timestamp_date_range(
+                        [Cap,price], start_date_range, end_date_range
                     )
-                price.sort_values(by=scenario, ascending=False, inplace=True)
+                #price.sort_values(by=scenario, ascending=False, inplace=True)
                 price.reset_index(drop=True, inplace=True)
                 all_prices.append(price)
+                #all_prices.append(Cap)
 
+                
+            #Cap["year"] = Cap.index.get_level_values("timestamp").year.astype(str
+
+            
             duration_curve = pd.concat(all_prices, axis=1)
             duration_curve.columns = duration_curve.columns.str.replace("_", " ")
 
+
             data_out = duration_curve.copy()
             data_out.columns = [zone_input + "_" + str(col) for col in data_out.columns]
+            #ww added
+            #global cap 
+            #data_out.columns = sum(data_out*cap)/sum(cap)
             data_table.append(data_out)
 
             color_dict = dict(zip(duration_curve.columns, self.color_list))
@@ -161,12 +187,12 @@ class Prices(MPlotDataHelper):
         Data_Table_Out = Data_Table_Out.add_suffix(" ($/MWh)")
 
         fig.savefig(
-            save_figures.joinpath("Price_Duration_Curve_All_Regions.svg"),
+            save_figures.joinpath("Price_weight_average.svg"),
             dpi=600,
             bbox_inches="tight",
         )
         Data_Table_Out.to_csv(
-            save_figures.joinpath("Price_Duration_Curve_All_Regions.csv")
+            save_figures.joinpath("Price_weight_average.csv")
         )
         outputs = DataSavedInModule()
         return outputs
