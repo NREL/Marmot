@@ -14,6 +14,13 @@ def reeds():
     except ModuleNotFoundError:
         return traceback.format_exc()
 
+def reeds_india():
+    try:
+        from .formatreeds_india import ProcessReEDSIndia
+        return ProcessReEDSIndia
+    except ModuleNotFoundError:
+        return traceback.format_exc()
+
 def egret():
     try:
         from .formategret import ProcessEGRET

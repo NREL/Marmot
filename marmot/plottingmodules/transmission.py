@@ -2037,7 +2037,7 @@ class Transmission(MPlotDataHelper):
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)
 
                 rr_int_agg = rr_int.groupby(['timestamp','parent','child'],as_index=True).sum()
-                rr_int_agg.rename(columns = {0:'flow (MW)'}, inplace = True)
+                rr_int_agg.rename(columns = {'values':'flow (MW)'}, inplace = True)
                 rr_int_agg = rr_int_agg.reset_index()
 
                 # If plotting all regions update plot setup
@@ -2060,6 +2060,7 @@ class Transmission(MPlotDataHelper):
 
                 for parent in parent_region:
                     single_parent = rr_int_agg[rr_int_agg['parent'] == parent]
+
                     single_parent = single_parent.pivot(index = 'timestamp',columns = 'child',values = 'flow (MW)')
                     single_parent = single_parent.loc[:,(single_parent != 0).any(axis = 0)] #Remove all 0 columns (uninteresting).
                     if (parent in single_parent.columns):
@@ -2177,7 +2178,7 @@ class Transmission(MPlotDataHelper):
                     rr_int['parent'] = rr_int['parent'].map(agg_region_mapping)
                     rr_int['child']  = rr_int['child'].map(agg_region_mapping)
             rr_int_agg = rr_int.groupby(['parent','child'],as_index=True).sum()
-            rr_int_agg.rename(columns = {0:'flow (MW)'}, inplace = True)
+            rr_int_agg.rename(columns = {'values':'flow (MW)'}, inplace = True)
             rr_int_agg=rr_int_agg.loc[rr_int_agg['flow (MW)']>0.01] # Keep only positive flows
             rr_int_agg.sort_values(ascending=False,by='flow (MW)')
             rr_int_agg = rr_int_agg/1000 # MWh -> GWh
