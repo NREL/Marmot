@@ -863,7 +863,7 @@ class TotalGeneration(MPlotDataHelper):
 
                 axs[i].margins(x=0.01)
                 axs[i].set_xlabel("")
-
+                axs[i].set_title(scenario)
                 if plot_as_percnt:
                     mplt.set_yaxis_major_tick_format(tick_format="percent", sub_pos=i)
 
@@ -905,7 +905,7 @@ class TotalGeneration(MPlotDataHelper):
                             c="black",
                             linewidth=2,
                             label=load_legend_names["demand"],
-                        )
+                        )       
 
             # add facet labels
             mplt.add_facet_labels(xlabels=self.xlabels, ylabels=self.ylabels)
