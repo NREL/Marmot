@@ -368,7 +368,7 @@ class Prices(MPlotDataHelper):
             df.reset_index(drop=True, inplace=True)
             df_all_list.append(df)
         
-        df_all = pd.concat(df_all_list)
+        df_all = pd.concat(df_all_list,axis = 1)
 
         # setup plot
         nrows = 1
