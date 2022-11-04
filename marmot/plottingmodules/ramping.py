@@ -465,13 +465,3 @@ class Ramping(MPlotDataHelper):
 
             outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs
-
-
-# t = Ramping(Zones = ['GVEA'],
-#             AGG_BY = 'region',
-#             Scenarios = ['BESS100_2_Delta42','BESS100_2_Delta90'],
-#             ordered_gen = pd.read_csv('/Users/mschwarz/Marmot_local/Marmot/marmot/input_files/mapping_folder/ordered_gen_categories.csv'),
-#             marmot_solutions_folder = '/Users/mschwarz/GVEA BESS/Solutions')
-
-# figout = t.count_starts_single_gen(prop = 'North Pole 3/4')
-# figout['GVEA']['fig'].show()
