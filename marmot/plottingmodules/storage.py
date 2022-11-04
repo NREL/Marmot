@@ -7,13 +7,6 @@ This module creates energy storage plots.
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
-import numpy as np
-import re
-import matplotlib as mpl
-import matplotlib.pyplot as plt
-import matplotlib.cm as cm
-import matplotlib.colors as mcolors
-import matplotlib.dates as mdates
 
 import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
