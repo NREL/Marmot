@@ -507,60 +507,7 @@ class InstalledCapacity(MPlotDataHelper):
             data_tables = []
 
             if plot_data_settings["include_barplot_load_lines"]:
-                for n, scenario in enumerate(Total_Generation_Stack_Out.index.unique()):
-                    x = [
-                        axs[1].patches[n].get_x(),
-                        axs[1].patches[n].get_x() + axs[1].patches[n].get_width(),
-                    ]
-
-                    height1 = [
-                        float(extra_plot_data.loc[scenario, "Total Load"].sum())
-                    ] * 2
-
-                    if (
-                        plot_data_settings["include_barplot_load_storage_charging_line"]
-                        and extra_plot_data.loc[scenario, "Total Load"].sum()
-                        > extra_plot_data.loc[scenario, "Total Demand"].sum()
-                    ):
-                        axs[1].plot(
-                            x,
-                            height1,
-                            c="black",
-                            linewidth=1.5,
-                            linestyle="--",
-                            label=load_legend_names["load"],
-                        )
-                        height2 = [
-                            float(extra_plot_data.loc[scenario, "Total Demand"])
-                        ] * 2
-                        axs[1].plot(
-                            x,
-                            height2,
-                            c="black",
-                            linewidth=1.5,
-                            label=load_legend_names["demand"],
-                        )
-                    elif extra_plot_data.loc[scenario, "Total Demand"].sum() > 0:
-                        axs[1].plot(
-                            x,
-                            height1,
-                            c="black",
-                            linewidth=1.5,
-                            label=load_legend_names["demand"],
-                        )
-
-                    if extra_plot_data.loc[scenario, "Unserved Energy"] > 0:
-                        height3 = [
-                            float(extra_plot_data.loc[scenario, "Load-Unserved_Energy"])
-                        ] * 2
-                        axs[1].fill_between(
-                            x,
-                            height3,
-                            height1,
-                            facecolor="#DD0200",
-                            alpha=0.5,
-                            label="Unserved Energy",
-                        )
+                mplt.add_barplot_load_lines_and_use(extra_plot_data, sub_pos=1)
 
             data_tables = pd.DataFrame()  # TODO pass output data back to plot main
 

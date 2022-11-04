@@ -299,60 +299,8 @@ class TotalGeneration(MPlotDataHelper):
             )
 
             if plot_data_settings["include_barplot_load_lines"]:
-                for n, scenario in enumerate(total_generation_stack_out.index.unique()):
-                    x = [
-                        ax.patches[n].get_x(),
-                        ax.patches[n].get_x() + ax.patches[n].get_width(),
-                    ]
+                mplt.add_barplot_load_lines_and_use(extra_data_out)
 
-                    height1 = [
-                        float(extra_data_out.loc[scenario, "Total Load"].sum())
-                    ] * 2
-
-                    if (
-                        plot_data_settings["include_barplot_load_storage_charging_line"]
-                        and extra_plot_data["Total Load"].sum()
-                        > extra_plot_data["Total Demand"].sum()
-                    ):
-                        ax.plot(
-                            x,
-                            height1,
-                            c="black",
-                            linewidth=1.5,
-                            linestyle="--",
-                            label=load_legend_names["load"],
-                        )
-                        height2 = [
-                            float(extra_data_out.loc[scenario, "Total Demand"])
-                        ] * 2
-                        ax.plot(
-                            x,
-                            height2,
-                            c="black",
-                            linewidth=1.5,
-                            label=load_legend_names["demand"],
-                        )
-                    elif extra_plot_data["Total Demand"].sum() > 0:
-                        ax.plot(
-                            x,
-                            height1,
-                            c="black",
-                            linewidth=1.5,
-                            label=load_legend_names["demand"],
-                        )
-
-                    if extra_data_out.loc[scenario, "Unserved Energy"] > 0:
-                        height3 = [
-                            float(extra_data_out.loc[scenario, "Load-Unserved_Energy"])
-                        ] * 2
-                        ax.fill_between(
-                            x,
-                            height3,
-                            height1,
-                            facecolor="#DD0200",
-                            alpha=0.5,
-                            label="Unserved Energy",
-                        )
             # Add legend
             mplt.add_legend(reverse_legend=True, sort_by=self.ordered_gen)
             # Add title
@@ -891,43 +839,7 @@ class TotalGeneration(MPlotDataHelper):
 
                 if not vre_only and plot_data_settings["include_barplot_load_lines"]:
                     month_extra = extra_data_out.xs(scenario, level="Scenario")
-                    for n, _m in enumerate(month_extra.index):
-                        x = [
-                            axs[i].patches[n].get_x(),
-                            axs[i].patches[n].get_x() + axs[i].patches[n].get_width(),
-                        ]
-                        height1 = [float(month_extra.loc[_m, "Total Load"])] * 2
-
-                        if (
-                            plot_data_settings["include_barplot_load_storage_charging_line"]
-                            and month_extra.loc[_m, "Total Load"].sum()
-                            > month_extra.loc[_m, "Total Demand"].sum()
-                        ):
-
-                            axs[i].plot(
-                                x,
-                                height1,
-                                c="black",
-                                linewidth=2,
-                                linestyle="--",
-                                label=load_legend_names["load"],
-                            )
-                            height2 = [float(month_extra.loc[_m, "Total Demand"])] * 2
-                            axs[i].plot(
-                                x,
-                                height2,
-                                c="black",
-                                linewidth=1.5,
-                                label=load_legend_names["demand"],
-                            )
-                        elif month_extra.loc[_m, "Total Demand"].sum() > 0:
-                            axs[i].plot(
-                                x,
-                                height1,
-                                c="black",
-                                linewidth=2,
-                                label=load_legend_names["demand"],
-                            )
+                    mplt.add_barplot_load_lines_and_use(month_extra, sub_pos=i)
 
             # add facet labels
             mplt.add_facet_labels(xlabels=self.xlabels, ylabels=self.ylabels)
