@@ -371,3 +371,97 @@ class Ramping(MPlotDataHelper):
 
             outputs[zone_input] = {"fig": fig2, "data_table": Data_Table_Out}
         return outputs
+
+    def count_starts_single_gen(self, 
+                                prop: str = None,
+                                start_date_range: str = None,
+                                end_date_range: str = None,
+                                **_,):
+        """Counts the number of times a specified generator turns on during the simulation.
+
+        Args:
+
+            prop (str, optional): Name of the PLEXOS generator.
+                Defaults to None.
+        Returns:
+            dict: Dictionary containing the created plot and its data table.
+        """
+
+        outputs: dict = {}
+
+        # List of properties needed by the plot, properties are a set of
+        # tuples and contain 3 parts:
+        # required True/False, property name and scenarios required,
+        # scenarios must be a list.
+        properties = [
+            (True, "generator_Generation", self.Scenarios),
+        ]
+
+        # Runs get_formatted_data within MPlotDataHelper to populate
+        # MPlotDataHelper dictionary with all required properties,
+        # returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        if 1 in check_input_data:
+            return MissingInputData()
+
+        for zone_input in self.Zones:
+            logger.info(f"{self.AGG_BY} = {zone_input}")
+            cycles_df = pd.DataFrame(
+                columns=[prop],
+                index=self.Scenarios,
+            )
+
+            for scenario in self.Scenarios:
+                logger.info(f"Scenario = {str(scenario)}")
+
+                Gen: pd.DataFrame = self["generator_Generation"].get(scenario)             
+                try:
+                    Gen = Gen.xs(prop, level='gen_name')
+                except KeyError:
+                    logger.warning(f"{prop} has no generation in {zone_input}")
+                    break
+
+                if pd.notna(start_date_range):
+                    Gen = self.set_timestamp_date_range(
+                        Gen, start_date_range, end_date_range
+                    )
+                    if Gen.empty is True:
+                        logger.warning("No Generation in selected Date Range")
+                        continue
+
+                starts = 0
+                for idx in range(len(Gen['values']) - 1):
+                    if (
+                        Gen['values'].iloc[idx] == 0
+                        and not Gen['values'].iloc[idx + 1] == 0
+                    ):
+                        starts += 1
+                
+                cycles_df.loc[scenario, prop] = starts
+
+            if cycles_df.empty == True:
+                outputs[zone_input] = MissingZoneData()
+                continue
+
+            cycles_df = cycles_df.fillna(0)
+            unitconversion = self.capacity_energy_unitconversion(cycles_df)
+
+            cycles_df = (cycles_df / unitconversion["divisor"])
+            Data_Table_Out = cycles_df.add_suffix("starts")
+
+            mplt = PlotLibrary()
+            fig, ax = mplt.get_figure()
+            mplt.barplot(cycles_df, color=self.color_list)
+
+            ax.set_ylabel(
+                "Number of starts",
+                color="black",
+                rotation="vertical",
+            )
+
+            #mplt.add_legend()
+            mplt.add_main_title(prop)
+
+            outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
+        return outputs

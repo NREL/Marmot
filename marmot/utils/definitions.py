@@ -52,6 +52,7 @@ Module_CLASS_MAPPING = {
     "ramping": "Ramping",
     "reserves": "Reserves",
     "sensitivities": "Sensitivities",
+    "storage":"Storage",
     "thermal_cap_reserve": "ThermalReserve",
     "total_generation": "TotalGeneration",
     "total_installed_capacity": "InstalledCapacity",

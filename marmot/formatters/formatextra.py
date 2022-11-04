@@ -157,21 +157,34 @@ class ExtraPLEXOSProperties(ExtraProperties):
         Returns:
             pd.DataFrame: region_Demand / zone_Demand df
         """
-        data_chunks = []
+        pump_load_chunks = []
+        batt_load_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
+            pump_load_data = self.model.get_processed_data(
                 "generator", "Pump Load", timescale, file
             )
 
-            if processed_data.empty is True:
+            batt_load_data = self.model.get_processed_data(
+                "batterie", "Load", timescale, file
+            )
+
+            if pump_load_data.empty is True and batt_load_data.empty is True:
                 logger.info("Total Demand will equal Total Load")
                 return df
 
-            data_chunks.append(processed_data)
+            if pump_load_data.empty is False:
+                pump_load_chunks.append(pump_load_data)
+                pump_load = self.model.combine_models(pump_load_chunks)
+                pump_load = pump_load.groupby(df.index.names).sum()
+                df = df - pump_load
 
-        pump_load = self.model.combine_models(data_chunks)
-        pump_load = pump_load.groupby(df.index.names).sum()
-        return df - pump_load
+            if batt_load_data.empty is False:
+                batt_load_chunks.append(batt_load_data)
+                batt_load = self.model.combine_models(batt_load_chunks)
+                batt_load = batt_load.groupby(df.index.names).sum()
+                df = df - batt_load
+
+        return df
 
     def cost_unserved_energy(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a region_Cost_Unserved_Energy property for PLEXOS result sets

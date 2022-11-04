@@ -94,11 +94,7 @@ class GenerationStack(MPlotDataHelper):
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
         properties = [
-            (
-                True,
-                f"generator_Installed_Capacity{data_resolution}",
-                [self.Scenarios[0]],
-            ),
+            (True, f"generator_Installed_Capacity{data_resolution}",self.Scenarios[0]),
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
             (True, f"generator_Units_Generating{data_resolution}", self.Scenarios),
             (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios),
@@ -311,14 +307,11 @@ class GenerationStack(MPlotDataHelper):
         # scenarios must be a list.
         properties = [
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
-            (
-                False,
-                f"generator_{self.curtailment_prop}{data_resolution}",
-                self.Scenarios,
-            ),
+            (False,f"generator_{self.curtailment_prop}{data_resolution}",self.Scenarios),
             (False, f"{agg}_Load{data_resolution}", self.Scenarios),
             (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
             (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios),
+            (False,f"batterie_Generation{data_resolution}", self.Scenarios)
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -413,6 +406,32 @@ class GenerationStack(MPlotDataHelper):
                 else:
                     vre_gen_cat = self.gen_categories.vre
 
+                #Insert battery generation.
+                stacked_bat_gen : pd.DataFrame = self[
+                    f"batterie_Generation{data_resolution}"
+                ].get(scenario)
+                battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
+                if stacked_bat_gen.empty is True:
+                    logger.info("No Battery generation in selected Date Range")
+                else:
+                    if shift_leapday:
+                        stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
+
+                    stacked_bat_gen = stacked_bat_gen.xs(
+                        zone_input, level=self.AGG_BY
+                    )
+
+                    stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
+
+                    stacked_gen_df.insert(
+                        len(stacked_bat_gen.columns),
+                        column=battery_discharge_name,
+                        value=stacked_bat_gen,
+                    )
+
+                stacked_gen_df = stacked_gen_df.fillna(0)
+
+                #Zoom in on selected date range.
                 if pd.notna(start_date_range):
                     stacked_gen_df = self.set_timestamp_date_range(
                         stacked_gen_df, start_date_range, end_date_range

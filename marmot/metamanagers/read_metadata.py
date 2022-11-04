@@ -268,6 +268,46 @@ class MetaData:
 
         return zone_gen_cat
 
+    def region_batteries(self, filename: str) -> pd.DataFrame:
+        """Region batteries mapping.
+
+        Args:
+            filename (str): The name of the h5 file to retreive data from.
+                If retreiving from fromatted h5 file, just pass scenario name.
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+
+        try:
+            region_batt = pd.read_hdf(
+                self.h5_filepath,
+                key=f"{self.start_index}/relations/regions_batteries",
+            )
+            region_batt.rename(
+                columns={"child": "battery_name", "parent": "region"}, inplace=True
+            )
+            region_batt = region_batt.applymap(
+                lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
+            )
+            region_batt.drop_duplicates(
+                subset=["battery_name"], keep="first", inplace=True
+            )  # For batteries which belong to more than 1 region, drop duplicates.
+
+            #Merge in region mapping.
+            if not self.Region_Mapping.empty:
+                region_batt = pd.merge(
+                    region_batt,
+                    self.Region_Mapping,
+                    how="left",
+                    on="region",
+                )
+                region_batt.dropna(axis=1, how="all", inplace=True)
+
+        except KeyError:
+            region_batt = pd.DataFrame()
+
+        return region_batt
+
     # Generator storage has been updated so that only one of 
     # tail_storage & head_storage is required
     # If both are available, both are used

@@ -855,17 +855,20 @@ class ProcessPLEXOS(Process):
             Processed Output, single value column with multiindex.
 
         """
-        df = self.df.droplevel(level=["band", "property"])
+        df = df.droplevel(level=["band", "property"])
         df.index.rename("battery_name", level="name", inplace=True)
-        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df = df.reset_index()
+        region_batt_map = self.metadata.region_batteries(model_name)
+        df = df.merge(region_batt_map, on='battery_name', how='left')
         df_col = list(
             df.index.names
         )  # Gets names of all columns in df and places in list
-        df_col.insert(
-            0, df_col.pop(df_col.index("timestamp"))
-        )  # move timestamp to start of df
-        df = df.reorder_levels(df_col, axis=0)
+        df_col = list(df.columns)
+        df_col.remove(0)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
+        df.set_index(df_col, inplace=True)
         df[0] = pd.to_numeric(df[0], downcast="float")
+
         return df
 
     def df_process_waterway(
