@@ -540,7 +540,6 @@ class MPlotDataHelper(dict):
         if self.TECH_SUBSET:
             logger.info("Net Imports can not be calculated when using TECH_SUBSET")
             return gen_df
-
         curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
         if curtailment_name in gen_df.columns:
             total_gen = gen_df.drop(curtailment_name, axis=1).sum(axis=1)
@@ -555,7 +554,7 @@ class MPlotDataHelper(dict):
         net_imports = net_imports.fillna(0)
         gen_df = pd.concat([gen_df, net_imports], axis=1)
         # In the event of two Net Imports columns combine here
-        gen_df = gen_df.groupby(level=0, axis=1).sum()
+        gen_df = gen_df.groupby(level=0, axis=1, observed=True).sum()
         gen_df = self.create_categorical_tech_index(gen_df, axis=1)
         return gen_df
 

@@ -93,7 +93,7 @@ class TotalGeneration(MPlotDataHelper):
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
             (False, f"{agg}_Unserved_Energy", self.Scenarios),
-            (False,"batterie_Generation",self.scenarios)
+            (False,"batterie_Generation", self.Scenarios)
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -168,20 +168,21 @@ class TotalGeneration(MPlotDataHelper):
                 battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
                 if stacked_bat_gen.empty is True:
                     logger.info("No Battery generation in selected Date Range")
-                    continue
-                if shift_leapday:
-                    stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
+                else:
+                    if shift_leapday:
+                        stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
 
-                stacked_bat_gen = stacked_bat_gen.xs(
-                    zone_input, level=self.AGG_BY
-                )
+                    stacked_bat_gen = stacked_bat_gen.xs(
+                        zone_input, level=self.AGG_BY
+                    )
 
-                stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
-                Total_Gen_Stack.insert(
-                    len(Total_Gen_Stack.columns),
-                    column=battery_discharge_name,
-                    value=stacked_bat_gen,
-                )
+                    stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
+                    Total_Gen_Stack.insert(
+                        len(Total_Gen_Stack.columns),
+                        column=battery_discharge_name,
+                        value=stacked_bat_gen,
+                    )
+                    
                 Total_Gen_Stack = Total_Gen_Stack / interval_count
 
                 # Extra optional properties
@@ -203,7 +204,6 @@ class TotalGeneration(MPlotDataHelper):
                         df = df.xs(zone_input, level=self.AGG_BY)
                         df = df.groupby(["timestamp"]).sum()
                     df = df.rename(columns={"values" : ext_prop})
-                    df = df.rename(columns={0 : ext_prop})
                     extra_data_frames.append(df)
 
                 extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
@@ -889,45 +889,45 @@ class TotalGeneration(MPlotDataHelper):
                 if plot_as_percnt:
                     mplt.set_yaxis_major_tick_format(tick_format="percent", sub_pos=i)
 
-            if not vre_only and plot_data_settings["include_barplot_load_lines"]:
-                month_extra = extra_data_out.xs(scenario, level="Scenario")
-                for n, _m in enumerate(month_extra.index):
-                    x = [
-                        axs[i].patches[n].get_x(),
-                        axs[i].patches[n].get_x() + axs[i].patches[n].get_width(),
-                    ]
-                    height1 = [float(month_extra.loc[_m, "Total Load"])] * 2
+                if not vre_only and plot_data_settings["include_barplot_load_lines"]:
+                    month_extra = extra_data_out.xs(scenario, level="Scenario")
+                    for n, _m in enumerate(month_extra.index):
+                        x = [
+                            axs[i].patches[n].get_x(),
+                            axs[i].patches[n].get_x() + axs[i].patches[n].get_width(),
+                        ]
+                        height1 = [float(month_extra.loc[_m, "Total Load"])] * 2
 
-                    if (
-                        plot_data_settings["include_barplot_load_storage_charging_line"]
-                        and month_extra.loc[_m, "Total Load"].sum()
-                        > month_extra.loc[_m, "Total Demand"].sum()
-                    ):
+                        if (
+                            plot_data_settings["include_barplot_load_storage_charging_line"]
+                            and month_extra.loc[_m, "Total Load"].sum()
+                            > month_extra.loc[_m, "Total Demand"].sum()
+                        ):
 
-                        axs[i].plot(
-                            x,
-                            height1,
-                            c="black",
-                            linewidth=2,
-                            linestyle="--",
-                            label=load_legend_names["load"],
-                        )
-                        height2 = [float(month_extra.loc[_m, "Total Demand"])] * 2
-                        axs[i].plot(
-                            x,
-                            height2,
-                            c="black",
-                            linewidth=1.5,
-                            label=load_legend_names["demand"],
-                        )
-                    elif month_extra.loc[_m, "Total Demand"].sum() > 0:
-                        axs[i].plot(
-                            x,
-                            height1,
-                            c="black",
-                            linewidth=2,
-                            label=load_legend_names["demand"],
-                        )
+                            axs[i].plot(
+                                x,
+                                height1,
+                                c="black",
+                                linewidth=2,
+                                linestyle="--",
+                                label=load_legend_names["load"],
+                            )
+                            height2 = [float(month_extra.loc[_m, "Total Demand"])] * 2
+                            axs[i].plot(
+                                x,
+                                height2,
+                                c="black",
+                                linewidth=1.5,
+                                label=load_legend_names["demand"],
+                            )
+                        elif month_extra.loc[_m, "Total Demand"].sum() > 0:
+                            axs[i].plot(
+                                x,
+                                height1,
+                                c="black",
+                                linewidth=2,
+                                label=load_legend_names["demand"],
+                            )
 
             # add facet labels
             mplt.add_facet_labels(xlabels=self.xlabels, ylabels=self.ylabels)

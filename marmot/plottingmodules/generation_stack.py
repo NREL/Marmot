@@ -311,7 +311,7 @@ class GenerationStack(MPlotDataHelper):
             (False, f"{agg}_Load{data_resolution}", self.Scenarios),
             (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
             (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios),
-            (False,f"batterie_Generation{data_resolution}",self.scenarios)
+            (False,f"batterie_Generation{data_resolution}", self.Scenarios)
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -412,22 +412,23 @@ class GenerationStack(MPlotDataHelper):
                 ].get(scenario)
                 battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
                 if stacked_bat_gen.empty is True:
-                    logger.warning("No Battery generation in selected Date Range")
-                    continue
-                if shift_leapday:
-                    stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
+                    logger.info("No Battery generation in selected Date Range")
+                else:
+                    if shift_leapday:
+                        stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
 
-                stacked_bat_gen = stacked_bat_gen.xs(
-                    zone_input, level=self.AGG_BY
-                )
+                    stacked_bat_gen = stacked_bat_gen.xs(
+                        zone_input, level=self.AGG_BY
+                    )
 
-                stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
+                    stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
 
-                stacked_gen_df.insert(
-                    len(stacked_bat_gen.columns),
-                    column=battery_discharge_name,
-                    value=stacked_bat_gen,
-                )
+                    stacked_gen_df.insert(
+                        len(stacked_bat_gen.columns),
+                        column=battery_discharge_name,
+                        value=stacked_bat_gen,
+                    )
+
                 stacked_gen_df = stacked_gen_df.fillna(0)
 
                 #Zoom in on selected date range.
@@ -435,6 +436,9 @@ class GenerationStack(MPlotDataHelper):
                     stacked_gen_df = self.set_timestamp_date_range(
                         stacked_gen_df, start_date_range, end_date_range
                     )
+                    if stacked_gen_df.empty is True:
+                        logger.warning("No Generation in selected Date Range")
+                        continue
 
                 # Adjust list of values to drop depending on if it exists in stacked_gen_df df
                 vre_gen_cat = [
@@ -537,7 +541,6 @@ class GenerationStack(MPlotDataHelper):
                         extra_plot_data["Total Load"],
                         extra_plot_data["Unserved Energy"],
                     )
-                else: stacked_gen_df = self.create_categorical_tech_index(stacked_gen_df, axis=1)
 
                 # Remove any all 0 columns
                 stacked_gen_df = stacked_gen_df.loc[
