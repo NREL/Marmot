@@ -185,42 +185,15 @@ class TotalGeneration(MPlotDataHelper):
                     
                 Total_Gen_Stack = Total_Gen_Stack / interval_count
 
-                # Extra optional properties
-                extra_data_frames = []
+                # Process extra optional properties
                 extra_property_names = [
                     f"{agg}_Load",
                     f"{agg}_Demand",
                     f"{agg}_Unserved_Energy",
                 ]
-                # Get and process extra properties
-                for ext_prop in extra_property_names:
-                    df: pd.DataFrame = self[ext_prop].get(scenario)
-                    if df.empty or not plot_data_settings["include_barplot_load_lines"]:
-                        date_index = pd.date_range(
-                            start="2010-01-01", periods=1, freq="H", name="timestamp"
-                        )
-                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
-                    else:
-                        df = df.xs(zone_input, level=self.AGG_BY)
-                        df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={"values" : ext_prop})
-                    extra_data_frames.append(df)
-
-                extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
-
-                if (extra_plot_data[f"{agg}_Unserved_Energy"] == 0).all() == False:
-                    extra_plot_data["Load-Unserved_Energy"] = (
-                        extra_plot_data[f"{agg}_Demand"]
-                        - extra_plot_data[f"{agg}_Unserved_Energy"]
-                    )
-
-                extra_plot_data = extra_plot_data.rename(
-                    columns={
-                        f"{agg}_Load": "Total Load",
-                        f"{agg}_Unserved_Energy": "Unserved Energy",
-                        f"{agg}_Demand": "Total Demand",
-                    }
-                )
+                extra_plot_data = self.process_extra_properties(extra_property_names, 
+                                    scenario, zone_input, agg)
+                
                 extra_plot_data = extra_plot_data / interval_count               
                 extra_plot_data = extra_plot_data.loc[
                     Total_Gen_Stack.index.min() : Total_Gen_Stack.index.max()
@@ -268,12 +241,9 @@ class TotalGeneration(MPlotDataHelper):
             extra_data_out = extra_data_out / unitconversion["divisor"]
 
             # Data table of values to return to main program
-            if plot_data_settings["include_barplot_load_lines"]:
-                Data_Table_Out = pd.concat(
-                    [extra_data_out, total_generation_stack_out], axis=1, sort=False
-                )
-            else:
-                Data_Table_Out = total_generation_stack_out
+            Data_Table_Out = pd.concat(
+                [extra_data_out, total_generation_stack_out], axis=1, sort=False
+            )
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']}h)")
 
             mplt = PlotLibrary()
@@ -674,30 +644,10 @@ class TotalGeneration(MPlotDataHelper):
                             :, (Total_Gen_Stack != 0).any(axis=0)
                         ]
 
-                extra_data_frames = []
+                # Process extra optional properties
                 extra_property_names = [f"{agg}_Load", f"{agg}_Demand"]
-                # Get and process extra properties
-                for ext_prop in extra_property_names:
-                    df: pd.DataFrame = self[ext_prop].get(scenario)
-                    if df.empty or not plot_data_settings["include_barplot_load_lines"]:
-                        date_index = pd.date_range(
-                            start="2010-01-01", periods=1, freq="H", name="timestamp"
-                        )
-                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
-                    else:
-                        df = df.xs(zone_input, level=self.AGG_BY)
-                        df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={"values": ext_prop})
-                    extra_data_frames.append(df)
-
-                extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
-
-                extra_plot_data = extra_plot_data.rename(
-                    columns={
-                        f"{agg}_Load": "Total Load",
-                        f"{agg}_Demand": "Total Demand",
-                    }
-                )
+                extra_plot_data = self.process_extra_properties(extra_property_names, 
+                                    scenario, zone_input, agg)
 
                 if pd.notna(start_date_range):
                     Total_Gen_Stack = self.set_timestamp_date_range(

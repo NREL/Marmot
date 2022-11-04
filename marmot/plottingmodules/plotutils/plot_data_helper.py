@@ -628,6 +628,47 @@ class MPlotDataHelper(dict):
 
         return {"units": units, "divisor": divisor}
 
+    def process_extra_properties(self, extra_properties: list, 
+        scenario: str,
+        zone_input: str,
+        agg: str, 
+        data_resolution: str = "") -> pd.DataFrame:
+
+        extra_data_frames = []
+        # Get and process extra properties
+        for ext_prop in extra_properties:
+            df: pd.DataFrame = self[ext_prop].get(scenario)
+            if df.empty:
+                date_index = pd.date_range(
+                    start="2010-01-01", periods=1, freq="H", name="timestamp"
+                )
+                df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
+            else:
+                df = df.xs(zone_input, level=self.AGG_BY)
+                df = df.groupby(["timestamp"]).sum()
+            df = df.rename(columns={"values": ext_prop})
+            extra_data_frames.append(df)
+
+        extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
+
+        if extra_plot_data.columns.str.contains("Unserved_Energy").any():
+            if (
+                extra_plot_data[f"{agg}_Unserved_Energy{data_resolution}"] == 0
+            ).all() == False:
+                extra_plot_data["Load-Unserved_Energy"] = (
+                    extra_plot_data[f"{agg}_Demand{data_resolution}"]
+                    - extra_plot_data[f"{agg}_Unserved_Energy{data_resolution}"]
+                )
+
+        extra_plot_data = extra_plot_data.rename(
+            columns={
+                f"{agg}_Load{data_resolution}": "Total Load",
+                f"{agg}_Unserved_Energy{data_resolution}": "Unserved Energy",
+                f"{agg}_Demand{data_resolution}": "Total Demand",
+            }
+        )
+        return extra_plot_data
+
     @staticmethod
     def set_timestamp_date_range(
         dfs: Union[pd.DataFrame, List[pd.DataFrame]], start_date: str, end_date: str
