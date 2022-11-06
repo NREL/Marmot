@@ -261,8 +261,12 @@ class Prices(MPlotDataHelper):
                     price = self.set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
-                price.sort_values(by=scenario, ascending=False, inplace=True)
+                if 'values' in price.columns:
+                    price.sort_values(by='values', ascending=False, inplace=True)
+                else:
+                    price.sort_values(by=scenario, ascending=False, inplace=True)             
                 price.reset_index(drop=True, inplace=True)
+                price.columns = [scenario]
                 all_prices.append(price)
 
             duration_curve = pd.concat(all_prices, axis=1)
@@ -317,6 +321,91 @@ class Prices(MPlotDataHelper):
             if plot_data_settings["plot_title_as_region"]:
                 mplt.add_main_title(zone_input)
             outputs[zone_input] = {"fig": fig, "data_table": Data_Out}
+        return outputs
+
+    def national_lwavg_price(
+        self,
+        figure_name: str = None,
+        y_axis_max: float = None,
+        timezone: str = "",
+        start_date_range: str = None,
+        end_date_range: str = None,
+        **_,
+    ):   
+
+        outputs: dict={}
+
+        def weighted_avg(df,values,weights):
+            return sum(df[values] * df[values] / df[weights].sum())
+
+        properties = [(True, "region_Price", self.Scenarios),
+                      (True, "region_Demand", self.Scenarios)]
+
+        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # with all required properties, returns a 1 if required data is missing
+        check_input_data = self.get_formatted_data(properties)
+
+        if 1 in check_input_data:
+            return MissingInputData()
+
+        df_all_list = []
+        for scenario in self.Scenarios:
+            logger.info(f"Scenario = {scenario}")
+            price = self['region_Price'].get(scenario)
+            demand = self['region_Demand'].get(scenario)
+            avgs = pd.merge(price,demand,on=['timestamp','region'])
+            avgs.columns = ['price','demand']
+            avgs = avgs.reset_index()
+            avgs.set_index('timestamp',inplace=True)
+            df = pd.DataFrame(index = avgs.index.unique(),
+                            columns = [scenario])
+            for ts in df.index:
+                avg_hour = avgs[avgs.index == ts]
+                lwavg = np.average(a = avg_hour['price'],weights = avg_hour['demand'])
+                df.loc[ts,scenario] = lwavg
+        
+            df.sort_values(by=scenario, ascending=False, inplace=True)             
+            df.reset_index(drop=True, inplace=True)
+            df_all_list.append(df)
+        
+        df_all = pd.concat(df_all_list,axis = 1)
+
+        # setup plot
+        nrows = 1
+        ncols = 1
+        mplt = SetupSubplot(
+            nrows, ncols, sharey=True, squeeze=False, ravel_axs=True
+        )
+        fig, axs = mplt.get_figure()
+        plt.subplots_adjust(wspace=0.05, hspace=0.2)
+
+        n = 0
+        for column in df_all:
+            axs[n].plot(
+                df_all[column],
+                linewidth=1,
+                label=column,
+                alpha=1,
+            )
+            if pd.notna(y_axis_max):
+                axs[n].set_ylim(bottom=0, top=float(y_axis_max))
+                axs[n].set_xlim(0, len(df_all))
+
+        mplt.add_legend()
+        plt.ylabel(
+            "Price ($/MWh)",
+            color="black",
+            rotation="vertical",
+            labelpad=20,
+        )
+        plt.xlabel("Intervals", color="black", rotation="horizontal", labelpad=20)
+        mplt.add_main_title('Nation-wide load weighted average')
+
+        fig.savefig(self.figure_folder.joinpath("Country_prices", f"{figure_name}.svg"), 
+                    dpi=600, bbox_inches='tight')
+        df_all.to_csv(self.figure_folder.joinpath("Country_prices", f"{figure_name}.csv"))
+
+        outputs = DataSavedInModule()
         return outputs
 
     def region_timeseries_price(

@@ -5,12 +5,13 @@ This module creates energy storage plots.
 """
 
 import logging
+from re import I, L
 import pandas as pd
 import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
 
-from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
@@ -20,9 +21,28 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings = mconfig.parser("plot_data")
 
+#####
+#Testing
+#####
+# import os
+# os.chdir('/Users/mschwarz/CCS_local/ReEDS2_PLEXOS_link/Marmot')
+
+# self = FLECCSOperation(
+#     Zones = ['p97'],
+#     AGG_BY = 'region',
+#     Scenarios = ['Envergex_Ref150','Envergex_Ref225','Envergex_Ref300'],
+#     ordered_gen = ['Nuclear', 'Coal', 'Gas-CC', 'Gas-CC CCS', 'Gas-CT', 'Gas', 'Gas-Steam', 'Dual Fuel', 'DualFuel', 'Oil-Gas-Steam', 'Oil', 'Hydro', 'Ocean', 'Geothermal', 'Biomass', 'Biopower', 'Other', 'VRE', 'Wind', 'Offshore Wind', 'OffshoreWind', 'Solar', 'PV', 'dPV', 'CSP', 'PV-Battery', 'Battery', 'OSW-Battery', 'PHS', 'Storage', 'Net Imports', 'Curtailment', 'curtailment', 'Demand', 'Deamand + Storage Charging'],
+#     marmot_solutions_folder = '/Users/mschwarz/CCS_local'
+# )
+# start_date_range='5/7/50'
+# end_date_range='5/14/50'
+# prop = 'Envergex_p97_1'
+#prop = 'Envergex_p92_2'
+
+#######
 
 class FLECCSOperation(MPlotDataHelper):
-    """The fleccs_operation.py module contains methods that are
+    """The FLECCS_operation.py module contains methods that are
     related to NGCC plants fitted with a flexible CCS technology, 
     specifically designed for the ARPA-E FLECCS project.
 
@@ -43,12 +63,17 @@ class FLECCSOperation(MPlotDataHelper):
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
 
-    def FLECCS_timeseries(
+    def FLECCS_timeseries_singleplant(self,**kwargs):
+
+        return self._FLECCS_timeseries(single_plant=True,**kwargs)
+
+    def _FLECCS_timeseries(
         self,
         timezone: str = "",
         start_date_range: str = None,
         end_date_range: str = None,
         prop: str = None,
+        single_plant: bool = False,
         **_,
     ):
         """Creates time series plot of aggregate storage volume for all storage objects in a given region.
@@ -68,6 +93,7 @@ class FLECCSOperation(MPlotDataHelper):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
+
         if self.AGG_BY == "zone":
             agg = "zone"
         else:
@@ -79,10 +105,11 @@ class FLECCSOperation(MPlotDataHelper):
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
         properties = [
-            (False, "storage_Initial_Volume", self.Scenarios),  #Releveant for storage techs
+            (True, "storage_Initial_Volume", self.Scenarios),  #Releveant for storage techs
             (True, "waterway_Flow", self.Scenarios), #Represents CCS load.
-            (True, "generator_Generation", [self.Scenarios[0]]),  #For the base NGCC
-            (True, "generator_Pump_Load", [self.Scenarios[0]])
+            (True, "generator_Generation", self.Scenarios),  #For the base NGCC
+            (False, "region_Price", self.Scenarios),
+            (False, "generator_Pump_Load", self.Scenarios)
         ]
 
         # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
@@ -95,13 +122,22 @@ class FLECCSOperation(MPlotDataHelper):
         for zone_input in self.Zones:
             logger.info(f"{self.AGG_BY} = {zone_input}")
 
-            stor_chunk = []
-            use_chunk = []
+            # sets up x, y dimensions of plot
+            ncols, nrows = self.set_facet_col_row_dimensions(
+                multi_scenario=self.Scenarios
+            )
+            #mplt = SetupSubplot(nrows=len(self.Scenarios), squeeze=False, ravel_axs=True)
+            mplt = PlotLibrary(nrows, ncols, sharey=True, squeeze=False, ravel_axs=True)
+            fig, axs = mplt.get_figure()
+            plt.subplots_adjust(wspace=0.05, hspace=0.2)
 
-            for scenario in self.Multi_Scenario:
+            for i,scenario in enumerate(self.Scenarios):
 
                 logger.info(f"Scenario = {str(scenario)}")
 
+                #####
+                #Pull storage volume.
+                #####
                 storage_volume_read = self["storage_Initial_Volume"].get(scenario)
                 try:
                     storage_volume: pd.DataFrame = storage_volume_read.xs(
@@ -112,32 +148,76 @@ class FLECCSOperation(MPlotDataHelper):
                     outputs[zone_input] = MissingZoneData()
                     continue
 
-                # Isolate only head storage objects (not tail).
+                # Isolate only FLECCS head storage objects (no actual storage plants and no tail).
                 storage_gen_units = storage_volume.index.get_level_values(
                     "storage_resource"
                 )
-                head_units = [unit for unit in storage_gen_units if "head" in unit]
+                if single_plant:
+                    single_stor = prop.split('_')[0] + '_head_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                    FLECCS_units = [unit for unit in storage_gen_units if single_stor in unit]
+                else:
+                    FLECCS_units = [unit for unit in storage_gen_units if f"{prop}_head" in unit]
+
                 storage_volume = storage_volume.iloc[
                     storage_volume.index.get_level_values("storage_resource").isin(
-                        head_units
+                        FLECCS_units
                     )
                 ]
                 storage_volume = storage_volume.groupby("timestamp").sum()
-                storage_volume.columns = [scenario]
+                storage_volume.columns = ['Solvent storage volume \n (MWh equivalent)']
 
-                waterway_read = self["waterway_Flow"].get(scenario)
-                try:
-                    storage_volume: pd.DataFrame = storage_volume_read.xs(
-                        zone_input, level=self.AGG_BY
-                    )
-                except KeyError:
-                    logger.warning(f"No storage resources in {zone_input}")
-                    outputs[zone_input] = MissingZoneData()
-                    continue                
+                ######
+                #Pull waterway flow
+                #####
+
+                waterway_flow = self["waterway_Flow"].get(scenario)
+                if single_plant:
+                    single_ww = prop.split('_')[0] + '_waterway_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                    waterway_flow = waterway_flow.iloc[
+                        waterway_flow.index.get_level_values("waterway_name").isin([single_ww])
+                    ] #Downselect specific unit  
+                waterway_flow.columns = ['CCS load']
+
+                ######
+                #Pull NGCC generation
+                #####
+
+                gen = self["generator_Generation"].get(scenario)
+                if single_plant:
+                    FLECCS_gens = prop.split('_')[0] + '_NGCC_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                else:
+                    all_gens = gen.index.get_level_values('gen_name').unique()
+                    FLECCS_gens = [g for g in all_gens if 'Envergex_NGCC' in g]
+                NGCCgen = gen.iloc[
+                    gen.index.get_level_values("gen_name").isin([FLECCS_gens])
+                ] #Downselect specific unit
+                NGCCgen.columns = ['Net power to the grid']
+
+                ######
+                #Pull region price
+                #####
+
+                price = self["region_Price"].get(scenario)
+                price = price.iloc[
+                    price.index.get_level_values("region").isin([zone_input])
+                ] #Downselect specific unit  
+                price.columns = ['Energy price ($/MWh)']
+
+                ######
+                #Pull pump load
+                #####
+
+                pump = self["generator_Pump_Load"].get(scenario)
+                FLECCS_pump = prop.split('_')[0] + '_pump_' + prop.split('_')[1] + '_' + prop.split('_')[2]
+                pump = pump.iloc[
+                    pump.index.get_level_values("gen_name").isin([FLECCS_pump])
+                ] #Downselect specific unit  
+                pump.columns = ['Storage charging']
+
 
                 if pd.notna(start_date_range):
-                    storage_volume, waterway_flow = self.set_timestamp_date_range(
-                        [storage_volume, waterway_flow],
+                    storage_volume, waterway_flow, NGCCgen, pump, price = self.set_timestamp_date_range(
+                        [storage_volume, waterway_flow, NGCCgen, pump, price],
                         start_date_range,
                         end_date_range,
                     )
@@ -145,76 +225,63 @@ class FLECCSOperation(MPlotDataHelper):
                         logger.warning("No Storage resources in selected Date Range")
                         continue
                     if waterway_flow.empty is True:
-                        logger.warning("No Storage resources in selected Date Range")
+                        logger.warning("No waterway flow in selected Date Range")
+                        continue
+                    if NGCCgen.empty is True:
+                        logger.warning("No NGCCgen in selected Date Range")
+                        continue
+                    if pump.empty is True:
+                        logger.warning("No pump in selected Date Range")
                         continue
 
-                print(storage_volume)
-                print(waterway_flow)
+                #df=pd.merge(NGCCgen,waterway_flow,on=['timestamp'])
+                df=pd.merge(NGCCgen,pump,on=['timestamp'])
+                #Subtract pump load from gen to get net power to the grid.
+                df['Net power to the grid'] = df['Net power to the grid'] - df['Storage charging']
+                df=df.merge(storage_volume,on=['timestamp'])
+                df=df.merge(price*10,on=['timestamp'])
 
-                stor_chunk.append(storage_volume)
+                # Data table of values to return to main program
+                Data_Table_Out = df.copy()
 
-            storage_volume_all_scenarios = pd.concat(stor_chunk, axis=1)
+                if df.empty:
+                    out = MissingZoneData()
+                    outputs[zone_input] = out
+                    continue
 
-            use_all_scenarios = pd.concat(use_chunk, axis=1)
-
-            # Data table of values to return to main program
-            Data_Table_Out = pd.concat(
-                [storage_volume_all_scenarios, use_all_scenarios], axis=1
-            )
-            # Make scenario/color dictionary.
-            color_dict = dict(
-                zip(storage_volume_all_scenarios.columns, self.color_list)
-            )
-
-            mplt = SetupSubplot(nrows=2, squeeze=False, ravel_axs=True)
-            fig, axs = mplt.get_figure()
-            plt.subplots_adjust(wspace=0.05, hspace=0.2)
-
-            if storage_volume_all_scenarios.empty:
-                out = MissingZoneData()
-                outputs[zone_input] = out
-                continue
-
-            for column in storage_volume_all_scenarios:
-                axs[0].plot(
-                    storage_volume_all_scenarios.index.values,
-                    storage_volume_all_scenarios[column],
-                    linewidth=1,
-                    color=color_dict[column],
-                    label=column,
-                )
-
+                for col in df.columns:
+                    mplt.lineplot(
+                        df,
+                        col,
+                        linewidth=1,
+                        linestyle='dashed' if col == 'Energy price ($/MWh)' else 'solid',
+                        label=col,
+                        sub_pos=i
+                    )
                 axs[0].set_ylabel(
-                    "Head Storage Volume (GWh)", color="black", rotation="vertical"
-                )
-                mplt.set_yaxis_major_tick_format(sub_pos=0)
-                axs[0].margins(x=0.01)
-                mplt.set_subplot_timeseries_format(sub_pos=0)
-                axs[0].set_ylim(ymin=0)
-                axs[0].set_title(zone_input)
-
-                axs[1].plot(
-                    use_all_scenarios.index.values,
-                    use_all_scenarios[column],
-                    linewidth=1,
-                    color=color_dict[column],
-                    label=f"{column} Unserved Energy",
+                    "Power (MW)", color="black", rotation="vertical"
                 )
 
-                axs[1].set_ylabel(
-                    "Unserved Energy (GWh)", color="black", rotation="vertical"
-                )
-                axs[1].set_xlabel(timezone, color="black", rotation="horizontal")
-                mplt.set_yaxis_major_tick_format(sub_pos=1)
-                axs[1].margins(x=0.01)
-                mplt.set_subplot_timeseries_format(sub_pos=1)
+                def power2price(x):
+                    return x/10
+                def price2power(x):
+                    return x*10
+                if i == len(self.Scenarios)-1:
+                    secax = axs[i].secondary_yaxis('right',functions=(power2price,price2power))
+                    secax.set_ylabel('Price ($/MWh)')
 
-            mplt.set_yaxis_major_tick_format()
-            axs[0].axhline(y=max_volume, linestyle=":", label="Max Volume")
-            axs[0].legend(loc="lower left", bbox_to_anchor=(1.15, 0))
-            axs[1].legend(loc="lower left", bbox_to_anchor=(1.15, 0.2))
-            if plot_data_settings["plot_title_as_region"]:
-                mplt.add_main_title(zone_input)
+                mplt.set_yaxis_major_tick_format(sub_pos=i)
+                axs[i].margins(x=0.01)
+                mplt.set_subplot_timeseries_format(sub_pos=i)
+                axs[i].set_ylim(ymin=0,ymax=2000)
+                axs[i].set_title(scenario.split('_')[1])
+
+                axs[len(self.Scenarios)-1].legend(loc="lower left", bbox_to_anchor=(1.15, 0))
+                if plot_data_settings["plot_title_as_region"]:
+                    if single_plant:
+                        mplt.add_main_title(prop)
+                    else:
+                        mplt.add_main_title(zone_input)
 
             outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}
         return outputs
