@@ -21,8 +21,8 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 
-class FLECCS_operation(MPlotDataHelper):
-    """The FLECCS_operation.py module contains methods that are
+class FLECCSOperation(MPlotDataHelper):
+    """The fleccs_operation.py module contains methods that are
     related to NGCC plants fitted with a flexible CCS technology, 
     specifically designed for the ARPA-E FLECCS project.
 
