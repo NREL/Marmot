@@ -187,41 +187,12 @@ class GenerationUnStack(MPlotDataHelper):
                 stacked_gen_df = self.df_process_gen_inputs(stacked_gen_df)
 
                 # Insert Curtailment into gen stack if it exists in database
-                Stacked_Curt = (
-                    self[f"generator_{self.curtailment_prop}{data_resolution}"]
-                    .get(scenario)
-                    .copy()
-                )
-                if not Stacked_Curt.empty:
-                    curtailment_name = self.gen_names_dict.get(
-                        "Curtailment", "Curtailment"
-                    )
-                    if shift_leapday:
-                        Stacked_Curt = self.adjust_for_leapday(Stacked_Curt)
-                    if (
-                        zone_input
-                        in Stacked_Curt.index.get_level_values(self.AGG_BY).unique()
-                    ):
-                        Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
-                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
-                        # If using Marmot's curtailment property
-                        if self.curtailment_prop == "Curtailment":
-                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
-                        Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        Stacked_Curt[
-                            Stacked_Curt < 0.05
-                        ] = 0  # Remove values less than 0.05 MW
-                        # Insert curtailment into
-                        stacked_gen_df.insert(
-                            len(stacked_gen_df.columns),
-                            column=curtailment_name,
-                            value=Stacked_Curt,
-                        )
-                        stacked_gen_df = stacked_gen_df.fillna(0)
-                        # Calculates Net Load by removing variable gen + curtailment
-                        vre_gen_cat = self.gen_categories.vre + [curtailment_name]
-                    else:
-                        vre_gen_cat = self.gen_categories.vre
+                stacked_gen_df = self.add_curtailment_to_df(stacked_gen_df, scenario,
+                    zone_input, data_resolution=data_resolution)
+                
+                curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
+                if curtailment_name in stacked_gen_df.columns:
+                    vre_gen_cat = self.gen_categories.vre + [curtailment_name]
                 else:
                     vre_gen_cat = self.gen_categories.vre
 

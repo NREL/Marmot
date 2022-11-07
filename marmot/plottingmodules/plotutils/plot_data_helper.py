@@ -22,6 +22,8 @@ import marmot.utils.mconfig as mconfig
 import marmot.utils.dataio as dataio
 
 logger = logging.getLogger("plotter." + __name__)
+shift_leapday: bool = mconfig.parser("shift_leapday")
+curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
 @dataclass
 class GenCategories:
@@ -95,8 +97,8 @@ class MPlotDataHelper(dict):
     def __init__(
         self,
         Zones: List[str],
-        AGG_BY: str,
         Scenarios: List[str],
+        AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         gen_names_dict: dict = None,
@@ -110,6 +112,7 @@ class MPlotDataHelper(dict):
         marker_style: List[str] = None,
         Region_Mapping: pd.DataFrame = pd.DataFrame(),
         TECH_SUBSET: List[str] = None,
+        **_,
     ) -> None:
         """
         Args:
@@ -152,8 +155,8 @@ class MPlotDataHelper(dict):
                 Defaults to None.
         """
         self.Zones = Zones
-        self.AGG_BY = AGG_BY
         self.Scenarios = Scenarios
+        self.AGG_BY = AGG_BY
         self.ordered_gen = ordered_gen
         self.marmot_solutions_folder = Path(marmot_solutions_folder)
 
@@ -628,12 +631,30 @@ class MPlotDataHelper(dict):
 
         return {"units": units, "divisor": divisor}
 
-    def process_extra_properties(self, extra_properties: list, 
+    def process_extra_properties(self, extra_properties: List[str], 
         scenario: str,
         zone_input: str,
         agg: str, 
-        data_resolution: str = "") -> pd.DataFrame:
+        data_resolution: str = ""
+    ) -> pd.DataFrame:
+        """Processes a list of extra properties and saves them into a single dataframe. 
 
+        Should be used with properties that should be aggregated to a 
+        zonal/regional aggregation such as; Load, Demand and Unsereved Energy.
+
+        Args:
+            extra_properties (List[str]): list of extra propty names to retrieve from formatted 
+                data file and process
+            scenario (str): scenario to pull data from
+            zone_input (str): zone to subset by.
+            agg_by (str): Area aggregtaion, zone or region.
+            data_resolution (str, optional):  Specifies the data resolution to 
+                pull from the formatted data and plot. 
+                Defaults to "".
+
+        Returns:
+            pd.DataFrame: Dataframe of extra properties with timeseries index.
+        """
         extra_data_frames = []
         # Get and process extra properties
         for ext_prop in extra_properties:
@@ -668,6 +689,100 @@ class MPlotDataHelper(dict):
             }
         )
         return extra_plot_data
+
+    def add_curtailment_to_df(self, df: pd.DataFrame, scenario: str, 
+        zone_input: str, data_resolution: str = ""
+    ) -> pd.DataFrame:
+        """Adds curtailment to the passed Dataframe as a new column
+
+        Args:
+            df (pd.DataFrame): DataFrame to add curtailment column to
+            scenario (str): scenario to pull data from
+            zone_input (str): zone to subset by
+            data_resolution (str, optional):  Specifies the data resolution to 
+                pull from the formatted data and plot. 
+                Defaults to "".
+
+        Returns:
+            pd.DataFrame: DataFrame with added curtailment column.
+        """
+        curt_df: pd.DataFrame = self[
+                    f"generator_{curtailment_prop}{data_resolution}"
+                ].get(scenario)
+        curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
+
+        if not curt_df.empty:
+            if shift_leapday:
+                curt_df = self.adjust_for_leapday(curt_df)
+            if (
+                zone_input
+                in curt_df.index.get_level_values(self.AGG_BY).unique()
+            ):
+                curt_df = curt_df.xs(
+                    zone_input, level=self.AGG_BY
+                )
+                curt_df = self.df_process_gen_inputs(curt_df)
+                # If using Marmot's curtailment property
+                if curtailment_prop == "Curtailment":
+                    curt_df = self.assign_curtailment_techs(
+                        curt_df
+                    )
+                curt_df = curt_df.sum(axis=1)
+                # Remove values less than 0.05 MW
+                curt_df[curt_df < 0.05] = 0
+                # Insert curtailment into
+                df.insert(
+                    len(df.columns),
+                    column=curtailment_name,
+                    value=curt_df,
+                )
+                # If columns are all 0 remove
+                df = df.loc[:, (df != 0).any(axis=0)]
+                df = df.fillna(0)        
+        return df
+
+    def add_battery_gen_to_df(self, df: pd.DataFrame, scenario: str, 
+        zone_input: str, data_resolution: str = "") -> pd.DataFrame:
+        """Adds Battery generation to the passed dataframe.
+
+        Args:
+            df (pd.DataFrame): DataFrame to add battery generation to.
+            scenario (str): scenario to pull data from
+            zone_input (str): zone to subset by
+            data_resolution (str, optional):  Specifies the data resolution to 
+                pull from the formatted data and plot. 
+                Defaults to "".
+
+        Returns:
+            pd.DataFrame: DataFrame with added battery gen column.
+        """
+        battery_gen : pd.DataFrame = self[
+                    f"batterie_Generation{data_resolution}"
+        ].get(scenario)
+        battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
+        if battery_gen.empty is True:
+            logger.info("No Battery generation in selected Date Range")
+        else:
+            if shift_leapday:
+                battery_gen = self.adjust_for_leapday(battery_gen)
+
+            if (
+                zone_input
+                in battery_gen.index.get_level_values(self.AGG_BY).unique()
+            ):
+                battery_gen = battery_gen.xs(
+                    zone_input, level=self.AGG_BY
+                )
+                battery_gen = battery_gen.groupby("timestamp").sum()
+                df.insert(
+                    len(df.columns),
+                    column=battery_discharge_name,
+                    value=battery_gen,
+                )
+                df = df.fillna(0)
+                # In the event of two columns with the same name, combine here.
+                df = df.groupby(level=0, axis=1, observed=True).sum()
+        return df
 
     @staticmethod
     def set_timestamp_date_range(
