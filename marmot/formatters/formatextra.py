@@ -176,15 +176,21 @@ class ExtraPLEXOSProperties(ExtraProperties):
                 pump_load_chunks.append(pump_load_data)
                 pump_load = self.model.combine_models(pump_load_chunks)
                 pump_load = pump_load.groupby(df.index.names).sum()
-                df = df - pump_load
+                dfpump = df - pump_load
+                dfpump['values'] = dfpump['values'].fillna(df['values'])
+            else:
+                dfpump = df
 
             if batt_load_data.empty is False:
                 batt_load_chunks.append(batt_load_data)
                 batt_load = self.model.combine_models(batt_load_chunks)
                 batt_load = batt_load.groupby(df.index.names).sum()
-                df = df - batt_load
+                dfbattpump = dfpump - batt_load
+                dfbattpump['values'] = dfbattpump['values'].fillna(dfpump['values'])
+            else:
+                dfbattpump = dfpump
 
-        return df
+        return dfbattpump
 
     def cost_unserved_energy(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a region_Cost_Unserved_Energy property for PLEXOS result sets
