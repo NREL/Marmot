@@ -448,47 +448,14 @@ class GenerationStack(MPlotDataHelper):
                 net_load = net_load.sum(axis=1)
                 net_load = net_load.rename("Net Load")
 
-                # Extra optional properties
-                extra_data_frames = []
+                # Process extra optional properties
                 extra_property_names = [
                     f"{agg}_Load{data_resolution}",
                     f"{agg}_Demand{data_resolution}",
                     f"{agg}_Unserved_Energy{data_resolution}",
                 ]
-                # Get and process extra properties
-                for ext_prop in extra_property_names:
-                    df: pd.DataFrame = self[ext_prop].get(scenario)
-                    if (
-                        df.empty
-                        or not plot_data_settings["include_stackplot_load_lines"]
-                    ):
-                        date_index = pd.date_range(
-                            start="2010-01-01", periods=1, freq="H", name="timestamp"
-                        )
-                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
-                    else:
-                        df = df.xs(zone_input, level=self.AGG_BY)
-                        df = df.groupby(["timestamp"]).sum()
-                    df = df.rename(columns={"values": ext_prop})
-                    extra_data_frames.append(df)
-
-                extra_plot_data = pd.concat(extra_data_frames, axis=1).fillna(0)
-
-                if (
-                    extra_plot_data[f"{agg}_Unserved_Energy{data_resolution}"] == 0
-                ).all() == False:
-                    extra_plot_data["Load-Unserved_Energy"] = (
-                        extra_plot_data[f"{agg}_Demand{data_resolution}"]
-                        - extra_plot_data[f"{agg}_Unserved_Energy{data_resolution}"]
-                    )
-
-                extra_plot_data = extra_plot_data.rename(
-                    columns={
-                        f"{agg}_Load{data_resolution}": "Total Load",
-                        f"{agg}_Unserved_Energy{data_resolution}": "Unserved Energy",
-                        f"{agg}_Demand{data_resolution}": "Total Demand",
-                    }
-                )
+                extra_plot_data = self.process_extra_properties(extra_property_names, 
+                                    scenario, zone_input, agg, data_resolution=data_resolution)
 
                 # Adjust extra data to generator date range
                 extra_plot_data = extra_plot_data.loc[
