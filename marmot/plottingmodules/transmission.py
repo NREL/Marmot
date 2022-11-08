@@ -15,11 +15,13 @@ import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 import matplotlib.dates as mdates
+from typing import List
 
 import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
+from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
@@ -27,28 +29,45 @@ logger = logging.getLogger('plotter.'+__name__)
 plot_data_settings = mconfig.parser("plot_data")
 shift_leapday : bool = mconfig.parser("shift_leapday")
 
-class Transmission(MPlotDataHelper):
+class Transmission(PlotDataStoreAndProcessor):
     """System transmission plots.
 
     The transmission.py module contains methods that are
     related to the transmission network.
 
-    Transmission inherits from the MPlotDataHelper class to assist 
+    Transmission inherits from the PlotDataStoreAndProcessor class to assist 
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        custom_xticklabels: List[str] = None,
+        color_list: list = ColorList().colors,
+        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper
+                Minimum required parameters passed to the PlotDataStoreAndProcessor
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper
+                These parameters will be passed to the PlotDataStoreAndProcessor
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.ylabels = ylabels
+        self.xlabels = xlabels
+        self.custom_xticklabels = custom_xticklabels
+        self.color_list = color_list
+        self.Region_Mapping = Region_Mapping
 
         self.font_defaults = mconfig.parser("font_settings")
         self.meta = MetaData(self.processed_hdf5_folder,
@@ -115,7 +134,7 @@ class Transmission(MPlotDataHelper):
         properties = [(True, "line_Flow", self.Scenarios),
                       (True, "line_Import_Limit", self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -283,7 +302,7 @@ class Transmission(MPlotDataHelper):
     #                   (True,"interface_Import_Limit",self.Scenarios),
     #                   (True,"interface_Export_Limit",self.Scenarios)]
         
-    #     # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+    #     # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
     #     # with all required properties, returns a 1 if required data is missing
     #     check_input_data = self.get_formatted_data(properties)
 
@@ -498,7 +517,7 @@ class Transmission(MPlotDataHelper):
                       (True,"interface_Import_Limit",self.Scenarios),
                       (True,"interface_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -998,7 +1017,7 @@ class Transmission(MPlotDataHelper):
                       (False, f"{connection}_Import_Limit",self.Scenarios),
                       (False, f"{connection}_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1143,7 +1162,7 @@ class Transmission(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1270,7 +1289,7 @@ class Transmission(MPlotDataHelper):
                       (True,"line_Import_Limit",self.Scenarios),
                       (True,"line_Export_Limit",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1512,7 +1531,7 @@ class Transmission(MPlotDataHelper):
 
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -1996,7 +2015,7 @@ class Transmission(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",scenario_type)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -2146,7 +2165,7 @@ class Transmission(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True,f"{agg}_{agg}s_Net_Interchange",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -2294,7 +2313,7 @@ class Transmission(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "line_Violation", self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -2413,7 +2432,7 @@ class Transmission(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True,f"{agg}_Net_Interchange",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         
@@ -2515,7 +2534,7 @@ class Transmission(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "line_Flow", self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -2685,7 +2704,7 @@ class Transmission(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True,"line_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -2834,7 +2853,7 @@ class Transmission(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True,"interface_Flow",self.Scenarios)]
         
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary  
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary  
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 

@@ -12,11 +12,12 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-
+from typing import List
 import marmot.utils.mconfig as mconfig
 
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -28,28 +29,44 @@ plot_data_settings = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
 
 
-class CapacityOut(MPlotDataHelper):
+class CapacityOut(PlotDataStoreAndProcessor):
     """Generator outage plots.
 
     The capacity_out.py module contains methods that are
     related to generators that are on an outage.
 
-    CapacityOut inherits from the MPlotDataHelper class to assist
+    CapacityOut inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args,
+        marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
 
     def capacity_out_stack(
         self,
@@ -86,7 +103,7 @@ class CapacityOut(MPlotDataHelper):
             (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -179,7 +196,7 @@ class CapacityOut(MPlotDataHelper):
 
                 mplt.stackplot(
                     df=cap_out,
-                    color_dict=self.PLEXOS_color_dict,
+                    color_dict=self.marmot_color_dict,
                     labels=cap_out.columns,
                     sub_pos=i,
                 )
@@ -322,7 +339,7 @@ class CapacityOut(MPlotDataHelper):
                         labels=one_zone.columns,
                         linewidth=0,
                         colors=[
-                            self.PLEXOS_color_dict.get(x, "#333333")
+                            self.marmot_color_dict.get(x, "#333333")
                             for x in one_zone.T.index
                         ],
                     )
@@ -358,7 +375,7 @@ class CapacityOut(MPlotDataHelper):
                         labels=one_zone.columns,
                         linewidth=0,
                         colors=[
-                            self.PLEXOS_color_dict.get(x, "#333333")
+                            self.marmot_color_dict.get(x, "#333333")
                             for x in one_zone.T.index
                         ],
                     )

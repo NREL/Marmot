@@ -15,8 +15,6 @@ import concurrent.futures
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Tuple, Union, List
-import matplotlib.colors as mcolors
-import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
 import marmot.utils.dataio as dataio
@@ -83,42 +81,30 @@ class GenCategories:
         return cls(**gen_cat_dict)
 
 
-class MPlotDataHelper(dict):
+class PlotDataStoreAndProcessor(dict):
     """Methods used to assist with the creation of Marmot plots
 
     Collection of Methods to assist with creation of figures,
     including getting and formatting data, setting up plot sizes.
 
-    MPlotDataHelper inherits the python class 'dict' so acts like a 
+    PlotDataStoreAndProcessor inherits the python class 'dict' so acts like a 
     dictionary and stores the formatted data when retrieved by the 
     get_formatted_data method.
     """
 
     def __init__(
         self,
-        Zones: List[str],
-        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         gen_names_dict: dict = None,
         gen_categories: pd.DataFrame = pd.DataFrame(),
-        PLEXOS_color_dict: dict = None,
-        Scenario_Diff: List[str] = None,
-        ylabels: List[str] = None,
-        xlabels: List[str] = None,
-        custom_xticklabels: List[str] = None,
-        color_list: List[str] = None,
-        marker_style: List[str] = None,
-        Region_Mapping: pd.DataFrame = pd.DataFrame(),
         TECH_SUBSET: List[str] = None,
         **_,
     ) -> None:
         """
         Args:
-            Zones (List[str]): List of regions/zones to plot.
             AGG_BY (str): Informs region type to aggregate by when creating plots.
-            Scenarios (List[str]): List of scenarios to process.
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
@@ -128,34 +114,11 @@ class MPlotDataHelper(dict):
             gen_categories (pd.Dataframe, optional): Dataframe containing ordered generation 
                 and columns to specify technology categories.
                 Defaults to pd.DataFrame().
-            PLEXOS_color_dict (dict, optional): Dictionary of colors to use for 
-                generation technologies.
-                Defaults to None.
-            Scenario_Diff (List[str], optional): 2 value list, used to compare 2
-                scenarios.
-                Defaults to None.
-            ylabels (List[str], optional): y-axis labels for facet plots.
-                Defaults to None.
-            xlabels (List[str], optional): x-axis labels for facet plots.
-                Defaults to None.
-            custom_xticklabels (List[str], optional): List of custom x labels to 
-                apply to barplots. Values will overwite existing ones. 
-                Defaults to None.
-            color_list (List[str], optional): List of colors for plotting.
-                Defaults to None.
-            marker_style (List[str], optional): List of markers for plotting.
-                Defaults to None.
-            Region_Mapping (pd.DataFrame, optional): Mapping file to map 
-                custom regions/zones to create custom aggregations. 
-                Aggregations are created by grouping PLEXOS regions.
-                Defaults to pd.DataFrame().
             TECH_SUBSET (List[str], optional): Tech subset category to plot.
                 The TECH_SUBSET value should be a column in the
                 ordered_gen_categories.csv. If left None all techs will be plotted
                 Defaults to None.
         """
-        self.Zones = Zones
-        self.Scenarios = Scenarios
         self.AGG_BY = AGG_BY
         self.ordered_gen = ordered_gen
         self.marmot_solutions_folder = Path(marmot_solutions_folder)
@@ -174,52 +137,6 @@ class MPlotDataHelper(dict):
             self.gen_names_dict = gen_names_dict
 
         self.gen_categories: GenCategories = GenCategories.set_categories(gen_categories)
-
-        if PLEXOS_color_dict is None:
-            logger.warning(
-                "'Color dictionary' not passed! Random colors will now be used."
-            )
-            cmap = plt.cm.get_cmap(lut=len(ordered_gen))
-            colors = []
-            for i in range(cmap.N):
-                colors.append(mcolors.rgb2hex(cmap(i)))
-            self.PLEXOS_color_dict = dict(zip(ordered_gen, colors))
-        else:
-            self.PLEXOS_color_dict = PLEXOS_color_dict
-        if Scenario_Diff is None:
-            self.Scenario_Diff = [""]
-        else:
-            self.Scenario_Diff = Scenario_Diff
-        if ylabels is None:
-            self.ylabels = []
-        else:
-            self.ylabels = ylabels
-        if xlabels is None:    
-            self.xlabels = []
-        else:    
-            self.xlabels = xlabels
-        if color_list is None:
-            self.color_list = [
-                "#396AB1",
-                "#CC2529",
-                "#3E9651",
-                "#ff7f00",
-                "#6B4C9A",
-                "#922428",
-                "#cab2d6",
-                "#6a3d9a",
-                "#fb9a99",
-                "#b15928"
-            ]
-        else:
-            self.color_list = color_list
-        if marker_style is None:
-            self.marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
-        else:
-            self.marker_style = marker_style
-
-        self.custom_xticklabels = custom_xticklabels
-        self.Region_Mapping = Region_Mapping
         self.TECH_SUBSET = TECH_SUBSET
 
     def get_formatted_data(self, properties: List[tuple]) -> list:
@@ -411,115 +328,6 @@ class MPlotDataHelper(dict):
         df = df.sort_index(axis=axis)
         return df
 
-    def merge_new_agg(self, df: pd.DataFrame) -> pd.DataFrame:
-        # TODO Needs fixing
-        """Adds new region aggregation in the plotting step.
-
-        This allows one to create a new aggregation without re-formatting the .h5 file.
-        Args:
-            df (pd.DataFrame): Dataframe to process.
-
-        Returns:
-            pd.DataFrame: Same dataframe, with new aggregation level added.
-        """
-        agg_new = self.Region_Mapping[["region", self.AGG_BY]]
-        agg_new = agg_new.set_index("region")
-        df = df.merge(agg_new, left_on="region", right_index=True)
-        return df
-
-    def adjust_for_leapday(self, df: pd.DataFrame) -> pd.DataFrame:
-        """Shifts dataframe ahead by one day.
-        
-        Use if a non-leap year time series is modeled with a leap year time index.
-
-        Modeled year must be included in the scenario parent directory name.
-        Args:
-            df (pd.DataFrame): Dataframe to process.
-
-        Returns:
-            pd.DataFrame: Same dataframe, with time index shifted.
-        """
-        if (
-            "2008" not in self.processed_hdf5_folder
-            and "2012" not in self.processed_hdf5_folder
-            and df.index.get_level_values("timestamp")[0]
-            > dt.datetime(2024, 2, 28, 0, 0)
-        ):
-
-            df.index = df.index.set_levels(
-                df.index.levels[df.index.names.index("timestamp")].shift(1, freq="D"),
-                level="timestamp",
-            )
-
-        # # Special case where timezone shifting may also be necessary.
-        #     df.index = df.index.set_levels(
-        #         df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
-        #         level = 'timestamp')
-
-        return df
-
-    def set_facet_col_row_dimensions(
-        self, facet: bool = True, multi_scenario: list = None
-    ) -> Tuple[int, int]:
-        """Sets facet plot col and row dimensions based on user defined labeles
-
-        Args:
-            facet (bool, optional): Trigger for plotting facet plots.
-                Defaults to True.
-            multi_scenario (list, optional): List of scenarios.
-                Defaults to None.
-
-        Returns:
-            Tuple[int, int]: Facet x,y dimensions.
-        """
-        
-        if not self.xlabels:
-            ncols = 1
-        else:
-            ncols = len(self.xlabels)
-        if not self.ylabels:
-            nrows = 1
-        else:
-            nrows = len(self.ylabels)
-        # If the plot is not a facet plot, grid size should be 1x1
-        if not facet:
-            ncols = 1
-            nrows = 1
-            return ncols, nrows
-        # If no labels were provided or dimensions less than len scenarios use 
-        # Marmot default dimension settings
-        if (
-            not self.xlabels
-            and not self.ylabels
-            or ncols * nrows < len(multi_scenario)
-        ):
-            logger.info(
-                "Dimensions could not be determined from x & y labels - Using Marmot "
-                "default dimensions"
-            )
-            ncols, nrows = self.set_x_y_dimension(len(multi_scenario))
-        return ncols, nrows
-
-    def set_x_y_dimension(self, region_number: int) -> Tuple[int, int]:
-        """Sets X,Y dimension of plots without x,y labels.
-
-        Args:
-            region_number (int): # regions/scenarios
-
-        Returns:
-            Tuple[int, int]: Facet x,y dimensions.
-        """
-        if region_number >= 5:
-            ncols = 3
-            nrows = math.ceil(region_number / 3)
-        if region_number <= 3:
-            ncols = region_number
-            nrows = 1
-        if region_number == 4:
-            ncols = 2
-            nrows = 2
-        return ncols, nrows
-
     def include_net_imports(
         self,
         gen_df: pd.DataFrame,
@@ -561,76 +369,6 @@ class MPlotDataHelper(dict):
         gen_df = self.create_categorical_tech_index(gen_df, axis=1)
         return gen_df
 
-    def capacity_energy_unitconversion(
-        self, df: pd.DataFrame, sum_values: bool = False
-    ) -> dict:
-        """Unitconversion for capacity and energy figures.
-
-        Takes a pd.DataFrame as input and will then determine the max value
-        in the frame.
-
-        If sum_values is True, either rows or columns will be summated before
-        determining max value. The axis is chosen automatically based on where
-        the scenario entries or datetime index is located. If correct axis
-        cannot be determined axis 0 (rows) will be summed.
-        This setting should mainly be set to True when potting stacked bar
-        and area plots.
-
-        Args:
-            df (pd.DataFrame): pandas dataframe
-            sum_values (bool, optional): Sum axis values if True.
-                Should be set to True for stacked bar and area plots.
-                Defaults to False.
-
-        Returns:
-            dict: Dictionary containing divisor and units.
-        """
-        if mconfig.parser("auto_convert_units"):
-            if sum_values:
-                # Check if scenarios are in index sum across columns
-                if isinstance(df.index, pd.MultiIndex) and "Scenario" in df.index.names:
-                    sum_axis = 1
-                # If index datetime sum across columns
-                elif isinstance(df.index, pd.DatetimeIndex):
-                    sum_axis = 1
-                # If any sceanrio is in the index
-                elif any(scen in self.Scenarios for scen in df.index):
-                    sum_axis = 0
-                # If sceanrio is contained as a substring in the index
-                # (only works for equal length lists scenario and index lists)
-                elif [x for x, y in zip(self.Scenarios, df.index) if re.search(x, y)]:
-                    sum_axis = 1
-                elif any(scen in self.Scenarios for scen in df.columns):
-                    sum_axis = 0
-                else:
-                    logger.warning(
-                        "Could not determine axis to sum across, "
-                        "defaulting to axis 0 (rows)"
-                    )
-                    sum_axis = 0
-                max_value = df.abs().sum(axis=sum_axis).max()
-            else:
-                max_value = df.abs().to_numpy().max()
-
-            if max_value < 1000 and max_value > 1:
-                divisor = 1
-                units = "MW"
-            elif max_value < 1:
-                divisor = 0.001
-                units = "kW"
-            elif max_value > 999999.9:
-                divisor = 1000000
-                units = "TW"
-            else:
-                divisor = 1000
-                units = "GW"
-        else:
-            # Disables auto unit conversion, all values in MW
-            divisor = 1
-            units = "MW"
-
-        return {"units": units, "divisor": divisor}
-
     def process_extra_properties(self, extra_properties: List[str], 
         scenario: str,
         zone_input: str,
@@ -639,11 +377,11 @@ class MPlotDataHelper(dict):
     ) -> pd.DataFrame:
         """Processes a list of extra properties and saves them into a single dataframe. 
 
-        Should be used with properties that should be aggregated to a 
+        Use with properties that should be aggregated to a 
         zonal/regional aggregation such as; Load, Demand and Unsereved Energy.
 
         Args:
-            extra_properties (List[str]): list of extra propty names to retrieve from formatted 
+            extra_properties (List[str]): list of extra property names to retrieve from formatted 
                 data file and process
             scenario (str): scenario to pull data from
             zone_input (str): zone to subset by.
@@ -785,65 +523,6 @@ class MPlotDataHelper(dict):
         return df
 
     @staticmethod
-    def set_timestamp_date_range(
-        dfs: Union[pd.DataFrame, List[pd.DataFrame]], start_date: str, end_date: str
-    ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
-        """Sets the timestamp date range based on start_date and end_date strings
-
-        .. versionadded:: 0.10.0
-
-        Takes either a single df or a list of dfs as input.
-        The index must be a pd.DatetimeIndex or a multiindex with level timestamp.
-
-        Args:
-            dfs (Union[pd.DataFrame, List[pd.DataFrame]]): df(s) to set date range for
-            start_date (str): start date
-            end_date (str): end date
-
-        Raises:
-            ValueError: If df.index is not of type type pd.DatetimeIndex or
-                            type pd.MultiIndex with level timestamp.
-
-        Returns:
-            pd.DataFrame or Tuple[pd.DataFrame]: adjusted dataframes
-        """
-
-        logger.info(
-            f"Plotting specific date range: \
-                    {str(start_date)} to {str(end_date)}"
-        )
-
-        df_list = []
-        if isinstance(dfs, list):
-            for df in dfs:
-                if isinstance(df.index, pd.DatetimeIndex):
-                    df = df.loc[start_date:end_date]
-                elif isinstance(df.index, pd.MultiIndex):
-                    df = df.xs(
-                        slice(start_date, end_date), level="timestamp", drop_level=False
-                    )
-                else:
-                    raise ValueError(
-                        "'df.index' must be of type pd.DatetimeIndex or "
-                        "type pd.MultiIndex with level 'timestamp'"
-                    )
-                df_list.append(df)
-            return tuple(df_list)
-        else:
-            if isinstance(dfs.index, pd.DatetimeIndex):
-                df = dfs.loc[start_date:end_date]
-            elif isinstance(dfs.index, pd.MultiIndex):
-                df = dfs.xs(
-                    slice(start_date, end_date), level="timestamp", drop_level=False
-                )
-            else:
-                raise ValueError(
-                    "'df.index' must be of type pd.DatetimeIndex or "
-                    "type pd.MultiIndex with level 'timestamp'"
-                )
-            return df
-
-    @staticmethod
     def year_scenario_grouper(
         df: pd.DataFrame,
         scenario: str,
@@ -914,44 +593,6 @@ class MPlotDataHelper(dict):
         return df.groupby(grouper, **kwargs)
 
     @staticmethod
-    def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
-        """Detects the interval spacing of timeseries data.
-
-        Used to adjust sums of certain variables for sub-hourly data.
-
-        Args:
-            df (pd.DataFrame): pandas dataframe with timestamp in index.
-
-        Returns:
-            int: Number of intervals per 60 minutes.
-        """
-        timestamps = df.index.get_level_values("timestamp").unique()
-        time_delta = timestamps[1] - timestamps[0]
-        # Finds intervals in 60 minute period
-        intervals_per_hour = 60 / (time_delta / np.timedelta64(1, "m"))
-        # If intervals are greater than 1 hour, returns 1
-        return max(1, intervals_per_hour)
-
-    @staticmethod
-    def sort_duration(df: pd.DataFrame, col: str) -> pd.DataFrame:
-        """Converts a dataframe time series into a duration curve.
-
-        Args:
-            df (pd.DataFrame): pandas multiindex dataframe.
-            col (str): Column name by which to sort.
-
-        Returns:
-            pd.DataFrame: Dataframe with values sorted from largest to smallest.
-        """
-        sorted_duration = (
-            df.sort_values(by=col, ascending=False)
-            .reset_index()
-            .drop(columns=["timestamp"])
-        )
-
-        return sorted_duration
-
-    @staticmethod
     def insert_custom_data_columns(
         existing_df: pd.DataFrame, custom_data_file_path: Path
     ) -> pd.DataFrame:
@@ -1004,3 +645,289 @@ class MPlotDataHelper(dict):
             modifed_df.drop("column_position", inplace=True)
 
         return modifed_df
+
+
+
+    #TODO timeseries_modifiers
+    # def adjust_for_leapday(self, df: pd.DataFrame) -> pd.DataFrame:
+    #     """Shifts dataframe ahead by one day.
+        
+    #     Use if a non-leap year time series is modeled with a leap year time index.
+
+    #     Modeled year must be included in the scenario parent directory name.
+    #     Args:
+    #         df (pd.DataFrame): Dataframe to process.
+
+    #     Returns:
+    #         pd.DataFrame: Same dataframe, with time index shifted.
+    #     """
+    #     if (
+    #         "2008" not in self.processed_hdf5_folder
+    #         and "2012" not in self.processed_hdf5_folder
+    #         and df.index.get_level_values("timestamp")[0]
+    #         > dt.datetime(2024, 2, 28, 0, 0)
+    #     ):
+
+    #         df.index = df.index.set_levels(
+    #             df.index.levels[df.index.names.index("timestamp")].shift(1, freq="D"),
+    #             level="timestamp",
+    #         )
+
+    #     # # Special case where timezone shifting may also be necessary.
+    #     #     df.index = df.index.set_levels(
+    #     #         df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
+    #     #         level = 'timestamp')
+
+    #     return df
+    #TODO Move 
+    def merge_new_agg(self, df: pd.DataFrame) -> pd.DataFrame:
+        # TODO Needs fixing
+        """Adds new region aggregation in the plotting step.
+
+        This allows one to create a new aggregation without re-formatting the .h5 file.
+        Args:
+            df (pd.DataFrame): Dataframe to process.
+
+        Returns:
+            pd.DataFrame: Same dataframe, with new aggregation level added.
+        """
+        agg_new = Region_Mapping[["region", self.AGG_BY]]
+        agg_new = agg_new.set_index("region")
+        df = df.merge(agg_new, left_on="region", right_index=True)
+        return df
+
+
+    #TODO Move 
+    def set_facet_col_row_dimensions(
+        self, facet: bool = True, multi_scenario: list = None
+    ) -> Tuple[int, int]:
+        """Sets facet plot col and row dimensions based on user defined labeles
+
+        Args:
+            facet (bool, optional): Trigger for plotting facet plots.
+                Defaults to True.
+            multi_scenario (list, optional): List of scenarios.
+                Defaults to None.
+
+        Returns:
+            Tuple[int, int]: Facet x,y dimensions.
+        """
+        
+        if not xlabels:
+            ncols = 1
+        else:
+            ncols = len(xlabels)
+        if not self.ylabels:
+            nrows = 1
+        else:
+            nrows = len(ylabels)
+        # If the plot is not a facet plot, grid size should be 1x1
+        if not facet:
+            ncols = 1
+            nrows = 1
+            return ncols, nrows
+        # If no labels were provided or dimensions less than len scenarios use 
+        # Marmot default dimension settings
+        if (
+            not xlabels
+            and not ylabels
+            or ncols * nrows < len(multi_scenario)
+        ):
+            logger.info(
+                "Dimensions could not be determined from x & y labels - Using Marmot "
+                "default dimensions"
+            )
+            ncols, nrows = self.set_x_y_dimension(len(multi_scenario))
+        return ncols, nrows
+
+    #TODO Move 
+    def set_x_y_dimension(self, region_number: int) -> Tuple[int, int]:
+        """Sets X,Y dimension of plots without x,y labels.
+
+        Args:
+            region_number (int): # regions/scenarios
+
+        Returns:
+            Tuple[int, int]: Facet x,y dimensions.
+        """
+        if region_number >= 5:
+            ncols = 3
+            nrows = math.ceil(region_number / 3)
+        if region_number <= 3:
+            ncols = region_number
+            nrows = 1
+        if region_number == 4:
+            ncols = 2
+            nrows = 2
+        return ncols, nrows
+
+    #TODO Move 
+    def capacity_energy_unitconversion(
+        self, df: pd.DataFrame, Scenarios: str, sum_values: bool = False
+    ) -> dict:
+        """Unitconversion for capacity and energy figures.
+
+        Takes a pd.DataFrame as input and will then determine the max value
+        in the frame.
+
+        If sum_values is True, either rows or columns will be summated before
+        determining max value. The axis is chosen automatically based on where
+        the scenario entries or datetime index is located. If correct axis
+        cannot be determined axis 0 (rows) will be summed.
+        This setting should mainly be set to True when potting stacked bar
+        and area plots.
+
+        Args:
+            df (pd.DataFrame): pandas dataframe
+            sum_values (bool, optional): Sum axis values if True.
+                Should be set to True for stacked bar and area plots.
+                Defaults to False.
+
+        Returns:
+            dict: Dictionary containing divisor and units.
+        """
+        if mconfig.parser("auto_convert_units"):
+            if sum_values:
+                # Check if scenarios are in index sum across columns
+                if isinstance(df.index, pd.MultiIndex) and "Scenario" in df.index.names:
+                    sum_axis = 1
+                # If index datetime sum across columns
+                elif isinstance(df.index, pd.DatetimeIndex):
+                    sum_axis = 1
+                # If any sceanrio is in the index
+                elif any(scen in Scenarios for scen in df.index):
+                    sum_axis = 0
+                # If sceanrio is contained as a substring in the index
+                # (only works for equal length lists scenario and index lists)
+                elif [x for x, y in zip(Scenarios, df.index) if re.search(x, y)]:
+                    sum_axis = 1
+                elif any(scen in Scenarios for scen in df.columns):
+                    sum_axis = 0
+                else:
+                    logger.warning(
+                        "Could not determine axis to sum across, "
+                        "defaulting to axis 0 (rows)"
+                    )
+                    sum_axis = 0
+                max_value = df.abs().sum(axis=sum_axis).max()
+            else:
+                max_value = df.abs().to_numpy().max()
+
+            if max_value < 1000 and max_value > 1:
+                divisor = 1
+                units = "MW"
+            elif max_value < 1:
+                divisor = 0.001
+                units = "kW"
+            elif max_value > 999999.9:
+                divisor = 1000000
+                units = "TW"
+            else:
+                divisor = 1000
+                units = "GW"
+        else:
+            # Disables auto unit conversion, all values in MW
+            divisor = 1
+            units = "MW"
+
+        return {"units": units, "divisor": divisor}
+
+
+    #TODO timeseries_modifiers
+    # def set_timestamp_date_range(
+    #     dfs: Union[pd.DataFrame, List[pd.DataFrame]], start_date: str, end_date: str
+    # ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
+    #     """Sets the timestamp date range based on start_date and end_date strings
+
+    #     .. versionadded:: 0.10.0
+
+    #     Takes either a single df or a list of dfs as input.
+    #     The index must be a pd.DatetimeIndex or a multiindex with level timestamp.
+
+    #     Args:
+    #         dfs (Union[pd.DataFrame, List[pd.DataFrame]]): df(s) to set date range for
+    #         start_date (str): start date
+    #         end_date (str): end date
+
+    #     Raises:
+    #         ValueError: If df.index is not of type type pd.DatetimeIndex or
+    #                         type pd.MultiIndex with level timestamp.
+
+    #     Returns:
+    #         pd.DataFrame or Tuple[pd.DataFrame]: adjusted dataframes
+    #     """
+
+    #     logger.info(
+    #         f"Plotting specific date range: \
+    #                 {str(start_date)} to {str(end_date)}"
+    #     )
+
+    #     df_list = []
+    #     if isinstance(dfs, list):
+    #         for df in dfs:
+    #             if isinstance(df.index, pd.DatetimeIndex):
+    #                 df = df.loc[start_date:end_date]
+    #             elif isinstance(df.index, pd.MultiIndex):
+    #                 df = df.xs(
+    #                     slice(start_date, end_date), level="timestamp", drop_level=False
+    #                 )
+    #             else:
+    #                 raise ValueError(
+    #                     "'df.index' must be of type pd.DatetimeIndex or "
+    #                     "type pd.MultiIndex with level 'timestamp'"
+    #                 )
+    #             df_list.append(df)
+    #         return tuple(df_list)
+    #     else:
+    #         if isinstance(dfs.index, pd.DatetimeIndex):
+    #             df = dfs.loc[start_date:end_date]
+    #         elif isinstance(dfs.index, pd.MultiIndex):
+    #             df = dfs.xs(
+    #                 slice(start_date, end_date), level="timestamp", drop_level=False
+    #             )
+    #         else:
+    #             raise ValueError(
+    #                 "'df.index' must be of type pd.DatetimeIndex or "
+    #                 "type pd.MultiIndex with level 'timestamp'"
+    #             )
+    #         return df
+
+
+    #TODO timeseries_modifiers
+    # def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
+    #     """Detects the interval spacing of timeseries data.
+
+    #     Used to adjust sums of certain variables for sub-hourly data.
+
+    #     Args:
+    #         df (pd.DataFrame): pandas dataframe with timestamp in index.
+
+    #     Returns:
+    #         int: Number of intervals per 60 minutes.
+    #     """
+    #     timestamps = df.index.get_level_values("timestamp").unique()
+    #     time_delta = timestamps[1] - timestamps[0]
+    #     # Finds intervals in 60 minute period
+    #     intervals_per_hour = 60 / (time_delta / np.timedelta64(1, "m"))
+    #     # If intervals are greater than 1 hour, returns 1
+    #     return max(1, intervals_per_hour)
+
+    # @staticmethod
+    # def sort_duration(df: pd.DataFrame, col: str) -> pd.DataFrame:
+    #     """Converts a dataframe time series into a duration curve.
+
+    #     Args:
+    #         df (pd.DataFrame): pandas multiindex dataframe.
+    #         col (str): Column name by which to sort.
+
+    #     Returns:
+    #         pd.DataFrame: Dataframe with values sorted from largest to smallest.
+    #     """
+    #     sorted_duration = (
+    #         df.sort_values(by=col, ascending=False)
+    #         .reset_index()
+    #         .drop(columns=["timestamp"])
+    #     )
+
+    #     return sorted_duration
+

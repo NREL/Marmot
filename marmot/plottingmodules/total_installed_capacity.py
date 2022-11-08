@@ -10,11 +10,13 @@ import re
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
+from typing import List
 
 import marmot.utils.mconfig as mconfig
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.total_generation import TotalGeneration
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -25,31 +27,48 @@ plot_data_settings: dict = mconfig.parser("plot_data")
 load_legend_names: dict = mconfig.parser("load_legend_names")
 
 
-class InstalledCapacity(MPlotDataHelper):
+class InstalledCapacity(PlotDataStoreAndProcessor):
     """Installed capacity plots.
 
     The total_installed_capacity module contains methods that are
     related to the total installed capacity of generators and other devices.
 
-    InstalledCapacity inherits from the MPlotDataHelper class to assist
+    InstalledCapacity inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args,
+        marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        custom_xticklabels: List[str] = None,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
         
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
+        self.custom_xticklabels = custom_xticklabels
+        
         self.argument_list = args
-        self.argument_dict = kwargs
 
     def total_cap(
         self,
@@ -174,7 +193,7 @@ class InstalledCapacity(MPlotDataHelper):
 
             mplt.barplot(
                 Total_Installed_Capacity_Out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )
@@ -227,7 +246,7 @@ class InstalledCapacity(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -342,7 +361,7 @@ class InstalledCapacity(MPlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(
-                Total_Installed_Capacity_Out, color=self.PLEXOS_color_dict, stacked=True
+                Total_Installed_Capacity_Out, color=self.marmot_color_dict, stacked=True
             )
 
             ax.set_ylabel(
@@ -393,7 +412,9 @@ class InstalledCapacity(MPlotDataHelper):
         """
         # generation figure
         logger.info("Generation data")
-        gen_obj = TotalGeneration(*self.argument_list, **self.argument_dict)
+
+        gen_obj = TotalGeneration(self.Zones, self.Scenarios, *self.argument_list, 
+            self.marmot_color_dict, self.ylabels, self.xlabels, self.custom_xticklabels)
         gen_outputs = gen_obj.total_gen(
             start_date_range, end_date_range, scenario_groupby
         )
@@ -440,7 +461,7 @@ class InstalledCapacity(MPlotDataHelper):
 
             mplt.barplot(
                 Total_Installed_Capacity_Out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 sub_pos=0,
                 custom_tick_labels=tick_labels,
@@ -494,7 +515,7 @@ class InstalledCapacity(MPlotDataHelper):
 
             mplt.barplot(
                 Total_Generation_Stack_Out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 sub_pos=1,
                 custom_tick_labels=tick_labels,
@@ -654,7 +675,7 @@ class InstalledCapacity(MPlotDataHelper):
 
                 mplt.barplot(
                     installed_capacity_grouped,
-                    color=self.PLEXOS_color_dict,
+                    color=self.marmot_color_dict,
                     stacked=True,
                     custom_tick_labels=tick_labels,
                     sub_pos=i,

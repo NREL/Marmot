@@ -12,12 +12,14 @@ TO DO:
 
 import logging
 import pandas as pd
+from typing import List
 from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
 
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     InputSheetError,
@@ -28,28 +30,42 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 
-class Emissions(MPlotDataHelper):
+class Emissions(PlotDataStoreAndProcessor):
     """Generator emissions plots.
 
     The emissions.py module contains methods that are
     related to the fossil fuel emissions of generators.
 
-    Emissions inherits from the MPlotDataHelper class to assist
+    Emissions inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args, 
+        marmot_color_dict: dict = None,
+        custom_xticklabels: List[str] = None,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.custom_xticklabels = custom_xticklabels
 
     def total_emissions_by_type(
         self,
@@ -94,7 +110,7 @@ class Emissions(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "emissions_generators_Production", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -191,7 +207,7 @@ class Emissions(MPlotDataHelper):
 
             mplt.barplot(
                 emitPlot,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )

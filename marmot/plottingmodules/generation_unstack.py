@@ -10,10 +10,11 @@ import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 import marmot.utils.mconfig as mconfig
+from typing import List
 
-
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -24,29 +25,45 @@ plot_data_settings = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
 
 
-class GenerationUnStack(MPlotDataHelper):
+class GenerationUnStack(PlotDataStoreAndProcessor):
     """Timeseries generation line plots.
 
     The generation_unstack.py module contains methods that are
     related to the timeseries generation of generators,
     displayed in an unstacked line format.
 
-    GenerationUnStack inherits from the MPlotDataHelper class to assist
+    GenerationUnStack inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args, 
+        marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
 
         self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
@@ -123,7 +140,7 @@ class GenerationUnStack(MPlotDataHelper):
                 (False, f"{agg}_Unserved_Energy{data_resolution}", scenario_list),
             ]
 
-            # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+            # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
             # with all required properties, returns a 1 if required data is missing
             return self.get_formatted_data(properties)
 
@@ -283,7 +300,7 @@ class GenerationUnStack(MPlotDataHelper):
                         stacked_gen_df.index.values,
                         stacked_gen_df[column],
                         linewidth=2,
-                        color=self.PLEXOS_color_dict.get(column, "#333333"),
+                        color=self.marmot_color_dict.get(column, "#333333"),
                         label=column,
                     )
 

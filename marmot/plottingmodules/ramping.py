@@ -8,11 +8,11 @@ This module creates bar plot of the total volume of generator starts in MW,GW,et
 
 import logging
 import pandas as pd
-
+from typing import List
 import marmot.utils.mconfig as mconfig
-
+from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -23,28 +23,37 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 
-class Ramping(MPlotDataHelper):
+class Ramping(PlotDataStoreAndProcessor):
     """Generator start and ramping plots.
 
     The ramping.py module contains methods that are
     related to the ramp periods of generators.
 
-    Ramping inherits from the MPlotDataHelper class to assist
+    Ramping inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args,
+        color_list: list = ColorList().colors,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.color_list = color_list
 
     def capacity_started(
         self,
@@ -86,8 +95,8 @@ class Ramping(MPlotDataHelper):
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate
-        # MPlotDataHelper dictionary with all required properties,
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate
+        # PlotDataStoreAndProcessor dictionary with all required properties,
         # returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -240,7 +249,7 @@ class Ramping(MPlotDataHelper):
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -397,8 +406,8 @@ class Ramping(MPlotDataHelper):
             (True, "generator_Generation", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate
-        # MPlotDataHelper dictionary with all required properties,
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate
+        # PlotDataStoreAndProcessor dictionary with all required properties,
         # returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 

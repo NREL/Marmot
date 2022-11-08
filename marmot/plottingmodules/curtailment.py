@@ -8,10 +8,12 @@ This module creates plots are related to the curtailment of generators.
 
 import logging
 import pandas as pd
-
+from typing import List
 import marmot.utils.mconfig as mconfig
+
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict, ColorList, PlotMarkers
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     DataSavedInModule,
@@ -23,28 +25,46 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 
-class Curtailment(MPlotDataHelper):
+class Curtailment(PlotDataStoreAndProcessor):
     """Device curtailment plots.
 
     The curtailment.py module contains methods that are
     related to the curtailment of generators .
 
-    Curtailment inherits from the MPlotDataHelper class to assist
+    Curtailment inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args, 
+        marmot_color_dict: dict = None,
+        custom_xticklabels: List[str] = None,
+        color_list: list = ColorList().colors,
+        marker_style: List = PlotMarkers().markers,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.custom_xticklabels = custom_xticklabels
+        self.color_list = color_list
+        self.marker_style = marker_style
 
         self.curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
@@ -80,7 +100,7 @@ class Curtailment(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -165,7 +185,7 @@ class Curtailment(MPlotDataHelper):
                     outputs[zone_input] = out
                     continue
                 # unit conversion return divisor and energy units
-                unitconversion = self.capacity_energy_unitconversion(PV_Curtailment_DC)
+                unitconversion = self.capacity_energy_unitconversion(PV_Curtailment_DC, self.Scenarios)
                 PV_Curtailment_DC = PV_Curtailment_DC / unitconversion["divisor"]
                 Data_Table_Out = PV_Curtailment_DC
                 Data_Table_Out = Data_Table_Out.add_suffix(
@@ -193,7 +213,7 @@ class Curtailment(MPlotDataHelper):
                     outputs[zone_input] = out
                     continue
                 # unit conversion return divisor and energy units
-                unitconversion = self.capacity_energy_unitconversion(RE_Curtailment_DC)
+                unitconversion = self.capacity_energy_unitconversion(RE_Curtailment_DC, self.Scenarios)
                 RE_Curtailment_DC = RE_Curtailment_DC / unitconversion["divisor"]
                 Data_Table_Out = RE_Curtailment_DC
                 Data_Table_Out = Data_Table_Out.add_suffix(
@@ -266,7 +286,7 @@ class Curtailment(MPlotDataHelper):
             (True, "generator_Total_Generation_Cost", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -554,7 +574,7 @@ class Curtailment(MPlotDataHelper):
             (False, "generator_Available_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -643,7 +663,7 @@ class Curtailment(MPlotDataHelper):
 
             # unit conversion return divisor and energy units
             unitconversion = self.capacity_energy_unitconversion(
-                Total_Curtailment_out, sum_values=True
+                Total_Curtailment_out, self.Scenarios, sum_values=True
             )
             Total_Curtailment_out = Total_Curtailment_out / unitconversion["divisor"]
 
@@ -662,7 +682,7 @@ class Curtailment(MPlotDataHelper):
 
             mplt.barplot(
                 Total_Curtailment_out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )
@@ -737,7 +757,7 @@ class Curtailment(MPlotDataHelper):
             (True, "generator_Available_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -832,7 +852,7 @@ class Curtailment(MPlotDataHelper):
 
             # unit conversion return divisor and energy units
             unitconversion = self.capacity_energy_unitconversion(
-                Total_Curtailment_out, sum_values=True
+                Total_Curtailment_out, self.Scenarios, sum_values=True
             )
             Total_Curtailment_out = Total_Curtailment_out / unitconversion["divisor"]
 
@@ -841,7 +861,7 @@ class Curtailment(MPlotDataHelper):
             Total_Curtailment_out.plot.bar(
                 stacked=True,
                 color=[
-                    self.PLEXOS_color_dict.get(x, "#333333")
+                    self.marmot_color_dict.get(x, "#333333")
                     for x in Total_Curtailment_out.columns
                 ],
                 ax=ax,
@@ -941,7 +961,7 @@ class Curtailment(MPlotDataHelper):
             (True, f"generator_{self.curtailment_prop}", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1072,7 +1092,7 @@ class Curtailment(MPlotDataHelper):
 
         ax.set_ylabel("Curtailment (%)", color="black", rotation="vertical")
 
-        unitconversion = self.capacity_energy_unitconversion(Total_Curt)
+        unitconversion = self.capacity_energy_unitconversion(Total_Curt, self.Scenarios)
         Total_Curt = Total_Curt / unitconversion["divisor"]
 
         Total_Curt = round(Total_Curt, 2)
@@ -1147,7 +1167,7 @@ class Curtailment(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -1219,7 +1239,7 @@ class Curtailment(MPlotDataHelper):
             mplt = SetupSubplot()
             fig, ax = mplt.get_figure()
 
-            unitconversion = self.capacity_energy_unitconversion(RE_Curtailment_DC)
+            unitconversion = self.capacity_energy_unitconversion(RE_Curtailment_DC, self.Scenarios)
             RE_Curtailment_DC = RE_Curtailment_DC / unitconversion["divisor"]
             Data_Table_Out = RE_Curtailment_DC.copy()
             Data_Table_Out.index = pd.date_range(

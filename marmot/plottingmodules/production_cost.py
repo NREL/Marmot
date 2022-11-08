@@ -10,10 +10,12 @@ Plots can be broken down by cost categories, generator types etc.
 import logging
 import pandas as pd
 from pathlib import Path
+from typing import List
 
 import marmot.utils.mconfig as mconfig
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -23,28 +25,42 @@ plot_data_settings = mconfig.parser("plot_data")
 logger = logging.getLogger("plotter." + __name__)
 
 
-class SystemCosts(MPlotDataHelper):
+class SystemCosts(PlotDataStoreAndProcessor):
     """System operating cost plots.
 
     The production_cost.py module contains methods that are
     related related to the cost of operating the power system.
 
-    SystemCosts inherits from the MPlotDataHelper class to assist
+    SystemCosts inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args,
+        marmot_color_dict: dict = None,
+        custom_xticklabels: List[str] = None,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.custom_xticklabels = custom_xticklabels
 
     def prod_cost(
         self,
@@ -90,7 +106,7 @@ class SystemCosts(MPlotDataHelper):
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -259,7 +275,7 @@ class SystemCosts(MPlotDataHelper):
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -446,7 +462,7 @@ class SystemCosts(MPlotDataHelper):
             (False, "generator_Emissions_Cost", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -635,7 +651,7 @@ class SystemCosts(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -715,7 +731,7 @@ class SystemCosts(MPlotDataHelper):
 
             mplt.barplot(
                 total_systems_cost_out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )
@@ -777,7 +793,7 @@ class SystemCosts(MPlotDataHelper):
             (False, f"{agg}_Cost_Unserved_Energy", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -925,7 +941,7 @@ class SystemCosts(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
         # Checks if all data required by plot is available, if 1 in list required data is missing
@@ -1003,7 +1019,7 @@ class SystemCosts(MPlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(
-                total_systems_cost_out, color=self.PLEXOS_color_dict, stacked=True
+                total_systems_cost_out, color=self.marmot_color_dict, stacked=True
             )
 
             ax.axhline(y=0)
@@ -1066,7 +1082,7 @@ class SystemCosts(MPlotDataHelper):
             (False, "generator_Emissions_Cost", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 

@@ -9,11 +9,12 @@ plots and is called from marmot_plot_main.py
 
 import logging
 import pandas as pd
+from typing import List
 
 import marmot.utils.mconfig as mconfig
-
+from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -23,28 +24,39 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 
-class UnservedEnergy(MPlotDataHelper):
+class UnservedEnergy(PlotDataStoreAndProcessor):
     """System unserved energy plots.
 
     The unserved_energy.py module contains methods that are
     related to unserved energy in the power system.
 
-    UnservedEnergy inherits from the MPlotDataHelper class to assist
+    UnservedEnergy inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args,
+        custom_xticklabels: List[str] = None,
+        color_list: list = ColorList().colors,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.custom_xticklabels = custom_xticklabels
+        self.color_list = color_list
 
     def unserved_energy_timeseries(
         self,
@@ -83,7 +95,7 @@ class UnservedEnergy(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -202,7 +214,7 @@ class UnservedEnergy(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -350,8 +362,8 @@ class UnservedEnergy(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate
-        # MPlotDataHelper dictionary with all required properties,
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate
+        # PlotDataStoreAndProcessor dictionary with all required properties,
         # returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 

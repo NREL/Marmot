@@ -6,6 +6,7 @@ This code creates generation stack plots.
 """
 
 import logging
+from typing import List
 import pandas as pd
 import datetime as dt
 import numpy as np
@@ -13,8 +14,9 @@ import matplotlib.pyplot as plt
 
 import marmot.utils.mconfig as mconfig
 
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -28,29 +30,50 @@ shift_leapday: bool = mconfig.parser("shift_leapday")
 load_legend_names: dict = mconfig.parser("load_legend_names")
 
 
-class GenerationStack(MPlotDataHelper):
+class GenerationStack(PlotDataStoreAndProcessor):
     """Timeseries generation stacked area plots.
 
     The generation_stack.py contains methods that are
     related to the timeseries generation of generators,
     in a stacked area format.
 
-    GenerationStack inherits from the MPlotDataHelper class to assist
+    GenerationStack inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args, 
+        marmot_color_dict: dict = None,
+        Scenario_Diff: List[str] = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
+        if Scenario_Diff is None:
+            self.Scenario_Diff = [""]
+        else:
+            self.Scenario_Diff = Scenario_Diff
 
         self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
@@ -100,7 +123,7 @@ class GenerationStack(MPlotDataHelper):
             (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -206,17 +229,17 @@ class GenerationStack(MPlotDataHelper):
                         commit_cap = avail_cap[tech]
 
                     axs[j, i].plot(
-                        gen_one_tech, alpha=0, color=self.PLEXOS_color_dict[tech]
+                        gen_one_tech, alpha=0, color=self.marmot_color_dict[tech]
                     )[0]
                     axs[j, i].fill_between(
                         gen_one_tech.index,
                         gen_one_tech,
                         0,
-                        color=self.PLEXOS_color_dict[tech],
+                        color=self.marmot_color_dict[tech],
                         alpha=0.5,
                     )
                     if tech != "Hydro":
-                        axs[j, i].plot(commit_cap, color=self.PLEXOS_color_dict[tech])
+                        axs[j, i].plot(commit_cap, color=self.marmot_color_dict[tech])
 
                     mplt.set_yaxis_major_tick_format(sub_pos=(j, i))
                     axs[j, i].margins(x=0.01)
@@ -314,7 +337,7 @@ class GenerationStack(MPlotDataHelper):
             (False,f"batterie_Generation{data_resolution}", self.Scenarios)
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -483,7 +506,7 @@ class GenerationStack(MPlotDataHelper):
 
                 mplt.stackplot(
                     stacked_gen_df,
-                    self.PLEXOS_color_dict,
+                    self.marmot_color_dict,
                     labels=stacked_gen_df.columns,
                     sub_pos=i,
                 )
@@ -597,7 +620,7 @@ class GenerationStack(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"generator_Generation{data_resolution}", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -688,7 +711,7 @@ class GenerationStack(MPlotDataHelper):
                 ax.plot(
                     Gen_Stack_Out[column],
                     linewidth=3,
-                    color=self.PLEXOS_color_dict[column],
+                    color=self.marmot_color_dict[column],
                     label=column,
                 )
 

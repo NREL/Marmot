@@ -8,10 +8,11 @@ related to investigating generator and other device sensitivities.
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
-
+from typing import List
 import marmot.utils.mconfig as mconfig
 
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -22,28 +23,40 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 
-class Sensitivities(MPlotDataHelper):
+class Sensitivities(PlotDataStoreAndProcessor):
     """System sensitivity plots
 
     The sensitivities.py module contains methods that are
     related to investigating generator sensitivities.
 
-    Sensitivities inherits from the MPlotDataHelper class to assist
+    Sensitivities inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args,
+        marmot_color_dict: dict = None,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
 
         self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
@@ -112,7 +125,7 @@ class Sensitivities(MPlotDataHelper):
             (True, "region_Net_Interchange", self.Scenario_Diff),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -247,11 +260,11 @@ class Sensitivities(MPlotDataHelper):
                 Data_Table_Out = pd.concat(Data_Out_List, axis=1, copy=False)
 
                 custom_color_dict = {
-                    "Curtailment difference": self.PLEXOS_color_dict["Curtailment"],
-                    prop + " " + self.Scenario_Diff[0]: self.PLEXOS_color_dict[prop],
-                    self.Scenario_Diff[1]: self.PLEXOS_color_dict[prop],
-                    "Gas-CC difference": self.PLEXOS_color_dict["Gas-CC"],
-                    "Gas-CT difference": self.PLEXOS_color_dict["Gas-CT"],
+                    "Curtailment difference": self.marmot_color_dict["Curtailment"],
+                    prop + " " + self.Scenario_Diff[0]: self.marmot_color_dict[prop],
+                    self.Scenario_Diff[1]: self.marmot_color_dict[prop],
+                    "Gas-CC difference": self.marmot_color_dict["Gas-CC"],
+                    "Gas-CT difference": self.marmot_color_dict["Gas-CT"],
                     "Net export difference": "black",
                 }
 
@@ -315,7 +328,7 @@ class Sensitivities(MPlotDataHelper):
                 axs[0].set_ylabel("Generation (MW)", color="black", rotation="vertical")
                 axs[0].set_xlabel(timezone, color="black", rotation="horizontal")
                 axs[0].margins(x=0.01)
-                MPlotDataHelper.set_subplot_timeseries_format(axs)
+                PlotDataStoreAndProcessor.set_subplot_timeseries_format(axs)
                 handles, labels = axs[0].get_legend_handles_labels()
                 axs[0].legend(
                     reversed(handles),

@@ -12,11 +12,12 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
-
+from typing import List
 import marmot.utils.mconfig as mconfig
 
+from marmot.plottingmodules.plotutils.styles import ColorList, GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -26,29 +27,49 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings = mconfig.parser("plot_data")
 
 
-class Reserves(MPlotDataHelper):
+class Reserves(PlotDataStoreAndProcessor):
     """Generator and system reserve plots.
 
     The reserves.py module contains methods that are
     related to reserve provision and shortage.
 
-    Reserves inherits from the MPlotDataHelper class to assist
+    Reserves inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        *args,
+        marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        custom_xticklabels: List[str] = None,
+        color_list: list = ColorList().colors,
+        **kwargs):
         """
         Args:
             *args
-                Minimum required parameters passed to the MPlotDataHelper 
+                Minimum required parameters passed to the PlotDataStoreAndProcessor 
                 class.
             **kwargs
-                These parameters will be passed to the MPlotDataHelper 
+                These parameters will be passed to the PlotDataStoreAndProcessor 
                 class.
         """
         # Instantiation of MPlotHelperFunctions
         super().__init__(*args, **kwargs)
 
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
+        self.custom_xticklabels = custom_xticklabels
+        self.color_list = color_list
+        
     def reserve_gen_timeseries(
         self,
         prop: str = None,
@@ -110,7 +131,7 @@ class Reserves(MPlotDataHelper):
             (True, f"reserves_generators_Provision{data_resolution}", self.Scenarios)
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -206,7 +227,7 @@ class Reserves(MPlotDataHelper):
 
                 mplt.stackplot(
                     reserve_provision_timeseries,
-                    color_dict=self.PLEXOS_color_dict,
+                    color_dict=self.marmot_color_dict,
                     labels=reserve_provision_timeseries.columns,
                     sub_pos=n,
                 )
@@ -272,7 +293,7 @@ class Reserves(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "reserves_generators_Provision", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -354,7 +375,7 @@ class Reserves(MPlotDataHelper):
 
             mplt.barplot(
                 total_reserves_out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )
@@ -455,7 +476,7 @@ class Reserves(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"reserve_{data_set}", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -636,7 +657,7 @@ class Reserves(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"reserve_Shortage{data_resolution}", Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
