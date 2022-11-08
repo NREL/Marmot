@@ -31,6 +31,7 @@ except ModuleNotFoundError:
 from marmot.utils.loggersetup import SetupLogger
 from marmot.utils.definitions import INPUT_DIR, Module_CLASS_MAPPING
 from marmot.metamanagers.read_metadata import MetaData
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict, PlotMarkers, ColorList
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     DataSavedInModule,
     InputSheetError,
@@ -311,36 +312,15 @@ class MarmotPlot(SetupLogger):
             ordered_gen.append("Other")
 
         if self.color_dictionary_file is not None:
-            PLEXOS_color_dict = self.color_dictionary_file.rename(
-                columns={
-                    self.color_dictionary_file.columns[0]: "Generator",
-                    self.color_dictionary_file.columns[1]: "Colour",
-                }
-            )
-
-            PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
-            PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
-            PLEXOS_color_dict = (
-                PLEXOS_color_dict[["Generator", "Colour"]]
-                .set_index("Generator")
-                .to_dict()["Colour"]
-            )
+            marmot_color_dict = GeneratorColorDict.set_colors_from_df(self.color_dictionary_file).color_dict
         else:
-            PLEXOS_color_dict = None
+            self.logger.warning(
+                "'Color dictionary' not passed! Random colors will now be used."
+            )
+            marmot_color_dict = GeneratorColorDict.set_random_colors(ordered_gen).color_dict
 
-        color_list = [
-            "#396AB1",
-            "#CC2529",
-            "#3E9651",
-            "#ff7f00",
-            "#6B4C9A",
-            "#922428",
-            "#cab2d6",
-            "#6a3d9a",
-            "#fb9a99",
-            "#b15928"
-        ]
-        marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
+        color_list = ColorList().colors
+        marker_style = PlotMarkers().markers
 
         gen_names_dict = (
             self.gen_names[["Original", "New"]].set_index("Original").to_dict()["New"]
@@ -491,7 +471,7 @@ class MarmotPlot(SetupLogger):
             argument_dict = {
                 "gen_names_dict": gen_names_dict,
                 "gen_categories": self.ordered_gen_categories,
-                "PLEXOS_color_dict": PLEXOS_color_dict,
+                "marmot_color_dict": marmot_color_dict,
                 "Scenario_Diff": self.Scenario_Diff,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
