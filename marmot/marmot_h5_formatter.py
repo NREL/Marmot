@@ -29,6 +29,7 @@ except ModuleNotFoundError:
     sys.exit()
 from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
 from marmot.utils.loggersetup import SetupLogger
+from marmot.utils.error_handler import PropertyNotFound
 import marmot.utils.dataio as dataio
 import marmot.formatters as formatters
 from marmot.formatters.formatbase import Process
@@ -185,17 +186,13 @@ class MarmotFormat(SetupLogger):
         else:
             scen_name = self.Scenario_name
 
-        try:
-            process_class = getattr(formatters, sim_model.lower())()
-            if not callable(process_class):
-                self.logger.error(
-                    "A required module was not found to " f"process {sim_model} results"
-                )
-                self.logger.error(process_class)
-                sys.exit()
-        except AttributeError:
-            self.logger.error(f"No formatter found for model: {sim_model}")
-            sys.exit()
+        process_class = getattr(formatters, sim_model.lower())()
+        if not callable(process_class):
+            self.logger.error(
+                "A required module was not found to " f"process {sim_model} results"
+            )
+            self.logger.error(process_class)
+            raise ModuleNotFoundError("A required module was not found to " f"process {sim_model} results")
 
         self.logger.info(f"#### Processing {scen_name} {sim_model} " "Results ####")
 
@@ -272,11 +269,13 @@ class MarmotFormat(SetupLogger):
 
             if property_key_name not in existing_keys:
                 for model in files_list:
-                    processed_data = process_sim_model.get_processed_data(
-                        row["group"], row["data_set"], row["data_type"], model
-                    )
-                    if processed_data.empty is True:
-                        data_chunks.append(processed_data)
+                    try:
+                        processed_data = process_sim_model.get_processed_data(
+                            row["group"], row["data_set"], row["data_type"], model
+                        )
+                    except PropertyNotFound as e:
+                        self.logger.warning(e.message)
+                        data_chunks.append(pd.DataFrame())
                         break
 
                     # Check if data is for year interval and of type capacity

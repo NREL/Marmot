@@ -11,6 +11,7 @@ import pandas as pd
 from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
+from marmot.utils.error_handler import PropertyNotFound
 import marmot.metamanagers.write_siip_metadata as write_siip_metadata
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process
@@ -121,8 +122,8 @@ class ProcessSIIP(Process):
         try:
             df: pd.DataFrame = pd.read_csv(siip_partition.joinpath(prop + ".csv"))
         except FileNotFoundError:
-            df = self.report_prop_error(prop, prop_class)
-            return df
+            raise PropertyNotFound(prop, prop_class)
+
         # Convert to datetime64[ns] type
         df.DateTime = pd.to_datetime(df.DateTime)
         df = df.rename(columns={"DateTime": "timestamp"})

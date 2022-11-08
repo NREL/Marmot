@@ -7,11 +7,10 @@ instead edit the values directly in the config.yml file once created.
 """
 
 import yaml
-import traceback
-import sys
 from pathlib import Path
 from typing import Union
 from marmot.utils.definitions import ROOT_DIR
+from marmot.utils.error_handler import ConfigFileReadError
 
 CONFIGFILE_NAME = "config.yml"
 configfile_path = ROOT_DIR.parent.joinpath(CONFIGFILE_NAME)
@@ -259,7 +258,7 @@ def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, bo
 
     Returns:
         Union[dict, str, int, bool]: Returns the requested level or value from 
-        the config file. Return type varies based on level accessed.
+        the config file. Return type varies based on levesl accessed.
     """
     with open(configfile_path, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile.read())
@@ -270,14 +269,8 @@ def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, bo
         else:
             value = cfg[top_level][second_level]
         return value
-    except KeyError:
-        print(traceback.format_exc())
-        print(
-            "Config file read Error: New config settings have been added which "
-            "require the config.yml to be re-created. "
-            "To continue delete config.yml located in the top directory level of Marmot"
-        )
-        sys.exit()
+    except KeyError as e:
+        raise ConfigFileReadError(e.args[0])
 
 
 def edit_value(new_value: str, top_level: str, second_level: str = None):

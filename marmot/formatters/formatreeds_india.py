@@ -9,6 +9,7 @@ import logging
 from typing import List
 from dataclasses import dataclass, field
 
+from marmot.formatters.formatbase import ReEDSPropertyColumnsBase
 from marmot.formatters.formatreeds import ProcessReEDS
 from marmot.formatters.formatextra import ExtraReEDSIndiaProperties
 
@@ -49,7 +50,7 @@ class ProcessReEDSIndia(ProcessReEDS):
 
 
 @dataclass
-class ReEDSIndiaPropertyColumns():
+class ReEDSIndiaPropertyColumns(ReEDSPropertyColumnsBase):
     """ReEDS India property column names"""
 
     gen_out: List = field(
