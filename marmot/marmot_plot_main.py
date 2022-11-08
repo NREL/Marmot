@@ -481,8 +481,8 @@ class MarmotPlot(SetupLogger):
             # List of required arguments
             argument_list = [
                 Zones,
-                self.AGG_BY,
                 self.Scenarios,
+                self.AGG_BY,
                 ordered_gen,
                 self.marmot_solutions_folder
             ]

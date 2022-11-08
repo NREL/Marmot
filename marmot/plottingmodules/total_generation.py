@@ -118,7 +118,6 @@ class TotalGeneration(MPlotDataHelper):
                 Total_Gen_Stack: pd.DataFrame = self["generator_Generation"].get(
                     scenario
                 )
-
                 # Check if zone has generation, if not skips
                 try:
                     Total_Gen_Stack = Total_Gen_Stack.xs(zone_input, level=self.AGG_BY)
@@ -134,54 +133,16 @@ class TotalGeneration(MPlotDataHelper):
                     if Total_Gen_Stack.empty is True:
                         logger.warning("No Generation in selected Date Range")
                         continue
-
+                
                 # Calculates interval step to correct for MWh of generation
                 interval_count = self.get_sub_hour_interval_count(Total_Gen_Stack)
 
-                curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
                 # Insert Curtailment into gen stack if it exists in database
-                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
-                if not Stacked_Curt.empty:
-                    if (
-                        zone_input
-                        in Stacked_Curt.index.get_level_values(self.AGG_BY).unique()
-                    ):
-                        Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
-                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
-                        # If using Marmot's curtailment property
-                        if self.curtailment_prop == "Curtailment":
-                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
-                        Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        Total_Gen_Stack.insert(
-                            len(Total_Gen_Stack.columns),
-                            column=curtailment_name,
-                            value=Stacked_Curt,
-                        )  # Insert curtailment into
-                        Total_Gen_Stack = Total_Gen_Stack.loc[
-                            :, (Total_Gen_Stack != 0).any(axis=0)
-                        ]
-
+                Total_Gen_Stack = self.add_curtailment_to_df(Total_Gen_Stack, scenario,
+                    zone_input)
                 #Insert battery generation.
-                stacked_bat_gen : pd.DataFrame = self[
-                    f"batterie_Generation"
-                ].get(scenario)
-                battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
-                if stacked_bat_gen.empty is True:
-                    logger.info("No Battery generation in selected Date Range")
-                else:
-                    if shift_leapday:
-                        stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
-
-                    stacked_bat_gen = stacked_bat_gen.xs(
-                        zone_input, level=self.AGG_BY
-                    )
-
-                    stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
-                    Total_Gen_Stack.insert(
-                        len(Total_Gen_Stack.columns),
-                        column=battery_discharge_name,
-                        value=stacked_bat_gen,
-                    )
+                Total_Gen_Stack = self.add_battery_gen_to_df(Total_Gen_Stack, scenario,
+                    zone_input)
                     
                 Total_Gen_Stack = Total_Gen_Stack / interval_count
 
@@ -353,29 +314,8 @@ class TotalGeneration(MPlotDataHelper):
                 interval_count = self.get_sub_hour_interval_count(Total_Gen_Stack)
 
                 # Insert Curtailment into gen stack if it exists in database
-                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
-                if not Stacked_Curt.empty:
-                    curtailment_name = self.gen_names_dict.get(
-                        "Curtailment", "Curtailment"
-                    )
-                    if (
-                        zone_input
-                        in Stacked_Curt.index.get_level_values(self.AGG_BY).unique()
-                    ):
-                        Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
-                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
-                        # If using Marmot's curtailment property
-                        if self.curtailment_prop == "Curtailment":
-                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
-                        Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        Total_Gen_Stack.insert(
-                            len(Total_Gen_Stack.columns),
-                            column=curtailment_name,
-                            value=Stacked_Curt,
-                        )  # Insert curtailment into
-                        Total_Gen_Stack = Total_Gen_Stack.loc[
-                            :, (Total_Gen_Stack != 0).any(axis=0)
-                        ]
+                Total_Gen_Stack = self.add_curtailment_to_df(Total_Gen_Stack, scenario,
+                    zone_input)
 
                 Total_Gen_Stack = Total_Gen_Stack / interval_count
 
@@ -430,6 +370,10 @@ class TotalGeneration(MPlotDataHelper):
             Data_Table_Out = total_generation_stack_out.add_suffix(
                 f" ({unitconversion['units']}h)"
             )
+
+            curtailment_name = self.gen_names_dict.get(
+                        "Curtailment", "Curtailment"
+                    )
 
             net_diff = total_generation_stack_out
             try:
@@ -620,29 +564,8 @@ class TotalGeneration(MPlotDataHelper):
                 interval_count = self.get_sub_hour_interval_count(Total_Gen_Stack)
 
                 # Insert Curtailment into gen stack if it exists in database
-                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
-                if not Stacked_Curt.empty:
-                    curtailment_name = self.gen_names_dict.get(
-                        "Curtailment", "Curtailment"
-                    )
-                    if (
-                        zone_input
-                        in Stacked_Curt.index.get_level_values(self.AGG_BY).unique()
-                    ):
-                        Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
-                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
-                        # If using Marmot's curtailment property
-                        if self.curtailment_prop == "Curtailment":
-                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
-                        Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        Total_Gen_Stack.insert(
-                            len(Total_Gen_Stack.columns),
-                            column=curtailment_name,
-                            value=Stacked_Curt,
-                        )
-                        Total_Gen_Stack = Total_Gen_Stack.loc[
-                            :, (Total_Gen_Stack != 0).any(axis=0)
-                        ]
+                Total_Gen_Stack = self.add_curtailment_to_df(Total_Gen_Stack, scenario,
+                    zone_input)
 
                 # Process extra optional properties
                 extra_property_names = [f"{agg}_Load", f"{agg}_Demand"]
@@ -888,6 +811,10 @@ class TotalGeneration(MPlotDataHelper):
                     continue
 
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
+                
+                # Insert Curtailment into gen stack if it exists in database
+                Total_Gen_Stack = self.add_curtailment_to_df(Total_Gen_Stack, scenario,
+                    zone_input)
 
                 if pd.notna(start_date_range):
                     Total_Gen_Stack = self.set_timestamp_date_range(
@@ -896,32 +823,6 @@ class TotalGeneration(MPlotDataHelper):
                     if Total_Gen_Stack.empty is True:
                         logger.warning("No Generation in selected Date Range")
                         continue
-
-                # Insert Curtailment into gen stack if it exists in database
-                Stacked_Curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
-                if not Stacked_Curt.empty:
-                    curtailment_name = self.gen_names_dict.get(
-                        "Curtailment", "Curtailment"
-                    )
-                    if (
-                        zone_input
-                        in Stacked_Curt.index.get_level_values(self.AGG_BY).unique()
-                    ):
-                        Stacked_Curt = Stacked_Curt.xs(zone_input, level=self.AGG_BY)
-                        Stacked_Curt = self.df_process_gen_inputs(Stacked_Curt)
-                        # If using Marmot's curtailment property
-                        if self.curtailment_prop == "Curtailment":
-                            Stacked_Curt = self.assign_curtailment_techs(Stacked_Curt)
-                        Stacked_Curt = Stacked_Curt.sum(axis=1)
-                        # Insert curtailment into
-                        Total_Gen_Stack.insert(
-                            len(Total_Gen_Stack.columns),
-                            column=curtailment_name,
-                            value=Stacked_Curt,
-                        )
-                        Total_Gen_Stack = Total_Gen_Stack.loc[
-                            :, (Total_Gen_Stack != 0).any(axis=0)
-                        ]
 
                 Total_Gen_Stack = self.year_scenario_grouper(
                     Total_Gen_Stack, scenario

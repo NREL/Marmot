@@ -368,68 +368,17 @@ class GenerationStack(MPlotDataHelper):
                 stacked_gen_df = self.df_process_gen_inputs(stacked_gen_df)
 
                 # Insert Curtailment into gen stack if it exists in database
-                stacked_curt_df: pd.DataFrame = self[
-                    f"generator_{self.curtailment_prop}{data_resolution}"
-                ].get(scenario)
+                stacked_gen_df = self.add_curtailment_to_df(stacked_gen_df, scenario,
+                    zone_input, data_resolution=data_resolution)
+                
                 curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
-                if not stacked_curt_df.empty:
-                    if shift_leapday:
-                        stacked_curt_df = self.adjust_for_leapday(stacked_curt_df)
-                    if (
-                        zone_input
-                        in stacked_curt_df.index.get_level_values(self.AGG_BY).unique()
-                    ):
-                        stacked_curt_df = stacked_curt_df.xs(
-                            zone_input, level=self.AGG_BY
-                        )
-                        stacked_curt_df = self.df_process_gen_inputs(stacked_curt_df)
-                        # If using Marmot's curtailment property
-                        if self.curtailment_prop == "Curtailment":
-                            stacked_curt_df = self.assign_curtailment_techs(
-                                stacked_curt_df
-                            )
-                        stacked_curt_df = stacked_curt_df.sum(axis=1)
-                        stacked_curt_df[
-                            stacked_curt_df < 0.05
-                        ] = 0  # Remove values less than 0.05 MW
-                        # Insert curtailment into
-                        stacked_gen_df.insert(
-                            len(stacked_gen_df.columns),
-                            column=curtailment_name,
-                            value=stacked_curt_df,
-                        )
-                        stacked_gen_df = stacked_gen_df.fillna(0)
-                        # Calculates Net Load by removing variable gen + curtailment
-                        vre_gen_cat = self.gen_categories.vre + [curtailment_name]
-                    else:
-                        vre_gen_cat = self.gen_categories.vre
+                if curtailment_name in stacked_gen_df.columns:
+                    vre_gen_cat = self.gen_categories.vre + [curtailment_name]
                 else:
                     vre_gen_cat = self.gen_categories.vre
-
                 #Insert battery generation.
-                stacked_bat_gen : pd.DataFrame = self[
-                    f"batterie_Generation{data_resolution}"
-                ].get(scenario)
-                battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
-                if stacked_bat_gen.empty is True:
-                    logger.info("No Battery generation in selected Date Range")
-                else:
-                    if shift_leapday:
-                        stacked_bat_gen = self.adjust_for_leapday(stacked_bat_gen)
-
-                    stacked_bat_gen = stacked_bat_gen.xs(
-                        zone_input, level=self.AGG_BY
-                    )
-
-                    stacked_bat_gen.index = stacked_bat_gen.index.droplevel(['category','units'])
-
-                    stacked_gen_df.insert(
-                        len(stacked_bat_gen.columns),
-                        column=battery_discharge_name,
-                        value=stacked_bat_gen,
-                    )
-
-                stacked_gen_df = stacked_gen_df.fillna(0)
+                stacked_gen_df = self.add_battery_gen_to_df(stacked_gen_df, scenario,
+                    zone_input, data_resolution=data_resolution)
 
                 #Zoom in on selected date range.
                 if pd.notna(start_date_range):
