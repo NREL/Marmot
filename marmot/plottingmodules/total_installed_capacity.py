@@ -10,11 +10,15 @@ import re
 import logging
 import pandas as pd
 import matplotlib.pyplot as plt
+from typing import List
+from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.total_generation import TotalGeneration
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -22,33 +26,61 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
-load_legend_names: dict = mconfig.parser("load_legend_names")
 
 
-class InstalledCapacity(MPlotDataHelper):
+class InstalledCapacity(PlotDataStoreAndProcessor):
     """Installed capacity plots.
 
     The total_installed_capacity module contains methods that are
     related to the total installed capacity of generators and other devices.
 
-    InstalledCapacity inherits from the MPlotDataHelper class to assist
+    InstalledCapacity inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        custom_xticklabels: List[str] = None,
+        **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.            
+            custom_xticklabels (List[str], optional): List of custom x labels to 
+                apply to barplots. Values will overwite existing ones. 
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
         
-        self.argument_list = args
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
+        self.custom_xticklabels = custom_xticklabels
+        
         self.argument_dict = kwargs
 
     def total_cap(
@@ -127,7 +159,7 @@ class InstalledCapacity(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    Total_Installed_Capacity = self.set_timestamp_date_range(
+                    Total_Installed_Capacity = set_timestamp_date_range(
                         Total_Installed_Capacity, start_date_range, end_date_range
                     )
                     if Total_Installed_Capacity.empty is True:
@@ -154,7 +186,7 @@ class InstalledCapacity(MPlotDataHelper):
                 outputs[zone_input] = out
                 continue
             unitconversion = self.capacity_energy_unitconversion(
-                Total_Installed_Capacity_Out, sum_values=True
+                Total_Installed_Capacity_Out, self.Scenarios, sum_values=True
             )
             Total_Installed_Capacity_Out = (
                 Total_Installed_Capacity_Out / unitconversion["divisor"]
@@ -174,7 +206,7 @@ class InstalledCapacity(MPlotDataHelper):
 
             mplt.barplot(
                 Total_Installed_Capacity_Out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )
@@ -227,7 +259,7 @@ class InstalledCapacity(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -281,7 +313,7 @@ class InstalledCapacity(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    Total_Installed_Capacity = self.set_timestamp_date_range(
+                    Total_Installed_Capacity = set_timestamp_date_range(
                         Total_Installed_Capacity, start_date_range, end_date_range
                     )
                     if Total_Installed_Capacity.empty is True:
@@ -329,7 +361,7 @@ class InstalledCapacity(MPlotDataHelper):
                 continue
 
             unitconversion = self.capacity_energy_unitconversion(
-                Total_Installed_Capacity_Out, sum_values=True
+                Total_Installed_Capacity_Out, self.Scenarios, sum_values=True
             )
             Total_Installed_Capacity_Out = (
                 Total_Installed_Capacity_Out / unitconversion["divisor"]
@@ -342,7 +374,7 @@ class InstalledCapacity(MPlotDataHelper):
             fig, ax = mplt.get_figure()
 
             mplt.barplot(
-                Total_Installed_Capacity_Out, color=self.PLEXOS_color_dict, stacked=True
+                Total_Installed_Capacity_Out, color=self.marmot_color_dict, stacked=True
             )
 
             ax.set_ylabel(
@@ -393,7 +425,19 @@ class InstalledCapacity(MPlotDataHelper):
         """
         # generation figure
         logger.info("Generation data")
-        gen_obj = TotalGeneration(*self.argument_list, **self.argument_dict)
+
+        gen_obj = TotalGeneration(
+                        self.Zones, 
+                        self.Scenarios, 
+                        self.AGG_BY,
+                        self.ordered_gen, 
+                        self.marmot_solutions_folder,
+                        marmot_color_dict=self.marmot_color_dict, 
+                        ylabels=self.ylabels, 
+                        xlabels=self.xlabels, 
+                        custom_xticklabels=self.custom_xticklabels, 
+                        **self.argument_dict)
+
         gen_outputs = gen_obj.total_gen(
             start_date_range, end_date_range, scenario_groupby
         )
@@ -440,7 +484,7 @@ class InstalledCapacity(MPlotDataHelper):
 
             mplt.barplot(
                 Total_Installed_Capacity_Out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 sub_pos=0,
                 custom_tick_labels=tick_labels,
@@ -494,7 +538,7 @@ class InstalledCapacity(MPlotDataHelper):
 
             mplt.barplot(
                 Total_Generation_Stack_Out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 sub_pos=1,
                 custom_tick_labels=tick_labels,
@@ -578,7 +622,7 @@ class InstalledCapacity(MPlotDataHelper):
             logger.info(f"Zone = {zone_input}")
             
             # sets up x, y dimensions of plot
-            ncols, nrows = self.set_facet_col_row_dimensions(
+            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
                 multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
@@ -622,7 +666,7 @@ class InstalledCapacity(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    installed_capacity = self.set_timestamp_date_range(
+                    installed_capacity = set_timestamp_date_range(
                         installed_capacity, start_date_range, end_date_range
                     )
                     if installed_capacity.empty is True:
@@ -636,7 +680,7 @@ class InstalledCapacity(MPlotDataHelper):
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                    installed_capacity_grouped, sum_values=True
+                    installed_capacity_grouped, self.Scenarios, sum_values=True
                     )
                 installed_capacity_grouped = (
                     installed_capacity_grouped / unitconversion["divisor"]
@@ -654,7 +698,7 @@ class InstalledCapacity(MPlotDataHelper):
 
                 mplt.barplot(
                     installed_capacity_grouped,
-                    color=self.PLEXOS_color_dict,
+                    color=self.marmot_color_dict,
                     stacked=True,
                     custom_tick_labels=tick_labels,
                     sub_pos=i,

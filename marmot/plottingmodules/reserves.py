@@ -12,43 +12,81 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
+from typing import List
+from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
 
+from marmot.plottingmodules.plotutils.styles import ColorList, GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, get_sub_hour_interval_count
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 
 
-class Reserves(MPlotDataHelper):
+class Reserves(PlotDataStoreAndProcessor):
     """Generator and system reserve plots.
 
     The reserves.py module contains methods that are
     related to reserve provision and shortage.
 
-    Reserves inherits from the MPlotDataHelper class to assist
+    Reserves inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        custom_xticklabels: List[str] = None,
+        color_list: list = ColorList().colors,
+        **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.            
+            custom_xticklabels (List[str], optional): List of custom x labels to 
+                apply to barplots. Values will overwite existing ones. 
+                Defaults to None.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
+        self.custom_xticklabels = custom_xticklabels
+        self.color_list = color_list
+        
     def reserve_gen_timeseries(
         self,
         prop: str = None,
@@ -110,7 +148,7 @@ class Reserves(MPlotDataHelper):
             (True, f"reserves_generators_Provision{data_resolution}", self.Scenarios)
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -121,7 +159,7 @@ class Reserves(MPlotDataHelper):
         for region in self.Zones:
             logger.info(f"Zone = {region}")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(
+            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
                 multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
@@ -152,7 +190,7 @@ class Reserves(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    reserve_provision_timeseries = self.set_timestamp_date_range(
+                    reserve_provision_timeseries = set_timestamp_date_range(
                         reserve_provision_timeseries, start_date_range, end_date_range
                     )
                     if reserve_provision_timeseries.empty is True:
@@ -162,7 +200,7 @@ class Reserves(MPlotDataHelper):
                 # unitconversion based off peak generation hour, only checked once
                 if n == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                        reserve_provision_timeseries, sum_values=True
+                        reserve_provision_timeseries, self.Scenarios, sum_values=True
                     )
                 reserve_provision_timeseries = (
                     reserve_provision_timeseries / unitconversion["divisor"]
@@ -206,7 +244,7 @@ class Reserves(MPlotDataHelper):
 
                 mplt.stackplot(
                     reserve_provision_timeseries,
-                    color_dict=self.PLEXOS_color_dict,
+                    color_dict=self.marmot_color_dict,
                     labels=reserve_provision_timeseries.columns,
                     sub_pos=n,
                 )
@@ -272,7 +310,7 @@ class Reserves(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "reserves_generators_Provision", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -303,7 +341,7 @@ class Reserves(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    reserve_provision_timeseries = self.set_timestamp_date_range(
+                    reserve_provision_timeseries = set_timestamp_date_range(
                         reserve_provision_timeseries, start_date_range, end_date_range
                     )
                     if reserve_provision_timeseries.empty is True:
@@ -311,7 +349,7 @@ class Reserves(MPlotDataHelper):
                         continue
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = self.get_sub_hour_interval_count(
+                interval_count = get_sub_hour_interval_count(
                     reserve_provision_timeseries
                 )
                 reserve_provision_timeseries = (
@@ -337,7 +375,7 @@ class Reserves(MPlotDataHelper):
 
             # Convert units
             unitconversion = self.capacity_energy_unitconversion(
-                total_reserves_out, sum_values=True
+                total_reserves_out, self.Scenarios, sum_values=True
             )
             total_reserves_out = total_reserves_out / unitconversion["divisor"]
             data_table_out = total_reserves_out.add_suffix(
@@ -354,7 +392,7 @@ class Reserves(MPlotDataHelper):
 
             mplt.barplot(
                 total_reserves_out,
-                color=self.PLEXOS_color_dict,
+                color=self.marmot_color_dict,
                 stacked=True,
                 custom_tick_labels=tick_labels,
             )
@@ -455,7 +493,7 @@ class Reserves(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"reserve_{data_set}", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -483,7 +521,7 @@ class Reserves(MPlotDataHelper):
                     continue
 
                 if pd.notna(start_date_range):
-                    reserve_timeseries = self.set_timestamp_date_range(
+                    reserve_timeseries = set_timestamp_date_range(
                         reserve_timeseries, start_date_range, end_date_range
                     )
                     if reserve_timeseries.empty is True:
@@ -503,7 +541,7 @@ class Reserves(MPlotDataHelper):
                     ["timestamp", "Type", "parent"], append=True, inplace=True
                 )
 
-                interval_count = self.get_sub_hour_interval_count(reserve_timeseries)
+                interval_count = get_sub_hour_interval_count(reserve_timeseries)
                 # Groupby Type
                 if count_hours == False:
                     reserve_total = (
@@ -547,7 +585,7 @@ class Reserves(MPlotDataHelper):
             )
             if count_hours == False:
                 # Convert units
-                unitconversion = self.capacity_energy_unitconversion(reserve_out)
+                unitconversion = self.capacity_energy_unitconversion(reserve_out, self.Scenarios)
                 reserve_out = reserve_out / unitconversion["divisor"]
                 Data_Table_Out = reserve_out.add_suffix(
                     f" ({unitconversion['units']}h)"
@@ -636,7 +674,7 @@ class Reserves(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, f"reserve_Shortage{data_resolution}", Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -647,7 +685,7 @@ class Reserves(MPlotDataHelper):
         for region in self.Zones:
             logger.info(f"Zone = {region}")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(
+            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
                 facet, multi_scenario=Scenarios
             )
             grid_size = ncols * nrows
@@ -690,7 +728,7 @@ class Reserves(MPlotDataHelper):
                 )
 
                 if pd.notna(start_date_range):
-                    reserve_timeseries = self.set_timestamp_date_range(
+                    reserve_timeseries = set_timestamp_date_range(
                         reserve_timeseries, start_date_range, end_date_range
                     )
                     if reserve_timeseries.empty is True:

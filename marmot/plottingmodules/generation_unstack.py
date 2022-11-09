@@ -9,46 +9,78 @@ import numpy as np
 import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
+from pathlib import Path
 import marmot.utils.mconfig as mconfig
+from typing import List
 
-
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, adjust_for_leapday
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
-
-class GenerationUnStack(MPlotDataHelper):
+class GenerationUnStack(PlotDataStoreAndProcessor):
     """Timeseries generation line plots.
 
     The generation_unstack.py module contains methods that are
     related to the timeseries generation of generators,
     displayed in an unstacked line format.
 
-    GenerationUnStack inherits from the MPlotDataHelper class to assist
+    GenerationUnStack inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
+        marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.        
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
-        self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
+
 
     def gen_unstack(
         self,
@@ -115,7 +147,7 @@ class GenerationUnStack(MPlotDataHelper):
                 (True, f"generator_Generation{data_resolution}", scenario_list),
                 (
                     False,
-                    f"generator_{self.curtailment_prop}{data_resolution}",
+                    f"generator_{curtailment_prop}{data_resolution}",
                     scenario_list,
                 ),
                 (False, f"{agg}_Load{data_resolution}", scenario_list),
@@ -123,7 +155,7 @@ class GenerationUnStack(MPlotDataHelper):
                 (False, f"{agg}_Unserved_Energy{data_resolution}", scenario_list),
             ]
 
-            # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+            # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
             # with all required properties, returns a 1 if required data is missing
             return self.get_formatted_data(properties)
 
@@ -136,7 +168,7 @@ class GenerationUnStack(MPlotDataHelper):
             return outputs
 
         # sets up x, y dimensions of plot
-        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=all_scenarios)
+        ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, multi_scenario=all_scenarios)
 
         grid_size = ncols * nrows
 
@@ -175,7 +207,7 @@ class GenerationUnStack(MPlotDataHelper):
                         .copy()
                     )
                     if shift_leapday:
-                        stacked_gen_df = self.adjust_for_leapday(stacked_gen_df)
+                        stacked_gen_df = adjust_for_leapday(stacked_gen_df)
                     stacked_gen_df = stacked_gen_df.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
                     logger.warning(f"No generation in {zone_input}")
@@ -188,7 +220,7 @@ class GenerationUnStack(MPlotDataHelper):
 
                 # Insert Curtailment into gen stack if it exists in database
                 stacked_gen_df = self.add_curtailment_to_df(stacked_gen_df, scenario,
-                    zone_input, data_resolution=data_resolution)
+                    zone_input, self.gen_categories.vre, data_resolution=data_resolution)
                 
                 curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
                 if curtailment_name in stacked_gen_df.columns:
@@ -197,7 +229,7 @@ class GenerationUnStack(MPlotDataHelper):
                     vre_gen_cat = self.gen_categories.vre
 
                 if pd.notna(start_date_range):
-                    stacked_gen_df = self.set_timestamp_date_range(
+                    stacked_gen_df = set_timestamp_date_range(
                         stacked_gen_df, start_date_range, end_date_range
                     )
                     if stacked_gen_df.empty is True:
@@ -234,7 +266,7 @@ class GenerationUnStack(MPlotDataHelper):
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                        stacked_gen_df, sum_values=True
+                        stacked_gen_df, self.Scenarios, sum_values=True
                     )
                 # Convert units
                 stacked_gen_df = stacked_gen_df / unitconversion["divisor"]
@@ -283,7 +315,7 @@ class GenerationUnStack(MPlotDataHelper):
                         stacked_gen_df.index.values,
                         stacked_gen_df[column],
                         linewidth=2,
-                        color=self.PLEXOS_color_dict.get(column, "#333333"),
+                        color=self.marmot_color_dict.get(column, "#333333"),
                         label=column,
                     )
 

@@ -31,6 +31,8 @@ except ModuleNotFoundError:
 from marmot.utils.loggersetup import SetupLogger
 from marmot.utils.definitions import INPUT_DIR, Module_CLASS_MAPPING
 from marmot.metamanagers.read_metadata import MetaData
+from marmot.plottingmodules.plotutils.plot_data_helper import GenCategories
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict, PlotMarkers, ColorList
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     DataSavedInModule,
     InputSheetError,
@@ -306,41 +308,18 @@ class MarmotPlot(SetupLogger):
                 self.ordered_gen_categories["Ordered_Gen"].str.strip().tolist()
             )
 
+        gen_categories = GenCategories().set_categories(self.ordered_gen_categories)
         # If Other category does not exist in ordered_gen, create entry
         if "Other" not in ordered_gen:
             ordered_gen.append("Other")
 
         if self.color_dictionary_file is not None:
-            PLEXOS_color_dict = self.color_dictionary_file.rename(
-                columns={
-                    self.color_dictionary_file.columns[0]: "Generator",
-                    self.color_dictionary_file.columns[1]: "Colour",
-                }
-            )
-
-            PLEXOS_color_dict["Generator"] = PLEXOS_color_dict["Generator"].str.strip()
-            PLEXOS_color_dict["Colour"] = PLEXOS_color_dict["Colour"].str.strip()
-            PLEXOS_color_dict = (
-                PLEXOS_color_dict[["Generator", "Colour"]]
-                .set_index("Generator")
-                .to_dict()["Colour"]
-            )
+            marmot_color_dict = GeneratorColorDict.set_colors_from_df(self.color_dictionary_file).color_dict
         else:
-            PLEXOS_color_dict = None
-
-        color_list = [
-            "#396AB1",
-            "#CC2529",
-            "#3E9651",
-            "#ff7f00",
-            "#6B4C9A",
-            "#922428",
-            "#cab2d6",
-            "#6a3d9a",
-            "#fb9a99",
-            "#b15928"
-        ]
-        marker_style = ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
+            self.logger.warning(
+                "'Color dictionary' not passed! Random colors will now be used."
+            )
+            marmot_color_dict = GeneratorColorDict.set_random_colors(ordered_gen).color_dict
 
         gen_names_dict = (
             self.gen_names[["Original", "New"]].set_index("Original").to_dict()["New"]
@@ -484,20 +463,20 @@ class MarmotPlot(SetupLogger):
                 self.Scenarios,
                 self.AGG_BY,
                 ordered_gen,
-                self.marmot_solutions_folder
+                self.marmot_solutions_folder,
             ]
             # dictionary of keyword arguments passed to plotting modules;
             # key names match the instance variables in each module
             argument_dict = {
                 "gen_names_dict": gen_names_dict,
-                "gen_categories": self.ordered_gen_categories,
-                "PLEXOS_color_dict": PLEXOS_color_dict,
+                "gen_categories": gen_categories,
+                "marmot_color_dict": marmot_color_dict,
                 "Scenario_Diff": self.Scenario_Diff,
                 "ylabels": self.ylabels,
                 "xlabels": self.xlabels,
                 "custom_xticklabels": self.custom_xticklabels,
-                "color_list": color_list,
-                "marker_style": marker_style,
+                "color_list": ColorList().colors,
+                "marker_style": PlotMarkers().markers,
                 "Region_Mapping": self.Region_Mapping,
                 "TECH_SUBSET": self.TECH_SUBSET,
             }
@@ -508,7 +487,6 @@ class MarmotPlot(SetupLogger):
 
             class_name = getattr(plot_module, Module_CLASS_MAPPING[module])
             instantiate_mplot = class_name(*argument_list, **argument_dict)
-
             # Create output folder for each plotting module
             figures : Path = instantiate_mplot.figure_folder.joinpath(f"{self.AGG_BY}_{module}")
             figures.mkdir(exist_ok=True)

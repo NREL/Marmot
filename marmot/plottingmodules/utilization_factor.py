@@ -15,10 +15,12 @@ import logging
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+from typing import List
+from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -26,7 +28,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 
 
 def df_process_gen_ind_inputs(df, self):
@@ -40,32 +42,53 @@ def df_process_gen_ind_inputs(df, self):
     df = df.sort_values(["tech"])
     df.set_index(["timestamp", "tech", "gen_name"], inplace=True)
     df = df["values"]
-
     return df
 
 
-class UtilizationFactor(MPlotDataHelper):
+class UtilizationFactor(PlotDataStoreAndProcessor):
     """Device utilization plots.
 
     The utilization.py module contains methods that are
     related to the utilization of generators and other devices.
 
-    UtilizationFactor inherits from the MPlotDataHelper class to assist
+    UtilizationFactor inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, 
+        Zones: List[str], 
+        Scenarios: List[str], 
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
+        marmot_color_dict: dict = None,
+        **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
 
     def uf_fleet(self, **_):
         """Plot under development
@@ -86,7 +109,7 @@ class UtilizationFactor(MPlotDataHelper):
             (True, "generator_Available_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -142,7 +165,7 @@ class UtilizationFactor(MPlotDataHelper):
                     if len(self.Scenarios) > 1:
                         ax3[n].plot(
                             duration_curve["Type CF"],
-                            color=self.PLEXOS_color_dict.get(i, "#333333"),
+                            color=self.marmot_color_dict.get(i, "#333333"),
                             label=i,
                         )
                         ax3[n].legend()
@@ -158,7 +181,7 @@ class UtilizationFactor(MPlotDataHelper):
                     else:
                         ax3.plot(
                             duration_curve["Type CF"],
-                            color=self.PLEXOS_color_dict.get(i, "#333333"),
+                            color=self.marmot_color_dict.get(i, "#333333"),
                             label=i,
                         )
                         ax3.legend()
@@ -224,7 +247,7 @@ class UtilizationFactor(MPlotDataHelper):
             (True, "generator_Available_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -282,7 +305,7 @@ class UtilizationFactor(MPlotDataHelper):
                             cfs.replace([np.inf, np.nan]),
                             bins=20,
                             range=(0, 1),
-                            color=self.PLEXOS_color_dict.get(i, "#333333"),
+                            color=self.marmot_color_dict.get(i, "#333333"),
                             label=scenario + "_" + i,
                         )
                         ax2[len(self.Scenarios) - 1][m].set_xlabel(
@@ -299,7 +322,7 @@ class UtilizationFactor(MPlotDataHelper):
                             cfs.replace([np.inf, np.nan]),
                             bins=20,
                             range=(0, 1),
-                            color=self.PLEXOS_color_dict.get(i, "#333333"),
+                            color=self.marmot_color_dict.get(i, "#333333"),
                             label=scenario + "_" + i,
                         )
                         ax2[m].legend()
@@ -369,7 +392,7 @@ class UtilizationFactor(MPlotDataHelper):
             (True, "generator_Available_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -485,7 +508,7 @@ class UtilizationFactor(MPlotDataHelper):
         # scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios)]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -528,7 +551,7 @@ class UtilizationFactor(MPlotDataHelper):
                     if len(self.Scenarios) > 1:
                         ax3[n].plot(
                             duration_curve["values"] / 1000,
-                            color=self.PLEXOS_color_dict.get(i, "#333333"),
+                            color=self.marmot_color_dict.get(i, "#333333"),
                             label=i,
                         )
                         ax3[n].legend()
@@ -544,7 +567,7 @@ class UtilizationFactor(MPlotDataHelper):
                     else:
                         ax3.plot(
                             duration_curve["values"] / 1000,
-                            color=self.PLEXOS_color_dict.get(i, "#333333"),
+                            color=self.marmot_color_dict.get(i, "#333333"),
                             label=i,
                         )
                         ax3.legend()
