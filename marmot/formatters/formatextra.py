@@ -8,6 +8,7 @@ import logging
 import pandas as pd
 import marmot.utils.mconfig as mconfig
 from marmot.formatters.formatbase import Process
+from marmot.utils.error_handler import PropertyNotFound
 
 logger = logging.getLogger("formatter." + __name__)
 
@@ -123,11 +124,12 @@ class ExtraPLEXOSProperties(ExtraProperties):
         """
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "Available Capacity", timescale, file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "generator", "Available Capacity", timescale, file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.warning(
                     "generator_Available_Capacity & "
                     "generator_Generation are required "
@@ -160,35 +162,41 @@ class ExtraPLEXOSProperties(ExtraProperties):
         pump_load_chunks = []
         batt_load_chunks = []
         for file in self.files_list:
-            pump_load_data = self.model.get_processed_data(
-                "generator", "Pump Load", timescale, file
-            )
-
-            batt_load_data = self.model.get_processed_data(
-                "batterie", "Load", timescale, file
-            )
+            try:
+                pump_load_data = self.model.get_processed_data(
+                    "generator", "Pump Load", timescale, file
+                )
+            except PropertyNotFound:
+                pump_load_data = pd.DataFrame()
+            try:
+                batt_load_data = self.model.get_processed_data(
+                    "batterie", "Load", timescale, file
+                )
+            except PropertyNotFound:
+                batt_load_data = pd.DataFrame()
 
             if pump_load_data.empty is True and batt_load_data.empty is True:
-                logger.info("Total Demand will equal Total Load")
+                logger.info("Total Demand will equal Total Load, No Storage objects found in results")
                 return df
 
-            if pump_load_data.empty is False:
-                pump_load_chunks.append(pump_load_data)
-                pump_load = self.model.combine_models(pump_load_chunks)
-                pump_load = pump_load.groupby(df.index.names).sum()
-                dfpump = df - pump_load
-                dfpump['values'] = dfpump['values'].fillna(df['values'])
-            else:
-                dfpump = df
+            pump_load_chunks.append(pump_load_data)
+            batt_load_chunks.append(batt_load_data)
 
-            if batt_load_data.empty is False:
-                batt_load_chunks.append(batt_load_data)
-                batt_load = self.model.combine_models(batt_load_chunks)
-                batt_load = batt_load.groupby(df.index.names).sum()
-                dfbattpump = dfpump - batt_load
-                dfbattpump['values'] = dfbattpump['values'].fillna(dfpump['values'])
-            else:
-                dfbattpump = dfpump
+        if pump_load_data.empty is False:
+            pump_load = self.model.combine_models(pump_load_chunks)
+            pump_load = pump_load.groupby(df.index.names).sum()
+            dfpump = df - pump_load
+            dfpump['values'] = dfpump['values'].fillna(df['values'])
+        else:
+            dfpump = df
+
+        if batt_load_data.empty is False:
+            batt_load = self.model.combine_models(batt_load_chunks)
+            batt_load = batt_load.groupby(df.index.names).sum()
+            dfbattpump = dfpump - batt_load
+            dfbattpump['values'] = dfbattpump['values'].fillna(dfpump['values'])
+        else:
+            dfbattpump = dfpump
 
         return dfbattpump
 
@@ -253,11 +261,12 @@ class ExtraReEDSProperties(ExtraProperties):
         """
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "region", "stor_in", "interval", file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "region", "stor_in", "interval", file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.info("region_Load will equal region_Demand")
                 return df
 
@@ -356,13 +365,14 @@ class ExtraReEDSIndiaProperties(ExtraReEDSProperties):
         """
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "stor_charge", "interval", file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "generator", "stor_charge", "interval", file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.info("region_Load will equal region_Demand")
-                return df
+                return df                
 
             data_chunks.append(processed_data)
 
@@ -409,11 +419,12 @@ class ExtraSIIProperties(ExtraProperties):
 
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "generation_availability", timescale, file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "generator", "generation_availability", timescale, file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.warning(
                     "generation_availability & "
                     "generation_actual are required "
@@ -449,11 +460,12 @@ class ExtraSIIProperties(ExtraProperties):
         """
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "pump", timescale, file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "generator", "pump", timescale, file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.info("region_Load will equal region_Demand")
                 return df
 
