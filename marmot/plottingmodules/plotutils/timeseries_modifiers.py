@@ -1,3 +1,7 @@
+"""Collection of functions which modify or infer information from timeseries 
+
+@author: Daniel Levie
+"""
 
 import logging
 import datetime as dt
@@ -12,8 +16,6 @@ def set_timestamp_date_range(
     dfs: Union[pd.DataFrame, List[pd.DataFrame]], start_date: str, end_date: str
 ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
     """Sets the timestamp date range based on start_date and end_date strings
-
-    .. versionadded:: 0.10.0
 
     Takes either a single df or a list of dfs as input.
     The index must be a pd.DatetimeIndex or a multiindex with level timestamp.

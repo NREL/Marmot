@@ -1,5 +1,9 @@
+"""Classes containing color styles and markers for plotting
 
-from dataclasses import dataclass, field, asdict
+@author: Daniel Levie
+"""
+
+from dataclasses import dataclass, field
 from typing import List
 import pandas as pd
 import matplotlib.colors as mcolors
@@ -8,7 +12,10 @@ import matplotlib.pyplot as plt
 
 @dataclass
 class ColorList():
+    """List of colors to apply to plots.
 
+    Generally used with non generator plots.
+    """
     colors: List[str] = field(
         default_factory=lambda: [
             "#396AB1",
@@ -25,7 +32,8 @@ class ColorList():
 
 @dataclass
 class PlotMarkers():
-
+    """List of plot markers to use in certain plots.
+    """
     markers: List[str] = field(
         default_factory=lambda: [
             "^", 
@@ -42,12 +50,37 @@ class PlotMarkers():
 
 @dataclass
 class GeneratorColorDict():
+    """Dictionary of gen names to colors for generation plots.
+
+    The dictionary is usually set with the colour_dictionary.csv using 
+    the set_colors_from_df method. The file should have the following
+    format:
+
+        https://nrel.github.io/Marmot/references/input-files/mapping-folder/colour_dictionary.html
+
+    Random colors can also be set with the set_random_colors method or assigned
+    manually directly to the color_dict attribute.
+
+    Args:
+        Dictionary of generator names to colors.
+    """
 
     color_dict: dict
 
     @classmethod
     def set_colors_from_df(cls, color_df: pd.DataFrame) -> "GeneratorColorDict":
+        """Sets colors from a dataframe.
 
+        The dataframe should have the following format:
+
+            https://nrel.github.io/Marmot/references/input-files/mapping-folder/colour_dictionary.html
+
+        Args:
+            color_df (pd.DataFrame): DataFrame with Generator and Color column
+
+        Returns:
+            GeneratorColorDict: Instance of class 
+        """
         color_dict = color_df.rename(
             columns={
                 color_df.columns[0]: "Generator",
@@ -65,7 +98,14 @@ class GeneratorColorDict():
 
     @classmethod
     def set_random_colors(cls, generator_list: list) -> "GeneratorColorDict":
+        """Sets random colors, given a list of names/technologies
 
+        Args:
+            generator_list (list): List of generator names. 
+
+        Returns:
+            GeneratorColorDict: Instance of class 
+        """
         cmap = plt.cm.get_cmap(lut=len(generator_list))
         colors = []
         for i in range(cmap.N):
