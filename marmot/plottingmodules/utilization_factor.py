@@ -16,10 +16,11 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import List
+from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -57,23 +58,33 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
     def __init__(self, 
         Zones: List[str], 
         Scenarios: List[str], 
-        *args,
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
         marmot_color_dict: dict = None,
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor 
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
         if marmot_color_dict is None:
             self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
         else:

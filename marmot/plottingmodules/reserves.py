@@ -13,11 +13,14 @@ import pandas as pd
 import datetime as dt
 import matplotlib.pyplot as plt
 from typing import List
+from pathlib import Path
+
 import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import ColorList, GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, get_sub_hour_interval_count
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -40,7 +43,9 @@ class Reserves(PlotDataStoreAndProcessor):
     def __init__(self, 
         Zones: List[str], 
         Scenarios: List[str], 
-        *args,
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
         marmot_color_dict: dict = None,
         ylabels: List[str] = None,
         xlabels: List[str] = None,
@@ -49,15 +54,27 @@ class Reserves(PlotDataStoreAndProcessor):
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor 
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.            
+            custom_xticklabels (List[str], optional): List of custom x labels to 
+                apply to barplots. Values will overwite existing ones. 
+                Defaults to None.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
@@ -142,7 +159,7 @@ class Reserves(PlotDataStoreAndProcessor):
         for region in self.Zones:
             logger.info(f"Zone = {region}")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(
+            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
                 multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
@@ -173,7 +190,7 @@ class Reserves(PlotDataStoreAndProcessor):
                 )
 
                 if pd.notna(start_date_range):
-                    reserve_provision_timeseries = self.set_timestamp_date_range(
+                    reserve_provision_timeseries = set_timestamp_date_range(
                         reserve_provision_timeseries, start_date_range, end_date_range
                     )
                     if reserve_provision_timeseries.empty is True:
@@ -183,7 +200,7 @@ class Reserves(PlotDataStoreAndProcessor):
                 # unitconversion based off peak generation hour, only checked once
                 if n == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                        reserve_provision_timeseries, sum_values=True
+                        reserve_provision_timeseries, self.Scenarios, sum_values=True
                     )
                 reserve_provision_timeseries = (
                     reserve_provision_timeseries / unitconversion["divisor"]
@@ -324,7 +341,7 @@ class Reserves(PlotDataStoreAndProcessor):
                 )
 
                 if pd.notna(start_date_range):
-                    reserve_provision_timeseries = self.set_timestamp_date_range(
+                    reserve_provision_timeseries = set_timestamp_date_range(
                         reserve_provision_timeseries, start_date_range, end_date_range
                     )
                     if reserve_provision_timeseries.empty is True:
@@ -332,7 +349,7 @@ class Reserves(PlotDataStoreAndProcessor):
                         continue
 
                 # Calculates interval step to correct for MWh of generation
-                interval_count = self.get_sub_hour_interval_count(
+                interval_count = get_sub_hour_interval_count(
                     reserve_provision_timeseries
                 )
                 reserve_provision_timeseries = (
@@ -358,7 +375,7 @@ class Reserves(PlotDataStoreAndProcessor):
 
             # Convert units
             unitconversion = self.capacity_energy_unitconversion(
-                total_reserves_out, sum_values=True
+                total_reserves_out, self.Scenarios, sum_values=True
             )
             total_reserves_out = total_reserves_out / unitconversion["divisor"]
             data_table_out = total_reserves_out.add_suffix(
@@ -504,7 +521,7 @@ class Reserves(PlotDataStoreAndProcessor):
                     continue
 
                 if pd.notna(start_date_range):
-                    reserve_timeseries = self.set_timestamp_date_range(
+                    reserve_timeseries = set_timestamp_date_range(
                         reserve_timeseries, start_date_range, end_date_range
                     )
                     if reserve_timeseries.empty is True:
@@ -524,7 +541,7 @@ class Reserves(PlotDataStoreAndProcessor):
                     ["timestamp", "Type", "parent"], append=True, inplace=True
                 )
 
-                interval_count = self.get_sub_hour_interval_count(reserve_timeseries)
+                interval_count = get_sub_hour_interval_count(reserve_timeseries)
                 # Groupby Type
                 if count_hours == False:
                     reserve_total = (
@@ -568,7 +585,7 @@ class Reserves(PlotDataStoreAndProcessor):
             )
             if count_hours == False:
                 # Convert units
-                unitconversion = self.capacity_energy_unitconversion(reserve_out)
+                unitconversion = self.capacity_energy_unitconversion(reserve_out, self.Scenarios)
                 reserve_out = reserve_out / unitconversion["divisor"]
                 Data_Table_Out = reserve_out.add_suffix(
                     f" ({unitconversion['units']}h)"
@@ -668,7 +685,7 @@ class Reserves(PlotDataStoreAndProcessor):
         for region in self.Zones:
             logger.info(f"Zone = {region}")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(
+            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
                 facet, multi_scenario=Scenarios
             )
             grid_size = ncols * nrows
@@ -711,7 +728,7 @@ class Reserves(PlotDataStoreAndProcessor):
                 )
 
                 if pd.notna(start_date_range):
-                    reserve_timeseries = self.set_timestamp_date_range(
+                    reserve_timeseries = set_timestamp_date_range(
                         reserve_timeseries, start_date_range, end_date_range
                     )
                     if reserve_timeseries.empty is True:

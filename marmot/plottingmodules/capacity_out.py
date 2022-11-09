@@ -13,11 +13,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
 from typing import List
+from pathlib import Path
 import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, adjust_for_leapday
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -40,24 +42,37 @@ class CapacityOut(PlotDataStoreAndProcessor):
     """
 
     def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
-        *args,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
         marmot_color_dict: dict = None,
+        gen_categories: GenCategories = GenCategories(),
         ylabels: List[str] = None,
         xlabels: List[str] = None,
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor 
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.        
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
@@ -65,6 +80,7 @@ class CapacityOut(PlotDataStoreAndProcessor):
             self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
+        self.gen_categories = gen_categories
         self.ylabels = ylabels
         self.xlabels = xlabels
 
@@ -111,7 +127,7 @@ class CapacityOut(PlotDataStoreAndProcessor):
             return MissingInputData()
 
         # sets up x, y dimensions of plot
-        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+        ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, multi_scenario=self.Scenarios)
 
         grid_size = ncols * nrows
 
@@ -146,7 +162,7 @@ class CapacityOut(PlotDataStoreAndProcessor):
                     .copy()
                 )
                 if shift_leapday:
-                    avail_cap = self.adjust_for_leapday(avail_cap)
+                    avail_cap = adjust_for_leapday(avail_cap)
                 if zone_input in avail_cap.index.get_level_values(self.AGG_BY).unique():
                     avail_cap = avail_cap.xs(zone_input, level=self.AGG_BY)
                 else:
@@ -175,7 +191,7 @@ class CapacityOut(PlotDataStoreAndProcessor):
                     logger.warning(f"No Thermal Generation in: {zone_input}")
                     continue
                 if pd.notna(start_date_range):
-                    cap_out = self.set_timestamp_date_range(
+                    cap_out = set_timestamp_date_range(
                         cap_out, start_date_range, end_date_range
                     )
                     if cap_out.empty is True:
@@ -185,7 +201,7 @@ class CapacityOut(PlotDataStoreAndProcessor):
                 # unitconversion based off peak outage hour, only checked once
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                        cap_out, sum_values=True
+                        cap_out, self.Scenarios, sum_values=True
                     )
 
                 cap_out = cap_out / unitconversion["divisor"]
@@ -243,12 +259,14 @@ class CapacityOut(PlotDataStoreAndProcessor):
 
             logger.info("Zone = " + str(zone_input))
 
-            ncols = len(self.xlabels)
-            if ncols == 0:
+            if not self.xlabels:
                 ncols = 1
-            nrows = len(self.ylabels)
-            if nrows == 0:
+            else:
+                ncols = len(self.xlabels)
+            if not self.ylabels:
                 nrows = 1
+            else:
+                nrows = len(self.ylabels)
             grid_size = ncols * nrows
             fig1, axs = plt.subplots(
                 nrows, ncols, figsize=((8 * ncols), (4 * nrows)), sharey=True

@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""Methods used to assist with the creation of Marmot plots.
+"""Classes, Methods, and functions used to assist with the creation 
+   of Marmot plots.
 
 @author: Daniel Levie
 """
@@ -7,17 +8,16 @@
 import re
 import math
 import logging
-import datetime as dt
 import pandas as pd
-import numpy as np
 import functools
 import concurrent.futures
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Tuple, Union, List
+from typing import Tuple, List
 
 import marmot.utils.mconfig as mconfig
 import marmot.utils.dataio as dataio
+from marmot.plottingmodules.plotutils.timeseries_modifiers import adjust_for_leapday
 
 logger = logging.getLogger("plotter." + __name__)
 shift_leapday: bool = mconfig.parser("shift_leapday")
@@ -85,7 +85,7 @@ class PlotDataStoreAndProcessor(dict):
     """Methods used to assist with the creation of Marmot plots
 
     Collection of Methods to assist with creation of figures,
-    including getting and formatting data, setting up plot sizes.
+    including getting and formatting data and modifying dataframes
 
     PlotDataStoreAndProcessor inherits the python class 'dict' so acts like a 
     dictionary and stores the formatted data when retrieved by the 
@@ -98,7 +98,6 @@ class PlotDataStoreAndProcessor(dict):
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         gen_names_dict: dict = None,
-        gen_categories: pd.DataFrame = pd.DataFrame(),
         TECH_SUBSET: List[str] = None,
         **_,
     ) -> None:
@@ -111,9 +110,6 @@ class PlotDataStoreAndProcessor(dict):
             gen_names_dict (dict, optional): Mapping dictionary to rename generator 
                 technologies.
                 Default is None.
-            gen_categories (pd.Dataframe, optional): Dataframe containing ordered generation 
-                and columns to specify technology categories.
-                Defaults to pd.DataFrame().
             TECH_SUBSET (List[str], optional): Tech subset category to plot.
                 The TECH_SUBSET value should be a column in the
                 ordered_gen_categories.csv. If left None all techs will be plotted
@@ -135,8 +131,6 @@ class PlotDataStoreAndProcessor(dict):
             self.gen_names_dict = {}
         else:
             self.gen_names_dict = gen_names_dict
-
-        self.gen_categories: GenCategories = GenCategories.set_categories(gen_categories)
         self.TECH_SUBSET = TECH_SUBSET
 
     def get_formatted_data(self, properties: List[tuple]) -> list:
@@ -251,12 +245,13 @@ class PlotDataStoreAndProcessor(dict):
                 )
         return df
 
-    def assign_curtailment_techs(self, df: pd.DataFrame) -> pd.DataFrame:
+    def assign_curtailment_techs(self, df: pd.DataFrame, vre_techs: list) -> pd.DataFrame:
         """Assign technologies to Marmot's Curtailment property (generator_Curtailment).
 
         Args:
             df (pd.DataFrame): Dataframe to process.
-
+            vre_techs (list): List of vre tech names, or technologies that should be 
+                included in curtailment calculations.
         Returns:
             pd.DataFrame: Dataframe containing only specified curtailment technologies.
         """
@@ -264,7 +259,7 @@ class PlotDataStoreAndProcessor(dict):
         # Adjust list of values to drop from vre_gen_cat depending 
         # on if it exists in processed techs
         adjusted_vre_gen_list = [
-            name for name in self.gen_categories.vre if name in df.columns
+            name for name in vre_techs if name in df.columns
         ]
 
         if not adjusted_vre_gen_list:
@@ -276,7 +271,7 @@ class PlotDataStoreAndProcessor(dict):
             )
 
         # Retrun df with just vre techs
-        return df[df.columns.intersection(self.gen_categories.vre)]
+        return df[df.columns.intersection(vre_techs)]
 
     def df_process_gen_inputs(self, df: pd.DataFrame) -> pd.DataFrame:
         """Processes generation data into a pivot table.
@@ -429,7 +424,7 @@ class PlotDataStoreAndProcessor(dict):
         return extra_plot_data
 
     def add_curtailment_to_df(self, df: pd.DataFrame, scenario: str, 
-        zone_input: str, data_resolution: str = ""
+        zone_input: str, vre_techs: list, data_resolution: str = ""
     ) -> pd.DataFrame:
         """Adds curtailment to the passed Dataframe as a new column
 
@@ -437,6 +432,8 @@ class PlotDataStoreAndProcessor(dict):
             df (pd.DataFrame): DataFrame to add curtailment column to
             scenario (str): scenario to pull data from
             zone_input (str): zone to subset by
+            vre_techs (list): List of vre tech names, or technologies that should be 
+                included in curtailment calculations.
             data_resolution (str, optional):  Specifies the data resolution to 
                 pull from the formatted data and plot. 
                 Defaults to "".
@@ -451,7 +448,7 @@ class PlotDataStoreAndProcessor(dict):
 
         if not curt_df.empty:
             if shift_leapday:
-                curt_df = self.adjust_for_leapday(curt_df)
+                curt_df = adjust_for_leapday(curt_df)
             if (
                 zone_input
                 in curt_df.index.get_level_values(self.AGG_BY).unique()
@@ -463,7 +460,7 @@ class PlotDataStoreAndProcessor(dict):
                 # If using Marmot's curtailment property
                 if curtailment_prop == "Curtailment":
                     curt_df = self.assign_curtailment_techs(
-                        curt_df
+                        curt_df, vre_techs
                     )
                 curt_df = curt_df.sum(axis=1)
                 # Remove values less than 0.05 MW
@@ -502,7 +499,7 @@ class PlotDataStoreAndProcessor(dict):
             logger.info("No Battery generation in selected Date Range")
         else:
             if shift_leapday:
-                battery_gen = self.adjust_for_leapday(battery_gen)
+                battery_gen = adjust_for_leapday(battery_gen)
 
             if (
                 zone_input
@@ -646,125 +643,10 @@ class PlotDataStoreAndProcessor(dict):
 
         return modifed_df
 
-
-
-    #TODO timeseries_modifiers
-    # def adjust_for_leapday(self, df: pd.DataFrame) -> pd.DataFrame:
-    #     """Shifts dataframe ahead by one day.
-        
-    #     Use if a non-leap year time series is modeled with a leap year time index.
-
-    #     Modeled year must be included in the scenario parent directory name.
-    #     Args:
-    #         df (pd.DataFrame): Dataframe to process.
-
-    #     Returns:
-    #         pd.DataFrame: Same dataframe, with time index shifted.
-    #     """
-    #     if (
-    #         "2008" not in self.processed_hdf5_folder
-    #         and "2012" not in self.processed_hdf5_folder
-    #         and df.index.get_level_values("timestamp")[0]
-    #         > dt.datetime(2024, 2, 28, 0, 0)
-    #     ):
-
-    #         df.index = df.index.set_levels(
-    #             df.index.levels[df.index.names.index("timestamp")].shift(1, freq="D"),
-    #             level="timestamp",
-    #         )
-
-    #     # # Special case where timezone shifting may also be necessary.
-    #     #     df.index = df.index.set_levels(
-    #     #         df.index.levels[df.index.names.index('timestamp')].shift(-3,freq = 'H'),
-    #     #         level = 'timestamp')
-
-    #     return df
-    #TODO Move 
-    def merge_new_agg(self, df: pd.DataFrame) -> pd.DataFrame:
-        # TODO Needs fixing
-        """Adds new region aggregation in the plotting step.
-
-        This allows one to create a new aggregation without re-formatting the .h5 file.
-        Args:
-            df (pd.DataFrame): Dataframe to process.
-
-        Returns:
-            pd.DataFrame: Same dataframe, with new aggregation level added.
-        """
-        agg_new = Region_Mapping[["region", self.AGG_BY]]
-        agg_new = agg_new.set_index("region")
-        df = df.merge(agg_new, left_on="region", right_index=True)
-        return df
-
-
-    #TODO Move 
-    def set_facet_col_row_dimensions(
-        self, facet: bool = True, multi_scenario: list = None
-    ) -> Tuple[int, int]:
-        """Sets facet plot col and row dimensions based on user defined labeles
-
-        Args:
-            facet (bool, optional): Trigger for plotting facet plots.
-                Defaults to True.
-            multi_scenario (list, optional): List of scenarios.
-                Defaults to None.
-
-        Returns:
-            Tuple[int, int]: Facet x,y dimensions.
-        """
-        
-        if not xlabels:
-            ncols = 1
-        else:
-            ncols = len(xlabels)
-        if not self.ylabels:
-            nrows = 1
-        else:
-            nrows = len(ylabels)
-        # If the plot is not a facet plot, grid size should be 1x1
-        if not facet:
-            ncols = 1
-            nrows = 1
-            return ncols, nrows
-        # If no labels were provided or dimensions less than len scenarios use 
-        # Marmot default dimension settings
-        if (
-            not xlabels
-            and not ylabels
-            or ncols * nrows < len(multi_scenario)
-        ):
-            logger.info(
-                "Dimensions could not be determined from x & y labels - Using Marmot "
-                "default dimensions"
-            )
-            ncols, nrows = self.set_x_y_dimension(len(multi_scenario))
-        return ncols, nrows
-
-    #TODO Move 
-    def set_x_y_dimension(self, region_number: int) -> Tuple[int, int]:
-        """Sets X,Y dimension of plots without x,y labels.
-
-        Args:
-            region_number (int): # regions/scenarios
-
-        Returns:
-            Tuple[int, int]: Facet x,y dimensions.
-        """
-        if region_number >= 5:
-            ncols = 3
-            nrows = math.ceil(region_number / 3)
-        if region_number <= 3:
-            ncols = region_number
-            nrows = 1
-        if region_number == 4:
-            ncols = 2
-            nrows = 2
-        return ncols, nrows
-
-    #TODO Move 
+    @staticmethod
     def capacity_energy_unitconversion(
-        self, df: pd.DataFrame, Scenarios: str, sum_values: bool = False
-    ) -> dict:
+        df: pd.DataFrame, Scenarios: List[str], sum_values: bool = False
+        ) -> dict:
         """Unitconversion for capacity and energy figures.
 
         Takes a pd.DataFrame as input and will then determine the max value
@@ -779,6 +661,7 @@ class PlotDataStoreAndProcessor(dict):
 
         Args:
             df (pd.DataFrame): pandas dataframe
+            Scenarios (List[str]):  List of scenarios being processed.
             sum_values (bool, optional): Sum axis values if True.
                 Should be set to True for stacked bar and area plots.
                 Defaults to False.
@@ -833,101 +716,88 @@ class PlotDataStoreAndProcessor(dict):
         return {"units": units, "divisor": divisor}
 
 
-    #TODO timeseries_modifiers
-    # def set_timestamp_date_range(
-    #     dfs: Union[pd.DataFrame, List[pd.DataFrame]], start_date: str, end_date: str
-    # ) -> Union[pd.DataFrame, Tuple[pd.DataFrame, ...]]:
-    #     """Sets the timestamp date range based on start_date and end_date strings
+#################################################
+## Other helper functions
+#################################################
 
-    #     .. versionadded:: 0.10.0
+def merge_new_agg(Region_Mapping: pd.DataFrame, df: pd.DataFrame, AGG_BY: str) -> pd.DataFrame:
+    """Adds new region aggregation in the plotting step.
 
-    #     Takes either a single df or a list of dfs as input.
-    #     The index must be a pd.DatetimeIndex or a multiindex with level timestamp.
+    This allows one to create a new aggregation without re-formatting the .h5 file.
+    Args:
+        df (pd.DataFrame): Dataframe to process.
 
-    #     Args:
-    #         dfs (Union[pd.DataFrame, List[pd.DataFrame]]): df(s) to set date range for
-    #         start_date (str): start date
-    #         end_date (str): end date
+    Returns:
+        pd.DataFrame: Same dataframe, with new aggregation level added.
+    """
+    agg_new = Region_Mapping[["region", AGG_BY]]
+    agg_new = agg_new.set_index("region")
+    df = df.merge(agg_new, left_on="region", right_index=True)
+    return df
 
-    #     Raises:
-    #         ValueError: If df.index is not of type type pd.DatetimeIndex or
-    #                         type pd.MultiIndex with level timestamp.
+def set_facet_col_row_dimensions(xlabels=None, ylabels=None,
+    facet: bool = True, multi_scenario: list = None
+) -> Tuple[int, int]:
+    """Sets facet plot col and row dimensions based on user defined labeles
 
-    #     Returns:
-    #         pd.DataFrame or Tuple[pd.DataFrame]: adjusted dataframes
-    #     """
+    Args:
+        ylabels (List[str], optional): y-axis labels for facet plots.
+            Defaults to None.
+        xlabels (List[str], optional): x-axis labels for facet plots.
+            Defaults to None.
+        facet (bool, optional): Trigger for plotting facet plots.
+            Defaults to True.
+        multi_scenario (list, optional): List of scenarios.
+            Defaults to None.
 
-    #     logger.info(
-    #         f"Plotting specific date range: \
-    #                 {str(start_date)} to {str(end_date)}"
-    #     )
+    Returns:
+        Tuple[int, int]: Facet x,y dimensions.
+    """
+    
+    if not xlabels:
+        ncols = 1
+    else:
+        ncols = len(xlabels)
+    if not ylabels:
+        nrows = 1
+    else:
+        nrows = len(ylabels)
+    # If the plot is not a facet plot, grid size should be 1x1
+    if not facet:
+        ncols = 1
+        nrows = 1
+        return ncols, nrows
+    # If no labels were provided or dimensions less than len scenarios use 
+    # Marmot default dimension settings
+    if (
+        not xlabels
+        and not ylabels
+        or ncols * nrows < len(multi_scenario)
+    ):
+        logger.info(
+            "Dimensions could not be determined from x & y labels - Using Marmot "
+            "default dimensions"
+        )
+        ncols, nrows = set_x_y_dimension(len(multi_scenario))
+    return ncols, nrows
 
-    #     df_list = []
-    #     if isinstance(dfs, list):
-    #         for df in dfs:
-    #             if isinstance(df.index, pd.DatetimeIndex):
-    #                 df = df.loc[start_date:end_date]
-    #             elif isinstance(df.index, pd.MultiIndex):
-    #                 df = df.xs(
-    #                     slice(start_date, end_date), level="timestamp", drop_level=False
-    #                 )
-    #             else:
-    #                 raise ValueError(
-    #                     "'df.index' must be of type pd.DatetimeIndex or "
-    #                     "type pd.MultiIndex with level 'timestamp'"
-    #                 )
-    #             df_list.append(df)
-    #         return tuple(df_list)
-    #     else:
-    #         if isinstance(dfs.index, pd.DatetimeIndex):
-    #             df = dfs.loc[start_date:end_date]
-    #         elif isinstance(dfs.index, pd.MultiIndex):
-    #             df = dfs.xs(
-    #                 slice(start_date, end_date), level="timestamp", drop_level=False
-    #             )
-    #         else:
-    #             raise ValueError(
-    #                 "'df.index' must be of type pd.DatetimeIndex or "
-    #                 "type pd.MultiIndex with level 'timestamp'"
-    #             )
-    #         return df
+def set_x_y_dimension(region_number: int) -> Tuple[int, int]:
+    """Sets X,Y dimension of plots without x,y labels.
 
+    Args:
+        region_number (int): # regions/scenarios
 
-    #TODO timeseries_modifiers
-    # def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
-    #     """Detects the interval spacing of timeseries data.
-
-    #     Used to adjust sums of certain variables for sub-hourly data.
-
-    #     Args:
-    #         df (pd.DataFrame): pandas dataframe with timestamp in index.
-
-    #     Returns:
-    #         int: Number of intervals per 60 minutes.
-    #     """
-    #     timestamps = df.index.get_level_values("timestamp").unique()
-    #     time_delta = timestamps[1] - timestamps[0]
-    #     # Finds intervals in 60 minute period
-    #     intervals_per_hour = 60 / (time_delta / np.timedelta64(1, "m"))
-    #     # If intervals are greater than 1 hour, returns 1
-    #     return max(1, intervals_per_hour)
-
-    # @staticmethod
-    # def sort_duration(df: pd.DataFrame, col: str) -> pd.DataFrame:
-    #     """Converts a dataframe time series into a duration curve.
-
-    #     Args:
-    #         df (pd.DataFrame): pandas multiindex dataframe.
-    #         col (str): Column name by which to sort.
-
-    #     Returns:
-    #         pd.DataFrame: Dataframe with values sorted from largest to smallest.
-    #     """
-    #     sorted_duration = (
-    #         df.sort_values(by=col, ascending=False)
-    #         .reset_index()
-    #         .drop(columns=["timestamp"])
-    #     )
-
-    #     return sorted_duration
+    Returns:
+        Tuple[int, int]: Facet x,y dimensions.
+    """
+    if region_number >= 5:
+        ncols = 3
+        nrows = math.ceil(region_number / 3)
+    if region_number <= 3:
+        ncols = region_number
+        nrows = 1
+    if region_number == 4:
+        ncols = 2
+        nrows = 2
+    return ncols, nrows
 

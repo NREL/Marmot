@@ -17,7 +17,8 @@ import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions, set_x_y_dimension
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     DataSavedInModule,
@@ -41,22 +42,30 @@ class Prices(PlotDataStoreAndProcessor):
     def __init__(self, 
         Zones: List[str], 
         Scenarios: List[str], 
-        *args, 
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
         color_list: list = ColorList().colors,
         ylabels: List[str] = None,
         xlabels: List[str] = None,
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor 
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.        
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
@@ -112,7 +121,7 @@ class Prices(PlotDataStoreAndProcessor):
 
         region_number = len(self.Zones)
         # determine x,y length for plot
-        ncols, nrows = self.set_x_y_dimension(region_number)
+        ncols, nrows = set_x_y_dimension(region_number)
 
         grid_size = ncols * nrows
         # Used to calculate any excess axis to delete
@@ -131,7 +140,7 @@ class Prices(PlotDataStoreAndProcessor):
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
                 price.sort_values(by=scenario, ascending=False, inplace=True)
@@ -247,7 +256,7 @@ class Prices(PlotDataStoreAndProcessor):
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
                 price.sort_values(by=scenario, ascending=False, inplace=True)
@@ -259,12 +268,14 @@ class Prices(PlotDataStoreAndProcessor):
 
             Data_Out = duration_curve.add_suffix(" ($/MWh)")
 
-            ncols = len(self.xlabels)
-            if ncols == 0:
+            if not self.xlabels:
                 ncols = 1
-            nrows = len(self.ylabels)
-            if nrows == 0:
+            else:
+                ncols = len(self.xlabels)
+            if not self.ylabels:
                 nrows = 1
+            else:
+                nrows = len(self.ylabels)
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not facet:
@@ -371,7 +382,7 @@ class Prices(PlotDataStoreAndProcessor):
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
                 all_prices.append(price)
@@ -381,12 +392,14 @@ class Prices(PlotDataStoreAndProcessor):
 
             Data_Out = timeseries.add_suffix(" ($/MWh)")
 
-            ncols = len(self.xlabels)
-            if ncols == 0:
+            if not self.xlabels:
                 ncols = 1
-            nrows = len(self.ylabels)
-            if nrows == 0:
+            else:
+                ncols = len(self.xlabels)
+            if not self.ylabels:
                 nrows = 1
+            else:
+                nrows = len(self.ylabels)
 
             # If the plot is not a facet plot, grid size should be 1x1
             if not facet:
@@ -483,7 +496,7 @@ class Prices(PlotDataStoreAndProcessor):
         save_figures: Path = self.figure_folder.joinpath(f"{self.AGG_BY}_prices")
 
         region_number = len(self.Zones)
-        ncols, nrows = self.set_x_y_dimension(region_number)
+        ncols, nrows = set_x_y_dimension(region_number)
 
         grid_size = ncols * nrows
         # Used to calculate any excess axis to delete
@@ -504,7 +517,7 @@ class Prices(PlotDataStoreAndProcessor):
                 price = self._process_data(self[f"{agg}_Price"], scenario, zone_input)
                 price = price.groupby(["timestamp"]).sum()
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
                 all_prices.append(price)
@@ -653,7 +666,7 @@ class Prices(PlotDataStoreAndProcessor):
             price = price.groupby(["timestamp", "node"]).sum()
             price.rename(columns={"values": scenario}, inplace=True)
             if pd.notna(start_date_range):
-                price = self.set_timestamp_date_range(
+                price = set_timestamp_date_range(
                     price, start_date_range, end_date_range
                 )
             if PDC:
@@ -666,7 +679,7 @@ class Prices(PlotDataStoreAndProcessor):
 
         Data_Out = pdc.add_suffix(" ($/MWh)")
 
-        ncols, nrows = self.set_x_y_dimension(len(select_nodes))
+        ncols, nrows = set_x_y_dimension(len(select_nodes))
 
         # setup plot
         mplt = SetupSubplot(nrows, ncols, sharey=True, squeeze=False, ravel_axs=True)
@@ -824,7 +837,7 @@ class Prices(PlotDataStoreAndProcessor):
                 price = price.groupby(["timestamp"]).sum()
                 price.rename(columns={"values": scenario}, inplace=True)
                 if pd.notna(start_date_range):
-                    price = self.set_timestamp_date_range(
+                    price = set_timestamp_date_range(
                         price, start_date_range, end_date_range
                     )
 
@@ -843,7 +856,7 @@ class Prices(PlotDataStoreAndProcessor):
             p_hist.columns = p_hist.columns.str.replace("_", " ")
             data_out = p_hist.add_suffix(" ($/MWh)")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(
+            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
                 multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows

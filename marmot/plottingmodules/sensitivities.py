@@ -9,10 +9,12 @@ import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import List
+from pathlib import Path
+
 import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, merge_new_agg
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -36,20 +38,30 @@ class Sensitivities(PlotDataStoreAndProcessor):
     def __init__(self, 
         Zones: List[str], 
         Scenarios: List[str], 
-        *args,
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
         marmot_color_dict: dict = None,
+        Region_Mapping: pd.DataFrame = pd.DataFrame(),
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor 
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
+            Region_Mapping (pd.DataFrame, optional): Mapping file to map 
+                custom regions/zones to create custom aggregations. 
+                Aggregations are created by grouping PLEXOS regions.
+                Defaults to pd.DataFrame().
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
@@ -57,7 +69,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
             self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
-
+        self.Region_Mapping = Region_Mapping
         self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
     def _process_ts(self, df, zone_input):
@@ -133,7 +145,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
             return MissingInputData()
 
         try:
-            bc = self.adjust_for_leapday(
+            bc = adjust_for_leapday(
                 self["generator_Generation"].get(self.Scenario_Diff[0])
             )
         except IndexError:
@@ -148,7 +160,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
         bc_CT = bc.xs("Gas-CT", level="tech")
         bc_CC = bc.xs("Gas-CC", level="tech")
         try:
-            scen = self.adjust_for_leapday(
+            scen = adjust_for_leapday(
                 self["generator_Generation"].get(self.Scenario_Diff[1])
             )
         except IndexError:
@@ -163,10 +175,10 @@ class Sensitivities(PlotDataStoreAndProcessor):
         scen_CT = scen.xs("Gas-CT", level="tech")
         scen_CC = scen.xs("Gas-CC", level="tech")
 
-        curt_bc = self.adjust_for_leapday(
+        curt_bc = adjust_for_leapday(
             self[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[0])
         )
-        curt_scen = self.adjust_for_leapday(
+        curt_scen = adjust_for_leapday(
             self[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[1])
         )
         curt_diff_all = curt_scen - curt_bc
@@ -193,10 +205,10 @@ class Sensitivities(PlotDataStoreAndProcessor):
             ),
             "region_Net_Interchange",
         )
-        bc_int = self.adjust_for_leapday(
+        bc_int = adjust_for_leapday(
             self["region_Net_Interchange"].get(self.Scenario_Diff[0])
         )
-        scen_int = self.adjust_for_leapday(
+        scen_int = adjust_for_leapday(
             self["region_Net_Interchange"].get(self.Scenario_Diff[1])
         )
 
@@ -238,7 +250,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
 
                 int_diff_all = int_diff_all.reset_index()
                 if self.AGG_BY not in int_diff_all.columns:
-                    int_diff_all = self.merge_new_agg(int_diff_all)
+                    int_diff_all = merge_new_agg(self.Region_Mapping, int_diff_all, self.AGG_BY)
                 int_diff = int_diff_all[int_diff_all[self.AGG_BY] == zone_input]
                 int_diff = int_diff.groupby("timestamp").sum()
                 int_diff.columns = ["Net export difference"]

@@ -8,11 +8,13 @@ import logging
 import pandas as pd
 import matplotlib.pyplot as plt
 from typing import List
+from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_x_y_dimension
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, adjust_for_leapday, sort_duration
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
     MissingZoneData)
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
@@ -34,20 +36,24 @@ class Storage(PlotDataStoreAndProcessor):
     def __init__(self, 
         Zones: List[str], 
         Scenarios: List[str], 
-        *args,
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
         color_list: list = ColorList().colors,
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor 
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
@@ -147,7 +153,7 @@ class Storage(PlotDataStoreAndProcessor):
                 use.columns = [scenario]
 
                 if pd.notna(start_date_range):
-                    storage_volume, max_volume, use = self.set_timestamp_date_range(
+                    storage_volume, max_volume, use = set_timestamp_date_range(
                         [storage_volume, max_volume, use],
                         start_date_range,
                         end_date_range,
@@ -289,7 +295,7 @@ class Storage(PlotDataStoreAndProcessor):
         logger.info(f'Plotting only batteries specified in Marmot_plot_select.csv')
         logger.info(select_bats)
 
-        xdim, ydim = self.set_x_y_dimension(len(select_bats))
+        xdim, ydim = set_x_y_dimension(len(select_bats))
         mplt = PlotLibrary(ydim, xdim, squeeze=False,
                             ravel_axs=True, sharey=True)
         fig, axs = mplt.get_figure()
@@ -312,10 +318,10 @@ class Storage(PlotDataStoreAndProcessor):
                 gen = gen.rename(columns={"values": scenario})
 
                 if shift_leapday:
-                    gen = self.adjust_for_leapday(gen)
+                    gen = adjust_for_leapday(gen)
 
                 if pd.notna(start_date_range):
-                    gen = self.set_timestamp_date_range(
+                    gen = set_timestamp_date_range(
                         gen, start_date_range, end_date_range
                     )
                     if gen.empty is True:
@@ -341,7 +347,7 @@ class Storage(PlotDataStoreAndProcessor):
             # Only convert on first lines
             if n == 0:
                 unitconversion = self.capacity_energy_unitconversion(
-                    gen_out, sum_values=False
+                    gen_out, self.Scenarios, sum_values=False
                 )
             gen_out = (
                 gen_out / unitconversion["divisor"]
@@ -351,7 +357,7 @@ class Storage(PlotDataStoreAndProcessor):
             # Plot line flow
             for column in gen_out:
                 if duration_curve:
-                    gen_single = self.sort_duration(gen_out, column)
+                    gen_single = sort_duration(gen_out, column)
                 else:
                     gen_single = gen_out
                 legend_label = f"{column}"

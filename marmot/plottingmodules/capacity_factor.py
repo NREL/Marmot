@@ -9,12 +9,13 @@ import logging
 import numpy as np
 import pandas as pd
 from typing import List
-
+from pathlib import Path
 import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import ColorList
 
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
@@ -35,26 +36,35 @@ class CapacityFactor(PlotDataStoreAndProcessor):
     assist in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
-        *args, 
+    def __init__(self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
         color_list: list = ColorList().colors,
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor 
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+                into defined categories.
+                Deafults to GenCategories.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
         self.color_list = color_list
 
         self.x = mconfig.parser("figure_size", "xdimension")
@@ -132,7 +142,7 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                 Cap = Cap.rename(columns={"values": "Installed Capacity (MW)"})
 
                 if pd.notna(start_date_range):
-                    Cap, Gen = self.set_timestamp_date_range(
+                    Cap, Gen = set_timestamp_date_range(
                         [Cap, Gen], start_date_range, end_date_range
                     )
                     if Gen.empty is True:
@@ -294,7 +304,7 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                 Cap = self.df_process_gen_inputs(Cap)
 
                 if pd.notna(start_date_range):
-                    Cap, Gen = self.set_timestamp_date_range(
+                    Cap, Gen = set_timestamp_date_range(
                         [Cap, Gen], start_date_range, end_date_range
                     )
                     if Gen.empty is True:
@@ -418,7 +428,7 @@ class CapacityFactor(PlotDataStoreAndProcessor):
                 Cap = Cap.xs(zone_input, level=self.AGG_BY)
 
                 if pd.notna(start_date_range):
-                    Min, Gen, Cap = self.set_timestamp_date_range(
+                    Min, Gen, Cap = set_timestamp_date_range(
                         [Min, Gen, Cap], start_date_range, end_date_range
                     )
                     if Gen.empty is True:

@@ -16,12 +16,15 @@ import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 import matplotlib.dates as mdates
 from typing import List
+from pathlib import Path
+
 
 import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions, set_x_y_dimension
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, adjust_for_leapday, sort_duration
 from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
@@ -42,7 +45,11 @@ class Transmission(PlotDataStoreAndProcessor):
     def __init__(self, 
         Zones: List[str], 
         Scenarios: List[str], 
-        *args,
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
+        Scenario_Diff: List[str] = None,
         ylabels: List[str] = None,
         xlabels: List[str] = None,
         custom_xticklabels: List[str] = None,
@@ -51,18 +58,42 @@ class Transmission(PlotDataStoreAndProcessor):
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+                into defined categories.
+                Deafults to GenCategories.
+            Scenario_Diff (List[str], optional): 2 value list, used to compare 2
+                scenarios.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.            
+            custom_xticklabels (List[str], optional): List of custom x labels to 
+                apply to barplots. Values will overwite existing ones. 
+                Defaults to None.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
+            Region_Mapping (pd.DataFrame, optional): Mapping file to map 
+                custom regions/zones to create custom aggregations. 
+                Aggregations are created by grouping PLEXOS regions.
+                Defaults to pd.DataFrame().
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
+        if Scenario_Diff is None:
+            self.Scenario_Diff = [""]
+        else:
+            self.Scenario_Diff = Scenario_Diff
         self.ylabels = ylabels
         self.xlabels = xlabels
         self.custom_xticklabels = custom_xticklabels
@@ -142,7 +173,7 @@ class Transmission(PlotDataStoreAndProcessor):
             return MissingInputData()
 
         # sets up x, y dimensions of plot
-        ncols, nrows = self.set_facet_col_row_dimensions(facet=True, 
+        ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, facet=True, 
                                         multi_scenario=self.Scenarios)
         grid_size = ncols*nrows
         # Used to calculate any excess axis to delete
@@ -187,7 +218,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 flow = flow[flow.index.get_level_values('line_name').isin(zone_lines)] 
 
                 if pd.notna(start_date_range):
-                    flow = self.set_timestamp_date_range(
+                    flow = set_timestamp_date_range(
                         flow, start_date_range, end_date_range
                     )
                     if flow.empty is True:
@@ -195,7 +226,7 @@ class Transmission(PlotDataStoreAndProcessor):
                         continue
 
                 if shift_leapday:
-                    flow = self.adjust_for_leapday(flow)
+                    flow = adjust_for_leapday(flow)
 
                 if "Scenario" in line_limits.index.names:
                     limits = line_limits.xs(scenario, level="Scenario")
@@ -376,7 +407,7 @@ class Transmission(PlotDataStoreAndProcessor):
     #             interf_list = reported_ints.copy()
 
     #         logger.info('Plotting full time series results.')
-    #         xdim,ydim = self.set_x_y_dimension(len(interf_list))
+    #         xdim,ydim = set_x_y_dimension(len(interf_list))
             
     #         mplt = PlotLibrary(ydim, xdim, squeeze=False,
     #                            ravel_axs=True)
@@ -417,12 +448,12 @@ class Transmission(PlotDataStoreAndProcessor):
     #                     limits = limits.reset_index().set_index('timestamp')
 
     #                     if shift_leapday:
-    #                         single_int = self.adjust_for_leapday(single_int)
+    #                         single_int = adjust_for_leapday(single_int)
     #                     if pd.notna(start_date_range):
     #                         single_int = single_int[start_date_range : end_date_range]
     #                         limits = limits[start_date_range : end_date_range]
     #                     if duration_curve:
-    #                         single_int = self.sort_duration(single_int,interf)
+    #                         single_int = sort_duration(single_int,interf)
 
     #                     mplt.lineplot(single_int, interf, 
     #                                             label=f"{scenario}\n interface flow",
@@ -637,17 +668,17 @@ class Transmission(PlotDataStoreAndProcessor):
                     single_int.index = single_int.index.droplevel('interface_category')
                     single_int.columns = [interf]
                     if shift_leapday:
-                        single_int = self.adjust_for_leapday(single_int)
+                        single_int = adjust_for_leapday(single_int)
                     summer = single_int[start_date_range:end_date_range]
                     winter = single_int.drop(summer.index)
                     summer_lim = limits[start_date_range:end_date_range]
                     winter_lim = limits.drop(summer.index)
 
                     if duration_curve:
-                        summer = self.sort_duration(summer,interf)
-                        winter = self.sort_duration(winter,interf)
-                        summer_lim = self.sort_duration(summer_lim,'export limit')
-                        winter_lim = self.sort_duration(winter_lim,'export limit')
+                        summer = sort_duration(summer,interf)
+                        winter = sort_duration(winter,interf)
+                        summer_lim = sort_duration(summer_lim,'export limit')
+                        winter_lim = sort_duration(winter_lim,'export limit')
 
                     axs[n,0].plot(summer[interf],linewidth = 1,label = scenario + '\n interface flow')
                     axs[n,1].plot(winter[interf],linewidth = 1,label = scenario + '\n interface flow')
@@ -804,7 +835,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 interf_list = reported_ints.copy()
                 
             logger.info('Plotting full time series results.')
-            xdim,ydim = self.set_x_y_dimension(len(interf_list))
+            xdim,ydim = set_x_y_dimension(len(interf_list))
 
             mplt = PlotLibrary(nrows, ncols,
                               squeeze=False, ravel_axs=True)
@@ -844,7 +875,7 @@ class Transmission(PlotDataStoreAndProcessor):
                         single_int.columns = [interf]
 
                         if shift_leapday:
-                            single_int = self.adjust_for_leapday(single_int)
+                            single_int = adjust_for_leapday(single_int)
 
                         single_int = single_int.reset_index().set_index('timestamp')
                         limits = limits.reset_index().set_index('timestamp')
@@ -854,7 +885,7 @@ class Transmission(PlotDataStoreAndProcessor):
                             limits = limits[self.start_date : self.end_date]
 
                         if duration_curve:
-                            single_int = self.sort_duration(single_int,interf)
+                            single_int = sort_duration(single_int,interf)
                             
 
                         mplt.lineplot(single_int,interf,label = scenario + '\n interface flow', sub_pos = n)
@@ -1029,7 +1060,7 @@ class Transmission(PlotDataStoreAndProcessor):
         logger.info(f'Plotting only {connection}s specified in Marmot_plot_select.csv')
         logger.info(select_lines)
 
-        xdim, ydim = self.set_x_y_dimension(len(select_lines))
+        xdim, ydim = set_x_y_dimension(len(select_lines))
         mplt = PlotLibrary(ydim, xdim, squeeze=False,
                             ravel_axs=True, sharey=True)
         fig, axs = mplt.get_figure()
@@ -1058,10 +1089,10 @@ class Transmission(PlotDataStoreAndProcessor):
                 single_line = single_line.rename(columns={"values": scenario})
 
                 if shift_leapday:
-                    single_line = self.adjust_for_leapday(single_line)
+                    single_line = adjust_for_leapday(single_line)
 
                 if pd.notna(start_date_range):
-                    single_line = self.set_timestamp_date_range(
+                    single_line = set_timestamp_date_range(
                         single_line, start_date_range, end_date_range
                     )
                     if single_line.empty is True:
@@ -1085,7 +1116,7 @@ class Transmission(PlotDataStoreAndProcessor):
             # Only convert on first lines
             if n == 0:
                 unitconversion = self.capacity_energy_unitconversion(
-                    line_flow_out, sum_values=False
+                    line_flow_out, self.Scenarios, sum_values=False
                 )
             line_flow_out = (
                 line_flow_out / unitconversion["divisor"]
@@ -1095,7 +1126,7 @@ class Transmission(PlotDataStoreAndProcessor):
             # Plot line flow
             for column in line_flow_out:
                 if duration_curve:
-                    line_flow_single = self.sort_duration(line_flow_out, column)
+                    line_flow_single = sort_duration(line_flow_out, column)
                 else:
                     line_flow_single = line_flow_out
                 legend_label = f"{column}"
@@ -1180,7 +1211,7 @@ class Transmission(PlotDataStoreAndProcessor):
         logger.info(select_lines) 
         flow_diff = self["line_Flow"].get(self.Scenario_Diff[1]) - self["line_Flow"].get(self.Scenario_Diff[0])
 
-        xdim,ydim = self.set_x_y_dimension(len(select_lines))
+        xdim,ydim = set_x_y_dimension(len(select_lines))
         grid_size = xdim * ydim
         excess_axs = grid_size - len(select_lines)
 
@@ -1204,11 +1235,11 @@ class Transmission(PlotDataStoreAndProcessor):
                 single_line = flow_diff.xs(line,level = 'line_name')
                 single_line.columns = [line]
                 if shift_leapday:
-                    single_line = self.adjust_for_leapday(single_line)
+                    single_line = adjust_for_leapday(single_line)
 
                 single_line_out = single_line.copy()
                 if duration_curve:
-                    single_line = self.sort_duration(single_line,line)
+                    single_line = sort_duration(single_line,line)
                                         
                 #mplt.lineplot(single_line,line, label = self.Scenario_Diff[1] + ' - \n' + self.Scenario_Diff[0] + '\n line flow', sub_pos = n)
                 mplt.lineplot(single_line,line, label = 'BESS - no BESS \n line flow', sub_pos=n)
@@ -1372,7 +1403,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 single_line_out = single_line.copy()
                 single_line.columns = [line]
                 if shift_leapday:
-                    single_line = self.adjust_for_leapday(single_line)
+                    single_line = adjust_for_leapday(single_line)
 
                 #Split into seasons.
                 summer = single_line[start_date_range : end_date_range]
@@ -1381,10 +1412,10 @@ class Transmission(PlotDataStoreAndProcessor):
                 winter_lim = limits.drop(summer.index)
 
                 if duration_curve:
-                    summer = self.sort_duration(summer,line)
-                    winter = self.sort_duration(winter,line)
-                    summer_lim = self.sort_duration(summer_lim,'export limit')
-                    winter_lim = self.sort_duration(winter_lim,'export limit')
+                    summer = sort_duration(summer,line)
+                    winter = sort_duration(winter,line)
+                    summer_lim = sort_duration(summer_lim,'export limit')
+                    winter_lim = sort_duration(winter_lim,'export limit')
 
                 axs[i,0].plot(summer[line],linewidth = 1,label = scenario + '\n line flow')
                 axs[i,1].plot(winter[line],linewidth = 1,label = scenario + '\n line flow')
@@ -1684,15 +1715,15 @@ class Transmission(PlotDataStoreAndProcessor):
 
             zone_interchange_timeseries = pd.concat(data_table_chunks, copy=False, axis=0)
             #create and bank unit conversions
-            line_unitconversion = self.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,:-1].abs().values.max())
+            line_unitconversion = self.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,:-1].abs().values.max(), self.Scenarios,)
             zone_interchange_timeseries.iloc[:,:-1] = zone_interchange_timeseries.iloc[:,:-1] / line_unitconversion['divisor']
             # zone_interchange_avgs = pd.concat(data_avgs, copy=False, axis=0)
-            attr_unitconversion = self.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,-1].abs().values.max())
+            attr_unitconversion = self.capacity_energy_unitconversion(zone_interchange_timeseries.iloc[:,-1].abs().values.max(), self.Scenarios)
             zone_interchange_timeseries.iloc[:,-1] = zone_interchange_timeseries.iloc[:,-1] / attr_unitconversion['divisor']
 
             #Make a facet plot, one panel for each child zone.
             plot_number = len(zone_interchange_timeseries.columns)-1
-            xdimension, ydimension =  self.set_x_y_dimension(plot_number)
+            xdimension, ydimension =  set_x_y_dimension(plot_number)
             grid_size = xdimension*ydimension
             excess_axs = grid_size - plot_number
             fig3, axs = self.setup_plot(xdimension,ydimension,sharey=False)
@@ -1861,7 +1892,8 @@ class Transmission(PlotDataStoreAndProcessor):
             ydimension = mconfig.parser("figure_size","ydimension")
 
             #convert values to appropriate units?
-            unitconversion = self.capacity_energy_unitconversion(max(grouped_import_lims["values"].values.max(), grouped_export_lims["values"].values.max()))
+            unitconversion = self.capacity_energy_unitconversion(max(grouped_import_lims["values"].values.max(), grouped_export_lims["values"].values.max()), 
+                    self.Scenarios,)
 
             for zone_input in self.Zones:
                 self.logger.info(f"Zone = {zone_input}")
@@ -2025,7 +2057,7 @@ class Transmission(PlotDataStoreAndProcessor):
         for zone_input in self.Zones:
             logger.info(f"Zone = {zone_input}")
 
-            ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=scenario_type)
+            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, multi_scenario=scenario_type)
 
             mplt = PlotLibrary(nrows, ncols, sharey=True,
                               squeeze=False, ravel_axs=True)
@@ -2038,7 +2070,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
                 rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
                 if shift_leapday:
-                    rr_int = self.adjust_for_leapday(rr_int)
+                    rr_int = adjust_for_leapday(rr_int)
 
                 # For plot_main handeling - need to find better solution
                 if plot_scenario == False:
@@ -2064,7 +2096,7 @@ class Transmission(PlotDataStoreAndProcessor):
                     #Make a facet plot, one panel for each parent zone.
                     parent_region = rr_int_agg['parent'].unique()
                     plot_number = len(parent_region)
-                    ncols, nrows =  self.set_x_y_dimension(plot_number)
+                    ncols, nrows =  set_x_y_dimension(plot_number)
                     mplt = PlotLibrary(nrows, ncols,
                                         squeeze=False, ravel_axs=True)
                     fig, axs = mplt.get_figure()
@@ -2099,7 +2131,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
                     #Convert units
                     if n == 0:
-                        unitconversion = self.capacity_energy_unitconversion(single_parent)
+                        unitconversion = self.capacity_energy_unitconversion(single_parent, self.Scenarios)
                     single_parent = single_parent / unitconversion['divisor']
 
                     for column in single_parent.columns:
@@ -2172,7 +2204,7 @@ class Transmission(PlotDataStoreAndProcessor):
         if 1 in check_input_data:
             return MissingInputData()
 
-        ncols, nrows = self.set_x_y_dimension(len(self.Scenarios))
+        ncols, nrows = set_x_y_dimension(len(self.Scenarios))
         grid_size = ncols*nrows
         excess_axs = grid_size - len(self.Scenarios)
 
@@ -2186,7 +2218,7 @@ class Transmission(PlotDataStoreAndProcessor):
         for scenario in self.Scenarios:
             rr_int = self[f"{agg}_{agg}s_Net_Interchange"].get(scenario)
             if shift_leapday:
-                rr_int = self.adjust_for_leapday(rr_int)
+                rr_int = adjust_for_leapday(rr_int)
 
             if self.AGG_BY != 'region' and self.AGG_BY != 'zone':
                     agg_region_mapping = self.Region_Mapping[['region',self.AGG_BY]].set_index('region').to_dict()[self.AGG_BY]
@@ -2335,7 +2367,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 line_v = self["line_Violation"].get(scenario)
                 
                 if pd.notna(start_date_range):
-                    line_v = self.set_timestamp_date_range(
+                    line_v = set_timestamp_date_range(
                         line_v, start_date_range, end_date_range
                     )
                     if line_v.empty is True:
@@ -2364,7 +2396,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 outputs[zone_input] = MissingZoneData()
                 continue
             
-            unitconversion = self.capacity_energy_unitconversion(all_scenarios)
+            unitconversion = self.capacity_energy_unitconversion(all_scenarios, self.Scenarios)
             all_scenarios = all_scenarios/unitconversion['divisor']
 
             data_table_out = all_scenarios.add_suffix(f" ({unitconversion['units']})")
@@ -2448,14 +2480,14 @@ class Transmission(PlotDataStoreAndProcessor):
                 logger.info(f"Scenario = {scenario}")
                 net_export_read = self[f"{agg}_Net_Interchange"].get(scenario)
                 if shift_leapday:
-                    net_export_read = self.adjust_for_leapday(net_export_read)                
+                    net_export_read = adjust_for_leapday(net_export_read)                
 
                 net_export = net_export_read.xs(zone_input, level=self.AGG_BY)
                 net_export = net_export.groupby("timestamp").sum()
                 net_export.columns = [scenario]
 
                 if pd.notna(start_date_range):
-                    net_export = self.set_timestamp_date_range(
+                    net_export = set_timestamp_date_range(
                         net_export, start_date_range, end_date_range
                     )
                     if net_export.empty is True:
@@ -2466,7 +2498,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
             net_export_all_scenarios = pd.concat(net_export_chunks, axis=1)
 
-            unitconversion = self.capacity_energy_unitconversion(net_export_all_scenarios)
+            unitconversion = self.capacity_energy_unitconversion(net_export_all_scenarios, self.Scenarios)
             net_export_all_scenarios = net_export_all_scenarios / unitconversion["divisor"]
             # Data table of values to return to main program
             data_table_out = net_export_all_scenarios.add_suffix(f" ({unitconversion['units']})")
@@ -2544,7 +2576,7 @@ class Transmission(PlotDataStoreAndProcessor):
         outputs : dict = {}
 
         # sets up x, y dimensions of plot
-        ncols, nrows = self.set_facet_col_row_dimensions(multi_scenario=self.Scenarios)
+        ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, multi_scenario=self.Scenarios)
         grid_size = ncols*nrows
 
         # Used to calculate any excess axis to delete
@@ -2587,7 +2619,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 logger.info(f"Scenario = {str(scenario)}")
                 flow = self["line_Flow"][scenario].copy()
                 if shift_leapday:
-                    flow = self.adjust_for_leapday(flow)
+                    flow = adjust_for_leapday(flow)
                 flow = flow.reset_index()
 
                 for other_zone in other_zones:
@@ -2618,7 +2650,7 @@ class Transmission(PlotDataStoreAndProcessor):
                     net_export.columns = [other_zone]
 
                     if pd.notna(start_date_range):
-                        net_export = self.set_timestamp_date_range(
+                        net_export = set_timestamp_date_range(
                             net_export, start_date_range, end_date_range
                         )
                         if net_export.empty is True:
@@ -2626,7 +2658,7 @@ class Transmission(PlotDataStoreAndProcessor):
                             continue
 
                     if duration_curve:
-                        net_export = self.sort_duration(net_export,other_zone)
+                        net_export = sort_duration(net_export,other_zone)
 
                     net_exports.append(net_export)
 
@@ -2637,7 +2669,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
                 # unitconversion based off peak export hour, only checked once
                 if zone_input == self.Zones[0] and scenario == self.Scenarios[0]:
-                    unitconversion = self.capacity_energy_unitconversion(net_exports)
+                    unitconversion = self.capacity_energy_unitconversion(net_exports, self.Scenarios)
 
                 net_exports = net_exports / unitconversion['divisor']
 
@@ -2776,7 +2808,7 @@ class Transmission(PlotDataStoreAndProcessor):
                     net_export.columns = [other_zone]
 
                     if pd.notna(start_date_range):
-                        net_export = self.set_timestamp_date_range(
+                        net_export = set_timestamp_date_range(
                             net_export, start_date_range, end_date_range
                         )
                         if net_export.empty is True:
@@ -2797,7 +2829,7 @@ class Transmission(PlotDataStoreAndProcessor):
 
                 # unitconversion based off peak export hour, only checked once
                 if scenario == self.Scenarios[0]:
-                    unitconversion = self.capacity_energy_unitconversion(both)
+                    unitconversion = self.capacity_energy_unitconversion(both, self.Scenarios,)
 
                 both = both / unitconversion['divisor']
                 net_exports_all.append(both)
@@ -2897,7 +2929,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 flow = flow_all.xs(inter, level='interface_name')
                 
                 if pd.notna(start_date_range):
-                    flow = self.set_timestamp_date_range(
+                    flow = set_timestamp_date_range(
                         flow, start_date_range, end_date_range
                     )
                     if flow.empty is True:
@@ -2916,7 +2948,7 @@ class Transmission(PlotDataStoreAndProcessor):
             both = pd.concat(both_chunk)
             both.columns = ['Total Export','Total Import']
             if scenario == self.Scenarios[0]:
-                unitconversion = self.capacity_energy_unitconversion(both)
+                unitconversion = self.capacity_energy_unitconversion(both, self.Scenarios)
 
             both = both / unitconversion['divisor']
             both.index = available_inter

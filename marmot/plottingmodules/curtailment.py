@@ -9,11 +9,14 @@ This module creates plots are related to the curtailment of generators.
 import logging
 import pandas as pd
 from typing import List
+from pathlib import Path
+
 import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict, ColorList, PlotMarkers
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
+from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, get_sub_hour_interval_count
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     DataSavedInModule,
@@ -38,7 +41,10 @@ class Curtailment(PlotDataStoreAndProcessor):
     def __init__(self, 
         Zones: List[str], 
         Scenarios: List[str], 
-        *args, 
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
         marmot_color_dict: dict = None,
         custom_xticklabels: List[str] = None,
         color_list: list = ColorList().colors,
@@ -46,22 +52,37 @@ class Curtailment(PlotDataStoreAndProcessor):
         **kwargs):
         """
         Args:
-            *args
-                Minimum required parameters passed to the PlotDataStoreAndProcessor 
-                class.
-            **kwargs
-                These parameters will be passed to the PlotDataStoreAndProcessor 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+                generation technologies.
+                Defaults to None.
+            custom_xticklabels (List[str], optional): List of custom x labels to 
+                apply to barplots. Values will overwite existing ones. 
+                Defaults to None.
+            color_list (list, optional): List of colors to apply to non-gen plots.
+                Defaults to ColorList().colors.
+            marker_style (List, optional): List of markers for plotting.
+                Defaults to PlotMarkers().markers.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
 
         self.Zones = Zones
         self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
         if marmot_color_dict is None:
             self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
+        
         self.custom_xticklabels = custom_xticklabels
         self.color_list = color_list
         self.marker_style = marker_style
@@ -128,7 +149,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 re_curt = self.df_process_gen_inputs(re_curt)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == "Curtailment":
-                    re_curt = self.assign_curtailment_techs(re_curt)
+                    re_curt = self.assign_curtailment_techs(re_curt, self.gen_categories.vre)
 
                 # Timeseries [MW] PV curtailment [MWh]
                 pv_curt = re_curt[re_curt.columns.intersection(self.gen_categories.pv)]
@@ -140,7 +161,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 pv_curt = pv_curt.squeeze()  # Convert to Series
 
                 if pd.notna(start_date_range):
-                    re_curt, pv_curt = self.set_timestamp_date_range(
+                    re_curt, pv_curt = set_timestamp_date_range(
                         [re_curt, pv_curt], start_date_range, end_date_range
                     )
                     if re_curt.empty or pv_curt.empty:
@@ -321,7 +342,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 re_curt = self.df_process_gen_inputs(re_curt)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == "Curtailment":
-                    re_curt = self.assign_curtailment_techs(re_curt)
+                    re_curt = self.assign_curtailment_techs(re_curt, self.gen_categories.vre)
 
                 # Total generation cost
                 Total_Gen_Cost = self["generator_Total_Generation_Cost"].get(scenario)
@@ -333,7 +354,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                         avail_gen,
                         re_curt,
                         Total_Gen_Cost,
-                    ) = self.set_timestamp_date_range(
+                    ) = set_timestamp_date_range(
                         [gen, avail_gen, re_curt, Total_Gen_Cost],
                         start_date_range,
                         end_date_range,
@@ -600,7 +621,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 vre_curt = self.df_process_gen_inputs(vre_curt)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == "Curtailment":
-                    vre_curt = self.assign_curtailment_techs(vre_curt)
+                    vre_curt = self.assign_curtailment_techs(vre_curt, self.gen_categories.vre)
 
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
                 if avail_gen.empty:
@@ -617,10 +638,10 @@ class Curtailment(PlotDataStoreAndProcessor):
                 avail_gen = self.df_process_gen_inputs(avail_gen)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == "Curtailment":
-                    avail_gen = self.assign_curtailment_techs(avail_gen)
+                    avail_gen = self.assign_curtailment_techs(avail_gen, self.gen_categories.vre)
 
                 if pd.notna(start_date_range):
-                    vre_curt, avail_gen = self.set_timestamp_date_range(
+                    vre_curt, avail_gen = set_timestamp_date_range(
                         [vre_curt, avail_gen], start_date_range, end_date_range
                     )
                     if vre_curt.empty:
@@ -628,7 +649,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                         continue
 
                 # Calculates interval step to correct for MWh
-                interval_count = self.get_sub_hour_interval_count(vre_curt)
+                interval_count = get_sub_hour_interval_count(vre_curt)
                 vre_curt = vre_curt / interval_count
                 avail_gen = avail_gen / interval_count
                 vre_table = self.year_scenario_grouper(
@@ -792,7 +813,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 vre_curt = self.df_process_gen_inputs(vre_curt)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == "Curtailment":
-                    vre_curt = self.assign_curtailment_techs(vre_curt)
+                    vre_curt = self.assign_curtailment_techs(vre_curt, self.gen_categories.vre)
 
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
                 try:  # Check for regions missing all generation.
@@ -804,7 +825,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 avail_gen = self.df_process_gen_inputs(avail_gen)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == "Curtailment":
-                    avail_gen = self.assign_curtailment_techs(avail_gen)
+                    avail_gen = self.assign_curtailment_techs(avail_gen, self.gen_categories.vre)
 
                 for vre_type in self.gen_categories.vre:
                     try:
@@ -1008,7 +1029,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                     curt = vre_curt.xs(site, level="gen_name")
 
                     if pd.notna(start_date_range):
-                        gen_site, curt = self.set_timestamp_date_range(
+                        gen_site, curt = set_timestamp_date_range(
                             [gen_site, curt], start_date_range, end_date_range
                         )
                         if curt.empty:
@@ -1191,19 +1212,19 @@ class Curtailment(PlotDataStoreAndProcessor):
                 re_curt = self.df_process_gen_inputs(re_curt)
                 # If using Marmot's curtailment property
                 if self.curtailment_prop == "Curtailment":
-                    re_curt = self.assign_curtailment_techs(re_curt)
+                    re_curt = self.assign_curtailment_techs(re_curt, self.gen_categories.vre)
                 # Sum across technologies
                 re_curt = re_curt.sum(axis=1)
 
                 if pd.notna(start_date_range):
-                    re_curt = self.set_timestamp_date_range(
+                    re_curt = set_timestamp_date_range(
                         re_curt, start_date_range, end_date_range
                     )
                     if re_curt.empty:
                         logger.warning("No curtailment in selected Date Range")
                         continue
 
-                interval_count = self.get_sub_hour_interval_count(re_curt)
+                interval_count = get_sub_hour_interval_count(re_curt)
                 re_curt = re_curt / interval_count
 
                 # Group data by hours and find mean across entire range
