@@ -11,11 +11,12 @@ import matplotlib.pyplot as plt
 
 
 @dataclass
-class ColorList():
+class ColorList:
     """List of colors to apply to plots.
 
     Generally used with non generator plots.
     """
+
     colors: List[str] = field(
         default_factory=lambda: [
             "#396AB1",
@@ -27,32 +28,25 @@ class ColorList():
             "#cab2d6",
             "#6a3d9a",
             "#fb9a99",
-            "#b15928",]
+            "#b15928",
+        ]
     )
 
+
 @dataclass
-class PlotMarkers():
-    """List of plot markers to use in certain plots.
-    """
+class PlotMarkers:
+    """List of plot markers to use in certain plots."""
+
     markers: List[str] = field(
-        default_factory=lambda: [
-            "^", 
-            "*", 
-            "o", 
-            "D", 
-            "x", 
-            "<", 
-            "P", 
-            "H", 
-            "8", 
-            "+"]
+        default_factory=lambda: ["^", "*", "o", "D", "x", "<", "P", "H", "8", "+"]
     )
 
+
 @dataclass
-class GeneratorColorDict():
+class GeneratorColorDict:
     """Dictionary of gen names to colors for generation plots.
 
-    The dictionary is usually set with the colour_dictionary.csv using 
+    The dictionary is usually set with the colour_dictionary.csv using
     the set_colors_from_df method. The file should have the following
     format:
 
@@ -79,7 +73,7 @@ class GeneratorColorDict():
             color_df (pd.DataFrame): DataFrame with Generator and Color column
 
         Returns:
-            GeneratorColorDict: Instance of class 
+            GeneratorColorDict: Instance of class
         """
         color_dict = color_df.rename(
             columns={
@@ -101,10 +95,10 @@ class GeneratorColorDict():
         """Sets random colors, given a list of names/technologies
 
         Args:
-            generator_list (list): List of generator names. 
+            generator_list (list): List of generator names.
 
         Returns:
-            GeneratorColorDict: Instance of class 
+            GeneratorColorDict: Instance of class
         """
         cmap = plt.cm.get_cmap(lut=len(generator_list))
         colors = []

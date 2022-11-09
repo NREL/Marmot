@@ -5,7 +5,7 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
-#os.environ['GAMSDIR'] = r"C:\GAMS\39"
+# os.environ['GAMSDIR'] = r"C:\GAMS\39"
 import logging
 import re
 from pathlib import Path
@@ -69,12 +69,16 @@ class ProcessReEDS(Process):
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
             **kwargs
-                These parameters will be passed to the Process 
+                These parameters will be passed to the Process
                 class.
         """
         # Instantiation of Process Base class
         super().__init__(
-            input_folder, output_file_path, *args, Region_Mapping=Region_Mapping, **kwargs
+            input_folder,
+            output_file_path,
+            *args,
+            Region_Mapping=Region_Mapping,
+            **kwargs,
         )
         # Internal cached data is saved to the following variables.
         # To access the values use the public api e.g self.property_units
@@ -160,18 +164,23 @@ class ProcessReEDS(Process):
             reeds_outputs_dir = self.input_folder.joinpath("outputs")
             files = []
             for names in reeds_outputs_dir.iterdir():
-                if names.name == f"{self.GDX_RESULTS_PREFIX}{self.input_folder.name}.gdx":
+                if (
+                    names.name
+                    == f"{self.GDX_RESULTS_PREFIX}{self.input_folder.name}.gdx"
+                ):
                     files.append(names.name)
 
                     self.property_units = str(names)
 
             # List of all files in input folder in alpha numeric order
-            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+            self._get_input_data_paths = sorted(
+                files, key=lambda x: int(re.sub("\D", "0", x))
+            )
         return self._get_input_data_paths
-    
+
     @property
     def data_collection(self) -> Dict[str, Path]:
-        """Dictionary input file names to full filename path 
+        """Dictionary input file names to full filename path
 
         Returns:
             dict: data_collection {filename: fullpath}
@@ -179,7 +188,9 @@ class ProcessReEDS(Process):
         if self._data_collection is None:
             self._data_collection = {}
             for file in self.get_input_data_paths:
-                self._data_collection[file] = self.input_folder.joinpath("outputs", file)
+                self._data_collection[file] = self.input_folder.joinpath(
+                    "outputs", file
+                )
         return self._data_collection
 
     def output_metadata(self, files_list: list) -> None:
@@ -191,8 +202,7 @@ class ProcessReEDS(Process):
         """
         for partition in files_list:
             region_df = pd.read_csv(
-                self.input_folder.joinpath("inputs_case", "regions.csv"),
-                dtype=str
+                self.input_folder.joinpath("inputs_case", "regions.csv"), dtype=str
             )
             region_df.rename(columns={"p": "name", "s": "category"}, inplace=True)
             region_df[["name", "category"]].to_hdf(
@@ -344,8 +354,10 @@ class ProcessReEDS(Process):
                 ]
             except gdxpds.tools.Error:
                 return df
-            
-            stor_out = self.reeds_prop_cols.assign_column_names(stor_out, stor_prop_name)
+
+            stor_out = self.reeds_prop_cols.assign_column_names(
+                stor_out, stor_prop_name
+            )
             if prop == "gen_out_ann":
                 stor_out = stor_out.loc[stor_out.type == "out"]
             stor_out = stor_out.groupby(group_list).sum()

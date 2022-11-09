@@ -14,8 +14,13 @@ import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import ColorList
 
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
@@ -38,7 +43,8 @@ class CapacityFactor(PlotDataStoreAndProcessor):
     assist in creating figures.
     """
 
-    def __init__(self,
+    def __init__(
+        self,
         Zones: List[str],
         Scenarios: List[str],
         AGG_BY: str,
@@ -46,7 +52,8 @@ class CapacityFactor(PlotDataStoreAndProcessor):
         marmot_solutions_folder: Path,
         gen_categories: GenCategories = GenCategories(),
         color_list: list = ColorList().colors,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -55,7 +62,7 @@ class CapacityFactor(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
                 into defined categories.
                 Deafults to GenCategories.
             color_list (list, optional): List of colors to apply to non-gen plots.
@@ -76,20 +83,20 @@ class CapacityFactor(PlotDataStoreAndProcessor):
         scenario_groupby: str = "Scenario",
         **_,
     ):
-        """Creates barplots of the percentage average generation output when committed 
+        """Creates barplots of the percentage average generation output when committed
         by technology type.
 
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent 
+            start_date_range (str, optional): Defines a start date at which to represent
                 data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -100,15 +107,15 @@ class CapacityFactor(PlotDataStoreAndProcessor):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor 
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor
         # dictionary with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -249,14 +256,14 @@ class CapacityFactor(PlotDataStoreAndProcessor):
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent 
+            start_date_range (str, optional): Defines a start date at which to represent
                 data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -268,15 +275,15 @@ class CapacityFactor(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Installed_Capacity", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor 
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor
         # dictionary with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -369,14 +376,14 @@ class CapacityFactor(PlotDataStoreAndProcessor):
         Each scenario is plotted by a different colored grouped bar.
 
         Args:
-            start_date_range (str, optional): Defines a start date at which to represent 
+            start_date_range (str, optional): Defines a start date at which to represent
                 data from.
                 Defaults to None.
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -388,8 +395,8 @@ class CapacityFactor(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),

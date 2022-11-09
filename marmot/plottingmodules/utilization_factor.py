@@ -20,7 +20,10 @@ from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -55,15 +58,17 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         gen_categories: GenCategories = GenCategories(),
         marmot_color_dict: dict = None,
-        **kwargs):
+        **kwargs
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -72,10 +77,10 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
                 into defined categories.
                 Deafults to GenCategories.
-            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
         """
@@ -86,7 +91,9 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
         self.Scenarios = Scenarios
         self.gen_categories = gen_categories
         if marmot_color_dict is None:
-            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
 
@@ -101,8 +108,8 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
         )  # TODO: fix bugs/improve performance, get back to working stage
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -239,8 +246,8 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
         )  # TODO: fix bugs/improve performance, get back to working stage
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -384,8 +391,8 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
         )  # TODO: fix bugs/improve performance, get back to working stage
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -438,7 +445,9 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
                 )  # Calculation of fleet wide capacity factor by hour and type
                 n = 0  # Counter for type subplots
 
-                for i in self.gen_categories.thermal:  # Gen.reset_index()['tech'].unique():
+                for (
+                    i
+                ) in self.gen_categories.thermal:  # Gen.reset_index()['tech'].unique():
                     try:
                         duration_curve = (
                             Gen.xs(i, level="tech")
@@ -503,8 +512,8 @@ class UtilizationFactor(PlotDataStoreAndProcessor):
         )  # TODO: fix bugs/improve performance, get back to working stage
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios)]
 

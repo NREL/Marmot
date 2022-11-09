@@ -15,8 +15,14 @@ from pathlib import Path
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, get_sub_hour_interval_count
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+    get_sub_hour_interval_count,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -36,15 +42,17 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         custom_xticklabels: List[str] = None,
         color_list: list = ColorList().colors,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -53,8 +61,8 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            custom_xticklabels (List[str], optional): List of custom x labels to 
-                apply to barplots. Values will overwite existing ones. 
+            custom_xticklabels (List[str], optional): List of custom x labels to
+                apply to barplots. Values will overwite existing ones.
                 Defaults to None.
             color_list (list, optional): List of colors to apply to non-gen plots.
                 Defaults to ColorList().colors.
@@ -99,8 +107,8 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios)]
 
@@ -149,7 +157,9 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
                 continue
 
             # Determine auto unit coversion
-            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out, self.Scenarios)
+            unitconversion = self.capacity_energy_unitconversion(
+                unserved_energy_out, self.Scenarios
+            )
             unserved_energy_out = unserved_energy_out / unitconversion["divisor"]
 
             # Data table of values to return to main program
@@ -201,8 +211,8 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -218,8 +228,8 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Unserved_Energy", self.Scenarios)]
 
@@ -277,7 +287,9 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
                 continue
 
             # Determine auto unit coversion
-            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out, self.Scenarios)
+            unitconversion = self.capacity_energy_unitconversion(
+                unserved_energy_out, self.Scenarios
+            )
             unserved_energy_out = unserved_energy_out / unitconversion["divisor"]
 
             # Data table of values to return to main program
@@ -348,8 +360,8 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -436,7 +448,9 @@ class UnservedEnergy(PlotDataStoreAndProcessor):
             mplt = PlotLibrary()
             fig, ax = mplt.get_figure()
 
-            unitconversion = self.capacity_energy_unitconversion(unserved_energy_out, self.Scenarios)
+            unitconversion = self.capacity_energy_unitconversion(
+                unserved_energy_out, self.Scenarios
+            )
             unserved_energy_out = unserved_energy_out / unitconversion["divisor"]
             Data_Table_Out = unserved_energy_out
             Data_Table_Out = Data_Table_Out.add_suffix(f" ({unitconversion['units']})")

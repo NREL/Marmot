@@ -19,8 +19,15 @@ import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import ColorList, GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, get_sub_hour_interval_count
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+    set_facet_col_row_dimensions,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+    get_sub_hour_interval_count,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -40,9 +47,10 @@ class Reserves(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
@@ -51,7 +59,8 @@ class Reserves(PlotDataStoreAndProcessor):
         xlabels: List[str] = None,
         custom_xticklabels: List[str] = None,
         color_list: list = ColorList().colors,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -60,15 +69,15 @@ class Reserves(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
             ylabels (List[str], optional): y-axis labels for facet plots.
                 Defaults to None.
             xlabels (List[str], optional): x-axis labels for facet plots.
-                Defaults to None.            
-            custom_xticklabels (List[str], optional): List of custom x labels to 
-                apply to barplots. Values will overwite existing ones. 
+                Defaults to None.
+            custom_xticklabels (List[str], optional): List of custom x labels to
+                apply to barplots. Values will overwite existing ones.
                 Defaults to None.
             color_list (list, optional): List of colors to apply to non-gen plots.
                 Defaults to ColorList().colors.
@@ -79,14 +88,16 @@ class Reserves(PlotDataStoreAndProcessor):
         self.Zones = Zones
         self.Scenarios = Scenarios
         if marmot_color_dict is None:
-            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
         self.ylabels = ylabels
         self.xlabels = xlabels
         self.custom_xticklabels = custom_xticklabels
         self.color_list = color_list
-        
+
     def reserve_gen_timeseries(
         self,
         prop: str = None,
@@ -141,8 +152,8 @@ class Reserves(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, f"reserves_generators_Provision{data_resolution}", self.Scenarios)
@@ -159,8 +170,8 @@ class Reserves(PlotDataStoreAndProcessor):
         for region in self.Zones:
             logger.info(f"Zone = {region}")
 
-            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
-                multi_scenario=self.Scenarios
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
             excess_axs = grid_size - len(self.Scenarios)
@@ -293,8 +304,8 @@ class Reserves(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -305,8 +316,8 @@ class Reserves(PlotDataStoreAndProcessor):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "reserves_generators_Provision", self.Scenarios)]
 
@@ -476,8 +487,8 @@ class Reserves(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -488,8 +499,8 @@ class Reserves(PlotDataStoreAndProcessor):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"reserve_{data_set}", self.Scenarios)]
 
@@ -585,7 +596,9 @@ class Reserves(PlotDataStoreAndProcessor):
             )
             if count_hours == False:
                 # Convert units
-                unitconversion = self.capacity_energy_unitconversion(reserve_out, self.Scenarios)
+                unitconversion = self.capacity_energy_unitconversion(
+                    reserve_out, self.Scenarios
+                )
                 reserve_out = reserve_out / unitconversion["divisor"]
                 Data_Table_Out = reserve_out.add_suffix(
                     f" ({unitconversion['units']}h)"
@@ -669,8 +682,8 @@ class Reserves(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"reserve_Shortage{data_resolution}", Scenarios)]
 
@@ -685,8 +698,8 @@ class Reserves(PlotDataStoreAndProcessor):
         for region in self.Zones:
             logger.info(f"Zone = {region}")
 
-            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
-                facet, multi_scenario=Scenarios
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, facet, multi_scenario=Scenarios
             )
             grid_size = ncols * nrows
             excess_axs = grid_size - len(Scenarios)

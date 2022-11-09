@@ -48,7 +48,7 @@ def createConfig(configfile_path: Path):
         - ydimension: 4
 
     - **axes_options:**
-        *Allows adjustment of the minimum and maximum tick marks on datetime x-axes and 
+        *Allows adjustment of the minimum and maximum tick marks on datetime x-axes and
         the number of decimal points to include on the y-axes. Also controls visibility of
         figure spines and legend settings and position*
 
@@ -71,7 +71,7 @@ def createConfig(configfile_path: Path):
     - **axes_label_options:**
         *Controls whether x-axes labels are rotated from their default horizontal (0 degrees),
         and at what number of labels to begin rotating to the specified rotation_angle.
-        By default, labels will begin rotating at 7 labels to an angle of 45 degrees from 
+        By default, labels will begin rotating at 7 labels to an angle of 45 degrees from
         0 degrees*
 
         - rotate_x_labels: true
@@ -79,15 +79,15 @@ def createConfig(configfile_path: Path):
         - rotation_angle: 45
 
     - **plot_data:**
-        *Controls certain plot data settings. 
-        `curtailment_property` source of Curtailment data. The code defaults to 
+        *Controls certain plot data settings.
+        `curtailment_property` source of Curtailment data. The code defaults to
         Marmot's calculated Curtailment property.
-        `plot_title_as_region` If True a the region/zone name will be added as a title to the 
+        `plot_title_as_region` If True a the region/zone name will be added as a title to the
         figure
-        `include_barplot_load_storage_charging_line` specifies whether to include the line 
-        representing pumped load in total generation bar plots. 
-        `include_timeseries_load_storage_charging_line` specifies whether to include the line 
-        representing pumped load in timeseries generation plots 
+        `include_barplot_load_storage_charging_line` specifies whether to include the line
+        representing pumped load in total generation bar plots.
+        `include_timeseries_load_storage_charging_line` specifies whether to include the line
+        representing pumped load in timeseries generation plots
         `*_net_imports` settings controls whether net imports should be included in the figures*
 
         - curtailment_property: Curtailment
@@ -108,13 +108,13 @@ def createConfig(configfile_path: Path):
         .. versionadded:: 0.10.0
 
     - **formatter_settings:**
-        *Formatter specific settings, VOLL value, 
-        `skip_existing_properties` Toggles whether existing properties are skipped or 
-        overwritten if they already contained in a previous processed_h5 file, the default is 
+        *Formatter specific settings, VOLL value,
+        `skip_existing_properties` Toggles whether existing properties are skipped or
+        overwritten if they already contained in a previous processed_h5 file, the default is
         to skip.
-        `append_plexos_block_name` Toggles whether to append PLEXOS block name to formatted 
+        `append_plexos_block_name` Toggles whether to append PLEXOS block name to formatted
         results e.g ST, MT, LT, PASA. Defaults to False.
-        `exclude_pumping_from_reeds_storage_gen` toggles whether to exclude pumping 
+        `exclude_pumping_from_reeds_storage_gen` toggles whether to exclude pumping
         (negative gen) from ReEDS storage generation. Defaults to True*
 
         - VoLL: 10000
@@ -136,22 +136,22 @@ def createConfig(configfile_path: Path):
         *Handles auto shifting of leap day, if required by your model. The default is false*
 
     - **auto_convert_units:** true
-        *If True automatically converts Energy and Capacity units so that no number 
+        *If True automatically converts Energy and Capacity units so that no number
         exceeds 1000. All base units are in MW, and units can be converted to GW, TW and kW*
 
     - **read_csv_properties:** false
-        *If True the Marmot plotter will attempt to read the required plot property from a 
+        *If True the Marmot plotter will attempt to read the required plot property from a
         csv file if it cannot be found in the formatted h5 file.
-        Format of data must adhere to the standard 
+        Format of data must adhere to the standard
         Marmot formats for each data class, e.g generator, line etc.
 
         Filename should be of the following pattern:
         - {scenario}_{plx_prop_name}.csv
-        
+
         An example of a line_Net_Import:
         - Base DA_line_Net_Import.csv
-        
-        These csv files should be saved in the *csv_properties* folder which will be 
+
+        These csv files should be saved in the *csv_properties* folder which will be
         created in the Marmot_Solutions_folder.
 
         .. versionadded:: 0.11.0
@@ -257,7 +257,7 @@ def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, bo
             Defaults to None.
 
     Returns:
-        Union[dict, str, int, bool]: Returns the requested level or value from 
+        Union[dict, str, int, bool]: Returns the requested level or value from
         the config file. Return type varies based on levesl accessed.
     """
     with open(configfile_path, "r") as ymlfile:

@@ -67,8 +67,8 @@ class Process:
         input_folder: Path,
         output_file_path: Path,
         *_,
-        Region_Mapping : pd.DataFrame = pd.DataFrame(),
-        emit_names : pd.DataFrame = pd.DataFrame(),
+        Region_Mapping: pd.DataFrame = pd.DataFrame(),
+        emit_names: pd.DataFrame = pd.DataFrame(),
         **__,
     ):
         """
@@ -122,12 +122,14 @@ class Process:
                 files.append(names.name)
 
             # List of all files in input folder in alpha numeric order
-            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
-        return self._get_input_data_paths 
-    
+            self._get_input_data_paths = sorted(
+                files, key=lambda x: int(re.sub("\D", "0", x))
+            )
+        return self._get_input_data_paths
+
     @property
     def data_collection(self) -> Dict[str, Path]:
-        """Dictionary model names to full filename path 
+        """Dictionary model names to full filename path
 
         Returns:
             dict: data_collection {filename: fullpath}
@@ -162,8 +164,9 @@ class Process:
         """
         raise NotImplementedError("No default implementation of this functionality")
 
-    def combine_models(self, model_list: list, 
-        drop_duplicates: bool = True) -> pd.DataFrame:
+    def combine_models(
+        self, model_list: list, drop_duplicates: bool = True
+    ) -> pd.DataFrame:
         """Combine temporally disaggregated model results.
 
         Will drop duplicate index entries by default.
@@ -187,7 +190,7 @@ class Process:
         return df
 
 
-class ReEDSPropertyColumnsBase():
+class ReEDSPropertyColumnsBase:
     """Contains methods common to all ReEDSPropertyColumns classes"""
 
     def assign_column_names(self, df: pd.DataFrame, prop: str) -> pd.DataFrame:
@@ -198,9 +201,9 @@ class ReEDSPropertyColumnsBase():
             prop (str): Property name e.g gen_out, cap_out etc.
 
         Raises:
-            ReEDSColumnLengthError: Raised when there is a length mismatch 
+            ReEDSColumnLengthError: Raised when there is a length mismatch
                 between ReEDS df and ReEDSPropertyColumns
-            ReEDSYearTypeConvertError: Raised when ReEDS df.year column cannot 
+            ReEDSYearTypeConvertError: Raised when ReEDS df.year column cannot
                 be convetred to type int
 
         Returns:
