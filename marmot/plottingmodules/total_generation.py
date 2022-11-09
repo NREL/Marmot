@@ -16,8 +16,15 @@ import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, get_sub_hour_interval_count
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+    set_facet_col_row_dimensions,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+    get_sub_hour_interval_count,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -27,6 +34,7 @@ logger = logging.getLogger("plotter." + __name__)
 shift_leapday: bool = mconfig.parser("shift_leapday")
 plot_data_settings: dict = mconfig.parser("plot_data")
 curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
+
 
 class TotalGeneration(PlotDataStoreAndProcessor):
     """Total generation plots.
@@ -38,9 +46,10 @@ class TotalGeneration(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
@@ -49,7 +58,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         ylabels: List[str] = None,
         xlabels: List[str] = None,
         custom_xticklabels: List[str] = None,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -58,18 +68,18 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
                 into defined categories.
                 Deafults to GenCategories.
-            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
             ylabels (List[str], optional): y-axis labels for facet plots.
                 Defaults to None.
             xlabels (List[str], optional): x-axis labels for facet plots.
-                Defaults to None.            
-            custom_xticklabels (List[str], optional): List of custom x labels to 
-                apply to barplots. Values will overwite existing ones. 
+                Defaults to None.
+            custom_xticklabels (List[str], optional): List of custom x labels to
+                apply to barplots. Values will overwite existing ones.
                 Defaults to None.
         """
         # Instantiation of PlotDataStoreAndProcessor
@@ -79,13 +89,14 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         self.Scenarios = Scenarios
         self.gen_categories = gen_categories
         if marmot_color_dict is None:
-            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
         self.ylabels = ylabels
         self.xlabels = xlabels
         self.custom_xticklabels = custom_xticklabels
-
 
     def total_gen(
         self,
@@ -104,8 +115,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -121,8 +132,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             agg = "zone"
         else:
             agg = "region"
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -130,7 +141,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
             (False, f"{agg}_Unserved_Energy", self.Scenarios),
-            (False,"batterie_Generation", self.Scenarios)
+            (False, "batterie_Generation", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -170,17 +181,19 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     if Total_Gen_Stack.empty is True:
                         logger.warning("No Generation in selected Date Range")
                         continue
-                
+
                 # Calculates interval step to correct for MWh of generation
                 interval_count = get_sub_hour_interval_count(Total_Gen_Stack)
 
                 # Insert Curtailment into gen stack if it exists in database
-                Total_Gen_Stack = self.add_curtailment_to_df(Total_Gen_Stack, scenario,
-                    zone_input, self.gen_categories.vre)
-                #Insert battery generation.
-                Total_Gen_Stack = self.add_battery_gen_to_df(Total_Gen_Stack, scenario,
-                    zone_input)
-                    
+                Total_Gen_Stack = self.add_curtailment_to_df(
+                    Total_Gen_Stack, scenario, zone_input, self.gen_categories.vre
+                )
+                # Insert battery generation.
+                Total_Gen_Stack = self.add_battery_gen_to_df(
+                    Total_Gen_Stack, scenario, zone_input
+                )
+
                 Total_Gen_Stack = Total_Gen_Stack / interval_count
 
                 # Process extra optional properties
@@ -189,10 +202,11 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     f"{agg}_Demand",
                     f"{agg}_Unserved_Energy",
                 ]
-                extra_plot_data = self.process_extra_properties(extra_property_names, 
-                                    scenario, zone_input, agg)
-                
-                extra_plot_data = extra_plot_data / interval_count               
+                extra_plot_data = self.process_extra_properties(
+                    extra_property_names, scenario, zone_input, agg
+                )
+
+                extra_plot_data = extra_plot_data / interval_count
                 extra_plot_data = extra_plot_data.loc[
                     Total_Gen_Stack.index.min() : Total_Gen_Stack.index.max()
                 ]
@@ -211,9 +225,9 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 outputs[zone_input] = MissingZoneData()
                 continue
 
-            total_generation_stack_out = pd.concat(
-                gen_chunks, axis=0
-            ).fillna(0).sort_index(axis=1)
+            total_generation_stack_out = (
+                pd.concat(gen_chunks, axis=0).fillna(0).sort_index(axis=1)
+            )
             extra_data_out = pd.concat(extra_data_chunks, axis=0, sort=False)
 
             # Add Net Imports if desired
@@ -298,8 +312,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -311,8 +325,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -351,8 +365,9 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 interval_count = get_sub_hour_interval_count(Total_Gen_Stack)
 
                 # Insert Curtailment into gen stack if it exists in database
-                Total_Gen_Stack = self.add_curtailment_to_df(Total_Gen_Stack, scenario,
-                    zone_input, self.gen_categories.vre)
+                Total_Gen_Stack = self.add_curtailment_to_df(
+                    Total_Gen_Stack, scenario, zone_input, self.gen_categories.vre
+                )
 
                 Total_Gen_Stack = Total_Gen_Stack / interval_count
 
@@ -395,7 +410,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             if total_generation_stack_out.empty:
                 outputs[zone_input] = MissingZoneData()
                 continue
-            
+
             unitconversion = self.capacity_energy_unitconversion(
                 total_generation_stack_out, self.Scenarios, sum_values=True
             )
@@ -408,9 +423,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 f" ({unitconversion['units']}h)"
             )
 
-            curtailment_name = self.gen_names_dict.get(
-                        "Curtailment", "Curtailment"
-                    )
+            curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
 
             net_diff = total_generation_stack_out
             try:
@@ -536,8 +549,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -554,7 +567,9 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             outputs = MissingInputData()
             return outputs
 
-        ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, multi_scenario=self.Scenarios)
+        ncols, nrows = set_facet_col_row_dimensions(
+            self.xlabels, self.ylabels, multi_scenario=self.Scenarios
+        )
         grid_size = ncols * nrows
 
         # Used to calculate any excess axis to delete
@@ -601,13 +616,15 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                 interval_count = get_sub_hour_interval_count(Total_Gen_Stack)
 
                 # Insert Curtailment into gen stack if it exists in database
-                Total_Gen_Stack = self.add_curtailment_to_df(Total_Gen_Stack, scenario,
-                    zone_input, self.gen_categories.vre)
+                Total_Gen_Stack = self.add_curtailment_to_df(
+                    Total_Gen_Stack, scenario, zone_input, self.gen_categories.vre
+                )
 
                 # Process extra optional properties
                 extra_property_names = [f"{agg}_Load", f"{agg}_Demand"]
-                extra_plot_data = self.process_extra_properties(extra_property_names, 
-                                    scenario, zone_input, agg)
+                extra_plot_data = self.process_extra_properties(
+                    extra_property_names, scenario, zone_input, agg
+                )
 
                 if pd.notna(start_date_range):
                     Total_Gen_Stack = set_timestamp_date_range(
@@ -695,7 +712,10 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             if not plot_as_percnt:
                 # unit conversion return divisor and energy units
                 if vre_only:
-                    unitconversion = self.capacity_energy_unitconversion(Gen_Out, self.Scenarios,)
+                    unitconversion = self.capacity_energy_unitconversion(
+                        Gen_Out,
+                        self.Scenarios,
+                    )
                 else:
                     unitconversion = self.capacity_energy_unitconversion(
                         Gen_Out, self.Scenarios, sum_values=True
@@ -758,7 +778,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             # Remove extra axes
             mplt.remove_excess_axs(excess_axs, grid_size)
 
-            # Y-label should change if there are facet labels, leave at 40 for now, 
+            # Y-label should change if there are facet labels, leave at 40 for now,
             # works for all values in spacing
             labelpad = 40
             if plot_as_percnt:
@@ -802,8 +822,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -818,7 +838,9 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             outputs = MissingInputData()
             return outputs
 
-        ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, multi_scenario=self.Scenarios)
+        ncols, nrows = set_facet_col_row_dimensions(
+            self.xlabels, self.ylabels, multi_scenario=self.Scenarios
+        )
         grid_size = ncols * nrows
 
         # Used to calculate any excess axis to delete
@@ -848,10 +870,11 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     continue
 
                 Total_Gen_Stack = self.df_process_gen_inputs(Total_Gen_Stack)
-                
+
                 # Insert Curtailment into gen stack if it exists in database
-                Total_Gen_Stack = self.add_curtailment_to_df(Total_Gen_Stack, scenario,
-                    zone_input, self.gen_categories.vre)
+                Total_Gen_Stack = self.add_curtailment_to_df(
+                    Total_Gen_Stack, scenario, zone_input, self.gen_categories.vre
+                )
 
                 if pd.notna(start_date_range):
                     Total_Gen_Stack = set_timestamp_date_range(
@@ -926,7 +949,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
     ):
         """Creates a stacked barplot of total generation.
         Each scenario will be plotted in a separate bar subplot.
-        This plot is particularly useful for plotting ReEDS results or 
+        This plot is particularly useful for plotting ReEDS results or
         other models than span multiple years with changing capacity.
         Ensure scenario_groupby is set to 'Year-Sceanrio' to observe this
         effect.
@@ -937,8 +960,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -948,8 +971,8 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Generation", self.Scenarios)]
 
@@ -965,10 +988,10 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         for zone_input in self.Zones:
 
             logger.info(f"Zone = {zone_input}")
-            
+
             # sets up x, y dimensions of plot
-            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
-                multi_scenario=self.Scenarios
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
             # Used to calculate any excess axis to delete
@@ -994,10 +1017,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             for i, scenario in enumerate(self.Scenarios):
                 logger.info(f"Scenario = {scenario}")
 
-
-                total_generation = self["generator_Generation"].get(
-                    scenario
-                )
+                total_generation = self["generator_Generation"].get(scenario)
 
                 try:
                     generation = total_generation.xs(zone_input, level=self.AGG_BY)
@@ -1006,9 +1026,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     outputs[zone_input] = MissingZoneData()
                     continue
 
-                generation = self.df_process_gen_inputs(
-                    generation
-                )
+                generation = self.df_process_gen_inputs(generation)
 
                 if pd.notna(start_date_range):
                     generation = set_timestamp_date_range(
@@ -1018,18 +1036,15 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                         logger.warning("No Data in selected Date Range")
                         continue
                 generation_grouped = self.year_scenario_grouper(
-                        generation, scenario, groupby=scenario_groupby
-                    ).sum()
-                
+                    generation, scenario, groupby=scenario_groupby
+                ).sum()
 
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                    generation_grouped, self.Scenarios, sum_values=True
+                        generation_grouped, self.Scenarios, sum_values=True
                     )
-                generation_grouped = (
-                    generation_grouped / unitconversion["divisor"]
-                )
+                generation_grouped = generation_grouped / unitconversion["divisor"]
 
                 data_tables.append(generation_grouped)
 
@@ -1048,7 +1063,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
                     custom_tick_labels=tick_labels,
                     sub_pos=i,
                 )
-                
+
                 if scenario_groupby == "Year-Scenario":
                     axs[i].set_xlabel(scenario)
                 else:
@@ -1057,7 +1072,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             if not data_tables:
                 outputs[zone_input] = MissingZoneData()
                 continue
-            
+
             # Add facet labels
             if self.xlabels or self.ylabels:
                 mplt.add_facet_labels(xlabels=self.xlabels, ylabels=self.ylabels)
@@ -1073,10 +1088,10 @@ class TotalGeneration(PlotDataStoreAndProcessor):
             # works for all values in spacing
             labelpad = 40
             plt.ylabel(
-                    f"Total Generation ({unitconversion['units']})",
-                    color="black",
-                    rotation="vertical",
-                    labelpad=labelpad,
+                f"Total Generation ({unitconversion['units']})",
+                color="black",
+                rotation="vertical",
+                labelpad=labelpad,
             )
 
             Data_Table_Out = pd.concat(data_tables)

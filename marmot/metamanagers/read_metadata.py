@@ -14,9 +14,9 @@ import logging
 
 logger = logging.getLogger("formatter." + __name__)
 
+
 class MetaData:
-    """Handle the retrieval of metadata from the formatted or original solution h5 files.
-    """
+    """Handle the retrieval of metadata from the formatted or original solution h5 files."""
 
     filename: str = None
     """The name of the h5 file to retrieve data from."""
@@ -86,7 +86,7 @@ class MetaData:
 
         try:
             if self.read_from_formatted_h5:
-                
+
                 if "_formatted.h5" not in filename:
                     filename = processed_file_format.format(filename)
                 self.h5_filepath = self.HDF5_folder_in.joinpath(filename)
@@ -293,7 +293,7 @@ class MetaData:
                 subset=["battery_name"], keep="first", inplace=True
             )  # For batteries which belong to more than 1 region, drop duplicates.
 
-            #Merge in region mapping.
+            # Merge in region mapping.
             if not self.Region_Mapping.empty:
                 region_batt = pd.merge(
                     region_batt,
@@ -308,7 +308,7 @@ class MetaData:
 
         return region_batt
 
-    # Generator storage has been updated so that only one of 
+    # Generator storage has been updated so that only one of
     # tail_storage & head_storage is required
     # If both are available, both are used
     def generator_storage(self, filename: str) -> pd.DataFrame:

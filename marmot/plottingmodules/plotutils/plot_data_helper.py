@@ -23,10 +23,11 @@ logger = logging.getLogger("plotter." + __name__)
 shift_leapday: bool = mconfig.parser("shift_leapday")
 curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
+
 @dataclass
 class GenCategories:
-    """Defines various generator categories.
-    """
+    """Defines various generator categories."""
+
     vre: List[str] = field(default_factory=list)
     """vre (List[str]): List of variable renewable technologies.
     """
@@ -53,9 +54,9 @@ class GenCategories:
 
         Args:
             df (pd.DataFrame): Dataframe containing an 'Ordered_Gen'
-                column and a column for each generator category. The 
+                column and a column for each generator category. The
                 format should appear like the following.
-                
+
                 https://nrel.github.io/Marmot/references/input-files/mapping-folder/
                 ordered_gen_categories.html#input-example
 
@@ -67,7 +68,8 @@ class GenCategories:
         for category in gen_cats:
             if category in df.columns:
                 gen_cat_dict[category] = (
-                    df.loc[df[category] == True]["Ordered_Gen"].str.strip().tolist())
+                    df.loc[df[category] == True]["Ordered_Gen"].str.strip().tolist()
+                )
             else:
                 logger.warning(
                     f"'{category}' column was not found in the "
@@ -76,8 +78,10 @@ class GenCategories:
                     "certain plots to display correctly"
                 )
                 if category == "vre":
-                    logger.warning("'vre' generator categories not set, "
-                        "curtailment will not be defined!")
+                    logger.warning(
+                        "'vre' generator categories not set, "
+                        "curtailment will not be defined!"
+                    )
         return cls(**gen_cat_dict)
 
 
@@ -87,8 +91,8 @@ class PlotDataStoreAndProcessor(dict):
     Collection of Methods to assist with creation of figures,
     including getting and formatting data and modifying dataframes
 
-    PlotDataStoreAndProcessor inherits the python class 'dict' so acts like a 
-    dictionary and stores the formatted data when retrieved by the 
+    PlotDataStoreAndProcessor inherits the python class 'dict' so acts like a
+    dictionary and stores the formatted data when retrieved by the
     get_formatted_data method.
     """
 
@@ -107,7 +111,7 @@ class PlotDataStoreAndProcessor(dict):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            gen_names_dict (dict, optional): Mapping dictionary to rename generator 
+            gen_names_dict (dict, optional): Mapping dictionary to rename generator
                 technologies.
                 Default is None.
             TECH_SUBSET (List[str], optional): Tech subset category to plot.
@@ -120,10 +124,14 @@ class PlotDataStoreAndProcessor(dict):
         self.marmot_solutions_folder = Path(marmot_solutions_folder)
 
         # Assign input/output folders
-        self.processed_hdf5_folder = self.marmot_solutions_folder.joinpath("Processed_HDF5_folder")
+        self.processed_hdf5_folder = self.marmot_solutions_folder.joinpath(
+            "Processed_HDF5_folder"
+        )
         self.figure_folder = self.marmot_solutions_folder.joinpath("Figures_Output")
         self.figure_folder.mkdir(exist_ok=True)
-        self.csv_properties_folder = self.marmot_solutions_folder.joinpath("csv_properties")
+        self.csv_properties_folder = self.marmot_solutions_folder.joinpath(
+            "csv_properties"
+        )
         self.csv_properties_folder.mkdir(exist_ok=True)
 
         if gen_names_dict is None:
@@ -146,7 +154,7 @@ class PlotDataStoreAndProcessor(dict):
             list: If 1 in list required data is missing.
         """
         check_input_data = []
-        
+
         for prop in properties:
             required, plx_prop_name, scenario_list = prop
             if f"{plx_prop_name}" not in self:
@@ -158,8 +166,9 @@ class PlotDataStoreAndProcessor(dict):
             if scen_list:
                 # Read data in with multi threading
                 executor_func_setup = functools.partial(
-                    dataio.read_processed_h5file, self.processed_hdf5_folder, 
-                    plx_prop_name
+                    dataio.read_processed_h5file,
+                    self.processed_hdf5_folder,
+                    plx_prop_name,
                 )
                 with concurrent.futures.ThreadPoolExecutor(
                     max_workers=mconfig.parser("multithreading_workers")
@@ -168,9 +177,11 @@ class PlotDataStoreAndProcessor(dict):
                 # Save data to dict
                 for scenario, df in zip(scen_list, data_files):
                     self[f"{plx_prop_name}"][scenario] = df
-            
+
             # If any of the dataframes are empty for given property log warning
-            missing_scen_data = [scen for scen, df in self[f"{plx_prop_name}"].items() if df.empty]
+            missing_scen_data = [
+                scen for scen, df in self[f"{plx_prop_name}"].items() if df.empty
+            ]
             if missing_scen_data:
                 if mconfig.parser("read_csv_properties"):
                     logger.info(
@@ -179,9 +190,7 @@ class PlotDataStoreAndProcessor(dict):
                     )
                     for scenario in missing_scen_data:
                         df = dataio.read_csv_property_file(
-                                self.csv_properties_folder,
-                                plx_prop_name,
-                                scenario
+                            self.csv_properties_folder, plx_prop_name, scenario
                         )
                         self[f"{plx_prop_name}"][scenario] = df
                         if df.empty and required == True:
@@ -207,9 +216,11 @@ class PlotDataStoreAndProcessor(dict):
             # If tech is a column name
             if "tech" in df.columns:
                 original_tech_index = df.tech.unique()
-                # Checks if all generator tech categories have been identified and matched. 
+                # Checks if all generator tech categories have been identified and matched.
                 # If not, lists categories that need a match
-                unmapped_techs = set(original_tech_index) - set(self.gen_names_dict.keys())
+                unmapped_techs = set(original_tech_index) - set(
+                    self.gen_names_dict.keys()
+                )
                 df["tech"] = pd.CategoricalIndex(
                     df.tech.map(lambda x: self.gen_names_dict.get(x, "Other"))
                 )
@@ -217,12 +228,16 @@ class PlotDataStoreAndProcessor(dict):
             # If tech is in the index
             elif "tech" in df.index.names:
                 original_tech_index = df.index.get_level_values(level="tech")
-                # Checks if all generator tech categories have been identified and matched. 
+                # Checks if all generator tech categories have been identified and matched.
                 # If not, lists categories that need a match
-                unmapped_techs = set(original_tech_index) - set(self.gen_names_dict.keys())
+                unmapped_techs = set(original_tech_index) - set(
+                    self.gen_names_dict.keys()
+                )
 
                 tech_index = pd.CategoricalIndex(
-                    original_tech_index.map(lambda x: self.gen_names_dict.get(x, "Other"))
+                    original_tech_index.map(
+                        lambda x: self.gen_names_dict.get(x, "Other")
+                    )
                 )
                 df.reset_index(level="tech", drop=True, inplace=True)
 
@@ -245,22 +260,22 @@ class PlotDataStoreAndProcessor(dict):
                 )
         return df
 
-    def assign_curtailment_techs(self, df: pd.DataFrame, vre_techs: list) -> pd.DataFrame:
+    def assign_curtailment_techs(
+        self, df: pd.DataFrame, vre_techs: list
+    ) -> pd.DataFrame:
         """Assign technologies to Marmot's Curtailment property (generator_Curtailment).
 
         Args:
             df (pd.DataFrame): Dataframe to process.
-            vre_techs (list): List of vre tech names, or technologies that should be 
+            vre_techs (list): List of vre tech names, or technologies that should be
                 included in curtailment calculations.
         Returns:
             pd.DataFrame: Dataframe containing only specified curtailment technologies.
         """
 
-        # Adjust list of values to drop from vre_gen_cat depending 
+        # Adjust list of values to drop from vre_gen_cat depending
         # on if it exists in processed techs
-        adjusted_vre_gen_list = [
-            name for name in vre_techs if name in df.columns
-        ]
+        adjusted_vre_gen_list = [name for name in vre_techs if name in df.columns]
 
         if not adjusted_vre_gen_list:
             logger.warning(
@@ -286,7 +301,8 @@ class PlotDataStoreAndProcessor(dict):
         Returns:
             pd.DataFrame: Transformed Dataframe.
         """
-        if 'values' not in df.columns: df = df.rename(columns={0: "values"})
+        if "values" not in df.columns:
+            df = df.rename(columns={0: "values"})
         if set(["timestamp", "tech"]).issubset(df.index.names):
             df = df.reset_index(["timestamp", "tech"])
         df = df.groupby(["timestamp", "tech"], as_index=False, observed=True).sum()
@@ -364,25 +380,27 @@ class PlotDataStoreAndProcessor(dict):
         gen_df = self.create_categorical_tech_index(gen_df, axis=1)
         return gen_df
 
-    def process_extra_properties(self, extra_properties: List[str], 
+    def process_extra_properties(
+        self,
+        extra_properties: List[str],
         scenario: str,
         zone_input: str,
-        agg: str, 
-        data_resolution: str = ""
+        agg: str,
+        data_resolution: str = "",
     ) -> pd.DataFrame:
-        """Processes a list of extra properties and saves them into a single dataframe. 
+        """Processes a list of extra properties and saves them into a single dataframe.
 
-        Use with properties that should be aggregated to a 
+        Use with properties that should be aggregated to a
         zonal/regional aggregation such as; Load, Demand and Unsereved Energy.
 
         Args:
-            extra_properties (List[str]): list of extra property names to retrieve from formatted 
+            extra_properties (List[str]): list of extra property names to retrieve from formatted
                 data file and process
             scenario (str): scenario to pull data from
             zone_input (str): zone to subset by.
             agg_by (str): Area aggregtaion, zone or region.
-            data_resolution (str, optional):  Specifies the data resolution to 
-                pull from the formatted data and plot. 
+            data_resolution (str, optional):  Specifies the data resolution to
+                pull from the formatted data and plot.
                 Defaults to "".
 
         Returns:
@@ -423,8 +441,13 @@ class PlotDataStoreAndProcessor(dict):
         )
         return extra_plot_data
 
-    def add_curtailment_to_df(self, df: pd.DataFrame, scenario: str, 
-        zone_input: str, vre_techs: list, data_resolution: str = ""
+    def add_curtailment_to_df(
+        self,
+        df: pd.DataFrame,
+        scenario: str,
+        zone_input: str,
+        vre_techs: list,
+        data_resolution: str = "",
     ) -> pd.DataFrame:
         """Adds curtailment to the passed Dataframe as a new column
 
@@ -432,36 +455,29 @@ class PlotDataStoreAndProcessor(dict):
             df (pd.DataFrame): DataFrame to add curtailment column to
             scenario (str): scenario to pull data from
             zone_input (str): zone to subset by
-            vre_techs (list): List of vre tech names, or technologies that should be 
+            vre_techs (list): List of vre tech names, or technologies that should be
                 included in curtailment calculations.
-            data_resolution (str, optional):  Specifies the data resolution to 
-                pull from the formatted data and plot. 
+            data_resolution (str, optional):  Specifies the data resolution to
+                pull from the formatted data and plot.
                 Defaults to "".
 
         Returns:
             pd.DataFrame: DataFrame with added curtailment column.
         """
         curt_df: pd.DataFrame = self[
-                    f"generator_{curtailment_prop}{data_resolution}"
-                ].get(scenario)
+            f"generator_{curtailment_prop}{data_resolution}"
+        ].get(scenario)
         curtailment_name = self.gen_names_dict.get("Curtailment", "Curtailment")
 
         if not curt_df.empty:
             if shift_leapday:
                 curt_df = adjust_for_leapday(curt_df)
-            if (
-                zone_input
-                in curt_df.index.get_level_values(self.AGG_BY).unique()
-            ):
-                curt_df = curt_df.xs(
-                    zone_input, level=self.AGG_BY
-                )
+            if zone_input in curt_df.index.get_level_values(self.AGG_BY).unique():
+                curt_df = curt_df.xs(zone_input, level=self.AGG_BY)
                 curt_df = self.df_process_gen_inputs(curt_df)
                 # If using Marmot's curtailment property
                 if curtailment_prop == "Curtailment":
-                    curt_df = self.assign_curtailment_techs(
-                        curt_df, vre_techs
-                    )
+                    curt_df = self.assign_curtailment_techs(curt_df, vre_techs)
                 curt_df = curt_df.sum(axis=1)
                 # Remove values less than 0.05 MW
                 curt_df[curt_df < 0.05] = 0
@@ -473,27 +489,32 @@ class PlotDataStoreAndProcessor(dict):
                 )
                 # If columns are all 0 remove
                 df = df.loc[:, (df != 0).any(axis=0)]
-                df = df.fillna(0)        
+                df = df.fillna(0)
         return df
 
-    def add_battery_gen_to_df(self, df: pd.DataFrame, scenario: str, 
-        zone_input: str, data_resolution: str = "") -> pd.DataFrame:
+    def add_battery_gen_to_df(
+        self,
+        df: pd.DataFrame,
+        scenario: str,
+        zone_input: str,
+        data_resolution: str = "",
+    ) -> pd.DataFrame:
         """Adds Battery generation to the passed dataframe.
 
         Args:
             df (pd.DataFrame): DataFrame to add battery generation to.
             scenario (str): scenario to pull data from
             zone_input (str): zone to subset by
-            data_resolution (str, optional):  Specifies the data resolution to 
-                pull from the formatted data and plot. 
+            data_resolution (str, optional):  Specifies the data resolution to
+                pull from the formatted data and plot.
                 Defaults to "".
 
         Returns:
             pd.DataFrame: DataFrame with added battery gen column.
         """
-        battery_gen : pd.DataFrame = self[
-                    f"batterie_Generation{data_resolution}"
-        ].get(scenario)
+        battery_gen: pd.DataFrame = self[f"batterie_Generation{data_resolution}"].get(
+            scenario
+        )
         battery_discharge_name = self.gen_names_dict.get("battery", "Storage")
         if battery_gen.empty is True:
             logger.info("No Battery generation in selected Date Range")
@@ -501,13 +522,8 @@ class PlotDataStoreAndProcessor(dict):
             if shift_leapday:
                 battery_gen = adjust_for_leapday(battery_gen)
 
-            if (
-                zone_input
-                in battery_gen.index.get_level_values(self.AGG_BY).unique()
-            ):
-                battery_gen = battery_gen.xs(
-                    zone_input, level=self.AGG_BY
-                )
+            if zone_input in battery_gen.index.get_level_values(self.AGG_BY).unique():
+                battery_gen = battery_gen.xs(zone_input, level=self.AGG_BY)
                 battery_gen = battery_gen.groupby("timestamp").sum()
                 df.insert(
                     len(df.columns),
@@ -530,7 +546,7 @@ class PlotDataStoreAndProcessor(dict):
         """Special groupby method to group dataframes by Scenario or Year-Scenario.
 
         .. versionadded:: 0.10.0
-        
+
         Grouping by Year-Scenario is useful for multi year results sets
         where examining results by year is of interest.
 
@@ -547,7 +563,7 @@ class PlotDataStoreAndProcessor(dict):
             additional_groups (list, optional): List of any additional columns
                 to groupby. Defaults to None.
             **kwargs
-                These parameters will be passed to pandas.DataFrame.groupby 
+                These parameters will be passed to pandas.DataFrame.groupby
                 function.
 
         Raises:
@@ -646,7 +662,7 @@ class PlotDataStoreAndProcessor(dict):
     @staticmethod
     def capacity_energy_unitconversion(
         df: pd.DataFrame, Scenarios: List[str], sum_values: bool = False
-        ) -> dict:
+    ) -> dict:
         """Unitconversion for capacity and energy figures.
 
         Takes a pd.DataFrame as input and will then determine the max value
@@ -720,7 +736,10 @@ class PlotDataStoreAndProcessor(dict):
 ## Other helper functions
 #################################################
 
-def merge_new_agg(Region_Mapping: pd.DataFrame, df: pd.DataFrame, AGG_BY: str) -> pd.DataFrame:
+
+def merge_new_agg(
+    Region_Mapping: pd.DataFrame, df: pd.DataFrame, AGG_BY: str
+) -> pd.DataFrame:
     """Adds new region aggregation in the plotting step.
 
     This allows one to create a new aggregation without re-formatting the .h5 file.
@@ -735,8 +754,9 @@ def merge_new_agg(Region_Mapping: pd.DataFrame, df: pd.DataFrame, AGG_BY: str) -
     df = df.merge(agg_new, left_on="region", right_index=True)
     return df
 
-def set_facet_col_row_dimensions(xlabels=None, ylabels=None,
-    facet: bool = True, multi_scenario: list = None
+
+def set_facet_col_row_dimensions(
+    xlabels=None, ylabels=None, facet: bool = True, multi_scenario: list = None
 ) -> Tuple[int, int]:
     """Sets facet plot col and row dimensions based on user defined labeles
 
@@ -753,7 +773,7 @@ def set_facet_col_row_dimensions(xlabels=None, ylabels=None,
     Returns:
         Tuple[int, int]: Facet x,y dimensions.
     """
-    
+
     if not xlabels:
         ncols = 1
     else:
@@ -767,19 +787,16 @@ def set_facet_col_row_dimensions(xlabels=None, ylabels=None,
         ncols = 1
         nrows = 1
         return ncols, nrows
-    # If no labels were provided or dimensions less than len scenarios use 
+    # If no labels were provided or dimensions less than len scenarios use
     # Marmot default dimension settings
-    if (
-        not xlabels
-        and not ylabels
-        or ncols * nrows < len(multi_scenario)
-    ):
+    if not xlabels and not ylabels or ncols * nrows < len(multi_scenario):
         logger.info(
             "Dimensions could not be determined from x & y labels - Using Marmot "
             "default dimensions"
         )
         ncols, nrows = set_x_y_dimension(len(multi_scenario))
     return ncols, nrows
+
 
 def set_x_y_dimension(region_number: int) -> Tuple[int, int]:
     """Sets X,Y dimension of plots without x,y labels.
@@ -800,4 +817,3 @@ def set_x_y_dimension(region_number: int) -> Tuple[int, int]:
         ncols = 2
         nrows = 2
     return ncols, nrows
-

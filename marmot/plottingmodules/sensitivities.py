@@ -14,7 +14,11 @@ from pathlib import Path
 import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, merge_new_agg
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+    merge_new_agg,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -24,6 +28,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
 curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
+
 
 class Sensitivities(PlotDataStoreAndProcessor):
     """System sensitivity plots
@@ -35,15 +40,17 @@ class Sensitivities(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         marmot_color_dict: dict = None,
         Region_Mapping: pd.DataFrame = pd.DataFrame(),
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -52,11 +59,11 @@ class Sensitivities(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
-            Region_Mapping (pd.DataFrame, optional): Mapping file to map 
-                custom regions/zones to create custom aggregations. 
+            Region_Mapping (pd.DataFrame, optional): Mapping file to map
+                custom regions/zones to create custom aggregations.
                 Aggregations are created by grouping PLEXOS regions.
                 Defaults to pd.DataFrame().
         """
@@ -66,11 +73,12 @@ class Sensitivities(PlotDataStoreAndProcessor):
         self.Zones = Zones
         self.Scenarios = Scenarios
         if marmot_color_dict is None:
-            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
         self.Region_Mapping = Region_Mapping
-
 
     def _process_ts(self, df, zone_input):
         oz = df.xs(zone_input, level=self.AGG_BY)
@@ -128,8 +136,8 @@ class Sensitivities(PlotDataStoreAndProcessor):
             outputs = InputSheetError()
             return outputs
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenario_Diff),
@@ -250,7 +258,9 @@ class Sensitivities(PlotDataStoreAndProcessor):
 
                 int_diff_all = int_diff_all.reset_index()
                 if self.AGG_BY not in int_diff_all.columns:
-                    int_diff_all = merge_new_agg(self.Region_Mapping, int_diff_all, self.AGG_BY)
+                    int_diff_all = merge_new_agg(
+                        self.Region_Mapping, int_diff_all, self.AGG_BY
+                    )
                 int_diff = int_diff_all[int_diff_all[self.AGG_BY] == zone_input]
                 int_diff = int_diff.groupby("timestamp").sum()
                 int_diff.columns = ["Net export difference"]

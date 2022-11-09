@@ -17,8 +17,14 @@ import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.total_generation import TotalGeneration
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+    set_facet_col_row_dimensions,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -38,9 +44,10 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
@@ -48,7 +55,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
         ylabels: List[str] = None,
         xlabels: List[str] = None,
         custom_xticklabels: List[str] = None,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -57,30 +65,32 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
             ylabels (List[str], optional): y-axis labels for facet plots.
                 Defaults to None.
             xlabels (List[str], optional): x-axis labels for facet plots.
-                Defaults to None.            
-            custom_xticklabels (List[str], optional): List of custom x labels to 
-                apply to barplots. Values will overwite existing ones. 
+                Defaults to None.
+            custom_xticklabels (List[str], optional): List of custom x labels to
+                apply to barplots. Values will overwite existing ones.
                 Defaults to None.
         """
         # Instantiation of PlotDataStoreAndProcessor
         super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
-        
+
         self.Zones = Zones
         self.Scenarios = Scenarios
         if marmot_color_dict is None:
-            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
         self.ylabels = ylabels
         self.xlabels = xlabels
         self.custom_xticklabels = custom_xticklabels
-        
+
         self.argument_dict = kwargs
 
     def total_cap(
@@ -100,8 +110,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -111,8 +121,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
@@ -172,13 +182,18 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 )
 
             if capacity_chunks:
-                Total_Installed_Capacity_Out = pd.concat(
-                    capacity_chunks, axis=0,
-                ).fillna(0).sort_index(axis=1)
+                Total_Installed_Capacity_Out = (
+                    pd.concat(
+                        capacity_chunks,
+                        axis=0,
+                    )
+                    .fillna(0)
+                    .sort_index(axis=1)
+                )
                 Total_Installed_Capacity_Out = Total_Installed_Capacity_Out.loc[
                     :, (Total_Installed_Capacity_Out != 0).any(axis=0)
                 ]
-            # If Total_Installed_Capacity_Out df is empty returns a empty 
+            # If Total_Installed_Capacity_Out df is empty returns a empty
             # dataframe and does not plot
             else:
                 logger.warning(f"No installed capacity in {zone_input}")
@@ -243,8 +258,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -254,8 +269,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
@@ -413,8 +428,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -427,16 +442,17 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
         logger.info("Generation data")
 
         gen_obj = TotalGeneration(
-                        self.Zones, 
-                        self.Scenarios, 
-                        self.AGG_BY,
-                        self.ordered_gen, 
-                        self.marmot_solutions_folder,
-                        marmot_color_dict=self.marmot_color_dict, 
-                        ylabels=self.ylabels, 
-                        xlabels=self.xlabels, 
-                        custom_xticklabels=self.custom_xticklabels, 
-                        **self.argument_dict)
+            self.Zones,
+            self.Scenarios,
+            self.AGG_BY,
+            self.ordered_gen,
+            self.marmot_solutions_folder,
+            marmot_color_dict=self.marmot_color_dict,
+            ylabels=self.ylabels,
+            xlabels=self.xlabels,
+            custom_xticklabels=self.custom_xticklabels,
+            **self.argument_dict,
+        )
 
         gen_outputs = gen_obj.total_gen(
             start_date_range, end_date_range, scenario_groupby
@@ -522,9 +538,9 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                     :, f"Unserved Energy"
                 ]
                 if "Load-Unserved_Energy" in Total_Gen_Results.columns:
-                    extra_plot_data["Load-Unserved_Energy"] = (
-                            Total_Gen_Results["Load-Unserved_Energy"]
-                    )
+                    extra_plot_data["Load-Unserved_Energy"] = Total_Gen_Results[
+                        "Load-Unserved_Energy"
+                    ]
                     Total_Gen_Results.drop("Load-Unserved_Energy", axis=1, inplace=True)
 
             Total_Generation_Stack_Out = Total_Gen_Results.drop(
@@ -581,7 +597,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
     ):
         """Creates a stacked barplot of total installed capacity.
         Each sceanrio will be plotted in a separate bar subplot.
-        This plot is particularly useful for plotting ReEDS results or 
+        This plot is particularly useful for plotting ReEDS results or
         other models than span multiple years with changing capacity.
         Ensure scenario_groupby is set to 'Year-Sceanrio' to observe this
         effect.
@@ -592,8 +608,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -603,8 +619,8 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             dict: Dictionary containing the created plot and its data table.
         """
         outputs: dict = {}
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Installed_Capacity", self.Scenarios)]
 
@@ -620,10 +636,10 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
         for zone_input in self.Zones:
 
             logger.info(f"Zone = {zone_input}")
-            
+
             # sets up x, y dimensions of plot
-            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
-                multi_scenario=self.Scenarios
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
             # Used to calculate any excess axis to delete
@@ -649,21 +665,20 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             for i, scenario in enumerate(self.Scenarios):
                 logger.info(f"Scenario = {scenario}")
 
-
                 total_installed_capacity = self["generator_Installed_Capacity"].get(
                     scenario
                 )
 
                 try:
-                    installed_capacity = total_installed_capacity.xs(zone_input, level=self.AGG_BY)
+                    installed_capacity = total_installed_capacity.xs(
+                        zone_input, level=self.AGG_BY
+                    )
                 except KeyError:
                     logger.warning(f"No installed capacity in {zone_input}")
                     outputs[zone_input] = MissingZoneData()
                     continue
 
-                installed_capacity = self.df_process_gen_inputs(
-                    installed_capacity
-                )
+                installed_capacity = self.df_process_gen_inputs(installed_capacity)
 
                 if pd.notna(start_date_range):
                     installed_capacity = set_timestamp_date_range(
@@ -673,14 +688,13 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                         logger.warning("No Data in selected Date Range")
                         continue
                 installed_capacity_grouped = self.year_scenario_grouper(
-                        installed_capacity, scenario, groupby=scenario_groupby
-                    ).sum()
-                
+                    installed_capacity, scenario, groupby=scenario_groupby
+                ).sum()
 
                 # unitconversion based off peak generation hour, only checked once
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                    installed_capacity_grouped, self.Scenarios, sum_values=True
+                        installed_capacity_grouped, self.Scenarios, sum_values=True
                     )
                 installed_capacity_grouped = (
                     installed_capacity_grouped / unitconversion["divisor"]
@@ -692,7 +706,9 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 if self.custom_xticklabels:
                     tick_labels = self.custom_xticklabels
                 elif scenario_groupby == "Year-Scenario":
-                    tick_labels = [x.split(":")[0] for x in installed_capacity_grouped.index]
+                    tick_labels = [
+                        x.split(":")[0] for x in installed_capacity_grouped.index
+                    ]
                 else:
                     tick_labels = installed_capacity_grouped.index
 
@@ -703,7 +719,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                     custom_tick_labels=tick_labels,
                     sub_pos=i,
                 )
-                
+
                 if scenario_groupby == "Year-Scenario":
                     axs[i].set_xlabel(scenario)
                 else:
@@ -712,7 +728,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             if not data_tables:
                 outputs[zone_input] = MissingZoneData()
                 continue
-            
+
             # Add facet labels
             if self.xlabels or self.ylabels:
                 mplt.add_facet_labels(xlabels=self.xlabels, ylabels=self.ylabels)
@@ -728,10 +744,10 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             # works for all values in spacing
             labelpad = 40
             plt.ylabel(
-                    f"Total Installed Capacity ({unitconversion['units']})",
-                    color="black",
-                    rotation="vertical",
-                    labelpad=labelpad,
+                f"Total Installed Capacity ({unitconversion['units']})",
+                color="black",
+                rotation="vertical",
+                labelpad=labelpad,
             )
 
             Data_Table_Out = pd.concat(data_tables)

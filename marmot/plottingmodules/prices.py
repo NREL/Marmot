@@ -17,8 +17,15 @@ import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions, set_x_y_dimension
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+    set_facet_col_row_dimensions,
+    set_x_y_dimension,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     DataSavedInModule,
@@ -39,16 +46,18 @@ class Prices(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         color_list: list = ColorList().colors,
         ylabels: List[str] = None,
         xlabels: List[str] = None,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -62,7 +71,7 @@ class Prices(PlotDataStoreAndProcessor):
             ylabels (List[str], optional): y-axis labels for facet plots.
                 Defaults to None.
             xlabels (List[str], optional): x-axis labels for facet plots.
-                Defaults to None.        
+                Defaults to None.
         """
         # Instantiation of PlotDataStoreAndProcessor
         super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
@@ -104,8 +113,8 @@ class Prices(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
@@ -235,8 +244,8 @@ class Prices(PlotDataStoreAndProcessor):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
@@ -362,8 +371,8 @@ class Prices(PlotDataStoreAndProcessor):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
@@ -480,8 +489,8 @@ class Prices(PlotDataStoreAndProcessor):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, f"{agg}_Price", self.Scenarios)]
 
@@ -635,8 +644,8 @@ class Prices(PlotDataStoreAndProcessor):
         Returns:
             DataSavedInModule: DataSavedInModule exception.
         """
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
 
@@ -800,8 +809,8 @@ class Prices(PlotDataStoreAndProcessor):
         Returns:
             DataSavedInModule: DataSavedInModule exception.
         """
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "node_Price", self.Scenarios)]
 
@@ -856,8 +865,8 @@ class Prices(PlotDataStoreAndProcessor):
             p_hist.columns = p_hist.columns.str.replace("_", " ")
             data_out = p_hist.add_suffix(" ($/MWh)")
 
-            ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, 
-                multi_scenario=self.Scenarios
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
             )
             grid_size = ncols * nrows
             # Used to calculate any excess axis to delete

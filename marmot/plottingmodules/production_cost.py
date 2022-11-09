@@ -15,8 +15,13 @@ from typing import List
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -36,15 +41,17 @@ class SystemCosts(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         marmot_color_dict: dict = None,
         custom_xticklabels: List[str] = None,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -53,11 +60,11 @@ class SystemCosts(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
-            custom_xticklabels (List[str], optional): List of custom x labels to 
-                apply to barplots. Values will overwite existing ones. 
+            custom_xticklabels (List[str], optional): List of custom x labels to
+                apply to barplots. Values will overwite existing ones.
                 Defaults to None.
         """
         # Instantiation of PlotDataStoreAndProcessor
@@ -66,7 +73,9 @@ class SystemCosts(PlotDataStoreAndProcessor):
         self.Zones = Zones
         self.Scenarios = Scenarios
         if marmot_color_dict is None:
-            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
         self.custom_xticklabels = custom_xticklabels
@@ -93,8 +102,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -105,8 +114,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
@@ -259,8 +268,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -276,8 +285,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
         else:
             agg = "region"
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
@@ -447,8 +456,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -459,8 +468,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (False, "generator_FOM_Cost", self.Scenarios),
@@ -493,7 +502,9 @@ class SystemCosts(PlotDataStoreAndProcessor):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
+                        df = pd.DataFrame(
+                            data=[0], index=date_index, columns=["values"]
+                        )
                     else:
                         try:
                             df = df.xs(zone_input, level=self.AGG_BY)
@@ -642,8 +653,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
             custom_data_file_path (Path, optional): Path to custom data file to concat extra
                 data. Index and column format should be consistent with output data csv.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -655,8 +666,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios)]
 
@@ -700,7 +711,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     ).sum()
                 )
 
-            # Checks if gen_cost_out_chunks contains data, 
+            # Checks if gen_cost_out_chunks contains data,
             # if not skips zone and does not return a plot
             if not gen_cost_out_chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -716,7 +727,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 :, (total_systems_cost_out != 0).any(axis=0)
             ]
 
-            # Checks if total_systems_cost_out contains data, 
+            # Checks if total_systems_cost_out contains data,
             # if not skips zone and does not return a plot
             if total_systems_cost_out.empty:
                 outputs[zone_input] = MissingZoneData()
@@ -777,8 +788,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -794,8 +805,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Total_Generation_Cost", self.Scenarios),
@@ -932,8 +943,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -945,8 +956,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
         # Create Dictionary to hold Datframes for each scenario
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [(True, "generator_Total_Generation_Cost", self.Scenarios)]
 
@@ -988,7 +999,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     ).sum()
                 )
 
-            # Checks if gen_cost_out_chunks contains data, 
+            # Checks if gen_cost_out_chunks contains data,
             # if not skips zone and does not return a plot
             if not gen_cost_out_chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -1015,7 +1026,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 continue
             total_systems_cost_out.drop(scen_base, inplace=True)  # Drop base entry
 
-            # Checks if total_systems_cost_out contains data, 
+            # Checks if total_systems_cost_out contains data,
             # if not skips zone and does not return a plot
             if total_systems_cost_out.empty == True:
                 outputs[zone_input] = MissingZoneData()
@@ -1054,7 +1065,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
         scenario_groupby: str = "Scenario",
         **_,
     ):
-        """Creates stacked barplots of Total Generation Cost by by cost type 
+        """Creates stacked barplots of Total Generation Cost by by cost type
         (fuel, emission, start cost etc.) relative to a base scenario.
 
         Barplots show the change in total total generation cost relative to a base scenario.
@@ -1067,8 +1078,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
             end_date_range (str, optional): Defines a end date at which to represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -1079,8 +1090,8 @@ class SystemCosts(PlotDataStoreAndProcessor):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (False, "generator_FOM_Cost", self.Scenarios),
@@ -1113,7 +1124,9 @@ class SystemCosts(PlotDataStoreAndProcessor):
                         date_index = pd.date_range(
                             start="2010-01-01", periods=1, freq="H", name="timestamp"
                         )
-                        df = pd.DataFrame(data=[0], index=date_index, columns=["values"])
+                        df = pd.DataFrame(
+                            data=[0], index=date_index, columns=["values"]
+                        )
                     else:
                         try:
                             df = df.xs(zone_input, level=self.AGG_BY)
@@ -1153,7 +1166,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                     ).sum()
                 )
 
-            # Checks if gen_cost_out_chunks contains data, if not skips zone and does 
+            # Checks if gen_cost_out_chunks contains data, if not skips zone and does
             # not return a plot
             if not gen_cost_out_chunks:
                 outputs[zone_input] = MissingZoneData()
@@ -1186,7 +1199,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 :, (detailed_gen_cost_out != 0).any(axis=0)
             ]
 
-            # Checks if detailed_gen_cost_out contains data, 
+            # Checks if detailed_gen_cost_out contains data,
             # if not skips zone and does not return a plot
             if detailed_gen_cost_out.empty == True:
                 outputs[zone_input] = MissingZoneData()

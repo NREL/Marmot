@@ -14,8 +14,13 @@ from pathlib import Path
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
@@ -36,15 +41,17 @@ class Ramping(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         gen_categories: GenCategories = GenCategories(),
         color_list: list = ColorList().colors,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -53,7 +60,7 @@ class Ramping(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
                 into defined categories.
                 Deafults to GenCategories.
             color_list (list, optional): List of colors to apply to non-gen plots.
@@ -86,8 +93,8 @@ class Ramping(PlotDataStoreAndProcessor):
                 represent data to.
                 Defaults to None.
             scenario_groupby (str, optional): Specifies whether to group data by Scenario
-                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified 
-                from the timestamp and appeneded to the sceanrio name. This is useful when 
+                or Year-Sceanrio. If grouping by Year-Sceanrio the year will be identified
+                from the timestamp and appeneded to the sceanrio name. This is useful when
                 plotting data which covers multiple years such as ReEDS.
                 Defaults to Scenario.
 
@@ -253,8 +260,8 @@ class Ramping(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
@@ -393,11 +400,13 @@ class Ramping(PlotDataStoreAndProcessor):
             outputs[zone_input] = {"fig": fig2, "data_table": Data_Table_Out}
         return outputs
 
-    def count_starts_single_gen(self, 
-                                prop: str = None,
-                                start_date_range: str = None,
-                                end_date_range: str = None,
-                                **_,):
+    def count_starts_single_gen(
+        self,
+        prop: str = None,
+        start_date_range: str = None,
+        end_date_range: str = None,
+        **_,
+    ):
         """Counts the number of times a specified generator turns on during the simulation.
 
         Args:
@@ -436,9 +445,9 @@ class Ramping(PlotDataStoreAndProcessor):
             for scenario in self.Scenarios:
                 logger.info(f"Scenario = {str(scenario)}")
 
-                Gen: pd.DataFrame = self["generator_Generation"].get(scenario)             
+                Gen: pd.DataFrame = self["generator_Generation"].get(scenario)
                 try:
-                    Gen = Gen.xs(prop, level='gen_name')
+                    Gen = Gen.xs(prop, level="gen_name")
                 except KeyError:
                     logger.warning(f"{prop} has no generation in {zone_input}")
                     break
@@ -452,13 +461,13 @@ class Ramping(PlotDataStoreAndProcessor):
                         continue
 
                 starts = 0
-                for idx in range(len(Gen['values']) - 1):
+                for idx in range(len(Gen["values"]) - 1):
                     if (
-                        Gen['values'].iloc[idx] == 0
-                        and not Gen['values'].iloc[idx + 1] == 0
+                        Gen["values"].iloc[idx] == 0
+                        and not Gen["values"].iloc[idx + 1] == 0
                     ):
                         starts += 1
-                
+
                 cycles_df.loc[scenario, prop] = starts
 
             if cycles_df.empty == True:
@@ -466,9 +475,11 @@ class Ramping(PlotDataStoreAndProcessor):
                 continue
 
             cycles_df = cycles_df.fillna(0)
-            unitconversion = self.capacity_energy_unitconversion(cycles_df, self.Scenarios)
+            unitconversion = self.capacity_energy_unitconversion(
+                cycles_df, self.Scenarios
+            )
 
-            cycles_df = (cycles_df / unitconversion["divisor"])
+            cycles_df = cycles_df / unitconversion["divisor"]
             Data_Table_Out = cycles_df.add_suffix("starts")
 
             mplt = PlotLibrary()
@@ -481,7 +492,7 @@ class Ramping(PlotDataStoreAndProcessor):
                 rotation="vertical",
             )
 
-            #mplt.add_legend()
+            # mplt.add_legend()
             mplt.add_main_title(prop)
 
             outputs[zone_input] = {"fig": fig, "data_table": Data_Table_Out}

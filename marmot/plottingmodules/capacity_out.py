@@ -18,8 +18,15 @@ import marmot.utils.mconfig as mconfig
 
 from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_facet_col_row_dimensions
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, adjust_for_leapday
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+    set_facet_col_row_dimensions,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+    adjust_for_leapday,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     UnderDevelopment,
@@ -41,7 +48,8 @@ class CapacityOut(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
+    def __init__(
+        self,
         Zones: List[str],
         Scenarios: List[str],
         AGG_BY: str,
@@ -51,7 +59,8 @@ class CapacityOut(PlotDataStoreAndProcessor):
         gen_categories: GenCategories = GenCategories(),
         ylabels: List[str] = None,
         xlabels: List[str] = None,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -60,16 +69,16 @@ class CapacityOut(PlotDataStoreAndProcessor):
             ordered_gen (List[str]): Ordered list of generator technologies to plot,
                 order defines the generator technology position in stacked bar and area plots.
             marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
-            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies 
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
                 into defined categories.
                 Deafults to GenCategories.
-            marmot_color_dict (dict, optional): Dictionary of colors to use for 
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
                 generation technologies.
                 Defaults to None.
             ylabels (List[str], optional): y-axis labels for facet plots.
                 Defaults to None.
             xlabels (List[str], optional): x-axis labels for facet plots.
-                Defaults to None.        
+                Defaults to None.
         """
         # Instantiation of PlotDataStoreAndProcessor
         super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
@@ -77,7 +86,9 @@ class CapacityOut(PlotDataStoreAndProcessor):
         self.Zones = Zones
         self.Scenarios = Scenarios
         if marmot_color_dict is None:
-            self.marmot_color_dict = GeneratorColorDict.set_random_colors(self.ordered_gen).color_dict
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
         else:
             self.marmot_color_dict = marmot_color_dict
         self.gen_categories = gen_categories
@@ -111,8 +122,8 @@ class CapacityOut(PlotDataStoreAndProcessor):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, f"generator_Installed_Capacity{data_resolution}", self.Scenarios),
@@ -127,7 +138,9 @@ class CapacityOut(PlotDataStoreAndProcessor):
             return MissingInputData()
 
         # sets up x, y dimensions of plot
-        ncols, nrows = set_facet_col_row_dimensions(self.xlabels, self.ylabels, multi_scenario=self.Scenarios)
+        ncols, nrows = set_facet_col_row_dimensions(
+            self.xlabels, self.ylabels, multi_scenario=self.Scenarios
+        )
 
         grid_size = ncols * nrows
 
@@ -183,7 +196,9 @@ class CapacityOut(PlotDataStoreAndProcessor):
                 cap_out = self.df_process_gen_inputs(cap_out)
                 # Subset only thermal gen categories
                 thermal_gens = [
-                    therm for therm in self.gen_categories.thermal if therm in cap_out.columns
+                    therm
+                    for therm in self.gen_categories.thermal
+                    if therm in cap_out.columns
                 ]
                 cap_out = cap_out[thermal_gens]
 

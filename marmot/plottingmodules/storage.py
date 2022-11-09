@@ -13,15 +13,27 @@ from pathlib import Path
 import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.styles import ColorList
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor, GenCategories, set_x_y_dimension
-from marmot.plottingmodules.plotutils.timeseries_modifiers import set_timestamp_date_range, adjust_for_leapday, sort_duration
-from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, DataSavedInModule,
-    MissingZoneData)
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    PlotDataStoreAndProcessor,
+    GenCategories,
+    set_x_y_dimension,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+    adjust_for_leapday,
+    sort_duration,
+)
+from marmot.plottingmodules.plotutils.plot_exceptions import (
+    MissingInputData,
+    DataSavedInModule,
+    MissingZoneData,
+)
 from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
 
-logger = logging.getLogger('plotter.'+__name__)
+logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
-shift_leapday : bool = mconfig.parser("shift_leapday")
+shift_leapday: bool = mconfig.parser("shift_leapday")
+
 
 class Storage(PlotDataStoreAndProcessor):
     """Energy storage plots.
@@ -33,14 +45,16 @@ class Storage(PlotDataStoreAndProcessor):
     in creating figures.
     """
 
-    def __init__(self, 
-        Zones: List[str], 
-        Scenarios: List[str], 
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
         AGG_BY: str,
         ordered_gen: List[str],
         marmot_solutions_folder: Path,
         color_list: list = ColorList().colors,
-        **kwargs):
+        **kwargs,
+    ):
         """
         Args:
             Zones (List[str]): List of regions/zones to plot.
@@ -89,8 +103,8 @@ class Storage(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, "storage_Initial_Volume", self.Scenarios),
@@ -250,7 +264,7 @@ class Storage(PlotDataStoreAndProcessor):
                                 as well as duration curve or chronological time series.
             timezone (str, optional): The timezone to display on the x-axes.
                 Defaults to "".
-            prop (str): Used to pass in battery names. 
+            prop (str): Used to pass in battery names.
                 Input format should be a comma seperated string.
             start_date_range (str, optional): Defines a start date at which to represent data from.
                 Defaults to None.
@@ -260,15 +274,15 @@ class Storage(PlotDataStoreAndProcessor):
         Returns:
             dict: Dictionary containing the created plot and its data table.
         """
-        duration_curve=False
-        if 'duration_curve' in figure_name:
+        duration_curve = False
+        if "duration_curve" in figure_name:
             duration_curve = True
 
-        var = 'Generation'
-        var_name = 'Battery discharge'
-        if 'Load' in figure_name: 
-            var = 'Load'
-            var_name = 'Battery charging'
+        var = "Generation"
+        var_name = "Battery discharge"
+        if "Load" in figure_name:
+            var = "Load"
+            var_name = "Battery charging"
 
         if self.AGG_BY == "zone":
             agg = "zone"
@@ -277,8 +291,8 @@ class Storage(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, f"batterie_{var}", self.Scenarios),
@@ -290,14 +304,13 @@ class Storage(PlotDataStoreAndProcessor):
         if 1 in check_input_data:
             return MissingInputData()
 
-        #Select only lines specified in Marmot_plot_select.csv.
-        select_bats = [x.strip() for x in prop.split(",")]        
-        logger.info(f'Plotting only batteries specified in Marmot_plot_select.csv')
+        # Select only lines specified in Marmot_plot_select.csv.
+        select_bats = [x.strip() for x in prop.split(",")]
+        logger.info(f"Plotting only batteries specified in Marmot_plot_select.csv")
         logger.info(select_bats)
 
         xdim, ydim = set_x_y_dimension(len(select_bats))
-        mplt = PlotLibrary(ydim, xdim, squeeze=False,
-                            ravel_axs=True, sharey=True)
+        mplt = PlotLibrary(ydim, xdim, squeeze=False, ravel_axs=True, sharey=True)
         fig, axs = mplt.get_figure()
 
         data_tables = []
@@ -309,12 +322,12 @@ class Storage(PlotDataStoreAndProcessor):
                 logger.info(f"Scenario = {scenario}")
                 gen = self[f"batterie_{var}"].get(scenario)
                 try:
-                    gen = gen.xs(bat, level=f'battery_name')
+                    gen = gen.xs(bat, level=f"battery_name")
                 except KeyError:
                     logger.warning(f"{bat} not found in results.")
                     return MissingInputData()
 
-                gen = gen.droplevel(['units','category'])
+                gen = gen.droplevel(["units", "category"])
                 gen = gen.rename(columns={"values": scenario})
 
                 if shift_leapday:
@@ -330,13 +343,13 @@ class Storage(PlotDataStoreAndProcessor):
 
                 chunks_bat.append(gen)
 
-                #For output time series.csv
+                # For output time series.csv
                 gen_out = gen.rename(columns={scenario: f"battery {var}"})
-                scenario_names = pd.Series([scenario] * len(gen_out), name='Scenario')
-                gen_name = pd.Series([bat] * len(gen_out), name='battery')
+                scenario_names = pd.Series([scenario] * len(gen_out), name="Scenario")
+                gen_name = pd.Series([bat] * len(gen_out), name="battery")
                 gen_out = gen_out.set_index([scenario_names, gen_name], append=True)
 
-                #print(gen_out)
+                # print(gen_out)
                 data_tables.append(gen_out)
 
             if chunks_bat:
@@ -349,9 +362,7 @@ class Storage(PlotDataStoreAndProcessor):
                 unitconversion = self.capacity_energy_unitconversion(
                     gen_out, self.Scenarios, sum_values=False
                 )
-            gen_out = (
-                gen_out / unitconversion["divisor"]
-            )
+            gen_out = gen_out / unitconversion["divisor"]
 
             legend_order = []
             # Plot line flow
@@ -381,18 +392,34 @@ class Storage(PlotDataStoreAndProcessor):
         data_table_out = pd.concat(data_tables, axis=0) / unitconversion["divisor"]
         data_table_out = data_table_out.add_suffix(f" ({unitconversion['units']})")
 
-        #legend_order.extend(["Export Limit", "Import Limit"])
+        # legend_order.extend(["Export Limit", "Import Limit"])
         mplt.add_legend(sort_by=legend_order)
-        axs[0].set_ylim(top = 83)
-        #axs[0].set_xlim(right = 2000)
-        plt.ylabel(f"{var_name} ({unitconversion['units']})", color='black', rotation='vertical', labelpad=30)
+        axs[0].set_ylim(top=83)
+        # axs[0].set_xlim(right = 2000)
+        plt.ylabel(
+            f"{var_name} ({unitconversion['units']})",
+            color="black",
+            rotation="vertical",
+            labelpad=30,
+        )
         # plt.tight_layout()
         if duration_curve:
-            plt.xlabel("Hour of the year", color="black", rotation="horizontal", labelpad=20)
-        fn_suffix = '_duration_curve' if duration_curve else ''
-        fig.savefig(self.figure_folder.joinpath(f"{self.AGG_BY}_storage", f"{figure_name}{fn_suffix}.svg"), 
-                    dpi=600, bbox_inches='tight')
-        data_table_out.to_csv(self.figure_folder.joinpath(f"{self.AGG_BY}_storage", f"{figure_name}{fn_suffix}.csv"))
+            plt.xlabel(
+                "Hour of the year", color="black", rotation="horizontal", labelpad=20
+            )
+        fn_suffix = "_duration_curve" if duration_curve else ""
+        fig.savefig(
+            self.figure_folder.joinpath(
+                f"{self.AGG_BY}_storage", f"{figure_name}{fn_suffix}.svg"
+            ),
+            dpi=600,
+            bbox_inches="tight",
+        )
+        data_table_out.to_csv(
+            self.figure_folder.joinpath(
+                f"{self.AGG_BY}_storage", f"{figure_name}{fn_suffix}.csv"
+            )
+        )
 
         outputs = DataSavedInModule()
         return outputs

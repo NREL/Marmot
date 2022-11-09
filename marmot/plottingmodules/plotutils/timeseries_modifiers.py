@@ -9,6 +9,7 @@ from typing import Tuple, Union, List
 
 import numpy as np
 import pandas as pd
+
 logger = logging.getLogger("plotter." + __name__)
 
 
@@ -68,6 +69,7 @@ def set_timestamp_date_range(
             )
         return df
 
+
 def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
     """Detects the interval spacing of timeseries data.
 
@@ -86,9 +88,10 @@ def get_sub_hour_interval_count(df: pd.DataFrame) -> int:
     # If intervals are greater than 1 hour, returns 1
     return max(1, intervals_per_hour)
 
+
 def adjust_for_leapday(self, df: pd.DataFrame) -> pd.DataFrame:
     """Shifts dataframe ahead by one day.
-    
+
     Use if a non-leap year time series is modeled with a leap year time index.
 
     Modeled year must be included in the scenario parent directory name.
@@ -101,8 +104,7 @@ def adjust_for_leapday(self, df: pd.DataFrame) -> pd.DataFrame:
     if (
         "2008" not in self.processed_hdf5_folder
         and "2012" not in self.processed_hdf5_folder
-        and df.index.get_level_values("timestamp")[0]
-        > dt.datetime(2024, 2, 28, 0, 0)
+        and df.index.get_level_values("timestamp")[0] > dt.datetime(2024, 2, 28, 0, 0)
     ):
 
         df.index = df.index.set_levels(
@@ -110,6 +112,7 @@ def adjust_for_leapday(self, df: pd.DataFrame) -> pd.DataFrame:
             level="timestamp",
         )
         return df
+
 
 def sort_duration(df: pd.DataFrame, col: str) -> pd.DataFrame:
     """Converts a dataframe time series into a duration curve.

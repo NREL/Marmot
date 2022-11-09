@@ -80,7 +80,7 @@ class MarmotFormat(SetupLogger):
                 to rename emissions types.
                 Defaults to pd.DataFrame().
             **kwargs
-                These parameters will be passed to the 
+                These parameters will be passed to the
                 marmot.utils.loggersetup.SetupLogger class.
         """
         super().__init__("formatter", **kwargs)  # Instantiation of SetupLogger
@@ -192,7 +192,9 @@ class MarmotFormat(SetupLogger):
                 "A required module was not found to " f"process {sim_model} results"
             )
             self.logger.error(process_class)
-            raise ModuleNotFoundError("A required module was not found to " f"process {sim_model} results")
+            raise ModuleNotFoundError(
+                "A required module was not found to " f"process {sim_model} results"
+            )
 
         self.logger.info(f"#### Processing {scen_name} {sim_model} " "Results ####")
 
@@ -320,7 +322,9 @@ class MarmotFormat(SetupLogger):
                             save_attempt += 1
 
                     # Calculate any extra properties
-                    extra_prop_functions = extraprops_init.get_extra_properties(property_key_name)
+                    extra_prop_functions = extraprops_init.get_extra_properties(
+                        property_key_name
+                    )
                     if extra_prop_functions:
 
                         for prop_function_tup in extra_prop_functions:
@@ -344,9 +348,11 @@ class MarmotFormat(SetupLogger):
                                 else:
                                     self.logger.warning(f"{prop_name} was not saved")
                                     continue
-                                
+
                             # Run again to check for properties based of new properties
-                            extra2_prop_functions = extraprops_init.get_extra_properties(prop_name)
+                            extra2_prop_functions = (
+                                extraprops_init.get_extra_properties(prop_name)
+                            )
                             if extra2_prop_functions:
 
                                 for prop_function_tup2 in extra2_prop_functions:
