@@ -26,8 +26,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 logger = logging.getLogger("plotter." + __name__)
 shift_leapday: bool = mconfig.parser("shift_leapday")
 plot_data_settings: dict = mconfig.parser("plot_data")
-load_legend_names: dict = mconfig.parser("load_legend_names")
-
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
 class TotalGeneration(PlotDataStoreAndProcessor):
     """Total generation plots.
@@ -87,7 +86,6 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         self.xlabels = xlabels
         self.custom_xticklabels = custom_xticklabels
 
-        self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
     def total_gen(
         self,
@@ -128,7 +126,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
-            (False, f"generator_{self.curtailment_prop}", self.Scenarios),
+            (False, f"generator_{curtailment_prop}", self.Scenarios),
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
             (False, f"{agg}_Unserved_Energy", self.Scenarios),
@@ -318,7 +316,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
-            (False, f"generator_{self.curtailment_prop}", self.Scenarios),
+            (False, f"generator_{curtailment_prop}", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -543,7 +541,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
-            (False, f"generator_{self.curtailment_prop}", self.Scenarios),
+            (False, f"generator_{curtailment_prop}", self.Scenarios),
             (False, f"{agg}_Load", self.Scenarios),
             (False, f"{agg}_Demand", self.Scenarios),
         ]
@@ -809,7 +807,7 @@ class TotalGeneration(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
-            (False, f"generator_{self.curtailment_prop}", self.Scenarios),
+            (False, f"generator_{curtailment_prop}", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary

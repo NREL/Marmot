@@ -29,8 +29,11 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (MissingInputData, 
             UnderDevelopment, InputSheetError, MissingMetaData, UnsupportedAggregation, MissingZoneData)
 
 logger = logging.getLogger('plotter.'+__name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 shift_leapday : bool = mconfig.parser("shift_leapday")
+xdimension = mconfig.parser("figure_size","xdimension")
+ydimension = mconfig.parser("figure_size","ydimension")
+
 
 class Transmission(PlotDataStoreAndProcessor):
     """System transmission plots.
@@ -100,7 +103,6 @@ class Transmission(PlotDataStoreAndProcessor):
         self.color_list = color_list
         self.Region_Mapping = Region_Mapping
 
-        self.font_defaults = mconfig.parser("font_settings")
         self.meta = MetaData(self.processed_hdf5_folder,
                             Region_Mapping=self.Region_Mapping)
 
@@ -1888,8 +1890,6 @@ class Transmission(PlotDataStoreAndProcessor):
             
             grouped_import_lims = import_lim.groupby(['line_name']).mean().reset_index()
             grouped_export_lims = export_lim.groupby(['line_name']).mean().reset_index()
-            xdimension = mconfig.parser("figure_size","xdimension")
-            ydimension = mconfig.parser("figure_size","ydimension")
 
             #convert values to appropriate units?
             unitconversion = self.capacity_energy_unitconversion(max(grouped_import_lims["values"].values.max(), grouped_export_lims["values"].values.max()), 
@@ -1952,7 +1952,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 axs[0].tick_params(axis='y', which='major', length=5, width=1)
                 axs[0].tick_params(axis='x', which='major', length=5, width=1)
                 axs[0].get_legend().remove()
-                if mconfig.parser("plot_title_as_region"):
+                if plot_data_settings["plot_title_as_region"]:
                     axs[0].set_title(zone_input)
                 
                 # right panel
@@ -1968,7 +1968,7 @@ class Transmission(PlotDataStoreAndProcessor):
                 axs[1].tick_params(axis='y', which='major', length=5, width=1)
                 axs[1].tick_params(axis='x', which='major', length=5, width=1)
 
-                if mconfig.parser("plot_title_as_region"):
+                if plot_data_settings["plot_title_as_region"]:
                     axs[0].set_title(zone_input)
 
                 # create custom line legend

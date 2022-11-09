@@ -22,8 +22,8 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
-
+plot_data_settings: dict = mconfig.parser("plot_data")
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
 class Sensitivities(PlotDataStoreAndProcessor):
     """System sensitivity plots
@@ -70,7 +70,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
         else:
             self.marmot_color_dict = marmot_color_dict
         self.Region_Mapping = Region_Mapping
-        self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
+
 
     def _process_ts(self, df, zone_input):
         oz = df.xs(zone_input, level=self.AGG_BY)
@@ -133,7 +133,7 @@ class Sensitivities(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenario_Diff),
-            (True, f"generator_{self.curtailment_prop}", self.Scenario_Diff),
+            (True, f"generator_{curtailment_prop}", self.Scenario_Diff),
             (True, "region_Net_Interchange", self.Scenario_Diff),
         ]
 
@@ -176,10 +176,10 @@ class Sensitivities(PlotDataStoreAndProcessor):
         scen_CC = scen.xs("Gas-CC", level="tech")
 
         curt_bc = adjust_for_leapday(
-            self[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[0])
+            self[f"generator_{curtailment_prop}"].get(self.Scenario_Diff[0])
         )
         curt_scen = adjust_for_leapday(
-            self[f"generator_{self.curtailment_prop}"].get(self.Scenario_Diff[1])
+            self[f"generator_{curtailment_prop}"].get(self.Scenario_Diff[1])
         )
         curt_diff_all = curt_scen - curt_bc
 

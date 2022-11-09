@@ -22,7 +22,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingZoneData,
 )
 
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 logger = logging.getLogger("plotter." + __name__)
 
 

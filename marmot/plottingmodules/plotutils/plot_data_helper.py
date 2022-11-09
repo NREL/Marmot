@@ -21,7 +21,7 @@ from marmot.plottingmodules.plotutils.timeseries_modifiers import adjust_for_lea
 
 logger = logging.getLogger("plotter." + __name__)
 shift_leapday: bool = mconfig.parser("shift_leapday")
-curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
 @dataclass
 class GenCategories:

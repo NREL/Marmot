@@ -23,9 +23,9 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
-
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
 class GenerationUnStack(PlotDataStoreAndProcessor):
     """Timeseries generation line plots.
@@ -81,7 +81,6 @@ class GenerationUnStack(PlotDataStoreAndProcessor):
         self.ylabels = ylabels
         self.xlabels = xlabels
 
-        self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
     def gen_unstack(
         self,
@@ -148,7 +147,7 @@ class GenerationUnStack(PlotDataStoreAndProcessor):
                 (True, f"generator_Generation{data_resolution}", scenario_list),
                 (
                     False,
-                    f"generator_{self.curtailment_prop}{data_resolution}",
+                    f"generator_{curtailment_prop}{data_resolution}",
                     scenario_list,
                 ),
                 (False, f"{agg}_Load{data_resolution}", scenario_list),

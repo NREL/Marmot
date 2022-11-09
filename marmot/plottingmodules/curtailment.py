@@ -25,8 +25,8 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
-
+plot_data_settings: dict = mconfig.parser("plot_data")
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
 class Curtailment(PlotDataStoreAndProcessor):
     """Device curtailment plots.
@@ -87,7 +87,6 @@ class Curtailment(PlotDataStoreAndProcessor):
         self.color_list = color_list
         self.marker_style = marker_style
 
-        self.curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
     def curt_duration_curve(
         self,
@@ -119,7 +118,7 @@ class Curtailment(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and 
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
-        properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios)]
+        properties = [(True, f"generator_{curtailment_prop}", self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
@@ -137,7 +136,7 @@ class Curtailment(PlotDataStoreAndProcessor):
             for scenario in self.Scenarios:
                 logger.info(f"Scenario = {scenario}")
 
-                re_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                re_curt = self[f"generator_{curtailment_prop}"].get(scenario)
 
                 # Timeseries [MW] RE curtailment [MWh]
                 try:  # Check for regions missing all generation.
@@ -148,7 +147,7 @@ class Curtailment(PlotDataStoreAndProcessor):
 
                 re_curt = self.df_process_gen_inputs(re_curt)
                 # If using Marmot's curtailment property
-                if self.curtailment_prop == "Curtailment":
+                if curtailment_prop == "Curtailment":
                     re_curt = self.assign_curtailment_techs(re_curt, self.gen_categories.vre)
 
                 # Timeseries [MW] PV curtailment [MWh]
@@ -303,7 +302,7 @@ class Curtailment(PlotDataStoreAndProcessor):
         properties = [
             (True, "generator_Generation", self.Scenarios),
             (True, "generator_Available_Capacity", self.Scenarios),
-            (True, f"generator_{self.curtailment_prop}", self.Scenarios),
+            (True, f"generator_{curtailment_prop}", self.Scenarios),
             (True, "generator_Total_Generation_Cost", self.Scenarios),
         ]
 
@@ -332,7 +331,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
                 avail_gen = avail_gen.xs(zone_input, level=self.AGG_BY)
 
-                re_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                re_curt = self[f"generator_{curtailment_prop}"].get(scenario)
                 try:
                     re_curt = re_curt.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
@@ -341,7 +340,7 @@ class Curtailment(PlotDataStoreAndProcessor):
 
                 re_curt = self.df_process_gen_inputs(re_curt)
                 # If using Marmot's curtailment property
-                if self.curtailment_prop == "Curtailment":
+                if curtailment_prop == "Curtailment":
                     re_curt = self.assign_curtailment_techs(re_curt, self.gen_categories.vre)
 
                 # Total generation cost
@@ -591,7 +590,7 @@ class Curtailment(PlotDataStoreAndProcessor):
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
         properties = [
-            (True, f"generator_{self.curtailment_prop}", self.Scenarios),
+            (True, f"generator_{curtailment_prop}", self.Scenarios),
             (False, "generator_Available_Capacity", self.Scenarios),
         ]
 
@@ -611,7 +610,7 @@ class Curtailment(PlotDataStoreAndProcessor):
             for scenario in self.Scenarios:
                 logger.info(f"Scenario = {scenario}")
 
-                vre_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                vre_curt = self[f"generator_{curtailment_prop}"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
@@ -620,12 +619,12 @@ class Curtailment(PlotDataStoreAndProcessor):
 
                 vre_curt = self.df_process_gen_inputs(vre_curt)
                 # If using Marmot's curtailment property
-                if self.curtailment_prop == "Curtailment":
+                if curtailment_prop == "Curtailment":
                     vre_curt = self.assign_curtailment_techs(vre_curt, self.gen_categories.vre)
 
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
                 if avail_gen.empty:
-                    avail_gen = self[f"generator_{self.curtailment_prop}"][
+                    avail_gen = self[f"generator_{curtailment_prop}"][
                         scenario
                     ].copy()
                     avail_gen.iloc[:, 0] = 0
@@ -637,7 +636,7 @@ class Curtailment(PlotDataStoreAndProcessor):
 
                 avail_gen = self.df_process_gen_inputs(avail_gen)
                 # If using Marmot's curtailment property
-                if self.curtailment_prop == "Curtailment":
+                if curtailment_prop == "Curtailment":
                     avail_gen = self.assign_curtailment_techs(avail_gen, self.gen_categories.vre)
 
                 if pd.notna(start_date_range):
@@ -774,7 +773,7 @@ class Curtailment(PlotDataStoreAndProcessor):
 
         outputs: dict = {}
         properties = [
-            (True, f"generator_{self.curtailment_prop}", self.Scenarios),
+            (True, f"generator_{curtailment_prop}", self.Scenarios),
             (True, "generator_Available_Capacity", self.Scenarios),
         ]
 
@@ -804,7 +803,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                 vre_collection = {}
                 avail_vre_collection = {}
 
-                vre_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                vre_curt = self[f"generator_{curtailment_prop}"].get(scenario)
                 try:
                     vre_curt = vre_curt.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
@@ -812,7 +811,7 @@ class Curtailment(PlotDataStoreAndProcessor):
                     continue
                 vre_curt = self.df_process_gen_inputs(vre_curt)
                 # If using Marmot's curtailment property
-                if self.curtailment_prop == "Curtailment":
+                if curtailment_prop == "Curtailment":
                     vre_curt = self.assign_curtailment_techs(vre_curt, self.gen_categories.vre)
 
                 avail_gen = self["generator_Available_Capacity"].get(scenario)
@@ -824,7 +823,7 @@ class Curtailment(PlotDataStoreAndProcessor):
 
                 avail_gen = self.df_process_gen_inputs(avail_gen)
                 # If using Marmot's curtailment property
-                if self.curtailment_prop == "Curtailment":
+                if curtailment_prop == "Curtailment":
                     avail_gen = self.assign_curtailment_techs(avail_gen, self.gen_categories.vre)
 
                 for vre_type in self.gen_categories.vre:
@@ -979,7 +978,7 @@ class Curtailment(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, "generator_Generation", self.Scenarios),
-            (True, f"generator_{self.curtailment_prop}", self.Scenarios),
+            (True, f"generator_{curtailment_prop}", self.Scenarios),
         ]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
@@ -1000,7 +999,7 @@ class Curtailment(PlotDataStoreAndProcessor):
             scen_idx += 1
             logger.info(f"Scenario = {scenario}")
 
-            vre_curt: pd.DataFrame = self[f"generator_{self.curtailment_prop}"].get(
+            vre_curt: pd.DataFrame = self[f"generator_{curtailment_prop}"].get(
                 scenario
             )
             gen: pd.DataFrame = self["generator_Generation"].get(scenario)
@@ -1186,7 +1185,7 @@ class Curtailment(PlotDataStoreAndProcessor):
         # List of properties needed by the plot, properties are a set of tuples and 
         # contain 3 parts: required True/False, property name and scenarios required, 
         # scenarios must be a list.
-        properties = [(True, f"generator_{self.curtailment_prop}", self.Scenarios)]
+        properties = [(True, f"generator_{curtailment_prop}", self.Scenarios)]
 
         # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
@@ -1202,7 +1201,7 @@ class Curtailment(PlotDataStoreAndProcessor):
             for scenario in self.Scenarios:
                 logger.info(f"Scenario = {scenario}")
 
-                re_curt = self[f"generator_{self.curtailment_prop}"].get(scenario)
+                re_curt = self[f"generator_{curtailment_prop}"].get(scenario)
                 try:
                     re_curt = re_curt.xs(zone_input, level=self.AGG_BY)
                 except KeyError:
@@ -1211,7 +1210,7 @@ class Curtailment(PlotDataStoreAndProcessor):
 
                 re_curt = self.df_process_gen_inputs(re_curt)
                 # If using Marmot's curtailment property
-                if self.curtailment_prop == "Curtailment":
+                if curtailment_prop == "Curtailment":
                     re_curt = self.assign_curtailment_techs(re_curt, self.gen_categories.vre)
                 # Sum across technologies
                 re_curt = re_curt.sum(axis=1)

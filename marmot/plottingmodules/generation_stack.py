@@ -29,7 +29,7 @@ logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
 load_legend_names: dict = mconfig.parser("load_legend_names")
-
+curtailment_prop: str = mconfig.parser("plot_data", "curtailment_property")
 
 class GenerationStack(PlotDataStoreAndProcessor):
     """Timeseries generation stacked area plots.
@@ -93,7 +93,6 @@ class GenerationStack(PlotDataStoreAndProcessor):
         else:
             self.Scenario_Diff = Scenario_Diff
 
-        self.curtailment_prop = mconfig.parser("plot_data", "curtailment_property")
 
     def committed_stack(
         self,
@@ -349,7 +348,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
         # scenarios must be a list.
         properties = [
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
-            (False,f"generator_{self.curtailment_prop}{data_resolution}",self.Scenarios),
+            (False,f"generator_{curtailment_prop}{data_resolution}",self.Scenarios),
             (False, f"{agg}_Load{data_resolution}", self.Scenarios),
             (False, f"{agg}_Demand{data_resolution}", self.Scenarios),
             (False, f"{agg}_Unserved_Energy{data_resolution}", self.Scenarios),
@@ -493,7 +492,7 @@ class GenerationStack(PlotDataStoreAndProcessor):
                         stacked_gen_df = stacked_gen_df.loc[start_date:end_date]
                         extra_plot_data = extra_plot_data.loc[start_date:end_date]
 
-                if mconfig.parser("plot_data", "include_stackplot_net_imports"):
+                if plot_data_settings["include_stackplot_net_imports"]:
                     stacked_gen_df = self.include_net_imports(
                         stacked_gen_df,
                         extra_plot_data["Total Load"],

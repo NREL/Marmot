@@ -23,7 +23,9 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
+xdimension: int = mconfig.parser("figure_size", "xdimension")
+ydimension: int = mconfig.parser("figure_size", "ydimension")
 
 
 class CapacityFactor(PlotDataStoreAndProcessor):
@@ -66,9 +68,6 @@ class CapacityFactor(PlotDataStoreAndProcessor):
         self.Scenarios = Scenarios
         self.gen_categories = gen_categories
         self.color_list = color_list
-
-        self.x = mconfig.parser("figure_size", "xdimension")
-        self.y = mconfig.parser("figure_size", "ydimension")
 
     def avg_output_when_committed(
         self,
@@ -341,7 +340,7 @@ class CapacityFactor(PlotDataStoreAndProcessor):
 
             Data_Table_Out = CF_all_scenarios.T
 
-            mplt = PlotLibrary(figsize=(self.x * 1.5, self.y * 1.5))
+            mplt = PlotLibrary(figsize=(xdimension * 1.5, ydimension * 1.5))
             fig, ax = mplt.get_figure()
 
             mplt.barplot(
@@ -477,7 +476,7 @@ class CapacityFactor(PlotDataStoreAndProcessor):
 
             Data_Table_Out = time_at_min.T
 
-            mplt = PlotLibrary(figsize=(self.x * 1.5, self.y * 1.5))
+            mplt = PlotLibrary(figsize=(xdimension * 1.5, ydimension * 1.5))
             fig, ax = mplt.get_figure()
 
             mplt.barplot(

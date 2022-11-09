@@ -28,7 +28,7 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
 )
 
 logger = logging.getLogger("plotter." + __name__)
-plot_data_settings = mconfig.parser("plot_data")
+plot_data_settings: dict = mconfig.parser("plot_data")
 
 
 def df_process_gen_ind_inputs(df, self):
