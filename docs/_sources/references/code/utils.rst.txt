@@ -14,6 +14,9 @@ Utilities
 Utility classes and functions needed by Marmot.
 Includes things such as logger setup and config file parsers.
 
+Output Logs
+~~~~~~~~~~~~~~
+
 .. currentmodule:: marmot.utils.loggersetup
 .. autosummary::
    :toctree: _autosummary
@@ -21,6 +24,9 @@ Includes things such as logger setup and config file parsers.
    :recursive:
 
    SetupLogger
+
+Definitions and Configuration
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: marmot.utils
 .. autosummary::
@@ -30,7 +36,16 @@ Includes things such as logger setup and config file parsers.
 
    definitions
 
-.. versionadded:: 0.10.0
+.. currentmodule:: marmot.utils
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-module-template.rst
+   :recursive:
+
+   mconfig
+
+Data Input/Output
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: marmot.utils
 .. autosummary::
@@ -40,13 +55,22 @@ Includes things such as logger setup and config file parsers.
 
    dataio
 
+
+Error and Exception Classes
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: marmot.utils.error_handler
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :recursive:
+
+   MissingH5PLEXOSDataError
+   PropertyNotFound
+   ConfigFileReadError
+   ReEDSColumnLengthError
+   ReEDSYearTypeConvertError
+
 .. versionadded:: 0.11.0
 
 
-.. currentmodule:: marmot.utils
-.. autosummary::
-   :toctree: _autosummary
-   :template: custom-module-template.rst
-   :recursive:
-
-   mconfig

@@ -40,7 +40,7 @@
     <script src="../../_static/doctools.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html" />
+    <link rel="next" title="marmot.plottingmodules.plotutils.plot_library.SetupSubplot" href="_autosummary/marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html" />
     <link rel="prev" title="marmot.plottingmodules.utilization_factor.UtilizationFactor" href="_autosummary/marmot.plottingmodules.utilization_factor.UtilizationFactor.html" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="docsearch:language" content="None">
@@ -477,11 +477,6 @@
   </label>
   <ul>
    <li class="toctree-l2">
-    <a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html">
-     marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor
-    </a>
-   </li>
-   <li class="toctree-l2">
     <a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html">
      marmot.plottingmodules.plotutils.plot_library.SetupSubplot
     </a>
@@ -489,6 +484,16 @@
    <li class="toctree-l2">
     <a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_library.PlotLibrary.html">
      marmot.plottingmodules.plotutils.plot_library.PlotLibrary
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html">
+     marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.GenCategories.html">
+     marmot.plottingmodules.plotutils.plot_data_helper.GenCategories
     </a>
    </li>
    <li class="toctree-l2 has-children">
@@ -647,43 +652,11 @@
     </ul>
    </li>
    <li class="toctree-l2 has-children">
-    <a class="reference internal" href="_autosummary/marmot.utils.dataio.html">
-     marmot.utils.dataio
-    </a>
-    <input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/>
-    <label for="toctree-checkbox-14">
-     <i class="fas fa-chevron-down">
-     </i>
-    </label>
-    <ul>
-     <li class="toctree-l3">
-      <a class="reference internal" href="_autosummary/marmot.utils.dataio.read_csv_property_file.html">
-       marmot.utils.dataio.read_csv_property_file
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="_autosummary/marmot.utils.dataio.read_processed_h5file.html">
-       marmot.utils.dataio.read_processed_h5file
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="_autosummary/marmot.utils.dataio.save_to_h5.html">
-       marmot.utils.dataio.save_to_h5
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="_autosummary/marmot.utils.dataio.write_metadata_to_h5.html">
-       marmot.utils.dataio.write_metadata_to_h5
-      </a>
-     </li>
-    </ul>
-   </li>
-   <li class="toctree-l2 has-children">
     <a class="reference internal" href="_autosummary/marmot.utils.mconfig.html">
      marmot.utils.mconfig
     </a>
-    <input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/>
-    <label for="toctree-checkbox-15">
+    <input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/>
+    <label for="toctree-checkbox-14">
      <i class="fas fa-chevron-down">
      </i>
     </label>
@@ -710,6 +683,63 @@
      </li>
     </ul>
    </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="_autosummary/marmot.utils.dataio.html">
+     marmot.utils.dataio
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/>
+    <label for="toctree-checkbox-15">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="_autosummary/marmot.utils.dataio.read_csv_property_file.html">
+       marmot.utils.dataio.read_csv_property_file
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="_autosummary/marmot.utils.dataio.read_processed_h5file.html">
+       marmot.utils.dataio.read_processed_h5file
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="_autosummary/marmot.utils.dataio.save_to_h5.html">
+       marmot.utils.dataio.save_to_h5
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="_autosummary/marmot.utils.dataio.write_metadata_to_h5.html">
+       marmot.utils.dataio.write_metadata_to_h5
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.utils.error_handler.MissingH5PLEXOSDataError.html">
+     marmot.utils.error_handler.MissingH5PLEXOSDataError
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.utils.error_handler.PropertyNotFound.html">
+     marmot.utils.error_handler.PropertyNotFound
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.utils.error_handler.ConfigFileReadError.html">
+     marmot.utils.error_handler.ConfigFileReadError
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.utils.error_handler.ReEDSColumnLengthError.html">
+     marmot.utils.error_handler.ReEDSColumnLengthError
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="_autosummary/marmot.utils.error_handler.ReEDSYearTypeConvertError.html">
+     marmot.utils.error_handler.ReEDSYearTypeConvertError
+    </a>
+   </li>
   </ul>
  </li>
 </ul>
@@ -730,9 +760,36 @@
     
     <div class="toc-item">
       
+<div class="tocsection onthispage mt-5 pt-1 pb-3">
+    <i class="fas fa-list"></i> On this page
+</div>
 
 <nav id="bd-toc-nav">
-    
+    <ul class="visible nav section-nav flex-column">
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#plotting-engines">
+   Plotting Engines
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#data-storage-and-processing">
+   Data Storage and Processing
+  </a>
+  <ul class="nav section-nav flex-column">
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#plot-design">
+   Plot Design
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#plot-exceptions">
+   Plot Exceptions
+  </a>
+ </li>
+</ul>
+
 </nav>
     </div>
     
@@ -758,17 +815,8 @@
 </script><section id="plot-utilities">
 <h1>Plot Utilities<a class="headerlink" href="#plot-utilities" title="Permalink to this headline">#</a></h1>
 <p>Classes to assist in creating plots. Used extensively by the Plot classes.</p>
-<table class="autosummary longtable table autosummary">
-<colgroup>
-<col style="width: 10%" />
-<col style="width: 90%" />
-</colgroup>
-<tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PlotDataStoreAndProcessor</span></code></a>(AGG_BY, ...[, ...])</p></td>
-<td><p>Methods used to assist with the creation of Marmot plots</p></td>
-</tr>
-</tbody>
-</table>
+<section id="plotting-engines">
+<h2>Plotting Engines<a class="headerlink" href="#plotting-engines" title="Permalink to this headline">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
@@ -783,6 +831,23 @@
 </tr>
 </tbody>
 </table>
+</section>
+<section id="data-storage-and-processing">
+<h2>Data Storage and Processing<a class="headerlink" href="#data-storage-and-processing" title="Permalink to this headline">#</a></h2>
+<table class="autosummary longtable table autosummary">
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 90%" />
+</colgroup>
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html#marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor" title="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">PlotDataStoreAndProcessor</span></code></a>(AGG_BY, ...[, ...])</p></td>
+<td><p>Methods used to assist with the creation of Marmot plots</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.GenCategories.html#marmot.plottingmodules.plotutils.plot_data_helper.GenCategories" title="marmot.plottingmodules.plotutils.plot_data_helper.GenCategories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GenCategories</span></code></a>(vre, pv, re, thermal)</p></td>
+<td><p>Defines various generator categories.</p></td>
+</tr>
+</tbody>
+</table>
 <table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
@@ -794,6 +859,9 @@
 </tr>
 </tbody>
 </table>
+</section>
+<section id="plot-design">
+<h2>Plot Design<a class="headerlink" href="#plot-design" title="Permalink to this headline">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
@@ -808,6 +876,9 @@
 <div class="versionadded">
 <p><span class="versionmodified added">New in version 0.11.0.</span></p>
 </div>
+</section>
+<section id="plot-exceptions">
+<h2>Plot Exceptions<a class="headerlink" href="#plot-exceptions" title="Permalink to this headline">#</a></h2>
 <table class="autosummary longtable table autosummary">
 <colgroup>
 <col style="width: 10%" />
@@ -819,6 +890,7 @@
 </tr>
 </tbody>
 </table>
+</section>
 </section>
 
 
@@ -836,10 +908,10 @@
           <p class="prev-next-title">marmot.plottingmodules.utilization_factor.UtilizationFactor</p>
       </div>
   </a>
-  <a class='right-next' id="next-link" href="_autosummary/marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html" title="next page">
+  <a class='right-next' id="next-link" href="_autosummary/marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html" title="next page">
   <div class="prev-next-info">
       <p class="prev-next-subtitle">next</p>
-      <p class="prev-next-title">marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor</p>
+      <p class="prev-next-title">marmot.plottingmodules.plotutils.plot_library.SetupSubplot</p>
   </div>
   <i class="fas fa-angle-right"></i>
   </a>

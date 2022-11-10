@@ -477,11 +477,6 @@
   </label>
   <ul>
    <li class="toctree-l2">
-    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html">
-     marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor
-    </a>
-   </li>
-   <li class="toctree-l2">
     <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.SetupSubplot.html">
      marmot.plottingmodules.plotutils.plot_library.SetupSubplot
     </a>
@@ -489,6 +484,16 @@
    <li class="toctree-l2">
     <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_library.PlotLibrary.html">
      marmot.plottingmodules.plotutils.plot_library.PlotLibrary
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor.html">
+     marmot.plottingmodules.plotutils.plot_data_helper.PlotDataStoreAndProcessor
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.plottingmodules.plotutils.plot_data_helper.GenCategories.html">
+     marmot.plottingmodules.plotutils.plot_data_helper.GenCategories
     </a>
    </li>
    <li class="toctree-l2 has-children">
@@ -647,11 +652,43 @@
     </ul>
    </li>
    <li class="toctree-l2 has-children">
-    <a class="reference internal" href="marmot.utils.dataio.html">
-     marmot.utils.dataio
+    <a class="reference internal" href="marmot.utils.mconfig.html">
+     marmot.utils.mconfig
     </a>
     <input class="toctree-checkbox" id="toctree-checkbox-14" name="toctree-checkbox-14" type="checkbox"/>
     <label for="toctree-checkbox-14">
+     <i class="fas fa-chevron-down">
+     </i>
+    </label>
+    <ul>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.createConfig.html">
+       marmot.utils.mconfig.createConfig
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.edit_value.html">
+       marmot.utils.mconfig.edit_value
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.parser.html">
+       marmot.utils.mconfig.parser
+      </a>
+     </li>
+     <li class="toctree-l3">
+      <a class="reference internal" href="marmot.utils.mconfig.reset_defaults.html">
+       marmot.utils.mconfig.reset_defaults
+      </a>
+     </li>
+    </ul>
+   </li>
+   <li class="toctree-l2 has-children">
+    <a class="reference internal" href="marmot.utils.dataio.html">
+     marmot.utils.dataio
+    </a>
+    <input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/>
+    <label for="toctree-checkbox-15">
      <i class="fas fa-chevron-down">
      </i>
     </label>
@@ -678,37 +715,30 @@
      </li>
     </ul>
    </li>
-   <li class="toctree-l2 has-children">
-    <a class="reference internal" href="marmot.utils.mconfig.html">
-     marmot.utils.mconfig
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.utils.error_handler.MissingH5PLEXOSDataError.html">
+     marmot.utils.error_handler.MissingH5PLEXOSDataError
     </a>
-    <input class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" type="checkbox"/>
-    <label for="toctree-checkbox-15">
-     <i class="fas fa-chevron-down">
-     </i>
-    </label>
-    <ul>
-     <li class="toctree-l3">
-      <a class="reference internal" href="marmot.utils.mconfig.createConfig.html">
-       marmot.utils.mconfig.createConfig
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="marmot.utils.mconfig.edit_value.html">
-       marmot.utils.mconfig.edit_value
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="marmot.utils.mconfig.parser.html">
-       marmot.utils.mconfig.parser
-      </a>
-     </li>
-     <li class="toctree-l3">
-      <a class="reference internal" href="marmot.utils.mconfig.reset_defaults.html">
-       marmot.utils.mconfig.reset_defaults
-      </a>
-     </li>
-    </ul>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.utils.error_handler.PropertyNotFound.html">
+     marmot.utils.error_handler.PropertyNotFound
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.utils.error_handler.ConfigFileReadError.html">
+     marmot.utils.error_handler.ConfigFileReadError
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.utils.error_handler.ReEDSColumnLengthError.html">
+     marmot.utils.error_handler.ReEDSColumnLengthError
+    </a>
+   </li>
+   <li class="toctree-l2">
+    <a class="reference internal" href="marmot.utils.error_handler.ReEDSYearTypeConvertError.html">
+     marmot.utils.error_handler.ReEDSYearTypeConvertError
+    </a>
    </li>
   </ul>
  </li>
@@ -857,7 +887,7 @@ of partition folders, else returns scenario folder.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.formatters.formatsiip.ProcessSIIP.get_processed_data">
-<span class="sig-name descname"><span class="pre">get_processed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prop_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">timescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.get_processed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.get_processed_data" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_processed_data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">prop_class</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">prop</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">timescale</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">model_name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.11)"><span class="pre">str</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.get_processed_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.get_processed_data" title="Permalink to this definition">#</a></dt>
 <dd><p>Handles the pulling of data from the SIIP input folder
 and then passes the data to one of the formating functions</p>
 <dl class="field-list simple">
@@ -880,7 +910,7 @@ and then passes the data to one of the formating functions</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.formatters.formatsiip.ProcessSIIP.df_process_generator">
-<span class="sig-name descname"><span class="pre">df_process_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.df_process_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.df_process_generator" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">df_process_generator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.df_process_generator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.df_process_generator" title="Permalink to this definition">#</a></dt>
 <dd><p>Format SIIP Generator class data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -897,7 +927,7 @@ and then passes the data to one of the formating functions</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.formatters.formatsiip.ProcessSIIP.df_process_region">
-<span class="sig-name descname"><span class="pre">df_process_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.df_process_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.df_process_region" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">df_process_region</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.df_process_region"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.df_process_region" title="Permalink to this definition">#</a></dt>
 <dd><p>Format SIIP Region data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -914,7 +944,7 @@ and then passes the data to one of the formating functions</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.formatters.formatsiip.ProcessSIIP.df_process_reserves_generators">
-<span class="sig-name descname"><span class="pre">df_process_reserves_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.df_process_reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.df_process_reserves_generators" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">df_process_reserves_generators</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.df_process_reserves_generators"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.df_process_reserves_generators" title="Permalink to this definition">#</a></dt>
 <dd><p>Format SIIP Reserves Generator data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -931,7 +961,7 @@ and then passes the data to one of the formating functions</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="marmot.formatters.formatsiip.ProcessSIIP.df_process_line">
-<span class="sig-name descname"><span class="pre">df_process_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pandas.core.frame.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">pandas.core.frame.DataFrame</span></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.df_process_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.df_process_line" title="Permalink to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">df_process_line</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">df</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference external" href="https://pandas.pydata.org/pandas-docs/dev/reference/api/pandas.DataFrame.html#pandas.DataFrame" title="(in pandas v2.0.0.dev0+629.gf2f4d12030)"><span class="pre">pandas.core.frame.DataFrame</span></a></span></span><a class="reference internal" href="../../../_modules/marmot/formatters/formatsiip.html#ProcessSIIP.df_process_line"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#marmot.formatters.formatsiip.ProcessSIIP.df_process_line" title="Permalink to this definition">#</a></dt>
 <dd><p>Format SIIP Line data</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

@@ -13,13 +13,8 @@ Plot Utilities
 
 Classes to assist in creating plots. Used extensively by the Plot classes.
 
-.. currentmodule:: marmot.plottingmodules.plotutils.plot_data_helper
-.. autosummary::
-   :toctree: _autosummary
-   :template: custom-class-template.rst
-   :recursive:
-
-   PlotDataStoreAndProcessor
+Plotting Engines
+~~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: marmot.plottingmodules.plotutils.plot_library
 .. autosummary::
@@ -30,6 +25,18 @@ Classes to assist in creating plots. Used extensively by the Plot classes.
    SetupSubplot
    PlotLibrary
 
+Data Storage and Processing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. currentmodule:: marmot.plottingmodules.plotutils.plot_data_helper
+.. autosummary::
+   :toctree: _autosummary
+   :template: custom-class-template.rst
+   :recursive:
+
+   PlotDataStoreAndProcessor
+   GenCategories
+
 .. currentmodule:: marmot.plottingmodules.plotutils
 .. autosummary::
    :toctree: _autosummary
@@ -38,15 +45,23 @@ Classes to assist in creating plots. Used extensively by the Plot classes.
 
    timeseries_modifiers
 
+
+
+Plot Design
+~~~~~~~~~~~~~
+
 .. currentmodule:: marmot.plottingmodules.plotutils
 .. autosummary::
    :toctree: _autosummary
    :template: custom-module-template.rst
    :recursive:
-
+   
    styles
 
 .. versionadded:: 0.11.0
+
+Plot Exceptions
+~~~~~~~~~~~~~~~~~
 
 .. currentmodule:: marmot.plottingmodules.plotutils
 .. autosummary::

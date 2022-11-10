@@ -15,6 +15,9 @@ Model specific formatting classes to process input data.
 Also includes the ExtraProperties class to create extra properties 
 required by Marmots plotter.
 
+Parent Class and Extra Properties Processing 
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 .. currentmodule:: marmot.formatters.formatbase
 .. autosummary::
    :toctree: _autosummary
