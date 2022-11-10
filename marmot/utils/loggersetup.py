@@ -3,11 +3,13 @@
 @author: Daniel Levie
 """
 
-from pathlib import Path
-import yaml
 import logging
 import logging.config
-from marmot.utils.definitions import ROOT_DIR, LOG_DIR
+from pathlib import Path
+
+import yaml
+
+from marmot.utils.definitions import LOG_DIR, ROOT_DIR
 
 
 class SetupLogger:

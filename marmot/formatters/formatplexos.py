@@ -5,16 +5,18 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
-import re
-import pandas as pd
-import h5py
 import logging
-from typing import Dict
+import re
 from pathlib import Path
-from marmot.utils.error_handler import MissingH5PLEXOSDataError, PropertyNotFound
-from marmot.metamanagers.read_metadata import MetaData
+from typing import Dict
+
+import h5py
+import pandas as pd
+
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraPLEXOSProperties
+from marmot.metamanagers.read_metadata import MetaData
+from marmot.utils.error_handler import MissingH5PLEXOSDataError, PropertyNotFound
 
 try:
     # Import as Submodule

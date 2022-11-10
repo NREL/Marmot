@@ -7,41 +7,41 @@ This code creates transmission line and interface plots.
 """
 
 import logging
-import pandas as pd
-import numpy as np
 import re
+from pathlib import Path
+from typing import List
+
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 import matplotlib.colors as mcolors
 import matplotlib.dates as mdates
-from typing import List
-from pathlib import Path
-
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
 from marmot.metamanagers.read_metadata import MetaData
-from marmot.plottingmodules.plotutils.styles import ColorList
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
+    PlotDataStoreAndProcessor,
     set_facet_col_row_dimensions,
     set_x_y_dimension,
 )
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-    adjust_for_leapday,
-    sort_duration,
-)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
     DataSavedInModule,
-    UnderDevelopment,
     InputSheetError,
+    MissingInputData,
     MissingMetaData,
-    UnsupportedAggregation,
     MissingZoneData,
+    UnderDevelopment,
+    UnsupportedAggregation,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    adjust_for_leapday,
+    set_timestamp_date_range,
+    sort_duration,
 )
 
 logger = logging.getLogger("plotter." + __name__)

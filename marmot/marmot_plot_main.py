@@ -13,13 +13,14 @@ generation_stack.py, curtailment.py etc.
 # Import Python Libraries
 # ========================================================================================
 
-import sys
 import importlib
+import sys
 import time
-import pandas as pd
 from pathlib import Path
 from typing import Union
+
 import matplotlib.pyplot as plt
+import pandas as pd
 
 try:
     import marmot.utils.mconfig as mconfig
@@ -28,15 +29,8 @@ except ModuleNotFoundError:
 
     print(INCORRECT_ENTRY_POINT.format(Path(__file__).name))
     sys.exit()
-from marmot.utils.loggersetup import SetupLogger
-from marmot.utils.definitions import INPUT_DIR, Module_CLASS_MAPPING
 from marmot.metamanagers.read_metadata import MetaData
 from marmot.plottingmodules.plotutils.plot_data_helper import GenCategories
-from marmot.plottingmodules.plotutils.styles import (
-    GeneratorColorDict,
-    PlotMarkers,
-    ColorList,
-)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     DataSavedInModule,
     InputSheetError,
@@ -46,6 +40,13 @@ from marmot.plottingmodules.plotutils.plot_exceptions import (
     UnderDevelopment,
     UnsupportedAggregation,
 )
+from marmot.plottingmodules.plotutils.styles import (
+    ColorList,
+    GeneratorColorDict,
+    PlotMarkers,
+)
+from marmot.utils.definitions import INPUT_DIR, Module_CLASS_MAPPING
+from marmot.utils.loggersetup import SetupLogger
 
 # A bug in pandas requires this to be included, otherwise df.to_string truncates
 # long strings.

@@ -6,25 +6,25 @@ of generators and average output plots
 """
 
 import logging
+from pathlib import Path
+from typing import List
+
 import numpy as np
 import pandas as pd
-from typing import List
-from pathlib import Path
+
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.styles import ColorList
-
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
+    PlotDataStoreAndProcessor,
 )
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-)
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)

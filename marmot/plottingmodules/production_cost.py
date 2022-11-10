@@ -8,23 +8,21 @@ Plots can be broken down by cost categories, generator types etc.
 """
 
 import logging
-import pandas as pd
 from pathlib import Path
 from typing import List
 
+import pandas as pd
+
 import marmot.utils.mconfig as mconfig
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
-    GenCategories,
-)
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-)
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
 )
 
 plot_data_settings: dict = mconfig.parser("plot_data")
@@ -499,12 +497,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 for prop_name in properties:
                     df: pd.DataFrame = self[prop_name[1]].get(scenario)
                     if df.empty:
-                        date_index = pd.date_range(
-                            start="2010-01-01", periods=1, freq="H", name="timestamp"
-                        )
-                        df = pd.DataFrame(
-                            data=[0], index=date_index, columns=["values"]
-                        )
+                        continue
                     else:
                         try:
                             df = df.xs(zone_input, level=self.AGG_BY)
@@ -1121,12 +1114,7 @@ class SystemCosts(PlotDataStoreAndProcessor):
                 for prop_name in properties:
                     df: pd.DataFrame = self[prop_name[1]].get(scenario)
                     if df.empty:
-                        date_index = pd.date_range(
-                            start="2010-01-01", periods=1, freq="H", name="timestamp"
-                        )
-                        df = pd.DataFrame(
-                            data=[0], index=date_index, columns=["values"]
-                        )
+                        continue
                     else:
                         try:
                             df = df.xs(zone_input, level=self.AGG_BY)

@@ -5,17 +5,18 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
-import re
 import logging
-import pandas as pd
+import re
 from pathlib import Path
 
-import marmot.utils.mconfig as mconfig
-from marmot.utils.error_handler import PropertyNotFound
+import pandas as pd
+
 import marmot.metamanagers.write_siip_metadata as write_siip_metadata
-from marmot.metamanagers.read_metadata import MetaData
+import marmot.utils.mconfig as mconfig
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraSIIProperties
+from marmot.metamanagers.read_metadata import MetaData
+from marmot.utils.error_handler import PropertyNotFound
 
 logger = logging.getLogger("formatter." + __name__)
 formatter_settings = mconfig.parser("formatter_settings")

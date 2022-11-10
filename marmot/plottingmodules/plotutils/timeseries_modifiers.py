@@ -3,9 +3,9 @@
 @author: Daniel Levie
 """
 
-import logging
 import datetime as dt
-from typing import Tuple, Union, List
+import logging
+from typing import List, Tuple, Union
 
 import numpy as np
 import pandas as pd

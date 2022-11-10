@@ -4,11 +4,12 @@ Inherited by all model specific Process classes
 @author: Daniel Levie
 """
 
-import re
 import logging
-import pandas as pd
+import re
 from pathlib import Path
 from typing import Dict
+
+import pandas as pd
 
 from marmot.utils.error_handler import ReEDSColumnLengthError, ReEDSYearTypeConvertError
 

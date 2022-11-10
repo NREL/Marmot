@@ -7,27 +7,27 @@ This module plots figures of total generation for a year, month etc.
 """
 
 import logging
-from typing import List
-import pandas as pd
-import matplotlib.pyplot as plt
 from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
+    PlotDataStoreAndProcessor,
     set_facet_col_row_dimensions,
-)
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-    get_sub_hour_interval_count,
 )
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    get_sub_hour_interval_count,
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)

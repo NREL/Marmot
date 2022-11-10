@@ -6,12 +6,12 @@ Inherits the ProcessReEDS class.
 """
 
 import logging
-from typing import List
 from dataclasses import dataclass, field
+from typing import List
 
 from marmot.formatters.formatbase import ReEDSPropertyColumnsBase
-from marmot.formatters.formatreeds import ProcessReEDS
 from marmot.formatters.formatextra import ExtraReEDSIndiaProperties
+from marmot.formatters.formatreeds import ProcessReEDS
 
 logger = logging.getLogger("formatter." + __name__)
 

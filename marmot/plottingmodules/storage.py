@@ -5,30 +5,29 @@ This module creates energy storage plots.
 """
 
 import logging
-import pandas as pd
-import matplotlib.pyplot as plt
-from typing import List
 from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-from marmot.plottingmodules.plotutils.styles import ColorList
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import (
     PlotDataStoreAndProcessor,
-    GenCategories,
     set_x_y_dimension,
 )
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-    adjust_for_leapday,
-    sort_duration,
-)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
     DataSavedInModule,
+    MissingInputData,
     MissingZoneData,
 )
-from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    adjust_for_leapday,
+    set_timestamp_date_range,
+    sort_duration,
+)
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")

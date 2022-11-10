@@ -7,31 +7,31 @@ This module creates plots are related to the curtailment of generators.
 """
 
 import logging
-import pandas as pd
-from typing import List
 from pathlib import Path
+from typing import List
+
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.styles import (
-    GeneratorColorDict,
-    ColorList,
-    PlotMarkers,
-)
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
-)
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-    get_sub_hour_interval_count,
+    PlotDataStoreAndProcessor,
 )
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
     DataSavedInModule,
-    UnderDevelopment,
+    MissingInputData,
     MissingZoneData,
+    UnderDevelopment,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
+from marmot.plottingmodules.plotutils.styles import (
+    ColorList,
+    GeneratorColorDict,
+    PlotMarkers,
+)
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    get_sub_hour_interval_count,
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)

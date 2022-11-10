@@ -7,24 +7,25 @@ This module creates bar plot of the total volume of generator starts in MW,GW,et
 """
 
 import logging
-import pandas as pd
-from typing import List
 from pathlib import Path
+from typing import List
+
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-from marmot.plottingmodules.plotutils.styles import ColorList
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
-)
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
+    PlotDataStoreAndProcessor,
 )
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
     UnderDevelopment,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)

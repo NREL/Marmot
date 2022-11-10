@@ -5,31 +5,31 @@ This code creates generation stack plots.
 @author: Daniel Levie
 """
 
-import logging
-from typing import List
-import pandas as pd
 import datetime as dt
-import numpy as np
-import matplotlib.pyplot as plt
+import logging
 from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_library import SetupSubplot, PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
+    PlotDataStoreAndProcessor,
     set_facet_col_row_dimensions,
 )
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-    adjust_for_leapday,
-)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
     InputSheetError,
+    MissingInputData,
     MissingZoneData,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary, SetupSubplot
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    adjust_for_leapday,
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)

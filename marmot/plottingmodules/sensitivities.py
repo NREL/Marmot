@@ -6,24 +6,23 @@ related to investigating generator and other device sensitivities.
 """
 
 import logging
-import pandas as pd
-import matplotlib.pyplot as plt
-from typing import List
 from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_data_helper import (
     PlotDataStoreAndProcessor,
-    GenCategories,
     merge_new_agg,
 )
 from marmot.plottingmodules.plotutils.plot_exceptions import (
+    InputSheetError,
     MissingInputData,
     UnderDevelopment,
-    InputSheetError,
 )
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")

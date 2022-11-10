@@ -5,18 +5,19 @@
 @author: Daniel Levie
 """
 
-import re
-import math
-import logging
-import pandas as pd
-import functools
 import concurrent.futures
+import functools
+import logging
+import math
+import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Tuple, List
+from typing import List, Tuple
 
-import marmot.utils.mconfig as mconfig
+import pandas as pd
+
 import marmot.utils.dataio as dataio
+import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.timeseries_modifiers import adjust_for_leapday
 
 logger = logging.getLogger("plotter." + __name__)
