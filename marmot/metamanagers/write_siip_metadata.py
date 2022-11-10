@@ -1,8 +1,10 @@
 """Write SIIP metadata to Marmot formatted results file 
 """
 import json
-import pandas as pd
 from pathlib import Path
+
+import pandas as pd
+
 from marmot.utils.dataio import write_metadata_to_h5
 
 META_KEYS_TO_FUNCTIONS: dict = {

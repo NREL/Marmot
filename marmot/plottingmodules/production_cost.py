@@ -8,22 +8,21 @@ Plots can be broken down by cost categories, generator types etc.
 """
 
 import logging
-import pandas as pd
 from pathlib import Path
 from typing import List
 
+import pandas as pd
+
 import marmot.utils.mconfig as mconfig
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
-)
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-)
+from marmot.plottingmodules.plotutils.plot_data_helper import PlotDataStoreAndProcessor
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
 )
 
 plot_data_settings: dict = mconfig.parser("plot_data")

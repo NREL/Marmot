@@ -5,7 +5,9 @@ required by the Marmot plotter.
 """
 
 import logging
+
 import pandas as pd
+
 import marmot.utils.mconfig as mconfig
 from marmot.formatters.formatbase import Process
 from marmot.utils.error_handler import PropertyNotFound

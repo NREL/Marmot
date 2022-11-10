@@ -6,31 +6,32 @@ generators that are on an outage.
 @author: Daniel Levie 
 """
 
-import os
 import logging
+import os
+from pathlib import Path
+from typing import List
+
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-import matplotlib.dates as mdates
-from typing import List
-from pathlib import Path
-import marmot.utils.mconfig as mconfig
 
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
+    PlotDataStoreAndProcessor,
     set_facet_col_row_dimensions,
-)
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-    adjust_for_leapday,
 )
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
-    UnderDevelopment,
     MissingZoneData,
+    UnderDevelopment,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    adjust_for_leapday,
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)

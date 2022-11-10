@@ -7,19 +7,19 @@ and a library of regularly used plot types.
 
 import logging
 import textwrap
+from typing import List, Tuple, Union
+
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
-import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
 import matplotlib.ticker as mtick
 from matplotlib.axes import Axes
 from matplotlib.figure import Figure
 from matplotlib.patches import Patch
-from typing import Tuple, List, Union
 
 import marmot.utils.mconfig as mconfig
-
 
 logger = logging.getLogger("plotter." + __name__)
 

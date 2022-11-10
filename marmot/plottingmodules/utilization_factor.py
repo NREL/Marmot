@@ -12,23 +12,24 @@ and is called from Marmot_plot_main.py
 """
 
 import logging
+from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
-from typing import List
-from pathlib import Path
 
 import marmot.utils.mconfig as mconfig
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
+    PlotDataStoreAndProcessor,
 )
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
-    UnderDevelopment,
     MissingZoneData,
+    UnderDevelopment,
 )
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")

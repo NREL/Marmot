@@ -14,11 +14,12 @@ it can be read into the marmot_plot_main.py file
 # =======================================================================================
 
 import sys
-from pathlib import Path
 import time
+from pathlib import Path
 from typing import Union
-import pandas as pd
+
 import h5py
+import pandas as pd
 
 try:
     import marmot.utils.mconfig as mconfig
@@ -27,13 +28,12 @@ except ModuleNotFoundError:
 
     print(INCORRECT_ENTRY_POINT.format(Path(__file__).name))
     sys.exit()
-from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
-from marmot.utils.loggersetup import SetupLogger
-from marmot.utils.error_handler import PropertyNotFound
-import marmot.utils.dataio as dataio
 import marmot.formatters as formatters
+import marmot.utils.dataio as dataio
 from marmot.formatters.formatbase import Process
-
+from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
+from marmot.utils.error_handler import PropertyNotFound
+from marmot.utils.loggersetup import SetupLogger
 
 # A bug in pandas requires this to be included,
 # otherwise df.to_string truncates long strings. Fix available in Pandas 1.0

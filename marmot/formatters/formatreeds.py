@@ -8,17 +8,18 @@ Inherits the Process class.
 # os.environ['GAMSDIR'] = r"C:\GAMS\39"
 import logging
 import re
-from pathlib import Path
-from typing import List, Dict
 from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Dict, List
+
 import gdxpds
 import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-from marmot.utils.error_handler import PropertyNotFound
-from marmot.metamanagers.read_metadata import MetaData
 from marmot.formatters.formatbase import Process, ReEDSPropertyColumnsBase
 from marmot.formatters.formatextra import ExtraReEDSProperties
+from marmot.metamanagers.read_metadata import MetaData
+from marmot.utils.error_handler import PropertyNotFound
 
 logger = logging.getLogger("formatter." + __name__)
 formatter_settings = mconfig.parser("formatter_settings")

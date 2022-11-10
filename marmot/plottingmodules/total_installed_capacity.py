@@ -6,28 +6,29 @@ This
 @author: Daniel Levie
 """
 
-import re
 import logging
-import pandas as pd
-import matplotlib.pyplot as plt
-from typing import List
+import re
 from pathlib import Path
+from typing import List
+
+import matplotlib.pyplot as plt
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.total_generation import TotalGeneration
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import (
     PlotDataStoreAndProcessor,
     set_facet_col_row_dimensions,
-)
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
 )
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
 )
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
+)
+from marmot.plottingmodules.total_generation import TotalGeneration
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")
@@ -476,7 +477,7 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             except TypeError:
                 outputs[zone_input] = MissingZoneData()
                 continue
-            
+
             # right panel: annual generation
             try:
                 Total_Gen_Results: pd.DataFrame = gen_outputs[zone_input]["data_table"]

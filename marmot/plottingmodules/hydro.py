@@ -9,27 +9,28 @@ It may not produce production ready figures.
 @author: adyreson
 """
 
-import os
-import logging
-import pandas as pd
 import datetime as dt
-import matplotlib.ticker as mtick
-from typing import List
+import logging
+import os
 from pathlib import Path
-import marmot.utils.mconfig as mconfig
+from typing import List
 
-from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
-from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
+import matplotlib.ticker as mtick
+import pandas as pd
+
+import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import (
-    PlotDataStoreAndProcessor,
     GenCategories,
+    PlotDataStoreAndProcessor,
 )
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
     DataSavedInModule,
+    MissingInputData,
     MissingZoneData,
     UnderDevelopment,
 )
+from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
 
 logger = logging.getLogger("plotter." + __name__)
 plot_data_settings: dict = mconfig.parser("plot_data")

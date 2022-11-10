@@ -8,28 +8,28 @@ Prices plotted in $/MWh
 """
 
 import logging
-import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
 from pathlib import Path
 from typing import List
-import marmot.utils.mconfig as mconfig
 
-from marmot.plottingmodules.plotutils.styles import ColorList
-from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+import marmot.utils.mconfig as mconfig
 from marmot.plottingmodules.plotutils.plot_data_helper import (
     PlotDataStoreAndProcessor,
-    GenCategories,
     set_facet_col_row_dimensions,
     set_x_y_dimension,
 )
-from marmot.plottingmodules.plotutils.timeseries_modifiers import (
-    set_timestamp_date_range,
-)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
-    MissingInputData,
     DataSavedInModule,
     InputSheetError,
+    MissingInputData,
+)
+from marmot.plottingmodules.plotutils.plot_library import SetupSubplot
+from marmot.plottingmodules.plotutils.styles import ColorList
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)

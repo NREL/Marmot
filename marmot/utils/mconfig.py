@@ -6,9 +6,11 @@ The defaults defined here should not be modifed by any user,
 instead edit the values directly in the config.yml file once created. 
 """
 
-import yaml
 from pathlib import Path
 from typing import Union
+
+import yaml
+
 from marmot.utils.definitions import ROOT_DIR
 from marmot.utils.error_handler import ConfigFileReadError
 

@@ -6,11 +6,12 @@ Database can be either a h5plexos file or a formatted Marmot hdf5 file.
 @author: Ryan Houseman
 """
 
+import logging
 import sys
+from pathlib import Path
+
 import h5py
 import pandas as pd
-from pathlib import Path
-import logging
 
 logger = logging.getLogger("formatter." + __name__)
 
