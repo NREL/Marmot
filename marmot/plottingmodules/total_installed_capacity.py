@@ -19,7 +19,6 @@ from marmot.plottingmodules.total_generation import TotalGeneration
 from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
 from marmot.plottingmodules.plotutils.plot_data_helper import (
     PlotDataStoreAndProcessor,
-    GenCategories,
     set_facet_col_row_dimensions,
 )
 from marmot.plottingmodules.plotutils.timeseries_modifiers import (
@@ -477,6 +476,13 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
             except TypeError:
                 outputs[zone_input] = MissingZoneData()
                 continue
+            
+            # right panel: annual generation
+            try:
+                Total_Gen_Results: pd.DataFrame = gen_outputs[zone_input]["data_table"]
+            except TypeError:
+                outputs[zone_input] = MissingZoneData()
+                continue
 
             # Check units of data
             capacity_units = [
@@ -511,9 +517,6 @@ class InstalledCapacity(PlotDataStoreAndProcessor):
                 color="black",
                 rotation="vertical",
             )
-
-            # right panel: annual generation
-            Total_Gen_Results: pd.DataFrame = gen_outputs[zone_input]["data_table"]
 
             # Check units of data
             energy_units = [
