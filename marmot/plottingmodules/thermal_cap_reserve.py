@@ -8,16 +8,27 @@ available but not committed (i.e in reserve)
 """
 
 import logging
-import pandas as pd
+from pathlib import Path
+from typing import List
+
 import matplotlib.pyplot as plt
+import pandas as pd
 
 import marmot.utils.mconfig as mconfig
-
-from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
-from marmot.plottingmodules.plotutils.plot_data_helper import MPlotDataHelper
+from marmot.plottingmodules.plotutils.plot_data_helper import (
+    GenCategories,
+    PlotDataStoreAndProcessor,
+    set_facet_col_row_dimensions,
+)
 from marmot.plottingmodules.plotutils.plot_exceptions import (
     MissingInputData,
     MissingZoneData,
+)
+from marmot.plottingmodules.plotutils.plot_library import PlotLibrary
+from marmot.plottingmodules.plotutils.styles import GeneratorColorDict
+from marmot.plottingmodules.plotutils.timeseries_modifiers import (
+    adjust_for_leapday,
+    set_timestamp_date_range,
 )
 
 logger = logging.getLogger("plotter." + __name__)
@@ -25,28 +36,62 @@ plot_data_settings: dict = mconfig.parser("plot_data")
 shift_leapday: bool = mconfig.parser("shift_leapday")
 
 
-class ThermalReserve(MPlotDataHelper):
+class ThermalReserve(PlotDataStoreAndProcessor):
     """Thermal capacity in reserve plots.
 
     The thermal_cap_reserve module contains methods that
     display the amount of generation in reserve, i.e non committed capacity.
 
-    ThermalReserve inherits from the MPlotDataHelper class to assist
+    ThermalReserve inherits from the PlotDataStoreAndProcessor class to assist
     in creating figures.
     """
 
-    def __init__(self, *args, **kwargs):
+    def __init__(
+        self,
+        Zones: List[str],
+        Scenarios: List[str],
+        AGG_BY: str,
+        ordered_gen: List[str],
+        marmot_solutions_folder: Path,
+        gen_categories: GenCategories = GenCategories(),
+        marmot_color_dict: dict = None,
+        ylabels: List[str] = None,
+        xlabels: List[str] = None,
+        **kwargs,
+    ):
         """
         Args:
-            *args
-                Minimum required parameters passed to the MPlotDataHelper 
-                class.
-            **kwargs
-                These parameters will be passed to the MPlotDataHelper 
-                class.
+            Zones (List[str]): List of regions/zones to plot.
+            Scenarios (List[str]): List of scenarios to plot.
+            AGG_BY (str): Informs region type to aggregate by when creating plots.
+            ordered_gen (List[str]): Ordered list of generator technologies to plot,
+                order defines the generator technology position in stacked bar and area plots.
+            marmot_solutions_folder (Path): Directory containing Marmot solution outputs.
+            gen_categories (GenCategories): Instance of GenCategories class, groups generator technologies
+                into defined categories.
+                Deafults to GenCategories.
+            marmot_color_dict (dict, optional): Dictionary of colors to use for
+                generation technologies.
+                Defaults to None.
+            ylabels (List[str], optional): y-axis labels for facet plots.
+                Defaults to None.
+            xlabels (List[str], optional): x-axis labels for facet plots.
+                Defaults to None.
         """
-        # Instantiation of MPlotHelperFunctions
-        super().__init__(*args, **kwargs)
+        # Instantiation of PlotDataStoreAndProcessor
+        super().__init__(AGG_BY, ordered_gen, marmot_solutions_folder, **kwargs)
+
+        self.Zones = Zones
+        self.Scenarios = Scenarios
+        self.gen_categories = gen_categories
+        if marmot_color_dict is None:
+            self.marmot_color_dict = GeneratorColorDict.set_random_colors(
+                self.ordered_gen
+            ).color_dict
+        else:
+            self.marmot_color_dict = marmot_color_dict
+        self.ylabels = ylabels
+        self.xlabels = xlabels
 
     def thermal_cap_reserves(
         self,
@@ -76,15 +121,15 @@ class ThermalReserve(MPlotDataHelper):
         """
         outputs: dict = {}
 
-        # List of properties needed by the plot, properties are a set of tuples and 
-        # contain 3 parts: required True/False, property name and scenarios required, 
+        # List of properties needed by the plot, properties are a set of tuples and
+        # contain 3 parts: required True/False, property name and scenarios required,
         # scenarios must be a list.
         properties = [
             (True, f"generator_Generation{data_resolution}", self.Scenarios),
             (True, f"generator_Available_Capacity{data_resolution}", self.Scenarios),
         ]
 
-        # Runs get_formatted_data within MPlotDataHelper to populate MPlotDataHelper dictionary
+        # Runs get_formatted_data within PlotDataStoreAndProcessor to populate PlotDataStoreAndProcessor dictionary
         # with all required properties, returns a 1 if required data is missing
         check_input_data = self.get_formatted_data(properties)
 
@@ -95,8 +140,8 @@ class ThermalReserve(MPlotDataHelper):
             logger.info(f"Zone = {zone_input}")
 
             # sets up x, y dimensions of plot
-            ncols, nrows = self.set_facet_col_row_dimensions(
-                multi_scenario=self.Scenarios
+            ncols, nrows = set_facet_col_row_dimensions(
+                self.xlabels, self.ylabels, multi_scenario=self.Scenarios
             )
 
             grid_size = ncols * nrows
@@ -118,13 +163,13 @@ class ThermalReserve(MPlotDataHelper):
                     f"generator_Generation{data_resolution}"
                 ].get(scenario)
                 if shift_leapday:
-                    generation = self.adjust_for_leapday(generation)
+                    generation = adjust_for_leapday(generation)
 
                 avail_cap: pd.DataFrame = self[
                     f"generator_Available_Capacity{data_resolution}"
                 ].get(scenario)
                 if shift_leapday:
-                    avail_cap = self.adjust_for_leapday(avail_cap)
+                    avail_cap = adjust_for_leapday(avail_cap)
 
                 # Check if zone is in avail_cap
                 try:
@@ -147,7 +192,7 @@ class ThermalReserve(MPlotDataHelper):
                 # Convert units
                 if i == 0:
                     unitconversion = self.capacity_energy_unitconversion(
-                        thermal_reserve, sum_values=True
+                        thermal_reserve, self.Scenarios, sum_values=True
                     )
                 thermal_reserve = thermal_reserve / unitconversion["divisor"]
 
@@ -158,7 +203,7 @@ class ThermalReserve(MPlotDataHelper):
                     continue
 
                 if pd.notna(start_date_range):
-                    thermal_reserve = self.set_timestamp_date_range(
+                    thermal_reserve = set_timestamp_date_range(
                         thermal_reserve, start_date_range, end_date_range
                     )
                     if thermal_reserve.empty is True:
@@ -175,7 +220,7 @@ class ThermalReserve(MPlotDataHelper):
 
                 mplt.stackplot(
                     thermal_reserve,
-                    color_dict=self.PLEXOS_color_dict,
+                    color_dict=self.marmot_color_dict,
                     labels=thermal_reserve.columns,
                     sub_pos=i,
                 )

@@ -6,12 +6,13 @@ The defaults defined here should not be modifed by any user,
 instead edit the values directly in the config.yml file once created. 
 """
 
-import yaml
-import traceback
-import sys
 from pathlib import Path
 from typing import Union
+
+import yaml
+
 from marmot.utils.definitions import ROOT_DIR
+from marmot.utils.error_handler import ConfigFileReadError
 
 CONFIGFILE_NAME = "config.yml"
 configfile_path = ROOT_DIR.parent.joinpath(CONFIGFILE_NAME)
@@ -49,7 +50,7 @@ def createConfig(configfile_path: Path):
         - ydimension: 4
 
     - **axes_options:**
-        *Allows adjustment of the minimum and maximum tick marks on datetime x-axes and 
+        *Allows adjustment of the minimum and maximum tick marks on datetime x-axes and
         the number of decimal points to include on the y-axes. Also controls visibility of
         figure spines and legend settings and position*
 
@@ -72,7 +73,7 @@ def createConfig(configfile_path: Path):
     - **axes_label_options:**
         *Controls whether x-axes labels are rotated from their default horizontal (0 degrees),
         and at what number of labels to begin rotating to the specified rotation_angle.
-        By default, labels will begin rotating at 7 labels to an angle of 45 degrees from 
+        By default, labels will begin rotating at 7 labels to an angle of 45 degrees from
         0 degrees*
 
         - rotate_x_labels: true
@@ -80,15 +81,15 @@ def createConfig(configfile_path: Path):
         - rotation_angle: 45
 
     - **plot_data:**
-        *Controls certain plot data settings. 
-        `curtailment_property` source of Curtailment data. The code defaults to 
+        *Controls certain plot data settings.
+        `curtailment_property` source of Curtailment data. The code defaults to
         Marmot's calculated Curtailment property.
-        `plot_title_as_region` If True a the region/zone name will be added as a title to the 
+        `plot_title_as_region` If True a the region/zone name will be added as a title to the
         figure
-        `include_barplot_load_storage_charging_line` specifies whether to include the line 
-        representing pumped load in total generation bar plots. 
-        `include_timeseries_load_storage_charging_line` specifies whether to include the line 
-        representing pumped load in timeseries generation plots 
+        `include_barplot_load_storage_charging_line` specifies whether to include the line
+        representing pumped load in total generation bar plots.
+        `include_timeseries_load_storage_charging_line` specifies whether to include the line
+        representing pumped load in timeseries generation plots
         `*_net_imports` settings controls whether net imports should be included in the figures*
 
         - curtailment_property: Curtailment
@@ -109,13 +110,13 @@ def createConfig(configfile_path: Path):
         .. versionadded:: 0.10.0
 
     - **formatter_settings:**
-        *Formatter specific settings, VOLL value, 
-        `skip_existing_properties` Toggles whether existing properties are skipped or 
-        overwritten if they already contained in a previous processed_h5 file, the default is 
+        *Formatter specific settings, VOLL value,
+        `skip_existing_properties` Toggles whether existing properties are skipped or
+        overwritten if they already contained in a previous processed_h5 file, the default is
         to skip.
-        `append_plexos_block_name` Toggles whether to append PLEXOS block name to formatted 
+        `append_plexos_block_name` Toggles whether to append PLEXOS block name to formatted
         results e.g ST, MT, LT, PASA. Defaults to False.
-        `exclude_pumping_from_reeds_storage_gen` toggles whether to exclude pumping 
+        `exclude_pumping_from_reeds_storage_gen` toggles whether to exclude pumping
         (negative gen) from ReEDS storage generation. Defaults to True*
 
         - VoLL: 10000
@@ -137,11 +138,11 @@ def createConfig(configfile_path: Path):
         *Handles auto shifting of leap day, if required by your model. The default is false*
 
     - **auto_convert_units:** true
-        *If True automatically converts Energy and Capacity units so that no number 
+        *If True automatically converts Energy and Capacity units so that no number
         exceeds 1000. All base units are in MW, and units can be converted to GW, TW and kW*
 
     - **read_csv_properties:** false
-        *If True the Marmot plotter will attempt to read the required plot property from a 
+        *If True the Marmot plotter will attempt to read the required plot property from a
         csv file if it cannot be found in the formatted h5 file.
         Format of data must adhere to the standard 
         Marmot formats for each data class, e.g generator, line etc.*
@@ -258,8 +259,8 @@ def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, bo
             Defaults to None.
 
     Returns:
-        Union[dict, str, int, bool]: Returns the requested level or value from 
-        the config file. Return type varies based on level accessed.
+        Union[dict, str, int, bool]: Returns the requested level or value from
+        the config file. Return type varies based on levesl accessed.
     """
     with open(configfile_path, "r") as ymlfile:
         cfg = yaml.safe_load(ymlfile.read())
@@ -270,14 +271,8 @@ def parser(top_level: str, second_level: str = None) -> Union[dict, str, int, bo
         else:
             value = cfg[top_level][second_level]
         return value
-    except KeyError:
-        print(traceback.format_exc())
-        print(
-            "Config file read Error: New config settings have been added which "
-            "require the config.yml to be re-created. "
-            "To continue delete config.yml located in the top directory level of Marmot"
-        )
-        sys.exit()
+    except KeyError as e:
+        raise ConfigFileReadError(e.args[0])
 
 
 def edit_value(new_value: str, top_level: str, second_level: str = None):

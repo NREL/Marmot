@@ -1,4 +1,5 @@
 import logging
+
 from marmot.formatters.formatbase import Process
 
 logger = logging.getLogger("formatter." + __name__)

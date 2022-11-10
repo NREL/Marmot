@@ -5,15 +5,18 @@ Inherits the Process class.
 @author: Daniel Levie
 """
 
-import re
-import pandas as pd
-import h5py
 import logging
-from typing import Dict
+import re
 from pathlib import Path
-from marmot.metamanagers.read_metadata import MetaData
+from typing import Dict
+
+import h5py
+import pandas as pd
+
 from marmot.formatters.formatbase import Process
 from marmot.formatters.formatextra import ExtraPLEXOSProperties
+from marmot.metamanagers.read_metadata import MetaData
+from marmot.utils.error_handler import MissingH5PLEXOSDataError, PropertyNotFound
 
 try:
     # Import as Submodule
@@ -56,18 +59,24 @@ class ProcessPLEXOS(Process):
                 regions/zones to create custom aggregations.
                 Defaults to pd.DataFrame().
             **kwargs
-                These parameters will be passed to the Process 
+                These parameters will be passed to the Process
                 class.
         """
         # Instantiation of Process Base class
         super().__init__(
-            input_folder, output_file_path, *args, Region_Mapping=Region_Mapping, **kwargs
+            input_folder,
+            output_file_path,
+            *args,
+            Region_Mapping=Region_Mapping,
+            **kwargs,
         )
         self.plexos_block = plexos_block
         self.metadata = MetaData(
-            self.input_folder, read_from_formatted_h5=False, Region_Mapping=Region_Mapping
+            self.input_folder,
+            read_from_formatted_h5=False,
+            Region_Mapping=Region_Mapping,
         )
-    
+
     @property
     def get_input_data_paths(self) -> list:
         """Gets a list of h5plexos input files within the scenario folders
@@ -82,7 +91,9 @@ class ProcessPLEXOS(Process):
                     files.append(names.name)  # Creates a list of only the hdf5 files
 
             # List of all hf files in hdf5 folder in alpha numeric order
-            self._get_input_data_paths = sorted(files, key=lambda x: int(re.sub("\D", "0", x)))
+            self._get_input_data_paths = sorted(
+                files, key=lambda x: int(re.sub("\D", "0", x))
+            )
         return self._get_input_data_paths
 
     @property
@@ -99,9 +110,11 @@ class ProcessPLEXOS(Process):
 
             self._data_collection = {}
             for file in self.get_input_data_paths:
-                self._data_collection[file] = PLEXOSSolution(
-                    self.input_folder.joinpath(file)
-                )
+                plx_file = PLEXOSSolution(self.input_folder.joinpath(file))
+                if not list(plx_file.h5file["data"].keys()):
+                    raise MissingH5PLEXOSDataError(file)
+
+                self._data_collection[file] = plx_file
                 if not self.Region_Mapping.empty:
                     regions.update(list(self.metadata.regions(file)["region"]))
 
@@ -193,8 +206,7 @@ class ProcessPLEXOS(Process):
                     object_class = prop_class
 
         except (ValueError, KeyError):
-            df = self.report_prop_error(prop, prop_class)
-            return df
+            raise PropertyNotFound(prop, prop_class)
 
         if self.plexos_block != "ST" and timescale == "interval":
             df = self.merge_timeseries_block_data(db, df)
@@ -204,16 +216,14 @@ class ProcessPLEXOS(Process):
             # Get original units from h5plexos file
             df_units = (
                 db.h5file[
-                    f"/data/{self.plexos_block}/{timescale}"
-                    f"/{object_class}/{prop}"
+                    f"/data/{self.plexos_block}/{timescale}" f"/{object_class}/{prop}"
                 ]
                 .attrs["units"]
                 .decode("UTF-8")
             )
         else:
             df_units = db.h5file[
-                f"/data/{self.plexos_block}/{timescale}"
-                f"/{object_class}/{prop}"
+                f"/data/{self.plexos_block}/{timescale}" f"/{object_class}/{prop}"
             ].attrs["unit"]
         # find unit conversion values
         converted_units = self.UNITS_CONVERSION.get(df_units, (df_units, 1))
@@ -263,9 +273,7 @@ class ProcessPLEXOS(Process):
         merged_data = merged_data.sort_index(level=["category", "name"])
         return merged_data
 
-    def df_process_generator(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_generator(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Generator Class data.
 
         Args:
@@ -427,9 +435,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_interface(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_interface(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS PLEXOS Interface Class data.
 
         Args:
@@ -558,9 +564,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_constraint(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_constraint(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Constraint Class data.
 
         Args:
@@ -583,9 +587,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_emission(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_emission(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Emission Class data.
 
         Args:
@@ -822,9 +824,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_abatement(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_abatement(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Abatement Class data.
 
         Args:
@@ -843,9 +843,7 @@ class ProcessPLEXOS(Process):
         df[0] = pd.to_numeric(df[0], downcast="float")
         return df
 
-    def df_process_batterie(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_batterie(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """
         Method for formatting data which comes form the PLEXOS Batteries Class
 
@@ -855,22 +853,23 @@ class ProcessPLEXOS(Process):
             Processed Output, single value column with multiindex.
 
         """
-        df = self.df.droplevel(level=["band", "property"])
+        df = df.droplevel(level=["band", "property"])
         df.index.rename("battery_name", level="name", inplace=True)
-        df = pd.DataFrame(data=df.values.reshape(-1), index=df.index)
+        df = df.reset_index()
+        region_batt_map = self.metadata.region_batteries(model_name)
+        df = df.merge(region_batt_map, on="battery_name", how="left")
         df_col = list(
             df.index.names
         )  # Gets names of all columns in df and places in list
-        df_col.insert(
-            0, df_col.pop(df_col.index("timestamp"))
-        )  # move timestamp to start of df
-        df = df.reorder_levels(df_col, axis=0)
+        df_col = list(df.columns)
+        df_col.remove(0)
+        df_col.insert(0, df_col.pop(df_col.index("timestamp")))
+        df.set_index(df_col, inplace=True)
         df[0] = pd.to_numeric(df[0], downcast="float")
+
         return df
 
-    def df_process_waterway(
-        self, df: pd.DataFrame, model_name: str
-    ) -> pd.DataFrame:
+    def df_process_waterway(self, df: pd.DataFrame, model_name: str) -> pd.DataFrame:
         """Format PLEXOS Waterway Class data.
 
         Args:

@@ -5,10 +5,12 @@ required by the Marmot plotter.
 """
 
 import logging
+
 import pandas as pd
 from typing import Tuple, List
 import marmot.utils.mconfig as mconfig
 from marmot.formatters.formatbase import Process
+from marmot.utils.error_handler import PropertyNotFound
 
 logger = logging.getLogger("formatter." + __name__)
 
@@ -52,9 +54,7 @@ class ExtraProperties:
         """
         if key in self.EXTRA_MARMOT_PROPERTIES:
             extra_properties = []
-            extra_prop_functions = (
-                self.EXTRA_MARMOT_PROPERTIES[key]
-            )
+            extra_prop_functions = self.EXTRA_MARMOT_PROPERTIES[key]
             for prop_function_tup in extra_prop_functions:
                 prop_name, prop_function = prop_function_tup
                 extra_properties.append((prop_name, getattr(self, prop_function)))
@@ -92,9 +92,7 @@ class ExtraPLEXOSProperties(ExtraProperties):
         "region_Unserved_Energy": [
             ("region_Cost_Unserved_Energy", "cost_unserved_energy")
         ],
-        "zone_Unserved_Energy": [
-            ("zone_Cost_Unserved_Energy", "cost_unserved_energy")
-        ],
+        "zone_Unserved_Energy": [("zone_Cost_Unserved_Energy", "cost_unserved_energy")],
         "region_Load": [
             ("region_Load_Annual", "annualize_property"),
             ("region_Demand", "demand"),
@@ -103,9 +101,7 @@ class ExtraPLEXOSProperties(ExtraProperties):
             ("zone_Load_Annual", "annualize_property"),
             ("zone_Demand", "demand"),
         ],
-        "generator_Pump_Load": [
-            ("generator_Pump_Load_Annual", "annualize_property")
-        ],
+        "generator_Pump_Load": [("generator_Pump_Load_Annual", "annualize_property")],
         "reserves_generators_Provision": [
             ("reserves_generators_Provision_Annual", "annualize_property")
         ],
@@ -116,7 +112,6 @@ class ExtraPLEXOSProperties(ExtraProperties):
         "zone_Demand": [("zone_Demand_Annual", "annualize_property")],
     }
     """Dictionary of Extra custom properties that are created based off existing properties."""
-
 
     def generator_curtailment(
         self, df: pd.DataFrame, timescale: str = "interval"
@@ -133,11 +128,12 @@ class ExtraPLEXOSProperties(ExtraProperties):
         """
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "Available Capacity", timescale, file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "generator", "Available Capacity", timescale, file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.warning(
                     "generator_Available_Capacity & "
                     "generator_Generation are required "
@@ -150,9 +146,7 @@ class ExtraPLEXOSProperties(ExtraProperties):
         avail_gen = self.model.combine_models(data_chunks)
         return avail_gen - df
 
-    def demand(
-        self, df: pd.DataFrame, timescale: str = "interval"
-    ) -> pd.DataFrame:
+    def demand(self, df: pd.DataFrame, timescale: str = "interval") -> pd.DataFrame:
         """Creates a region_Demand / zone_Demand property for PLEXOS result sets
 
         PLEXOS includes generator_Pumped_Load in total load
@@ -167,21 +161,48 @@ class ExtraPLEXOSProperties(ExtraProperties):
         Returns:
             pd.DataFrame: region_Demand / zone_Demand df
         """
-        data_chunks = []
+        pump_load_chunks = []
+        batt_load_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "Pump Load", timescale, file
-            )
+            try:
+                pump_load_data = self.model.get_processed_data(
+                    "generator", "Pump Load", timescale, file
+                )
+            except PropertyNotFound:
+                pump_load_data = pd.DataFrame()
+            try:
+                batt_load_data = self.model.get_processed_data(
+                    "batterie", "Load", timescale, file
+                )
+            except PropertyNotFound:
+                batt_load_data = pd.DataFrame()
 
-            if processed_data.empty is True:
-                logger.info("Total Demand will equal Total Load")
+            if pump_load_data.empty is True and batt_load_data.empty is True:
+                logger.info(
+                    "Total Demand will equal Total Load, No Storage objects found in results"
+                )
                 return df
 
-            data_chunks.append(processed_data)
+            pump_load_chunks.append(pump_load_data)
+            batt_load_chunks.append(batt_load_data)
 
-        pump_load = self.model.combine_models(data_chunks)
-        pump_load = pump_load.groupby(df.index.names).sum()
-        return df - pump_load
+        if pump_load_data.empty is False:
+            pump_load = self.model.combine_models(pump_load_chunks)
+            pump_load = pump_load.groupby(df.index.names).sum()
+            dfpump = df - pump_load
+            dfpump["values"] = dfpump["values"].fillna(df["values"])
+        else:
+            dfpump = df
+
+        if batt_load_data.empty is False:
+            batt_load = self.model.combine_models(batt_load_chunks)
+            batt_load = batt_load.groupby(df.index.names).sum()
+            dfbattpump = dfpump - batt_load
+            dfbattpump["values"] = dfbattpump["values"].fillna(dfpump["values"])
+        else:
+            dfbattpump = dfpump
+
+        return dfbattpump
 
     def cost_unserved_energy(self, df: pd.DataFrame, **_) -> pd.DataFrame:
         """Creates a region_Cost_Unserved_Energy property for PLEXOS result sets
@@ -208,9 +229,7 @@ class ExtraReEDSProperties(ExtraProperties):
             ),
             ("generator_FOM_Cost", "generator_fom_cost"),
         ],
-        "reserves_generators_Provision": [
-            ("reserve_Provision", "reserve_provision")
-        ],
+        "reserves_generators_Provision": [("reserve_Provision", "reserve_provision")],
         "region_Demand": [
             ("region_Demand_Annual", "annualize_property"),
             ("region_Load", "region_total_load"),
@@ -218,14 +237,10 @@ class ExtraReEDSProperties(ExtraProperties):
         "generator_Curtailment": [
             ("generator_Curtailment_Annual", "annualize_property")
         ],
-        "generator_Pump_Load": [
-            ("generator_Pump_Load_Annual", "annualize_property")
-        ],
+        "generator_Pump_Load": [("generator_Pump_Load_Annual", "annualize_property")],
         "region_Load": [("region_Load_Annual", "annualize_property")],
-
     }
     """Dictionary of Extra custom properties that are created based off existing properties."""
-
 
     def region_total_load(
         self, df: pd.DataFrame, timescale: str = "year"
@@ -245,11 +260,12 @@ class ExtraReEDSProperties(ExtraProperties):
         """
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "region", "stor_in", "interval", file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "region", "stor_in", "interval", file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.info("region_Load will equal region_Demand")
                 return df
 
@@ -260,7 +276,11 @@ class ExtraReEDSProperties(ExtraProperties):
             pump_load = self.annualize_property(pump_load)
 
         all_col = list(pump_load.index.names)
-        [all_col.remove(x) for x in ["tech", "sub-tech", "units", "season"] if x in all_col]
+        [
+            all_col.remove(x)
+            for x in ["tech", "sub-tech", "units", "season"]
+            if x in all_col
+        ]
         pump_load = pump_load.groupby(all_col).sum()
 
         load = df.merge(pump_load, on=all_col, how="outer")
@@ -349,11 +369,12 @@ class ExtraReEDSIndiaProperties(ExtraReEDSProperties):
         """
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "stor_charge", "interval", file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "generator", "stor_charge", "interval", file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.info("region_Load will equal region_Demand")
                 return df
 
@@ -364,7 +385,11 @@ class ExtraReEDSIndiaProperties(ExtraReEDSProperties):
             pump_load = self.annualize_property(pump_load)
 
         all_col = list(pump_load.index.names)
-        [all_col.remove(x) for x in ["tech", "gen_name", "units", "season"] if x in all_col]
+        [
+            all_col.remove(x)
+            for x in ["tech", "gen_name", "units", "season"]
+            if x in all_col
+        ]
         pump_load = pump_load.groupby(all_col).sum()
 
         load = df.merge(pump_load, on=all_col, how="outer")
@@ -380,12 +405,14 @@ class ExtraSIIProperties(ExtraProperties):
     EXTRA_MARMOT_PROPERTIES: dict = {
         "generator_Generation": [
             ("generator_Curtailment", "generator_curtailment"),
-            ("generator_Generation_Annual", "annualize_property")],
+            ("generator_Generation_Annual", "annualize_property"),
+        ],
         "generator_Curtailment": [
-            ("generator_Curtailment_Annual", "annualize_property")],
-        "region_Demand": [("region_Load", "region_total_load")]}
+            ("generator_Curtailment_Annual", "annualize_property")
+        ],
+        "region_Demand": [("region_Load", "region_total_load")],
+    }
     """Dictionary of Extra custom properties that are created based off existing properties."""
-
 
     def generator_curtailment(
         self, df: pd.DataFrame, timescale: str = "interval"
@@ -403,11 +430,12 @@ class ExtraSIIProperties(ExtraProperties):
 
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "generation_availability", timescale, file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "generator", "generation_availability", timescale, file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.warning(
                     "generation_availability & "
                     "generation_actual are required "
@@ -420,10 +448,10 @@ class ExtraSIIProperties(ExtraProperties):
         avail_gen = self.model.combine_models(data_chunks)
 
         # Only use gens unique to avail_gen and filter generator_Generation df
-        unique_gens = avail_gen.index.get_level_values('gen_name').unique()
-        map_gens = df.index.isin(unique_gens, level='gen_name')
+        unique_gens = avail_gen.index.get_level_values("gen_name").unique()
+        map_gens = df.index.isin(unique_gens, level="gen_name")
 
-        return avail_gen - df.loc[map_gens,:]
+        return avail_gen - df.loc[map_gens, :]
 
     def region_total_load(
         self, df: pd.DataFrame, timescale: str = "interval"
@@ -443,11 +471,12 @@ class ExtraSIIProperties(ExtraProperties):
         """
         data_chunks = []
         for file in self.files_list:
-            processed_data = self.model.get_processed_data(
-                "generator", "pump", timescale, file
-            )
-
-            if processed_data.empty is True:
+            try:
+                processed_data = self.model.get_processed_data(
+                    "generator", "pump", timescale, file
+                )
+            except PropertyNotFound as e:
+                logger.warning(e.message)
                 logger.info("region_Load will equal region_Demand")
                 return df
 

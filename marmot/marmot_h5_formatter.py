@@ -14,11 +14,12 @@ it can be read into the marmot_plot_main.py file
 # =======================================================================================
 
 import sys
-from pathlib import Path
 import time
+from pathlib import Path
 from typing import Union
-import pandas as pd
+
 import h5py
+import pandas as pd
 
 try:
     import marmot.utils.mconfig as mconfig
@@ -27,12 +28,12 @@ except ModuleNotFoundError:
 
     print(INCORRECT_ENTRY_POINT.format(Path(__file__).name))
     sys.exit()
-from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
-from marmot.utils.loggersetup import SetupLogger
-import marmot.utils.dataio as dataio
 import marmot.formatters as formatters
+import marmot.utils.dataio as dataio
 from marmot.formatters.formatbase import Process
-
+from marmot.utils.definitions import INPUT_DIR, PLEXOS_YEAR_WARNING
+from marmot.utils.error_handler import PropertyNotFound
+from marmot.utils.loggersetup import SetupLogger
 
 # A bug in pandas requires this to be included,
 # otherwise df.to_string truncates long strings. Fix available in Pandas 1.0
@@ -79,7 +80,7 @@ class MarmotFormat(SetupLogger):
                 to rename emissions types.
                 Defaults to pd.DataFrame().
             **kwargs
-                These parameters will be passed to the 
+                These parameters will be passed to the
                 marmot.utils.loggersetup.SetupLogger class.
         """
         super().__init__("formatter", **kwargs)  # Instantiation of SetupLogger
@@ -185,17 +186,15 @@ class MarmotFormat(SetupLogger):
         else:
             scen_name = self.Scenario_name
 
-        try:
-            process_class = getattr(formatters, sim_model.lower())()
-            if not callable(process_class):
-                self.logger.error(
-                    "A required module was not found to " f"process {sim_model} results"
-                )
-                self.logger.error(process_class)
-                sys.exit()
-        except AttributeError:
-            self.logger.error(f"No formatter found for model: {sim_model}")
-            sys.exit()
+        process_class = getattr(formatters, sim_model.lower())()
+        if not callable(process_class):
+            self.logger.error(
+                "A required module was not found to " f"process {sim_model} results"
+            )
+            self.logger.error(process_class)
+            raise ModuleNotFoundError(
+                "A required module was not found to " f"process {sim_model} results"
+            )
 
         self.logger.info(f"#### Processing {scen_name} {sim_model} " "Results ####")
 
@@ -272,11 +271,13 @@ class MarmotFormat(SetupLogger):
 
             if property_key_name not in existing_keys:
                 for model in files_list:
-                    processed_data = process_sim_model.get_processed_data(
-                        row["group"], row["data_set"], row["data_type"], model
-                    )
-                    if processed_data.empty is True:
-                        data_chunks.append(processed_data)
+                    try:
+                        processed_data = process_sim_model.get_processed_data(
+                            row["group"], row["data_set"], row["data_type"], model
+                        )
+                    except PropertyNotFound as e:
+                        self.logger.warning(e.message)
+                        data_chunks.append(pd.DataFrame())
                         break
 
                     # Check if data is for year interval and of type capacity
@@ -321,7 +322,9 @@ class MarmotFormat(SetupLogger):
                             save_attempt += 1
 
                     # Calculate any extra properties
-                    extra_prop_functions = extraprops_init.get_extra_properties(property_key_name)
+                    extra_prop_functions = extraprops_init.get_extra_properties(
+                        property_key_name
+                    )
                     if extra_prop_functions:
 
                         for prop_function_tup in extra_prop_functions:
@@ -345,9 +348,11 @@ class MarmotFormat(SetupLogger):
                                 else:
                                     self.logger.warning(f"{prop_name} was not saved")
                                     continue
-                                
+
                             # Run again to check for properties based of new properties
-                            extra2_prop_functions = extraprops_init.get_extra_properties(prop_name)
+                            extra2_prop_functions = (
+                                extraprops_init.get_extra_properties(prop_name)
+                            )
                             if extra2_prop_functions:
 
                                 for prop_function_tup2 in extra2_prop_functions:

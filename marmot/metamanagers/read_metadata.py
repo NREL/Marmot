@@ -6,17 +6,18 @@ Database can be either a h5plexos file or a formatted Marmot hdf5 file.
 @author: Ryan Houseman
 """
 
+import logging
 import sys
+from pathlib import Path
+
 import h5py
 import pandas as pd
-from pathlib import Path
-import logging
 
 logger = logging.getLogger("formatter." + __name__)
 
+
 class MetaData:
-    """Handle the retrieval of metadata from the formatted or original solution h5 files.
-    """
+    """Handle the retrieval of metadata from the formatted or original solution h5 files."""
 
     filename: str = None
     """The name of the h5 file to retrieve data from."""
@@ -86,7 +87,7 @@ class MetaData:
 
         try:
             if self.read_from_formatted_h5:
-                
+
                 if "_formatted.h5" not in filename:
                     filename = processed_file_format.format(filename)
                 self.h5_filepath = self.HDF5_folder_in.joinpath(filename)
@@ -268,7 +269,47 @@ class MetaData:
 
         return zone_gen_cat
 
-    # Generator storage has been updated so that only one of 
+    def region_batteries(self, filename: str) -> pd.DataFrame:
+        """Region batteries mapping.
+
+        Args:
+            filename (str): The name of the h5 file to retreive data from.
+                If retreiving from fromatted h5 file, just pass scenario name.
+        """
+        if not self._check_if_existing_filename(filename):
+            self._read_data(filename)
+
+        try:
+            region_batt = pd.read_hdf(
+                self.h5_filepath,
+                key=f"{self.start_index}/relations/regions_batteries",
+            )
+            region_batt.rename(
+                columns={"child": "battery_name", "parent": "region"}, inplace=True
+            )
+            region_batt = region_batt.applymap(
+                lambda x: x.decode("utf-8") if isinstance(x, bytes) else x
+            )
+            region_batt.drop_duplicates(
+                subset=["battery_name"], keep="first", inplace=True
+            )  # For batteries which belong to more than 1 region, drop duplicates.
+
+            # Merge in region mapping.
+            if not self.Region_Mapping.empty:
+                region_batt = pd.merge(
+                    region_batt,
+                    self.Region_Mapping,
+                    how="left",
+                    on="region",
+                )
+                region_batt.dropna(axis=1, how="all", inplace=True)
+
+        except KeyError:
+            region_batt = pd.DataFrame()
+
+        return region_batt
+
+    # Generator storage has been updated so that only one of
     # tail_storage & head_storage is required
     # If both are available, both are used
     def generator_storage(self, filename: str) -> pd.DataFrame:
